@@ -51,6 +51,11 @@ SetReplaceFixedPointList::usage =
 	"the set no longer changes, and returns the list of all intermediate sets.";
 
 
+UnorderedSetPlot::usage=
+"UnorderedSetPlot[s, opts] plots a set of lists s as a directed hypergraph with each "~~
+	"hyperedge represented as a sequence of same-color arrows.";
+
+
 Begin["`Private`"];
 
 
@@ -132,6 +137,20 @@ SetReplaceFixedPoint[set_UnorderedSet, rules_] := SetReplace[set, rules, \[Infin
 
 
 SetReplaceFixedPointList[set_UnorderedSet, rules_] := SetReplaceList[set, rules, \[Infinity]]
+
+
+(* ::Text:: *)
+(*We might want to visualize the list-elements of the set as directed hyperedges. We can do that by drawing each hyperedge as a sequence of same-color normal 2-edges.*)
+
+
+UnorderedSetPlot[UnorderedSet[edges___List], o___] := Module[
+		{normalEdges, styledEdges},
+	normalEdges = Partition[#, 2, 1] & /@ {edges};
+	styledEdges =
+		With[{color = RandomColor[]}, Style[DirectedEdge @@ #, color] & /@ #] & /@
+			normalEdges;
+	Graph[Flatten[styledEdges], o]
+]
 
 
 End[];
