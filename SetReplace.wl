@@ -13,17 +13,42 @@ BeginPackage["SetReplace`"];
 
 
 UnorderedSet::usage =
-	"UnorderedSet[\!\(\*SubscriptBox[\(e\), \(1\)]\), "~~
+"UnorderedSet[\!\(\*SubscriptBox[\(e\), \(1\)]\), "~~
 	"\!\(\*SubscriptBox[\(e\), \(2\)]\), \[Ellipsis]] is an unordered collection of elements.";
 
 
 SetReplace::usage =
-	"SetReplace[s, {\!\(\*SubscriptBox[\(i\), \(1\)]\) \[Rule] "~~
+"SetReplace[s, {\!\(\*SubscriptBox[\(i\), \(1\)]\) \[Rule] "~~
 	"\!\(\*SubscriptBox[\(o\), \(1\)]\), \!\(\*SubscriptBox[\(i\), \(2\)]\) \[Rule] "~~
 	"\!\(\*SubscriptBox[\(o\), \(2\)]\), \[Ellipsis]}] attempts to replace a subset "~~
 	"\!\(\*SubscriptBox[\(i\), \(1\)]\) of s with \!\(\*SubscriptBox[\(o\), \(1\)]\). "~~
 	"If not found, replaces \!\(\*SubscriptBox[\(i\), \(2\)]\) with "~~
-	"\!\(\*SubscriptBox[\(o\), \(2\)]\), etc.";
+	"\!\(\*SubscriptBox[\(o\), \(2\)]\), etc.
+SetReplace[s, {\!\(\*SubscriptBox[\(i\), \(1\)]\) \[Rule] "~~
+	"\!\(\*SubscriptBox[\(o\), \(1\)]\), \!\(\*SubscriptBox[\(i\), \(2\)]\) \[Rule] "~~
+	"\!\(\*SubscriptBox[\(o\), \(2\)]\), \[Ellipsis]}, n] performs replacement n times "~~
+	"and returns the result.";
+
+
+SetReplaceList::usage =
+"SetReplaceList[s, {\!\(\*SubscriptBox[\(i\), \(1\)]\) \[Rule] "~~
+	"\!\(\*SubscriptBox[\(o\), \(1\)]\), \!\(\*SubscriptBox[\(i\), \(2\)]\) \[Rule] "~~
+	"\!\(\*SubscriptBox[\(o\), \(2\)]\), \[Ellipsis]}, n] performs SetReplace n times "~~
+	"and returns the list of all intermediate sets.";
+
+
+SetReplaceFixedPoint::usage =
+"SetReplaceList[s, {\!\(\*SubscriptBox[\(i\), \(1\)]\) \[Rule] "~~
+	"\!\(\*SubscriptBox[\(o\), \(1\)]\), \!\(\*SubscriptBox[\(i\), \(2\)]\) \[Rule] "~~
+	"\!\(\*SubscriptBox[\(o\), \(2\)]\), \[Ellipsis]}] performs SetReplace repeatedly until "~~
+	"the set no longer changes, and returns the final set.";
+
+
+SetReplaceFixedPointList::usage =
+"SetReplaceList[s, {\!\(\*SubscriptBox[\(i\), \(1\)]\) \[Rule] "~~
+	"\!\(\*SubscriptBox[\(o\), \(1\)]\), \!\(\*SubscriptBox[\(i\), \(2\)]\) \[Rule] "~~
+	"\!\(\*SubscriptBox[\(o\), \(2\)]\), \[Ellipsis]}] performs SetReplace repeatedly until "~~
+	"the set no longer changes, and returns the list of all intermediate sets.";
 
 
 Begin["`Private`"];
@@ -97,6 +122,10 @@ SetReplace[set_UnorderedSet, rules_] := SetReplace[set, rules, 1]
 SetReplaceList[set_UnorderedSet, rules_, n_] := FixedPointList[
 	Replace[#, $ToNormalRules @ rules] &,
 	List @@ set, n]
+
+
+(* ::Text:: *)
+(*TODO(maxitg): There is a potential issue that has to do with the order of elements in the set being rearranged at each replacement (even if the set contents are not changing), which will prevent FixedPoint from stopping. Possible solution: use custom comparison for FixedPoint.*)
 
 
 SetReplaceFixedPoint[set_UnorderedSet, rules_] := SetReplace[set, rules, \[Infinity]]
