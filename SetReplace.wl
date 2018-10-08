@@ -94,6 +94,17 @@ SetReplace[set_UnorderedSet, rules_, n_] := UnorderedSet @@ Quiet[
 SetReplace[set_UnorderedSet, rules_] := SetReplace[set, rules, 1]
 
 
+SetReplaceList[set_UnorderedSet, rules_, n_] := FixedPointList[
+	Replace[#, $ToNormalRules @ rules] &,
+	List @@ set, n]
+
+
+SetReplaceFixedPoint[set_UnorderedSet, rules_] := SetReplace[set, rules, \[Infinity]]
+
+
+SetReplaceFixedPointList[set_UnorderedSet, rules_] := SetReplaceList[set, rules, \[Infinity]]
+
+
 End[];
 
 
