@@ -86,8 +86,12 @@ $ToNormalRules[rules_List] := Join @@ $ToNormalRules /@ rules
 (*TODO(maxitg): Implement SyntaxInformation*)
 
 
-SetReplace[set_UnorderedSet, rules_] :=
-	UnorderedSet @@ Replace[List @@ set, $ToNormalRules @ rules]
+SetReplace[set_UnorderedSet, rules_, n_] := UnorderedSet @@ Quiet[
+	ReplaceRepeated[List @@ set, $ToNormalRules @ rules, MaxIterations -> n],
+	ReplaceRepeated::rrlim]
+
+
+SetReplace[set_UnorderedSet, rules_] := SetReplace[set, rules, 1]
 
 
 End[];
