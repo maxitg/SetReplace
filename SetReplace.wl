@@ -159,6 +159,10 @@ Options[UnorderedSetPlot] = Options[Graph];
 SyntaxInformation[UnorderedSetPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
 
 
+(* ::Text:: *)
+(*TODO(maxitg): There is an issue here due to a bug in WL. If there are multiple edges in a Graph with the same endpoints, it is impossible to color them differently due to how edges styles being handled internally in WL. Must be fixed upstream.*)
+
+
 UnorderedSetPlot[UnorderedSet[edges___List], o___] := Module[
 		{normalEdges, styledEdges},
 	normalEdges = Partition[#, 2, 1] & /@ {edges};
