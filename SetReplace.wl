@@ -112,8 +112,7 @@ $ToNormalRules[rules_List] := Join @@ $ToNormalRules /@ rules
 (*TODO(maxitg): Implement checking of arguments*)
 
 
-(* ::Text:: *)
-(*TODO(maxitg): Implement SyntaxInformation*)
+SyntaxInformation[SetReplace] = {"ArgumentsPattern" -> {_, _, _.}};
 
 
 SetReplace[set_UnorderedSet, rules_, n_] := UnorderedSet @@ Quiet[
@@ -124,7 +123,10 @@ SetReplace[set_UnorderedSet, rules_, n_] := UnorderedSet @@ Quiet[
 SetReplace[set_UnorderedSet, rules_] := SetReplace[set, rules, 1]
 
 
-SetReplaceList[set_UnorderedSet, rules_, n_] := FixedPointList[
+SyntaxInformation[SetReplaceList] = {"ArgumentsPattern" -> {_, _, _}};
+
+
+SetReplaceList[set_UnorderedSet, rules_, n_] := UnorderedSet @@@ FixedPointList[
 	Replace[#, $ToNormalRules @ rules] &,
 	List @@ set, n]
 
@@ -133,14 +135,28 @@ SetReplaceList[set_UnorderedSet, rules_, n_] := FixedPointList[
 (*TODO(maxitg): There is a potential issue that has to do with the order of elements in the set being rearranged at each replacement (even if the set contents are not changing), which will prevent FixedPoint from stopping. Possible solution: use custom comparison for FixedPoint.*)
 
 
-SetReplaceFixedPoint[set_UnorderedSet, rules_] := SetReplace[set, rules, \[Infinity]]
+SyntaxInformation[SetReplaceFixedPoint] = {"ArgumentsPattern" -> {_, _}};
 
 
-SetReplaceFixedPointList[set_UnorderedSet, rules_] := SetReplaceList[set, rules, \[Infinity]]
+SetReplaceFixedPoint[set_UnorderedSet, rules_] := UnorderedSet @@
+	SetReplace[set, rules, \[Infinity]]
+
+
+SyntaxInformation[SetReplaceFixedPointList] = {"ArgumentsPattern" -> {_, _}};
+
+
+SetReplaceFixedPointList[set_UnorderedSet, rules_] := UnorderedSet @@@
+	SetReplaceList[set, rules, \[Infinity]]
 
 
 (* ::Text:: *)
 (*We might want to visualize the list-elements of the set as directed hyperedges. We can do that by drawing each hyperedge as a sequence of same-color normal 2-edges.*)
+
+
+Options[UnorderedSetPlot] = Options[Graph];
+
+
+SyntaxInformation[UnorderedSetPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
 
 
 UnorderedSetPlot[UnorderedSet[edges___List], o___] := Module[
