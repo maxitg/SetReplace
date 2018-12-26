@@ -371,6 +371,15 @@ HypergraphPlot[args___] := 0 /;
 	!Developer`CheckArgumentCount[HypergraphPlot[args], 1, 1] && False
 
 
+HypergraphPlot::invalidEdges =
+	"First argument of HypergraphPlot must be list of lists, where elements " ~~
+	"represent vertices."; 
+
+
+HypergraphPlot[edges_, o : OptionsPattern[]] := 0 /;
+	!MatchQ[edges, {___List}] && Message[HypergraphPlot::invalidEdges]
+
+
 $CorrectOptions[HypergraphPlot][o___] := Module[
 		{plotStyle = OptionValue[HypergraphPlot, {o}, PlotStyle]},
 	Head[plotStyle] === ColorDataFunction &&
