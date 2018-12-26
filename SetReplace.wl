@@ -17,7 +17,7 @@ BeginPackage["SetReplace`"];
 
 SetReplace`Private`$PublicSymbols = {
 	SetReplace, SetReplaceList, SetReplaceFixedPoint, SetReplaceFixedPointList,
-	HypergraphPlot};
+	HypergraphPlot, ColoredEdgeShapeFunction};
 
 
 Unprotect @@ SetReplace`Private`$PublicSymbols;
@@ -357,7 +357,15 @@ HypergraphPlot::usage = UsageString[
 	"Graph options `opts` can be used."];
 
 
-Options[HypergraphPlot] = Join[Options[Graph], {PlotStyle -> ColorData[97]}];
+ColoredEdgeShapeFunction::usage = UsageString[
+	"ColoredEdgeShapeFunction is an argument for HypergraphPlot, which specifies a ",
+	"function used to draw an edge after appropriate ",
+	"color has already been applied to it. ",
+	"Some possible choices are (Line[#1] &) and (Arrow[#1] &)."];
+
+
+Options[HypergraphPlot] = Join[Options[Graph], {
+	PlotStyle -> ColorData[97], ColoredEdgeShapeFunction -> (Arrow[#1] &)}];
 
 
 (* ::Subsubsection:: *)
@@ -422,7 +430,8 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 		Association @ Thread[shapeHashes[[All, 2]] -> edgeColors[[All, 2]]];
 	Graph[DirectedEdge @@@ Flatten[normalEdges, 1], Join[
 		FilterRules[{o}, Options[Graph]],
-		{EdgeShapeFunction -> ({hashesToColors[Hash[#1]], Line[#1]} &)}]]
+		{EdgeShapeFunction -> ({
+			hashesToColors[Hash[#1]], OptionValue[ColoredEdgeShapeFunction][##]} &)}]]
 ]
 
 
