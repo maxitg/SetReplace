@@ -17,7 +17,7 @@ BeginPackage["SetReplace`"];
 
 SetReplace`Private`$PublicSymbols = {
 	SetReplace, SetReplaceList, SetReplaceFixedPoint, SetReplaceFixedPointList,
-	HypergraphPlot, ColoredEdgeShapeFunction};
+	HypergraphPlot};
 
 
 Unprotect @@ SetReplace`Private`$PublicSymbols;
@@ -357,15 +357,7 @@ HypergraphPlot::usage = UsageString[
 	"Graph options `opts` can be used."];
 
 
-ColoredEdgeShapeFunction::usage = UsageString[
-	"ColoredEdgeShapeFunction is an argument for HypergraphPlot, which specifies a ",
-	"function used to draw an edge after appropriate ",
-	"color has already been applied to it. ",
-	"Some possible choices are (Line[#1] &) and (Arrow[#1] &)."];
-
-
-Options[HypergraphPlot] = Join[Options[Graph], {
-	PlotStyle -> ColorData[97], ColoredEdgeShapeFunction -> (Arrow[#1] &)}];
+Options[HypergraphPlot] = Join[Options[Graph], {PlotStyle -> ColorData[97]}];
 
 
 (* ::Subsubsection:: *)
@@ -418,20 +410,30 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] := 0 /;
 
 HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 	$CorrectOptions[HypergraphPlot][o] := Module[
-		{normalEdges, edgeColors, shapeHashes, hashesToColors},
+		{normalEdges, edgeColors, shapeHashes, hashesToColors,
+		 graphEdges, graphOptions, graphBoxes, arrowheads, arrowheadOffset},
 	normalEdges = Partition[#, 2, 1] & /@ edges;
 	edgeColors = Sort @ Flatten @ MapIndexed[
 		Thread[DirectedEdge @@@ #1 -> OptionValue[PlotStyle][#2[[1]]]] &, normalEdges];
-	shapeHashes = Sort @ First @ Last @ Reap @ Rasterize @ Graph[
-		DirectedEdge @@@ Flatten[normalEdges, 1], Join[{
+	graphEdges = DirectedEdge @@@ Flatten[normalEdges, 1];
+	graphOptions = FilterRules[{o}, Options[Graph]];
+	shapeHashes = Sort @ (If[# == {}, {}, #[[1]]] &) @ Last @ Reap @ Rasterize @
+		Graph[graphEdges, Join[{
 			EdgeShapeFunction -> (Sow[#2 -> Hash[#1]] &)},
-			FilterRules[{o}, Options[Graph]]]];
+			graphOptions]];
+	graphBoxes = ToBoxes[Graph[graphEdges, DirectedEdges -> True]];
+	arrowheads = If[Length[#] == 0, {}, #[[1]]] & @Cases[graphBoxes, _Arrowheads, All];
+	arrowheadOffset = If[Length[#] == 0, 0, #[[1]]] & @
+		Cases[graphBoxes, ArrowBox[x_, offset_] :> offset, All];
 	hashesToColors =
 		Association @ Thread[shapeHashes[[All, 2]] -> edgeColors[[All, 2]]];
-	Graph[DirectedEdge @@@ Flatten[normalEdges, 1], Join[
-		FilterRules[{o}, Options[Graph]],
+	Graph[graphEdges, Join[
+		graphOptions,
 		{EdgeShapeFunction -> ({
-			hashesToColors[Hash[#1]], OptionValue[ColoredEdgeShapeFunction][##]} &)}]]
+			arrowheads,
+			hashesToColors[Hash[#1]],
+			Arrow[#1, arrowheadOffset]} &),
+		 If[arrowheadOffset > 0, Nothing, VertexShapeFunction -> Point]}]]
 ]
 
 
