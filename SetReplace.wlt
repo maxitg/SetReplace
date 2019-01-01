@@ -1,5 +1,7 @@
 BeginTestSection["SetReplace"]
 
+(* SetReplace *)
+
 VerificationTest[
 	SetReplace[{}, {} :> {}],
 	{}
@@ -100,6 +102,8 @@ VerificationTest[
 	{SetReplace::nonIntegerIterations}
 ]
 
+(* SetReplaceList *)
+
 VerificationTest[
 	SetReplaceList[{1, 2, 3}, {2 -> 5, 3 :> 6}, 10],
 	{{1, 2, 3}, {1, 3, 5}, {1, 5, 6}, {1, 5, 6}}
@@ -134,6 +138,8 @@ VerificationTest[
 	{SetReplace::nonIntegerIterations}
 ]
 
+(* SetReplaceFixedPoint *)
+
 VerificationTest[
 	SetReplaceFixedPoint[{1, 1, 1}, {1 -> 2}],
 	{2, 2, 2}
@@ -162,6 +168,8 @@ VerificationTest[
 	{SetReplace::invalidRules}
 ]
 
+(* SetReplaceFixedPointList *)
+
 VerificationTest[
 	SetReplaceFixedPointList[{1, 1, 1}, {1 -> 2}],
 	{{1, 1, 1}, {1, 1, 2}, {1, 2, 2}, {2, 2, 2}, {2, 2, 2}}
@@ -189,6 +197,8 @@ VerificationTest[
 	SetReplaceFixedPointList[{1}, {1}],
 	{SetReplace::invalidRules}
 ]
+
+(* HypergraphPlot *)
 
 VerificationTest[
 	HypergraphPlot[],
@@ -228,6 +238,93 @@ VerificationTest[
 	GraphQ[HypergraphPlot[{{1, 3}, 6, {2, 4}}]],
 	False,
 	{HypergraphPlot::invalidEdges}
+]
+
+(* FromAnonymousRules *)
+
+VerificationTest[
+	FromAnonymousRules[],
+	FromAnonymousRules[],
+	{FromAnonymousRules::argx}
+]
+
+VerificationTest[
+	FromAnonymousRules[1, 2],
+	FromAnonymousRules[1, 2],
+	{FromAnonymousRules::argx}
+]
+
+VerificationTest[
+	FromAnonymousRules[1],
+	FromAnonymousRules[1],
+	{FromAnonymousRules::notRules}
+]
+
+VerificationTest[
+	SetReplace[{{"v1", "v2"}}, FromAnonymousRules[{{1, 2}} -> {{1}}]],
+	{{"v1"}}
+]
+
+VerificationTest[
+	SetReplace[
+		{{"v1", "v2"}, {"v2", "v3"}},
+		FromAnonymousRules[{{1, 2}, {2, 3}} -> {{1, 3}}]],
+	{{"v1", "v3"}}
+]
+
+VerificationTest[
+	SetReplace[
+		{{"v1", "v2"}, {"v2", "v3"}},
+		FromAnonymousRules[{
+			{{1, 2}, {2, 3}} -> {{1, 3}},
+			{{1, 2}} -> {{1, 1, 2, 2}}}], 2],
+	{{"v1", "v1", "v3", "v3"}}
+]
+
+VerificationTest[
+	SetReplace[
+		SetReplace[{{"v1", "v2"}}, FromAnonymousRules[{{1, 2}} -> {{1, 2, 3}}]],
+		{{"v1", "v2", z_}} :> {{"v1", "v2"}}],
+	{{"v1", "v2"}}
+]
+
+VerificationTest[
+	SetReplace[
+		SetReplace[{{"v1", "v2"}}, FromAnonymousRules[{{1, 2}} -> {{1, 2, 3}}]],
+		{{"v1", "v2", z_}} :> {{"v1", "v2"}}],
+	{{"v1", "v2"}}
+]
+
+VerificationTest[
+	Module[{v1 = v2 = v3 = v4 = v5 = 1},
+		SetReplace[{z + z^z, y + y^y}, FromAnonymousRules[x + x^x -> x]]
+	],
+	{y + y^y, z}
+]
+
+VerificationTest[
+	FromAnonymousRules[{{} -> {}}],
+	{{} :> {}}
+]
+
+VerificationTest[
+	SetReplace[{{1, 2}, {2, 3}}, FromAnonymousRules[{{} -> {}}], 3],
+	{{1, 2}, {2, 3}}
+]
+
+VerificationTest[
+	SetReplace[
+		{{10 -> 30} -> 20, {30, 40}},
+		FromAnonymousRules[{{1 -> 3} -> 2, {3, 4}} -> {{1, 2, 3}, {3, 4, 5}}]][[1]],
+	{10, 20, 30}
+]
+
+VerificationTest[
+	SetReplace[{{{2, 2}, 1}},
+		FromAnonymousRules[{
+			{{Graph[{3 -> 4}], Graph[{3 -> 4}]}, Graph[{1 -> 2}]} ->
+			{Graph[{3 -> 4}], Graph[{1 -> 2}], Graph[{3 -> 4}]}}]],
+	{{2, 1, 2}}
 ]
 
 EndTestSection[]
