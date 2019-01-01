@@ -17,7 +17,7 @@ BeginPackage["SetReplace`"];
 
 SetReplace`Private`$PublicSymbols = {
 	SetReplace, SetReplaceList, SetReplaceFixedPoint, SetReplaceFixedPointList,
-	HypergraphPlot};
+	HypergraphPlot, FromAnonymousRules};
 
 
 Unprotect @@ SetReplace`Private`$PublicSymbols;
@@ -61,11 +61,12 @@ $ToNormalRules[(input_List :> output_List) | (input_List -> output_List)] := Mod
 	untouchedElements = Table[Unique[], inputLength + 1];
 	untouchedPatterns = Pattern[#, ___] & /@ untouchedElements;
 
-	inputPermutations = Permutations @ (List @@ input);
+	inputPermutations = Permutations @ input;
 	inputsWithUntouchedElements = Riffle[untouchedPatterns, #] & /@ inputPermutations;
-	outputWithUntouchedElements = Join[untouchedElements, List @@ output];
+	outputWithUntouchedElements = Join[untouchedElements, Thread @ Hold @ output];
 
-	# :> Evaluate @ outputWithUntouchedElements & /@ inputsWithUntouchedElements
+	With[{right = outputWithUntouchedElements},
+		# :> right & /@ inputsWithUntouchedElements] /. Hold[expr_] :> expr
 ] 
 
 
@@ -73,14 +74,19 @@ $ToNormalRules[(input_List :> output_List) | (input_List -> output_List)] := Mod
 (*Now, if there are new vertices that need to be created, we will disassemble the Module remembering which variables it applies to, and then reassemble it for the output.*)
 
 
-$ToNormalRules[input_List :> output_Module] := With[
+$ToNormalRules[input_List :> output_Module] := Module[
 		{ruleInputOriginal = input,
-		 moduleInputContents = Hold[output][[1, 2]]},
+		 heldModule = Map[Hold, Hold[output], {2}],
+		 moduleInputContents},
+	moduleInputContents = heldModule[[1, 2]];
 	With[{ruleInputFinal = #[[1]],
-		  moduleArguments = Hold[output][[1, 1]],
-		  moduleOutputContents = #[[2]]},
+		  moduleArguments = heldModule[[1, 1]],
+		  moduleOutputContents = (Hold /@ #)[[2]]},
 		ruleInputFinal :> Module[moduleArguments, moduleOutputContents]
-	] & /@ $ToNormalRules[ruleInputOriginal :> Evaluate @ moduleInputContents]
+	] & /@ $ToNormalRules[
+			ruleInputOriginal :> Evaluate @ moduleInputContents /.
+				Hold[expr_] :> expr] //.
+		Hold[expr_] :> expr
 ]
 
 
@@ -435,6 +441,86 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 			Arrow[#1, arrowheadOffset]} &),
 		 If[arrowheadOffset > 0, Nothing, VertexShapeFunction -> Point]}]]
 ]
+
+
+(* ::Subsection:: *)
+(*FromAnonymousRules*)
+
+
+(* ::Text:: *)
+(*The reason for anonymous rules is to make it simpler to specify rules, especially when they involve creation of new vertices (objects). The idea is that in an anonymous rule all symbols on the left-hand side are treated as patterns even if they are explicitly named.*)
+
+
+(* ::Text:: *)
+(*Thus, for example, {{1, 2}}->{{1, 2, 3}} will get translated to {{a_, b_}} :> Module[{$0}, {{a, b, $0}}].*)
+
+
+(* ::Text:: *)
+(*Clearly, the anonymous variant is easier to type, and, more importantly, easier to enumerate.*)
+
+
+(* ::Subsubsection:: *)
+(*Documentation*)
+
+
+FromAnonymousRules::usage = UsageString[
+	"FromAnonymousRules[`r`] converts a list of anonymous rules `r` into a list of ",
+	"rules that can be supplied into SetReplace.",
+	"\n",
+	"As an example, try FromAnonymousRules[{{{1, 2}} -> {{1, 2, 3}}}]."];
+
+
+(* ::Subsubsection:: *)
+(*Syntax*)
+
+
+SyntaxInformation[FromAnonymousRules] = {"ArgumentsPattern" -> {_}};
+
+
+FromAnonymousRules[args___] := 0 /;
+	!Developer`CheckArgumentCount[FromAnonymousRules[args], 1, 1] && False
+
+
+FromAnonymousRules::notRules =
+	"First argument of FromAnonymousRules must be either a Rule or a list of rules.";
+
+
+FromAnonymousRules[rules_] := 0 /;
+	!MatchQ[rules, {___Rule} | _Rule] && Message[FromAnonymousRules::notRules]
+
+
+(* ::Subsubsection:: *)
+(*Implementation*)
+
+
+(* ::Text:: *)
+(*We are going to find all non-lists in the rules, map them to symbols, and then replace original rules with these symbols using patterns and modules accordingly.*)
+
+
+FromAnonymousRules[rule : _Rule] := Module[
+		{leftSymbols, rightSymbols, symbols, newVertexNames, vertexPatterns,
+		 newLeft, leftVertices, rightVertices, rightOnlyVertices},
+	{leftSymbols, rightSymbols} = Union @ Cases[#, _ ? AtomQ, All] & /@ List @@ rule;
+	symbols = Union[leftSymbols, rightSymbols];
+	newVertexNames =
+		ToHeldExpression /@ StringTemplate["v``"] /@ Range @ Length @ symbols;
+	vertexPatterns = Pattern[#, Blank[]] & /@ newVertexNames;
+	newLeft = (rule[[1]] /. Thread[symbols -> vertexPatterns]);
+	{leftVertices, rightVertices} =
+		{leftSymbols, rightSymbols} /. Thread[symbols -> newVertexNames];
+	rightOnlyVertices = Complement[rightVertices, leftVertices];
+	With[
+			{moduleVariables = rightOnlyVertices,
+			moduleExpression = rule[[2]] /. Thread[symbols -> newVertexNames]},
+		If[moduleVariables =!= {},
+			newLeft :> Module[moduleVariables, moduleExpression],
+			newLeft :> moduleExpression
+		]
+	] /. Hold[expr_] :> expr
+]
+
+
+FromAnonymousRules[rules : {___Rule}] := FromAnonymousRules /@ rules
 
 
 (* ::Section:: *)
