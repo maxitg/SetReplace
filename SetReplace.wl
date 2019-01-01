@@ -183,13 +183,10 @@ SetReplace[set_, rules_, n_] := 0 /; !$StepCountQ[n] &&
 (*Implementation*)
 
 
-SetReplace[set_List, rules_ ? $SetReplaceRulesQ, n_ ? $StepCountQ] :=
+SetReplace[set_List, rules_ ? $SetReplaceRulesQ, n_: 1] /; $StepCountQ[n] :=
 	Quiet[
 		ReplaceRepeated[List @@ set, $ToNormalRules @ rules, MaxIterations -> n],
 		ReplaceRepeated::rrlim]
-
-
-SetReplace[set_List, rules_ ? $SetReplaceRulesQ] := SetReplace[set, rules, 1]
 
 
 (* ::Subsection:: *)
@@ -427,7 +424,8 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 			EdgeShapeFunction -> (Sow[#2 -> Hash[#1]] &)},
 			graphOptions]];
 	graphBoxes = ToBoxes[Graph[graphEdges, DirectedEdges -> True]];
-	arrowheads = If[Length[#] == 0, {}, #[[1]]] & @Cases[graphBoxes, _Arrowheads, All];
+	arrowheads =
+		If[Length[#] == 0, {}, #[[1]]] & @ Cases[graphBoxes, _Arrowheads, All];
 	arrowheadOffset = If[Length[#] == 0, 0, #[[1]]] & @
 		Cases[graphBoxes, ArrowBox[x_, offset_] :> offset, All];
 	hashesToColors =
@@ -621,13 +619,54 @@ SetReplaceAll[set_, rules_, n_] := 0 /; !$StepCountQ[n] &&
 (*The idea here is to replace each element of the set, and each element of rules input with something like touched[original, False], and replace every element of the rules output with touched[original, True]. This way, rules can no longer be applied on the previous output. Then, we can call SetReplaceFixedPoint on that, which will take care of evaluating until everything is fixed.*)
 
 
-SetReplaceAll[set_List, rules_ ? $SetReplaceRulesQ, n_ ? $StepCountQ] := Module[
-		{canonicalRules},
-	canonicalRules = $ToCanonicalRules[rules]
+SetReplaceAll[set_List, rules_ ? $SetReplaceRulesQ] := Module[
+		{canonicalRules, setUntouched, singleUseRules},
+	canonicalRules = $ToCanonicalRules[rules];
+	setUntouched = $Untouched /@ set;
+	singleUseRules = $ToSingleUseRule /@ canonicalRules;
+	SetReplaceFixedPoint[setUntouched, singleUseRules] /.
+		{$Touched[expr_] :> expr, $Untouched[expr_] :> expr}
 ]
 
 
-SetReplaceAll[set_List, rules_ ? $SetReplaceRulesQ] := SetReplaceAll[set, rules, 1]
+ClearAll[$ToSingleUseRule];
+$ToSingleUseRule[left_ :> right_] := With[
+		{newLeft = $Untouched /@ left, newRight = $ToTouched @ right},
+	(newLeft :> newRight) //. Hold[expr_] :> expr
+]
+
+
+ClearAll[$ToTouched];
+SetAttributes[$ToTouched, HoldAll];
+
+
+$ToTouched[expr_List] := $Touched /@ Hold /@ expr
+
+
+$ToTouched[expr_Module] := With[
+		{heldModule = Map[Hold, Hold @ expr, {3}]},
+	With[{
+			moduleVariables = heldModule[[1, 1]],
+			moduleExpression = $Touched /@ heldModule[[1, 2]]},
+		Hold[Module[moduleVariables, moduleExpression]]
+	]
+]
+
+
+(* ::Text:: *)
+(*If multiple steps are requested, we just use Nest.*)
+
+
+SetReplaceAll[set_List, rules_ ? $SetReplaceRulesQ, n_Integer ? $StepCountQ] :=
+	Nest[SetReplaceAll[#, rules] &, set, n]
+
+
+(* ::Text:: *)
+(*If infinite number of steps is requested, we simply do SetReplaceFixedPoint, because that would yield the same result.*)
+
+
+SetReplaceAll[set_List, rules_ ? $SetReplaceRulesQ, \[Infinity]] :=
+	SetReplaceFixedPoint[set, rules]
 
 
 (* ::Section:: *)
