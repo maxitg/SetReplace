@@ -17,7 +17,7 @@ BeginPackage["SetReplace`"];
 
 SetReplace`Private`$PublicSymbols = {
 	SetReplace, SetReplaceList, SetReplaceFixedPoint, SetReplaceFixedPointList,
-	HypergraphPlot, FromAnonymousRules};
+	SetReplaceAll, FromAnonymousRules, HypergraphPlot};
 
 
 Unprotect @@ SetReplace`Private`$PublicSymbols;
@@ -52,6 +52,9 @@ Begin["`Private`"];
 
 (* ::Text:: *)
 (*This is for the case of no new vertices being created, so there is no need for a Module in the output*)
+
+
+ClearAll[$ToNormalRules];
 
 
 $ToNormalRules[(input_List :> output_List) | (input_List -> output_List)] := Module[
@@ -154,23 +157,21 @@ SetReplace[args___] := 0 /;
 
 
 SetReplace::setNotList = "The first argument of `` must be a List.";
-SetReplace[set_, rules_, n_] := 0 /; !ListQ[set] &&
-	Message[SetReplace::setNotList, SetReplace]
-SetReplace[set_, rules_] := 0 /; !ListQ[set] &&
+SetReplace[set_, rules_, n_: 0] := 0 /; !ListQ[set] &&
 	Message[SetReplace::setNotList, SetReplace]
 
 
+ClearAll[$SetReplaceRulesQ];
 $SetReplaceRulesQ[rules_] :=
 	MatchQ[rules, {(_Rule | _RuleDelayed)..} | _Rule | _RuleDelayed]
 SetReplace::invalidRules =
 	"The second argument of `` must be either a Rule, RuleDelayed, or " ~~
 	"a List of them.";
-SetReplace[set_, rules_, n_] := 0 /;
-	!$SetReplaceRulesQ[rules] && Message[SetReplace::invalidRules, SetReplace]
-SetReplace[set_, rules_] := 0 /;
+SetReplace[set_, rules_, n_: 0] := 0 /;
 	!$SetReplaceRulesQ[rules] && Message[SetReplace::invalidRules, SetReplace]
 
 
+ClearAll[$StepCountQ];
 $StepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
 SetReplace::nonIntegerIterations =
 	"The third argument `2` of `1` must be an integer or infinity.";
@@ -182,16 +183,10 @@ SetReplace[set_, rules_, n_] := 0 /; !$StepCountQ[n] &&
 (*Implementation*)
 
 
-SetReplace[
-		set_List,
-		rules_ ? $SetReplaceRulesQ,
-		n_ ? $StepCountQ] :=
+SetReplace[set_List, rules_ ? $SetReplaceRulesQ, n_: 1] /; $StepCountQ[n] :=
 	Quiet[
 		ReplaceRepeated[List @@ set, $ToNormalRules @ rules, MaxIterations -> n],
 		ReplaceRepeated::rrlim]
-
-
-SetReplace[set_List, rules_ ? $SetReplaceRulesQ] := SetReplace[set, rules, 1]
 
 
 (* ::Subsection:: *)
@@ -386,6 +381,7 @@ HypergraphPlot[edges_, o : OptionsPattern[]] := 0 /;
 	!MatchQ[edges, {___List}] && Message[HypergraphPlot::invalidEdges]
 
 
+ClearAll[$CorrectOptions];
 $CorrectOptions[HypergraphPlot][o___] := Module[
 		{plotStyle = OptionValue[HypergraphPlot, {o}, PlotStyle]},
 	Head[plotStyle] === ColorDataFunction &&
@@ -428,7 +424,8 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 			EdgeShapeFunction -> (Sow[#2 -> Hash[#1]] &)},
 			graphOptions]];
 	graphBoxes = ToBoxes[Graph[graphEdges, DirectedEdges -> True]];
-	arrowheads = If[Length[#] == 0, {}, #[[1]]] & @Cases[graphBoxes, _Arrowheads, All];
+	arrowheads =
+		If[Length[#] == 0, {}, #[[1]]] & @ Cases[graphBoxes, _Arrowheads, All];
 	arrowheadOffset = If[Length[#] == 0, 0, #[[1]]] & @
 		Cases[graphBoxes, ArrowBox[x_, offset_] :> offset, All];
 	hashesToColors =
@@ -521,6 +518,155 @@ FromAnonymousRules[rule : _Rule] := Module[
 
 
 FromAnonymousRules[rules : {___Rule}] := FromAnonymousRules /@ rules
+
+
+(* ::Subsection:: *)
+(*$ToCanonicalRules*)
+
+
+(* ::Text:: *)
+(*There are multiple ways SetReplace rules can be expressed, which is mostly manifested by missing lists in various places. Specifically, we could have either a single rule, or a list of rules. Then, inputs / outputs of every rules might either have a single element or a subset. The idea of this function is to ensure two things: (1) we have a list (even if a single-element) of rules, and (2) each rule goes from a list to another list.*)
+
+
+ClearAll[$ToCanonicalRules];
+SetAttributes[$ToCanonicalRules, HoldAll];
+
+
+$ToCanonicalRules[r : (_Rule | _RuleDelayed)] := $ToCanonicalRules[{r}]
+
+
+$ToCanonicalRules[rules : {(_Rule | _RuleDelayed)..}] := $ToCanonicalRule /@ rules
+
+
+ClearAll[$ToCanonicalRule];
+SetAttributes[$ToCanonicalRule, HoldAll];
+
+
+$ToCanonicalRule[(left_ -> right_) | (left_ :> right_)] := With[
+		{newLeft = $ToCanonicalRuleSide[left], newRight = $ToCanonicalRuleSide[right]},
+	newLeft :> newRight
+] //. Hold[expr_] :> expr
+
+
+ClearAll[$ToCanonicalRuleSide];
+SetAttributes[$ToCanonicalRuleSide, HoldAll];
+
+
+$ToCanonicalRuleSide[expr_ : Except[_List | _Module]] := {expr}
+
+
+$ToCanonicalRuleSide[expr_List] := expr
+
+
+$ToCanonicalRuleSide[Module[args_, set_ ? (Not @* ListQ)]] := Hold @ Module[args, {set}]
+
+
+$ToCanonicalRuleSide[Module[args_, set_List]] := Hold @ Module[args, set]
+
+
+(* ::Subsection:: *)
+(*SetReplaceAll*)
+
+
+(* ::Text:: *)
+(*The idea for SetReplaceAll is to keep performing SetReplace on the graph until no replacement can be done without touching the same edge twice.*)
+
+
+(* ::Text:: *)
+(*Note, it's not doing replacement until all edges are touched at least once. That may not always be possible. We just don't want to touch edges twice in a single step.*)
+
+
+(* ::Subsubsection:: *)
+(*Documentation*)
+
+
+SetReplaceAll::usage = UsageString[
+	"SetReplaceAll[`s`, `r`] performs SetReplace[`s`, `r`] as many times as it takes ",
+	"until no replacement can be done without touching the same edge twice.",
+	"\n",
+	"SetReplaceAll[`s`, `r`, `n`] performes the same operation `n` times, i.e., any ",
+	"edge will at most be replaced `n` times."];
+
+
+(* ::Subsubsection:: *)
+(*Syntax*)
+
+
+SyntaxInformation[SetReplaceAll] = {"ArgumentsPattern" -> {_, _, _.}};
+
+
+SetReplaceAll[args___] := 0 /;
+	!Developer`CheckArgumentCount[SetReplaceAll[args], 2, 3] && False
+
+
+SetReplaceAll[set_, rules_, n_: 0] := 0 /; !ListQ[set] &&
+	Message[SetReplace::setNotList, SetReplaceAll]
+
+
+SetReplaceAll[set_, rules_, n_: 0] := 0 /;
+	!$SetReplaceRulesQ[rules] && Message[SetReplace::invalidRules, SetReplaceAll]
+
+
+SetReplaceAll[set_, rules_, n_] := 0 /; !$StepCountQ[n] &&
+	Message[SetReplace::nonIntegerIterations, SetReplaceAll, n]
+
+
+(* ::Subsubsection:: *)
+(*Implementation*)
+
+
+(* ::Text:: *)
+(*The idea here is to replace each element of the set, and each element of rules input with something like touched[original, False], and replace every element of the rules output with touched[original, True]. This way, rules can no longer be applied on the previous output. Then, we can call SetReplaceFixedPoint on that, which will take care of evaluating until everything is fixed.*)
+
+
+SetReplaceAll[set_List, rules_ ? $SetReplaceRulesQ] := Module[
+		{canonicalRules, setUntouched, singleUseRules},
+	canonicalRules = $ToCanonicalRules[rules];
+	setUntouched = $Untouched /@ set;
+	singleUseRules = $ToSingleUseRule /@ canonicalRules;
+	SetReplaceFixedPoint[setUntouched, singleUseRules] /.
+		{$Touched[expr_] :> expr, $Untouched[expr_] :> expr}
+]
+
+
+ClearAll[$ToSingleUseRule];
+$ToSingleUseRule[left_ :> right_] := With[
+		{newLeft = $Untouched /@ left, newRight = $ToTouched @ right},
+	(newLeft :> newRight) //. Hold[expr_] :> expr
+]
+
+
+ClearAll[$ToTouched];
+SetAttributes[$ToTouched, HoldAll];
+
+
+$ToTouched[expr_List] := $Touched /@ Hold /@ expr
+
+
+$ToTouched[expr_Module] := With[
+		{heldModule = Map[Hold, Hold @ expr, {3}]},
+	With[{
+			moduleVariables = heldModule[[1, 1]],
+			moduleExpression = $Touched /@ heldModule[[1, 2]]},
+		Hold[Module[moduleVariables, moduleExpression]]
+	]
+]
+
+
+(* ::Text:: *)
+(*If multiple steps are requested, we just use Nest.*)
+
+
+SetReplaceAll[set_List, rules_ ? $SetReplaceRulesQ, n_Integer ? $StepCountQ] :=
+	Nest[SetReplaceAll[#, rules] &, set, n]
+
+
+(* ::Text:: *)
+(*If infinite number of steps is requested, we simply do SetReplaceFixedPoint, because that would yield the same result.*)
+
+
+SetReplaceAll[set_List, rules_ ? $SetReplaceRulesQ, \[Infinity]] :=
+	SetReplaceFixedPoint[set, rules]
 
 
 (* ::Section:: *)
