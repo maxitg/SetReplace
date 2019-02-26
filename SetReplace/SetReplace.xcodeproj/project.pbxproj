@@ -7,10 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6909EBAB22258611001458D2 /* Match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6909EBA922258611001458D2 /* Match.cpp */; };
 		695F4867222440B90058E057 /* SetReplace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 695F4866222440B90058E057 /* SetReplace.cpp */; };
 		695F4870222443F20058E057 /* Set.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 695F486E222443F20058E057 /* Set.cpp */; };
-		69B2D41222244AFC008778A3 /* Expression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 69B2D41022244AFC008778A3 /* Expression.cpp */; };
-		69B2D41522244D1F008778A3 /* Rule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 69B2D41322244D1F008778A3 /* Rule.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,13 +25,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6909EBA922258611001458D2 /* Match.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Match.cpp; sourceTree = "<group>"; };
+		6909EBAA22258611001458D2 /* Match.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Match.hpp; sourceTree = "<group>"; };
 		695F4863222440B90058E057 /* SetReplace */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SetReplace; sourceTree = BUILT_PRODUCTS_DIR; };
 		695F4866222440B90058E057 /* SetReplace.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SetReplace.cpp; sourceTree = "<group>"; };
 		695F486E222443F20058E057 /* Set.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Set.cpp; sourceTree = "<group>"; };
 		695F486F222443F20058E057 /* Set.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Set.hpp; sourceTree = "<group>"; };
-		69B2D41022244AFC008778A3 /* Expression.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Expression.cpp; sourceTree = "<group>"; };
 		69B2D41122244AFC008778A3 /* Expression.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Expression.hpp; sourceTree = "<group>"; };
-		69B2D41322244D1F008778A3 /* Rule.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Rule.cpp; sourceTree = "<group>"; };
 		69B2D41422244D1F008778A3 /* Rule.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Rule.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -66,12 +65,12 @@
 		695F4865222440B90058E057 /* SetReplace */ = {
 			isa = PBXGroup;
 			children = (
+				69B2D41122244AFC008778A3 /* Expression.hpp */,
+				6909EBA922258611001458D2 /* Match.cpp */,
+				6909EBAA22258611001458D2 /* Match.hpp */,
+				69B2D41422244D1F008778A3 /* Rule.hpp */,
 				695F486E222443F20058E057 /* Set.cpp */,
 				695F486F222443F20058E057 /* Set.hpp */,
-				69B2D41322244D1F008778A3 /* Rule.cpp */,
-				69B2D41422244D1F008778A3 /* Rule.hpp */,
-				69B2D41022244AFC008778A3 /* Expression.cpp */,
-				69B2D41122244AFC008778A3 /* Expression.hpp */,
 				695F4866222440B90058E057 /* SetReplace.cpp */,
 			);
 			path = SetReplace;
@@ -134,8 +133,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				695F4870222443F20058E057 /* Set.cpp in Sources */,
-				69B2D41522244D1F008778A3 /* Rule.cpp in Sources */,
-				69B2D41222244AFC008778A3 /* Expression.cpp in Sources */,
+				6909EBAB22258611001458D2 /* Match.cpp in Sources */,
 				695F4867222440B90058E057 /* SetReplace.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

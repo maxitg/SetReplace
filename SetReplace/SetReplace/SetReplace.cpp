@@ -9,8 +9,8 @@ namespace SetReplace {
     Expression readExpression(std::ifstream& stream) {
         int count;
         stream >> count;
-        std::vector<Expression::AtomID> atoms(count);
-        for (Expression::AtomID& atom : atoms) {
+        std::vector<AtomID> atoms(count);
+        for (AtomID& atom : atoms) {
             stream >> atom;
         }
         return Expression(atoms);
@@ -27,7 +27,7 @@ namespace SetReplace {
     }
     
     Rule readRule(std::ifstream& stream) {
-        return Rule(readExpressions(stream), readExpressions(stream));
+        return {readExpressions(stream), readExpressions(stream)};
     }
     
     std::vector<Rule> readRules(std::ifstream& stream) {
@@ -48,8 +48,8 @@ namespace SetReplace {
     }
     
     void writeExpression(std::ofstream& stream, const Expression expression) {
-        stream << expression.atoms().size();
-        for (const auto& atom : expression.atoms()) {
+        stream << expression.size();
+        for (const auto& atom : expression) {
             stream << " " << atom;
         }
         stream << std::endl;

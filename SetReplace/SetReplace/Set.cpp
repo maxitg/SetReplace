@@ -1,6 +1,10 @@
+#include "Match.hpp"
 #include "Set.hpp"
 
+#include <set>
+#include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace SetReplace {
     class Set::Implementation {
@@ -11,7 +15,9 @@ namespace SetReplace {
         std::unordered_map<ExpressionID, Expression> expressions_;
         int nextExpressionID = 0;
         
-        std::unordered_map<Expression::AtomID, std::vector<ExpressionID>> atomsIndex_;
+        std::unordered_map<AtomID, std::unordered_set<ExpressionID>> atomsIndex_;
+        
+        std::set<Match> matches_;
         
     public:
         Implementation(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions) : rules_(rules) {
@@ -38,7 +44,7 @@ namespace SetReplace {
         void addExpressions(const std::vector<Expression>& expressions) {
             const auto ids = assignExpressionIDs(expressions);
             addToAtomsIndex(ids);
-            addMatchings(ids);
+            addMatches(ids);
         }
         
         std::vector<ExpressionID> assignExpressionIDs(const std::vector<Expression>& expressions) {
@@ -52,14 +58,125 @@ namespace SetReplace {
         
         void addToAtomsIndex(const std::vector<ExpressionID>& ids) {
             for (const auto expressionID : ids) {
-                for (const auto atom : expressions_.at(expressionID).atoms()) {
-                    atomsIndex_[atom].push_back(expressionID);
+                for (const auto atom : expressions_.at(expressionID)) {
+                    atomsIndex_[atom].insert(expressionID);
                 }
             }
         }
         
-        void addMatchings(const std::vector<ExpressionID>& ids) {
+        void addMatches(const std::vector<ExpressionID>& ids) {
+            for (int i = 0; i < rules_.size(); ++i) {
+                addMatches(ids, i);
+            }
+        }
+        
+        void addMatches(const std::vector<ExpressionID>& expressionIDs, const int ruleID) {
+            for (int i = 0; i < rules_[ruleID].inputs.size(); ++i) {
+                Match emptyMatch{ruleID, std::vector<ExpressionID>(rules_[ruleID].inputs.size(), -1)};
+                addMatches(emptyMatch, rules_[ruleID].inputs, i, expressionIDs);
+            }
+        }
+        
+        void addMatches(const Match& currentMatch,
+                        const std::vector<Expression>& inputs,
+                        const int nextInputID,
+                        const std::vector<ExpressionID>& potentialExpressionIDs) {
+            for (const auto expressionID : potentialExpressionIDs) {
+                if (expressionUnused(currentMatch, expressionID)) {
+                    addMatches(currentMatch, inputs, nextInputID, expressionID);
+                }
+            }
+        }
+        
+        bool expressionUnused(const Match& match, const ExpressionID expressionID) {
+            for (int i = 0; i < match.expressionIDs.size(); ++i) {
+                if (match.expressionIDs[i] == expressionID) return false;
+            }
+            return true;
+        }
+        
+        void addMatches(const Match& currentMatch,
+                        const std::vector<Expression>& inputs,
+                        const int nextInputID,
+                        const ExpressionID expressionID) {
+            const auto& input = inputs[nextInputID];
+            const auto& expression = expressions_[expressionID];
+            if (input.size() != expression.size()) return;
             
+            std::unordered_map<AtomID, AtomID> match;
+            for (int i = 0; i < input.size(); ++i) {
+                AtomID inputAtom;
+                if (match.count(input[i])) {
+                    inputAtom = match.at(input[i]);
+                } else {
+                    inputAtom = input[i];
+                }
+                
+                if (inputAtom < 0) { // pattern
+                    match[inputAtom] = expression[i];
+                } else { // explicit atom ID
+                    if (inputAtom != expression[i]) return; // inconsistency
+                }
+            }
+            
+            Match newCurrentMatch = currentMatch;
+            newCurrentMatch.expressionIDs[nextInputID] = expressionID;
+            
+            std::vector<Expression> newInputs = inputs;
+            for (int i = 0; i < newInputs.size(); ++i) {
+                for (int j = 0; j < newInputs[i].size(); ++j) {
+                    if (match.count(newInputs[i][j])) {
+                        newInputs[i][j] = match[newInputs[i][j]];
+                    }
+                }
+            }
+            
+            addMatches(newCurrentMatch, newInputs);
+        }
+        
+        // TODO: make intersection of expressions if multiple global atoms are present, this way we will choose the cheapest direction to explore.
+        
+        void addMatches(const Match& currentMatch, const std::vector<Expression>& inputs) {
+            if (matchComplete(currentMatch)) {
+                matches_.insert(currentMatch);
+                return;
+            }
+            
+            int nextInputID = -1;
+            AtomID referenceAtom = -1;
+            bool anonymousAtomsPresent = false;
+            
+            for (int i = 0; i < inputs.size(); ++i) {
+                if (currentMatch.expressionIDs[i] != -1) continue;
+                for (const auto atom : inputs[i]) {
+                    if (atom >= 0 && (referenceAtom == -1 || atomsIndex_[atom].size() < atomsIndex_[referenceAtom].size())) {
+                        nextInputID = i;
+                        referenceAtom = atom;
+                    } else if (atom < 0) {
+                        anonymousAtomsPresent = true;
+                    }
+                }
+            }
+            
+            if (nextInputID == -1 && anonymousAtomsPresent) {
+                throw std::string("Inputs of rule ") + std::to_string(currentMatch.ruleID) + std::string(" are not connected.");
+            } else if (nextInputID == -1) {
+                return;
+            }
+            
+            std::vector<ExpressionID> potentialExpressionIDs;
+            for (const auto& expressionID : atomsIndex_[referenceAtom]) {
+                potentialExpressionIDs.push_back(expressionID);
+            }
+            
+            addMatches(currentMatch, inputs, nextInputID, potentialExpressionIDs);
+        }
+        
+        bool matchComplete(const Match& match) {
+            for (int i = 0; i < match.expressionIDs.size(); ++i) {
+                if (match.expressionIDs[i] < 0) return false;
+            }
+            return true;
         }
     };
     
