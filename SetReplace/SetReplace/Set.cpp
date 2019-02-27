@@ -134,8 +134,6 @@ namespace SetReplace {
             addMatches(newCurrentMatch, newInputs);
         }
         
-        // TODO: make intersection of expressions if multiple global atoms are present, this way we will choose the cheapest direction to explore.
-        
         void addMatches(const Match& currentMatch, const std::vector<Expression>& inputs) {
             if (matchComplete(currentMatch)) {
                 matches_.insert(currentMatch);
@@ -143,18 +141,38 @@ namespace SetReplace {
             }
             
             int nextInputID = -1;
-            AtomID referenceAtom = -1;
+            std::vector<ExpressionID> potentialExpressionIDs;
             bool anonymousAtomsPresent = false;
             
             for (int i = 0; i < inputs.size(); ++i) {
                 if (currentMatch.expressionIDs[i] != -1) continue;
+                
+                std::unordered_set<AtomID> requiredAtoms;
                 for (const auto atom : inputs[i]) {
-                    if (atom >= 0 && (referenceAtom == -1 || atomsIndex_[atom].size() < atomsIndex_[referenceAtom].size())) {
-                        nextInputID = i;
-                        referenceAtom = atom;
+                    if (atom >= 0) {
+                        requiredAtoms.insert(atom);
                     } else if (atom < 0) {
                         anonymousAtomsPresent = true;
                     }
+                }
+                
+                std::unordered_map<ExpressionID, int> requiredAtomsCounts;
+                for (const auto atom : requiredAtoms) {
+                    for (const auto expression : atomsIndex_[atom]) {
+                        requiredAtomsCounts[expression]++;
+                    }
+                }
+                
+                std::vector<ExpressionID> candidateExpressionIDs;
+                for (const auto& expressionCount : requiredAtomsCounts) {
+                    if (expressionCount.second == requiredAtoms.size()) {
+                        candidateExpressionIDs.push_back(expressionCount.first);
+                    }
+                }
+                
+                if (nextInputID == -1 || candidateExpressionIDs.size() < potentialExpressionIDs.size()) {
+                    potentialExpressionIDs = candidateExpressionIDs;
+                    nextInputID = i;
                 }
             }
             
@@ -162,11 +180,6 @@ namespace SetReplace {
                 throw std::string("Inputs of rule ") + std::to_string(currentMatch.ruleID) + std::string(" are not connected.");
             } else if (nextInputID == -1) {
                 return;
-            }
-            
-            std::vector<ExpressionID> potentialExpressionIDs;
-            for (const auto& expressionID : atomsIndex_[referenceAtom]) {
-                potentialExpressionIDs.push_back(expressionID);
             }
             
             addMatches(currentMatch, inputs, nextInputID, potentialExpressionIDs);
