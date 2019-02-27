@@ -70,6 +70,10 @@ namespace SetReplace {
 
 int main(int argc, const char * argv[]) {
     if (argc != 4) std::cerr << "3 arguments expected: input file, output file, and step count.";
-    SetReplace::writeOutput(std::string(argv[3]), SetReplace::readInput(std::string(argv[1])).replace(std::stoi(argv[2])));
+    
+    auto set = SetReplace::readInput(std::string(argv[1]));
+    set.replace(std::stoi(argv[2]));
+    SetReplace::writeOutput(std::string(argv[3]), set);
+    
     return 0;
 }

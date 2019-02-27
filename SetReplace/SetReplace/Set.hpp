@@ -12,8 +12,8 @@ namespace SetReplace {
     public:
         Set(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions);
         
-        Set replace();
-        Set replace(const int stepCount);
+        int replace();
+        int replace(const int stepCount);
         
         std::vector<Expression> expressions() const;
         

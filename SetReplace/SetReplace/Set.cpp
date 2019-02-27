@@ -14,22 +14,64 @@ namespace SetReplace {
         using ExpressionID = int;
         std::unordered_map<ExpressionID, Expression> expressions_;
         int nextExpressionID = 0;
+        int nextAtomID = 0;
         
         std::unordered_map<AtomID, std::unordered_set<ExpressionID>> atomsIndex_;
         
         std::set<Match> matches_;
         
+        struct iterator_hash {
+            size_t operator()(std::set<Match>::const_iterator it) const {
+                return std::hash<int64_t>()((int64_t)&(*it));
+            }
+        };
+        std::unordered_map<ExpressionID, std::unordered_set<std::set<Match>::const_iterator, iterator_hash>> matchesIndex_;
+        
     public:
         Implementation(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions) : rules_(rules) {
+            for (const auto& expression : initialExpressions) {
+                for (const auto& atom : expression) {
+                    nextAtomID = std::max(nextAtomID - 1, atom) + 1;
+                }
+            }
             addExpressions(initialExpressions);
         }
         
-        void replace() {
-            // TODO: not implemented
+        int replace() {
+            if (matches_.empty()) {
+                return 0;
+            }
+            
+            Match match = *matches_.begin();
+            
+            const auto& ruleInputs = rules_[match.ruleID].inputs;
+            std::vector<Expression> inputExpressions;
+            for (const auto& expressionID : match.expressionIDs) {
+                inputExpressions.push_back(expressions_[expressionID]);
+            }
+            
+            auto explicitRuleInputs = ruleInputs;
+            replaceExplicit(ruleInputs, inputExpressions, explicitRuleInputs);
+            auto explicitRuleOutputs = rules_[match.ruleID].outputs;
+            replaceExplicit(ruleInputs, inputExpressions, explicitRuleOutputs);
+            const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
+            
+            // TODO: insertion, indexing and matching of new expressions works, but deleting of old ones is not currently implemented. This is the next thing to do here.
+            /*removeMatches(match.expressionIDs);
+            removeFromAtomsIndex(match.expressionIDs);
+            removeExpressions(match.expressionIDs);
+            */
+            addExpressions(namedRuleOutputs);
+            
+            return 1;
         }
         
-        void replace(const int stepCount) {
-            // TODO: not implemented
+        int replace(const int stepCount) {
+            int count = 0;
+            for (int i = 0; i < stepCount; ++i) {
+                count += replace();
+            }
+            return count;
         }
         
         std::vector<Expression> expressions() const {
@@ -41,6 +83,22 @@ namespace SetReplace {
         }
         
     private:
+        std::vector<Expression> nameAnonymousAtoms(const std::vector<Expression>& expressions) {
+            std::unordered_map<AtomID, AtomID> names;
+            std::vector<Expression> result = expressions;
+            for (auto& expression : result) {
+                for (auto& atom : expression) {
+                    if (atom < 0 && names.count(atom) == 0) {
+                        names[atom] = nextAtomID++;
+                    }
+                    if (atom < 0) {
+                        atom = names[atom];
+                    }
+                }
+            }
+            return result;
+        }
+        
         void addExpressions(const std::vector<Expression>& expressions) {
             const auto ids = assignExpressionIDs(expressions);
             addToAtomsIndex(ids);
@@ -103,40 +161,57 @@ namespace SetReplace {
             const auto& expression = expressions_[expressionID];
             if (input.size() != expression.size()) return;
             
-            std::unordered_map<AtomID, AtomID> match;
-            for (int i = 0; i < input.size(); ++i) {
-                AtomID inputAtom;
-                if (match.count(input[i])) {
-                    inputAtom = match.at(input[i]);
-                } else {
-                    inputAtom = input[i];
-                }
-                
-                if (inputAtom < 0) { // pattern
-                    match[inputAtom] = expression[i];
-                } else { // explicit atom ID
-                    if (inputAtom != expression[i]) return; // inconsistency
-                }
-            }
-            
             Match newCurrentMatch = currentMatch;
             newCurrentMatch.expressionIDs[nextInputID] = expressionID;
             
-            std::vector<Expression> newInputs = inputs;
-            for (int i = 0; i < newInputs.size(); ++i) {
-                for (int j = 0; j < newInputs[i].size(); ++j) {
-                    if (match.count(newInputs[i][j])) {
-                        newInputs[i][j] = match[newInputs[i][j]];
+            auto newInputs = inputs;
+            if (replaceExplicit({input}, {expression}, newInputs)) {
+                addMatches(newCurrentMatch, newInputs);
+            }
+        }
+        
+        bool replaceExplicit(const std::vector<Expression> patterns,
+                                                const std::vector<Expression> patternMatches,
+                                                std::vector<Expression>& expressions) {
+            if (patterns.size() != patternMatches.size()) return false;
+            
+            std::unordered_map<AtomID, AtomID> match;
+            for (int i = 0; i < patterns.size(); ++i) {
+                const auto& pattern = patterns[i];
+                const auto& patternMatch = patternMatches[i];
+                if (pattern.size() != patternMatch.size()) return false;;
+                for (int j = 0; j < pattern.size(); ++j) {
+                    AtomID inputAtom;
+                    if (match.count(pattern[j])) {
+                        inputAtom = match.at(pattern[j]);
+                    } else {
+                        inputAtom = pattern[j];
+                    }
+                    
+                    if (inputAtom < 0) { // pattern
+                        match[inputAtom] = patternMatch[j];
+                    } else { // explicit atom ID
+                        if (inputAtom != patternMatch[j]) return false;
                     }
                 }
             }
             
-            addMatches(newCurrentMatch, newInputs);
+            for (int i = 0; i < expressions.size(); ++i) {
+                for (int j = 0; j < expressions[i].size(); ++j) {
+                    if (match.count(expressions[i][j])) {
+                        expressions[i][j] = match[expressions[i][j]];
+                    }
+                }
+            }
+            return true;
         }
         
         void addMatches(const Match& currentMatch, const std::vector<Expression>& inputs) {
             if (matchComplete(currentMatch)) {
-                matches_.insert(currentMatch);
+                const auto iterator = matches_.insert(currentMatch).first;
+                for (const auto& expressionID : currentMatch.expressionIDs) {
+                    matchesIndex_[expressionID].insert(iterator);
+                }
                 return;
             }
             
@@ -197,14 +272,12 @@ namespace SetReplace {
         implementation_ = std::make_shared<Implementation>(rules, initialExpressions);
     }
     
-    Set Set::replace() {
-        implementation_->replace();
-        return *this;
+    int Set::replace() {
+        return implementation_->replace();
     }
     
-    Set Set::replace(const int stepCount) {
-        implementation_->replace(stepCount);
-        return *this;
+    int Set::replace(const int stepCount) {
+        return implementation_->replace(stepCount);
     }
     
     std::vector<Expression> Set::expressions() const {
