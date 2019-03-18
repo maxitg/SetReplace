@@ -56,7 +56,6 @@ namespace SetReplace {
             replaceExplicit(ruleInputs, inputExpressions, explicitRuleOutputs);
             const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
             
-            // TODO: insertion, indexing and matching of new expressions works, but deleting of old ones is not currently implemented. This is the next thing to do here.
             removeMatches(match.expressionIDs);
             removeFromAtomsIndex(match.expressionIDs);
             removeExpressions(match.expressionIDs);
@@ -102,11 +101,37 @@ namespace SetReplace {
         }
         
         void removeFromAtomsIndex(const std::vector<ExpressionID>& expressionIDs) {
-            // TODO: Implement
+            std::unordered_set<ExpressionID> expressionsToDelete;
+            for (const auto& expression : expressionIDs) {
+                expressionsToDelete.insert(expression);
+            }
+            
+            std::unordered_set<AtomID> involedAtoms;
+            for (const auto& expression : expressionIDs) {
+                for (const auto& atom : expressions_[expression]) {
+                    involedAtoms.insert(atom);
+                }
+            }
+            
+            for (const auto& atom : involedAtoms) {
+                auto expressionIterator = atomsIndex_[atom].begin();
+                while (expressionIterator != atomsIndex_[atom].end()) {
+                    if (expressionsToDelete.count(*expressionIterator)) {
+                        expressionIterator = atomsIndex_[atom].erase(expressionIterator);
+                    } else {
+                        ++expressionIterator;
+                    }
+                }
+                if (atomsIndex_[atom].empty()) {
+                    atomsIndex_.erase(atom);
+                }
+            }
         }
         
         void removeExpressions(const std::vector<ExpressionID>& expressionIDs) {
-            // TODO: Implement
+            for (const auto& expression : expressionIDs) {
+                expressions_.erase(expression);
+            }
         }
         
         int replace(const int stepCount) {
