@@ -20,12 +20,12 @@ namespace SetReplace {
         
         std::set<Match> matches_;
         
-        struct iterator_hash {
+        struct IteratorHash {
             size_t operator()(std::set<Match>::const_iterator it) const {
                 return std::hash<int64_t>()((int64_t)&(*it));
             }
         };
-        std::unordered_map<ExpressionID, std::unordered_set<std::set<Match>::const_iterator, iterator_hash>> matchesIndex_;
+        std::unordered_map<ExpressionID, std::unordered_set<std::set<Match>::const_iterator, IteratorHash>> matchesIndex_;
         
     public:
         Implementation(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions) : rules_(rules) {
@@ -57,13 +57,56 @@ namespace SetReplace {
             const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
             
             // TODO: insertion, indexing and matching of new expressions works, but deleting of old ones is not currently implemented. This is the next thing to do here.
-            /*removeMatches(match.expressionIDs);
+            removeMatches(match.expressionIDs);
             removeFromAtomsIndex(match.expressionIDs);
             removeExpressions(match.expressionIDs);
-            */
+            
             addExpressions(namedRuleOutputs);
             
             return 1;
+        }
+        
+        void removeMatches(const std::vector<ExpressionID>& expressionIDs) {
+            std::unordered_set<std::set<Match>::const_iterator, IteratorHash> matchIteratorsToDelete;
+            for (const auto& id : expressionIDs) {
+                const auto& matches = matchesIndex_[id];
+                for (const auto& matchIterator : matches) {
+                    matchIteratorsToDelete.insert(matchIterator);
+                }
+            }
+            
+            std::unordered_set<ExpressionID> involvedExpressions;
+            for (const auto& iterator : matchIteratorsToDelete) {
+                for (const auto& expression : iterator->expressionIDs) {
+                    involvedExpressions.insert(expression);
+                }
+            }
+            
+            for (const auto& expression : involvedExpressions) {
+                auto indexIterator = matchesIndex_[expression].begin();
+                while (indexIterator != matchesIndex_[expression].end()) {
+                    if (matchIteratorsToDelete.count(*indexIterator)) {
+                        indexIterator = matchesIndex_[expression].erase(indexIterator);
+                    } else {
+                        ++indexIterator;
+                    }
+                }
+                if (matchesIndex_[expression].empty()) {
+                    matchesIndex_.erase(expression);
+                }
+            }
+            
+            for (const auto& matchIterator : matchIteratorsToDelete) {
+                matches_.erase(matchIterator);
+            }
+        }
+        
+        void removeFromAtomsIndex(const std::vector<ExpressionID>& expressionIDs) {
+            // TODO: Implement
+        }
+        
+        void removeExpressions(const std::vector<ExpressionID>& expressionIDs) {
+            // TODO: Implement
         }
         
         int replace(const int stepCount) {
@@ -171,8 +214,8 @@ namespace SetReplace {
         }
         
         bool replaceExplicit(const std::vector<Expression> patterns,
-                                                const std::vector<Expression> patternMatches,
-                                                std::vector<Expression>& expressions) {
+                             const std::vector<Expression> patternMatches,
+                             std::vector<Expression>& expressions) {
             if (patterns.size() != patternMatches.size()) return false;
             
             std::unordered_map<AtomID, AtomID> match;
