@@ -108,10 +108,11 @@ namespace SetReplace {
         
         Set set(rules, initialExpressions);
         set.replace(steps);
+        const auto expressions = set.expressions();
         
-        int tensorLength = 1 + (int)set.expressions().size();
-        for (int i = 0; i < set.expressions().size(); ++i) {
-            tensorLength += set.expressions()[i].size();
+        int tensorLength = 1 + (int)expressions.size();
+        for (int i = 0; i < expressions.size(); ++i) {
+            tensorLength += expressions[i].size();
         }
         
         mint dimensions[1] = {tensorLength};
@@ -121,13 +122,13 @@ namespace SetReplace {
         int writeIndex = 0;
         mint position[1];
         position[0] = ++writeIndex;
-        libData->MTensor_setInteger(output, position, set.expressions().size());
-        for (int expressionIndex = 0; expressionIndex < set.expressions().size(); ++expressionIndex) {
+        libData->MTensor_setInteger(output, position, expressions.size());
+        for (int expressionIndex = 0; expressionIndex < expressions.size(); ++expressionIndex) {
             position[0] = ++writeIndex;
-            libData->MTensor_setInteger(output, position, set.expressions()[expressionIndex].size());
-            for (int atomIndex = 0; atomIndex < set.expressions()[expressionIndex].size(); ++atomIndex) {
+            libData->MTensor_setInteger(output, position, expressions[expressionIndex].size());
+            for (int atomIndex = 0; atomIndex < expressions[expressionIndex].size(); ++atomIndex) {
                 position[0] = ++writeIndex;
-                libData->MTensor_setInteger(output, position, set.expressions()[expressionIndex][atomIndex]);
+                libData->MTensor_setInteger(output, position, expressions[expressionIndex][atomIndex]);
             }
         }
         
