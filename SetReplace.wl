@@ -12,7 +12,7 @@
 (*See on GitHub: https://github.com/maxitg/SetReplace.*)
 
 
-BeginPackage["SetReplace`"];
+BeginPackage["SetReplace`", {"UsageString`"}];
 
 
 SetReplace`Private`$PublicSymbols = {
@@ -22,17 +22,6 @@ SetReplace`Private`$PublicSymbols = {
 
 Unprotect @@ SetReplace`Private`$PublicSymbols;
 ClearAll @@ SetReplace`Private`$PublicSymbols;
-
-
-(* ::Section:: *)
-(*Dependencies*)
-
-
-(* ::Subsection:: *)
-(*UsageString*)
-
-
-Get["https://raw.githubusercontent.com/maxitg/WLUsageString/master/UsageString.wl"]
 
 
 (* ::Section:: *)
