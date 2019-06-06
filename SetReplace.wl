@@ -32,6 +32,17 @@ Begin["`Private`"];
 
 
 (* ::Subsection:: *)
+(*Load C++ library*)
+
+
+$libraryDirectory =
+	FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID}];
+If[Not @ MemberQ[$LibraryPath, $libraryDirectory],
+	PrependTo[$LibraryPath, $libraryDirectory]
+]
+
+
+(* ::Subsection:: *)
 (*$ToNormalRules*)
 
 
