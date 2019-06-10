@@ -57,6 +57,7 @@ $cpp$setReplace = LibraryFunctionLoad[
 (*This format is used to pass both rules and set data into libSetReplace over LibraryLink*)
 
 
+ClearAll[$encodeNestedLists];
 $encodeNestedLists[list_List] :=
 		{list} //. {{l___, List[args___], r___} :> {l, Length[{args}], args, r}}
 
@@ -65,12 +66,14 @@ $encodeNestedLists[list_List] :=
 (*This is the reverse, used to decode set data (a list of hyperedges) from libSetReplace*)
 
 
+ClearAll[$readList];
 $readList[list_, index_] := Module[{count = list[[index]]},
 	Sow[list[[index + 1 ;; index + count]]];
 	index + count + 1
 ]
 
 
+ClearAll[$decodeListOfLists];
 $decodeListOfLists[{0}] := {}
 $decodeListOfLists[list_List] := Reap[Nest[$readList[list, #] &, 2, list[[1]]]][[2, 1]]
 
@@ -91,7 +94,7 @@ ClearAll[$ToCanonicalRules, $ToCanonicalRule];
 
 
 (* ::Text:: *)
-(*If there are multiple rules, we just join them, if not, we force the single rule to be in a list*)
+(*If there is a single rule, we put it in a list*)
 
 
 $ToCanonicalRules[rules_List] := $ToCanonicalRule /@ rules
@@ -131,8 +134,7 @@ $ToCanonicalRule[input_ :> Module[vars_List, expr : Except[_List]]] :=
 (*After all of that's done, drop $ToCanonicalRule*)
 
 
-$ToCanonicalRule[input_List :> output_Module] /;
-	Map[Hold, Hold[output], {2}][[1, 2, 1, 0]] === List := input :> output
+$ToCanonicalRule[input_ :> Module[vars_List, expr_List]] := input :> Module[vars, expr]
 
 
 (* ::Subsection:: *)
@@ -269,13 +271,13 @@ $wlMethod = "WolframLanguage";
 $setReplaceMethods = {Automatic, $cppMethod, $wlMethod};
 
 
-SetReplace::mtd =
+SetReplace::invalidMethod =
 	"Method should be one of " <> ToString[$setReplaceMethods, InputForm] <> ".";
 
 
 SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
 	!MatchQ[OptionValue[Method], Alternatives @@ $setReplaceMethods] &&
-	Message[SetReplace::mtd]
+	Message[SetReplace::invalidMethod]
 
 
 (* ::Subsubsection:: *)
@@ -331,6 +333,7 @@ SetReplace[
 (*WL Implementation*)
 
 
+ClearAll[$SetReplace$wl];
 $SetReplace$wl[set_, rules_, n_] := Quiet[
 	ReplaceRepeated[List @@ set, $ToNormalRules @ rules, MaxIterations -> n],
 	ReplaceRepeated::rrlim]
@@ -390,14 +393,14 @@ $RuleAtoms[left_ :> right_Module] := Module[{
 ]
 
 
-ClearAll[$MapRule];
+ClearAll[$RuleAtomsToIndices];
 
 
-$MapRule[left_ :> right : Except[_Module], globalIndex_, localIndex_] :=
-	$MapRule[left :> Module[{}, right], globalIndex, localIndex]
+$RuleAtomsToIndices[left_ :> right : Except[_Module], globalIndex_, localIndex_] :=
+	$RuleAtomsToIndices[left :> Module[{}, right], globalIndex, localIndex]
 
 
-$MapRule[left_ :> right_Module, globalIndex_, localIndex_] := Module[{
+$RuleAtomsToIndices[left_ :> right_Module, globalIndex_, localIndex_] := Module[{
 		newLeft, newRight},
 	newLeft = Replace[
 		left,
@@ -412,6 +415,7 @@ $MapRule[left_ :> right_Module, globalIndex_, localIndex_] := Module[{
 ]
 
 
+ClearAll[$SetReplace$cpp];
 $SetReplace$cpp[
 			set : {{___ ? AtomQ}...},
 			rules : {___ ? $SimpleRuleQ},
@@ -427,7 +431,11 @@ $SetReplace$cpp[
 	localIndices =
 		Association @ Thread[#[[2]] -> - Range[Length[#[[2]]]]] & /@ ruleAtoms;
 	mappedRules = Table[
-		$MapRule[rules[[K]], globalIndex, localIndices[[K]]], {K, Length[rules]}];
+		$RuleAtomsToIndices[
+			rules[[K]],
+			globalIndex,
+			localIndices[[K]]],
+		{K, Length[rules]}];
 	cppOutput = $decodeListOfLists @ $cpp$setReplace[
 		$encodeNestedLists[List @@@ mappedRules],
 		$encodeNestedLists[mappedSet],
