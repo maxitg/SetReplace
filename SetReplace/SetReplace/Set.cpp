@@ -143,11 +143,18 @@ namespace SetReplace {
         }
         
         std::vector<Expression> expressions() const {
-            std::vector<Expression> result;
-            for (const auto& idExpression : expressions_) {
-                result.push_back(idExpression.second);
-            }
-            return result;
+          std::vector<std::pair<ExpressionID, Expression>> idExpressions;
+          idExpressions.reserve(expressions_.size());
+          for (const auto& idExpression : expressions_) {
+            idExpressions.push_back(idExpression);
+          }
+          std::sort(idExpressions.begin(), idExpressions.end());
+          std::vector<Expression> result;
+          result.reserve(idExpressions.size());
+          for (const auto& idExpression : idExpressions) {
+            result.push_back(idExpression.second);
+          }
+          return result;
         }
         
     private:
