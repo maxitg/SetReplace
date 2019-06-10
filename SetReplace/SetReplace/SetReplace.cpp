@@ -25,29 +25,23 @@ mint getData(mint* data, mint length, mint index) {
     }
 }
 
-template<typename Lambda>
-void readSet(std::vector<SetReplace::Expression>& set, Lambda& lambda) {
-    
-}
-
 namespace SetReplace {
     std::vector<Rule> getRules(WolframLibraryData libData, MTensor& rulesTensor) {
         mint tensorLength = libData->MTensor_getFlattenedLength(rulesTensor);
         mint* tensorData = libData->MTensor_getIntegerData(rulesTensor);
-        std::vector<Rule> rules;
         int readIndex = 0;
         const auto getRulesData = [&tensorData, &tensorLength, &readIndex]() -> mint {
             return getData(tensorData, tensorLength, readIndex++);
         };
-
-        rules.resize(getRulesData());
+        
+        std::vector<Rule> rules(getRulesData());
         for (int ruleIndex = 0; ruleIndex < rules.size(); ++ruleIndex) {
             if (getRulesData() != 2) {
                 throw LIBRARY_FUNCTION_ERROR;
             } else {
                 const std::vector<std::vector<Expression>*> setsToRead =
                 {&rules[ruleIndex].inputs, &rules[ruleIndex].outputs};
-
+                
                 for (auto& set : setsToRead) {
                     set->resize(getRulesData());
                     for (int expressionIndex = 0; expressionIndex < set->size(); ++expressionIndex) {
@@ -65,13 +59,12 @@ namespace SetReplace {
     std::vector<Expression> getSet(WolframLibraryData libData, MTensor& setTensor) {
         mint tensorLength = libData->MTensor_getFlattenedLength(setTensor);
         mint* tensorData = libData->MTensor_getIntegerData(setTensor);
-        std::vector<Expression> set;
         int readIndex = 0;
         const auto getSetData = [&tensorData, &tensorLength, &readIndex]() -> mint {
             return getData(tensorData, tensorLength, readIndex++);
         };
-
-        set.resize(getSetData());
+        
+        std::vector<Expression> set(getSetData());
         for (int expressionIndex = 0; expressionIndex < set.size(); ++expressionIndex) {
             set[expressionIndex].resize(getSetData());
             for (int atomIndex = 0; atomIndex < set[expressionIndex].size(); ++atomIndex) {
@@ -81,36 +74,16 @@ namespace SetReplace {
         return set;
     }
     
-    EXTERN_C int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
-        if (argc != 3) {
-            return LIBRARY_FUNCTION_ERROR;
-        }
-
-        std::vector<Rule> rules;
-        std::vector<Expression> initialExpressions;
-        int steps;
-
-        try {
-            rules = getRules(libData, MArgument_getMTensor(argv[0]));
-            initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
-            steps = (int)MArgument_getInteger(argv[2]);
-        } catch (...) {
-            return LIBRARY_FUNCTION_ERROR;
-        }
-
-        Set set(rules, initialExpressions);
-        set.replace(steps);
-        const auto expressions = set.expressions();
-
+    MTensor putSet(const std::vector<Expression>& expressions, WolframLibraryData libData) {
         int tensorLength = 1 + (int)expressions.size();
         for (int i = 0; i < expressions.size(); ++i) {
             tensorLength += expressions[i].size();
         }
-
+        
         mint dimensions[1] = {tensorLength};
         MTensor output;
         libData->MTensor_new(MType_Integer, 1, dimensions, &output);
-
+        
         int writeIndex = 0;
         mint position[1];
         position[0] = ++writeIndex;
@@ -123,9 +96,32 @@ namespace SetReplace {
                 libData->MTensor_setInteger(output, position, expressions[expressionIndex][atomIndex]);
             }
         }
-
-        MArgument_setMTensor(result, output);
-
+        
+        return output;
+    }
+    
+    EXTERN_C int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+        if (argc != 3) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+        
+        std::vector<Rule> rules;
+        std::vector<Expression> initialExpressions;
+        int steps;
+        try {
+            rules = getRules(libData, MArgument_getMTensor(argv[0]));
+            initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
+            steps = (int)MArgument_getInteger(argv[2]);
+        } catch (...) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+        
+        Set set(rules, initialExpressions);
+        set.replace(steps);
+        const auto expressions = set.expressions();
+        
+        MArgument_setMTensor(result, putSet(expressions, libData));
+        
         return LIBRARY_NO_ERROR;
     }
 }
