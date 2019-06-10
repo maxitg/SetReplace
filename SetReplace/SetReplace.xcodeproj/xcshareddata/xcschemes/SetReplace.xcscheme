@@ -14,8 +14,8 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "695F4862222440B90058E057"
-               BuildableName = "SetReplace"
+               BlueprintIdentifier = "69CAF8672257B062006F9C60"
+               BuildableName = "libSetReplace.dylib"
                BlueprintName = "SetReplace"
                ReferencedContainer = "container:SetReplace.xcodeproj">
             </BuildableReference>
@@ -32,8 +32,8 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "695F4862222440B90058E057"
-            BuildableName = "SetReplace"
+            BlueprintIdentifier = "69CAF8672257B062006F9C60"
+            BuildableName = "libSetReplace.dylib"
             BlueprintName = "SetReplace"
             ReferencedContainer = "container:SetReplace.xcodeproj">
          </BuildableReference>
@@ -55,8 +55,8 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "695F4862222440B90058E057"
-            BuildableName = "SetReplace"
+            BlueprintIdentifier = "69CAF8672257B062006F9C60"
+            BuildableName = "libSetReplace.dylib"
             BlueprintName = "SetReplace"
             ReferencedContainer = "container:SetReplace.xcodeproj">
          </BuildableReference>
@@ -80,8 +80,8 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "695F4862222440B90058E057"
-            BuildableName = "SetReplace"
+            BlueprintIdentifier = "69CAF8672257B062006F9C60"
+            BuildableName = "libSetReplace.dylib"
             BlueprintName = "SetReplace"
             ReferencedContainer = "container:SetReplace.xcodeproj">
          </BuildableReference>

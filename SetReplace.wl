@@ -32,6 +32,112 @@ Begin["`Private`"];
 
 
 (* ::Subsection:: *)
+(*Load C++ library*)
+
+
+$libraryDirectory =
+	FileNameJoin[{DirectoryName[$InputFileName], "LibraryResources", $SystemID}];
+If[Not @ MemberQ[$LibraryPath, $libraryDirectory],
+	PrependTo[$LibraryPath, $libraryDirectory]
+];
+
+
+$cpp$setReplace = LibraryFunctionLoad[
+	FindLibrary["libSetReplace"],
+	"setReplace",
+	{{Integer, 1}, {Integer, 1}, Integer},
+	{Integer, 1}];
+
+
+(* ::Text:: *)
+(*The following code turns a nested list into a single list, prepending sizes of each sublist. I.e., {{a}, {b, c, d}} becomes {2, 1, a, 3, b, c, d}, where the first 2 is the length of the entire list, and 1 and 3 are the lengths of sublists.*)
+
+
+(* ::Text:: *)
+(*This format is used to pass both rules and set data into libSetReplace over LibraryLink*)
+
+
+ClearAll[$encodeNestedLists];
+$encodeNestedLists[list_List] :=
+		{list} //. {{l___, List[args___], r___} :> {l, Length[{args}], args, r}}
+
+
+(* ::Text:: *)
+(*This is the reverse, used to decode set data (a list of hyperedges) from libSetReplace*)
+
+
+ClearAll[$readList];
+$readList[list_, index_] := Module[{count = list[[index]]},
+	Sow[list[[index + 1 ;; index + count]]];
+	index + count + 1
+]
+
+
+ClearAll[$decodeListOfLists];
+$decodeListOfLists[{0}] := {}
+$decodeListOfLists[list_List] := Reap[Nest[$readList[list, #] &, 2, list[[1]]]][[2, 1]]
+
+
+(* ::Subsection:: *)
+(*$ToCanonicalRules*)
+
+
+(* ::Text:: *)
+(*Rules can be specified in various ways, in particular, single rule instead of a list, with or without a module, etc. This function is needed to standardize that:*)
+(*(1) Rules should always be specified as a list of rules instead of a single rule*)
+(*(2) RuleDelayed should be used instead of Rule*)
+(*(3) Module should be used on the right-hand side of the rule, even if with the empty first argument*)
+(*(4) Left- and right-hand side of the rules should explicitly be lists, possibly specifying sets of a single element*)
+
+
+ClearAll[$ToCanonicalRules, $ToCanonicalRule];
+
+
+(* ::Text:: *)
+(*If there is a single rule, we put it in a list*)
+
+
+$ToCanonicalRules[rules_List] := $ToCanonicalRule /@ rules
+
+
+$ToCanonicalRules[rule : Except[_List]] := $ToCanonicalRules[{rule}]
+
+
+(* ::Text:: *)
+(*Force RuleDelayed*)
+
+
+$ToCanonicalRule[input_ -> output_] := $ToCanonicalRule[input :> output]
+
+
+(* ::Text:: *)
+(*Force Module*)
+
+
+$ToCanonicalRule[input_ :> output : Except[_Module]] :=
+	$ToCanonicalRule[input :> Module[{}, output]]
+
+
+(* ::Text:: *)
+(*If input or output are not lists, we assume it is a single element set, so we put it into a single element list.*)
+
+
+$ToCanonicalRule[input_ :> output_] /; !ListQ[input] :=
+	$ToCanonicalRule[{input} :> output]
+
+
+$ToCanonicalRule[input_ :> Module[vars_List, expr : Except[_List]]] :=
+	input :> Module[vars, {expr}]
+
+
+(* ::Text:: *)
+(*After all of that's done, drop $ToCanonicalRule*)
+
+
+$ToCanonicalRule[input_ :> Module[vars_List, expr_List]] := input :> Module[vars, expr]
+
+
+(* ::Subsection:: *)
 (*$ToNormalRules*)
 
 
@@ -46,7 +152,7 @@ Begin["`Private`"];
 ClearAll[$ToNormalRules];
 
 
-$ToNormalRules[(input_List :> output_List) | (input_List -> output_List)] := Module[
+$ToNormalRules[input_List :> output_List] := Module[
 		{inputLength, untouchedElements, untouchedPatterns,
 		 inputPermutations, inputsWithUntouchedElements, outputWithUntouchedElements},
 	inputLength = Length @ input;
@@ -80,18 +186,6 @@ $ToNormalRules[input_List :> output_Module] := Module[
 				Hold[expr_] :> expr] //.
 		Hold[expr_] :> expr
 ]
-
-
-(* ::Text:: *)
-(*If input is not a list, we assume it is a single element set, so we put it into a single element list.*)
-
-
-$ToNormalRules[(input_ :> output_) | (input_ -> output_)] /; !ListQ[input] :=
-	$ToNormalRules[{input} :> output]
-
-
-$ToNormalRules[(input_ :> output_) | (input_ -> output_)] /; !ListQ[output] :=
-	$ToNormalRules[input :> {output}]
 
 
 (* ::Text:: *)
@@ -138,7 +232,7 @@ SetReplace::usage = UsageString[
 (*Syntax*)
 
 
-SyntaxInformation[SetReplace] = {"ArgumentsPattern" -> {_, _, _.}};
+SyntaxInformation[SetReplace] = {"ArgumentsPattern" -> {_, _, _., OptionsPattern[]}};
 
 
 SetReplace[args___] := 0 /;
@@ -146,7 +240,8 @@ SetReplace[args___] := 0 /;
 
 
 SetReplace::setNotList = "The first argument of `` must be a List.";
-SetReplace[set_, rules_, n_: 0] := 0 /; !ListQ[set] &&
+SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
+	!ListQ[set] &&
 	Message[SetReplace::setNotList, SetReplace]
 
 
@@ -156,7 +251,7 @@ $SetReplaceRulesQ[rules_] :=
 SetReplace::invalidRules =
 	"The second argument of `` must be either a Rule, RuleDelayed, or " ~~
 	"a List of them.";
-SetReplace[set_, rules_, n_: 0] := 0 /;
+SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
 	!$SetReplaceRulesQ[rules] && Message[SetReplace::invalidRules, SetReplace]
 
 
@@ -164,18 +259,193 @@ ClearAll[$StepCountQ];
 $StepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
 SetReplace::nonIntegerIterations =
 	"The third argument `2` of `1` must be an integer or infinity.";
-SetReplace[set_, rules_, n_] := 0 /; !$StepCountQ[n] &&
+SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
+	!$StepCountQ[n] &&
 	Message[SetReplace::nonIntegerIterations, SetReplace, n]
 
 
+$cppMethod = "C++";
+$wlMethod = "WolframLanguage";
+
+
+$setReplaceMethods = {Automatic, $cppMethod, $wlMethod};
+
+
+SetReplace::invalidMethod =
+	"Method should be one of " <> ToString[$setReplaceMethods, InputForm] <> ".";
+
+
+SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
+	!MatchQ[OptionValue[Method], Alternatives @@ $setReplaceMethods] &&
+	Message[SetReplace::invalidMethod]
+
+
 (* ::Subsubsection:: *)
-(*Implementation*)
+(*Implementation choice*)
 
 
-SetReplace[set_List, rules_ ? $SetReplaceRulesQ, n_: 1] /; $StepCountQ[n] :=
-	Quiet[
-		ReplaceRepeated[List @@ set, $ToNormalRules @ rules, MaxIterations -> n],
-		ReplaceRepeated::rrlim]
+$slowImplementationMessage =
+	"Slow Wolfram Language implementation will be used instead.";
+
+
+SetReplace::cppNotImplemented =
+	"C++ implementation is only available for local rules, " <>
+	"and only for sets of lists (hypergraphs). " <>
+	$slowImplementationMessage;
+
+
+SetReplace::cppInfinite =
+	"C++ implementation is only available for finite step count.";
+
+
+SetReplace::noCpp =
+	"C++ implementation was not compiled for your system type. " <>
+	$slowImplementationMessage;
+
+
+Options[SetReplace] = {Method -> Automatic};
+
+
+SetReplace[
+				set_List,
+				rules_ ? $SetReplaceRulesQ,
+				n : Except[_ ? OptionQ] : 1,
+				o : OptionsPattern[]] /;
+			$StepCountQ[n] := Module[{
+		method = OptionValue[Method], canonicalRules},
+	canonicalRules = $ToCanonicalRules[rules];
+	If[MatchQ[method, Automatic | "C++"]
+			&& MatchQ[set, {{___ ? AtomQ}...}]
+			&& MatchQ[canonicalRules, {___ ? $SimpleRuleQ}]
+			&& IntegerQ[n],
+		If[$SetReplace$cpp === $Failed,
+			Message[SetReplace::noCpp],
+			Return[$SetReplace$cpp[set, canonicalRules, n]]]];
+	If[MatchQ[method, "C++"],
+		If[IntegerQ[n],
+			Message[SetReplace::cppNotImplemented],
+			Message[SetReplace::cppInfinite]]];
+	$SetReplace$wl[set, canonicalRules, n]
+] /; MatchQ[OptionValue[Method], Alternatives @@ $setReplaceMethods]
+
+
+(* ::Subsubsection:: *)
+(*WL Implementation*)
+
+
+ClearAll[$SetReplace$wl];
+$SetReplace$wl[set_, rules_, n_] := Quiet[
+	ReplaceRepeated[List @@ set, $ToNormalRules @ rules, MaxIterations -> n],
+	ReplaceRepeated::rrlim]
+
+
+(* ::Subsubsection:: *)
+(*C++ Implementation*)
+
+
+(* ::Text:: *)
+(*Check if we have simple anonymous rules and use C++ library in that case*)
+
+
+ClearAll[$SimpleRuleQ];
+
+
+$SimpleRuleQ[
+		left : {{__ ? (AtomQ[#]
+			|| MatchQ[#, _Pattern?(AtomQ[#[[1]]] && #[[2]] === Blank[] &)] &)}..}
+		:> right : Module[{___ ? AtomQ}, {{___ ? AtomQ}...}]] := Module[{p},
+	ConnectedGraphQ @ Graph[
+		Flatten[Apply[
+				UndirectedEdge,
+				(Partition[#, 2, 1] & /@ (Append[#, #[[1]]] &) /@ left),
+				{2}]]
+			/. x_Pattern :> p[x[[1]]]]
+]
+
+
+$SimpleRuleQ[left_ :> right : Except[_Module]] :=
+	$SimpleRuleQ[left :> Module[{}, right]]
+
+
+$SimpleRuleQ[___] := False
+
+
+ClearAll[$RuleAtoms];
+
+
+$RuleAtoms[left_ :> right : Except[_Module]] :=
+	$RuleAtoms[left :> Module[{}, right]]
+
+
+$RuleAtoms[left_ :> right_Module] := Module[{
+		leftVertices, patterns, leftAtoms, patternSymbols, createdAtoms, rightAtoms},
+	leftVertices = Union @ Flatten[left];
+	leftAtoms = Select[leftVertices, AtomQ];
+	patterns = Complement[leftVertices, leftAtoms];
+	patternSymbols = Map[Hold, patterns, {2}][[All, 1]];
+	createdAtoms = Map[Hold, Hold[right], {3}][[1, 1]];
+	rightAtoms = Complement[
+		Union @ Flatten @ Map[Hold, Hold[right], {4}][[1, 2]],
+		Join[patternSymbols, createdAtoms]];
+	(* {global, local} *)
+	{Union @ Join[Hold /@ leftAtoms, rightAtoms],
+		Union @ Join[patternSymbols, createdAtoms]}
+]
+
+
+ClearAll[$RuleAtomsToIndices];
+
+
+$RuleAtomsToIndices[left_ :> right : Except[_Module], globalIndex_, localIndex_] :=
+	$RuleAtomsToIndices[left :> Module[{}, right], globalIndex, localIndex]
+
+
+$RuleAtomsToIndices[left_ :> right_Module, globalIndex_, localIndex_] := Module[{
+		newLeft, newRight},
+	newLeft = Replace[
+		left,
+		{x_ ? AtomQ :> globalIndex[Hold[x]],
+			x_Pattern :> localIndex[Map[Hold, x, {1}][[1]]]},
+		{2}];
+	newRight = Replace[
+		Map[Hold, Hold[right], {4}][[1, 2]],
+		x_ :> Lookup[localIndex, x, globalIndex[x]],
+		{2}];
+	newLeft -> newRight
+]
+
+
+ClearAll[$SetReplace$cpp];
+$SetReplace$cpp[
+			set : {{___ ? AtomQ}...},
+			rules : {___ ? $SimpleRuleQ},
+			n_] /; $SetReplace$cpp =!= $Failed := Module[{
+		setAtoms, ruleAtoms, globalAtoms, globalIndex,
+		mappedSet, localIndices, mappedRules, cppOutput, resultAtoms,
+		inversePartialGlobalMap, inverseGlobalMap},
+	setAtoms = Hold /@ Union[Flatten[set]];
+	ruleAtoms = $RuleAtoms /@ rules;
+	globalAtoms = Union @ Flatten @ {setAtoms, ruleAtoms[[All, 1]]};
+	globalIndex = Association @ Thread[globalAtoms -> Range[Length[globalAtoms]]];
+	mappedSet = Map[globalIndex, Map[Hold, set, {2}], {2}];
+	localIndices =
+		Association @ Thread[#[[2]] -> - Range[Length[#[[2]]]]] & /@ ruleAtoms;
+	mappedRules = Table[
+		$RuleAtomsToIndices[
+			rules[[K]],
+			globalIndex,
+			localIndices[[K]]],
+		{K, Length[rules]}];
+	cppOutput = $decodeListOfLists @ $cpp$setReplace[
+		$encodeNestedLists[List @@@ mappedRules],
+		$encodeNestedLists[mappedSet],
+		n];
+	resultAtoms = Union[Flatten[cppOutput]];
+	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
+	inverseGlobalMap = Association @ Thread[resultAtoms
+		-> (Lookup[inversePartialGlobalMap, #, Unique["v"]] & /@ resultAtoms)];
+	ReleaseHold @ Map[inverseGlobalMap, cppOutput, {2}]
+]
 
 
 (* ::Subsection:: *)
@@ -226,7 +496,7 @@ SetReplaceList[set_, rules_, n_] := 0 /; !$StepCountQ[n] &&
 
 
 SetReplaceList[set_List, rules_ ? $SetReplaceRulesQ, n_ ? $StepCountQ] :=
-	FixedPointList[Replace[#, $ToNormalRules @ rules] &, set, n]
+	FixedPointList[Replace[#, $ToNormalRules @ $ToCanonicalRules @ rules] &, set, n]
 
 
 (* ::Subsection:: *)
@@ -275,7 +545,8 @@ SetReplaceFixedPoint[set_, rules_] := 0 /; !$SetReplaceRulesQ[rules] &&
 (*Implementation*)
 
 
-SetReplaceFixedPoint[set_List, rules_ ? $SetReplaceRulesQ] := SetReplace[set, rules, \[Infinity]]
+SetReplaceFixedPoint[set_List, rules_ ? $SetReplaceRulesQ] :=
+	SetReplace[set, rules, \[Infinity], Method -> "WolframLanguage"]
 
 
 (* ::Subsection:: *)
@@ -507,50 +778,6 @@ FromAnonymousRules[rule : _Rule] := Module[
 
 
 FromAnonymousRules[rules : {___Rule}] := FromAnonymousRules /@ rules
-
-
-(* ::Subsection:: *)
-(*$ToCanonicalRules*)
-
-
-(* ::Text:: *)
-(*There are multiple ways SetReplace rules can be expressed, which is mostly manifested by missing lists in various places. Specifically, we could have either a single rule, or a list of rules. Then, inputs / outputs of every rules might either have a single element or a subset. The idea of this function is to ensure two things: (1) we have a list (even if a single-element) of rules, and (2) each rule goes from a list to another list.*)
-
-
-ClearAll[$ToCanonicalRules];
-SetAttributes[$ToCanonicalRules, HoldAll];
-
-
-$ToCanonicalRules[r : (_Rule | _RuleDelayed)] := $ToCanonicalRules[{r}]
-
-
-$ToCanonicalRules[rules : {(_Rule | _RuleDelayed)..}] := $ToCanonicalRule /@ rules
-
-
-ClearAll[$ToCanonicalRule];
-SetAttributes[$ToCanonicalRule, HoldAll];
-
-
-$ToCanonicalRule[(left_ -> right_) | (left_ :> right_)] := With[
-		{newLeft = $ToCanonicalRuleSide[left], newRight = $ToCanonicalRuleSide[right]},
-	newLeft :> newRight
-] //. Hold[expr_] :> expr
-
-
-ClearAll[$ToCanonicalRuleSide];
-SetAttributes[$ToCanonicalRuleSide, HoldAll];
-
-
-$ToCanonicalRuleSide[expr_ : Except[_List | _Module]] := {expr}
-
-
-$ToCanonicalRuleSide[expr_List] := expr
-
-
-$ToCanonicalRuleSide[Module[args_, set_ ? (Not @* ListQ)]] := Hold @ Module[args, {set}]
-
-
-$ToCanonicalRuleSide[Module[args_, set_List]] := Hold @ Module[args, set]
 
 
 (* ::Subsection:: *)
