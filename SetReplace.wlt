@@ -1,6 +1,6 @@
 BeginTestSection["SetReplace"]
 
-(* SetReplace *)
+(* SetReplace: Simple cases *)
 
 VerificationTest[
 	SetReplace[{}, {} :> {}],
@@ -48,6 +48,21 @@ VerificationTest[
 ]
 
 VerificationTest[
+	SetReplace[{{1}}, {{1}} :> {}, Method -> "C++"],
+	{}
+]
+
+VerificationTest[
+	SetReplace[{{1}}, {{1}} :> {}, Method -> "WolframLanguage"],
+	{}
+]
+
+VerificationTest[
+	SetReplace[{{1}}, {{1}} :> {}, Method -> Automatic],
+	{}
+]
+
+VerificationTest[
 	SetReplace[{{1}, {2}}, {{1}, {2}} :> {{3}}],
 	{{3}}
 ]
@@ -67,8 +82,22 @@ VerificationTest[
 ]
 
 VerificationTest[
+	SetReplace[{0}, 0 :> Module[{v}, v]],
+	{Unique[]},
+	SameTest -> (Dimensions[#1] == Dimensions[#2] &)
+]
+
+(* SetReplace: Argument checking *)
+
+VerificationTest[
 	SetReplace[],
 	SetReplace[],
+	{SetReplace::argt}
+]
+
+VerificationTest[
+	SetReplace[Method -> "C++"],
+	SetReplace[Method -> "C++"],
 	{SetReplace::argt}
 ]
 
@@ -79,8 +108,20 @@ VerificationTest[
 ]
 
 VerificationTest[
+	SetReplace[1, 1 -> 2, Method -> "C++"],
+	SetReplace[1, 1 -> 2, Method -> "C++"],
+	{SetReplace::setNotList}
+]
+
+VerificationTest[
 	SetReplace[{1}, 1],
 	SetReplace[{1}, 1],
+	{SetReplace::invalidRules}
+]
+
+VerificationTest[
+	SetReplace[{1}, 1, Method -> "C++"],
+	SetReplace[{1}, 1, Method -> "C++"],
 	{SetReplace::invalidRules}
 ]
 
@@ -97,9 +138,113 @@ VerificationTest[
 ]
 
 VerificationTest[
+	SetReplace[{1}, {1 -> 2}, -1, Method -> "C++"],
+	SetReplace[{1}, {1 -> 2}, -1, Method -> "C++"],
+	{SetReplace::nonIntegerIterations}
+]
+
+VerificationTest[
 	SetReplace[{1}, {1 -> 2}, 1.5],
 	SetReplace[{1}, {1 -> 2}, 1.5],
 	{SetReplace::nonIntegerIterations}
+]
+
+(* SetReplace: C++ implementation not supported cases *)
+
+(* not a hypergraph *)
+VerificationTest[
+	SetReplace[{1}, {1 -> 2}, Method -> "C++"],
+	SetReplace[{1}, {1 -> 2}, Method -> "C++"],
+	{SetReplace::cppNotImplemented}
+]
+
+(* rule is not local *)
+VerificationTest[
+	SetReplace[{{1, 2}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}, {2, 4}}, Method -> "C++"],
+	SetReplace[{{1, 2}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}, {2, 4}}, Method -> "C++"],
+	{SetReplace::cppNotImplemented}
+]
+
+(* nothing -> something not supported as well *)
+VerificationTest[
+	SetReplace[{{1, 2}, {3, 4}}, {} -> {{1, 3}, {2, 4}}, Method -> "C++"],
+	SetReplace[{{1, 2}, {3, 4}}, {} -> {{1, 3}, {2, 4}}, Method -> "C++"],
+	{SetReplace::cppNotImplemented}
+]
+
+(* infinite number of steps not supported *)
+VerificationTest[
+	SetReplace[{{1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Infinity, Method -> "C++"],
+	SetReplace[{{1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Infinity, Method -> "C++"],
+	{SetReplace::cppInfinite}
+]
+
+(* SetReplace: C++ / WL implementation consistancy *)
+$sameSetQ[x_, y_] := Module[{xAtoms, yAtoms},
+	{xAtoms, yAtoms} = DeleteDuplicates[Flatten[#]] & /@ {x, y};
+	If[Length[xAtoms] != Length[yAtoms], Return[False]];
+	(x /. Thread[xAtoms -> yAtoms]) === y
+]
+
+$systemsToTest = {
+	{{{0, 1}}, FromAnonymousRules[{{0, 1}} -> {{0, 2}, {2, 1}}], 100},
+	{{{1}}, FromAnonymousRules[{{{1}} -> {{1}}}], 100},
+	{{{1}}, FromAnonymousRules[{{{1}} -> {{2}}}], 100},
+	{{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {1, 2}}}], 100},
+	{{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 1}}}], 100},
+	{{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 2}}}], 100},
+	{{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 3}}}], 100},
+	{{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {2}, {1, 2}}}], 100},
+	{{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {3}, {1, 2}}}], 100},
+	{{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {3}, {1, 2, 4}}}], 100},
+	{{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {2}, {2}, {1, 2}}}], 100},
+	{{{1}, {1}, {1}}, FromAnonymousRules[{{{1}} -> {{2}, {1, 2}}}], 100},
+	{{{1, 1}}, FromAnonymousRules[{{{1, 2}} -> {{1, 3}, {2, 3}}}], 100},
+	{{{0, 1}, {0, 2}, {0, 3}},
+		{{{a_, b_}, {a_, c_}, {a_, d_}} :>
+			Module[{$0, $1, $2}, {
+				{$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
+				{$0, b}, {$1, c}, {$2, d}}]},
+		30},
+  {{{0, 0}, {0, 0}, {0, 0}},
+		{{{a_, b_}, {a_, c_}, {a_, d_}} :>
+			Module[{$0, $1, $2}, {
+				{$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
+				{$0, b}, {$1, c}, {$2, d}}]},
+		30},
+	{{{0, 1}, {0, 2}, {0, 3}},
+		{{{a_, b_}, {a_, c_}, {a_, d_}} :>
+			Module[{$0, $1, $2}, {
+				{$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
+				{$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
+		30},
+  {{{0, 0}, {0, 0}, {0, 0}},
+		{{{a_, b_}, {a_, c_}, {a_, d_}} :>
+			Module[{$0, $1, $2}, {
+				{$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
+				{$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
+		30}
+};
+
+VerificationTest[
+	SetReplace[##, Method -> "WolframLanguage"],
+	SetReplace[##, Method -> "C++"],
+	SameTest -> $sameSetQ
+] & @@@ $systemsToTest
+
+(* SetReplace: C++ performance *)
+VerificationTest[
+	SetReplace[
+		{{0, 0}, {0, 0}, {0, 0}},
+		{{{a_, b_}, {a_, c_}, {a_, d_}} :>
+			Module[{$0, $1, $2}, {
+				{$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
+				{$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
+		1000],
+	{0},
+	SameTest -> (ListQ[#1] && ListQ[#2] &),
+	TimeConstraint -> 3,
+	MemoryConstraint -> 5*^6
 ]
 
 (* SetReplaceList *)
