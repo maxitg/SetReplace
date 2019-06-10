@@ -15,7 +15,7 @@ CreateDirectory[buildDirectory];
 
 
 xcodeProjectPath = "SetReplace/SetReplace.xcodeproj/";
-xcodeTargetName = "SetReplaceLibrary";
+xcodeTargetName = "SetReplace";
 If[Run["xcodebuild -project " <> xcodeProjectPath <> " -target " <> xcodeTargetName] != 0,
 	Print[
 		"xcodebuild not successful. ",
@@ -45,12 +45,12 @@ If[FileExistsQ[libraryDirectory],
 ];
 CreateDirectory[libraryDirectory];
 CopyFile[
-	FileNameJoin[{".", "SetReplace", "build", "Release", "libSetReplaceLibrary.dylib"}],
+	FileNameJoin[{".", "SetReplace", "build", "Release", "libSetReplace.dylib"}],
 	FileNameJoin[{
 		buildDirectory,
 		"LibraryResources",
 		"MacOSX-x86-64",
-		"libSetReplaceLibrary.dylib"
+		"libSetReplace.dylib"
 	}]
 ];
 

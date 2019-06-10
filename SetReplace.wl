@@ -43,7 +43,7 @@ If[Not @ MemberQ[$LibraryPath, $libraryDirectory],
 
 
 $cpp$setReplace = LibraryFunctionLoad[
-	FindLibrary["libSetReplaceLibrary"],
+	FindLibrary["libSetReplace"],
 	"setReplace",
 	{{Integer, 1}, {Integer, 1}, Integer},
 	{Integer, 1}];
@@ -54,7 +54,7 @@ $cpp$setReplace = LibraryFunctionLoad[
 
 
 (* ::Text:: *)
-(*This format is used to pass both rules and set data into libSetReplaceLibrary over LibraryLink*)
+(*This format is used to pass both rules and set data into libSetReplace over LibraryLink*)
 
 
 $encodeNestedLists[list_List] :=
@@ -62,7 +62,7 @@ $encodeNestedLists[list_List] :=
 
 
 (* ::Text:: *)
-(*This is the reverse, used to decode set data (a list of hyperedges) from libSetReplaceLibrary*)
+(*This is the reverse, used to decode set data (a list of hyperedges) from libSetReplace*)
 
 
 $readList[list_, index_] := Module[{count = list[[index]]},

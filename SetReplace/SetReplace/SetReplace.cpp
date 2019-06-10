@@ -1,15 +1,7 @@
-//
-//  SetReplaceWL.cpp
-//  SetReplaceLibrary
-//
-//  Created by Max Piskunov on 4/5/19.
-//  Copyright © 2019 maxitg. All rights reserved.
-//
-
 #include <chrono>
 #include <string>
 
-#include "SetReplaceWL.hpp"
+#include "SetReplace.hpp"
 
 #include "Set.hpp"
 
@@ -47,7 +39,7 @@ namespace SetReplace {
         const auto getRulesData = [&tensorData, &tensorLength, &readIndex]() -> mint {
             return getData(tensorData, tensorLength, readIndex++);
         };
-        
+
         rules.resize(getRulesData());
         for (int ruleIndex = 0; ruleIndex < rules.size(); ++ruleIndex) {
             if (getRulesData() != 2) {
@@ -55,7 +47,7 @@ namespace SetReplace {
             } else {
                 const std::vector<std::vector<Expression>*> setsToRead =
                 {&rules[ruleIndex].inputs, &rules[ruleIndex].outputs};
-                
+
                 for (auto& set : setsToRead) {
                     set->resize(getRulesData());
                     for (int expressionIndex = 0; expressionIndex < set->size(); ++expressionIndex) {
@@ -78,7 +70,7 @@ namespace SetReplace {
         const auto getSetData = [&tensorData, &tensorLength, &readIndex]() -> mint {
             return getData(tensorData, tensorLength, readIndex++);
         };
-        
+
         set.resize(getSetData());
         for (int expressionIndex = 0; expressionIndex < set.size(); ++expressionIndex) {
             set[expressionIndex].resize(getSetData());
@@ -93,11 +85,11 @@ namespace SetReplace {
         if (argc != 3) {
             return LIBRARY_FUNCTION_ERROR;
         }
-        
+
         std::vector<Rule> rules;
         std::vector<Expression> initialExpressions;
         int steps;
-        
+
         try {
             rules = getRules(libData, MArgument_getMTensor(argv[0]));
             initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
@@ -105,20 +97,20 @@ namespace SetReplace {
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }
-        
+
         Set set(rules, initialExpressions);
         set.replace(steps);
         const auto expressions = set.expressions();
-        
+
         int tensorLength = 1 + (int)expressions.size();
         for (int i = 0; i < expressions.size(); ++i) {
             tensorLength += expressions[i].size();
         }
-        
+
         mint dimensions[1] = {tensorLength};
         MTensor output;
         libData->MTensor_new(MType_Integer, 1, dimensions, &output);
-        
+
         int writeIndex = 0;
         mint position[1];
         position[0] = ++writeIndex;
@@ -131,9 +123,9 @@ namespace SetReplace {
                 libData->MTensor_setInteger(output, position, expressions[expressionIndex][atomIndex]);
             }
         }
-        
+
         MArgument_setMTensor(result, output);
-        
+
         return LIBRARY_NO_ERROR;
     }
 }
