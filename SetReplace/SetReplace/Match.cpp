@@ -29,12 +29,14 @@ namespace SetReplace {
     }
     
     bool Match::operator<(const Match& other) const {
-        // First, find which Match has oldest (lowest ID) expressions
+        // First rule goes first
+        if (ruleID != other.ruleID) return ruleID < other.ruleID;
+
+        // Then, find which Match has oldest (lowest ID) expressions
         int sortedComparison = compareSortedIDs(*this, other);
         if (sortedComparison != 0) return sortedComparison < 0;
-        
-        if (ruleID != other.ruleID) return ruleID < other.ruleID;
-        
+
+        // Finally, if sets of expressions are the same, use smaller permutation
         return compareUnsortedIDs(*this, other) < 0;
     }
 }
