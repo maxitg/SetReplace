@@ -298,13 +298,16 @@ namespace SetReplace {
                 if (currentMatch.expressionIDs[i] != -1) continue;
                 
                 std::unordered_set<AtomID> requiredAtoms;
+                bool allAnonymous = true;
                 for (const auto atom : inputs[i]) {
                     if (atom >= 0) {
                         requiredAtoms.insert(atom);
+                        allAnonymous = false;
                     } else if (atom < 0) {
                         anonymousAtomsPresent = true;
                     }
                 }
+                if (allAnonymous) continue;
                 
                 std::unordered_map<ExpressionID, int> requiredAtomsCounts;
                 for (const auto atom : requiredAtoms) {
