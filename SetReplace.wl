@@ -689,15 +689,16 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] := 0 /;
 
 HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 	$CorrectOptions[HypergraphPlot][o] := Module[
-		{normalEdges, edgeColors, shapeHashes, hashesToColors,
+		{normalEdges, vertices, edgeColors, shapeHashes, hashesToColors,
 		 graphEdges, graphOptions, graphBoxes, arrowheads, arrowheadOffset},
 	normalEdges = Partition[#, 2, 1] & /@ edges;
+	vertices = Union @ Flatten @ edges;
 	edgeColors = Sort @ Flatten @ MapIndexed[
 		Thread[DirectedEdge @@@ #1 -> OptionValue[PlotStyle][#2[[1]]]] &, normalEdges];
 	graphEdges = DirectedEdge @@@ Flatten[normalEdges, 1];
 	graphOptions = FilterRules[{o}, Options[Graph]];
 	shapeHashes = Sort @ (If[# == {}, {}, #[[1]]] &) @ Last @ Reap @ Rasterize @
-		GraphPlot[graphEdges, Join[{
+		GraphPlot[vertices, graphEdges, Join[{
 			EdgeShapeFunction -> (Sow[#2 -> Hash[#1]] &)},
 			graphOptions]];
 	graphBoxes = ToBoxes[Graph[graphEdges, DirectedEdges -> True]];
@@ -707,7 +708,7 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 		Cases[graphBoxes, ArrowBox[x_, offset_] :> offset, All];
 	hashesToColors =
 		Association @ Thread[shapeHashes[[All, 2]] -> edgeColors[[All, 2]]];
-	GraphPlot[graphEdges, Join[
+	GraphPlot[vertices, graphEdges, Join[
 		graphOptions,
 		{EdgeShapeFunction -> ({
 			arrowheads,
