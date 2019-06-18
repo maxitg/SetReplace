@@ -12,7 +12,7 @@
 (*See on GitHub: https://github.com/maxitg/SetReplace.*)
 
 
-BeginPackage["SetReplace`", {"UsageString`"}];
+BeginPackage["SetReplace`"];
 
 
 SetReplace`Private`$PublicSymbols = {
@@ -29,6 +29,23 @@ ClearAll @@ SetReplace`Private`$PublicSymbols;
 
 
 Begin["`Private`"];
+
+
+(* ::Subsection:: *)
+(*$UsageString*)
+
+
+$ArgStyle[arg_Integer] := "TR";
+$ArgStyle["\[Ellipsis]"] := "TR";
+$ArgStyle[str_String] := "TI";
+
+
+$ArgString[arg_] :=
+	"\!\(\*StyleBox[\"" <> ToString[arg] <> "\", \"" <> $ArgStyle[arg] <> "\"]\)"
+
+
+$UsageString[str__] :=
+	(StringTemplate[StringJoin[{str}]] /. {TemplateSlot[s_] :> $ArgString[s]})[]
 
 
 (* ::Subsection:: *)
@@ -207,7 +224,7 @@ $ToNormalRules[rules_List] := Join @@ $ToNormalRules /@ rules
 (*Documentation*)
 
 
-SetReplace::usage = UsageString[
+SetReplace::usage = $UsageString[
 	"SetReplace[`s`, {\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) \[Rule] ",
 	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
 	"\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
@@ -460,7 +477,7 @@ $SetReplace$cpp[
 (*Documentation*)
 
 
-SetReplaceList::usage = UsageString[
+SetReplaceList::usage = $UsageString[
 	"SetReplaceList[`s`, {\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) \[Rule] ",
 	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
 	"\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
@@ -511,7 +528,7 @@ SetReplaceList[set_List, rules_ ? $SetReplaceRulesQ, n_ ? $StepCountQ] :=
 (*Documentation*)
 
 
-SetReplaceFixedPoint::usage = UsageString[
+SetReplaceFixedPoint::usage = $UsageString[
 	"SetReplaceFixedPoint[`s`, {\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) \[Rule] ",
 	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
 	"\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
@@ -561,7 +578,7 @@ SetReplaceFixedPoint[set_List, rules_ ? $SetReplaceRulesQ] :=
 (*Documentation*)
 
 
-SetReplaceFixedPointList::usage = UsageString[
+SetReplaceFixedPointList::usage = $UsageString[
 	"SetReplaceFixedPointList[`s`, {\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) \[Rule] ",
 	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
 	"\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
@@ -612,7 +629,7 @@ SetReplaceFixedPointList[set_List, rules_ ? $SetReplaceRulesQ] :=
 (*Documentation*)
 
 
-HypergraphPlot::usage = UsageString[
+HypergraphPlot::usage = $UsageString[
 	"HypergraphPlot[`s`, `opts`] plots a list of vertex lists `s` as a ",
 	"hypergraph with each hyperedge represented as a sequence of same-color arrows. ",
 	"Graph options `opts` can be used."];
@@ -720,7 +737,7 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 (*Documentation*)
 
 
-FromAnonymousRules::usage = UsageString[
+FromAnonymousRules::usage = $UsageString[
 	"FromAnonymousRules[`r`] converts a list of anonymous rules `r` into a list of ",
 	"rules that can be supplied into SetReplace.",
 	"\n",
@@ -796,7 +813,7 @@ FromAnonymousRules[rules : {___Rule}] := FromAnonymousRules /@ rules
 (*Documentation*)
 
 
-SetReplaceAll::usage = UsageString[
+SetReplaceAll::usage = $UsageString[
 	"SetReplaceAll[`s`, `r`] performs SetReplace[`s`, `r`] as many times as it takes ",
 	"until no replacement can be done without touching the same edge twice.",
 	"\n",
