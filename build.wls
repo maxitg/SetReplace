@@ -38,3 +38,6 @@ SetDirectory["../.."];
 
 
 PackPaclet[buildDirectory];
+
+
+Print["Done."];
