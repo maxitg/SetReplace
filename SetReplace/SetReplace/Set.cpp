@@ -1,6 +1,7 @@
 #include "Match.hpp"
 #include "Set.hpp"
 
+#include <algorithm>
 #include <set>
 #include <string>
 #include <unordered_map>
