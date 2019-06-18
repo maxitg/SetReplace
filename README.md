@@ -71,15 +71,15 @@ Here HypergraphPlot function is used, which takes a list of lists as an input, a
 
 ## Applications
 
-One application of this system is a fundamental physics models as described in Stephen Wolfram's [A New Kind Of Science](https://www.wolframscience.com/nks/chap-9--fundamental-physics/).
+One application of this system is a fundamental physics model as described in Stephen Wolfram's [A New Kind Of Science](https://www.wolframscience.com/nks/chap-9--fundamental-physics/).
 
-The system described there is not the same, but it follows the same general principles.
+The system described here is not the same, but it follows the same general principles.
 
 ## Implementations
 
 There are two implementations available: one written in Wolfram Language, and one in C++.
 
-The Wolfram Language implementation converts SetRepalce rules into a list of all permutations of ordinary rules, and then calls Replace repeatedly. This works well for rules with small inputs, and for small number of evolution steps. Note, evaluation time increases non-linearly with the number of steps, so this implementation is generally unusable if the number of steps is >~ 100.
+The Wolfram Language implementation converts SetRepalce rules into a list of all permutations of ordinary rules, and then calls Replace repeatedly. This works well for rules with small inputs, and for a small number of evolution steps. Note, evaluation time increases non-linearly with the number of steps, so this implementation is generally unusable if the number of steps is >~ 100.
 
 The C++ implementation is optimized for:
 1. Rules that do not change.
@@ -93,7 +93,7 @@ In[.] := SetReplace[{{0}},
 ```
 takes 3.25 seconds in C++ implementation, and less than 1 millisecond in Wolfram Language one.
 
-Hence a general rule for choosing an implementation is this: if one wants to check a large number of rules for small number of steps, then it's best to use Wolfram Language implementation. If one wants to simulate a single rule satisfying conditions above for a large number of steps, it's best to use C++ implementation.
+Hence a general rule for choosing an implementation is this: if one wants to check a large number of rules for a small number of steps, then it's best to use Wolfram Language implementation. If one wants to simulate a single rule satisfying conditions above for a large number of steps, it's best to use C++ implementation.
 
 Implementation can be specified with a "Method" option (the default is C++), i.e.,
 ```
@@ -165,7 +165,7 @@ which still looks quite complex.
 
 ## Build
 
-macOS, Linux and Windows are all supported. To build the paclet:
+macOS, Linux, and Windows are all supported. To build the paclet:
 
 1. `cd` to the root directory of the repository.
 2. Run `./build.wls`.
