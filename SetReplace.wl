@@ -713,8 +713,7 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 		{EdgeShapeFunction -> ({
 			arrowheads,
 			hashesToColors[Hash[#1]],
-			Arrow[#1, arrowheadOffset]} &),
-		 If[arrowheadOffset > 0, Nothing, VertexShapeFunction -> Point]}]]
+			Arrow[#1, arrowheadOffset]} &)}]]
 ]
 
 
