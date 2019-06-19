@@ -690,9 +690,11 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] := 0 /;
 HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 	$CorrectOptions[HypergraphPlot][o] := Module[
 		{normalEdges, vertices, edgeColors, shapeHashes, hashesToColors,
-		 graphEdges, graphOptions, graphBoxes, arrowheads, arrowheadOffset},
+		 graphEdges, graphOptions, graphBoxes, arrowheads, arrowheadOffset,
+		 vertexColors},
 	normalEdges = Partition[#, 2, 1] & /@ edges;
 	vertices = Union @ Flatten @ edges;
+	vertexColors = (# -> ColorData[97, Count[edges, {#}] + 1] & /@ vertices);
 	edgeColors = Sort @ Flatten @ MapIndexed[
 		Thread[DirectedEdge @@@ #1 -> OptionValue[PlotStyle][#2[[1]]]] &, normalEdges];
 	graphEdges = DirectedEdge @@@ Flatten[normalEdges, 1];
@@ -713,7 +715,8 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 		{EdgeShapeFunction -> ({
 			arrowheads,
 			hashesToColors[Hash[#1]],
-			Arrow[#1, arrowheadOffset]} &)}]]
+			Arrow[#1, arrowheadOffset]} &),
+		 VertexStyle -> vertexColors}]]
 ]
 
 
