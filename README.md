@@ -1,10 +1,10 @@
 # SetReplace
 
-## Introduction
+## Set | Network Substitution Systems
 
-This Wolfram Language package implements a substitution system such that in each step an unordered subset of a list is removed and replaced with different subset. This replacement is governed by a list of specified rules.
+**SetReplace** is a Wolfram Language package that implements a substitution system such that in each step an unordered subset matching a given pattern is deleted from a multiset and replaced with different subset. If each element of the set consists of pairs of elements, this set can be thought of as a directed graph, and the system becomes a ***network substitution*** (aka *graph rewrite*) ***system***.
 
-An example of such a system would be removing an element of a linked list as follows:
+An example of such a system would be removing vertices from a path graph
 ```
 In[.] := SetReplace[{{0, 1}, {1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, 2]
 ```
@@ -12,10 +12,9 @@ In[.] := SetReplace[{{0, 1}, {1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, 
 Out[.] = {{0, 3}}
 ```
 
-Here, the linked list is specified as the first argument, followed by the replacement rule, and the number of steps.
+Here, `{{0, 1}, {1, 2}, {2, 3}}` is the initial condition, `{{a_, b_}, {b_, c_}} :> {{a, c}}` is the rule that matches pairs of edges sharing a vertex and replaces them with a single edge, and `2` the number of steps, i.e., the number of times the rule is applied.
 
-Similarly, one can create a rule that inserts elements to a linked list:
-
+One can also imagine an inverse of the rule above
 ```
 In[.] := SetReplace[{{0, 1}}, {{a_, b_}} :>
   Module[{new}, {{a, new}, {new, b}}], 2]
@@ -24,22 +23,17 @@ In[.] := SetReplace[{{0, 1}}, {{a_, b_}} :>
 Out[.] = {{v11, 1}, {0, v12}, {v12, v11}}
 ```
 
-As using Module every time might become cumbersome, an alternative syntax is available, where integers are automatically converted into patterns,
+We use `Module` here to assign unique names to the newly created vertices. As using `Module` is somewhat cumbersome, a simplified syntax is available, where integers are automatically converted into patterns, and `Module` is added if necessary
 ```
 In[.] := SetReplace[{{0, 1}},
- Echo@FromAnonymousRules[{{0, 1}} -> {{0, 2}, {2, 1}}], 2]
+ Echo @ FromAnonymousRules[{{0, 1}} -> {{0, 2}, {2, 1}}], 2]
 ```
 ```
->> {{v1_,v2_}}:>Module[{v3},{{v1,v3},{v3,v2}}]
+>> {{v1_, v2_}} :> Module[{v3}\, {{v1, v3}, {v3, v2}}]
 Out[.] = {{v13, 1}, {0, v14}, {v14, v13}}
 ```
 
-## Graph Rewrites
-
-One can also think of this system as a directed hypergraph substitution system (each list in the set can be thought of a directed hyperedge), and a special case of that is a network substitution (graph rewrite) system.
-
-For example, one can make a system that takes a vertex with three out-edges and replaces it with a triangle of vertices
-
+A more complex example is taking three edges starting at the same vertex and replacing them with a triangle
 ```
 In[.] := pointToTriangle = {{0, 1}, {0, 2}, {0, 3}} -> {{4, 5}, {5, 4}, {4,
      6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}};
@@ -54,7 +48,7 @@ In[.] := Graph[DirectedEdge @@@
 ```
 ![Point to triangle result after 13 steps](READMEImages/pointToTriangleOutput.png)
 
-Unlike tradition graph rewrite systems, multiple-vertex edges are supported as well as first-class citizens:
+Edges can contain more than two vertices, in which case this becomes a directed hypergraph rewrite system
 ```
 In[.] := hyperedgeToTriangle = {{1, 2, 3}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5, 3}};
 In[.] := HypergraphPlot[#, VertexLabels -> "Name"] & /@ hyperedgeToTriangle
@@ -67,60 +61,44 @@ In[.] := HypergraphPlot[
 ```
 ![Hyperedge to triangle result after 13 steps](READMEImages/hyperedgeToTriangleOutput.png)
 
-Here HypergraphPlot function is used, which takes a list of lists as an input, and shows these lists as hyperedges, each in a different color.
+Here `HypergraphPlot` is used, which displays each directed hyperedge with a sequence of two-vertex edges, and colors each such sequence in a different color.
 
-## Applications
+## Fundamental Physics
 
-One application of this system is a fundamental physics model as described in Stephen Wolfram's [A New Kind Of Science](https://www.wolframscience.com/nks/chap-9--fundamental-physics/).
+A hypothesis is that space-time at the fundamental Planck scale might be represented as a network that can be produced by a system similar to the one this package implements.
 
-The system described here is not the same, but it follows the same general principles.
+This idea was first proposed in Stephen Wolfram's [A New Kind Of Science](https://www.wolframscience.com/nks/chap-9--fundamental-physics/).
 
-## Implementations
+The system here is not the same (the matching algorithm does not constrain vertex degrees), but it follows the same principles.
 
-There are two implementations available: one written in Wolfram Language, and one in C++.
+## C++ | Wolfram Language Implementations
 
-The Wolfram Language implementation converts SetRepalce rules into a list of all permutations of ordinary rules, and then calls Replace repeatedly. This works well for rules with small inputs, and for a small number of evolution steps. Note, evaluation time increases non-linearly with the number of steps, so this implementation is generally unusable if the number of steps is >~ 100.
+There are two implementations available: one written in Wolfram Language, one in C++.
 
-The C++ implementation is optimized for:
-1. Rules that do not change.
-2. Vertex degrees are small (not just in the rule inputs, but in the set itself).
-3. Rule inputs are reasonably small.
+The Wolfram Language implementation permutes `SetReplace` rules in all possible ways, and uses `Replace` a specified number of times to perform evolution. This works well for small graphs and small rule inputs, but it slows down with the number of edges in the graph, and has exponential complexity in rule size.
 
-If these are satisfied, C++ implementation runs in a linear time with the number of steps, which allows for generation of very large graphs (i.e., ~10^6 vertices or more). However, this implementation fails dramatically if vertex degrees grow large. For example the following
+The C++ implementation on the other keeps an index of all possible rule matches, and updates it after every step. The reindexing algorithm looks only at the local region of the graph close to the rewrite site, thus time complexity does not depend on the graph size as long as vertex degrees are small. The downside is that it has exponential complexity (both in time and memory) in the vertex degrees. Currently, it also does not work for non-local rules (i.e., rule inputs that do not form a connected graph), although one can imagine ways to implement that.
+
+So, in summary C++ implementation `Method -> "C++"` should be used if:
+1. Vertex degrees are expected to be small.
+2. Evolution needs to be done for a large number of steps `> 100`, it is possible to produce graphs with up to `10^6` edges or more.
+
+It should not be used, however, if vertex degrees can grow large. For example
 ```
 In[.] := SetReplace[{{0}},
   FromAnonymousRules[{{{0}} -> {{0}, {0}, {0}}, {{0}, {0}, {0}} -> {{0}}}], 30];
 ```
-takes 3.25 seconds in C++ implementation, and less than 1 millisecond in Wolfram Language one.
+takes 3.25 seconds in C++ implementation, and less than 1 millisecond in the Wolfram Language implementation.
 
-Hence a general rule for choosing an implementation is this: if one wants to check a large number of rules for a small number of steps, then it's best to use Wolfram Language implementation. If one wants to simulate a single rule satisfying conditions above for a large number of steps, it's best to use C++ implementation.
+On the other hand, Wolfram Language implementation `Method -> "WolframLanguage"` should be used if:
+1. Large number and variety of rules needs to be simulated for a small number of steps.
+2. Vertex degrees are expected to be large, or rules are non-local.
 
-Implementation can be specified with a "Method" option (the default is C++), i.e.,
-```
-In[.] := HypergraphPlot@
- SetReplace[{{0, 1}, {0, 2}, {0, 3}},
-  FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {{4, 5}, {5, 4}, {4,
-      6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3,
-      4}}], 100, "Method" -> "C++"]
-```
-![First neat rule after 100 steps](READMEImages/neat100.png)
+There are unit tests, but if you spend time studying a particular rule in detail, it is a good idea to evaluate it with both C++ and Wolfram Language implementations and check the results are the same. If results are different, create an issue, and assign `bug` and `P0` tags to it.
 
-or
+## Other Functions
 
-```
-In[.] := HypergraphPlot@
- SetReplace[{{0, 1}, {0, 2}, {0, 3}},
-  FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {{4, 5}, {5, 4}, {4,
-      6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3,
-      4}}], 100, "Method" -> "WolframLanguage"]
-```
-![First neat rule after 100 steps](READMEImages/neat100.png)
-
-If studying a particular rule in detail, it is also a good idea to evaluate it with both C++ and Wolfram Language implementations and make sure the results are the same. If they are not, please, create an issue on GitHub, and include the rule in it that produces the discrepancy.
-
-## Other SetReplace functions
-
-There are other functions available, such as SetReplaceAll, SetReplaceFixedPoint and SetReplaceList. Only Wolfram Language implementation is available for these at the moment. They all have usage strings, so just run
+There are other functions available, such as `SetReplaceAll`, `SetReplaceFixedPoint` and `SetReplaceList`. Only Wolfram Language implementations are available for these at the time. They all have usage strings, so just run
 ```
 In[.] := ?SetReplace`*
 ```
@@ -128,9 +106,9 @@ In[.] := ?SetReplace`*
 
 to see the full list and explore.
 
-## Neat examples
+## Rules with Complex Behaviors
 
-One example of a class 3 or 4 (unclear which) system is
+One example of an interesting system (credit to Stephen Wolfram) is
 ```
 In[.] := GraphPlot[
  UndirectedEdge @@@
@@ -141,7 +119,7 @@ In[.] := GraphPlot[
 ```
 ![First neat rule after 10,000 steps](READMEImages/neat10000.png)
 
-One can also delete some edges from the right-hand side of the rule to get the following:
+A smaller system that still appears complex is
 ```
 In[.] := GraphPlot[
  neat2 = Graph[
@@ -152,8 +130,7 @@ In[.] := GraphPlot[
 ```
 ![Second neat rule after 10,000 steps](READMEImages/neatPlanar.png)
 
-This interesting thing about this is that it creates a planar graph
-
+Curiously, it produces planar graphs
 ```
 In[.] := PlanarGraphQ[neat2]
 ```
@@ -161,14 +138,13 @@ In[.] := PlanarGraphQ[neat2]
 Out[.] = True
 ```
 
-which still looks quite complex.
+## Build Instructions
 
-## Build
+Prerequisites are Wolfram Language 12.0+ and a C++ compiler. Supported platforms are Linux, macOS and Windows.
 
-macOS, Linux, and Windows are all supported. To build the paclet:
-
+To build,
 1. `cd` to the root directory of the repository.
-2. Run `./build.wls`.
-3. Then run `./install.wls` to install the paclet into your Wolfram system.
+2. Run `./build.wls` to create the paclet file.
+3. Run `./install.wls` to install the paclet into your Wolfram system.
 4. Restart any running Wolfram kernels.
-5. Every time before using the package, evaluate ``<< SetReplace` `` to import.
+5. Evaluate ``<< SetReplace` `` every time prior to using package functions.
