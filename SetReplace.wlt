@@ -608,6 +608,20 @@ VerificationTest[
 	Graphics
 ] & /@ {10, 5000}
 
+(* HypergraphPlot: Vertices with single-vertex edges colored differently *)
+
+VerificationTest[
+	FreeQ[HypergraphPlot[{{1, 2}}], ColorData[97, #]] & /@ {1, 2, 3},
+	{False, True, True}]
+
+VerificationTest[
+	FreeQ[HypergraphPlot[{{1}}], ColorData[97, #]] & /@ {1, 2, 3},
+	{True, False, True}]
+
+VerificationTest[
+	FreeQ[HypergraphPlot[{{1}, {1}}], ColorData[97, #]] & /@ {1, 2, 3},
+	{True, True, False}]
+
 (* FromAnonymousRules *)
 
 VerificationTest[
