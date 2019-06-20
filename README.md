@@ -75,9 +75,9 @@ The system here is not the same (the matching algorithm does not constrain verte
 
 There are two implementations available: one written in Wolfram Language, one in C++.
 
-The Wolfram Language implementation permutes `SetReplace` rules in all possible ways, and uses `Replace` a specified number of times to perform evolution. This works well for small graphs and small rule inputs, but it slows down with the number of edges in the graph, and has exponential complexity in rule size.
+The Wolfram Language implementation permutes `SetReplace` rules in all possible ways and uses `Replace` a specified number of times to perform evolution. This works well for small graphs and small rule inputs, but it slows down with the number of edges in the graph and has exponential complexity in rule size.
 
-The C++ implementation on the other keeps an index of all possible rule matches, and updates it after every step. The reindexing algorithm looks only at the local region of the graph close to the rewrite site, thus time complexity does not depend on the graph size as long as vertex degrees are small. The downside is that it has exponential complexity (both in time and memory) in the vertex degrees. Currently, it also does not work for non-local rules (i.e., rule inputs that do not form a connected graph), although one can imagine ways to implement that.
+The C++ implementation, on the other hand, keeps an index of all possible rule matches and updates it after every step. The reindexing algorithm looks only at the local region of the graph close to the rewrite site, thus time complexity does not depend on the graph size as long as vertex degrees are small. The downside is that it has exponential complexity (both in time and memory) in the vertex degrees. Currently, it also does not work for non-local rules (i.e., rule inputs that do not form a connected graph), although one can imagine ways to implement that.
 
 So, in summary C++ implementation `Method -> "C++"` should be used if:
 1. Vertex degrees are expected to be small.
@@ -91,7 +91,7 @@ In[.] := SetReplace[{{0}},
 takes 3.25 seconds in C++ implementation, and less than 1 millisecond in the Wolfram Language implementation.
 
 On the other hand, Wolfram Language implementation `Method -> "WolframLanguage"` should be used if:
-1. Large number and variety of rules needs to be simulated for a small number of steps.
+1. A large number and variety of rules need to be simulated for a small number of steps.
 2. Vertex degrees are expected to be large, or rules are non-local.
 
 There are unit tests, but if you spend time studying a particular rule in detail, it is a good idea to evaluate it with both C++ and Wolfram Language implementations and check the results are the same. If results are different, create an issue, and assign `bug` and `P0` tags to it.
@@ -140,7 +140,7 @@ Out[.] = True
 
 ## Build Instructions
 
-Prerequisites are Wolfram Language 12.0+ and a C++ compiler. Supported platforms are Linux, macOS and Windows.
+Prerequisites are Wolfram Language 12.0+ and a C++ compiler. Supported platforms are Linux, macOS, and Windows.
 
 To build,
 1. `cd` to the root directory of the repository.
