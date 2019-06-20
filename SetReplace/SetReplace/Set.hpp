@@ -1,6 +1,7 @@
 #ifndef Set_hpp
 #define Set_hpp
 
+#include <functional>
 #include <memory>
 #include <vector>
 
