@@ -13,7 +13,7 @@ namespace SetReplace {
     public:
         enum Error {Aborted};
 
-        Set(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions, const std::function<bool()>& shouldAbort);
+        Set(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions, const std::function<bool()> shouldAbort);
         
         int replace();
         int replace(const int stepCount);

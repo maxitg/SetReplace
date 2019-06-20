@@ -28,12 +28,12 @@ namespace SetReplace {
         };
         std::unordered_map<ExpressionID, std::unordered_set<std::set<Match>::const_iterator, IteratorHash>> matchesIndex_;
         
-        const std::function<bool()>& shouldAbort_;
+        const std::function<bool()> shouldAbort_;
 
     public:
         Implementation(const std::vector<Rule>& rules,
                        const std::vector<Expression>& initialExpressions,
-                       const std::function<bool()>& shouldAbort) : rules_(rules), shouldAbort_(shouldAbort) {
+                       const std::function<bool()> shouldAbort) : rules_(rules), shouldAbort_(shouldAbort) {
             for (const auto& expression : initialExpressions) {
                 for (const auto& atom : expression) {
                     nextAtomID = std::max(nextAtomID - 1, atom) + 1;
@@ -354,7 +354,7 @@ namespace SetReplace {
         }
     };
     
-    Set::Set(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions, const std::function<bool()>& shouldAbort) {
+    Set::Set(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions, const std::function<bool()> shouldAbort) {
         implementation_ = std::make_shared<Implementation>(rules, initialExpressions, shouldAbort);
     }
     
