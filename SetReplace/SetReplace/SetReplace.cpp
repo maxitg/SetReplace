@@ -5,18 +5,6 @@
 
 #include "Set.hpp"
 
-EXTERN_C mint WolframLibrary_getVersion() {
-    return WolframLibraryVersion;
-}
-
-EXTERN_C int WolframLibrary_initialize(WolframLibraryData libData) {
-    return 0;
-}
-
-EXTERN_C void WolframLibrary_uninitialize(WolframLibraryData libData) {
-    return;
-}
-
 mint getData(mint* data, mint length, mint index) {
     if (index >= length) {
         throw LIBRARY_FUNCTION_ERROR;
@@ -100,7 +88,7 @@ namespace SetReplace {
         return output;
     }
     
-    EXTERN_C int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
         if (argc != 3) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -124,4 +112,20 @@ namespace SetReplace {
         
         return LIBRARY_NO_ERROR;
     }
+}
+
+EXTERN_C mint WolframLibrary_getVersion() {
+    return WolframLibraryVersion;
+}
+
+EXTERN_C int WolframLibrary_initialize(WolframLibraryData libData) {
+    return 0;
+}
+
+EXTERN_C void WolframLibrary_uninitialize(WolframLibraryData libData) {
+    return;
+}
+
+EXTERN_C int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    return SetReplace::setReplace(libData, argc, argv, result);
 }

@@ -59,11 +59,15 @@ If[Not @ MemberQ[$LibraryPath, $libraryDirectory],
 ];
 
 
-$cpp$setReplace = LibraryFunctionLoad[
-	FindLibrary["libSetReplace"],
-	"setReplace",
-	{{Integer, 1}, {Integer, 1}, Integer},
-	{Integer, 1}];
+$libraryFile = FindLibrary["libSetReplace"];
+$cpp$setReplace = If[$libraryFile =!= $Failed,
+	LibraryFunctionLoad[
+		$libraryFile,
+		"setReplace",
+		{{Integer, 1}, {Integer, 1}, Integer},
+		{Integer, 1}],
+	$Failed
+];
 
 
 (* ::Text:: *)
@@ -301,23 +305,16 @@ SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0
 (*Implementation choice*)
 
 
-$slowImplementationMessage =
-	"Slow Wolfram Language implementation will be used instead.";
-
-
 SetReplace::cppNotImplemented =
 	"C++ implementation is only available for local rules, " <>
-	"and only for sets of lists (hypergraphs). " <>
-	$slowImplementationMessage;
+	"and only for sets of lists (hypergraphs).";
 
 
 SetReplace::cppInfinite =
 	"C++ implementation is only available for finite step count.";
 
 
-SetReplace::noCpp =
-	"C++ implementation was not compiled for your system type. " <>
-	$slowImplementationMessage;
+SetReplace::noCpp = "C++ implementation was not compiled for your system type.";
 
 
 Options[SetReplace] = {Method -> Automatic};
@@ -329,21 +326,22 @@ SetReplace[
 				n : Except[_ ? OptionQ] : 1,
 				o : OptionsPattern[]] /;
 			$StepCountQ[n] := Module[{
-		method = OptionValue[Method], canonicalRules},
+		method = OptionValue[Method], canonicalRules, failedQ = False},
 	canonicalRules = $ToCanonicalRules[rules];
 	If[MatchQ[method, Automatic | "C++"]
 			&& MatchQ[set, {{___ ? AtomQ}...}]
 			&& MatchQ[canonicalRules, {___ ? $SimpleRuleQ}]
 			&& IntegerQ[n],
-		If[$SetReplace$cpp === $Failed,
-			Message[SetReplace::noCpp],
+		If[$cpp$setReplace =!= $Failed,
 			Return[$SetReplace$cpp[set, canonicalRules, n]]]];
 	If[MatchQ[method, "C++"],
-		If[IntegerQ[n],
-			Message[SetReplace::cppNotImplemented],
-			Message[SetReplace::cppInfinite]]];
+		failedQ = True;
+		If[$cpp$setReplace === $Failed, Message[SetReplace::noCpp]];
+		If[!IntegerQ[n], Message[SetReplace::cppInfinite]];
+		If[$cpp$setReplace =!= $Failed && IntegerQ[n],
+			Message[SetReplace::cppNotImplemented]]];
 	$SetReplace$wl[set, canonicalRules, n]
-] /; MatchQ[OptionValue[Method], Alternatives @@ $setReplaceMethods]
+/; MatchQ[OptionValue[Method], Alternatives @@ $setReplaceMethods] && !failedQ]
 
 
 (* ::Subsubsection:: *)
@@ -436,7 +434,7 @@ ClearAll[$SetReplace$cpp];
 $SetReplace$cpp[
 			set : {{___ ? AtomQ}...},
 			rules : {___ ? $SimpleRuleQ},
-			n_] /; $SetReplace$cpp =!= $Failed := Module[{
+			n_] /; $cpp$setReplace =!= $Failed := Module[{
 		setAtoms, ruleAtoms, globalAtoms, globalIndex,
 		mappedSet, localIndices, mappedRules, cppOutput, resultAtoms,
 		inversePartialGlobalMap, inverseGlobalMap},

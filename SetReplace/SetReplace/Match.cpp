@@ -1,5 +1,7 @@
 #include "Match.hpp"
 
+#include <algorithm>
+
 namespace SetReplace {
     namespace {
         int compareVectors(const std::vector<ExpressionID>& first, const std::vector<ExpressionID>& second) {
