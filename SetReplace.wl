@@ -697,7 +697,7 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 	graphEdges = DirectedEdge @@@ Flatten[normalEdges, 1];
 	graphOptions = FilterRules[{o}, Options[Graph]];
 	shapeHashes = Sort @ (If[# == {}, {}, #[[1]]] &) @ Last @ Reap @ Rasterize @
-		Graph[graphEdges, Join[{
+		GraphPlot[graphEdges, Join[{
 			EdgeShapeFunction -> (Sow[#2 -> Hash[#1]] &)},
 			graphOptions]];
 	graphBoxes = ToBoxes[Graph[graphEdges, DirectedEdges -> True]];
@@ -707,7 +707,7 @@ HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 		Cases[graphBoxes, ArrowBox[x_, offset_] :> offset, All];
 	hashesToColors =
 		Association @ Thread[shapeHashes[[All, 2]] -> edgeColors[[All, 2]]];
-	Graph[graphEdges, Join[
+	GraphPlot[graphEdges, Join[
 		graphOptions,
 		{EdgeShapeFunction -> ({
 			arrowheads,

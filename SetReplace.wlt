@@ -587,14 +587,26 @@ VerificationTest[
 ]
 
 VerificationTest[
-	GraphQ[HypergraphPlot[{{1, 3}, {2, 4}}]]
+	Head[HypergraphPlot[{{1, 3}, {2, 4}}]],
+	Graphics
 ]
 
 VerificationTest[
-	GraphQ[HypergraphPlot[{{1, 3}, 6, {2, 4}}]],
-	False,
+	HypergraphPlot[{{1, 3}, 6, {2, 4}}],
+	HypergraphPlot[{{1, 3}, 6, {2, 4}}],
 	{HypergraphPlot::invalidEdges}
 ]
+
+VerificationTest[
+	Head @ HypergraphPlot @ SetReplace[
+		{{0, 1}, {0, 2}, {0, 3}},
+		FromAnonymousRules[
+			{{0, 1}, {0, 2}, {0, 3}} ->
+			{{4, 5}, {5, 4}, {4, 6}, {6, 4},
+				{5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}],
+		#],
+	Graphics
+] & /@ {10, 5000}
 
 (* FromAnonymousRules *)
 
