@@ -138,9 +138,14 @@ In[.] := PlanarGraphQ[neat2]
 Out[.] = True
 ```
 
-## Build Instructions
+## Prerequisites
 
-Prerequisites are Wolfram Language 12.0+ and a C++ compiler. Supported platforms are Linux, macOS, and Windows.
+* Linux, macOS, or Windows.
+* [Wolfram Language 12.0+](https://www.wolfram.com/language/).
+* [WolframScript](https://www.wolfram.com/wolframscript/).
+* [C++ compiler](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
+
+## Build Instructions
 
 To build,
 1. `cd` to the root directory of the repository.
