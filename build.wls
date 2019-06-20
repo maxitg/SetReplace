@@ -24,12 +24,13 @@ CopyFile[FileNameJoin[{".", #}], FileNameJoin[{buildDirectory, #}]] & /@ files;
 
 << CCompilerDriver`
 SetDirectory["SetReplace/SetReplace"];
-CreateLibrary[
-	{"Match.cpp", "Set.cpp", "SetReplace.cpp"},
-	"libSetReplace",
-	"Language" -> "C++",
-	"CompileOptions" -> "-std=c++17",
-	"TargetDirectory" -> "../../Build/LibraryResources/" <> $SystemID];
+If[CreateLibrary[
+		{"Match.cpp", "Set.cpp", "SetReplace.cpp"},
+		"libSetReplace",
+		"Language" -> "C++",
+		"CompileOptions" -> "-std=c++17",
+		"TargetDirectory" -> "../../Build/LibraryResources/" <> $SystemID] === $Failed,
+	Print["Compilation failed. Paclet will be created without C++ implementation."]];
 SetDirectory["../.."];
 
 
