@@ -250,10 +250,10 @@ VerificationTest[
 (* SetReplace: C++ aborting *)
 (* assumes example below runs slow, may need to be replaced in the future *)
 VerificationTest[
-	1.0 < Timing[TimeConstrained[SetReplace[
+	0.8 < Timing[TimeConstrained[SetReplace[
 			{{0}},
   		FromAnonymousRules[{{{0}} -> {{0}, {0}, {0}}, {{0}, {0}, {0}} -> {{0}}}],
-  		30], 1]][[1]] < 1.5
+  		30], 1]][[1]] < 1.2
 ]
 
 (* SetReplace: matching cases *)
