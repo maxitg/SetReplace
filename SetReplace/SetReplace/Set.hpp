@@ -10,7 +10,9 @@
 namespace SetReplace {
     class Set {
     public:
-        Set(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions);
+        enum Error {Aborted};
+
+        Set(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions, const std::function<bool()>& shouldAbort);
         
         int replace();
         int replace(const int stepCount);
