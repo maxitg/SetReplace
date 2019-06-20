@@ -104,11 +104,17 @@ namespace SetReplace {
             return LIBRARY_FUNCTION_ERROR;
         }
         
-        Set set(rules, initialExpressions);
-        set.replace(steps);
-        const auto expressions = set.expressions();
-        
-        MArgument_setMTensor(result, putSet(expressions, libData));
+        const auto shouldAbort = [&libData]() {
+            return static_cast<bool>(libData->AbortQ());
+        };
+        try {
+            Set set(rules, initialExpressions, shouldAbort);
+            set.replace(steps);
+            const auto expressions = set.expressions();
+            MArgument_setMTensor(result, putSet(expressions, libData));
+        } catch (...) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
         
         return LIBRARY_NO_ERROR;
     }

@@ -247,6 +247,15 @@ VerificationTest[
 	MemoryConstraint -> 5*^6
 ]
 
+(* SetReplace: C++ aborting *)
+(* assumes example below runs slow, may need to be replaced in the future *)
+VerificationTest[
+	1.0 < Timing[TimeConstrained[SetReplace[
+			{{0}},
+  		FromAnonymousRules[{{{0}} -> {{0}, {0}, {0}}, {{0}, {0}, {0}} -> {{0}}}],
+  		30], 1]][[1]] < 1.5
+]
+
 (* SetReplace: matching cases *)
 graphsForMatching = {
 	{{1, 2}, {2, 3}, {3, 4}, {4, 5}},
