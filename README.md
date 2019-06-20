@@ -155,6 +155,7 @@ If you see an error message about c++17, make sure the C++ compiler you are usin
 COMPILER=CCompilerDriver\`ClangCompiler\`ClangCompiler COMPILER_INSTALLATION=/usr/bin ./build.wls
 ```
 Here `ClangCompiler` can be replaced with one of `"Compiler" /. CCompilers[Full]`, and `COMPILER_INSTALLATION` is a directory in which the compiler binary can be found.
+
 3. Run `./install.wls` to install the paclet into your Wolfram system.
 4. Restart any running Wolfram kernels.
 5. Evaluate ``<< SetReplace` `` every time prior to using package functions.
