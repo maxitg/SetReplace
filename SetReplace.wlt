@@ -250,6 +250,8 @@ VerificationTest[
 (* SetReplace: C++ aborting *)
 (* assumes example below runs slow, may need to be replaced in the future *)
 VerificationTest[
+	(* it is possible for evaluation to finish slightly earlier than the constraint, hence the min of 0.8;
+		 timing varies around +-0.05, so using tolerance 0.2 to avoid random failures *)
 	0.8 < Timing[TimeConstrained[SetReplace[
 			{{0}},
   		FromAnonymousRules[{{{0}} -> {{0}, {0}, {0}}, {{0}, {0}, {0}} -> {{0}}}],
