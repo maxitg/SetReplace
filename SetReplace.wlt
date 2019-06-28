@@ -823,4 +823,56 @@ VerificationTest[
 	107
 ]
 
+(* SetCases: Simple Cases *)
+
+VerificationTest[
+	SetCases[{}, {{x_}}],
+	{}
+]
+
+VerificationTest[
+	SetCases[{{1}}, {{1}}],
+	{{{1}}}
+]
+
+VerificationTest[
+	SetCases[{{0}}, {{x_}}],
+	{{{0}}}
+]
+
+VerificationTest[
+	SetCases[{{0}, {0}}, {{x_}}],
+	{{{0}}}
+]
+
+VerificationTest[
+	SetCases[{{0}, {1}}, {{x_}}],
+	{{{0}}, {{1}}}
+]
+
+VerificationTest[
+	SetCases[{{0, 1}, {0, 2}}, {{x_, y_}}],
+	{{{0, 1}}, {{0, 2}}}
+]
+
+VerificationTest[
+	SetCases[{{0, 1}, {0, 2}}, {{x_, y_}, {x_, z_}}],
+	{{{0, 1}, {0, 2}}, {{0, 2}, {0, 1}}}
+]
+
+VerificationTest[
+	SetCases[{{0, 1}, {0, 2}, {0, 3}}, {{x_, y_}, {x_, z_}}],
+	{{{0, 1}, {0, 2}}, {{0, 2}, {0, 1}}, {{0, 1}, {0, 3}}, {{0, 3}, {0, 1}}, {{0, 2}, {0, 3}}, {{0, 3}, {0, 2}}}
+]
+
+VerificationTest[
+	SetCases[{{0, 1}, {1, 2}, {2, 3}}, {{x_, y_}, {y_, z_}}],
+	{{{0, 1}, {1, 2}}, {{1, 2}, {2, 3}}}
+]
+
+VerificationTest[
+	SetCases[{{0, 1}, {1, 2}, {2, 3}}, {{x_, y_}, {x_, z_}}],
+	{}
+]
+
 EndTestSection[]
