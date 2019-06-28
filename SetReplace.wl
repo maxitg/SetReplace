@@ -99,9 +99,35 @@ $readList[list_, index_] := Module[{count = list[[index]]},
 ]
 
 
-ClearAll[$decodeListOfLists];
-$decodeListOfLists[{0}] := {}
-$decodeListOfLists[list_List] := Reap[Nest[$readList[list, #] &, 2, list[[1]]]][[2, 1]]
+ClearAll[$decodeNestedLists];
+
+
+$decodeNestedLists[depth_Integer][list_List] := $decodeNestedLists[list, depth]
+
+
+$decodeNestedLists[nestedList_List, depth_Integer] :=
+	Reap[$decodeNestedLists[nestedList, depth, 1]][[2, 1, 1]]
+
+
+$decodeNestedLists[list_List, 0, index_Integer ? (# >= 1 &)] := (
+	Sow[list[[index]]];
+	index + 1
+)
+
+
+$decodeNestedLists[list_List, depth_Integer ? (# >= 1 &), index_Integer ? (# >= 1 &)] /;
+		list[[index]] == 0 := (
+	Sow[{}];
+	index + 1
+)
+
+
+$decodeNestedLists[
+		list_List, depth_Integer ? (# >= 1 &), index_Integer ? (# >= 1 &)] := Module[{r},
+	r = Reap[Nest[$decodeNestedLists[list, depth - 1, #] &, index + 1, list[[index]]]];
+	Sow[r[[2, 1]]];
+	r[[1]]
+]
 
 
 (* ::Subsection:: *)
@@ -495,7 +521,7 @@ $SetReplace$cpp[
 			globalIndex,
 			localIndices[[K]]],
 		{K, Length[rules]}];
-	cppOutput = $decodeListOfLists @ $cpp$setReplace[
+	cppOutput = $decodeNestedLists[2] @ $cpp$setReplace[
 		$encodeNestedLists[List @@@ mappedRules],
 		$encodeNestedLists[mappedSet],
 		n];
@@ -736,14 +762,14 @@ $SetCases$cpp[
 	localIndices =
 		Association @ Thread[patternAtoms[[2]] -> - Range[Length[patternAtoms[[2]]]]];
 	mappedPattern = $PatternAtomsToIndices[pattern, globalIndex, localIndices];
-	cppOutput = $cpp$setCases[
+	cppOutput = DeleteDuplicates @ $decodeNestedLists[3] @ $cpp$setCases[
 		$encodeNestedLists[mappedPattern],
-		$encodeNestedLists[mappedSet]]
-	(*resultAtoms = Union[Flatten[cppOutput]];
+		$encodeNestedLists[mappedSet]];
+	resultAtoms = Union[Flatten[cppOutput]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
 	inverseGlobalMap = Association @ Thread[resultAtoms
 		-> (Lookup[inversePartialGlobalMap, #, Unique["v"]] & /@ resultAtoms)];
-	ReleaseHold @ Map[inverseGlobalMap, cppOutput, {2}]*)
+	ReleaseHold @ Map[inverseGlobalMap, cppOutput, {3}]
 ]
 
 
