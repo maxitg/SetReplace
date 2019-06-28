@@ -6,6 +6,8 @@
 #include "Expression.hpp"
 
 namespace SetReplace {
+    using RuleID = int;
+    
     struct Rule {
         std::vector<Expression> inputs;
         std::vector<Expression> outputs;

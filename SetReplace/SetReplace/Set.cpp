@@ -162,6 +162,22 @@ namespace SetReplace {
           return result;
         }
         
+        std::vector<std::pair<RuleID, std::vector<Expression>>> matches() const {
+            std::vector<std::pair<RuleID, std::vector<Expression>>> result;
+            result.reserve(matches_.size());
+            for (const auto& match : matches_) {
+                const auto& ruleID = match.ruleID;
+                const auto& expressionIDs = match.expressionIDs;
+                std::vector<Expression> expressions;
+                expressions.reserve(match.expressionIDs.size());
+                for (const auto& id : expressionIDs) {
+                    expressions.push_back(expressions_.at(id));
+                }
+                result.push_back({ruleID, expressions});
+            }
+            return result;
+        }
+        
     private:
         std::vector<Expression> nameAnonymousAtoms(const std::vector<Expression>& expressions) {
             std::unordered_map<AtomID, AtomID> names;
@@ -208,7 +224,7 @@ namespace SetReplace {
             }
         }
         
-        void addMatches(const std::vector<ExpressionID>& expressionIDs, const int ruleID) {
+        void addMatches(const std::vector<ExpressionID>& expressionIDs, const RuleID ruleID) {
             for (int i = 0; i < rules_[ruleID].inputs.size(); ++i) {
                 Match emptyMatch{ruleID, std::vector<ExpressionID>(rules_[ruleID].inputs.size(), -1)};
                 addMatches(emptyMatch, rules_[ruleID].inputs, i, expressionIDs);
@@ -368,5 +384,9 @@ namespace SetReplace {
     
     std::vector<Expression> Set::expressions() const {
         return implementation_->expressions();
+    }
+    
+    std::vector<std::pair<RuleID, std::vector<Expression>>> Set::matches() const {
+        return implementation_->matches();
     }
 }

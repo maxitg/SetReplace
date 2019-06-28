@@ -4,10 +4,11 @@
 #include <vector>
 
 #include "Expression.hpp"
+#include "Rule.hpp"
 
 namespace SetReplace {
     struct Match {
-        int ruleID;
+        RuleID ruleID;
         std::vector<ExpressionID> expressionIDs;
         
         bool operator<(const Match& other) const;

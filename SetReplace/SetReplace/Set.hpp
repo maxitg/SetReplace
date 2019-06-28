@@ -19,6 +19,7 @@ namespace SetReplace {
         int replace(const int stepCount);
         
         std::vector<Expression> expressions() const;
+        std::vector<std::pair<RuleID, std::vector<Expression>>> matches() const;
         
     private:
         class Implementation;
