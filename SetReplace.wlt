@@ -875,4 +875,66 @@ VerificationTest[
 	{}
 ]
 
+(* SetCases: Argument Checking *)
+
+VerificationTest[
+	SetCases[],
+	SetCases[],
+	{SetCases::argrx}
+]
+
+VerificationTest[
+	SetCases[1, {{1}}],
+	SetCases[1, {{1}}],
+	{SetReplace::setNotList}
+]
+
+VerificationTest[
+	SetCases[{{1}}, 1],
+	SetCases[{{1}}, 1],
+	{SetReplace::cppNotImplemented}
+]
+
+VerificationTest[
+	SetCases[{{1}}, {{1}, {2}}],
+	SetCases[{{1}}, {{1}, {2}}],
+	{SetReplace::cppNotImplemented}
+]
+
+VerificationTest[
+	SetCases[{{1}}, {1, {2}}],
+	SetCases[{{1}}, {1, {2}}],
+	{SetReplace::cppNotImplemented}
+]
+
+VerificationTest[
+	SetCases[{{1}}, {}],
+	SetCases[{{1}}, {}],
+	{SetReplace::cppNotImplemented}
+]
+
+(* SetCases: Performance *)
+
+VerificationTest[
+	SetCases[SetReplace[
+		{{0, 0}, {0, 0}, {0, 0}},
+		{{{a_, b_}, {a_, c_}, {a_, d_}} :>
+			Module[{$0, $1, $2}, {
+				{$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
+				{$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
+		100], {{a_, b_}, {a_, c_}, {a_, d_}}],
+	{0},
+	SameTest -> (ListQ[#1] && ListQ[#2] &),
+	TimeConstraint -> 5,
+	MemoryConstraint -> 5*^6
+]
+
+(* SetCases: Aborting *)
+
+VerificationTest[
+	0.8 < Timing[TimeConstrained[SetCases[
+			Table[{0}, 60],
+			{{0}, {0}, {0}}], 1]][[1]] < 1.2
+]
+
 EndTestSection[]
