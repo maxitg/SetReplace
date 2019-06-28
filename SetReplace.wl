@@ -17,7 +17,7 @@ BeginPackage["SetReplace`"];
 
 SetReplace`Private`$PublicSymbols = {
 	SetReplace, SetReplaceList, SetReplaceFixedPoint, SetReplaceFixedPointList,
-	SetReplaceAll, FromAnonymousRules, HypergraphPlot};
+	SetReplaceAll, SetCases, FromAnonymousRules, HypergraphPlot};
 
 
 Unprotect @@ SetReplace`Private`$PublicSymbols;
@@ -60,13 +60,18 @@ If[Not @ MemberQ[$LibraryPath, $libraryDirectory],
 
 
 $libraryFile = FindLibrary["libSetReplace"];
-$cpp$setReplace = If[$libraryFile =!= $Failed,
-	LibraryFunctionLoad[
+If[$libraryFile =!= $Failed,
+	$cpp$setReplace = LibraryFunctionLoad[
 		$libraryFile,
 		"setReplace",
 		{{Integer, 1}, {Integer, 1}, Integer},
-		{Integer, 1}],
-	$Failed
+		{Integer, 1}];
+	$cpp$setCases = LibraryFunctionLoad[
+		$libraryFile,
+		"setCases",
+		{{Integer, 1}, {Integer, 1}},
+		{Integer, 1}];,
+	$cpp$setReplace = $cpp$setCases = $Failed;
 ];
 
 
@@ -365,24 +370,41 @@ $SetReplace$wl[set_, rules_, n_] := Quiet[
 ClearAll[$SimpleRuleQ];
 
 
-$SimpleRuleQ[
-		left : {{__ ? (AtomQ[#]
-			|| MatchQ[#, _Pattern?(AtomQ[#[[1]]] && #[[2]] === Blank[] &)] &)}..}
-		:> right : Module[{___ ? AtomQ}, {{___ ? AtomQ}...}]] := Module[{p},
-	ConnectedGraphQ @ Graph[
-		Flatten[Apply[
-				UndirectedEdge,
-				(Partition[#, 2, 1] & /@ (Append[#, #[[1]]] &) /@ left),
-				{2}]]
-			/. x_Pattern :> p[x[[1]]]]
-]
+$SimpleRuleQ[left_ :> right_] := $SimpleRuleInputQ[left] && $SimpleRuleOutputQ[right]
 
 
-$SimpleRuleQ[left_ :> right : Except[_Module]] :=
-	$SimpleRuleQ[left :> Module[{}, right]]
+ClearAll[$SimpleRuleInputQ];
 
 
-$SimpleRuleQ[___] := False
+$SimpleRuleInputQ[
+		input : {{__ ? (AtomQ[#]
+			|| MatchQ[#, _Pattern?(AtomQ[#[[1]]] && #[[2]] === Blank[] &)] &)}..}] :=
+	Module[{p},
+		ConnectedGraphQ @ Graph[
+			Flatten[Apply[
+					UndirectedEdge,
+					(Partition[#, 2, 1] & /@ (Append[#, #[[1]]] &) /@ input),
+					{2}]]
+				/. x_Pattern :> p[x[[1]]]]]
+
+
+$SimpleRuleInputQ[___] := False
+
+
+ClearAll[$SimpleRuleOutputQ];
+
+
+Attributes[$SimpleRuleOutputQ] = {HoldAll};
+
+
+$SimpleRuleOutputQ[output : HoldPattern[Module[{___ ? AtomQ}, {{___ ? AtomQ}...}]]] :=
+	True
+
+
+$SimpleRuleOutputQ[output : Except[_Module]] := $SimpleRuleOutputQ[Module[{}, output]]
+
+
+$SimpleRuleOutputQ[___] := False
 
 
 ClearAll[$RuleAtoms];
@@ -393,41 +415,63 @@ $RuleAtoms[left_ :> right : Except[_Module]] :=
 
 
 $RuleAtoms[left_ :> right_Module] := Module[{
-		leftVertices, patterns, leftAtoms, patternSymbols, createdAtoms, rightAtoms},
-	leftVertices = Union @ Flatten[left];
-	leftAtoms = Select[leftVertices, AtomQ];
-	patterns = Complement[leftVertices, leftAtoms];
-	patternSymbols = Map[Hold, patterns, {2}][[All, 1]];
+		leftAtoms, patternSymbols, createdAtoms, rightAtoms},
+	{leftAtoms, patternSymbols} = $PatternAtoms[left];
 	createdAtoms = Map[Hold, Hold[right], {3}][[1, 1]];
 	rightAtoms = Complement[
 		Union @ Flatten @ Map[Hold, Hold[right], {4}][[1, 2]],
 		Join[patternSymbols, createdAtoms]];
 	(* {global, local} *)
-	{Union @ Join[Hold /@ leftAtoms, rightAtoms],
+	{Union @ Join[leftAtoms, rightAtoms],
 		Union @ Join[patternSymbols, createdAtoms]}
+]
+
+
+ClearAll[$PatternAtoms];
+
+
+$PatternAtoms[pattern_] := Module[{
+		leftVertices, patterns, leftAtoms, patternSymbols},
+	leftVertices = Union @ Flatten[pattern];
+	leftAtoms = Select[leftVertices, AtomQ];
+	patterns = Complement[leftVertices, leftAtoms];
+	patternSymbols = Map[Hold, patterns, {2}][[All, 1]];
+	(* {global, local} *)
+	{Union[Hold /@ leftAtoms], Union @ patternSymbols}
 ]
 
 
 ClearAll[$RuleAtomsToIndices];
 
 
-$RuleAtomsToIndices[left_ :> right : Except[_Module], globalIndex_, localIndex_] :=
-	$RuleAtomsToIndices[left :> Module[{}, right], globalIndex, localIndex]
+$RuleAtomsToIndices[left_ :> right_, indices___] :=
+	$PatternAtomsToIndices[left, indices] -> $RuleOutputAtomsToIndices[right, indices]
 
 
-$RuleAtomsToIndices[left_ :> right_Module, globalIndex_, localIndex_] := Module[{
-		newLeft, newRight},
-	newLeft = Replace[
-		left,
-		{x_ ? AtomQ :> globalIndex[Hold[x]],
-			x_Pattern :> localIndex[Map[Hold, x, {1}][[1]]]},
-		{2}];
-	newRight = Replace[
-		Map[Hold, Hold[right], {4}][[1, 2]],
-		x_ :> Lookup[localIndex, x, globalIndex[x]],
-		{2}];
-	newLeft -> newRight
-]
+ClearAll[$PatternAtomsToIndices];
+
+
+$PatternAtomsToIndices[pattern_, globalIndex_, localIndex_] := Replace[
+	pattern,
+	{x_ ? AtomQ :> globalIndex[Hold[x]],
+		x_Pattern :> localIndex[Map[Hold, x, {1}][[1]]]},
+	{2}]
+
+
+ClearAll[$RuleOutputAtomsToIndices];
+
+
+Attributes[$RuleOutputAtomsToIndices] = {HoldAll};
+
+
+$RuleOutputAtomsToIndices[output : Except[_Module], globalIndex_, localIndex_] :=
+	$RuleOutputAtomsToIndices[Module[{}, output], globalIndex, localIndex]
+
+
+$RuleOutputAtomsToIndices[output_Module, globalIndex_, localIndex_] := Replace[
+	Map[Hold, Hold[output], {4}][[1, 2]],
+	x_ :> Lookup[localIndex, x, globalIndex[x]],
+	{2}]
 
 
 ClearAll[$SetReplace$cpp];
@@ -609,6 +653,98 @@ SetReplaceFixedPointList[set_, rules_] := 0 /; !$SetReplaceRulesQ[rules] &&
 
 SetReplaceFixedPointList[set_List, rules_ ? $SetReplaceRulesQ] :=
 	SetReplaceList[set, rules, \[Infinity]]
+
+
+(* ::Subsection:: *)
+(*SetCases*)
+
+
+(* ::Text:: *)
+(*SetCases simply returns the list of all matches, but does not actually perform any replacements.*)
+
+
+(* ::Subsubsection:: *)
+(*Documentation*)
+
+
+SetCases::usage = $UsageString[
+	"SetCases[`s`, `p`] yields all (possibly intersecting) subsets of list `s` ",
+	"that match the pattern `p` ",
+	"in the order the corresponding rules would be applied by SetReplace."];
+
+
+(* ::Subsubsection:: *)
+(*Syntax*)
+
+
+SyntaxInformation[SetCases] = {"ArgumentsPattern" -> {_, _}};
+
+
+SetCases[args___] := 0 /;
+	!Developer`CheckArgumentCount[SetCases[args], 2, 2] && False
+
+
+SetCases[set_, pattern_] := 0 /;
+	!ListQ[set] &&
+	Message[SetReplace::setNotList, SetCases]
+
+
+(* ::Subsubsection:: *)
+(*Check for C++ implementation support*)
+
+
+SetCases::motImplemented =
+	"SetCases is only implemented for local patterns, " <>
+	"and only for sets of lists (hypergraphs).";
+
+
+SetCases::noCpp =
+	"SetCases requires C++ implementation that was not compiled for your system type.";
+
+
+SetCases[set_List, pattern_] := Module[{
+		canonicalPattern, failedQ = False},
+	canonicalPattern = If[ListQ[pattern], pattern, {pattern}];
+	If[MatchQ[set, {{___ ? AtomQ}...}] &&
+			MatchQ[canonicalPattern, _ ? $SimpleRuleInputQ],
+		If[$cpp$setCases =!= $Failed,
+			Return[$SetCases$cpp[set, canonicalPattern]]]];
+	failedQ = True;
+	If[$cpp$setCases === $Failed,
+		Message[SetCases::noCpp],
+		Message[SetReplace::cppNotImplemented]];
+/; !failedQ]
+
+
+(* ::Subsubsection:: *)
+(*C++ Implementation*)
+
+
+ClearAll[$SetCases$cpp];
+$SetCases$cpp[
+			set : {{___ ? AtomQ}...},
+			pattern_ ? $SimpleRuleInputQ] /;
+				$cpp$setCases =!= $Failed := Module[{
+		setAtoms, patternAtoms, globalAtoms, globalIndex,
+		mappedSet, localIndices, mappedPattern, cppOutput, resultAtoms,
+		inversePartialGlobalMap, inverseGlobalMap},
+	setAtoms = Hold /@ Union[Flatten[set]];
+	patternAtoms = $PatternAtoms @ pattern;
+	globalAtoms = Union @ Flatten @ {setAtoms, patternAtoms[[1]]};
+	globalIndex = Association @ Thread[globalAtoms -> Range[Length[globalAtoms]]];
+	mappedSet = Map[globalIndex, Map[Hold, set, {2}], {2}];
+	localIndices =
+		Association @ Thread[patternAtoms[[2]] -> - Range[Length[patternAtoms[[2]]]]];
+	mappedPattern = $PatternAtomsToIndices[pattern, globalIndex, localIndices];
+	cppOutput = $cpp$setCases[
+		$encodeNestedLists[mappedPattern],
+		$encodeNestedLists[mappedSet]]
+	(*resultAtoms = Union[Flatten[cppOutput]];
+	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
+	inverseGlobalMap = Association @ Thread[resultAtoms
+		-> (Lookup[inversePartialGlobalMap, #, Unique["v"]] & /@ resultAtoms)];
+	ReleaseHold @ Map[inverseGlobalMap, cppOutput, {2}]*)
+]
 
 
 (* ::Subsection:: *)
