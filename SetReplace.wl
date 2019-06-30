@@ -67,7 +67,7 @@ $cpp$setReplace = If[$libraryFile =!= $Failed,
 		{{Integer, 1}, (* rules *)
 			{Integer, 1}, (* initial state *)
 			Integer, (* step count *)
-			Integer}, (* allow overlap? *)
+			Integer}, (* allow overlaps? *)
 		{Integer, 1}] (* result *),
 	$Failed
 ];
@@ -327,15 +327,15 @@ SetReplace::noCpp =
 	$tryWLMessage;
 
 
-SetReplace::nonBooleanAllowOverlap =
-	"\"AllowOverlap\" option must be set to True or False.";
+SetReplace::nonBooleanAllowOverlaps =
+	"\"AllowOverlaps\" option must be set to True or False.";
 
 
 SetReplace::allowOverlapWL =
-	"\"AllowOverlap\" is only implemented for Method -> \"C++\".";
+	"\"AllowOverlaps\" is only implemented for Method -> \"C++\".";
 
 
-Options[SetReplace] = {Method -> Automatic, "AllowOverlap" -> True};
+Options[SetReplace] = {Method -> Automatic, "AllowOverlaps" -> True};
 
 
 SetReplace[
@@ -346,14 +346,14 @@ SetReplace[
 			$StepCountQ[n] := Module[{
 		method = OptionValue[Method], canonicalRules, failedQ = False},
 	canonicalRules = $ToCanonicalRules[rules];
-	If[!BooleanQ[OptionValue["AllowOverlap"]],
-		Message[SetReplace::nonBooleanAllowOverlap];
+	If[!BooleanQ[OptionValue["AllowOverlaps"]],
+		Message[SetReplace::nonBooleanAllowOverlaps];
 		failedQ = True;
 	];
-	If[OptionValue["AllowOverlap"] == False && method == Automatic,
+	If[OptionValue["AllowOverlaps"] == False && method == Automatic,
 		method = "C++"];
-	If[method == "WolframLanguage" && !OptionValue["AllowOverlap"],
-		Message[SetReplace::allowOverlapWL];
+	If[method == "WolframLanguage" && !OptionValue["AllowOverlaps"],
+		Message[SetReplace::allowOverlapsWL];
 		failedQ = True
 	];
 	If[!failedQ,
@@ -363,7 +363,7 @@ SetReplace[
 				&& IntegerQ[n],
 			If[$cpp$setReplace =!= $Failed,
 				Return[$SetReplace$cpp[
-					set, canonicalRules, n, OptionValue["AllowOverlap"]]]]];
+					set, canonicalRules, n, OptionValue["AllowOverlaps"]]]]];
 		If[MatchQ[method, "C++"],
 			failedQ = True;
 			If[$cpp$setReplace === $Failed, Message[SetReplace::noCpp]];
@@ -466,7 +466,7 @@ $SetReplace$cpp[
 			set : {{___ ? AtomQ}...},
 			rules : {___ ? $SimpleRuleQ},
 			n_,
-			allowOverlap_ ? BooleanQ] /; $cpp$setReplace =!= $Failed := Module[{
+			allowOverlaps_ ? BooleanQ] /; $cpp$setReplace =!= $Failed := Module[{
 		setAtoms, ruleAtoms, globalAtoms, globalIndex,
 		mappedSet, localIndices, mappedRules, cppOutput, decodedOutput,
 		resultAtoms, inversePartialGlobalMap, inverseGlobalMap},
@@ -487,8 +487,8 @@ $SetReplace$cpp[
 		$encodeNestedLists[List @@@ mappedRules],
 		$encodeNestedLists[mappedSet],
 		n,
-		Boole[allowOverlap]];
-	If[cppOutput == {-1}, Return[Failure["SetReplace", <|"RuleOverlap" -> True|>]]];
+		Boole[allowOverlaps]];
+	If[cppOutput == {-1}, Return[Failure["SetReplace", <|"Overlaps" -> True|>]]];
 	decodedOutput = $decodeListOfLists @ cppOutput;
 	resultAtoms = Union[Flatten[decodedOutput]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
