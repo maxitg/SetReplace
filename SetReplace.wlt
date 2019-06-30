@@ -149,6 +149,30 @@ VerificationTest[
 	{SetReplace::nonIntegerIterations}
 ]
 
+VerificationTest[
+	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> x],
+	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> x],
+	{SetReplace::nonBooleanAllowOverlaps}
+]
+
+VerificationTest[
+	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> 2],
+	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> 2],
+	{SetReplace::nonBooleanAllowOverlaps}
+]
+
+VerificationTest[
+	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> False, Method -> "WolframLanguage"],
+	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> False, Method -> "WolframLanguage"],
+	{SetReplace::allowOverlapsWL}
+]
+
+VerificationTest[
+	SetReplace[{{1, 2}, {2, 3}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}}, "AllowOverlaps" -> False],
+	SetReplace[{{1, 2}, {2, 3}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}}, "AllowOverlaps" -> False],
+	{SetReplace::cppNotImplemented}
+]
+
 (* SetReplace: C++ implementation not supported cases *)
 
 (* not a hypergraph *)
@@ -321,6 +345,36 @@ VerificationTest[
 		Method -> #],
 	{{1, 1}}
 ] & /@ methods
+
+(* SetReplace: allow overlaps *)
+VerificationTest[
+	SetReplace[{{0}}, {{0}} -> {{1}}, "AllowOverlaps" -> False],
+	{{1}}
+]
+
+VerificationTest[
+	SetReplace[{{0}}, FromAnonymousRules[{{0}} -> {{1}}], "AllowOverlaps" -> False],
+	{{v_}},
+	SameTest -> MatchQ
+]
+
+VerificationTest[
+	SetReplace[
+		{{0, 1}, {1, 2}, {2, 3}},
+		FromAnonymousRules[{{0, 1}} -> {{0, 0}}],
+		3,
+		"AllowOverlaps" -> False],
+	{{0, 0}, {1, 1}, {2, 2}}
+]
+
+VerificationTest[
+	SetReplace[
+		{{0, 1}, {1, 2}, {2, 3}},
+		FromAnonymousRules[{{0, 1}, {1, 2}} -> {{0, 2}}],
+		3,
+		"AllowOverlaps" -> False],
+	Failure["SetReplace", <|"Overlaps" -> True|>]
+]
 
 (* SetReplace: random tests *)
 graphFromHyperedges[edges_] := Graph[
