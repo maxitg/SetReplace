@@ -13,7 +13,7 @@ namespace SetReplace {
     public:
         enum Error {Aborted, Overlap};
         struct EvaluationParameters {
-            bool abortOnOverlap = false;
+            bool allowOverlap = false;
         };
 
         Set(const std::vector<Rule>& rules,

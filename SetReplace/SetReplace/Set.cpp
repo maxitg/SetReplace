@@ -300,7 +300,7 @@ namespace SetReplace {
                 for (const auto& matchExpressionID : currentMatch.expressionIDs) {
                     if (matchesIndex_.count(matchExpressionID)) {
                         matchesOverlap_ = true;
-                        if (evaluationParameters_.abortOnOverlap) throw Error::Overlap;
+                        if (!evaluationParameters_.allowOverlap) throw Error::Overlap;
                     }
                 }
                 const auto iterator = matches_.insert(currentMatch).first;
