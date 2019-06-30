@@ -331,7 +331,7 @@ SetReplace::nonBooleanAllowOverlaps =
 	"\"AllowOverlaps\" option must be set to True or False.";
 
 
-SetReplace::allowOverlapWL =
+SetReplace::allowOverlapsWL =
 	"\"AllowOverlaps\" is only implemented for Method -> \"C++\".";
 
 
