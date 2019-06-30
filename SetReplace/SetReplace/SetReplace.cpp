@@ -89,17 +89,19 @@ namespace SetReplace {
     }
     
     int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
-        if (argc != 3) {
+        if (argc != 4) {
             return LIBRARY_FUNCTION_ERROR;
         }
         
         std::vector<Rule> rules;
         std::vector<Expression> initialExpressions;
         int steps;
+        bool abortOnOverlap;
         try {
             rules = getRules(libData, MArgument_getMTensor(argv[0]));
             initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
             steps = (int)MArgument_getInteger(argv[2]);
+            abortOnOverlap = (bool)MArgument_getBoolean(argv[3]);
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -108,12 +110,22 @@ namespace SetReplace {
             return static_cast<bool>(libData->AbortQ());
         };
         try {
-            Set set(rules, initialExpressions, shouldAbort);
+            Set set(rules, initialExpressions, {abortOnOverlap}, shouldAbort);
             set.replace(steps);
             const auto expressions = set.expressions();
             MArgument_setMTensor(result, putSet(expressions, libData));
-        } catch (...) {
-            return LIBRARY_FUNCTION_ERROR;
+        } catch (Set::Error e) {
+            if (e == Set::Error::Aborted) {
+                return LIBRARY_FUNCTION_ERROR;
+            } else if (e == Set::Error::Overlap) {
+                MTensor output;
+                mint dimensions[1] = {1};
+                libData->MTensor_new(MType_Integer, 1, dimensions, &output);
+                mint position[1];
+                position[0] = 1;
+                libData->MTensor_setInteger(output, position, -1);
+                MArgument_setMTensor(result, output);
+            }
         }
         
         return LIBRARY_NO_ERROR;

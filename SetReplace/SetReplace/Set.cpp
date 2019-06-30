@@ -20,6 +20,7 @@ namespace SetReplace {
         std::unordered_map<AtomID, std::unordered_set<ExpressionID>> atomsIndex_;
         
         std::set<Match> matches_;
+        bool matchesOverlap_;
         
         struct IteratorHash {
             size_t operator()(std::set<Match>::const_iterator it) const {
@@ -28,12 +29,17 @@ namespace SetReplace {
         };
         std::unordered_map<ExpressionID, std::unordered_set<std::set<Match>::const_iterator, IteratorHash>> matchesIndex_;
         
+        const EvaluationParameters evaluationParameters_;
         const std::function<bool()> shouldAbort_;
 
     public:
         Implementation(const std::vector<Rule>& rules,
                        const std::vector<Expression>& initialExpressions,
-                       const std::function<bool()> shouldAbort) : rules_(rules), shouldAbort_(shouldAbort) {
+                       const EvaluationParameters& evaluationParameters,
+                       const std::function<bool()> shouldAbort) :
+        rules_(rules),
+        evaluationParameters_(evaluationParameters),
+        shouldAbort_(shouldAbort) {
             for (const auto& expression : initialExpressions) {
                 for (const auto& atom : expression) {
                     nextAtomID = std::max(nextAtomID - 1, atom) + 1;
@@ -291,6 +297,12 @@ namespace SetReplace {
                 throw Error::Aborted;
             }
             if (matchComplete(currentMatch)) {
+                for (const auto& matchExpressionID : currentMatch.expressionIDs) {
+                    if (matchesIndex_.count(matchExpressionID)) {
+                        matchesOverlap_ = true;
+                        if (evaluationParameters_.abortOnOverlap) throw Error::Overlap;
+                    }
+                }
                 const auto iterator = matches_.insert(currentMatch).first;
                 for (const auto& expressionID : currentMatch.expressionIDs) {
                     matchesIndex_[expressionID].insert(iterator);
@@ -354,8 +366,14 @@ namespace SetReplace {
         }
     };
     
-    Set::Set(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions, const std::function<bool()> shouldAbort) {
-        implementation_ = std::make_shared<Implementation>(rules, initialExpressions, shouldAbort);
+    Set::Set(const std::vector<Rule>& rules,
+             const std::vector<Expression>& initialExpressions,
+             const EvaluationParameters& evaluationParameters,
+             const std::function<bool()> shouldAbort) {
+        implementation_ = std::make_shared<Implementation>(rules,
+                                                           initialExpressions,
+                                                           evaluationParameters,
+                                                           shouldAbort);
     }
     
     int Set::replace() {
