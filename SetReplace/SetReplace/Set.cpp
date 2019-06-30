@@ -297,13 +297,17 @@ namespace SetReplace {
                 throw Error::Aborted;
             }
             if (matchComplete(currentMatch)) {
-                for (const auto& matchExpressionID : currentMatch.expressionIDs) {
-                    if (matchesIndex_.count(matchExpressionID)) {
-                        matchesOverlap_ = true;
-                        if (!evaluationParameters_.allowOverlaps) throw Error::Overlap;
+                const auto iteratorIsNew = matches_.insert(currentMatch);
+                const auto iterator = iteratorIsNew.first;
+                const auto isNew = iteratorIsNew.second;
+                if (isNew) {
+                    for (const auto& matchExpressionID : currentMatch.expressionIDs) {
+                        if (matchesIndex_.count(matchExpressionID)) {
+                            matchesOverlap_ = true;
+                            if (!evaluationParameters_.allowOverlaps) throw Error::Overlap;
+                        }
                     }
                 }
-                const auto iterator = matches_.insert(currentMatch).first;
                 for (const auto& expressionID : currentMatch.expressionIDs) {
                     matchesIndex_[expressionID].insert(iterator);
                 }
