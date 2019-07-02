@@ -15,12 +15,17 @@ namespace SetReplace {
             else return 0;
         }
         
-        int compareSortedIDs(const Match& first, const Match& second) {
+        int compareSortedIDs(const Match& first, const Match& second, bool reverseOrder) {
             std::vector<ExpressionID> thisExpressions = first.expressionIDs;
             std::sort(thisExpressions.begin(), thisExpressions.end());
             
             std::vector<ExpressionID> otherExpressions = second.expressionIDs;
             std::sort(otherExpressions.begin(), otherExpressions.end());
+            
+            if (reverseOrder) {
+                std::reverse(thisExpressions.begin(), thisExpressions.end());
+                std::reverse(otherExpressions.begin(), otherExpressions.end());
+            }
             
             return compareVectors(thisExpressions, otherExpressions);
         }
@@ -31,13 +36,17 @@ namespace SetReplace {
     }
     
     bool Match::operator<(const Match& other) const {
-        // First rule goes first
-        if (ruleID != other.ruleID) return ruleID < other.ruleID;
-
-        // Then, find which Match has oldest (lowest ID) expressions
-        int sortedComparison = compareSortedIDs(*this, other);
+        // First find matches with oldest newest IDs
+        int sortedComparison = compareSortedIDs(*this, other, true);
         if (sortedComparison != 0) return sortedComparison < 0;
-
+        
+        // Then, find which Match has oldest (lowest ID) expressions
+        sortedComparison = compareSortedIDs(*this, other, false);
+        if (sortedComparison != 0) return sortedComparison < 0;
+        
+        // Then, first rule goes first
+        if (ruleID != other.ruleID) return ruleID < other.ruleID;
+        
         // Finally, if sets of expressions are the same, use smaller permutation
         return compareUnsortedIDs(*this, other) < 0;
     }
