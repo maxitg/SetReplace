@@ -11,9 +11,15 @@
 namespace SetReplace {
     class Set {
     public:
-        enum Error {Aborted};
+        enum Error {Aborted, Overlap};
+        struct EvaluationParameters {
+            bool allowOverlaps = false;
+        };
 
-        Set(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions, const std::function<bool()> shouldAbort);
+        Set(const std::vector<Rule>& rules,
+            const std::vector<Expression>& initialExpressions,
+            const EvaluationParameters& evaluationParameters,
+            const std::function<bool()> shouldAbort);
         
         int replace();
         int replace(const int stepCount);
