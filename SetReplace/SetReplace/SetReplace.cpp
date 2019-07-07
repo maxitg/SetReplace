@@ -5,103 +5,180 @@
 
 #include "Set.hpp"
 
-mint getData(mint* data, mint length, mint index) {
-    if (index >= length) {
-        throw LIBRARY_FUNCTION_ERROR;
-    } else {
-        return data[index];
-    }
-}
-
 namespace SetReplace {
-    std::vector<Rule> getRules(WolframLibraryData libData, MTensor& rulesTensor) {
-        mint tensorLength = libData->MTensor_getFlattenedLength(rulesTensor);
-        mint* tensorData = libData->MTensor_getIntegerData(rulesTensor);
-        int readIndex = 0;
-        const auto getRulesData = [&tensorData, &tensorLength, &readIndex]() -> mint {
-            return getData(tensorData, tensorLength, readIndex++);
-        };
+    std::vector<AtomsVector> getSet(mint* expressionLengthsData,
+                                    mint* atomsData,
+                                    const int beginIndex,
+                                    const int endIndex) {
+        std::vector<AtomsVector> result;
+        result.reserve(endIndex - beginIndex);
+        for (int expressionPosition = beginIndex; expressionPosition < endIndex; ++expressionPosition) {
+            AtomsVector expression;
+            expression.reserve(expressionLengthsData[expressionPosition + 1] -
+                               expressionLengthsData[expressionPosition]);
+            for (int atomPosition = static_cast<int>(expressionLengthsData[expressionPosition]);
+                 atomPosition < expressionLengthsData[expressionPosition + 1];
+                 ++atomPosition) {
+                expression.push_back(static_cast<int>(atomsData[atomPosition]));
+            }
+            result.emplace_back(expression);
+        }
+        return result;
+    }
+    
+    std::vector<Rule> getRules(WolframLibraryData libData,
+                               MTensor ruleLengths,
+                               MTensor ruleExpressionLengths,
+                               MTensor ruleAtoms) {
+        mint ruleLengthsLength = libData->MTensor_getFlattenedLength(ruleLengths);
+        mint* ruleLengthsData = libData->MTensor_getIntegerData(ruleLengths);
+        mint* ruleExpressionLengthsData = libData->MTensor_getIntegerData(ruleExpressionLengths);
+        mint* ruleAtomsData = libData->MTensor_getIntegerData(ruleAtoms);
         
-        std::vector<Rule> rules(getRulesData());
-        for (int ruleIndex = 0; ruleIndex < rules.size(); ++ruleIndex) {
-            if (getRulesData() != 2) {
-                throw LIBRARY_FUNCTION_ERROR;
-            } else {
-                const std::vector<std::vector<Expression>*> setsToRead =
-                {&rules[ruleIndex].inputs, &rules[ruleIndex].outputs};
-                
-                for (auto& set : setsToRead) {
-                    set->resize(getRulesData());
-                    for (int expressionIndex = 0; expressionIndex < set->size(); ++expressionIndex) {
-                        (*set)[expressionIndex].resize(getRulesData());
-                        for (int atomIndex = 0; atomIndex < (*set)[expressionIndex].size(); ++atomIndex) {
-                            (*set)[expressionIndex][atomIndex] = (int)getRulesData();
-                        }
-                    }
-                }
+        std::vector<Rule> rules((ruleLengthsLength - 1) / 2);
+        for (int rulePartIdx = 0; rulePartIdx < 2 * rules.size();) {
+            rules[rulePartIdx / 2].id = rulePartIdx / 2;
+            for (const auto set : {&rules[rulePartIdx / 2].inputs, &rules[rulePartIdx / 2].outputs}) {
+                *set = getSet(ruleExpressionLengthsData,
+                              ruleAtomsData,
+                              static_cast<int>(ruleLengthsData[rulePartIdx]),
+                              static_cast<int>(ruleLengthsData[rulePartIdx + 1]));
+                ++rulePartIdx;
             }
         }
+        
         return rules;
     }
     
-    std::vector<Expression> getSet(WolframLibraryData libData, MTensor& setTensor) {
-        mint tensorLength = libData->MTensor_getFlattenedLength(setTensor);
-        mint* tensorData = libData->MTensor_getIntegerData(setTensor);
-        int readIndex = 0;
-        const auto getSetData = [&tensorData, &tensorLength, &readIndex]() -> mint {
-            return getData(tensorData, tensorLength, readIndex++);
-        };
-        
-        std::vector<Expression> set(getSetData());
-        for (int expressionIndex = 0; expressionIndex < set.size(); ++expressionIndex) {
-            set[expressionIndex].resize(getSetData());
-            for (int atomIndex = 0; atomIndex < set[expressionIndex].size(); ++atomIndex) {
-                set[expressionIndex][atomIndex] = (int)getSetData();
-            }
-        }
-        return set;
+    std::vector<AtomsVector> getSet(WolframLibraryData libData,
+                                    MTensor expressionLengths,
+                                    MTensor setAtoms) {
+        mint expressionLengthsLength = libData->MTensor_getFlattenedLength(expressionLengths);
+        mint* expressionLengthsData = libData->MTensor_getIntegerData(expressionLengths);
+        mint* setAtomsData = libData->MTensor_getIntegerData(setAtoms);
+        return getSet(expressionLengthsData,
+                      setAtomsData,
+                      0,
+                      static_cast<int>(expressionLengthsLength) - 1);
     }
     
-    MTensor putSet(const std::vector<Expression>& expressions, WolframLibraryData libData) {
-        int tensorLength = 1 + (int)expressions.size();
-        for (int i = 0; i < expressions.size(); ++i) {
-            tensorLength += expressions[i].size();
+    enum class EvaluationMode { Events, Generations };
+    std::pair<EvaluationMode, int> getSteps(WolframLibraryData libData, MTensor stepData) {
+        mint length = libData->MTensor_getFlattenedLength(stepData);
+        if (length != 2) {
+            throw LIBRARY_DIMENSION_ERROR;
+        }
+        mint* data = libData->MTensor_getIntegerData(stepData);
+        
+        EvaluationMode mode;
+        if (data[0] == 0) {
+            mode = EvaluationMode::Events;
+        } else if (data[0] == 1) {
+            mode = EvaluationMode::Generations;
+        } else {
+            throw LIBRARY_NUMERICAL_ERROR;
         }
         
-        mint dimensions[1] = {tensorLength};
-        MTensor output;
-        libData->MTensor_new(MType_Integer, 1, dimensions, &output);
+        int steps = static_cast<int>(data[1]);
+        return {mode, steps};
+    }
+    
+    MTensor putSet(const std::vector<Expression>& expressions,
+                   const std::set<Event>& events,
+                   const bool isConfluent,
+                   WolframLibraryData libData) {
+        std::vector<int> result;
         
-        int writeIndex = 0;
-        mint position[1];
-        position[0] = ++writeIndex;
-        libData->MTensor_setInteger(output, position, expressions.size());
-        for (int expressionIndex = 0; expressionIndex < expressions.size(); ++expressionIndex) {
-            position[0] = ++writeIndex;
-            libData->MTensor_setInteger(output, position, expressions[expressionIndex].size());
-            for (int atomIndex = 0; atomIndex < expressions[expressionIndex].size(); ++atomIndex) {
-                position[0] = ++writeIndex;
-                libData->MTensor_setInteger(output, position, expressions[expressionIndex][atomIndex]);
+        std::vector<const Event*> eventsVector;
+        eventsVector.resize(events.size());
+        for (const auto& event : events) {
+            eventsVector[event.id] = &event;
+        }
+        
+        result.push_back(static_cast<int>(expressions.size()));
+        result.push_back(static_cast<int>(eventsVector.size()));
+        result.push_back(isConfluent);
+        
+        constexpr int expressionMetadataSize = 6;
+        constexpr int eventMetadataSize = 5;
+        
+        int recordPosition = static_cast<int>(expressions.size() * expressionMetadataSize +
+                                              eventsVector.size() * eventMetadataSize) + 3;
+        for (const auto& expression : expressions) {
+            result.push_back(static_cast<int>(recordPosition));
+            recordPosition += expression.atoms.size();
+            result.push_back(static_cast<int>(recordPosition));
+            result.push_back(expression.generation);
+            if (expression.precedingEvent == events.end()) {
+                result.push_back(-1);
+            } else {
+                result.push_back(expression.precedingEvent->id);
+            }
+            result.push_back(static_cast<int>(recordPosition));
+            recordPosition += expression.succedingEvents.size();
+            result.push_back(static_cast<int>(recordPosition));
+        }
+        for (const auto& event : eventsVector) {
+            result.push_back(event->rule->id);
+            result.push_back(event->actualized());
+            result.push_back(recordPosition);
+            recordPosition += event->rule->inputs.size();
+            result.push_back(recordPosition);
+            if (event->actualized()) {
+                recordPosition += event->rule->outputs.size();
+            }
+            result.push_back(recordPosition);
+        }
+        for (const auto& expression : expressions) {
+            for (const auto& atom : expression.atoms) {
+                result.push_back(atom);
+            }
+            for (const auto& event : expression.succedingEvents) {
+                result.push_back(event->id);
+            }
+        }
+        for (const auto& event : eventsVector) {
+            for (const auto& expression : event->inputs) {
+                result.push_back(expression);
+            }
+            if (event->actualized()) {
+                for (const auto& expression : *event->outputs) {
+                    result.push_back(expression);
+                }
             }
         }
         
+        MTensor output;
+        mint dimensions[1] = {static_cast<mint>(result.size())};
+        libData->MTensor_new(MType_Integer, 1, dimensions, &output);
+        for (int i = 0; i < result.size(); ++i) {
+            dimensions[0] = i + 1;
+            libData->MTensor_setInteger(output, dimensions, result[i]);
+        }
         return output;
     }
     
     int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
-        if (argc != 4) {
+        if (argc != 6) {
             return LIBRARY_FUNCTION_ERROR;
         }
         
         std::vector<Rule> rules;
-        std::vector<Expression> initialExpressions;
-        int steps;
-        bool abortOnOverlap;
+        std::vector<AtomsVector> initialExpressions;
+        EvaluationMode mode;
+        int count;
         try {
-            rules = getRules(libData, MArgument_getMTensor(argv[0]));
-            initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
-            steps = (int)MArgument_getInteger(argv[2]);
-            abortOnOverlap = (bool)MArgument_getBoolean(argv[3]);
+            rules = getRules(libData,
+                             MArgument_getMTensor(argv[0]),
+                             MArgument_getMTensor(argv[1]),
+                             MArgument_getMTensor(argv[2]));
+            initialExpressions = getSet(libData,
+                                        MArgument_getMTensor(argv[3]),
+                                        MArgument_getMTensor(argv[4]));
+            const std::pair<EvaluationMode, int> modeCount = getSteps(libData,
+                                                                      MArgument_getMTensor(argv[5]));
+            mode = modeCount.first;
+            count = modeCount.second;
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -110,22 +187,20 @@ namespace SetReplace {
             return static_cast<bool>(libData->AbortQ());
         };
         try {
-            Set set(rules, initialExpressions, {abortOnOverlap}, shouldAbort);
-            set.replace(steps);
-            const auto expressions = set.expressions();
-            MArgument_setMTensor(result, putSet(expressions, libData));
-        } catch (Set::Error e) {
-            if (e == Set::Error::Aborted) {
-                return LIBRARY_FUNCTION_ERROR;
-            } else if (e == Set::Error::Overlap) {
-                MTensor output;
-                mint dimensions[1] = {1};
-                libData->MTensor_new(MType_Integer, 1, dimensions, &output);
-                mint position[1];
-                position[0] = 1;
-                libData->MTensor_setInteger(output, position, -1);
-                MArgument_setMTensor(result, output);
+            Set set(rules, initialExpressions, shouldAbort);
+            if (mode == EvaluationMode::Events) {
+                set.createEvents(count);
+            } else if (mode == EvaluationMode::Generations) {
+                set.replaceUptoGeneration(count);
             }
+            
+            const auto& expressions = set.expressions();
+            const auto& events = set.events();
+            const bool isConfluent = set.isConfluent();
+            
+            MArgument_setMTensor(result, putSet(expressions, events, isConfluent, libData));
+        } catch (...) {
+            return LIBRARY_FUNCTION_ERROR;
         }
         
         return LIBRARY_NO_ERROR;

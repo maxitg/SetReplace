@@ -7,10 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		69CAF86D2257B162006F9C60 /* Match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6909EBA922258611001458D2 /* Match.cpp */; };
+		69319F3A22CBF859009DB89E /* Expression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 69319F3922CBF859009DB89E /* Expression.cpp */; };
+		69CAF86D2257B162006F9C60 /* Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6909EBA922258611001458D2 /* Event.cpp */; };
 		69CAF86E2257B162006F9C60 /* Set.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 695F486E222443F20058E057 /* Set.cpp */; };
 		69CAF86F2257B1CB006F9C60 /* Expression.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 69B2D41122244AFC008778A3 /* Expression.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
-		69CAF8702257B1CE006F9C60 /* Match.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6909EBAA22258611001458D2 /* Match.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		69CAF8702257B1CE006F9C60 /* Event.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6909EBAA22258611001458D2 /* Event.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
 		69CAF8712257B1D0006F9C60 /* Rule.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 69B2D41422244D1F008778A3 /* Rule.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
 		69CAF8722257B1D2006F9C60 /* Set.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 695F486F222443F20058E057 /* Set.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
 		69CAF8752257B23B006F9C60 /* SetReplace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 69CAF8732257B23B006F9C60 /* SetReplace.cpp */; };
@@ -18,8 +19,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		6909EBA922258611001458D2 /* Match.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Match.cpp; sourceTree = "<group>"; };
-		6909EBAA22258611001458D2 /* Match.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Match.hpp; sourceTree = "<group>"; };
+		6909EBA922258611001458D2 /* Event.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Event.cpp; sourceTree = "<group>"; };
+		6909EBAA22258611001458D2 /* Event.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Event.hpp; sourceTree = "<group>"; };
+		69319F3922CBF859009DB89E /* Expression.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Expression.cpp; sourceTree = "<group>"; };
 		695F486E222443F20058E057 /* Set.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Set.cpp; sourceTree = "<group>"; };
 		695F486F222443F20058E057 /* Set.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Set.hpp; sourceTree = "<group>"; };
 		69B2D41122244AFC008778A3 /* Expression.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Expression.hpp; sourceTree = "<group>"; };
@@ -59,14 +61,15 @@
 		695F4865222440B90058E057 /* SetReplace */ = {
 			isa = PBXGroup;
 			children = (
-				69B2D41122244AFC008778A3 /* Expression.hpp */,
-				6909EBA922258611001458D2 /* Match.cpp */,
-				6909EBAA22258611001458D2 /* Match.hpp */,
 				69B2D41422244D1F008778A3 /* Rule.hpp */,
-				695F486E222443F20058E057 /* Set.cpp */,
+				6909EBAA22258611001458D2 /* Event.hpp */,
+				6909EBA922258611001458D2 /* Event.cpp */,
+				69B2D41122244AFC008778A3 /* Expression.hpp */,
+				69319F3922CBF859009DB89E /* Expression.cpp */,
 				695F486F222443F20058E057 /* Set.hpp */,
-				69CAF8732257B23B006F9C60 /* SetReplace.cpp */,
+				695F486E222443F20058E057 /* Set.cpp */,
 				69CAF8742257B23B006F9C60 /* SetReplace.hpp */,
+				69CAF8732257B23B006F9C60 /* SetReplace.cpp */,
 			);
 			path = SetReplace;
 			sourceTree = "<group>";
@@ -80,7 +83,7 @@
 			files = (
 				69CAF8762257B23B006F9C60 /* SetReplace.hpp in Headers */,
 				69CAF86F2257B1CB006F9C60 /* Expression.hpp in Headers */,
-				69CAF8702257B1CE006F9C60 /* Match.hpp in Headers */,
+				69CAF8702257B1CE006F9C60 /* Event.hpp in Headers */,
 				69CAF8712257B1D0006F9C60 /* Rule.hpp in Headers */,
 				69CAF8722257B1D2006F9C60 /* Set.hpp in Headers */,
 			);
@@ -144,8 +147,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				69CAF8752257B23B006F9C60 /* SetReplace.cpp in Sources */,
-				69CAF86D2257B162006F9C60 /* Match.cpp in Sources */,
+				69CAF86D2257B162006F9C60 /* Event.cpp in Sources */,
 				69CAF86E2257B162006F9C60 /* Set.cpp in Sources */,
+				69319F3A22CBF859009DB89E /* Expression.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,7 +162,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -217,7 +221,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;

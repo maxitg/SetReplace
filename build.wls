@@ -28,7 +28,7 @@ $TryEnvironment[var_, default_] := If[# === $Failed, default, #] & @ Environment
 << CCompilerDriver`
 SetDirectory["SetReplace/SetReplace"];
 If[CreateLibrary[
-		{"Match.cpp", "Set.cpp", "SetReplace.cpp"},
+		{"Event.cpp", "Expression.cpp", "Set.cpp", "SetReplace.cpp"},
 		"libSetReplace",
 		"Language" -> "C++",
 		"CompileOptions" -> "-std=c++17",

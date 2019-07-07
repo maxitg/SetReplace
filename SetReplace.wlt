@@ -149,30 +149,6 @@ VerificationTest[
 	{SetReplace::nonIntegerIterations}
 ]
 
-VerificationTest[
-	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> x],
-	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> x],
-	{SetReplace::nonBooleanAllowOverlaps}
-]
-
-VerificationTest[
-	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> 2],
-	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> 2],
-	{SetReplace::nonBooleanAllowOverlaps}
-]
-
-VerificationTest[
-	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> False, Method -> "WolframLanguage"],
-	SetReplace[{{1}}, {{1}} -> {{2}}, "AllowOverlaps" -> False, Method -> "WolframLanguage"],
-	{SetReplace::allowOverlapsWL}
-]
-
-VerificationTest[
-	SetReplace[{{1, 2}, {2, 3}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}}, "AllowOverlaps" -> False],
-	SetReplace[{{1, 2}, {2, 3}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}}, "AllowOverlaps" -> False],
-	{SetReplace::cppNotImplemented}
-]
-
 (* SetReplace: C++ implementation not supported cases *)
 
 (* not a hypergraph *)
@@ -348,164 +324,155 @@ VerificationTest[
 
 (* SetReplace: allow overlaps *)
 VerificationTest[
-	SetReplace[{{0}}, {{0}} -> {{1}}, "AllowOverlaps" -> False],
-	{{1}}
+	SetSubstitutionSystem[{{0}} -> {{1}}, {{0}}, 1]["ConfluentQ"],
+	True
 ]
 
 VerificationTest[
-	SetReplace[{{0}}, FromAnonymousRules[{{0}} -> {{1}}], "AllowOverlaps" -> False],
-	{{v_}},
-	SameTest -> MatchQ
+	SetSubstitutionSystem[FromAnonymousRules[{{0}} -> {{1}}], {{0}}, 1]["ConfluentQ"],
+	True
 ]
 
 VerificationTest[
-	SetReplace[
-		{{0, 1}, {1, 2}, {2, 3}},
+	SetSubstitutionSystem[
 		FromAnonymousRules[{{0, 1}} -> {{0, 0}}],
-		3,
-		"AllowOverlaps" -> False],
-	{{0, 0}, {1, 1}, {2, 2}}
+		{{0, 1}, {1, 2}, {2, 3}},
+		1]["ConfluentQ"],
+	True
 ]
 
 VerificationTest[
-	SetReplace[
-		{{0, 1}, {1, 2}, {2, 3}},
+	SetSubstitutionSystem[
 		FromAnonymousRules[{{0, 1}, {1, 2}} -> {{0, 2}}],
-		3,
-		"AllowOverlaps" -> False],
-	Failure["SetReplace", <|"Overlaps" -> True|>]
+		{{0, 1}, {1, 2}, {2, 3}},
+		3]["ConfluentQ"],
+	False
 ]
 
 (* more complicated examples of symmetry preserving / breaking rules *)
 
 VerificationTest[
-  SetReplace[
+  SetSubstitutionSystem[
+  	FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {}],
     {{0, 0}, {0, 0}, {0, 0}},
-    FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {}],
-    "AllowOverlaps" -> False],
-  {}
+    1]["ConfluentQ"],
+  True
 ]
 
 VerificationTest[
-  SetReplace[
+  SetSubstitutionSystem[
+  	FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {}],
     {{0, 1}, {0, 2}, {0, 3}},
-    FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {}],
-    "AllowOverlaps" -> False],
-  {}
+    1]["ConfluentQ"],
+  True
 ]
 
 VerificationTest[
-  SetReplace[
+  SetSubstitutionSystem[
+  	FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {{0, 1}, {0, 2}, {0, 3}}],
     {{0, 1}, {0, 2}, {0, 3}},
-    FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {{0, 1}, {0, 2}, {0, 3}}],
-    "AllowOverlaps" -> False],
-  {}
+    1]["ConfluentQ"],
+  True
 ]
 
 VerificationTest[
-  SetReplace[
+  SetSubstitutionSystem[
+  	FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {{0, 2}, {0, 1}, {0, 3}}],
     {{0, 1}, {0, 2}, {0, 3}},
-    FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {{0, 2}, {0, 1}, {0, 3}}],
-    "AllowOverlaps" -> False],
-  _Failure,
-  SameTest -> MatchQ
+    1]["ConfluentQ"],
+  False
 ]
 
 VerificationTest[
-  SetReplace[
+  SetSubstitutionSystem[
+  	FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {{0, 1}, {0, 1}, {0, 3}}],
     {{0, 1}, {0, 2}, {0, 3}},
-    FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {{0, 1}, {0, 1}, {0, 3}}],
-    "AllowOverlaps" -> False],
-  _Failure,
-  SameTest -> MatchQ
+    1]["ConfluentQ"],
+  False
 ]
 
 VerificationTest[
-  SetReplace[
+  SetSubstitutionSystem[
+  	FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {{0, 1}, {0, 1}, {0, 1}}],
     {{0, 1}, {0, 2}, {0, 3}},
-    FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} -> {{0, 1}, {0, 1}, {0, 1}}],
-    "AllowOverlaps" -> False],
-  {}
+    1]["ConfluentQ"],
+  True
 ]
 
 VerificationTest[
-  SetReplace[
-    {{0, 1}, {0, 2}, {0, 3}},
-    FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} ->
+  SetSubstitutionSystem[
+  	FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} ->
       {{4, 5}, {5, 6}, {6, 4}, {4, 6}, {6, 5}, {5, 4}, {4, 1}, {5, 2}, {6, 3}}],
-    "AllowOverlaps" -> False],
-  {}
+    {{0, 1}, {0, 2}, {0, 3}},
+    1]["ConfluentQ"],
+  True
 ]
 
 VerificationTest[
-  SetReplace[
-    {{0, 1}, {0, 2}, {0, 3}},
-    FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} ->
+  SetSubstitutionSystem[
+  	FromAnonymousRules[{{0, 1}, {0, 2}, {0, 3}} ->
       {{4, 5}, {5, 6}, {6, 4}, {4, 6}, {6, 5}, {5, 4}, {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}}],
-    "AllowOverlaps" -> False],
-  Failure_,
-  SameTest -> MatchQ
+    {{0, 1}, {0, 2}, {0, 3}},
+    1]["ConfluentQ"],
+  False
 ]
+
+(* TODO(maxitg): Add tests for systems in which critical pairs happens between spacelike current and past expressions *)
 
 (* examples of emulating string replace systems *)
 
 VerificationTest[
-	FailureQ[SetReplace[
-		{{"start", 0}, {0, 0.5}, {0.5, 1}, {1, 1.5}, {1.5, 2},
-			{2, "end"}, {"A", 0}, {"B", 1}, {"A", 2}},
+	SetSubstitutionSystem[
 		{{{l_, $1_}, {$1_, $1$5_}, {$1$5_, $2_}, {$2_, r_}, {"A", $1_}, {"B", $2_}} :> 
   			Module[{$$1, $$1$5, $$2, $$2$5, $$3, $$3$5, $$4},
   				{{l, $$1}, {$$1, $$1$5}, {$$1$5, $$2}, {$$2, $$2$5}, {$$2$5, $$3}, {$$3, $$3$5},
   					{$$3$5, $$4}, {$$4, r}, {"A", $$1}, {"B", $$2}, {"B", $$3}, {"A", $$4}}],
   		{{l_, $1_}, {$1_, $1$5_}, {$1$5_, $2_}, {$2_, r_}, {"B", $1_}, {"A", $2_}} :> {{l, r}}},
-    3,
-    "AllowOverlaps" -> False]],
-  True
+		{{"start", 0}, {0, 0.5}, {0.5, 1}, {1, 1.5}, {1.5, 2},
+			{2, "end"}, {"A", 0}, {"B", 1}, {"A", 2}},
+    2]["ConfluentQ"],
+  False
 ]
 
 VerificationTest[
-	FailureQ[SetReplace[
-		{{"start", 0}, {0, 0.5}, {0.5, 1}, {1, 1.5}, {1.5, 2}, {2, "end"}, {0}, {1, 1, 1}, {2}},
+	SetSubstitutionSystem[
 		FromAnonymousRules[{{{l, $1}, {$1, $1$5}, {$1$5, $2}, {$2, r}, {$1}, {$2, $2, $2}} ->
 				{{l, $$1}, {$$1, $$1$5}, {$$1$5, $$2}, {$$2, $$2$5}, {$$2$5, $$3}, {$$3, $$3$5},
 					{$$3$5, $$4}, {$$4, r}, {$$1}, {$$2, $$2, $$2}, {$$3, $$3, $$3}, {$$4}},
   		{{l, $1}, {$1, $1$5}, {$1$5, $2}, {$2, r}, {$1, $1, $1}, {$2}} -> {{l, r}}}],
-    3,
-    "AllowOverlaps" -> False]],
-  True
-]
-
-VerificationTest[
-	FailureQ[SetReplace[
-		{{"start", 0}, {0, 1}, {1, 2}, {2, "end"}, {0}, {1, 1, 1}, {2}},
-		FromAnonymousRules[{{{l, $1}, {$1, $2}, {$2, r}, {$1}, {$2, $2, $2}} ->
-			{{l, $$1}, {$$1, $$2}, {$$2, $$3}, {$$3, $$4}, {$$4, r},
-				{$$1}, {$$2, $$2, $$2}, {$$3, $$3, $$3}, {$$4}}}],
-    3,
-    "AllowOverlaps" -> False]],
+		{{"start", 0}, {0, 0.5}, {0.5, 1}, {1, 1.5}, {1.5, 2}, {2, "end"}, {0}, {1, 1, 1}, {2}},
+    2]["ConfluentQ"],
   False
 ]
 
 VerificationTest[
-	FailureQ[SetReplace[
-		{{"start", 0}, {0, 1}, {1, 2}, {2, "end"}, {0}, {1, 1, 1}, {2}},
+	SetSubstitutionSystem[
 		FromAnonymousRules[{{{l, $1}, {$1, $2}, {$2, r}, {$1}, {$2, $2, $2}} ->
 			{{l, $$1}, {$$1, $$2}, {$$2, $$3}, {$$3, $$4}, {$$4, r},
 				{$$1}, {$$2, $$2, $$2}, {$$3, $$3, $$3}, {$$4}}}],
-    4,
-    "AllowOverlaps" -> False]],
+		{{"start", 0}, {0, 1}, {1, 2}, {2, "end"}, {0}, {1, 1, 1}, {2}},
+    2]["ConfluentQ"],
   True
 ]
 
 VerificationTest[
-	FailureQ[SetReplace[
-		{{"start", 0}, {0, 0.5}, {0.5, 1}, {1, 1.5}, {1.5, 2}, {2, "end"}, {0}, {1, 1, 1}, {2}},
+	SetSubstitutionSystem[
+		FromAnonymousRules[{{{l, $1}, {$1, $2}, {$2, r}, {$1}, {$2, $2, $2}} ->
+			{{l, $$1}, {$$1, $$2}, {$$2, $$3}, {$$3, $$4}, {$$4, r},
+				{$$1}, {$$2, $$2, $$2}, {$$3, $$3, $$3}, {$$4}}}],
+		{{"start", 0}, {0, 1}, {1, 2}, {2, "end"}, {0}, {1, 1, 1}, {2}},
+    3]["ConfluentQ"],
+  False
+]
+
+VerificationTest[
+	SetSubstitutionSystem[
 		FromAnonymousRules[{{{l, $1}, {$1, $1$5}, {$1$5, $2}, {$2, r}, {$1}, {$2, $2, $2}} ->
 			{{l, $$1}, {$$1, $$1$5}, {$$1$5, $$2}, {$$2, $$2$5}, {$$2$5, $$3}, {$$3, $$3$5},
 				{$$3$5, $$4}, {$$4, r}, {$$1}, {$$2, $$2, $$2}, {$$3, $$3, $$3}, {$$4}}}],
-    100,
-    "AllowOverlaps" -> False]],
-  False
+		{{"start", 0}, {0, 0.5}, {0.5, 1}, {1, 1.5}, {1.5, 2}, {2, "end"}, {0}, {1, 1, 1}, {2}},
+    10]["ConfluentQ"],
+  True
 ]
 
 (* SetReplace: random tests *)

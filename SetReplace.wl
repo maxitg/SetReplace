@@ -17,7 +17,8 @@ BeginPackage["SetReplace`"];
 
 SetReplace`Private`$PublicSymbols = {
 	SetReplace, SetReplaceList, SetReplaceFixedPoint, SetReplaceFixedPointList,
-	SetReplaceAll, FromAnonymousRules, HypergraphPlot};
+	SetReplaceAll, FromAnonymousRules, HypergraphPlot,
+	SetSubstitutionSystem, SetSubstitutionEvolution};
 
 
 Unprotect @@ SetReplace`Private`$PublicSymbols;
@@ -65,41 +66,14 @@ $cpp$setReplace = If[$libraryFile =!= $Failed,
 		$libraryFile,
 		"setReplace",
 		{{Integer, 1}, (* rules *)
-			{Integer, 1}, (* initial state *)
-			Integer, (* step count *)
-			Integer}, (* allow overlaps? *)
-		{Integer, 1}] (* result *),
+			{Integer, 1}, (* rule sets positions *)
+			{Integer, 1}, (* rule atoms *)
+			{Integer, 1}, (* initial condition positions *)
+			{Integer, 1}, (* initial condition atoms *)
+			{Integer, 1}}, (* steps spec *)
+		{Integer, 1}] (* results *),
 	$Failed
 ];
-
-
-(* ::Text:: *)
-(*The following code turns a nested list into a single list, prepending sizes of each sublist. I.e., {{a}, {b, c, d}} becomes {2, 1, a, 3, b, c, d}, where the first 2 is the length of the entire list, and 1 and 3 are the lengths of sublists.*)
-
-
-(* ::Text:: *)
-(*This format is used to pass both rules and set data into libSetReplace over LibraryLink*)
-
-
-ClearAll[$encodeNestedLists];
-$encodeNestedLists[list_List] :=
-		{list} //. {{l___, List[args___], r___} :> {l, Length[{args}], args, r}}
-
-
-(* ::Text:: *)
-(*This is the reverse, used to decode set data (a list of hyperedges) from libSetReplace*)
-
-
-ClearAll[$readList];
-$readList[list_, index_] := Module[{count = list[[index]]},
-	Sow[list[[index + 1 ;; index + count]]];
-	index + count + 1
-]
-
-
-ClearAll[$decodeListOfLists];
-$decodeListOfLists[{0}] := {}
-$decodeListOfLists[list_List] := Reap[Nest[$readList[list, #] &, 2, list[[1]]]][[2, 1]]
 
 
 (* ::Subsection:: *)
@@ -220,6 +194,209 @@ $ToNormalRules[rules_List] := Join @@ $ToNormalRules /@ rules
 
 
 (* ::Subsection:: *)
+(*SetSubstitutionSystem*)
+
+
+(* ::Subsubsection:: *)
+(*Syntax*)
+
+
+SyntaxInformation[SetSubstitutionSystem] = {"ArgumentsPattern" -> {_, _, _}};
+
+
+(* ::Subsubsection:: *)
+(*Implementation*)
+
+
+(* ::Text:: *)
+(*Only implemented for C++ method.*)
+
+
+$decodeOutput[output : {__Integer}] := With[{
+	atomsCount = output[[1]],
+	eventsCount = output[[2]],
+	confluentQ = output[[3]]},
+	<|"Expressions" -> 
+			(<|"Atoms" -> output[[#[[1]] + 1 ;; #[[2]]]],
+					"Generation" -> #[[3]],
+					"PreceedingEventID" -> #[[4]] + 1,
+					"SucceedingEventIDs" -> output[[#[[5]] + 1 ;; #[[6]]]] + 1|> &
+				/@ Partition[output[[4 ;; 3 + 6 atomsCount]], 6]),
+		"Events" ->
+			(<|"RuleID" -> #[[1]],
+					"Actualized" -> Replace[#[[2]], {0 -> False, 1 -> True}],
+					"InputExpressionIDs" -> output[[#[[3]] + 1 ;; #[[4]]]] + 1,
+					"OutputExpressionIDs" -> output[[#[[4]] + 1 ;; #[[5]]]] + 1|> &
+				/@ Partition[output[[
+					4 + 6 atomsCount ;; 3 + 6 atomsCount + 5 eventsCount]], 5]),
+		"ConfluentQ" -> confluentQ|>
+]
+
+
+$SetSubstitutionSystem[
+			rules_ ? $SetReplaceRulesQ,
+			set : {{___ ? AtomQ}...},
+			{stepsReplaceAll_ ? BooleanQ, steps_Integer}] /;
+				$cpp$setReplace =!= $Failed &&
+				AllTrue[$ToCanonicalRules[rules], $SimpleRuleQ] := Module[{
+		canonicalRules, setAtoms, ruleAtoms, globalAtoms, globalIndex,
+		mappedSet, localIndices, mappedRules, cppOutput, decodedOutput,
+		resultAtoms, inversePartialGlobalMap, inverseGlobalMap},
+	canonicalRules = $ToCanonicalRules[rules];
+	setAtoms = Hold /@ Union[Flatten[set]];
+	ruleAtoms = $RuleAtoms /@ canonicalRules;
+	globalAtoms = Union @ Flatten @ {setAtoms, ruleAtoms[[All, 1]]};
+	globalIndex = Association @ Thread[globalAtoms -> Range[Length[globalAtoms]]];
+	mappedSet = Map[globalIndex, Map[Hold, set, {2}], {2}];
+	localIndices =
+		Association @ Thread[#[[2]] -> - Range[Length[#[[2]]]]] & /@ ruleAtoms;
+	mappedRules = Table[
+		$RuleAtomsToIndices[
+			canonicalRules[[K]],
+			globalIndex,
+			localIndices[[K]]],
+		{K, Length[canonicalRules]}];
+	cppOutput = $cpp$setReplace[
+		Prepend[Accumulate[Length /@ Catenate[List @@@ mappedRules]], 0],
+		Prepend[Accumulate[Length /@ Flatten[List @@@ mappedRules, 2]], 0],
+		Flatten[List @@@ mappedRules],
+		Prepend[Accumulate[Length /@ mappedSet], 0],
+		Flatten[mappedSet],
+		{Boole[stepsReplaceAll], steps}];
+	decodedOutput = Join[
+		$decodeOutput @ cppOutput,
+		<|"Rules" -> rules|>];
+	resultAtoms = Union[Flatten[decodedOutput[["Expressions", All, "Atoms"]]]];
+	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
+	inverseGlobalMap = Association @ Thread[resultAtoms
+		-> (Lookup[inversePartialGlobalMap, #, Unique["v"]] & /@ resultAtoms)];
+	SetSubstitutionEvolution[ReplacePart[
+		decodedOutput,
+		{"Expressions", #, "Atoms"} -> ReleaseHold[
+				inverseGlobalMap /@ decodedOutput[["Expressions", #, "Atoms"]]] & /@
+			Range[Length[decodedOutput[["Expressions"]]]]]]
+]
+
+
+SetSubstitutionSystem[
+		rules_ ? $SetReplaceRulesQ,
+		set : {{___ ? AtomQ}...},
+		steps_Integer ? (# >= 0 &)] :=
+	$SetSubstitutionSystem[rules, set, {True, steps}]
+
+
+(* ::Subsection:: *)
+(*SetSubstitutionEvolution*)
+
+
+(* ::Subsubsection:: *)
+(*Boxes*)
+
+
+(* ::Text:: *)
+(*This is an object that contains both states of the system at every step, and the causal network.*)
+
+
+$icon = HypergraphPlot[{{5, 6, 1}, {6, 4, 2}, {4, 5, 3}}, ImageSize -> 30];
+
+
+SetSubstitutionEvolution /:
+		MakeBoxes[evo : SetSubstitutionEvolution[data_Association], format_] := Module[
+	{atomCount, expressionCount, eventCount, confluentQ, stepCount},
+	atomCount = Length @ Union @ Flatten @ data[["Expressions", All, "Atoms"]];
+	expressionCount = Length @ data["Expressions"];
+	eventCount = Length @ Select[#["Actualized"] &] @ data["Events"];
+	confluentQ = data["ConfluentQ"];
+	stepCount = evo["StepCount"];
+	BoxForm`ArrangeSummaryBox[
+		SetSubstitutionEvolution,
+		evo,
+		$icon,
+		(* Always grid *)
+		{{BoxForm`SummaryItem[{"Step count: ", stepCount}]},
+		{BoxForm`SummaryItem[{"Event count: ", eventCount}]}},
+		(* Sometimes grid *)
+		{{BoxForm`SummaryItem[{"Confluent: ", confluentQ /. {0 -> False, 1 -> True}}]},
+		{BoxForm`SummaryItem[{"Atom count: ", atomCount}]},
+		{BoxForm`SummaryItem[{"Expression count: ", expressionCount}]}},
+		format,
+		"Interpretable" -> Automatic
+	]
+]
+
+
+(* ::Subsubsection:: *)
+(*Properties*)
+
+
+SetSubstitutionEvolution[data_]["Rules"] := data[["Rules"]]
+
+
+SetSubstitutionEvolution[data_][step_Integer] :=
+	SetSubstitutionEvolution[data][{"Step", step}]
+
+
+SetSubstitutionEvolution[data_][{"Step", step_Integer ? (# < 0 &)}] := Module[{maxGen},
+	maxGen = Replace[Max[
+		(Select[Length[Select[data[["Events", #, "Actualized"]]&] @
+					#["SucceedingEventIDs"]] > 0 &] @
+				data[["Expressions"]])[[
+			All, "Generation"]]] + 1, -Infinity -> 0];
+	SetSubstitutionEvolution[data][{
+		"Step",
+		Replace[
+			maxGen + (step + 1),
+			_ ? (# < 0 &) -> maxGen + 1]}]
+]
+
+
+SetSubstitutionEvolution[data_][{"Step", step_Integer ? (# >= 0 &)}] := Module[{event},
+	event = Max @ Select[data["Expressions"], #[["Generation"]] == step &][[
+		All, "PreceedingEventID"]];
+	(Select[#["PreceedingEventID"] <= event &&
+			Length[Select[
+				# <= event && data[["Events", #, "Actualized"]] &][
+					#["SucceedingEventIDs"]]] == 0 &] @
+		data[["Expressions"]])[[All, "Atoms"]]
+]
+
+
+SetSubstitutionEvolution[data_]["CausalNetwork"] := Graph @
+	Union @
+	Catenate @
+	MapIndexed[Thread[If[
+		#1[["Actualized"]],
+		data[["Expressions", #, "PreceedingEventID"]] & /@ #1[["InputExpressionIDs"]] ->
+			#2[[1]],
+		Nothing]] &] @
+	data["Events"]
+
+
+SetSubstitutionEvolution[data_]["NestingQ"] := With[{
+	causalNetwork = SetSubstitutionEvolution[data]["CausalNetwork"]},
+	TreeGraphQ[causalNetwork] || EmptyGraphQ[causalNetwork]
+]
+
+
+SetSubstitutionEvolution[data_]["ConfluentQ"] :=
+	Replace[data[["ConfluentQ"]], {0 -> False, 1 -> True}]
+
+
+SetSubstitutionEvolution[data_]["StepCount"] :=
+	Max[data[["Expressions", All, "Generation"]]]
+
+
+SetSubstitutionEvolution[data_]["Properties"] := {
+	"Properties",
+	"Rules",
+	_Integer | {"Step", _Integer},
+	"CausalNetwork",
+	"NestingQ",
+	"ConfluentQ",
+	"StepCount"};
+
+
+(* ::Subsection:: *)
 (*SetReplace*)
 
 
@@ -327,15 +504,7 @@ SetReplace::noCpp =
 	$tryWLMessage;
 
 
-SetReplace::nonBooleanAllowOverlaps =
-	"\"AllowOverlaps\" option must be set to True or False.";
-
-
-SetReplace::allowOverlapsWL =
-	"\"AllowOverlaps\" is only implemented for Method -> \"C++\".";
-
-
-Options[SetReplace] = {Method -> Automatic, "AllowOverlaps" -> True};
+Options[SetReplace] = {Method -> Automatic};
 
 
 SetReplace[
@@ -346,24 +515,13 @@ SetReplace[
 			$StepCountQ[n] := Module[{
 		method = OptionValue[Method], canonicalRules, failedQ = False},
 	canonicalRules = $ToCanonicalRules[rules];
-	If[!BooleanQ[OptionValue["AllowOverlaps"]],
-		Message[SetReplace::nonBooleanAllowOverlaps];
-		failedQ = True;
-	];
-	If[OptionValue["AllowOverlaps"] == False && method == Automatic,
-		method = "C++"];
-	If[method == "WolframLanguage" && !OptionValue["AllowOverlaps"],
-		Message[SetReplace::allowOverlapsWL];
-		failedQ = True
-	];
 	If[!failedQ,
 		If[MatchQ[method, Automatic | "C++"]
 				&& MatchQ[set, {{___ ? AtomQ}...}]
 				&& MatchQ[canonicalRules, {___ ? $SimpleRuleQ}]
 				&& IntegerQ[n],
 			If[$cpp$setReplace =!= $Failed,
-				Return[$SetReplace$cpp[
-					set, canonicalRules, n, OptionValue["AllowOverlaps"]]]]];
+				Return[$SetReplace$cpp[set, canonicalRules, n]]]];
 		If[MatchQ[method, "C++"],
 			failedQ = True;
 			If[$cpp$setReplace === $Failed, Message[SetReplace::noCpp]];
@@ -463,39 +621,10 @@ $RuleAtomsToIndices[left_ :> right_Module, globalIndex_, localIndex_] := Module[
 
 ClearAll[$SetReplace$cpp];
 $SetReplace$cpp[
-			set : {{___ ? AtomQ}...},
-			rules : {___ ? $SimpleRuleQ},
-			n_,
-			allowOverlaps_ ? BooleanQ] /; $cpp$setReplace =!= $Failed := Module[{
-		setAtoms, ruleAtoms, globalAtoms, globalIndex,
-		mappedSet, localIndices, mappedRules, cppOutput, decodedOutput,
-		resultAtoms, inversePartialGlobalMap, inverseGlobalMap},
-	setAtoms = Hold /@ Union[Flatten[set]];
-	ruleAtoms = $RuleAtoms /@ rules;
-	globalAtoms = Union @ Flatten @ {setAtoms, ruleAtoms[[All, 1]]};
-	globalIndex = Association @ Thread[globalAtoms -> Range[Length[globalAtoms]]];
-	mappedSet = Map[globalIndex, Map[Hold, set, {2}], {2}];
-	localIndices =
-		Association @ Thread[#[[2]] -> - Range[Length[#[[2]]]]] & /@ ruleAtoms;
-	mappedRules = Table[
-		$RuleAtomsToIndices[
-			rules[[K]],
-			globalIndex,
-			localIndices[[K]]],
-		{K, Length[rules]}];
-	cppOutput = $cpp$setReplace[
-		$encodeNestedLists[List @@@ mappedRules],
-		$encodeNestedLists[mappedSet],
-		n,
-		Boole[allowOverlaps]];
-	If[cppOutput == {-1}, Return[Failure["SetReplace", <|"Overlaps" -> True|>]]];
-	decodedOutput = $decodeListOfLists @ cppOutput;
-	resultAtoms = Union[Flatten[decodedOutput]];
-	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
-	inverseGlobalMap = Association @ Thread[resultAtoms
-		-> (Lookup[inversePartialGlobalMap, #, Unique["v"]] & /@ resultAtoms)];
-	ReleaseHold @ Map[inverseGlobalMap, decodedOutput, {2}]
-]
+		set : {{___ ? AtomQ}...},
+		rules : {___ ? $SimpleRuleQ},
+		n_] /; $cpp$setReplace =!= $Failed :=
+	$SetSubstitutionSystem[rules, set, {False, n}][-1]
 
 
 (* ::Subsection:: *)
