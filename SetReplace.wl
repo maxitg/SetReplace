@@ -18,7 +18,7 @@ BeginPackage["SetReplace`"];
 SetReplace`Private`$PublicSymbols = {
 	SetReplace, SetReplaceList, SetReplaceFixedPoint, SetReplaceFixedPointList,
 	SetReplaceAll, FromAnonymousRules, HypergraphPlot,
-	SetSubstitutionSystem, SetSubstitutionEvolution};
+	SetSubstitutionSystem, SetSubstitutionEvolution, SetCases};
 
 
 Unprotect @@ SetReplace`Private`$PublicSymbols;
@@ -631,6 +631,17 @@ $SetReplace$cpp[
 		rules : {___ ? $SimpleRuleQ},
 		n_] /; $cpp$setReplace =!= $Failed :=
 	$SetSubstitutionSystem[rules, set, {False, n}][-1]
+
+
+(* ::Subsection:: *)
+(*SetCases*)
+
+
+SetCases[set_List, pattern_] := Module[{
+		evolution = SetSubstitutionSystem[pattern :> {}, set, 0]},
+	Union[evolution[[1, "Expressions", #, "Atoms"]] & /@
+		evolution[[1, "Events", All, "InputExpressionIDs"]]]
+]
 
 
 (* ::Subsection:: *)
