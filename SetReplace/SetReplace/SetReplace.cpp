@@ -62,24 +62,38 @@ namespace SetReplace {
                       static_cast<int>(expressionLengthsLength) - 1);
     }
     
-    enum class EvaluationMode { Events, Generations };
+    enum class StepType { Events, Generations };
+    
+    struct EvaluationMode {
+        StepType stepType;
+        bool detectConfluence;
+    };
+    
     std::pair<EvaluationMode, int> getSteps(WolframLibraryData libData, MTensor stepData) {
         mint length = libData->MTensor_getFlattenedLength(stepData);
-        if (length != 2) {
+        if (length != 3) {
             throw LIBRARY_DIMENSION_ERROR;
         }
         mint* data = libData->MTensor_getIntegerData(stepData);
         
         EvaluationMode mode;
         if (data[0] == 0) {
-            mode = EvaluationMode::Events;
+            mode.stepType = StepType::Events;
         } else if (data[0] == 1) {
-            mode = EvaluationMode::Generations;
+            mode.stepType = StepType::Generations;
         } else {
             throw LIBRARY_NUMERICAL_ERROR;
         }
         
-        int steps = static_cast<int>(data[1]);
+        if (data[1] == 0) {
+            mode.detectConfluence = false;
+        } else if (data[1] == 1) {
+            mode.detectConfluence = true;
+        } else {
+            throw LIBRARY_NUMERICAL_ERROR;
+        }
+        
+        int steps = static_cast<int>(data[2]);
         return {mode, steps};
     }
     
@@ -187,10 +201,10 @@ namespace SetReplace {
             return static_cast<bool>(libData->AbortQ());
         };
         try {
-            Set set(rules, initialExpressions, shouldAbort);
-            if (mode == EvaluationMode::Events) {
+            Set set(rules, initialExpressions, mode.detectConfluence, shouldAbort);
+            if (mode.stepType == StepType::Events) {
                 set.createEvents(count);
-            } else if (mode == EvaluationMode::Generations) {
+            } else if (mode.stepType == StepType::Generations) {
                 set.replaceUptoGeneration(count);
             }
             

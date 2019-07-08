@@ -12,6 +12,7 @@ namespace SetReplace {
     private:
         // Function to call to check if Wolfram Language abort is in progress.
         const std::function<bool()> shouldAbort_;
+        const bool checkConfluence_;
         
         int nextAtom_ = 0;
         const std::vector<Rule> rules_;
@@ -27,8 +28,10 @@ namespace SetReplace {
     public:
         Implementation(const std::vector<Rule>& rules,
                        const std::vector<AtomsVector>& initialExpressions,
+                       const bool checkConfluence,
                        const std::function<bool()> shouldAbort) :
         rules_(rules),
+        checkConfluence_(checkConfluence),
         shouldAbort_(shouldAbort) {
             for (const auto& atoms : initialExpressions) {
                 for (const Atom atom : atoms) {
@@ -65,6 +68,22 @@ namespace SetReplace {
         
         bool isConfluent() const {
             return isConfluent_;
+        }
+        
+        std::vector<AtomsVector> atomVectors() {
+            std::vector<AtomsVector> result;
+            for (const auto& expr : expressions_) {
+                bool actualized = false;
+                for (const auto& eventAfterOther : expr.succedingEvents) {
+                    if (eventAfterOther->actualized()) { // expression could be deleted if single branch
+                        actualized = true;
+                    }
+                }
+                if (!actualized) {
+                    result.push_back(expr.atoms);
+                }
+            }
+            return result;
         }
         
     private:
@@ -277,7 +296,7 @@ namespace SetReplace {
             }
             
             if (nextInputID == -1 && anonymousAtomsPresent) {
-                throw std::string("Inputs of rule ") + std::to_string(ruleID) + std::string(" are not connected.");
+                throw Error::InputsDisconnected;
             } else if (nextInputID == -1) {
                 return;
             }
@@ -311,7 +330,12 @@ namespace SetReplace {
                     const auto expressionIterator = expressions_.begin() + expressionID;
                     expressionIterator->succedingEvents.insert(eventIterator);
                     if (expressionIterator->succedingEvents.size() > 1) {
-                        isConfluent_ = false;
+                        for (const auto& preexistingEvent : expressionIterator->succedingEvents) {
+                            if (preexistingEvent == eventIterator) continue;
+                            if (isConfluent_ && checkConfluence_ && !eventsEqual(*preexistingEvent, *eventIterator)) {
+                                isConfluent_ = false;
+                            }
+                        }
                     }
                 }
             } else {
@@ -382,12 +406,96 @@ namespace SetReplace {
             }
             return result;
         }
+        
+        bool eventsEqual(const Event& first, const Event& second) {
+            std::vector<AtomsVector> A = atomVectors(first.inputs);
+            std::vector<AtomsVector> B = atomVectors(second.inputs);
+            
+            Rule ruleA = deanonymize(*first.rule, A);
+            Rule ruleB = deanonymize(*second.rule, B);
+            
+            try {
+                Set BASet({ruleB}, A, false, shouldAbort_);
+                BASet.createEvents(1);
+                std::vector<AtomsVector> BA = BASet.atomVectors();
+                
+                Rule inverseA;
+                inverseA.id = 0;
+                inverseA.inputs = ruleA.outputs;
+                inverseA.outputs = {};
+                Set ABASet({inverseA}, BA, false, shouldAbort_);
+                if (!ABASet.createEvents(1)) {
+                    return false;
+                }
+                
+                Set ABSet({ruleA}, B, false, shouldAbort_);
+                ABSet.createEvents(1);
+                std::vector<AtomsVector> AB = ABSet.atomVectors();
+                
+                Rule inverseB;
+                inverseB.id = 0;
+                inverseB.inputs = ruleB.outputs;
+                inverseB.outputs = {};
+                Set BABSet({inverseB}, AB, false, shouldAbort_);
+                if (!BABSet.createEvents(1)) {
+                    return false;
+                }
+            } catch (Error e) {
+                if (e == Error::InputsDisconnected) {
+                    return true;
+                } else {
+                    throw e;
+                }
+            }
+            
+            return true;
+        }
+        
+        Rule deanonymize(const Rule& rule, std::vector<AtomsVector> globalInput) {
+            std::unordered_map<int, int> globalization;
+            for (int exprIdx = 0; exprIdx < rule.inputs.size(); ++exprIdx) {
+                for (int atomIdx = 0; atomIdx < rule.inputs[exprIdx].size(); ++atomIdx) {
+                    auto atom = rule.inputs[exprIdx][atomIdx];
+                    if (atom < 0) {
+                        globalization[atom] = globalInput[exprIdx][atomIdx];
+                    }
+                }
+            }
+            
+            std::vector<AtomsVector> globalOutput;
+            for (int exprIdx = 0; exprIdx < rule.outputs.size(); ++exprIdx) {
+                AtomsVector newAtoms;
+                for (int atomIdx = 0; atomIdx < rule.outputs[exprIdx].size(); ++atomIdx) {
+                    auto atom = rule.outputs[exprIdx][atomIdx];
+                    if (atom < 0 && globalization.count(atom)) {
+                        atom = globalization[atom];
+                    }
+                    newAtoms.push_back(atom);
+                }
+                globalOutput.push_back(newAtoms);
+            }
+            
+            Rule result;
+            result.id = rule.id;
+            result.inputs = globalInput;
+            result.outputs = globalOutput;
+            return result;
+        }
+        
+        std::vector<AtomsVector> atomVectors(const std::vector<ExpressionID>& ids) {
+            std::vector<AtomsVector> result;
+            for (const auto& expr : ids) {
+                result.push_back(expressions_[expr].atoms);
+            }
+            return result;
+        }
     };
     
     Set::Set(const std::vector<Rule>& rules,
              const std::vector<AtomsVector>& initialExpressions,
+             const bool checkConfluence,
              const std::function<bool()> shouldAbort) {
-        implementation_ = std::make_shared<Implementation>(rules, initialExpressions, shouldAbort);
+        implementation_ = std::make_shared<Implementation>(rules, initialExpressions, checkConfluence, shouldAbort);
     }
     
     int Set::createEvents(const int count) {
@@ -408,5 +516,9 @@ namespace SetReplace {
     
     bool Set::isConfluent() const {
         return implementation_->isConfluent();
+    }
+    
+    std::vector<AtomsVector> Set::atomVectors() {
+        return implementation_->atomVectors();
     }
 }

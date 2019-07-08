@@ -201,7 +201,8 @@ $ToNormalRules[rules_List] := Join @@ $ToNormalRules /@ rules
 (*Syntax*)
 
 
-SyntaxInformation[SetSubstitutionSystem] = {"ArgumentsPattern" -> {_, _, _}};
+SyntaxInformation[SetSubstitutionSystem] =
+	{"ArgumentsPattern" -> {_, _, _, OptionsPattern[]}};
 
 
 (* ::Subsubsection:: *)
@@ -212,7 +213,7 @@ SyntaxInformation[SetSubstitutionSystem] = {"ArgumentsPattern" -> {_, _, _}};
 (*Only implemented for C++ method.*)
 
 
-$decodeOutput[output : {__Integer}] := With[{
+$decodeOutput[detectConfluence_][output : {__Integer}] := With[{
 	atomsCount = output[[1]],
 	eventsCount = output[[2]],
 	confluentQ = output[[3]]},
@@ -229,14 +230,15 @@ $decodeOutput[output : {__Integer}] := With[{
 					"OutputExpressionIDs" -> output[[#[[4]] + 1 ;; #[[5]]]] + 1|> &
 				/@ Partition[output[[
 					4 + 6 atomsCount ;; 3 + 6 atomsCount + 5 eventsCount]], 5]),
-		"ConfluentQ" -> confluentQ|>
+		"ConfluentQ" -> If[detectConfluence, confluentQ, Missing["NotComputed"]]|>
 ]
 
 
 $SetSubstitutionSystem[
 			rules_ ? $SetReplaceRulesQ,
 			set : {{___ ? AtomQ}...},
-			{stepsReplaceAll_ ? BooleanQ, steps_Integer}] /;
+			{stepsReplaceAll_ ? BooleanQ, steps_Integer},
+			checkConfluence_] /;
 				$cpp$setReplace =!= $Failed &&
 				AllTrue[$ToCanonicalRules[rules], $SimpleRuleQ] := Module[{
 		canonicalRules, setAtoms, ruleAtoms, globalAtoms, globalIndex,
@@ -262,9 +264,9 @@ $SetSubstitutionSystem[
 		Flatten[List @@@ mappedRules],
 		Prepend[Accumulate[Length /@ mappedSet], 0],
 		Flatten[mappedSet],
-		{Boole[stepsReplaceAll], steps}];
+		{Boole[stepsReplaceAll], Boole[checkConfluence], steps}];
 	decodedOutput = Join[
-		$decodeOutput @ cppOutput,
+		$decodeOutput[checkConfluence] @ cppOutput,
 		<|"Rules" -> rules|>];
 	resultAtoms = Union[Flatten[decodedOutput[["Expressions", All, "Atoms"]]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
@@ -278,11 +280,15 @@ $SetSubstitutionSystem[
 ]
 
 
+Options[SetSubstitutionSystem] = {"CheckConfluence" -> False};
+
+
 SetSubstitutionSystem[
 		rules_ ? $SetReplaceRulesQ,
 		set : {{___ ? AtomQ}...},
-		steps_Integer ? (# >= 0 &)] :=
-	$SetSubstitutionSystem[rules, set, {True, steps}]
+		steps_Integer ? (# >= 0 &),
+		o : OptionsPattern[]] :=
+	$SetSubstitutionSystem[rules, set, {True, steps}, OptionValue["CheckConfluence"]]
 
 
 (* ::Subsection:: *)
@@ -306,7 +312,7 @@ SetSubstitutionEvolution /:
 	atomCount = Length @ Union @ Flatten @ data[["Expressions", All, "Atoms"]];
 	expressionCount = Length @ data["Expressions"];
 	eventCount = Length @ Select[#["Actualized"] &] @ data["Events"];
-	confluentQ = data["ConfluentQ"];
+	confluentQ = evo["ConfluentQ"];
 	stepCount = evo["StepCount"];
 	BoxForm`ArrangeSummaryBox[
 		SetSubstitutionEvolution,
@@ -379,7 +385,7 @@ SetSubstitutionEvolution[data_]["NestingQ"] := With[{
 
 
 SetSubstitutionEvolution[data_]["ConfluentQ"] :=
-	Replace[data[["ConfluentQ"]], {0 -> False, 1 -> True}]
+	Replace[data[["ConfluentQ"]], {0 -> False, 1 -> Missing["Unknown"]}]
 
 
 SetSubstitutionEvolution[data_]["StepCount"] :=

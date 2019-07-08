@@ -15,13 +15,14 @@ namespace SetReplace {
     public:
         /** @brief Specifies a runtime error that occured during evaluation.
          */
-        enum Error {Aborted};
+        enum Error {Aborted, InputsDisconnected};
         
         /** @brief Creates a new set with specified rules and initial condition.
          * @details Not instantaneous, because the rule matches index is created.
          */
         Set(const std::vector<Rule>& rules,
             const std::vector<AtomsVector>& initialExpressions,
+            const bool checkConfluence,
             const std::function<bool()> shouldAbort);
         
         /** @brief Applies a single substitution multiple times.
@@ -47,6 +48,8 @@ namespace SetReplace {
          * @details The system is defined as confluent if the causal network is unique, i.e., if every expression only has a single possible future event.
          */
         bool isConfluent() const;
+        
+        std::vector<AtomsVector> atomVectors();
         
     private:
         class Implementation;
