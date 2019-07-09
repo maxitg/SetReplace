@@ -630,7 +630,7 @@ $SetReplace$cpp[
 		set : {{___ ? AtomQ}...},
 		rules : {___ ? $SimpleRuleQ},
 		n_] /; $cpp$setReplace =!= $Failed :=
-	$SetSubstitutionSystem[rules, set, {False, n}][-1]
+	$SetSubstitutionSystem[rules, set, {False, n}, False][-1]
 
 
 (* ::Subsection:: *)
