@@ -15,7 +15,8 @@ CreateDirectory[buildDirectory];
 
 
 files = {"SetReplace.wl", "PacletInfo.m"};
-CopyFile[FileNameJoin[{".", #}], FileNameJoin[{buildDirectory, #}]] & /@ files;
+CopyFile[FileNameJoin[{".", "SetReplace", #}], FileNameJoin[{buildDirectory, #}]] & /@
+	files;
 
 
 (* ::Text:: *)
