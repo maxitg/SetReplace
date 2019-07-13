@@ -43,7 +43,7 @@
 		695F485A222440B90058E057 = {
 			isa = PBXGroup;
 			children = (
-				695F4865222440B90058E057 /* SetReplace */,
+				695F4865222440B90058E057 /* libSetReplace */,
 				695F4864222440B90058E057 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -56,7 +56,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		695F4865222440B90058E057 /* SetReplace */ = {
+		695F4865222440B90058E057 /* libSetReplace */ = {
 			isa = PBXGroup;
 			children = (
 				69B2D41122244AFC008778A3 /* Expression.hpp */,
@@ -68,7 +68,7 @@
 				69CAF8732257B23B006F9C60 /* SetReplace.cpp */,
 				69CAF8742257B23B006F9C60 /* SetReplace.hpp */,
 			);
-			path = SetReplace;
+			path = libSetReplace;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
