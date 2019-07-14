@@ -14,7 +14,11 @@ CreateDirectory[buildDirectory];
 (*Copy package files inside*)
 
 
-files = {"SetReplace.wl", "PacletInfo.m"};
+files = Select[StringMatchQ[#, __ ~~ (".wl" | ".m")] &] @ Import["SetReplace/"];
+CreateDirectory /@
+	Function[FileNameJoin[Join[{buildDirectory}, #]]] /@
+	Most /@
+	Select[Length[#] > 1 &][FileNameSplit /@ files];
 CopyFile[FileNameJoin[{".", "SetReplace", #}], FileNameJoin[{buildDirectory, #}]] & /@
 	files;
 
