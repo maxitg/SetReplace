@@ -44,6 +44,11 @@ SetReplace::usage = usageString[
 	"`n` times and returns the result."];
 
 
+$SetReplaceMethods::usage = usageString[
+	"$SetReplaceMethods gives the list of available values for Method option of ",
+	"SetReplace."];
+
+
 (* ::Section:: *)
 (*Syntax Information*)
 
