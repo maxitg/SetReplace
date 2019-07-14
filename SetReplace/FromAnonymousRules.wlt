@@ -1,20 +1,5 @@
 BeginTestSection["FromAnonymousRules"]
 
-(* Documentation *)
-
-VerificationTest[
-  StringQ[FromAnonymousRules::usage],
-  True
-]
-
-(* Syntax Information *)
-
-VerificationTest[
-  SyntaxInformation[FromAnonymousRules],
-  {},
-  SameTest -> Not @* SameQ
-]
-
 (* Argument Checks *)
 
 (** Argument count **)
