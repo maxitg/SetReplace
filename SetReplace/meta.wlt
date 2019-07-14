@@ -32,7 +32,7 @@ VerificationTest[
       ("PackageExports" /. Package`PackageInformation["SetReplace`"])}],
     StringContainsQ[StringJoin[Import[
       FileNameJoin[Append[Most @ FileNameSplit @ $TestFileName, "*.wlt"]],
-      "Text"]], #] &]
+      "Text"]], "BeginTestSection[\"" <> # <> "\"]"] &]
 ]
 
 EndTestSection[]

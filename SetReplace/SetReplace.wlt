@@ -1,6 +1,86 @@
 BeginTestSection["SetReplace"]
 
-(* SetReplace: Simple cases *)
+(* Argument checks *)
+
+(** Argument count **)
+
+VerificationTest[
+	SetReplace[],
+	SetReplace[],
+	{SetReplace::argt}
+]
+
+VerificationTest[
+	SetReplace[Method -> "C++"],
+	SetReplace[Method -> "C++"],
+	{SetReplace::argt}
+]
+
+(** Set is a list **)
+
+VerificationTest[
+	SetReplace[1, 1 -> 2],
+	SetReplace[1, 1 -> 2],
+	{SetReplace::setNotList}
+]
+
+VerificationTest[
+	SetReplace[1, 1 -> 2, Method -> "C++"],
+	SetReplace[1, 1 -> 2, Method -> "C++"],
+	{SetReplace::setNotList}
+]
+
+(** Rules are valid **)
+
+VerificationTest[
+	SetReplace[{1}, 1],
+	SetReplace[{1}, 1],
+	{SetReplace::invalidRules}
+]
+
+VerificationTest[
+	SetReplace[{1}, 1, Method -> "C++"],
+	SetReplace[{1}, 1, Method -> "C++"],
+	{SetReplace::invalidRules}
+]
+
+VerificationTest[
+	SetReplace[{1}, {1}],
+	SetReplace[{1}, {1}],
+	{SetReplace::invalidRules}
+]
+
+(** Step count is valid **)
+
+VerificationTest[
+	SetReplace[{1}, {1 -> 2}, -1],
+	SetReplace[{1}, {1 -> 2}, -1],
+	{SetReplace::nonIntegerIterations}
+]
+
+VerificationTest[
+	SetReplace[{1}, {1 -> 2}, -1, Method -> "C++"],
+	SetReplace[{1}, {1 -> 2}, -1, Method -> "C++"],
+	{SetReplace::nonIntegerIterations}
+]
+
+VerificationTest[
+	SetReplace[{1}, {1 -> 2}, 1.5],
+	SetReplace[{1}, {1 -> 2}, 1.5],
+	{SetReplace::nonIntegerIterations}
+]
+
+(** Method is valid **)
+
+VerificationTest[
+	SetReplace[{{0}}, {{0}} -> {{1}}, Method -> StringJoin[ToString /@ $SetReplaceMethods]],
+	SetReplace[{{0}}, {{0}} -> {{1}}, Method -> StringJoin[ToString /@ $SetReplaceMethods]],
+	{SetReplace::invalidMethod}
+]
+
+(* Implementation *)
+
+(** Simple examples **)
 
 VerificationTest[
 	SetReplace[{}, {} :> {}],
@@ -87,99 +167,38 @@ VerificationTest[
 	SameTest -> (Dimensions[#1] == Dimensions[#2] &)
 ]
 
-(* SetReplace: Argument checking *)
+(** Examples not supported by C++ implementation **)
 
-VerificationTest[
-	SetReplace[],
-	SetReplace[],
-	{SetReplace::argt}
-]
-
-VerificationTest[
-	SetReplace[Method -> "C++"],
-	SetReplace[Method -> "C++"],
-	{SetReplace::argt}
-]
-
-VerificationTest[
-	SetReplace[1, 1 -> 2],
-	SetReplace[1, 1 -> 2],
-	{SetReplace::setNotList}
-]
-
-VerificationTest[
-	SetReplace[1, 1 -> 2, Method -> "C++"],
-	SetReplace[1, 1 -> 2, Method -> "C++"],
-	{SetReplace::setNotList}
-]
-
-VerificationTest[
-	SetReplace[{1}, 1],
-	SetReplace[{1}, 1],
-	{SetReplace::invalidRules}
-]
-
-VerificationTest[
-	SetReplace[{1}, 1, Method -> "C++"],
-	SetReplace[{1}, 1, Method -> "C++"],
-	{SetReplace::invalidRules}
-]
-
-VerificationTest[
-	SetReplace[{1}, {1}],
-	SetReplace[{1}, {1}],
-	{SetReplace::invalidRules}
-]
-
-VerificationTest[
-	SetReplace[{1}, {1 -> 2}, -1],
-	SetReplace[{1}, {1 -> 2}, -1],
-	{SetReplace::nonIntegerIterations}
-]
-
-VerificationTest[
-	SetReplace[{1}, {1 -> 2}, -1, Method -> "C++"],
-	SetReplace[{1}, {1 -> 2}, -1, Method -> "C++"],
-	{SetReplace::nonIntegerIterations}
-]
-
-VerificationTest[
-	SetReplace[{1}, {1 -> 2}, 1.5],
-	SetReplace[{1}, {1 -> 2}, 1.5],
-	{SetReplace::nonIntegerIterations}
-]
-
-(* SetReplace: C++ implementation not supported cases *)
-
-(* not a hypergraph *)
+(*** not a hypergraph ***)
 VerificationTest[
 	SetReplace[{1}, {1 -> 2}, Method -> "C++"],
 	SetReplace[{1}, {1 -> 2}, Method -> "C++"],
 	{SetReplace::cppNotImplemented}
 ]
 
-(* rule is not local *)
+(*** rule is not local ***)
 VerificationTest[
 	SetReplace[{{1, 2}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}, {2, 4}}, Method -> "C++"],
 	SetReplace[{{1, 2}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}, {2, 4}}, Method -> "C++"],
 	{SetReplace::cppNotImplemented}
 ]
 
-(* nothing -> something not supported as well *)
+(*** nothing -> something ***)
 VerificationTest[
 	SetReplace[{{1, 2}, {3, 4}}, {} -> {{1, 3}, {2, 4}}, Method -> "C++"],
 	SetReplace[{{1, 2}, {3, 4}}, {} -> {{1, 3}, {2, 4}}, Method -> "C++"],
 	{SetReplace::cppNotImplemented}
 ]
 
-(* infinite number of steps not supported *)
+(*** infinite number of steps not supported ***)
 VerificationTest[
 	SetReplace[{{1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Infinity, Method -> "C++"],
 	SetReplace[{{1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Infinity, Method -> "C++"],
 	{SetReplace::cppInfinite}
 ]
 
-(* SetReplace: C++ / WL implementation consistancy *)
+(** C++ / WL implementation consistancy **)
+
 $sameSetQ[x_, y_] := Module[{xAtoms, yAtoms},
 	{xAtoms, yAtoms} = DeleteDuplicates[Flatten[#]] & /@ {x, y};
 	If[Length[xAtoms] != Length[yAtoms], Return[False]];
@@ -232,7 +251,8 @@ VerificationTest[
 	SameTest -> $sameSetQ
 ] & @@@ $systemsToTest
 
-(* SetReplace: C++ performance *)
+(** C++ performance **)
+
 VerificationTest[
 	SetReplace[
 		{{0, 0}, {0, 0}, {0, 0}},
@@ -247,7 +267,8 @@ VerificationTest[
 	MemoryConstraint -> 5*^6
 ]
 
-(* SetReplace: C++ aborting *)
+(** C++ aborting **)
+
 (* assumes example below runs slow, may need to be replaced in the future *)
 VerificationTest[
 	(* it is possible for evaluation to finish slightly earlier than the constraint, hence the min of 0.8;
@@ -258,7 +279,8 @@ VerificationTest[
   		30], 1]][[1]] < 1.2
 ]
 
-(* SetReplace: matching cases *)
+(** Complex matching **)
+
 graphsForMatching = {
 	{{1, 2}, {2, 3}, {3, 4}, {4, 5}},
 	{{1, 2}, {2, 3}, {3, 4}, {4, 1}},
@@ -322,7 +344,8 @@ VerificationTest[
 	{{1, 1}}
 ] & /@ methods
 
-(* SetReplace: random tests *)
+(** Random tests **)
+
 graphFromHyperedges[edges_] := Graph[
 	UndirectedEdge @@@ Flatten[Partition[#, 2, 1] & /@ edges, 1]];
 
@@ -469,203 +492,18 @@ VerificationTest[
 	True
 ]
 
-(* SetReplaceList *)
+EndTestSection[]
+
+BeginTestSection["$SetReplaceMethods"]
 
 VerificationTest[
-	SetReplaceList[{1, 2, 3}, {2 -> 5, 3 :> 6}, 10],
-	{{1, 2, 3}, {1, 3, 5}, {1, 5, 6}, {1, 5, 6}}
+	ListQ[$SetReplaceMethods]
 ]
 
 VerificationTest[
-	SetReplaceList[{1, 2, 3}, {2 -> 5, 3 :> 6}, 1],
-	{{1, 2, 3}, {1, 3, 5}}
-]
-
-VerificationTest[
-	SetReplaceList[{1}],
-	SetReplaceList[{1}],
-	{SetReplaceList::argr}
-]
-
-VerificationTest[
-	SetReplaceList[1, 1 -> 2, 2],
-	SetReplaceList[1, 1 -> 2, 2],
-	{SetReplace::setNotList}
-]
-
-VerificationTest[
-	SetReplaceList[{1}, {1}, 1],
-	SetReplaceList[{1}, {1}, 1],
-	{SetReplace::invalidRules}
-]
-
-VerificationTest[
-	SetReplaceList[{1}, {1 -> 2}, -1],
-	SetReplaceList[{1}, {1 -> 2}, -1],
-	{SetReplace::nonIntegerIterations}
-]
-
-(* SetReplaceFixedPoint *)
-
-VerificationTest[
-	SetReplaceFixedPoint[{1, 1, 1}, {1 -> 2}],
-	{2, 2, 2}
-]
-
-VerificationTest[
-	SetReplaceFixedPoint[{0.5}, {n_ :> 1 - n}],
-	{0.5}
-]
-
-VerificationTest[
-	SetReplaceFixedPoint[{1}],
-	SetReplaceFixedPoint[{1}],
-	{SetReplaceFixedPoint::argr}
-]
-
-VerificationTest[
-	SetReplaceFixedPoint[1, 1 -> 2],
-	SetReplaceFixedPoint[1, 1 -> 2],
-	{SetReplace::setNotList}
-]
-
-VerificationTest[
-	SetReplaceFixedPoint[{1}, {1}],
-	SetReplaceFixedPoint[{1}, {1}],
-	{SetReplace::invalidRules}
-]
-
-(* SetReplaceFixedPointList *)
-
-VerificationTest[
-	SetReplaceFixedPointList[{1, 1, 1}, {1 -> 2}],
-	{{1, 1, 1}, {1, 1, 2}, {1, 2, 2}, {2, 2, 2}, {2, 2, 2}}
-]
-
-VerificationTest[
-	SetReplaceFixedPointList[{0.5}, {n_ :> 1 - n}],
-	{{0.5}, {0.5}}
-]
-
-VerificationTest[
-	SetReplaceFixedPointList[{1}],
-	SetReplaceFixedPointList[{1}],
-	{SetReplaceFixedPointList::argr}
-]
-
-VerificationTest[
-	SetReplaceFixedPointList[1, 1 -> 2],
-	SetReplaceFixedPointList[1, 1 -> 2],
-	{SetReplace::setNotList}
-]
-
-VerificationTest[
-	SetReplaceFixedPointList[{1}, {1}],
-	SetReplaceFixedPointList[{1}, {1}],
-	{SetReplace::invalidRules}
-]
-
-(* SetReplaceAll *)
-
-VerificationTest[
-	SetReplaceAll[],
-	SetReplaceAll[],
-	{SetReplaceAll::argt}
-]
-
-VerificationTest[
-	SetReplaceAll[1, 1 -> 2],
-	SetReplaceAll[1, 1 -> 2],
-	{SetReplace::setNotList}
-]
-
-VerificationTest[
-	SetReplaceAll[{1}, 1],
-	SetReplaceAll[{1}, 1],
-	{SetReplace::invalidRules}
-]
-
-VerificationTest[
-	SetReplaceAll[{1}, {1}],
-	SetReplaceAll[{1}, {1}],
-	{SetReplace::invalidRules}
-]
-
-VerificationTest[
-	SetReplaceAll[{1}, {1 -> 2}, -1],
-	SetReplaceAll[{1}, {1 -> 2}, -1],
-	{SetReplace::nonIntegerIterations}
-]
-
-VerificationTest[
-	SetReplaceAll[{1}, {1 -> 2}, 1.5],
-	SetReplaceAll[{1}, {1 -> 2}, 1.5],
-	{SetReplace::nonIntegerIterations}
-]
-
-VerificationTest[	
-	SetReplaceAll[{1, 2, 3}, n_ :> -n],
-	{-1, -2, -3}
-]
-
-VerificationTest[
-	SetReplaceAll[{1, 2, 3}, n_ :> -n, 2],
-	{1, 2, 3}
-]
-
-VerificationTest[
-	SetReplaceAll[{1, 2, 3}, {n_, m_} :> {-m, -n}],
-	{3, -2, -1}
-]
-
-VerificationTest[
-	SetReplaceAll[{1, 2, 3}, {n_, m_} :> {-m, -n}, 2],
-	{-1, 2, -3}
-]
-
-VerificationTest[
-	Most @ SetReplaceAll[
-			{1, 2, 3, 4}, {2 -> {3, 4}, {v1_, v2_} :> Module[{x}, {v1, v2, x}]}],
-	{4, 3, 4, 1, 3}
-]
-
-VerificationTest[
-	MatchQ[SetReplaceAll[
-			{1, 2, 3, 4},
-			{2 -> {3, 4}, {v1_, v2_} :> Module[{x}, {v1, v2, x}]},
-			2], {4, 3, _, 4, 1, _, 3, _, _}],
-	True
-]
-
-VerificationTest[
-	Length @ SetReplaceAll[
-		{{0, 1}, {0, 2}, {0, 3}}, 
-		FromAnonymousRules[
-			{{0, 1}, {0, 2}, {0, 3}} ->
-			{{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}],
-		4],
-	3^5
-]
-
-VerificationTest[
-	Length @ SetReplaceAll[
-		{{0, 0}, {0, 0}, {0, 0}}, 
-		FromAnonymousRules[
-			{{0, 1}, {0, 2}, {0, 3}} ->
-			{{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}],
-		4],
-	3^5
-]
-
-VerificationTest[
-	Length @ SetReplaceAll[
-		{{0, 1}, {0, 2}, {0, 3}}, 
-		FromAnonymousRules[
-			{{0, 1}, {0, 2}, {0, 3}} ->
-			{{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5},
-			 {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}}],
-		3],
-	107
+	AllTrue[
+		$SetReplaceMethods,
+		SetReplace[{{0}}, {{0}} -> {{1}}, Method -> #] === {{1}} &]
 ]
 
 EndTestSection[]
