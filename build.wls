@@ -14,8 +14,13 @@ CreateDirectory[buildDirectory];
 (*Copy package files inside*)
 
 
-files = {"SetReplace.wl", "PacletInfo.m"};
-CopyFile[FileNameJoin[{".", #}], FileNameJoin[{buildDirectory, #}]] & /@ files;
+files = Select[StringMatchQ[#, __ ~~ (".wl" | ".m")] &] @ Import["SetReplace/"];
+CreateDirectory /@
+	Function[FileNameJoin[Join[{buildDirectory}, #]]] /@
+	Most /@
+	Select[Length[#] > 1 &][FileNameSplit /@ files];
+CopyFile[FileNameJoin[{".", "SetReplace", #}], FileNameJoin[{buildDirectory, #}]] & /@
+	files;
 
 
 (* ::Text:: *)
@@ -26,7 +31,7 @@ $TryEnvironment[var_, default_] := If[# === $Failed, default, #] & @ Environment
 
 
 << CCompilerDriver`
-SetDirectory["SetReplace/SetReplace"];
+SetDirectory["SetReplace/libSetReplace"];
 If[CreateLibrary[
 		{"Match.cpp", "Set.cpp", "SetReplace.cpp"},
 		"libSetReplace",

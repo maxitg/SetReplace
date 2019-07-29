@@ -1,7 +1,7 @@
 #!/usr/bin/env wolframscript
 (* ::Package:: *)
 
-pacletInfo = Association @@ Import["PacletInfo.m"];
+pacletInfo = Association @@ Import[FileNameJoin[{".", "SetReplace", "PacletInfo.m"}]];
 
 
 filename = pacletInfo[Name] <> "-" <> pacletInfo[Version] <> ".paclet";
