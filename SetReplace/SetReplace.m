@@ -28,7 +28,7 @@ SetReplace::usage = usageString[
 	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
 	"\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
 	"\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), `\[Ellipsis]`}] attempts to replace a subset ",
-	"\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) of list s with ",
+	"\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) of list `s` with ",
 	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\). ",
 	"If not found, replaces \!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) with ",
 	"\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), etc. ",
