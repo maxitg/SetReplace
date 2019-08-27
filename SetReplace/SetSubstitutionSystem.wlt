@@ -55,19 +55,19 @@ VerificationTest[
 VerificationTest[
   SetSubstitutionSystem[{1 -> 2}, {1}, -1],
   SetSubstitutionSystem[{1 -> 2}, {1}, -1],
-  {SetSubstitutionSystem::nonIntegerIterations}
+  {SetReplace::nonIntegerIterations}
 ]
 
 VerificationTest[
   SetSubstitutionSystem[{1 -> 2}, {1}, -1, Method -> "C++"],
   SetSubstitutionSystem[{1 -> 2}, {1}, -1, Method -> "C++"],
-  {SetSubstitutionSystem::nonIntegerIterations}
+  {SetReplace::nonIntegerIterations}
 ]
 
 VerificationTest[
   SetSubstitutionSystem[{1 -> 2}, {1}, 1.5],
   SetSubstitutionSystem[{1 -> 2}, {1}, 1.5],
-  {SetSubstitutionSystem::nonIntegerIterations}
+  {SetReplace::nonIntegerIterations}
 ]
 
 (** Method is valid **)
@@ -75,7 +75,7 @@ VerificationTest[
 VerificationTest[
   SetSubstitutionSystem[{{0}} -> {{1}}, {{0}}, Method -> StringJoin[ToString /@ $SetReplaceMethods]],
   SetSubstitutionSystem[{{0}} -> {{1}}, {{0}}, Method -> StringJoin[ToString /@ $SetReplaceMethods]],
-  {SetSubstitutionSystem::invalidMethod}
+  {SetReplace::invalidMethod}
 ]
 
 (* Implementation *)
