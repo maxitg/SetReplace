@@ -22,29 +22,30 @@ namespace SetReplace {
             return getData(tensorData, tensorLength, readIndex++);
         };
         
-        std::vector<Rule> rules(getRulesData());
-        for (int ruleIndex = 0; ruleIndex < rules.size(); ++ruleIndex) {
+        const int rulesCount = static_cast<int>(getRulesData());
+        std::vector<Rule> rules;
+        for (int ruleIndex = 0; ruleIndex < rulesCount; ++ruleIndex) {
             if (getRulesData() != 2) {
                 throw LIBRARY_FUNCTION_ERROR;
             } else {
-                const std::vector<std::vector<Expression>*> setsToRead =
-                {&rules[ruleIndex].inputs, &rules[ruleIndex].outputs};
+                std::vector<std::vector<AtomsVector>> ruleInputsAndOutputs(2);
                 
-                for (auto& set : setsToRead) {
-                    set->resize(getRulesData());
-                    for (int expressionIndex = 0; expressionIndex < set->size(); ++expressionIndex) {
-                        (*set)[expressionIndex].resize(getRulesData());
-                        for (int atomIndex = 0; atomIndex < (*set)[expressionIndex].size(); ++atomIndex) {
-                            (*set)[expressionIndex][atomIndex] = (int)getRulesData();
+                for (auto& set : ruleInputsAndOutputs) {
+                    set.resize(getRulesData());
+                    for (int expressionIndex = 0; expressionIndex < set.size(); ++expressionIndex) {
+                        set[expressionIndex].resize(getRulesData());
+                        for (int atomIndex = 0; atomIndex < set[expressionIndex].size(); ++atomIndex) {
+                            set[expressionIndex][atomIndex] = (int)getRulesData();
                         }
                     }
                 }
+                rules.push_back(Rule{ruleInputsAndOutputs[0], ruleInputsAndOutputs[1]});
             }
         }
         return rules;
     }
     
-    std::vector<Expression> getSet(WolframLibraryData libData, MTensor& setTensor) {
+    std::vector<AtomsVector> getSet(WolframLibraryData libData, MTensor& setTensor) {
         mint tensorLength = libData->MTensor_getFlattenedLength(setTensor);
         mint* tensorData = libData->MTensor_getIntegerData(setTensor);
         int readIndex = 0;
@@ -52,7 +53,7 @@ namespace SetReplace {
             return getData(tensorData, tensorLength, readIndex++);
         };
         
-        std::vector<Expression> set(getSetData());
+        std::vector<AtomsVector> set(getSetData());
         for (int expressionIndex = 0; expressionIndex < set.size(); ++expressionIndex) {
             set[expressionIndex].resize(getSetData());
             for (int atomIndex = 0; atomIndex < set[expressionIndex].size(); ++atomIndex) {
@@ -62,11 +63,16 @@ namespace SetReplace {
         return set;
     }
     
-    MTensor putSet(const std::vector<Expression>& expressions, WolframLibraryData libData) {
-        int tensorLength = 1 + (int)expressions.size();
+    MTensor putSet(const std::vector<SetExpression>& expressions, WolframLibraryData libData) {
+        int presentExpressionCount = 0;
+        int tensorLength = 1;
         for (int i = 0; i < expressions.size(); ++i) {
-            tensorLength += expressions[i].size();
+            if (expressions[i].destroyerEvent == finalStateEvent) {
+                tensorLength += expressions[i].atoms.size();
+                ++presentExpressionCount;
+            }
         }
+        tensorLength += presentExpressionCount;
         
         mint dimensions[1] = {tensorLength};
         MTensor output;
@@ -75,13 +81,17 @@ namespace SetReplace {
         int writeIndex = 0;
         mint position[1];
         position[0] = ++writeIndex;
-        libData->MTensor_setInteger(output, position, expressions.size());
+        libData->MTensor_setInteger(output, position, presentExpressionCount);
         for (int expressionIndex = 0; expressionIndex < expressions.size(); ++expressionIndex) {
+            if (expressions[expressionIndex].destroyerEvent != finalStateEvent) {
+                continue;
+            }
+            
             position[0] = ++writeIndex;
-            libData->MTensor_setInteger(output, position, expressions[expressionIndex].size());
-            for (int atomIndex = 0; atomIndex < expressions[expressionIndex].size(); ++atomIndex) {
+            libData->MTensor_setInteger(output, position, expressions[expressionIndex].atoms.size());
+            for (int atomIndex = 0; atomIndex < expressions[expressionIndex].atoms.size(); ++atomIndex) {
                 position[0] = ++writeIndex;
-                libData->MTensor_setInteger(output, position, expressions[expressionIndex][atomIndex]);
+                libData->MTensor_setInteger(output, position, expressions[expressionIndex].atoms[atomIndex]);
             }
         }
         
@@ -94,7 +104,7 @@ namespace SetReplace {
         }
         
         std::vector<Rule> rules;
-        std::vector<Expression> initialExpressions;
+        std::vector<AtomsVector> initialExpressions;
         int steps;
         try {
             rules = getRules(libData, MArgument_getMTensor(argv[0]));
