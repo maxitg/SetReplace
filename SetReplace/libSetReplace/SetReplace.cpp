@@ -64,15 +64,17 @@ namespace SetReplace {
     }
     
     MTensor putSet(const std::vector<SetExpression>& expressions, WolframLibraryData libData) {
-        int presentExpressionCount = 0;
-        int tensorLength = 1;
+        // atoms count + creator + destroyer events
+        // add fake event at the end to specify the length of the last expression
+        int tensorLength = 1 + 3 * (static_cast<int>(expressions.size()) + 1);
+        
+        // The rest of the result are the atoms, positions to which are referenced in each expression spec.
+        // This is where the first atom will be located.
+        int atomsPointer = tensorLength + 1;
+        
         for (int i = 0; i < expressions.size(); ++i) {
-            if (expressions[i].destroyerEvent == finalStateEvent) {
-                tensorLength += expressions[i].atoms.size();
-                ++presentExpressionCount;
-            }
+            tensorLength += expressions[i].atoms.size();
         }
-        tensorLength += presentExpressionCount;
         
         mint dimensions[1] = {tensorLength};
         MTensor output;
@@ -81,14 +83,25 @@ namespace SetReplace {
         int writeIndex = 0;
         mint position[1];
         position[0] = ++writeIndex;
-        libData->MTensor_setInteger(output, position, presentExpressionCount);
+        libData->MTensor_setInteger(output, position, expressions.size());
         for (int expressionIndex = 0; expressionIndex < expressions.size(); ++expressionIndex) {
-            if (expressions[expressionIndex].destroyerEvent != finalStateEvent) {
-                continue;
-            }
-            
             position[0] = ++writeIndex;
-            libData->MTensor_setInteger(output, position, expressions[expressionIndex].atoms.size());
+            libData->MTensor_setInteger(output, position, expressions[expressionIndex].creatorEvent);
+            position[0] = ++writeIndex;
+            libData->MTensor_setInteger(output, position, expressions[expressionIndex].destroyerEvent);
+            position[0] = ++writeIndex;
+            libData->MTensor_setInteger(output, position, atomsPointer);
+            atomsPointer += expressions[expressionIndex].atoms.size();
+        }
+        constexpr EventID fakeEvent = -3;
+        position[0] = ++writeIndex;
+        libData->MTensor_setInteger(output, position, fakeEvent);
+        position[0] = ++writeIndex;
+        libData->MTensor_setInteger(output, position, fakeEvent);
+        position[0] = ++writeIndex;
+        libData->MTensor_setInteger(output, position, atomsPointer);
+        
+        for (int expressionIndex = 0; expressionIndex < expressions.size(); ++expressionIndex) {
             for (int atomIndex = 0; atomIndex < expressions[expressionIndex].atoms.size(); ++atomIndex) {
                 position[0] = ++writeIndex;
                 libData->MTensor_setInteger(output, position, expressions[expressionIndex].atoms[atomIndex]);
