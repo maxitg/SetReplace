@@ -12,11 +12,6 @@ Package["SetReplace`"]
 
 
 PackageExport["SetReplace"]
-PackageExport["$SetReplaceMethods"]
-
-
-PackageScope["setReplaceRulesQ"]
-PackageScope["stepCountQ"]
 
 
 (* ::Section:: *)
@@ -44,11 +39,6 @@ SetReplace::usage = usageString[
 	"`n` times and returns the result."];
 
 
-$SetReplaceMethods::usage = usageString[
-	"$SetReplaceMethods gives the list of available values for Method option of ",
-	"SetReplace."];
-
-
 (* ::Section:: *)
 (*Syntax Information*)
 
@@ -72,40 +62,21 @@ SetReplace[args___] := 0 /;
 (*Set is a list*)
 
 
-SetReplace::setNotList = "The first argument of `` must be a List.";
-
-
 SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
 	!ListQ[set] &&
-	Message[SetReplace::setNotList, SetReplace]
+	Message[SetReplace::setNotList, "first", SetReplace]
 
 
 (* ::Subsection:: *)
 (*Rules are valid*)
 
 
-SetReplace::invalidRules =
-	"The second argument of `` must be either a Rule, RuleDelayed, or " ~~
-	"a List of them.";
-
-
-setReplaceRulesQ[rules_] :=
-	MatchQ[rules, {(_Rule | _RuleDelayed)..} | _Rule | _RuleDelayed]
-
-
 SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
-	!setReplaceRulesQ[rules] && Message[SetReplace::invalidRules, SetReplace]
+	!setReplaceRulesQ[rules] && Message[SetReplace::invalidRules, "second", SetReplace]
 
 
 (* ::Subsection:: *)
 (*Step count is valid*)
-
-
-SetReplace::nonIntegerIterations =
-	"The third argument `2` of `1` must be an integer or infinity.";
-
-
-stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
 
 
 SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
@@ -115,17 +86,6 @@ SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0
 
 (* ::Subsection:: *)
 (*Method is valid*)
-
-
-SetReplace::invalidMethod =
-	"Method should be one of " <> ToString[$SetReplaceMethods, InputForm] <> ".";
-
-
-$cppMethod = "C++";
-$wlMethod = "WolframLanguage";
-
-
-$SetReplaceMethods = {Automatic, $cppMethod, $wlMethod};
 
 
 SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
@@ -145,51 +105,7 @@ Options[SetReplace] = {Method -> Automatic};
 
 
 (* ::Subsection:: *)
-(*simpleRuleQ*)
-
-
-(* ::Text:: *)
-(*This is the rule that can be understood by C++ code*)
-
-
-simpleRuleQ[
-		left : {{__ ? (AtomQ[#]
-			|| MatchQ[#, _Pattern?(AtomQ[#[[1]]] && #[[2]] === Blank[] &)] &)}..}
-		:> right : Module[{___ ? AtomQ}, {{___ ? AtomQ}...}]] := Module[{p},
-	ConnectedGraphQ @ Graph[
-		Flatten[Apply[
-				UndirectedEdge,
-				(Partition[#, 2, 1] & /@ (Append[#, #[[1]]] &) /@ left),
-				{2}]]
-			/. x_Pattern :> p[x[[1]]]]
-]
-
-
-simpleRuleQ[left_ :> right : Except[_Module]] :=
-	simpleRuleQ[left :> Module[{}, right]]
-
-
-simpleRuleQ[___] := False
-
-
-(* ::Subsection:: *)
 (*SetReplace*)
-
-
-(* ::Text:: *)
-(*Switching code between WL and C++ implementations*)
-
-
-SetReplace::cppNotImplemented =
-	"C++ implementation is only available for local rules, " <>
-	"and only for sets of lists (hypergraphs).";
-
-
-SetReplace::cppInfinite =
-	"C++ implementation is only available for finite step count.";
-
-
-SetReplace::noCpp = "C++ implementation was not compiled for your system type.";
 
 
 SetReplace[

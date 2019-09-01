@@ -26,7 +26,9 @@ With[{libraryFile = FindLibrary["libSetReplace"]},
 		LibraryFunctionLoad[
 			libraryFile,
 			"setReplace",
-			{{Integer, 1}, {Integer, 1}, Integer},
+			{{Integer, 1}, (* rules *)
+				{Integer, 1}, (* initial set *)
+				{Integer, 1}}, (* {generations, steps} *)
 			{Integer, 1}],
 		$Failed]]
 
@@ -36,7 +38,7 @@ With[{libraryFile = FindLibrary["libSetReplace"]},
 
 
 (* ::Subsection:: *)
-(*Encoding / Decoding*)
+(*Encoding*)
 
 
 (* ::Text:: *)
@@ -51,18 +53,27 @@ encodeNestedLists[list_List] :=
 		{list} //. {{l___, List[args___], r___} :> {l, Length[{args}], args, r}}
 
 
+(* ::Subsection:: *)
+(*Decoding*)
+
+
 (* ::Text:: *)
-(*This is the reverse, used to decode set data (a list of hyperedges) from libSetReplace*)
+(*This is the reverse, used to decode set data (a list of expressions) from libSetReplace*)
 
 
-readList[list_, index_] := Module[{count = list[[index]]},
-	Sow[list[[index + 1 ;; index + count]]];
-	index + count + 1
+decodeExpressions[list_List] := Module[{
+		count = list[[1]],
+		creatorEvents, destroyerEvents, generations, atomPointers,
+		atomRanges, atomLists},
+	{creatorEvents, destroyerEvents, generations, atomPointers} =
+		Transpose[Partition[list[[2 ;; 4 (count + 1) + 1]], 4]];
+	atomRanges = Partition[atomPointers, 2, 1];
+	atomLists = list[[#[[1]] ;; #[[2]] - 1]] & /@ atomRanges;
+	<|$creatorEvents -> Most[creatorEvents],
+		$destroyerEvents -> Most[destroyerEvents],
+		$generations -> Most[generations],
+		$atomLists -> atomLists|>
 ]
-
-
-decodeListOfLists[{0}] := {}
-decodeListOfLists[list_List] := Reap[Nest[readList[list, #] &, 2, list[[1]]]][[2, 1]]
 
 
 (* ::Subsection:: *)
@@ -127,7 +138,11 @@ $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
 (*setReplace$cpp*)
 
 
-setReplace$cpp[set_, rules_, n_] /; $cppSetReplaceAvailable := Module[{
+$maxInt = 2^31 - 1;
+
+
+setReplace$cpp[set_, rules_, generations_, steps_] /;
+			$cppSetReplaceAvailable := Module[{
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
 		mappedSet, localIndices, mappedRules, cppOutput, resultAtoms,
 		inversePartialGlobalMap, inverseGlobalMap},
@@ -144,13 +159,15 @@ setReplace$cpp[set_, rules_, n_] /; $cppSetReplaceAvailable := Module[{
 			globalIndex,
 			localIndices[[K]]],
 		{K, Length[rules]}];
-	cppOutput = decodeListOfLists @ $cpp$setReplace[
+	cppOutput = decodeExpressions @ $cpp$setReplace[
 		encodeNestedLists[List @@@ mappedRules],
 		encodeNestedLists[mappedSet],
-		n];
-	resultAtoms = Union[Flatten[cppOutput]];
+		{generations, steps} /. {\[Infinity] -> $maxInt}];
+	resultAtoms = Union[Flatten[cppOutput[$atomLists]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
 	inverseGlobalMap = Association @ Thread[resultAtoms
 		-> (Lookup[inversePartialGlobalMap, #, Unique["v"]] & /@ resultAtoms)];
-	ReleaseHold @ Map[inverseGlobalMap, cppOutput, {2}]
+	SubSubstitutionEvolution[AppendTo[
+		cppOutput,
+		$atomLists -> ReleaseHold @ Map[inverseGlobalMap, cppOutput[$atomLists], {2}]]]
 ]
