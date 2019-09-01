@@ -63,10 +63,20 @@ namespace SetReplace {
         return set;
     }
     
+    std::pair<int, Generation> getGenerationsAndSteps(WolframLibraryData libData, MTensor& stepsTensor) {
+        mint tensorLength = libData->MTensor_getFlattenedLength(stepsTensor);
+        if (tensorLength != 2) {
+            throw LIBRARY_DIMENSION_ERROR;
+        } else {
+            mint* tensorData = libData->MTensor_getIntegerData(stepsTensor);
+            return {getData(tensorData, 2, 0), getData(tensorData, 2, 1)};
+        }
+    }
+    
     MTensor putSet(const std::vector<SetExpression>& expressions, WolframLibraryData libData) {
-        // atoms count + creator + destroyer events
+        // creator + destroyer events + generation + atoms count
         // add fake event at the end to specify the length of the last expression
-        int tensorLength = 1 + 3 * (static_cast<int>(expressions.size()) + 1);
+        int tensorLength = 1 + 4 * (static_cast<int>(expressions.size()) + 1);
         
         // The rest of the result are the atoms, positions to which are referenced in each expression spec.
         // This is where the first atom will be located.
@@ -90,14 +100,21 @@ namespace SetReplace {
             position[0] = ++writeIndex;
             libData->MTensor_setInteger(output, position, expressions[expressionIndex].destroyerEvent);
             position[0] = ++writeIndex;
+            libData->MTensor_setInteger(output, position, expressions[expressionIndex].generation);
+            position[0] = ++writeIndex;
             libData->MTensor_setInteger(output, position, atomsPointer);
             atomsPointer += expressions[expressionIndex].atoms.size();
         }
+        
+        // Put fake event at the end so that the length of final expression can be determined on WL side.
         constexpr EventID fakeEvent = -3;
+        constexpr Generation fakeGeneration = -1;
         position[0] = ++writeIndex;
         libData->MTensor_setInteger(output, position, fakeEvent);
         position[0] = ++writeIndex;
         libData->MTensor_setInteger(output, position, fakeEvent);
+        position[0] = ++writeIndex;
+        libData->MTensor_setInteger(output, position, fakeGeneration);
         position[0] = ++writeIndex;
         libData->MTensor_setInteger(output, position, atomsPointer);
         
@@ -118,11 +135,11 @@ namespace SetReplace {
         
         std::vector<Rule> rules;
         std::vector<AtomsVector> initialExpressions;
-        int steps;
+        std::pair<Generation, int> generationsAndSteps;
         try {
             rules = getRules(libData, MArgument_getMTensor(argv[0]));
             initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
-            steps = (int)MArgument_getInteger(argv[2]);
+            generationsAndSteps = getGenerationsAndSteps(libData, MArgument_getMTensor(argv[2]));
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -131,8 +148,8 @@ namespace SetReplace {
             return static_cast<bool>(libData->AbortQ());
         };
         try {
-            Set set(rules, initialExpressions, shouldAbort);
-            set.replace(steps);
+            Set set(rules, initialExpressions, shouldAbort, generationsAndSteps.first);
+            set.replace(generationsAndSteps.second);
             const auto expressions = set.expressions();
             MArgument_setMTensor(result, putSet(expressions, libData));
         } catch (...) {

@@ -20,6 +20,12 @@ namespace SetReplace {
     using EventID = int;
     constexpr EventID initialConditionEvent = -1;
     constexpr EventID finalStateEvent = -2;
+    
+    /** @brief Layer this expression belongs to in the causal network.
+     * @details Specifically, if the largest generation of expressions in the event inputs is n, the generation of its outputs will be n + 1.
+     */
+    using Generation = int;
+    constexpr Generation initialGeneration = 0;
 }
 
 #endif /* IDTypes_h */
