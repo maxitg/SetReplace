@@ -89,11 +89,11 @@ VerificationTest[
 ]
 
 VerificationTest[
-  SetReplace[{{{2, 2}, 1}},
+  SetReplace[{{2, 2}, 1},
     FromAnonymousRules[{
       {{Graph[{3 -> 4}], Graph[{3 -> 4}]}, Graph[{1 -> 2}]} ->
       {Graph[{3 -> 4}], Graph[{1 -> 2}], Graph[{3 -> 4}]}}]],
-  {{2, 1, 2}}
+  {2, 1, 2}
 ]
 
 EndTestSection[]

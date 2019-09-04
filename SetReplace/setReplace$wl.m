@@ -100,7 +100,7 @@ addMetadataManagement[
 		inputCreators = Table[Unique["creator"], Length[input]],
 		inputGenerations = Table[Unique["generation"], Length[input]],
 		nextEvent},
-	Echo @ With[{
+	With[{
 			heldModule = Map[Hold, Hold[output], {2}]},
 		With[{
 				moduleArguments = Append[

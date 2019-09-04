@@ -167,6 +167,16 @@ VerificationTest[
 	SameTest -> (Dimensions[#1] == Dimensions[#2] &)
 ]
 
+VerificationTest[
+	SetReplace[{{2, 2}, 1}, FromAnonymousRules[{{{3, 3}, 1} -> {3, 1, 3}}]],
+	{2, 1, 2}
+]
+
+VerificationTest[
+	SetReplace[{{{2, 2}, 1}}, FromAnonymousRules[{{{3, 3}, 1} -> {3, 1, 3}}]],
+	{{{2, 2}, 1}}
+]
+
 (** Examples not supported by C++ implementation **)
 
 (*** not a hypergraph ***)
