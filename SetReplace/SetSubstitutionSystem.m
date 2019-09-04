@@ -214,11 +214,11 @@ setSubstitutionSystem[
 		failedQ = True;
 		If[!$cppSetReplaceAvailable,
 			Message[SetReplace::noCpp],
-			Message[SetReplace::cppNotImplemented]];
+			Message[SetReplace::cppNotImplemented]]];
 	If[failedQ,
 		$Failed,
-		setReplace$wl[set, canonicalRules, generations, steps]]
-]]
+		setReplace$wl[canonicalRules, set, generations, steps]]
+]
 
 
 (* ::Subsection:: *)

@@ -75,9 +75,82 @@ toNormalRules[rules_List] := Join @@ toNormalRules /@ rules
 
 
 (* ::Subsection:: *)
+(*setReplace$wlRaw*)
+
+
+(* ::Text:: *)
+(*This function just does the replacements, but it does not keep track of any metadata (generations and events).*)
+
+
+setReplace$wlRaw[set_, rules_, n_] := Quiet[
+	ReplaceRepeated[List @@ set, toNormalRules @ rules, MaxIterations -> n],
+	ReplaceRepeated::rrlim]
+
+
+(* ::Subsection:: *)
+(*addMetadataManagement*)
+
+
+(* ::Text:: *)
+(*This function adds metadata management to the rules. I.e., the rules will not only perform the replacements, but will also keep track of generations, events, etc.*)
+
+
+addMetadataManagement[
+			input_List :> output_Module, getNextEvent_, maxGeneration_] := Module[{
+		inputCreators = Table[Unique["creator"], Length[input]],
+		inputGenerations = Table[Unique["generation"], Length[input]],
+		nextEvent},
+	Echo @ With[{
+			heldModule = Map[Hold, Hold[output], {2}]},
+		With[{
+				moduleArguments = Append[
+					ReleaseHold @ Map[Hold, heldModule[[1, 1]], {2}],
+					Hold[nextEvent = getNextEvent[]]],
+				moduleOutput = heldModule[[1, 2]]},
+			With[{
+					newModuleContents = Join[
+						ReleaseHold @ Map[
+							Function[
+								o,
+								{nextEvent, \[Infinity], Max @@ inputGenerations + 1, Hold[o]},
+								HoldAll],
+							moduleOutput,
+							{2}],
+						{#[[1]],
+						 nextEvent,
+						 #[[2]],
+						 #[[3]] /. x_Pattern :> x[[1]]} & /@
+							Transpose[{inputCreators, inputGenerations, input}]],
+					originalInput = input},
+				{Pattern[Evaluate[#[[1]]], Blank[]],
+				 Infinity,
+				 Pattern[Evaluate[#[[2]]], Blank[]] ? (# < maxGeneration &),
+				 #[[3]]} & /@
+						Transpose[{inputCreators, inputGenerations, originalInput}] :>
+					Module[moduleArguments, newModuleContents]]] //.
+						Hold[expr_] :> expr]
+]
+
+
+(* ::Subsection:: *)
 (*setReplace$wl*)
 
 
-setReplace$wl[set_, rules_, n_] := Quiet[
-	ReplaceRepeated[List @@ set, toNormalRules @ rules, MaxIterations -> n],
-	ReplaceRepeated::rrlim]
+(* ::Text:: *)
+(*This function runs a modified version of the set replace system that also keeps track of metadata such as generations and events. It uses setReplace$wlRaw to evaluate that modified system.*)
+
+
+setReplace$wl[rules_, set_, generations_, steps_] := Module[{
+		setWithMetadata, rulesWithMetadata, result, nextEventID = 1},
+	(* {creator, destroyer, generation, atoms} *)
+	setWithMetadata = {0, \[Infinity], 0, #} & /@ set;
+	rulesWithMetadata =
+		addMetadataManagement[#, nextEventID++ &, generations] & /@ rules;
+	result = setReplace$wlRaw[setWithMetadata, rulesWithMetadata, steps];
+	SetSubstitutionEvolution[<|
+		$creatorEvents -> result[[All, 1]],
+		$destroyerEvents -> result[[All, 2]],
+		$generations -> result[[All, 3]],
+		$atomLists -> result[[All, 4]],
+		$rules -> rules|>]
+]
