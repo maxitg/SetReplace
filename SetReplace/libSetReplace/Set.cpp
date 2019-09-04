@@ -18,10 +18,10 @@ namespace SetReplace {
         const Generation maxGeneration_;
         
         std::unordered_map<ExpressionID, SetExpression> expressions_;
-        std::vector<Event> events_;
         
         Atom nextAtom_ = 1;
         ExpressionID nextExpressionID_ = 0;
+        EventID nextEventID_ = 1;
         
         // Largest generation produced so far.
         // Note, this is not the same as max of generations of all events,
@@ -70,11 +70,8 @@ namespace SetReplace {
             }
             largestGeneration_ = std::max(largestGeneration_, outputGeneration);
             
-            const EventID eventID = static_cast<int>(events_.size());
-            events_.push_back(Event{
-                match.rule,
-                match.inputExpressions,
-                addExpressions(namedRuleOutputs, eventID, outputGeneration)});
+            const EventID eventID = nextEventID_++;
+            addExpressions(namedRuleOutputs, eventID, outputGeneration);
             assignDestroyerEvent(match.inputExpressions, eventID);
             
             return 1;
@@ -107,10 +104,6 @@ namespace SetReplace {
                 result.push_back(idAndExpression.second);
             }
             return result;
-        }
-        
-        std::vector<Event> events() const {
-            return events_;
         }
         
     private:
@@ -199,9 +192,5 @@ namespace SetReplace {
     
     std::vector<SetExpression> Set::expressions() const {
         return implementation_->expressions();
-    }
-    
-    std::vector<Event> Set::events() const {
-        return implementation_->events();
     }
 }

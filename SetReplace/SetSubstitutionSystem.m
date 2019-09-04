@@ -17,6 +17,7 @@ PackageExport["$SetReplaceMethods"]
 
 PackageScope["setReplaceRulesQ"]
 PackageScope["stepCountQ"]
+PackageScope["setSubstitutionSystem"]
 
 
 (* ::Section:: *)
@@ -24,12 +25,14 @@ PackageScope["stepCountQ"]
 
 
 SetSubstitutionSystem::usage = usageString[
-	"SetSubstitutionSystem[`r`, `s`, `n`] computes ",
+	"SetSubstitutionSystem[`r`, `s`, `g`] computes ",
 	"evolution of the set substitution system described by rules `r` ",
-	"and initial set `s` for `n` steps. All non-intersecting subsets are replaced ",
-	"at once at each step which is different from the behavior of SetReplace.",
+	"and initial set `s` for `g` generations. ",
+	"All non-intersecting subsets are replaced ",
+	"at once at each next generation ",
+	"which is different from the behavior of SetReplace.",
 	"\n",
-	"SetSubstitutionSystem[`r`, `s`] runs evolution for one step."];
+	"SetSubstitutionSystem[`r`, `s`] runs evolution for one generation."];
 
 
 $SetReplaceMethods::usage = usageString[
@@ -167,14 +170,14 @@ simpleRuleQ[___] := False
 
 
 (* ::Subsection:: *)
-(*$SetSubstitutionSystem*)
+(*setSubstitutionSystem*)
 
 
 (* ::Text:: *)
 (*This is a more general function than SetSubstitutionSystem because it accepts both the number of generations and the number of steps as an input, and runs until the first of the two is reached.*)
 
 
-Options[$SetSubstitutionSystem] = Options[SetSubstitutionSystem];
+Options[setSubstitutionSystem] = Options[SetSubstitutionSystem];
 
 
 (* ::Text:: *)
@@ -194,7 +197,7 @@ SetReplace::noCpp =
 	"C++ implementation was not compiled for your system type.";
 
 
-$SetSubstitutionSystem[
+setSubstitutionSystem[
 			rules_,
 			set_,
 			generations_,
@@ -212,13 +215,23 @@ $SetSubstitutionSystem[
 		If[!$cppSetReplaceAvailable,
 			Message[SetReplace::noCpp],
 			Message[SetReplace::cppNotImplemented]];
-	setReplace$wl[set, canonicalRules, generations, steps]
-]/; MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] && !failedQ]
+	If[failedQ,
+		$Failed,
+		setReplace$wl[set, canonicalRules, generations, steps]]
+]]
+
+
+(* ::Subsection:: *)
+(*SetSubstitutionSystem*)
 
 
 SetSubstitutionSystem[
-		rules_,
-		set_,
-		generations_,
-		o : OptionsPattern[]] :=
-	$SetSubstitutionSystem[rules, set, generations, \[Infinity], o]
+			rules_ ? setReplaceRulesQ,
+			set_List,
+			generations : Except[_ ? OptionQ] : 1,
+			o : OptionsPattern[]] /; stepCountQ[generations] := Module[{
+		result},
+	result = setSubstitutionSystem[rules, set, generations, Infinity, o];
+	result
+/; MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
+	result =!= $Failed]

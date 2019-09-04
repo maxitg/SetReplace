@@ -18,8 +18,8 @@ namespace SetReplace {
     /** @brief Identifiers for substitution events, later events have larger IDs.
      */
     using EventID = int;
-    constexpr EventID initialConditionEvent = -1;
-    constexpr EventID finalStateEvent = -2;
+    constexpr EventID initialConditionEvent = 0;
+    constexpr EventID finalStateEvent = -1;
     
     /** @brief Layer this expression belongs to in the causal network.
      * @details Specifically, if the largest generation of expressions in the event inputs is n, the generation of its outputs will be n + 1.

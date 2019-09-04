@@ -5,7 +5,6 @@
 #include <memory>
 #include <vector>
 
-#include "Event.hpp"
 #include "Expression.hpp"
 #include "Rule.hpp"
 
@@ -42,11 +41,6 @@ namespace SetReplace {
         /** @brief List of all expressions in the set, past and present.
          */
         std::vector<SetExpression> expressions() const;
-        
-        /** @brief List of all past events.
-         * @details Not that does not include matches for future events that have not been actualized yet.
-         */
-        std::vector<Event> events() const;
         
     private:
         class Implementation;

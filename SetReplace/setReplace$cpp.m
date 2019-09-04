@@ -12,9 +12,12 @@ Package["SetReplace`"]
 
 
 PackageScope["$cppSetReplaceAvailable"]
-
-
 PackageScope["setReplace$cpp"]
+PackageScope["$creatorEvents"]
+PackageScope["$destroyerEvents"]
+PackageScope["$generations"]
+PackageScope["$atomLists"]
+PackageScope["$rules"]
 
 
 (* ::Section:: *)
@@ -70,7 +73,7 @@ decodeExpressions[list_List] := Module[{
 	atomRanges = Partition[atomPointers, 2, 1];
 	atomLists = list[[#[[1]] ;; #[[2]] - 1]] & /@ atomRanges;
 	<|$creatorEvents -> Most[creatorEvents],
-		$destroyerEvents -> Most[destroyerEvents],
+		$destroyerEvents -> Most[destroyerEvents] /. {-1 -> Infinity},
 		$generations -> Most[generations],
 		$atomLists -> atomLists|>
 ]
@@ -167,7 +170,10 @@ setReplace$cpp[set_, rules_, generations_, steps_] /;
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
 	inverseGlobalMap = Association @ Thread[resultAtoms
 		-> (Lookup[inversePartialGlobalMap, #, Unique["v"]] & /@ resultAtoms)];
-	SubSubstitutionEvolution[AppendTo[
+	SetSubstitutionEvolution[Join[
 		cppOutput,
-		$atomLists -> ReleaseHold @ Map[inverseGlobalMap, cppOutput[$atomLists], {2}]]]
+		<|$atomLists ->
+				ReleaseHold @ Map[inverseGlobalMap, cppOutput[$atomLists], {2}],
+			$rules -> rules
+		|>]]
 ]

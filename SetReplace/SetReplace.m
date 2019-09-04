@@ -114,19 +114,8 @@ SetReplace[
 				n : Except[_ ? OptionQ] : 1,
 				o : OptionsPattern[]] /;
 			stepCountQ[n] := Module[{
-		method = OptionValue[Method], canonicalRules, failedQ = False},
-	canonicalRules = toCanonicalRules[rules];
-	If[MatchQ[method, Automatic | "C++"]
-			&& MatchQ[set, {{___ ? AtomQ}...}]
-			&& MatchQ[canonicalRules, {___ ? simpleRuleQ}]
-			&& IntegerQ[n],
-		If[$cppSetReplaceAvailable,
-			Return[setReplace$cpp[set, canonicalRules, n]]]];
-	If[MatchQ[method, "C++"],
-		failedQ = True;
-		If[!$cppSetReplaceAvailable, Message[SetReplace::noCpp]];
-		If[!IntegerQ[n], Message[SetReplace::cppInfinite]];
-		If[$cppSetReplaceAvailable && IntegerQ[n],
-			Message[SetReplace::cppNotImplemented]]];
-	setReplace$wl[set, canonicalRules, n]
-/; MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] && !failedQ]
+		result},
+	result = setSubstitutionSystem[rules, set, Infinity, n, o];
+	result[-1]
+/; MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
+	result =!= $Failed]
