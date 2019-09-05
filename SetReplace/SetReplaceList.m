@@ -51,7 +51,7 @@ SetReplaceList[args___] := 0 /;
 
 SetReplaceList[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
 	!ListQ[set] &&
-	Message[SetReplace::setNotList, SetReplaceList]
+	Message[SetReplace::setNotList, "first", SetReplaceList]
 
 
 (* ::Subsection:: *)
@@ -59,7 +59,8 @@ SetReplaceList[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] 
 
 
 SetReplaceList[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
-	!setReplaceRulesQ[rules] && Message[SetReplace::invalidRules, SetReplaceList]
+	!setReplaceRulesQ[rules] &&
+	Message[SetReplace::invalidRules, "second", SetReplaceList]
 
 
 (* ::Subsection:: *)
@@ -83,10 +84,11 @@ Options[SetReplaceList] := Options[SetSubstitutionSystem];
 
 
 SetReplaceList[
-		set_List,
-		rules_ ? setReplaceRulesQ,
-		n_ ? stepCountQ,
-		o : OptionsPattern[]] := Module[{failed = False, evolution, result},
+			set_List,
+			rules_ ? setReplaceRulesQ,
+			n : Except[_ ? OptionQ] : 1,
+			o : OptionsPattern[]] /; stepCountQ[n] := Module[{
+		failed = False, evolution, result},
 	evolution = Check[setSubstitutionSystem[rules, set, Infinity, n, o], failed = True];
 	If[!failed,
 		result = evolution["Step", #] & /@ Range[0, evolution["EventsCount"]]];

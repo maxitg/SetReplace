@@ -54,7 +54,7 @@ SetReplaceFixedPoint[args___] := 0 /;
 
 
 SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] := 0 /; !ListQ[set] &&
-	Message[SetReplace::setNotList, SetReplaceFixedPoint]
+	Message[SetReplace::setNotList, "first", SetReplaceFixedPoint]
 
 
 (* ::Subsection:: *)
@@ -62,7 +62,7 @@ SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] := 0 /; !ListQ[set] &&
 
 
 SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] := 0 /; !setReplaceRulesQ[rules] &&
-	Message[SetReplace::invalidRules, SetReplaceFixedPoint]
+	Message[SetReplace::invalidRules, "second", SetReplaceFixedPoint]
 
 
 (* ::Section:: *)

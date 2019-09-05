@@ -55,7 +55,7 @@ SetReplaceAll[args___] := 0 /;
 
 SetReplaceAll[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
 	!ListQ[set] &&
-	Message[SetReplace::setNotList, SetReplaceAll]
+	Message[SetReplace::setNotList, "first", SetReplaceAll]
 
 
 (* ::Subsection:: *)
@@ -64,7 +64,7 @@ SetReplaceAll[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] :
 
 SetReplaceAll[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
 	!setReplaceRulesQ[rules] &&
-	Message[SetReplace::invalidRules, SetReplaceAll]
+	Message[SetReplace::invalidRules, "second", SetReplaceAll]
 
 
 (* ::Subsection:: *)
@@ -94,8 +94,8 @@ Options[SetReplaceAll] := Options[SetSubstitutionSystem];
 SetReplaceAll[
 		set_List,
 		rules_ ? setReplaceRulesQ,
-		n_ ? stepCountQ,
-		o : OptionsPattern[]] := Module[{failed = False, result},
+		n : Except[_ ? OptionQ] : 1,
+		o : OptionsPattern[]] /; stepCountQ[n] := Module[{failed = False, result},
 	result = Check[SetSubstitutionSystem[rules, set, n, o][-1], failed = True];
 	result /; !failed
 ]
