@@ -30,7 +30,8 @@ SetReplaceFixedPointList::usage = usageString[
 (*Syntax Information*)
 
 
-SyntaxInformation[SetReplaceFixedPointList] = {"ArgumentsPattern" -> {_, _}};
+SyntaxInformation[SetReplaceFixedPointList] =
+	{"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 
 
 (* ::Section:: *)
@@ -49,7 +50,7 @@ SetReplaceFixedPointList[args___] := 0 /;
 (*Set is a list*)
 
 
-SetReplaceFixedPointList[set_, rules_] := 0 /; !ListQ[set] &&
+SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] := 0 /; !ListQ[set] &&
 	Message[SetReplace::setNotList, SetReplaceFixedPointList]
 
 
@@ -57,13 +58,25 @@ SetReplaceFixedPointList[set_, rules_] := 0 /; !ListQ[set] &&
 (*Rules are valid*)
 
 
-SetReplaceFixedPointList[set_, rules_] := 0 /; !setReplaceRulesQ[rules] &&
+SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] := 0 /;
+	!setReplaceRulesQ[rules] &&
 	Message[SetReplace::invalidRules, SetReplaceFixedPointList]
+
+
+(* ::Section:: *)
+(*Options*)
+
+
+Options[SetReplaceFixedPointList] := Options[SetSubstitutionSystem]
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
-SetReplaceFixedPointList[set_List, rules_ ? setReplaceRulesQ] :=
-	SetReplaceList[set, rules, \[Infinity]]
+SetReplaceFixedPointList[
+			set_List, rules_ ? setReplaceRulesQ, o : OptionsPattern[]] := Module[{
+		failed = False, result},
+	result = Check[SetReplaceList[set, rules, Infinity, o], failed = True];
+	result /; !failed
+]

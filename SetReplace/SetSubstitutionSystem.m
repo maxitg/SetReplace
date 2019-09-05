@@ -215,7 +215,7 @@ setSubstitutionSystem[
 		If[!$cppSetReplaceAvailable,
 			Message[SetReplace::noCpp],
 			Message[SetReplace::cppNotImplemented]]];
-	If[failedQ,
+	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
 		setReplace$wl[canonicalRules, set, generations, steps]]
 ]
@@ -231,8 +231,6 @@ SetSubstitutionSystem[
 			generations : Except[_ ? OptionQ] : 1,
 			o : OptionsPattern[]] /; stepCountQ[generations] := Module[{
 		result},
-	result = If[MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
-		setSubstitutionSystem[rules, set, generations, Infinity, o],
-		$Failed];
+	result = setSubstitutionSystem[rules, set, generations, Infinity, o];
 	result
 /; result =!= $Failed]

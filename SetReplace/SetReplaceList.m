@@ -30,7 +30,7 @@ SetReplaceList::usage = usageString[
 (*Syntax Information*)
 
 
-SyntaxInformation[SetReplaceList] = {"ArgumentsPattern" -> {_, _, _}};
+SyntaxInformation[SetReplaceList] = {"ArgumentsPattern" -> {_, _, _, OptionsPattern[]}};
 
 
 (* ::Section:: *)
@@ -49,7 +49,8 @@ SetReplaceList[args___] := 0 /;
 (*Set is a list*)
 
 
-SetReplaceList[set_, rules_, n_] := 0 /; !ListQ[set] &&
+SetReplaceList[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
+	!ListQ[set] &&
 	Message[SetReplace::setNotList, SetReplaceList]
 
 
@@ -57,7 +58,7 @@ SetReplaceList[set_, rules_, n_] := 0 /; !ListQ[set] &&
 (*Rules are valid*)
 
 
-SetReplaceList[set_, rules_, n_] := 0 /;
+SetReplaceList[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
 	!setReplaceRulesQ[rules] && Message[SetReplace::invalidRules, SetReplaceList]
 
 
@@ -65,13 +66,29 @@ SetReplaceList[set_, rules_, n_] := 0 /;
 (*Step count is valid*)
 
 
-SetReplaceList[set_, rules_, n_] := 0 /; !stepCountQ[n] &&
+SetReplaceList[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
+	!stepCountQ[n] &&
 	Message[SetReplace::nonIntegerIterations, SetReplaceList, n]
+
+
+(* ::Section:: *)
+(*Options*)
+
+
+Options[SetReplaceList] := Options[SetSubstitutionSystem];
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
-SetReplaceList[set_List, rules_ ? setReplaceRulesQ, n_ ? stepCountQ] :=
-	FixedPointList[Replace[#, toNormalRules @ toCanonicalRules @ rules] &, set, n]
+SetReplaceList[
+		set_List,
+		rules_ ? setReplaceRulesQ,
+		n_ ? stepCountQ,
+		o : OptionsPattern[]] := Module[{failed = False, evolution, result},
+	evolution = Check[setSubstitutionSystem[rules, set, Infinity, n, o], failed = True];
+	If[!failed,
+		result = evolution["Step", #] & /@ Range[0, evolution["EventsCount"]]];
+	result /; !failed
+]

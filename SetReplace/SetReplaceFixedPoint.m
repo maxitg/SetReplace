@@ -33,7 +33,8 @@ SetReplaceFixedPoint::usage = usageString[
 (*Syntax Information*)
 
 
-SyntaxInformation[SetReplaceFixedPoint] = {"ArgumentsPattern" -> {_, _}};
+SyntaxInformation[SetReplaceFixedPoint] =
+	{"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 
 
 (* ::Section:: *)
@@ -52,7 +53,7 @@ SetReplaceFixedPoint[args___] := 0 /;
 (*Set is a list*)
 
 
-SetReplaceFixedPoint[set_, rules_] := 0 /; !ListQ[set] &&
+SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] := 0 /; !ListQ[set] &&
 	Message[SetReplace::setNotList, SetReplaceFixedPoint]
 
 
@@ -60,13 +61,24 @@ SetReplaceFixedPoint[set_, rules_] := 0 /; !ListQ[set] &&
 (*Rules are valid*)
 
 
-SetReplaceFixedPoint[set_, rules_] := 0 /; !setReplaceRulesQ[rules] &&
+SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] := 0 /; !setReplaceRulesQ[rules] &&
 	Message[SetReplace::invalidRules, SetReplaceFixedPoint]
+
+
+(* ::Section:: *)
+(*Options*)
+
+
+Options[SetReplaceFixedPoint] := Options[SetSubstitutionSystem]
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
-SetReplaceFixedPoint[set_List, rules_ ? setReplaceRulesQ] :=
-	SetReplace[set, rules, \[Infinity], Method -> "WolframLanguage"]
+SetReplaceFixedPoint[
+			set_List, rules_ ? setReplaceRulesQ, o : OptionsPattern[]] := Module[{
+		failed = False, result},
+	result = Check[SetSubstitutionSystem[rules, set, Infinity, o][-1], failed = True];
+	result /; !failed
+]

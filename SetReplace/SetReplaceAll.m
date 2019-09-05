@@ -87,10 +87,6 @@ Options[SetReplaceAll] := Options[SetSubstitutionSystem];
 (*Implementation*)
 
 
-(* ::Subsection:: *)
-(*SetReplaceAll*)
-
-
 (* ::Text:: *)
 (*We just run SetSubstitutionSystem for the specified number of generations, and take the last set.*)
 
@@ -98,7 +94,7 @@ Options[SetReplaceAll] := Options[SetSubstitutionSystem];
 SetReplaceAll[
 		set_List,
 		rules_ ? setReplaceRulesQ,
-		n_Integer ? stepCountQ,
+		n_ ? stepCountQ,
 		o : OptionsPattern[]] := Module[{failed = False, result},
 	result = Check[SetSubstitutionSystem[rules, set, n, o][-1], failed = True];
 	result /; !failed
