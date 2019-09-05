@@ -6,9 +6,11 @@
 #include "Expression.hpp"
 
 namespace SetReplace {
+    /** @brief Substitution rule used in the evolution.
+     */
     struct Rule {
-        std::vector<Expression> inputs;
-        std::vector<Expression> outputs;
+        const std::vector<AtomsVector> inputs;
+        const std::vector<AtomsVector> outputs;
     };
 }
 

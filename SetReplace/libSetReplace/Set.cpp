@@ -10,363 +10,170 @@
 namespace SetReplace {
     class Set::Implementation {
     private:
+        // Rules fundamentally cannot be changed during evaluation, don't try to remove const.
+        // If rules do need to be changed, create another instance of Set and copy the expressions over.
         const std::vector<Rule> rules_;
         
-        using ExpressionID = int;
-        std::unordered_map<ExpressionID, Expression> expressions_;
-        int nextExpressionID = 0;
-        int nextAtomID = 0;
+        std::unordered_map<ExpressionID, SetExpression> expressions_;
+        std::vector<Event> events_;
         
-        std::unordered_map<AtomID, std::unordered_set<ExpressionID>> atomsIndex_;
+        Atom nextAtom_ = 1;
+        ExpressionID nextExpressionID_ = 0;
         
-        std::set<Match> matches_;
+        AtomsIndex atomsIndex_;
         
-        struct IteratorHash {
-            size_t operator()(std::set<Match>::const_iterator it) const {
-                return std::hash<int64_t>()((int64_t)&(*it));
-            }
-        };
-        std::unordered_map<ExpressionID, std::unordered_set<std::set<Match>::const_iterator, IteratorHash>> matchesIndex_;
+        Matcher matcher_;
         
-        const std::function<bool()> shouldAbort_;
-
     public:
         Implementation(const std::vector<Rule>& rules,
-                       const std::vector<Expression>& initialExpressions,
-                       const std::function<bool()> shouldAbort) : rules_(rules), shouldAbort_(shouldAbort) {
-            for (const auto& expression : initialExpressions) {
-                for (const auto& atom : expression) {
-                    nextAtomID = std::max(nextAtomID - 1, atom) + 1;
-                }
-            }
-            addExpressions(initialExpressions);
-        }
+                       const std::vector<AtomsVector>& initialExpressions,
+                       const std::function<bool()> shouldAbort) :
+            Implementation(rules, initialExpressions, shouldAbort, [this](const int expressionID) {
+                return expressions_.at(expressionID).atoms;
+            }) {}
         
-        int replace() {
-            if (matches_.empty()) {
-                return 0;
-            }
+        int replaceOnce() {
+            if (matcher_.matchCount() == 0) return 0;
+            Match match = matcher_.nextMatch();
             
-            Match match = *matches_.begin();
-            
-            const auto& ruleInputs = rules_[match.ruleID].inputs;
-            std::vector<Expression> inputExpressions;
-            for (const auto& expressionID : match.expressionIDs) {
-                inputExpressions.push_back(expressions_[expressionID]);
+            const auto& ruleInputs = rules_[match.rule].inputs;
+            std::vector<AtomsVector> inputExpressions;
+            for (const auto& expressionID : match.inputExpressions) {
+                inputExpressions.push_back(expressions_.at(expressionID).atoms);
             }
             
             auto explicitRuleInputs = ruleInputs;
-            replaceExplicit(ruleInputs, inputExpressions, explicitRuleInputs);
-            auto explicitRuleOutputs = rules_[match.ruleID].outputs;
-            replaceExplicit(ruleInputs, inputExpressions, explicitRuleOutputs);
+            Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, explicitRuleInputs);
+            
+            // Identify output atoms that appear in the input, that still leaves newly created atoms as patterns.
+            auto explicitRuleOutputs = rules_[match.rule].outputs;
+            Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, explicitRuleOutputs);
+            
+            // Name newly created atoms as well, now all atoms in the output are explicitly named.
             const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
             
-            removeMatches(match.expressionIDs);
-            removeFromAtomsIndex(match.expressionIDs);
-            removeExpressions(match.expressionIDs);
+            matcher_.removeMatchesInvolvingExpressions(match.inputExpressions);
+            atomsIndex_.removeExpressions(match.inputExpressions);
             
-            addExpressions(namedRuleOutputs);
+            const EventID eventID = static_cast<int>(events_.size());
+            events_.push_back(Event{
+                match.rule,
+                match.inputExpressions,
+                addExpressions(namedRuleOutputs, eventID)});
+            assignDestroyerEvent(match.inputExpressions, eventID);
             
             return 1;
         }
         
-        void removeMatches(const std::vector<ExpressionID>& expressionIDs) {
-            std::unordered_set<std::set<Match>::const_iterator, IteratorHash> matchIteratorsToDelete;
-            for (const auto& id : expressionIDs) {
-                const auto& matches = matchesIndex_[id];
-                for (const auto& matchIterator : matches) {
-                    matchIteratorsToDelete.insert(matchIterator);
-                }
-            }
-            
-            std::unordered_set<ExpressionID> involvedExpressions;
-            for (const auto& iterator : matchIteratorsToDelete) {
-                for (const auto& expression : iterator->expressionIDs) {
-                    involvedExpressions.insert(expression);
-                }
-            }
-            
-            for (const auto& expression : involvedExpressions) {
-                auto indexIterator = matchesIndex_[expression].begin();
-                while (indexIterator != matchesIndex_[expression].end()) {
-                    if (matchIteratorsToDelete.count(*indexIterator)) {
-                        indexIterator = matchesIndex_[expression].erase(indexIterator);
-                    } else {
-                        ++indexIterator;
-                    }
-                }
-                if (matchesIndex_[expression].empty()) {
-                    matchesIndex_.erase(expression);
-                }
-            }
-            
-            for (const auto& matchIterator : matchIteratorsToDelete) {
-                matches_.erase(matchIterator);
-            }
-        }
-        
-        void removeFromAtomsIndex(const std::vector<ExpressionID>& expressionIDs) {
-            std::unordered_set<ExpressionID> expressionsToDelete;
-            for (const auto& expression : expressionIDs) {
-                expressionsToDelete.insert(expression);
-            }
-            
-            std::unordered_set<AtomID> involedAtoms;
-            for (const auto& expression : expressionIDs) {
-                for (const auto& atom : expressions_[expression]) {
-                    involedAtoms.insert(atom);
-                }
-            }
-            
-            for (const auto& atom : involedAtoms) {
-                auto expressionIterator = atomsIndex_[atom].begin();
-                while (expressionIterator != atomsIndex_[atom].end()) {
-                    if (expressionsToDelete.count(*expressionIterator)) {
-                        expressionIterator = atomsIndex_[atom].erase(expressionIterator);
-                    } else {
-                        ++expressionIterator;
-                    }
-                }
-                if (atomsIndex_[atom].empty()) {
-                    atomsIndex_.erase(atom);
-                }
-            }
-        }
-        
-        void removeExpressions(const std::vector<ExpressionID>& expressionIDs) {
-            for (const auto& expression : expressionIDs) {
-                expressions_.erase(expression);
-            }
-        }
-        
-        int replace(const int stepCount) {
+        int replace(const int substitutionCount) {
             int count = 0;
-            for (int i = 0; i < stepCount; ++i) {
-                count += replace();
+            for (int i = 0; i < substitutionCount; ++i) {
+                if (replaceOnce()) {
+                    ++count;
+                } else {
+                    return count;
+                }
             }
             return count;
         }
         
-        std::vector<Expression> expressions() const {
-          std::vector<std::pair<ExpressionID, Expression>> idExpressions;
-          idExpressions.reserve(expressions_.size());
-          for (const auto& idExpression : expressions_) {
-            idExpressions.push_back(idExpression);
-          }
-          std::sort(idExpressions.begin(), idExpressions.end());
-          std::vector<Expression> result;
-          result.reserve(idExpressions.size());
-          for (const auto& idExpression : idExpressions) {
-            result.push_back(idExpression.second);
-          }
-          return result;
+        std::vector<SetExpression> expressions() const {
+            std::vector<std::pair<ExpressionID, SetExpression>> idsAndExpressions;
+            idsAndExpressions.reserve(expressions_.size());
+            for (const auto& idAndExpression : expressions_) {
+                idsAndExpressions.push_back(idAndExpression);
+            }
+            std::sort(idsAndExpressions.begin(), idsAndExpressions.end(), [](const auto& a, const auto& b) {
+                return a.first < b.first;
+            });
+            std::vector<SetExpression> result;
+            result.reserve(idsAndExpressions.size());
+            for (const auto& idAndExpression : idsAndExpressions) {
+                result.push_back(idAndExpression.second);
+            }
+            return result;
+        }
+        
+        std::vector<Event> events() const {
+            return events_;
         }
         
     private:
-        std::vector<Expression> nameAnonymousAtoms(const std::vector<Expression>& expressions) {
-            std::unordered_map<AtomID, AtomID> names;
-            std::vector<Expression> result = expressions;
+        Implementation(const std::vector<Rule>& rules,
+                       const std::vector<AtomsVector>& initialExpressions,
+                       const std::function<bool()> shouldAbort,
+                       const std::function<AtomsVector(ExpressionID)>& getAtomsVector) :
+        rules_(rules),
+        atomsIndex_(getAtomsVector),
+        matcher_(rules_, atomsIndex_, getAtomsVector, shouldAbort) {
+            for (const auto& expression : initialExpressions) {
+                for (const auto& atom : expression) {
+                    if (atom <= 0) throw Error::NonPositiveAtoms;
+                    nextAtom_ = std::max(nextAtom_ - 1, atom) + 1;
+                }
+            }
+            addExpressions(initialExpressions, initialConditionEvent);
+        }
+        
+        std::vector<AtomsVector> nameAnonymousAtoms(const std::vector<AtomsVector>& atomVectors) {
+            std::unordered_map<Atom, Atom> names;
+            std::vector<AtomsVector> result = atomVectors;
             for (auto& expression : result) {
                 for (auto& atom : expression) {
                     if (atom < 0 && names.count(atom) == 0) {
-                        names[atom] = nextAtomID++;
+                        names[atom] = nextAtom_++;
                     }
                     if (atom < 0) {
                         atom = names[atom];
                     }
                 }
             }
+            
             return result;
         }
         
-        void addExpressions(const std::vector<Expression>& expressions) {
-            const auto ids = assignExpressionIDs(expressions);
-            addToAtomsIndex(ids);
-            addMatches(ids);
+        std::vector<ExpressionID> addExpressions(const std::vector<AtomsVector>& expressions, const EventID creatorEvent) {
+            const auto ids = assignExpressionIDs(expressions, creatorEvent);
+            
+            // Atoms index must be updated first, because the matcher uses it to discover expressions.
+            atomsIndex_.addExpressions(ids);
+            matcher_.addMatchesInvolvingExpressions(ids);
+            return ids;
         }
         
-        std::vector<ExpressionID> assignExpressionIDs(const std::vector<Expression>& expressions) {
+        std::vector<ExpressionID> assignExpressionIDs(const std::vector<AtomsVector>& expressions, const EventID creatorEvent) {
             std::vector<ExpressionID> ids;
             for (const auto& expression : expressions) {
-                ids.push_back(nextExpressionID);
-                expressions_.insert(std::make_pair(nextExpressionID++, expression));
+                ids.push_back(nextExpressionID_);
+                expressions_.insert(std::make_pair(nextExpressionID_++, SetExpression{expression, creatorEvent}));
             }
             return ids;
         }
         
-        void addToAtomsIndex(const std::vector<ExpressionID>& ids) {
-            for (const auto expressionID : ids) {
-                for (const auto atom : expressions_.at(expressionID)) {
-                    atomsIndex_[atom].insert(expressionID);
-                }
+        void assignDestroyerEvent(const std::vector<ExpressionID>& expressions, const EventID destroyerEvent) {
+            for (const auto id : expressions) {
+                expressions_.at(id).destroyerEvent = destroyerEvent;
             }
-        }
-        
-        void addMatches(const std::vector<ExpressionID>& ids) {
-            for (int i = 0; i < rules_.size(); ++i) {
-                addMatches(ids, i);
-            }
-        }
-        
-        void addMatches(const std::vector<ExpressionID>& expressionIDs, const int ruleID) {
-            for (int i = 0; i < rules_[ruleID].inputs.size(); ++i) {
-                Match emptyMatch{ruleID, std::vector<ExpressionID>(rules_[ruleID].inputs.size(), -1)};
-                addMatches(emptyMatch, rules_[ruleID].inputs, i, expressionIDs);
-            }
-        }
-        
-        void addMatches(const Match& currentMatch,
-                        const std::vector<Expression>& inputs,
-                        const int nextInputID,
-                        const std::vector<ExpressionID>& potentialExpressionIDs) {
-            for (const auto expressionID : potentialExpressionIDs) {
-                if (expressionUnused(currentMatch, expressionID)) {
-                    addMatches(currentMatch, inputs, nextInputID, expressionID);
-                }
-            }
-        }
-        
-        bool expressionUnused(const Match& match, const ExpressionID expressionID) {
-            for (int i = 0; i < match.expressionIDs.size(); ++i) {
-                if (match.expressionIDs[i] == expressionID) return false;
-            }
-            return true;
-        }
-        
-        void addMatches(const Match& currentMatch,
-                        const std::vector<Expression>& inputs,
-                        const int nextInputID,
-                        const ExpressionID expressionID) {
-            const auto& input = inputs[nextInputID];
-            const auto& expression = expressions_[expressionID];
-            if (input.size() != expression.size()) return;
-            
-            Match newCurrentMatch = currentMatch;
-            newCurrentMatch.expressionIDs[nextInputID] = expressionID;
-            
-            auto newInputs = inputs;
-            if (replaceExplicit({input}, {expression}, newInputs)) {
-                addMatches(newCurrentMatch, newInputs);
-            }
-        }
-        
-        bool replaceExplicit(const std::vector<Expression> patterns,
-                             const std::vector<Expression> patternMatches,
-                             std::vector<Expression>& expressions) {
-            if (patterns.size() != patternMatches.size()) return false;
-            
-            std::unordered_map<AtomID, AtomID> match;
-            for (int i = 0; i < patterns.size(); ++i) {
-                const auto& pattern = patterns[i];
-                const auto& patternMatch = patternMatches[i];
-                if (pattern.size() != patternMatch.size()) return false;;
-                for (int j = 0; j < pattern.size(); ++j) {
-                    AtomID inputAtom;
-                    if (match.count(pattern[j])) {
-                        inputAtom = match.at(pattern[j]);
-                    } else {
-                        inputAtom = pattern[j];
-                    }
-                    
-                    if (inputAtom < 0) { // pattern
-                        match[inputAtom] = patternMatch[j];
-                    } else { // explicit atom ID
-                        if (inputAtom != patternMatch[j]) return false;
-                    }
-                }
-            }
-            
-            for (int i = 0; i < expressions.size(); ++i) {
-                for (int j = 0; j < expressions[i].size(); ++j) {
-                    if (match.count(expressions[i][j])) {
-                        expressions[i][j] = match[expressions[i][j]];
-                    }
-                }
-            }
-            return true;
-        }
-        
-        void addMatches(const Match& currentMatch, const std::vector<Expression>& inputs) {
-            if (shouldAbort_()) {
-                throw Error::Aborted;
-            }
-            if (matchComplete(currentMatch)) {
-                const auto iterator = matches_.insert(currentMatch).first;
-                for (const auto& expressionID : currentMatch.expressionIDs) {
-                    matchesIndex_[expressionID].insert(iterator);
-                }
-                return;
-            }
-            
-            int nextInputID = -1;
-            std::vector<ExpressionID> potentialExpressionIDs;
-            bool anonymousAtomsPresent = false;
-            
-            for (int i = 0; i < inputs.size(); ++i) {
-                if (currentMatch.expressionIDs[i] != -1) continue;
-                
-                std::unordered_set<AtomID> requiredAtoms;
-                bool allAnonymous = true;
-                for (const auto atom : inputs[i]) {
-                    if (atom >= 0) {
-                        requiredAtoms.insert(atom);
-                        allAnonymous = false;
-                    } else if (atom < 0) {
-                        anonymousAtomsPresent = true;
-                    }
-                }
-                if (allAnonymous) continue;
-                
-                std::unordered_map<ExpressionID, int> requiredAtomsCounts;
-                for (const auto atom : requiredAtoms) {
-                    for (const auto expression : atomsIndex_[atom]) {
-                        requiredAtomsCounts[expression]++;
-                    }
-                }
-                
-                std::vector<ExpressionID> candidateExpressionIDs;
-                for (const auto& expressionCount : requiredAtomsCounts) {
-                    if (expressionCount.second == requiredAtoms.size()) {
-                        candidateExpressionIDs.push_back(expressionCount.first);
-                    }
-                }
-                
-                if (nextInputID == -1 || candidateExpressionIDs.size() < potentialExpressionIDs.size()) {
-                    potentialExpressionIDs = candidateExpressionIDs;
-                    nextInputID = i;
-                }
-            }
-            
-            if (nextInputID == -1 && anonymousAtomsPresent) {
-                throw std::string("Inputs of rule ") + std::to_string(currentMatch.ruleID) + std::string(" are not connected.");
-            } else if (nextInputID == -1) {
-                return;
-            }
-            
-            addMatches(currentMatch, inputs, nextInputID, potentialExpressionIDs);
-        }
-        
-        bool matchComplete(const Match& match) {
-            for (int i = 0; i < match.expressionIDs.size(); ++i) {
-                if (match.expressionIDs[i] < 0) return false;
-            }
-            return true;
         }
     };
     
-    Set::Set(const std::vector<Rule>& rules, const std::vector<Expression>& initialExpressions, const std::function<bool()> shouldAbort) {
+    Set::Set(const std::vector<Rule>& rules, const std::vector<AtomsVector>& initialExpressions, const std::function<bool()> shouldAbort) {
         implementation_ = std::make_shared<Implementation>(rules, initialExpressions, shouldAbort);
     }
     
-    int Set::replace() {
-        return implementation_->replace();
+    int Set::replaceOnce() {
+        return implementation_->replaceOnce();
     }
     
-    int Set::replace(const int stepCount) {
-        return implementation_->replace(stepCount);
+    int Set::replace(const int substitutionCount) {
+        return implementation_->replace(substitutionCount);
     }
     
-    std::vector<Expression> Set::expressions() const {
+    std::vector<SetExpression> Set::expressions() const {
         return implementation_->expressions();
+    }
+    
+    std::vector<Event> Set::events() const {
+        return implementation_->events();
     }
 }
