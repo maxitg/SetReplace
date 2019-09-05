@@ -231,7 +231,8 @@ SetSubstitutionSystem[
 			generations : Except[_ ? OptionQ] : 1,
 			o : OptionsPattern[]] /; stepCountQ[generations] := Module[{
 		result},
-	result = setSubstitutionSystem[rules, set, generations, Infinity, o];
+	result = If[MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
+		setSubstitutionSystem[rules, set, generations, Infinity, o],
+		$Failed];
 	result
-/; MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
-	result =!= $Failed]
+/; result =!= $Failed]
