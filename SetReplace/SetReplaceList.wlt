@@ -44,7 +44,7 @@ VerificationTest[
 
 VerificationTest[
   SetReplaceList[{1, 2, 3}, {2 -> 5, 3 :> 6}, 10],
-  {{1, 2, 3}, {1, 3, 5}, {1, 5, 6}, {1, 5, 6}}
+  {{1, 2, 3}, {1, 3, 5}, {1, 5, 6}}
 ]
 
 VerificationTest[

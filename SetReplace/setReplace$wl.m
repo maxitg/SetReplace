@@ -96,7 +96,11 @@ setReplace$wlRaw[set_, rules_, n_] := Quiet[
 
 
 addMetadataManagement[
-			input_List :> output_Module, getNextEvent_, maxGeneration_] := Module[{
+			input_List :> output_Module,
+			getNextEvent_,
+			getNextExpression_,
+			maxGeneration_] := Module[{
+		inputIDs = Table[Unique["id"], Length[input]],
 		inputCreators = Table[Unique["creator"], Length[input]],
 		inputGenerations = Table[Unique["generation"], Length[input]],
 		nextEvent},
@@ -109,24 +113,37 @@ addMetadataManagement[
 				moduleOutput = heldModule[[1, 2]]},
 			With[{
 					newModuleContents = Join[
+						(* old expressions *)
+						{#[[1]],
+						 #[[2]],
+						 nextEvent,
+						 #[[3]],
+						 #[[4]] /. x_Pattern :> x[[1]]} & /@
+							Transpose[{
+								inputIDs, inputCreators, inputGenerations, input}],
+						(* new expressions *)
 						ReleaseHold @ Map[
 							Function[
 								o,
-								{nextEvent, \[Infinity], Max @@ inputGenerations + 1, Hold[o]},
+								{getNextExpression[],
+								 nextEvent,
+								 Infinity,
+								 Max @@ inputGenerations + 1,
+								 Hold[o]},
 								HoldAll],
 							moduleOutput,
-							{2}],
-						{#[[1]],
-						 nextEvent,
-						 #[[2]],
-						 #[[3]] /. x_Pattern :> x[[1]]} & /@
-							Transpose[{inputCreators, inputGenerations, input}]],
+							{2}]],
 					originalInput = input},
 				{Pattern[Evaluate[#[[1]]], Blank[]],
+				 Pattern[Evaluate[#[[2]]], Blank[]],
 				 Infinity,
-				 Pattern[Evaluate[#[[2]]], Blank[]] ? (# < maxGeneration &),
-				 #[[3]]} & /@
-						Transpose[{inputCreators, inputGenerations, originalInput}] :>
+				 Pattern[Evaluate[#[[3]]], Blank[]] ? (# < maxGeneration &),
+				 #[[4]]} & /@
+						Transpose[{
+							inputIDs,
+							inputCreators,
+							inputGenerations,
+							originalInput}] :>
 					Module[moduleArguments, newModuleContents]]] //.
 						Hold[expr_] :> expr]
 ]
@@ -141,16 +158,18 @@ addMetadataManagement[
 
 
 setReplace$wl[rules_, set_, generations_, steps_] := Module[{
-		setWithMetadata, rulesWithMetadata, result, nextEventID = 1},
-	(* {creator, destroyer, generation, atoms} *)
-	setWithMetadata = {0, \[Infinity], 0, #} & /@ set;
-	rulesWithMetadata =
-		addMetadataManagement[#, nextEventID++ &, generations] & /@ rules;
-	result = setReplace$wlRaw[setWithMetadata, rulesWithMetadata, steps];
+		setWithMetadata, rulesWithMetadata, result,
+		nextExpressionID = 1, nextEventID = 1, nextExpression},
+	nextExpression = nextExpressionID++ &;
+	(* {id, creator, destroyer, generation, atoms} *)
+	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
+	rulesWithMetadata = addMetadataManagement[
+		#, nextEventID++ &, nextExpression, generations] & /@ rules;
+	result = SortBy[setReplace$wlRaw[setWithMetadata, rulesWithMetadata, steps], First];
 	SetSubstitutionEvolution[<|
-		$creatorEvents -> result[[All, 1]],
-		$destroyerEvents -> result[[All, 2]],
-		$generations -> result[[All, 3]],
-		$atomLists -> result[[All, 4]],
+		$creatorEvents -> result[[All, 2]],
+		$destroyerEvents -> result[[All, 3]],
+		$generations -> result[[All, 4]],
+		$atomLists -> result[[All, 5]],
 		$rules -> rules|>]
 ]
