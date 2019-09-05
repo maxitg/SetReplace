@@ -125,7 +125,7 @@ addMetadataManagement[
 						ReleaseHold @ Map[
 							Function[
 								o,
-								{getNextExpression[],
+								{Hold[getNextExpression[]],
 								 nextEvent,
 								 Infinity,
 								 Max @@ inputGenerations + 1,
