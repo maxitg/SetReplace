@@ -177,6 +177,12 @@ VerificationTest[
 	{{{2, 2}, 1}}
 ]
 
+(*** infinite number of steps is supported ***)
+VerificationTest[
+	SetReplace[{{1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Infinity, Method -> "C++"],
+	{{1, 3}}
+]
+
 (** Examples not supported by C++ implementation **)
 
 (*** not a hypergraph ***)
@@ -198,13 +204,6 @@ VerificationTest[
 	SetReplace[{{1, 2}, {3, 4}}, {} -> {{1, 3}, {2, 4}}, Method -> "C++"],
 	SetReplace[{{1, 2}, {3, 4}}, {} -> {{1, 3}, {2, 4}}, Method -> "C++"],
 	{SetReplace::cppNotImplemented}
-]
-
-(*** infinite number of steps not supported ***)
-VerificationTest[
-	SetReplace[{{1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Infinity, Method -> "C++"],
-	SetReplace[{{1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Infinity, Method -> "C++"],
-	{SetReplace::cppInfinite}
 ]
 
 (** C++ / WL implementation consistancy **)

@@ -239,6 +239,7 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["Rules"] := data[$rules]
 
 
 SetSubstitutionEvolution[data_ ? evolutionDataQ]["GenerationsCount"] := Max[
+	0,
 	Max @ data[$generations],
 	1 + Max @ data[$generations][[
 		Position[
@@ -250,7 +251,7 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["GenerationsCount"] := Max[
 
 
 SetSubstitutionEvolution[data_ ? evolutionDataQ]["EventsCount"] :=
-	Max[DeleteCases[data[$destroyerEvents], Infinity], 0]
+	Max[0, DeleteCases[data[$destroyerEvents], Infinity]]
 
 
 (* ::Subsection:: *)
