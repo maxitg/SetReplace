@@ -40,11 +40,6 @@ VerificationTest[
 ]
 
 VerificationTest[
-  SetReplaceFixedPoint[{0.5}, {n_ :> 1 - n}],
-  {0.5}
-]
-
-VerificationTest[
   SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}, {b_, c_}} :> {{a, c}}],
   {{1, 4}}
 ]
