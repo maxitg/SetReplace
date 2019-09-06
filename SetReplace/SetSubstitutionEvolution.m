@@ -208,7 +208,7 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_Integer] /;
 SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_Integer] /;
 		- SetSubstitutionEvolution[data]["EventsCount"] - 1 <= s < 0 :=
 	SetSubstitutionEvolution[data][
-		"Step", s + 1 + SetSubstitutionEvolution[data]["EventsCount"]]
+		"SetAfterEvent", s + 1 + SetSubstitutionEvolution[data]["EventsCount"]]
 
 
 (* ::Subsection:: *)
@@ -286,7 +286,7 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ][g_Integer] :=
 
 
 SetSubstitutionEvolution[data_ ? evolutionDataQ]["AtomsCountFinal"] :=
-	Length[Union @@ SetSubstitutionEvolution[data]["Step", -1]]
+	Length[Union @@ SetSubstitutionEvolution[data]["SetAfterEvent", -1]]
 
 
 (* ::Subsection:: *)
@@ -302,7 +302,7 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["AtomsCountTotal"] :=
 
 
 SetSubstitutionEvolution[data_ ? evolutionDataQ]["ExpressionsCountFinal"] :=
-	Length[SetSubstitutionEvolution[data]["Step", -1]]
+	Length[SetSubstitutionEvolution[data]["SetAfterEvent", -1]]
 
 
 (* ::Subsection:: *)
