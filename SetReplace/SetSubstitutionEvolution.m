@@ -14,6 +14,17 @@ Package["SetReplace`"]
 PackageExport["SetSubstitutionEvolution"]
 
 
+(* ::Text:: *)
+(*Keys in the data association.*)
+
+
+PackageScope["$creatorEvents"]
+PackageScope["$destroyerEvents"]
+PackageScope["$generations"]
+PackageScope["$atomLists"]
+PackageScope["$rules"]
+
+
 (* ::Section:: *)
 (*Documentation*)
 

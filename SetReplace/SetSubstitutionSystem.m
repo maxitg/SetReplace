@@ -189,7 +189,8 @@ setSubstitutionSystem[
 			&& MatchQ[set, {{___ ? AtomQ}...}]
 			&& MatchQ[canonicalRules, {___ ? simpleRuleQ}],
 		If[$cppSetReplaceAvailable,
-			Return[setReplace$cpp[set, canonicalRules, generations, steps]]]];
+			Return[
+				setSubstitutionSystem$cpp[set, canonicalRules, generations, steps]]]];
 	If[MatchQ[method, "C++"],
 		failedQ = True;
 		If[!$cppSetReplaceAvailable,
@@ -197,7 +198,7 @@ setSubstitutionSystem[
 			makeMessage[caller, "cppNotImplemented"]]];
 	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
-		setReplace$wl[canonicalRules, set, generations, steps]]
+		setSubstitutionSystem$wl[canonicalRules, set, generations, steps]]
 ]
 
 

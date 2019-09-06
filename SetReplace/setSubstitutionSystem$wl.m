@@ -1,18 +1,17 @@
 (* ::Package:: *)
 
 (* ::Title:: *)
-(*SetReplace WL*)
+(*setSubstitutionSystem$wl*)
 
 
 (* ::Text:: *)
-(*Implementation of SetReplace in Wolfram Language. Works better with larger vertex degrees, but is otherwise much slower.*)
+(*Implementation of SetSubstitutionSystem in Wolfram Language. Works better with larger vertex degrees, but is otherwise much slower.*)
 
 
 Package["SetReplace`"]
 
 
-PackageScope["setReplace$wl"]
-PackageScope["toNormalRules"]
+PackageScope["setSubstitutionSystem$wl"]
 
 
 (* ::Section:: *)
@@ -75,14 +74,14 @@ toNormalRules[rules_List] := Join @@ toNormalRules /@ rules
 
 
 (* ::Subsection:: *)
-(*setReplace$wlRaw*)
+(*setReplace$wl*)
 
 
 (* ::Text:: *)
 (*This function just does the replacements, but it does not keep track of any metadata (generations and events).*)
 
 
-setReplace$wlRaw[set_, rules_, n_] := Quiet[
+setReplace$wl[set_, rules_, n_] := Quiet[
 	ReplaceRepeated[List @@ set, toNormalRules @ rules, MaxIterations -> n],
 	ReplaceRepeated::rrlim]
 
@@ -150,14 +149,14 @@ addMetadataManagement[
 
 
 (* ::Subsection:: *)
-(*setReplace$wl*)
+(*setSubstitutionSystem$wl*)
 
 
 (* ::Text:: *)
-(*This function runs a modified version of the set replace system that also keeps track of metadata such as generations and events. It uses setReplace$wlRaw to evaluate that modified system.*)
+(*This function runs a modified version of the set replace system that also keeps track of metadata such as generations and events. It uses setReplace$wl to evaluate that modified system.*)
 
 
-setReplace$wl[rules_, set_, generations_, steps_] := Module[{
+setSubstitutionSystem$wl[rules_, set_, generations_, steps_] := Module[{
 		setWithMetadata, rulesWithMetadata, result,
 		nextExpressionID = 1, nextEventID = 1, nextExpression},
 	nextExpression = nextExpressionID++ &;
@@ -165,7 +164,7 @@ setReplace$wl[rules_, set_, generations_, steps_] := Module[{
 	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
 	rulesWithMetadata = addMetadataManagement[
 		#, nextEventID++ &, nextExpression, generations] & /@ rules;
-	result = SortBy[setReplace$wlRaw[setWithMetadata, rulesWithMetadata, steps], First];
+	result = SortBy[setReplace$wl[setWithMetadata, rulesWithMetadata, steps], First];
 	SetSubstitutionEvolution[<|
 		$creatorEvents -> result[[All, 2]],
 		$destroyerEvents -> result[[All, 3]],

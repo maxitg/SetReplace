@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 (* ::Title:: *)
-(*SetReplace C++*)
+(*setSubstitutionSystem$cpp*)
 
 
 (* ::Text:: *)
@@ -12,12 +12,7 @@ Package["SetReplace`"]
 
 
 PackageScope["$cppSetReplaceAvailable"]
-PackageScope["setReplace$cpp"]
-PackageScope["$creatorEvents"]
-PackageScope["$destroyerEvents"]
-PackageScope["$generations"]
-PackageScope["$atomLists"]
-PackageScope["$rules"]
+PackageScope["setSubstitutionSystem$cpp"]
 
 
 (* ::Section:: *)
@@ -138,13 +133,13 @@ $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
 
 
 (* ::Subsection:: *)
-(*setReplace$cpp*)
+(*setSubstitutionSystem$cpp*)
 
 
 $maxInt = 2^31 - 1;
 
 
-setReplace$cpp[set_, rules_, generations_, steps_] /;
+setSubstitutionSystem$cpp[set_, rules_, generations_, steps_] /;
 			$cppSetReplaceAvailable := Module[{
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
 		mappedSet, localIndices, mappedRules, cppOutput, resultAtoms,
