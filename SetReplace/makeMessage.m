@@ -5,7 +5,7 @@
 
 
 (* ::Text:: *)
-(*Many functions in the package eventually just call setSubstitutionSystem, as such they reuse many of very similar messages. It is therefore useful to define a function that would define a message of a given type for a given function, and then produce this message.*)
+(*Many functions in the package eventually just call setSubstitutionSystem, as such they reuse many of very similar messages. It is therefore useful to have a function that would define a message of a given type for a given function, and then produce this message.*)
 
 
 (* ::Text:: *)
