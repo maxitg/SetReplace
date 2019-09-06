@@ -5,7 +5,7 @@
 
 
 (* ::Text:: *)
-(*This is the main function of the package, which behaves similarly to StringReplace. In this file only argument checks and selection between C++ and WL implementations is done, the implementations themselves are in different files.*)
+(*This function behaves similarly to StringReplace. The implementation is done with SetSubstitutionSystem, which is a more general function.*)
 
 
 Package["SetReplace`"]

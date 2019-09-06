@@ -5,7 +5,7 @@
 
 
 (* ::Text:: *)
-(*This function is similar to SetReplace, except it produces a SetSubstitutionEvolution object that contains information about evolution of the network step-by-step.*)
+(*This is a main function of the package. This function is similar to SetReplaceAll, except it produces a SetSubstitutionEvolution object that contains information about evolution of the network step-by-step. All SetReplace* functions use argument checks and implementation done here.*)
 
 
 Package["SetReplace`"]
@@ -48,6 +48,10 @@ SyntaxInformation[SetSubstitutionSystem] =
 
 (* ::Section:: *)
 (*Argument Checks*)
+
+
+(* ::Text:: *)
+(*Argument checks here except for argument count produce messages for the caller instead of SetSubstitutionSystem itself. That is because setSubstitutionSystem is used by all SetReplace* functions, which want to produce their own messages.*)
 
 
 (* ::Subsection:: *)
@@ -134,7 +138,7 @@ Options[SetSubstitutionSystem] = {Method -> Automatic};
 
 
 (* ::Text:: *)
-(*This is the rule that can be understood by C++ code*)
+(*This is the rule that can be understood by C++ code. Will be generalized in the future until simply returns True.*)
 
 
 simpleRuleQ[
@@ -162,10 +166,10 @@ simpleRuleQ[___] := False
 
 
 (* ::Text:: *)
-(*This is a more general function than SetSubstitutionSystem because it accepts both the number of generations and the number of steps as an input, and runs until the first of the two is reached.*)
+(*This is a more general function than SetSubstitutionSystem because it accepts both the number of generations and the number of steps as an input, and runs until the first of the two is reached. it also takes a caller function as an argument, which is used for message generation.*)
 
 
-Options[setSubstitutionSystem] = Options[SetSubstitutionSystem];
+Options[setSubstitutionSystem] := Options[SetSubstitutionSystem]
 
 
 (* ::Text:: *)
