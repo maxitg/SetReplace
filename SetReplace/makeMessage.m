@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 (* ::Title:: *)
-(*Common Messages*)
+(*makeMessage*)
 
 
 (* ::Text:: *)
