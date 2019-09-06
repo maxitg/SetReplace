@@ -45,8 +45,28 @@ VerificationTest[
 ]
 
 VerificationTest[
-  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}],
+  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "C++"],
   {{{1, 2}, {2, 3}, {3, 1}}, {{3, 1}, {1, 3}}, {{3, 3}}}
+]
+
+VerificationTest[
+  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "WolframLanguage"],
+  {{{1, 2}, {2, 3}, {3, 1}}, {{3, 1}, {1, 3}}, {{3, 3}}}
+]
+
+VerificationTest[
+  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}} :> {}],
+  {{{1, 2}, {2, 3}, {3, 4}}, {{2, 3}, {3, 4}}, {{3, 4}}, {}}
+]
+
+VerificationTest[
+  TimeConstrained[SetReplaceFixedPointList[{}, {} :> {{1, 2}}], 1],
+  $Aborted
+]
+
+VerificationTest[
+  TimeConstrained[SetReplaceFixedPointList[{{1, 2}}, {{1, 2}} :> {{1, 2}}], 1],
+  $Aborted
 ]
 
 EndTestSection[]
