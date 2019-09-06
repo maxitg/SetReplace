@@ -39,39 +39,6 @@ SyntaxInformation[SetSubstitutionEvolution] = {"ArgumentsPattern" -> {___}};
 
 
 (* ::Section:: *)
-(*Argument Checks*)
-
-
-(* ::Subsection:: *)
-(*Argument count*)
-
-
-SetSubstitutionEvolution[args___] := 0 /;
-	!Developer`CheckArgumentCount[SetSubstitutionEvolution[args], 1, 1] && False
-
-
-(* ::Subsection:: *)
-(*Association has correct fields*)
-
-
-SetSubstitutionEvolution::corrupt =
-	"SetSubstitutionEvolution does not have a correct format. " ~~
-	"Use SetSubstitutionSystem for construction.";
-
-
-evolutionDataQ[data_Association] := Sort[Keys[data]] =!=
-	{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules}
-
-
-evolutionDataQ[___] := False
-
-
-SetSubstitutionSystem[data_] := 0 /;
-	!evolutionDataQ[data] &&
-	Message[SetSubstitutionEvolution::corrupt]
-
-
-(* ::Section:: *)
 (*Boxes*)
 
 
@@ -400,3 +367,40 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["ExpressionsCountFinal"] :=
 
 SetSubstitutionEvolution[data_ ? evolutionDataQ]["ExpressionsCountTotal"] :=
 	Length[data[$atomLists]]
+
+
+(* ::Section:: *)
+(*Argument Checks*)
+
+
+(* ::Text:: *)
+(*Argument Checks should be evaluated after Implementation, otherwise ::corrupt messages will be created while assigning SubValues.*)
+
+
+(* ::Subsection:: *)
+(*Argument count*)
+
+
+SetSubstitutionEvolution[args___] := 0 /;
+	!Developer`CheckArgumentCount[SetSubstitutionEvolution[args], 1, 1] && False
+
+
+(* ::Subsection:: *)
+(*Association has correct fields*)
+
+
+SetSubstitutionEvolution::corrupt =
+	"SetSubstitutionEvolution does not have a correct format. " ~~
+	"Use SetSubstitutionSystem for construction.";
+
+
+evolutionDataQ[data_Association] := Sort[Keys[data]] ===
+	Sort[{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules}]
+
+
+evolutionDataQ[___] := False
+
+
+SetSubstitutionEvolution[data_] := 0 /;
+	!evolutionDataQ[data] &&
+	Message[SetSubstitutionEvolution::corrupt]
