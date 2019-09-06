@@ -178,3 +178,20 @@ VerificationTest[
   SetSubstitutionSystem[{{a_, b_}, {b_, c_}} :> {{a, c}}, {{1, 2}, {2, 3}, {3, 4}, {4, 5}}, 2][-1],
   {{1, 5}}
 ]
+
+EndTestSection[]
+
+
+BeginTestSection["$SetReplaceMethods"]
+
+VerificationTest[
+  ListQ[$SetReplaceMethods]
+]
+
+VerificationTest[
+  AllTrue[
+    $SetReplaceMethods,
+    SetReplace[{{0}}, {{0}} -> {{1}}, Method -> #] === {{1}} &]
+]
+
+EndTestSection[]
