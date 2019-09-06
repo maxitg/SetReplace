@@ -46,10 +46,11 @@ SetSubstitutionEvolution /:
 		MakeBoxes[
 			evo : SetSubstitutionEvolution[data_ ? evolutionDataQ],
 			format_] := Module[
-	{generationsCount, eventsCount, rules},
-	generationsCount = SetSubstitutionEvolution[data]["GenerationsCount"];
-	eventsCount = SetSubstitutionEvolution[data]["EventsCount"];
+	{generationsCount, eventsCount, rules, initialSet},
+	generationsCount = evo["GenerationsCount"];
+	eventsCount = evo["EventsCount"];
 	rules = data[$rules];
+	initialSet = evo[0];
 	BoxForm`ArrangeSummaryBox[
 		SetSubstitutionEvolution,
 		evo,
@@ -58,7 +59,8 @@ SetSubstitutionEvolution /:
 		{{BoxForm`SummaryItem[{"Generations count: ", generationsCount}]},
 		{BoxForm`SummaryItem[{"Events count: ", eventsCount}]}},
 		(* Sometimes grid *)
-		{{BoxForm`SummaryItem[{"Rules: ", rules}]}},
+		{{BoxForm`SummaryItem[{"Rules: ", Short[rules]}]},
+		{BoxForm`SummaryItem[{"Initial set: ", Short[initialSet]}]}},
 		format,
 		"Interpretable" -> Automatic
 	]
@@ -70,7 +72,7 @@ SetSubstitutionEvolution /:
 
 
 $properties = {
-	"Generation", "Step", "Rules", "GenerationsCount", "EventsCount",
+	"Generation", "SetAfterEvent", "Rules", "GenerationsCount", "EventsCount",
 	"AtomsCountFinal", "AtomsCountTotal",
 	"ExpressionsCountFinal", "ExpressionsCountTotal",
 	"Properties"};
@@ -97,7 +99,7 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ][s : Except[_Integer], ___] := 0
 (*Unknown property arguments*)
 
 
-$propertiesWithArguments = {"Generation", "Step"};
+$propertiesWithArguments = {"Generation", "SetAfterEvent"};
 
 
 SetSubstitutionEvolution::unknownArg = "Property `` does not accept any arguments.";
@@ -160,19 +162,19 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["EventsCount"] :=
 (*Argument checks*)
 
 
-SetSubstitutionEvolution::stepTooLarge = "Step `` requested out of `` total.";
+SetSubstitutionEvolution::stepTooLarge = "Event `` requested out of `` total.";
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["Step", s_Integer] := 0 /;
+SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_Integer] := 0 /;
 	With[{eventsCount = SetSubstitutionEvolution[data]["EventsCount"]},
 		!(- eventsCount - 1 <= s <= eventsCount) &&
 		Message[SetSubstitutionEvolution::stepTooLarge, s, eventsCount]]
 
 
-SetSubstitutionEvolution::stepNotInteger = "Step `` must be an integer.";
+SetSubstitutionEvolution::stepNotInteger = "Event `` must be an integer.";
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["Step", s_] := 0 /;
+SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_] := 0 /;
 	!IntegerQ[s] &&
 	Message[SetSubstitutionEvolution::stepNotInteger, s]
 
@@ -181,7 +183,7 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["Step", s_] := 0 /;
 (*Positive steps*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["Step", s_Integer] /;
+SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_Integer] /;
 		0 <= s <= SetSubstitutionEvolution[data]["EventsCount"] :=
 	data[$atomLists][[Intersection[
 		Position[data[$creatorEvents], _ ? (# <= s &)][[All, 1]],
@@ -192,7 +194,7 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["Step", s_Integer] /;
 (*Negative steps*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["Step", s_Integer] /;
+SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_Integer] /;
 		- SetSubstitutionEvolution[data]["EventsCount"] - 1 <= s < 0 :=
 	SetSubstitutionEvolution[data][
 		"Step", s + 1 + SetSubstitutionEvolution[data]["EventsCount"]]
