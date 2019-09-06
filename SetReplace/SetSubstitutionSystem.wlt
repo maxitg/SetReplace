@@ -21,13 +21,13 @@ VerificationTest[
 VerificationTest[
   SetSubstitutionSystem[1 -> 2, 1],
   SetSubstitutionSystem[1 -> 2, 1],
-  {SetSubstitutionSystem::setNotList}
+  {SetReplace::setNotList}
 ]
 
 VerificationTest[
   SetSubstitutionSystem[1 -> 2, 1, Method -> "C++"],
   SetSubstitutionSystem[1 -> 2, 1, Method -> "C++"],
-  {SetSubstitutionSystem::setNotList}
+  {SetReplace::setNotList}
 ]
 
 (** Rules are valid **)
@@ -35,19 +35,19 @@ VerificationTest[
 VerificationTest[
   SetSubstitutionSystem[1, {1}],
   SetSubstitutionSystem[1, {1}],
-  {SetSubstitutionSystem::invalidRules}
+  {SetReplace::invalidRules}
 ]
 
 VerificationTest[
   SetSubstitutionSystem[1, {1}, Method -> "C++"],
   SetSubstitutionSystem[1, {1}, Method -> "C++"],
-  {SetSubstitutionSystem::invalidRules}
+  {SetReplace::invalidRules}
 ]
 
 VerificationTest[
   SetSubstitutionSystem[{1}, {1}],
   SetSubstitutionSystem[{1}, {1}],
-  {SetSubstitutionSystem::invalidRules}
+  {SetReplace::invalidRules}
 ]
 
 (** Step count is valid **)
@@ -83,7 +83,7 @@ VerificationTest[
 (** Simple examples **)
 
 VerificationTest[
-  SetSubstitutionSystem[{} :> {}, {}]["StepCount"],
+  SetSubstitutionSystem[{1} :> {1}, {1}]["EventsCount"],
   1
 ]
 
@@ -113,7 +113,7 @@ VerificationTest[
 ]
 
 VerificationTest[
-  SetSubstitutionSystem[{2 -> 5, 3 :> 6}, {1, 2, 3}, 2]["StepCount"],
+  SetSubstitutionSystem[{2 -> 5, 3 :> 6}, {1, 2, 3}, 2]["GenerationsCount"],
   1
 ]
 
@@ -128,7 +128,7 @@ VerificationTest[
 ]
 
 VerificationTest[
-  SetSubstitutionSystem[4 -> 5, {1, 2, 3}]["StepCount"],
+  SetSubstitutionSystem[4 -> 5, {1, 2, 3}]["EventsCount"],
   0
 ]
 
