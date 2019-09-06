@@ -9,50 +9,60 @@ $sameSetQ[x_, y_] := Module[{xAtoms, yAtoms},
 ]
 
 $systemsToTest = {
-  {{{0, 1}}, FromAnonymousRules[{{0, 1}} -> {{0, 2}, {2, 1}}], 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}}}], 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}}}], 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {1, 2}}}], 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 1}}}], 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 2}}}], 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 3}}}], 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {2}, {1, 2}}}], 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {3}, {1, 2}}}], 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {3}, {1, 2, 4}}}], 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {2}, {2}, {1, 2}}}], 100},
-  {{{1}, {1}, {1}}, FromAnonymousRules[{{{1}} -> {{2}, {1, 2}}}], 100},
-  {{{1, 1}}, FromAnonymousRules[{{{1, 2}} -> {{1, 3}, {2, 3}}}], 100},
+  {{{0, 1}}, FromAnonymousRules[{{0, 1}} -> {{0, 2}, {2, 1}}], 100, 6},
+  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}}}], 100, 100},
+  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}}}], 100, 100},
+  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {1, 2}}}], 100, 6},
+  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 1}}}], 100, 6},
+  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 2}}}], 100, 6},
+  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 3}}}], 100, 6},
+  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {2}, {1, 2}}}], 100, 6},
+  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {3}, {1, 2}}}], 100, 6},
+  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {3}, {1, 2, 4}}}], 100, 6},
+  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {2}, {2}, {1, 2}}}], 100, 4},
+  {{{1}, {1}, {1}}, FromAnonymousRules[{{{1}} -> {{2}, {1, 2}}}], 100, 34},
+  {{{1, 1}}, FromAnonymousRules[{{{1, 2}} -> {{1, 3}, {2, 3}}}], 100, 6},
   {{{0, 1}, {0, 2}, {0, 3}},
     {{{a_, b_}, {a_, c_}, {a_, d_}} :>
       Module[{$0, $1, $2}, {
         {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
         {$0, b}, {$1, c}, {$2, d}}]},
-    30},
+    30,
+    3},
   {{{0, 0}, {0, 0}, {0, 0}},
     {{{a_, b_}, {a_, c_}, {a_, d_}} :>
       Module[{$0, $1, $2}, {
         {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
         {$0, b}, {$1, c}, {$2, d}}]},
-    30},
+    30,
+    3},
   {{{0, 1}, {0, 2}, {0, 3}},
     {{{a_, b_}, {a_, c_}, {a_, d_}} :>
       Module[{$0, $1, $2}, {
         {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
         {$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
-    30},
+    30,
+    3},
   {{{0, 0}, {0, 0}, {0, 0}},
     {{{a_, b_}, {a_, c_}, {a_, d_}} :>
       Module[{$0, $1, $2}, {
         {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
         {$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
-    30}
+    30,
+    3}
 };
 
 VerificationTest[
   SetReplace[##, Method -> "WolframLanguage"],
   SetReplace[##, Method -> "C++"],
   SameTest -> $sameSetQ
-] & @@@ $systemsToTest
+] & @@@ $systemsToTest[[All, {1, 2, 3}]]
+
+VerificationTest[
+  SetReplaceAll[##, Method -> "WolframLanguage"],
+  SetReplaceAll[##, Method -> "C++"],
+  SameTest -> $sameSetQ
+] & @@@ $systemsToTest[[All, {1, 2, 4}]]
 
 (** Complex matching **)
 

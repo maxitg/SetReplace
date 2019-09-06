@@ -88,11 +88,6 @@ VerificationTest[
 ]
 
 VerificationTest[
-  SetSubstitutionSystem[{} :> {}, {}][-1],
-  {}
-]
-
-VerificationTest[
   SetSubstitutionSystem[2 -> 5, {1, 2, 3}][-1],
   {1, 3, 5}
 ]
@@ -161,8 +156,6 @@ VerificationTest[
   SetSubstitutionSystem[{{1}, {2}} :> {{3}}, {{2}, {1}}][-1],
   {{3}}
 ]
-
-(** Consistent step counts vs. SetReplace **)
 
 VerificationTest[
   SetSubstitutionSystem[{{a_, b_}, {b_, c_}} :> {{a, c}}, {{1, 2}, {2, 3}, {3, 4}, {4, 5}}, 2][1],
