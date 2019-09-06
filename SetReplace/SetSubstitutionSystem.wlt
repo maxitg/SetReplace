@@ -21,13 +21,13 @@ VerificationTest[
 VerificationTest[
   SetSubstitutionSystem[1 -> 2, 1],
   SetSubstitutionSystem[1 -> 2, 1],
-  {SetReplace::setNotList}
+  {SetSubstitutionSystem::setNotList}
 ]
 
 VerificationTest[
   SetSubstitutionSystem[1 -> 2, 1, Method -> "C++"],
   SetSubstitutionSystem[1 -> 2, 1, Method -> "C++"],
-  {SetReplace::setNotList}
+  {SetSubstitutionSystem::setNotList}
 ]
 
 (** Rules are valid **)
@@ -35,19 +35,19 @@ VerificationTest[
 VerificationTest[
   SetSubstitutionSystem[1, {1}],
   SetSubstitutionSystem[1, {1}],
-  {SetReplace::invalidRules}
+  {SetSubstitutionSystem::invalidRules}
 ]
 
 VerificationTest[
   SetSubstitutionSystem[1, {1}, Method -> "C++"],
   SetSubstitutionSystem[1, {1}, Method -> "C++"],
-  {SetReplace::invalidRules}
+  {SetSubstitutionSystem::invalidRules}
 ]
 
 VerificationTest[
   SetSubstitutionSystem[{1}, {1}],
   SetSubstitutionSystem[{1}, {1}],
-  {SetReplace::invalidRules}
+  {SetSubstitutionSystem::invalidRules}
 ]
 
 (** Step count is valid **)
@@ -55,19 +55,19 @@ VerificationTest[
 VerificationTest[
   SetSubstitutionSystem[{1 -> 2}, {1}, -1],
   SetSubstitutionSystem[{1 -> 2}, {1}, -1],
-  {SetReplace::nonIntegerIterations}
+  {SetSubstitutionSystem::nonIntegerIterations}
 ]
 
 VerificationTest[
   SetSubstitutionSystem[{1 -> 2}, {1}, -1, Method -> "C++"],
   SetSubstitutionSystem[{1 -> 2}, {1}, -1, Method -> "C++"],
-  {SetReplace::nonIntegerIterations}
+  {SetSubstitutionSystem::nonIntegerIterations}
 ]
 
 VerificationTest[
   SetSubstitutionSystem[{1 -> 2}, {1}, 1.5],
   SetSubstitutionSystem[{1 -> 2}, {1}, 1.5],
-  {SetReplace::nonIntegerIterations}
+  {SetSubstitutionSystem::nonIntegerIterations}
 ]
 
 (** Method is valid **)
@@ -75,7 +75,7 @@ VerificationTest[
 VerificationTest[
   SetSubstitutionSystem[{{0}} -> {{1}}, {{0}}, Method -> StringJoin[ToString /@ $SetReplaceMethods]],
   SetSubstitutionSystem[{{0}} -> {{1}}, {{0}}, Method -> StringJoin[ToString /@ $SetReplaceMethods]],
-  {SetReplace::invalidMethod}
+  {SetSubstitutionSystem::invalidMethod}
 ]
 
 (* Implementation *)

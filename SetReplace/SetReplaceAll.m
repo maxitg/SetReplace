@@ -49,38 +49,11 @@ SetReplaceAll[args___] := 0 /;
 	!Developer`CheckArgumentCount[SetReplaceAll[args], 2, 3] && False
 
 
-(* ::Subsection:: *)
-(*Set is a list*)
-
-
-SetReplaceAll[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
-	!ListQ[set] &&
-	Message[SetReplace::setNotList, "first", SetReplaceAll]
-
-
-(* ::Subsection:: *)
-(*Rules are valid*)
-
-
-SetReplaceAll[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
-	!setReplaceRulesQ[rules] &&
-	Message[SetReplace::invalidRules, "second", SetReplaceAll]
-
-
-(* ::Subsection:: *)
-(*Step count is valid*)
-
-
-SetReplaceAll[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
-	!stepCountQ[n] &&
-	Message[SetReplace::nonIntegerIterations, SetReplaceAll, n]
-
-
 (* ::Section:: *)
 (*Options*)
 
 
-Options[SetReplaceAll] := Options[SetSubstitutionSystem];
+Options[SetReplaceAll] := Options[SetSubstitutionSystem]
 
 
 (* ::Section:: *)
@@ -92,10 +65,11 @@ Options[SetReplaceAll] := Options[SetSubstitutionSystem];
 
 
 SetReplaceAll[
-		set_List,
-		rules_ ? setReplaceRulesQ,
-		n : Except[_ ? OptionQ] : 1,
-		o : OptionsPattern[]] /; stepCountQ[n] := Module[{failed = False, result},
-	result = Check[SetSubstitutionSystem[rules, set, n, o][-1], failed = True];
-	result /; !failed
-]
+		set_, rules_, generations : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] :=
+	Module[{result},
+		result = Check[
+			setSubstitutionSystem[
+				rules, set, generations, Infinity, SetReplaceAll, o][-1],
+			$Failed];
+		result /; result =!= $Failed
+	]

@@ -15,8 +15,6 @@ PackageExport["SetSubstitutionSystem"]
 PackageExport["$SetReplaceMethods"]
 
 
-PackageScope["setReplaceRulesQ"]
-PackageScope["stepCountQ"]
 PackageScope["setSubstitutionSystem"]
 
 
@@ -64,57 +62,47 @@ SetSubstitutionSystem[args___] := 0 /;
 (*Set is a list*)
 
 
-SetReplace::setNotList = "The `` argument of `` must be a List.";
-
-
-SetSubstitutionSystem[
-		rules_, set_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
+setSubstitutionSystem[
+		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
 	!ListQ[set] &&
-	Message[SetReplace::setNotList, "second", SetSubstitutionSystem]
+	makeMessage[caller, "setNotList", set]
 
 
 (* ::Subsection:: *)
 (*Rules are valid*)
 
 
-SetReplace::invalidRules =
-	"The `` argument of `` must be either a Rule, RuleDelayed, or " ~~
-	"a List of them.";
-
-
 setReplaceRulesQ[rules_] :=
 	MatchQ[rules, {(_Rule | _RuleDelayed)..} | _Rule | _RuleDelayed]
 
 
-SetSubstitutionSystem[
-		rules_, set_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
+setSubstitutionSystem[
+		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
 	!setReplaceRulesQ[rules] &&
-	Message[SetReplace::invalidRules, "first", SetSubstitutionSystem]
+	makeMessage[caller, "invalidRules", rules]
 
 
 (* ::Subsection:: *)
 (*Step count is valid*)
 
 
-SetReplace::nonIntegerIterations =
-	"The third argument `2` of `1` must be an integer or infinity.";
-
-
 stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
 
 
-SetSubstitutionSystem[
-		rules_, set_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
-	!stepCountQ[n] &&
-	Message[SetReplace::nonIntegerIterations, SetSubstitutionSystem, n]
+setSubstitutionSystem[
+		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+	!stepCountQ[generations] &&
+	makeMessage[caller, "nonIntegerIterations", "generations", generations]
+
+
+setSubstitutionSystem[
+		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+	!stepCountQ[maxEvents] &&
+	makeMessage[caller, "nonIntegerIterations", "replacements", maxEvents]
 
 
 (* ::Subsection:: *)
 (*Method is valid*)
-
-
-SetReplace::invalidMethod =
-	"Method should be one of " <> ToString[$SetReplaceMethods, InputForm] <> ".";
 
 
 $cppMethod = "C++";
@@ -124,10 +112,10 @@ $wlMethod = "WolframLanguage";
 $SetReplaceMethods = {Automatic, $cppMethod, $wlMethod};
 
 
-SetSubstitutionSystem[
-		rules_, set_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
+setSubstitutionSystem[
+		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
 	!MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
-	Message[SetReplace::invalidMethod]
+	makeMessage[caller, "invalidMethod"]
 
 
 (* ::Section:: *)
@@ -184,24 +172,12 @@ Options[setSubstitutionSystem] = Options[SetSubstitutionSystem];
 (*Switching code between WL and C++ implementations*)
 
 
-SetReplace::cppNotImplemented =
-	"C++ implementation is only available for local rules, " <>
-	"and only for sets of lists (hypergraphs).";
-
-
-SetReplace::cppInfinite =
-	"C++ implementation is only available for finite step count.";
-
-
-SetReplace::noCpp =
-	"C++ implementation was not compiled for your system type.";
-
-
 setSubstitutionSystem[
-			rules_,
-			set_,
-			generations_,
-			steps_,
+			rules_ ? setReplaceRulesQ,
+			set_List,
+			generations_ ? stepCountQ,
+			steps_ ? stepCountQ,
+			caller_,
 			o : OptionsPattern[]] := Module[{
 		method = OptionValue[Method], canonicalRules, failedQ = False},
 	canonicalRules = toCanonicalRules[rules];
@@ -213,8 +189,8 @@ setSubstitutionSystem[
 	If[MatchQ[method, "C++"],
 		failedQ = True;
 		If[!$cppSetReplaceAvailable,
-			Message[SetReplace::noCpp],
-			Message[SetReplace::cppNotImplemented]]];
+			makeMessage[caller, "noCpp"],
+			makeMessage[caller, "cppNotImplemented"]]];
 	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
 		setReplace$wl[canonicalRules, set, generations, steps]]
@@ -226,11 +202,11 @@ setSubstitutionSystem[
 
 
 SetSubstitutionSystem[
-			rules_ ? setReplaceRulesQ,
-			set_List,
-			generations : Except[_ ? OptionQ] : 1,
-			o : OptionsPattern[]] /; stepCountQ[generations] := Module[{
-		result},
-	result = setSubstitutionSystem[rules, set, generations, Infinity, o];
-	result
-/; result =!= $Failed]
+		rules_, set_, generations : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] :=
+	Module[{result},
+		result = Check[
+			setSubstitutionSystem[
+				rules, set, generations, Infinity, SetSubstitutionSystem, o],
+			$Failed];
+		result /; result =!= $Failed
+	]

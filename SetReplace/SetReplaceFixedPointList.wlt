@@ -21,7 +21,7 @@ VerificationTest[
 VerificationTest[
   SetReplaceFixedPointList[1, 1 -> 2],
   SetReplaceFixedPointList[1, 1 -> 2],
-  {SetReplace::setNotList}
+  {SetReplaceFixedPointList::setNotList}
 ]
 
 (** Rules are valid **)
@@ -29,7 +29,7 @@ VerificationTest[
 VerificationTest[
   SetReplaceFixedPointList[{1}, {1}],
   SetReplaceFixedPointList[{1}, {1}],
-  {SetReplace::invalidRules}
+  {SetReplaceFixedPointList::invalidRules}
 ]
 
 (* Implementation *)

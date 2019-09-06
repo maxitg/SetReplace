@@ -58,64 +58,21 @@ SetReplace[args___] := 0 /;
 	!Developer`CheckArgumentCount[SetReplace[args], 2, 3] && False
 
 
-(* ::Subsection:: *)
-(*Set is a list*)
-
-
-SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
-	!ListQ[set] &&
-	Message[SetReplace::setNotList, "first", SetReplace]
-
-
-(* ::Subsection:: *)
-(*Rules are valid*)
-
-
-SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
-	!setReplaceRulesQ[rules] && Message[SetReplace::invalidRules, "second", SetReplace]
-
-
-(* ::Subsection:: *)
-(*Step count is valid*)
-
-
-SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
-	!stepCountQ[n] &&
-	Message[SetReplace::nonIntegerIterations, SetReplace, n]
-
-
-(* ::Subsection:: *)
-(*Method is valid*)
-
-
-SetReplace[set_, rules_, n : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] := 0 /;
-	!MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
-	Message[SetReplace::invalidMethod]
-
-
 (* ::Section:: *)
 (*Options*)
 
 
-Options[SetReplace] = {Method -> Automatic};
+Options[SetReplace] := Options[SetSubstitutionSystem]
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
-(* ::Subsection:: *)
-(*SetReplace*)
-
-
-SetReplace[
-				set_List,
-				rules_ ? setReplaceRulesQ,
-				n : Except[_ ? OptionQ] : 1,
-				o : OptionsPattern[]] /;
-			stepCountQ[n] := Module[{
-		result},
-	result = setSubstitutionSystem[rules, set, Infinity, n, o];
-	result[-1]
-/; MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
-	result =!= $Failed]
+SetReplace[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] :=
+	Module[{result},
+		result = Check[
+			setSubstitutionSystem[rules, set, Infinity, events, SetReplace, o][-1],
+			$Failed];
+		result /; result =!= $Failed
+	]

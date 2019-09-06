@@ -49,22 +49,6 @@ SetReplaceFixedPoint[args___] := 0 /;
 	!Developer`CheckArgumentCount[SetReplaceFixedPoint[args], 2, 2] && False
 
 
-(* ::Subsection:: *)
-(*Set is a list*)
-
-
-SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] := 0 /; !ListQ[set] &&
-	Message[SetReplace::setNotList, "first", SetReplaceFixedPoint]
-
-
-(* ::Subsection:: *)
-(*Rules are valid*)
-
-
-SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] := 0 /; !setReplaceRulesQ[rules] &&
-	Message[SetReplace::invalidRules, "second", SetReplaceFixedPoint]
-
-
 (* ::Section:: *)
 (*Options*)
 
@@ -76,9 +60,10 @@ Options[SetReplaceFixedPoint] := Options[SetSubstitutionSystem]
 (*Implementation*)
 
 
-SetReplaceFixedPoint[
-			set_List, rules_ ? setReplaceRulesQ, o : OptionsPattern[]] := Module[{
-		failed = False, result},
-	result = Check[SetSubstitutionSystem[rules, set, Infinity, o][-1], failed = True];
-	result /; !failed
+SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] := Module[{result},
+	result = Check[
+		setSubstitutionSystem[
+			rules, set, Infinity, Infinity, SetReplaceFixedPoint, o][-1],
+		$Failed];
+	result /; result =!= $Failed
 ]

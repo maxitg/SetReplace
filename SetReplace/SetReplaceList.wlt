@@ -21,7 +21,7 @@ VerificationTest[
 VerificationTest[
   SetReplaceList[1, 1 -> 2, 2],
   SetReplaceList[1, 1 -> 2, 2],
-  {SetReplace::setNotList}
+  {SetReplaceList::setNotList}
 ]
 
 (** Rules are valid **)
@@ -29,7 +29,7 @@ VerificationTest[
 VerificationTest[
   SetReplaceList[{1}, {1}, 1],
   SetReplaceList[{1}, {1}, 1],
-  {SetReplace::invalidRules}
+  {SetReplaceList::invalidRules}
 ]
 
 (** Step count is valid **)
@@ -37,7 +37,7 @@ VerificationTest[
 VerificationTest[
   SetReplaceList[{1}, {1 -> 2}, -1],
   SetReplaceList[{1}, {1 -> 2}, -1],
-  {SetReplace::nonIntegerIterations}
+  {SetReplaceList::nonIntegerIterations}
 ]
 
 (* Implementation *)
