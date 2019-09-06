@@ -43,18 +43,43 @@ VerificationTest[
 (* Implementation *)
 
 VerificationTest[
-  SetReplaceList[{1, 2, 3}, {2 -> 5, 3 :> 6}, 10],
-  {{1, 2, 3}, {1, 3, 5}, {1, 5, 6}}
+  SetReplaceList[{1, 2, 3}, {2 -> 5, 3 :> 6, 5 :> 9}, 10],
+  {{1, 2, 3}, {1, 3, 5}, {1, 5, 6}, {1, 6, 9}}
 ]
 
 VerificationTest[
-  SetReplaceList[{1, 2, 3}, {2 -> 5, 3 :> 6}, 1],
+  SetReplaceList[{1, 2, 3}, {2 -> 5, 3 :> 6, 5 :> 9}, Infinity],
+  {{1, 2, 3}, {1, 3, 5}, {1, 5, 6}, {1, 6, 9}}
+]
+
+VerificationTest[
+  SetReplaceList[{1, 2, 3}, {2 -> 5, 3 :> 6, 5 :> 9}, 1],
   {{1, 2, 3}, {1, 3, 5}}
+]
+
+VerificationTest[
+  SetReplaceList[{{1}, {2}, {3}}, {{{2}} -> {{5}}, {{3}} :> {{6}}, {{5}} :> {{9}}}, 2, Method -> "C++"],
+  {{{1}, {2}, {3}}, {{1}, {3}, {5}}, {{1}, {5}, {6}}}
+]
+
+VerificationTest[
+  SetReplaceList[{{1}, {2}, {3}}, {{{2}} -> {{5}}, {{3}} :> {{6}}, {{5}} :> {{9}}}, 2, Method -> "WolframLanguage"],
+  {{{1}, {2}, {3}}, {{1}, {3}, {5}}, {{1}, {5}, {6}}}
 ]
 
 VerificationTest[
   SetReplaceList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, 2],
   {{{1, 2}, {2, 3}, {3, 1}}, {{3, 1}, {1, 3}}, {{3, 3}}}
+]
+
+VerificationTest[
+  SetReplaceList[{}, {} :> {{1, 2}}, 2],
+  {{}, {{1, 2}}, {{1, 2}, {1, 2}}}
+]
+
+VerificationTest[
+  SetReplaceList[{{1, 2}}, {{1, 2}} :> {{1, 2}}, 2],
+  {{{1, 2}}, {{1, 2}}, {{1, 2}}}
 ]
 
 EndTestSection[]

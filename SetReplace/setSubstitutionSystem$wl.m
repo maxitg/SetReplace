@@ -127,7 +127,7 @@ addMetadataManagement[
 								{Hold[getNextExpression[]],
 								 nextEvent,
 								 Infinity,
-								 Max @@ inputGenerations + 1,
+								 Max[0, inputGenerations] + 1,
 								 Hold[o]},
 								HoldAll],
 							moduleOutput,

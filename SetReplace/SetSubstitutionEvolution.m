@@ -162,7 +162,7 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["GenerationsCount"] := Max[
 
 
 SetSubstitutionEvolution[data_ ? evolutionDataQ]["EventsCount"] :=
-	Max[0, DeleteCases[data[$destroyerEvents], Infinity]]
+	Max[0, DeleteCases[Join[data[$destroyerEvents], data[$creatorEvents]], Infinity]]
 
 
 (* ::Subsection:: *)
