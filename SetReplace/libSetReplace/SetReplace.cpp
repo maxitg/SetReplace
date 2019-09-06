@@ -92,37 +92,30 @@ namespace SetReplace {
         
         int writeIndex = 0;
         mint position[1];
-        position[0] = ++writeIndex;
-        libData->MTensor_setInteger(output, position, expressions.size());
+        const auto appendToTensor = [libData, &writeIndex, &position, &output](const std::vector<int> numbers) {
+            for (const auto number : numbers) {
+                position[0] = ++writeIndex;
+                libData->MTensor_setInteger(output, position, number);
+            }
+        };
+        
+        appendToTensor({static_cast<int>(expressions.size())});
         for (int expressionIndex = 0; expressionIndex < expressions.size(); ++expressionIndex) {
-            position[0] = ++writeIndex;
-            libData->MTensor_setInteger(output, position, expressions[expressionIndex].creatorEvent);
-            position[0] = ++writeIndex;
-            libData->MTensor_setInteger(output, position, expressions[expressionIndex].destroyerEvent);
-            position[0] = ++writeIndex;
-            libData->MTensor_setInteger(output, position, expressions[expressionIndex].generation);
-            position[0] = ++writeIndex;
-            libData->MTensor_setInteger(output, position, atomsPointer);
+            appendToTensor({
+                expressions[expressionIndex].creatorEvent,
+                expressions[expressionIndex].destroyerEvent,
+                expressions[expressionIndex].generation,
+                atomsPointer});
             atomsPointer += expressions[expressionIndex].atoms.size();
         }
         
         // Put fake event at the end so that the length of final expression can be determined on WL side.
         constexpr EventID fakeEvent = -3;
         constexpr Generation fakeGeneration = -1;
-        position[0] = ++writeIndex;
-        libData->MTensor_setInteger(output, position, fakeEvent);
-        position[0] = ++writeIndex;
-        libData->MTensor_setInteger(output, position, fakeEvent);
-        position[0] = ++writeIndex;
-        libData->MTensor_setInteger(output, position, fakeGeneration);
-        position[0] = ++writeIndex;
-        libData->MTensor_setInteger(output, position, atomsPointer);
+        appendToTensor({fakeEvent, fakeEvent, fakeGeneration, atomsPointer});
         
         for (int expressionIndex = 0; expressionIndex < expressions.size(); ++expressionIndex) {
-            for (int atomIndex = 0; atomIndex < expressions[expressionIndex].atoms.size(); ++atomIndex) {
-                position[0] = ++writeIndex;
-                libData->MTensor_setInteger(output, position, expressions[expressionIndex].atoms[atomIndex]);
-            }
+            appendToTensor(expressions[expressionIndex].atoms);
         }
         
         return output;
