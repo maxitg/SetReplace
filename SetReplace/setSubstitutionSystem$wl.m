@@ -100,6 +100,7 @@ addMetadataManagement[
 			getNextExpression_,
 			maxGeneration_] := Module[{
 		inputIDs = Table[Unique["id"], Length[input]],
+		wholeInputPatternNames = Table[Unique["inputExpression"], Length[input]],
 		inputCreators = Table[Unique["creator"], Length[input]],
 		inputGenerations = Table[Unique["generation"], Length[input]],
 		nextEvent},
@@ -119,13 +120,12 @@ addMetadataManagement[
 							which just output Nothing at the end,
 							they pass just fine through all the transformation. *)
 						Hold[Sow[#]; Nothing] & @* ({
-							#[[1]],
-							#[[2]],
-							nextEvent,
-							#[[3]],
-							#[[4]] /. x_Pattern :> x[[1]]} &) /@
+							#[[1]], #[[2]], nextEvent, #[[3]], #[[4]]} &) /@
 								Transpose[{
-									inputIDs, inputCreators, inputGenerations, input}],
+									inputIDs,
+									inputCreators,
+									inputGenerations,
+									wholeInputPatternNames}],
 						(* new expressions *)
 						ReleaseHold @ Map[
 							Function[
@@ -143,12 +143,13 @@ addMetadataManagement[
 				 Pattern[Evaluate[#[[2]]], Blank[]],
 				 Infinity,
 				 Pattern[Evaluate[#[[3]]], Blank[]] ? (# < maxGeneration &),
-				 #[[4]]} & /@
+				 Pattern[Evaluate[#[[5]]], #[[4]]]} & /@
 						Transpose[{
 							inputIDs,
 							inputCreators,
 							inputGenerations,
-							originalInput}] :>
+							originalInput,
+							wholeInputPatternNames}] :>
 					Module[moduleArguments, newModuleContents]]] //.
 						Hold[expr_] :> expr]
 ]

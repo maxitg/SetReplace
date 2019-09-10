@@ -161,7 +161,7 @@ VerificationTest[
   SetSubstitutionSystem[
     {x_List ? (Length[#] == 3 &), y_List ? (Length[#] == 6 &)} :> {x, y, Join[x, y]},
     {"This" -> "that", {2, 3, 4}, {2, 5}, {1, 2, 3, 4, 5, 6}},
-    2][0]
+    2][0],
   {"This" -> "that", {2, 3, 4}, {2, 5}, {1, 2, 3, 4, 5, 6}}
 ]
 
@@ -169,8 +169,8 @@ VerificationTest[
   SetSubstitutionSystem[
     {x_List ? (Length[#] == 3 &), y_List ? (Length[#] == 6 &)} :> {x, y, Join[x, y]},
     {"This" -> "that", {2, 3, 4}, {2, 5}, {1, 2, 3, 4, 5, 6}},
-    2][-1]
-  {"This" -> "that", {1, 2, 3, 4, 5, 6}, {2, 3, 4, 1, 2, 3, 4, 5, 6}, {2, 3, 4}, {2, 5}, {2, 3, 4, 1, 2, 3, 4, 5, 6}}
+    2][-1],
+  {"This" -> "that", {2, 5}, {2, 3, 4, 1, 2, 3, 4, 5, 6}, {2, 3, 4}, {1, 2, 3, 4, 5, 6}, {2, 3, 4, 1, 2, 3, 4, 5, 6}}
 ]
 
 VerificationTest[
