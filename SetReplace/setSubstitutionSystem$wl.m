@@ -171,7 +171,11 @@ setSubstitutionSystem$wl[rules_, set_, generations_, steps_] := Module[{
 	rulesWithMetadata = addMetadataManagement[
 		#, nextEventID++ &, nextExpression, generations] & /@ rules;
 	outputWithMetadata = Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, steps]];
-	result = SortBy[Join[outputWithMetadata[[1]], outputWithMetadata[[2, 1]]], First];
+	result = SortBy[
+		Join[
+			outputWithMetadata[[1]],
+			If[outputWithMetadata[[2]] == {}, {}, outputWithMetadata[[2, 1]]]],
+		First];
 	SetSubstitutionEvolution[<|
 		$creatorEvents -> result[[All, 2]],
 		$destroyerEvents -> result[[All, 3]],
