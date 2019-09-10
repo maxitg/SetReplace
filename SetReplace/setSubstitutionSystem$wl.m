@@ -113,13 +113,19 @@ addMetadataManagement[
 			With[{
 					newModuleContents = Join[
 						(* old expressions *)
-						{#[[1]],
-						 #[[2]],
-						 nextEvent,
-						 #[[3]],
-						 #[[4]] /. x_Pattern :> x[[1]]} & /@
-							Transpose[{
-								inputIDs, inputCreators, inputGenerations, input}],
+						(* don't put them in the main set, sow them instead,
+							that's much faster.
+							Given that these look just like normal expressions,
+							which just output Nothing at the end,
+							they pass just fine through all the transformation. *)
+						Hold[Sow[#]; Nothing] & @* ({
+							#[[1]],
+							#[[2]],
+							nextEvent,
+							#[[3]],
+							#[[4]] /. x_Pattern :> x[[1]]} &) /@
+								Transpose[{
+									inputIDs, inputCreators, inputGenerations, input}],
 						(* new expressions *)
 						ReleaseHold @ Map[
 							Function[
@@ -157,14 +163,15 @@ addMetadataManagement[
 
 
 setSubstitutionSystem$wl[rules_, set_, generations_, steps_] := Module[{
-		setWithMetadata, rulesWithMetadata, result,
+		setWithMetadata, rulesWithMetadata, outputWithMetadata, result,
 		nextExpressionID = 1, nextEventID = 1, nextExpression},
 	nextExpression = nextExpressionID++ &;
 	(* {id, creator, destroyer, generation, atoms} *)
 	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
 	rulesWithMetadata = addMetadataManagement[
 		#, nextEventID++ &, nextExpression, generations] & /@ rules;
-	result = SortBy[setReplace$wl[setWithMetadata, rulesWithMetadata, steps], First];
+	outputWithMetadata = Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, steps]];
+	result = SortBy[Join[outputWithMetadata[[1]], outputWithMetadata[[2, 1]]], First];
 	SetSubstitutionEvolution[<|
 		$creatorEvents -> result[[All, 2]],
 		$destroyerEvents -> result[[All, 3]],
