@@ -134,6 +134,18 @@ VerificationTest[
   {SetSubstitutionEvolution::eventNotInteger}
 ]
 
+VerificationTest[
+  SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    4]["SetAfterEvent", "good"],
+  SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    4]["SetAfterEvent", "good"],
+  {SetSubstitutionEvolution::eventNotInteger}
+]
+
 (* Incorrect generation arguments *)
 
 VerificationTest[

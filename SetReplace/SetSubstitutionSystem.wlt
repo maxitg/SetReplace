@@ -219,6 +219,60 @@ VerificationTest[
   1023
 ]
 
+VerificationTest[
+  SetSubstitutionSystem[FromAnonymousRules[{{1}} -> {}], {{1}, {2}, {3}, {4}, {5}}, Infinity]["GenerationsCount"],
+  1
+]
+
+VerificationTest[
+  SetSubstitutionSystem[FromAnonymousRules[{{1}} -> {}], {{1}, {2}, {3}, {4}, {5}}, Infinity]["EventsCount"],
+  5
+]
+
+VerificationTest[
+  SetSubstitutionSystem[FromAnonymousRules[{{1}} -> {}], {{1}, {2}, {3}, {4}, {5}}, Infinity][-1],
+  {}
+]
+
+VerificationTest[
+  SetSubstitutionSystem[FromAnonymousRules[{{1}} -> {{1}}], {{1}, {2}, {3}, {4}, {5}}, 0]["GenerationsCount"],
+  0
+]
+
+VerificationTest[
+  SetSubstitutionSystem[FromAnonymousRules[{{1}} -> {{1}}], {{1}, {2}, {3}, {4}, {5}}, 0]["EventsCount"],
+  0
+]
+
+VerificationTest[
+  SetSubstitutionSystem[
+    FromAnonymousRules[{{{1}} -> {}, {{1, 2}} -> {{1}}}],
+    {{1, 2}, {2}, {3}, {4}, {5}},
+    2]["GenerationsCount"],
+  2
+]
+
+VerificationTest[
+  SetSubstitutionSystem[
+    FromAnonymousRules[{{{1}} -> {}, {{1, 2}} -> {{1}}}],
+    {{1, 2}, {2}, {3}, {4}, {5}},
+    2]["EventsCount"],
+  6
+]
+
+VerificationTest[
+  SetSubstitutionSystem[
+    {{{1}} -> {{2}}},
+    {{1}, {1}, {1}},
+    1,
+    Method -> "C++"],
+  SetSubstitutionSystem[
+    {{{1}} -> {{2}}},
+    {{1}, {1}, {1}},
+    1,
+    Method -> "WolframLanguage"]
+]
+
 EndTestSection[]
 
 
