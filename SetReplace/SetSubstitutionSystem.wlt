@@ -174,6 +174,22 @@ VerificationTest[
 ]
 
 VerificationTest[
+  SetSubstitutionSystem[
+    {x_List /; (Length[x] == 3), y_List /; (Length[y] == 6)} :> {x, y, Join[x, y]},
+    {"This" -> "that", {2, 3, 4}, {2, 5}, {1, 2, 3, 4, 5, 6}},
+    2][0],
+  {"This" -> "that", {2, 3, 4}, {2, 5}, {1, 2, 3, 4, 5, 6}}
+]
+
+VerificationTest[
+  SetSubstitutionSystem[
+    {x_List /; (Length[x] == 3), y_List /; (Length[y] == 6)} :> {x, y, Join[x, y]},
+    {"This" -> "that", {2, 3, 4}, {2, 5}, {1, 2, 3, 4, 5, 6}},
+    2][-1],
+  {"This" -> "that", {2, 5}, {2, 3, 4, 1, 2, 3, 4, 5, 6}, {2, 3, 4}, {1, 2, 3, 4, 5, 6}, {2, 3, 4, 1, 2, 3, 4, 5, 6}}
+]
+
+VerificationTest[
   SetSubstitutionSystem[{{a_, b_}, {b_, c_}} :> {{a, c}}, {{1, 2}, {2, 3}, {3, 4}, {4, 5}}, 2][1],
   {{1, 3}, {3, 5}}
 ]
