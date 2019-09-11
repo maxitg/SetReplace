@@ -23,7 +23,8 @@ SetReplaceFixedPointList::usage = usageString[
 	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
 	"\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
 	"\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), \[Ellipsis]}] performs SetReplace repeatedly ",
-	"until the set no longer changes, and returns the list of all intermediate sets."];
+	"until no further events can be matched, ",
+	"and returns the list of all intermediate sets."];
 
 
 (* ::Section:: *)

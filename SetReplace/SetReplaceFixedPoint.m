@@ -23,10 +23,9 @@ SetReplaceFixedPoint::usage = usageString[
 	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
 	"\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
 	"\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), \[Ellipsis]}] performs SetReplace repeatedly ",
-	"until the set no longer changes, and returns the final set.",
+	"until no further events can be matched, and returns the final set.",
 	"\n",
-	"Fixed point requires not only the elements, but also the order of elements to be ",
-	"fixed. Will go into infinite loop if fixed point does not exist."];
+	"Will go into infinite loop if fixed point does not exist."];
 
 
 (* ::Section:: *)
