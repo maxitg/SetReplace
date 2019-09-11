@@ -166,28 +166,28 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["EventsCount"] :=
 
 
 (* ::Subsection:: *)
-(*Step*)
+(*SetAfterEvent*)
 
 
 (* ::Subsubsection:: *)
 (*Argument checks*)
 
 
-SetSubstitutionEvolution::stepTooLarge = "Event `` requested out of `` total.";
+SetSubstitutionEvolution::eventTooLarge = "Event `` requested out of `` total.";
 
 
 SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_Integer] := 0 /;
 	With[{eventsCount = SetSubstitutionEvolution[data]["EventsCount"]},
 		!(- eventsCount - 1 <= s <= eventsCount) &&
-		Message[SetSubstitutionEvolution::stepTooLarge, s, eventsCount]]
+		Message[SetSubstitutionEvolution::eventTooLarge, s, eventsCount]]
 
 
-SetSubstitutionEvolution::stepNotInteger = "Event `` must be an integer.";
+SetSubstitutionEvolution::eventNotInteger = "Event `` must be an integer.";
 
 
 SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_] := 0 /;
 	!IntegerQ[s] &&
-	Message[SetSubstitutionEvolution::stepNotInteger, s]
+	Message[SetSubstitutionEvolution::eventNotInteger, s]
 
 
 (* ::Subsubsection:: *)

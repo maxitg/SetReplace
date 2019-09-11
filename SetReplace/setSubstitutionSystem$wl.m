@@ -170,7 +170,7 @@ setSubstitutionSystem$wl[rules_, set_, generations_, steps_] := Module[{
 	(* {id, creator, destroyer, generation, atoms} *)
 	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
 	rulesWithMetadata = addMetadataManagement[
-		#, nextEventID++ &, nextExpression, generations] & /@ rules;
+		#, nextEventID++ &, nextExpression, generations] & /@ toCanonicalRules[rules];
 	outputWithMetadata = Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, steps]];
 	result = SortBy[
 		Join[

@@ -139,13 +139,15 @@ $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
 $maxInt = 2^31 - 1;
 
 
-setSubstitutionSystem$cpp[set_, rules_, generations_, steps_] /;
+setSubstitutionSystem$cpp[rules_, set_, generations_, steps_] /;
 			$cppSetReplaceAvailable := Module[{
+		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
 		mappedSet, localIndices, mappedRules, cppOutput, resultAtoms,
 		inversePartialGlobalMap, inverseGlobalMap},
+	canonicalRules = toCanonicalRules[rules];
 	setAtoms = Hold /@ Union[Flatten[set]];
-	atomsInRules = ruleAtoms /@ rules;
+	atomsInRules = ruleAtoms /@ canonicalRules;
 	globalAtoms = Union @ Flatten @ {setAtoms, atomsInRules[[All, 1]]};
 	globalIndex = Association @ Thread[globalAtoms -> Range[Length[globalAtoms]]];
 	mappedSet = Map[globalIndex, Map[Hold, set, {2}], {2}];
@@ -153,10 +155,10 @@ setSubstitutionSystem$cpp[set_, rules_, generations_, steps_] /;
 		Association @ Thread[#[[2]] -> - Range[Length[#[[2]]]]] & /@ atomsInRules;
 	mappedRules = Table[
 		ruleAtomsToIndices[
-			rules[[K]],
+			canonicalRules[[K]],
 			globalIndex,
 			localIndices[[K]]],
-		{K, Length[rules]}];
+		{K, Length[canonicalRules]}];
 	cppOutput = decodeExpressions @ $cpp$setReplace[
 		encodeNestedLists[List @@@ mappedRules],
 		encodeNestedLists[mappedSet],
