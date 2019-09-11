@@ -157,19 +157,18 @@ VerificationTest[
 
 (** Random tests **)
 
-SeedRandom["correctness.wlt"]
-
 graphFromHyperedges[edges_] := Graph[
   UndirectedEdge @@@ Flatten[Partition[#, 2, 1] & /@ edges, 1]];
 
 randomConnectedGraphs[edgeCount_, edgeLength_, graphCount_] := (
-  Select[ConnectedGraphQ @* graphFromHyperedges]
-    @ Table[
-      With[{k = edgeCount}, Table[RandomInteger[edgeLength k], k, edgeLength]],
-      graphCount]
+  #[[All, 1]] & @ Select[#[[2]] &] @ ParallelMap[
+    {#, ConnectedGraphQ @ graphFromHyperedges @ #} &,
+    BlockRandom[
+      Table[
+        With[{k = edgeCount}, Table[RandomInteger[edgeLength k], k, edgeLength]],
+        graphCount],
+      RandomSeeding -> ToString[{"randomConnectedGraphs", edgeCount, edgeLength, graphCount}]]]
 )
-
-DistributeDefinitions["SetReplace`"];
 
 (* Here we generate random graphs and try replacing them to nothing *)
 randomSameGraphMatchTest[edgeCount_, edgeLength_, graphCount_, method_] := Module[{
@@ -177,8 +176,10 @@ randomSameGraphMatchTest[edgeCount_, edgeLength_, graphCount_, method_] := Modul
   tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
   Union[
     ParallelMap[
-        BlockRandom[SetReplace[#, FromAnonymousRules[RandomSample[#] -> {}], Method -> method], RandomSeeding -> ToString[#]] &,
-        tests]]
+        SetReplace[#[[1]], FromAnonymousRules[#[[2]] -> {}], Method -> method] &,
+        BlockRandom[
+          {#, RandomSample[#]} & /@ tests,
+          RandomSeeding -> ToString[{"randomSameGraphMatchTest", edgeCount, edgeLength, graphCount, method}]]]]
       === {{}}
 ]
 
@@ -224,8 +225,8 @@ randomDistinctGraphMatchTest[
   Not[Or @@ ParallelMap[
     (* degenerate graphs can still match if not isomorphic, i.e., {{0, 0}} will match {{0, 1}},
        that's why we need to try replacing both ways *)
-    BlockRandom[SetReplace[#[[1]], FromAnonymousRules[#[[2]] -> {}], Method -> method] == {}
-      && SetReplace[#[[2]], FromAnonymousRules[#[[1]] -> {}], Method -> method] == {}, RandomSeeding -> ToString[#]] &,
+    SetReplace[#[[1]], FromAnonymousRules[#[[2]] -> {}], Method -> method] == {}
+      && SetReplace[#[[2]], FromAnonymousRules[#[[1]] -> {}], Method -> method] == {} &,
     tests]]
 ]
 
@@ -267,11 +268,13 @@ randomDegenerateGraphMatchTest[
   tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
 Union[
   ParallelMap[
-      BlockRandom[SetReplace[
-        # /. RandomChoice[Flatten[#]] -> RandomChoice[Flatten[#]],
-        FromAnonymousRules[RandomSample[#] -> {}],
-        Method -> method], RandomSeeding -> ToString[#]] &,
-      tests]]
+      SetReplace[
+        #[[1]] /. #[[2]] -> #[[3]],
+        FromAnonymousRules[#[[4]] -> {}],
+        Method -> method] &,
+      BlockRandom[
+        {#, RandomChoice[Flatten[#]], RandomChoice[Flatten[#]], RandomSample[#]} & /@ tests,
+        RandomSeeding -> ToString[{"randomDegenerateGraphMatchTest", edgeCount, edgeLength, graphCount, method}]]]]
     === {{}}
 ]
 

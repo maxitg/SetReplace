@@ -10,7 +10,7 @@
 
 CloseKernels[];
 LaunchKernels[];
-DistributeDefinitions["SetReplace`"]
+ParallelEvaluate[<< SetReplace`]
 
 
 (* ::Text:: *)
