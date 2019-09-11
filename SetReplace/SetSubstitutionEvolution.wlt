@@ -45,7 +45,7 @@ VerificationTest[
     {{a_, b_}, {b_, c_}} :> {{a, c}},
     Partition[Range[17], 2, 1],
     4]["GenerationsCount", 3],
-  {SetSubstitutionEvolution::unknownArg}
+  {SetSubstitutionEvolution::pargx}
 ]
 
 VerificationTest[
@@ -57,7 +57,7 @@ VerificationTest[
     {{a_, b_}, {b_, c_}} :> {{a, c}},
     Partition[Range[17], 2, 1],
     4]["GenerationsCount", 3, 3],
-  {SetSubstitutionEvolution::unknownArg}
+  {SetSubstitutionEvolution::pargx}
 ]
 
 VerificationTest[
@@ -403,6 +403,137 @@ VerificationTest[
     Partition[Range[17], 2, 1],
     4]["ExpressionsCountTotal"],
   16 + 8 + 4 + 2 + 1
+]
+
+(* CausalGraph *)
+
+VerificationTest[
+  SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    4]["CausalGraph", 1],
+   SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    4]["CausalGraph", 1],
+  {SetSubstitutionEvolution::nonopt}
+]
+
+VerificationTest[
+  SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    4]["CausalGraph", 1, "str" -> 3],
+   SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    4]["CausalGraph", 1, "str" -> 3],
+  {SetSubstitutionEvolution::nonopt}
+]
+
+VerificationTest[
+  SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    4]["CausalGraph", "BadOpt" -> "NotExist"],
+   SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    4]["CausalGraph", "BadOpt" -> "NotExist"],
+  {SetSubstitutionEvolution::optx}
+]
+
+VerificationTest[
+  SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    4]["CausalGraph"],
+  Graph[Range[15], {
+    1 -> 9, 2 -> 9, 3 -> 10, 4 -> 10, 5 -> 11, 6 -> 11, 7 -> 12, 8 -> 12,
+    9 -> 13, 10 -> 13, 11 -> 14, 12 -> 14,
+    13 -> 15, 14 -> 15
+  }]
+]
+
+VerificationTest[
+  SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    4]["CausalGraph", VertexLabels -> "Name", GraphLayout -> "SpringElectricalEmbedding"],
+  Graph[Range[15], {
+    1 -> 9, 2 -> 9, 3 -> 10, 4 -> 10, 5 -> 11, 6 -> 11, 7 -> 12, 8 -> 12,
+    9 -> 13, 10 -> 13, 11 -> 14, 12 -> 14,
+    13 -> 15, 14 -> 15
+  }, VertexLabels -> "Name", GraphLayout -> "SpringElectricalEmbedding"]
+]
+
+VerificationTest[
+  SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    1]["CausalGraph"],
+  Graph[Range[8], {}]
+]
+
+VerificationTest[
+  SetSubstitutionSystem[
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    Partition[Range[17], 2, 1],
+    2]["CausalGraph"],
+  Graph[Range[12], {1 -> 9, 2 -> 9, 3 -> 10, 4 -> 10, 5 -> 11, 6 -> 11, 7 -> 12, 8 -> 12}]
+]
+
+$largeEvolution = SetSubstitutionSystem[
+  FromAnonymousRules[
+    {{0, 1}, {0, 2}, {0, 3}} ->
+      {{4, 5}, {5, 6}, {6, 4}, {4, 6}, {6, 5}, {5, 4},
+      {4, 1}, {5, 2}, {6, 3},
+      {1, 6}, {3, 4}}],
+  {{0, 0}, {0, 0}, {0, 0}},
+  7];
+
+VerificationTest[
+  AcyclicGraphQ[$largeEvolution["CausalGraph"]]
+]
+
+VerificationTest[
+  LoopFreeGraphQ[$largeEvolution["CausalGraph"]]
+]
+
+VerificationTest[
+  Count[VertexInDegree[$largeEvolution["CausalGraph"]], 3],
+  $largeEvolution["EventsCount"] - 1
+]
+
+VerificationTest[
+  VertexCount[$largeEvolution["CausalGraph"]],
+  $largeEvolution["EventsCount"]
+]
+
+VerificationTest[
+  GraphDistance[$largeEvolution["CausalGraph"], 1, $largeEvolution["EventsCount"]],
+  $largeEvolution["GenerationsCount"] - 1
+]
+
+VerificationTest[
+  SetSubstitutionSystem[
+    FromAnonymousRules[
+      {{0, 1}, {0, 2}, {0, 3}} ->
+        {{4, 5}, {5, 6}, {6, 4}, {4, 6}, {6, 5}, {5, 4},
+        {4, 1}, {5, 2}, {6, 3},
+        {1, 6}, {3, 4}}],
+    {{0, 0}, {0, 0}, {0, 0}},
+    3,
+    Method -> "WolframLanguage"]["CausalGraph"],
+  SetSubstitutionSystem[
+    FromAnonymousRules[
+      {{0, 1}, {0, 2}, {0, 3}} ->
+        {{4, 5}, {5, 6}, {6, 4}, {4, 6}, {6, 5}, {5, 4},
+        {4, 1}, {5, 2}, {6, 3},
+        {1, 6}, {3, 4}}],
+    {{0, 0}, {0, 0}, {0, 0}},
+    3,
+    Method -> "C++"]["CausalGraph"]
 ]
 
 EndTestSection[]
