@@ -52,17 +52,43 @@ $systemsToTest = {
     3}
 };
 
+(* Fixed number of events *)
+
 VerificationTest[
   SetReplace[##, Method -> "WolframLanguage"],
   SetReplace[##, Method -> "C++"],
   SameTest -> $sameSetQ
 ] & @@@ $systemsToTest[[All, {1, 2, 3}]]
 
+(* Fixed number of generations *)
+
 VerificationTest[
   SetReplaceAll[##, Method -> "WolframLanguage"],
   SetReplaceAll[##, Method -> "C++"],
   SameTest -> $sameSetQ
 ] & @@@ $systemsToTest[[All, {1, 2, 4}]]
+
+(* Causal graphs consistency *)
+
+VerificationTest[
+  SetSubstitutionSystem[##, Method -> "WolframLanguage"]["CausalGraph"],
+  SetSubstitutionSystem[##, Method -> "C++"]["CausalGraph"]
+] & @@@ $systemsToTest[[All, {2, 1, 4}]]
+
+(** Causal graphs properties check **)
+
+VerificationTest[
+  AcyclicGraphQ[SetSubstitutionSystem[##]["CausalGraph"]]
+] & @@@ $systemsToTest[[All, {2, 1, 4}]]
+
+VerificationTest[
+  LoopFreeGraphQ[SetSubstitutionSystem[##]["CausalGraph"]]
+] & @@@ $systemsToTest[[All, {2, 1, 4}]]
+
+VerificationTest[
+  VertexCount[SetSubstitutionSystem[##]["CausalGraph"]],
+  SetSubstitutionSystem[##]["EventsCount"]
+] & @@@ $systemsToTest[[All, {2, 1, 4}]]
 
 (** Complex matching **)
 
@@ -131,6 +157,8 @@ VerificationTest[
 
 (** Random tests **)
 
+SeedRandom["correctness.wlt"]
+
 graphFromHyperedges[edges_] := Graph[
   UndirectedEdge @@@ Flatten[Partition[#, 2, 1] & /@ edges, 1]];
 
@@ -144,15 +172,15 @@ randomConnectedGraphs[edgeCount_, edgeLength_, graphCount_] := (
 DistributeDefinitions["SetReplace`"];
 
 (* Here we generate random graphs and try replacing them to nothing *)
-randomSameGraphMatchTest[edgeCount_, edgeLength_, graphCount_, method_] := BlockRandom[Module[{
+randomSameGraphMatchTest[edgeCount_, edgeLength_, graphCount_, method_] := Module[{
     tests},
   tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
   Union[
     ParallelMap[
-        SetReplace[#, FromAnonymousRules[RandomSample[#] -> {}], Method -> method] &,
+        BlockRandom[SetReplace[#, FromAnonymousRules[RandomSample[#] -> {}], Method -> method], RandomSeeding -> ToString[#]] &,
         tests]]
       === {{}}
-]]
+]
 
 VerificationTest[
   randomSameGraphMatchTest[10, 2, 10000, "C++"],
@@ -186,7 +214,7 @@ VerificationTest[
 
 (* Here we generate pairs of different graphs, and check they are not being matched *)
 randomDistinctGraphMatchTest[
-      edgeCount_, edgeLength_, graphCount_, method_] := BlockRandom[Module[{
+      edgeCount_, edgeLength_, graphCount_, method_] := Module[{
     tests},
   tests = Select[!IsomorphicGraphQ @@ (graphFromHyperedges /@ #) &]
     @ Partition[
@@ -196,10 +224,10 @@ randomDistinctGraphMatchTest[
   Not[Or @@ ParallelMap[
     (* degenerate graphs can still match if not isomorphic, i.e., {{0, 0}} will match {{0, 1}},
        that's why we need to try replacing both ways *)
-    SetReplace[#[[1]], FromAnonymousRules[#[[2]] -> {}], Method -> method] == {}
-      && SetReplace[#[[2]], FromAnonymousRules[#[[1]] -> {}], Method -> method] == {} &,
+    BlockRandom[SetReplace[#[[1]], FromAnonymousRules[#[[2]] -> {}], Method -> method] == {}
+      && SetReplace[#[[2]], FromAnonymousRules[#[[1]] -> {}], Method -> method] == {}, RandomSeeding -> ToString[#]] &,
     tests]]
-]]
+]
 
 VerificationTest[
   randomDistinctGraphMatchTest[10, 2, 10000, "C++"],
@@ -234,18 +262,18 @@ VerificationTest[
 (* Here we make initial condition degenerate, and check it still matches, i.e.,
    {{0, 0}} should still match {{0, 1}} *)
 randomDegenerateGraphMatchTest[
-      edgeCount_, edgeLength_, graphCount_, method_] := BlockRandom[Module[{
+      edgeCount_, edgeLength_, graphCount_, method_] := Module[{
     tests},
   tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
 Union[
   ParallelMap[
-      SetReplace[
+      BlockRandom[SetReplace[
         # /. RandomChoice[Flatten[#]] -> RandomChoice[Flatten[#]],
         FromAnonymousRules[RandomSample[#] -> {}],
-        Method -> method] &,
+        Method -> method], RandomSeeding -> ToString[#]] &,
       tests]]
     === {{}}
-]]
+]
 
 VerificationTest[
   randomDegenerateGraphMatchTest[10, 2, 10000, "C++"],
