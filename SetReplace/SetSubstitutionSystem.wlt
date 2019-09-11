@@ -88,6 +88,11 @@ VerificationTest[
 ]
 
 VerificationTest[
+  SetSubstitutionSystem[1 -> 2, {1, 2, 3}][-1],
+  {2, 3, 2}
+]
+
+VerificationTest[
   SetSubstitutionSystem[2 -> 5, {1, 2, 3}][-1],
   {1, 3, 5}
 ]
@@ -202,6 +207,16 @@ VerificationTest[
 VerificationTest[
   SetSubstitutionSystem[{{a_, b_}, {b_, c_}} :> {{a, c}}, {{1, 2}, {2, 3}, {3, 4}, {4, 5}}, 2][-1],
   {{1, 5}}
+]
+
+VerificationTest[
+  SetSubstitutionSystem[FromAnonymousRules[{{1, 2}} -> {{1, 3}, {3, 2}}], {{1, 2}}, 10]["GenerationsCount"],
+  10
+]
+
+VerificationTest[
+  SetSubstitutionSystem[FromAnonymousRules[{{1, 2}} -> {{1, 3}, {3, 2}}], {{1, 2}}, 10]["EventsCount"],
+  1023
 ]
 
 EndTestSection[]
