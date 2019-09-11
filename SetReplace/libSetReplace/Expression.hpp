@@ -25,6 +25,10 @@ namespace SetReplace {
         /** @brief Substitution event that has this expression as part of its input.
          */
         EventID destroyerEvent = finalStateEvent;
+        
+        /** @brief Layer of the causal network this expression belongs to.
+         */
+        Generation generation;
     };
     
     /** @brief AtomsIndex keeps references to set expressions accessible by atoms, which is useful for matching.

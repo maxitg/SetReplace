@@ -21,7 +21,7 @@ VerificationTest[
 VerificationTest[
   SetReplaceAll[1, 1 -> 2],
   SetReplaceAll[1, 1 -> 2],
-  {SetReplace::setNotList}
+  {SetReplaceAll::setNotList}
 ]
 
 (** Rules are valid **)
@@ -29,13 +29,13 @@ VerificationTest[
 VerificationTest[
   SetReplaceAll[{1}, 1],
   SetReplaceAll[{1}, 1],
-  {SetReplace::invalidRules}
+  {SetReplaceAll::invalidRules}
 ]
 
 VerificationTest[
   SetReplaceAll[{1}, {1}],
   SetReplaceAll[{1}, {1}],
-  {SetReplace::invalidRules}
+  {SetReplaceAll::invalidRules}
 ]
 
 (** Step count is valid **)
@@ -43,13 +43,13 @@ VerificationTest[
 VerificationTest[
   SetReplaceAll[{1}, {1 -> 2}, -1],
   SetReplaceAll[{1}, {1 -> 2}, -1],
-  {SetReplace::nonIntegerIterations}
+  {SetReplaceAll::nonIntegerIterations}
 ]
 
 VerificationTest[
   SetReplaceAll[{1}, {1 -> 2}, 1.5],
   SetReplaceAll[{1}, {1 -> 2}, 1.5],
-  {SetReplace::nonIntegerIterations}
+  {SetReplaceAll::nonIntegerIterations}
 ]
 
 (* Implementation *)
@@ -117,6 +117,34 @@ VerificationTest[
        {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}}],
     3],
   107
+]
+
+VerificationTest[
+  Length @ SetReplaceAll[
+    {{0, 1}, {0, 2}, {0, 3}},
+    FromAnonymousRules[
+      {{0, 1}, {0, 2}, {0, 3}} ->
+      {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5},
+       {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}}],
+    3,
+    Method -> "C++"],
+  Length @ SetReplaceAll[
+    {{0, 1}, {0, 2}, {0, 3}},
+    FromAnonymousRules[
+      {{0, 1}, {0, 2}, {0, 3}} ->
+      {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5},
+       {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}}],
+    3,
+    Method -> "WolframLanguage"]
+]
+
+VerificationTest[
+  SetReplaceAll[
+    {{0, 1}, {1, 2}, {2, 3}, {3, 4}},
+    {{a_, b_}, {b_, c_}} :> {{a, c}},
+    2,
+    Method -> "C++"],
+  {{0, 4}}
 ]
 
 EndTestSection[]

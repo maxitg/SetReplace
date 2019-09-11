@@ -21,7 +21,7 @@ VerificationTest[
 VerificationTest[
   SetReplaceFixedPoint[1, 1 -> 2],
   SetReplaceFixedPoint[1, 1 -> 2],
-  {SetReplace::setNotList}
+  {SetReplaceFixedPoint::setNotList}
 ]
 
 (** Rules are valid **)
@@ -29,7 +29,7 @@ VerificationTest[
 VerificationTest[
   SetReplaceFixedPoint[{1}, {1}],
   SetReplaceFixedPoint[{1}, {1}],
-  {SetReplace::invalidRules}
+  {SetReplaceFixedPoint::invalidRules}
 ]
 
 (* Implementation *)
@@ -40,19 +40,33 @@ VerificationTest[
 ]
 
 VerificationTest[
-  SetReplaceFixedPoint[{0.5}, {n_ :> 1 - n}],
-  {0.5}
-]
-
-VerificationTest[
   SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}, {b_, c_}} :> {{a, c}}],
   {{1, 4}}
 ]
 
 VerificationTest[
-  SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}],
-  {{x_, x_}},
-  SameTest -> MatchQ
+  SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "WolframLanguage"],
+  {{3, 3}}
+]
+
+VerificationTest[
+  SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "C++"],
+  {{3, 3}}
+]
+
+VerificationTest[
+  SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}} :> {}],
+  {}
+]
+
+VerificationTest[
+  TimeConstrained[SetReplaceFixedPoint[{}, {} :> {{1, 2}}], 1],
+  $Aborted
+]
+
+VerificationTest[
+  TimeConstrained[SetReplaceFixedPoint[{{1, 2}}, {{1, 2}} :> {{1, 2}}], 1],
+  $Aborted
 ]
 
 EndTestSection[]

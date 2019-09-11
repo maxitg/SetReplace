@@ -23,14 +23,16 @@ SetReplaceFixedPointList::usage = usageString[
 	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
 	"\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
 	"\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), \[Ellipsis]}] performs SetReplace repeatedly ",
-	"until the set no longer changes, and returns the list of all intermediate sets."];
+	"until no further events can be matched, ",
+	"and returns the list of all intermediate sets."];
 
 
 (* ::Section:: *)
 (*Syntax Information*)
 
 
-SyntaxInformation[SetReplaceFixedPointList] = {"ArgumentsPattern" -> {_, _}};
+SyntaxInformation[SetReplaceFixedPointList] =
+	{"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 
 
 (* ::Section:: *)
@@ -45,25 +47,21 @@ SetReplaceFixedPointList[args___] := 0 /;
 	!Developer`CheckArgumentCount[SetReplaceFixedPointList[args], 2, 2] && False
 
 
-(* ::Subsection:: *)
-(*Set is a list*)
+(* ::Section:: *)
+(*Options*)
 
 
-SetReplaceFixedPointList[set_, rules_] := 0 /; !ListQ[set] &&
-	Message[SetReplace::setNotList, SetReplaceFixedPointList]
-
-
-(* ::Subsection:: *)
-(*Rules are valid*)
-
-
-SetReplaceFixedPointList[set_, rules_] := 0 /; !setReplaceRulesQ[rules] &&
-	Message[SetReplace::invalidRules, SetReplaceFixedPointList]
+Options[SetReplaceFixedPointList] := Options[SetSubstitutionSystem]
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
-SetReplaceFixedPointList[set_List, rules_ ? setReplaceRulesQ] :=
-	SetReplaceList[set, rules, \[Infinity]]
+SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] := Module[{result},
+	result = Check[
+		setSubstitutionSystem[
+			rules, set, Infinity, Infinity, SetReplaceFixedPointList, o],
+		$Failed];
+	result["SetAfterEvent", #] & /@ Range[0, result["EventsCount"]] /; result =!= $Failed
+]

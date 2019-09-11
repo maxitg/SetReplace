@@ -34,7 +34,7 @@ SetReplaceAll::usage = usageString[
 (*Syntax Information*)
 
 
-SyntaxInformation[SetReplaceAll] = {"ArgumentsPattern" -> {_, _, _.}};
+SyntaxInformation[SetReplaceAll] = {"ArgumentsPattern" -> {_, _, _., OptionsPattern[]}};
 
 
 (* ::Section:: *)
@@ -49,93 +49,27 @@ SetReplaceAll[args___] := 0 /;
 	!Developer`CheckArgumentCount[SetReplaceAll[args], 2, 3] && False
 
 
-(* ::Subsection:: *)
-(*Set is a list*)
+(* ::Section:: *)
+(*Options*)
 
 
-SetReplaceAll[set_, rules_, n_: 0] := 0 /; !ListQ[set] &&
-	Message[SetReplace::setNotList, SetReplaceAll]
-
-
-(* ::Subsection:: *)
-(*Rules are valid*)
-
-
-SetReplaceAll[set_, rules_, n_: 0] := 0 /;
-	!setReplaceRulesQ[rules] && Message[SetReplace::invalidRules, SetReplaceAll]
-
-
-(* ::Subsection:: *)
-(*Step count is valid*)
-
-
-SetReplaceAll[set_, rules_, n_] := 0 /; !stepCountQ[n] &&
-	Message[SetReplace::nonIntegerIterations, SetReplaceAll, n]
+Options[SetReplaceAll] := Options[SetSubstitutionSystem]
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
-(* ::Subsection:: *)
-(*toTouched*)
+(* ::Text:: *)
+(*We just run SetSubstitutionSystem for the specified number of generations, and take the last set.*)
 
 
-SetAttributes[toTouched, HoldAll];
-
-
-toTouched[expr_List] := touched /@ Hold /@ expr
-
-
-toTouched[expr_Module] := With[
-		{heldModule = Map[Hold, Hold @ expr, {3}]},
-	With[{
-			moduleVariables = heldModule[[1, 1]],
-			moduleExpression = touched /@ heldModule[[1, 2]]},
-		Hold[Module[moduleVariables, moduleExpression]]
+SetReplaceAll[
+		set_, rules_, generations : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] :=
+	Module[{result},
+		result = Check[
+			setSubstitutionSystem[
+				rules, set, generations, Infinity, SetReplaceAll, o][-1],
+			$Failed];
+		result /; result =!= $Failed
 	]
-]
-
-
-(* ::Subsection:: *)
-(*toSingleUseRule*)
-
-
-toSingleUseRule[left_ :> right_] := With[
-		{newLeft = untouched /@ left, newRight = toTouched @ right},
-	(newLeft :> newRight) //. Hold[expr_] :> expr
-]
-
-
-(* ::Subsection:: *)
-(*SetReplaceAll*)
-
-
-(* ::Text:: *)
-(*The idea here is to replace each element of the set, and each element of rules input with something like touched[original, False], and replace every element of the rules output with touched[original, True]. This way, rules can no longer be applied on the previous output. Then, we can call SetReplaceFixedPoint on that, which will take care of evaluating until everything is fixed.*)
-
-
-SetReplaceAll[set_List, rules_ ? setReplaceRulesQ] := Module[
-		{canonicalRules, setUntouched, singleUseRules},
-	canonicalRules = toCanonicalRules[rules];
-	setUntouched = untouched /@ set;
-	singleUseRules = toSingleUseRule /@ canonicalRules;
-	SetReplaceFixedPoint[setUntouched, singleUseRules] /.
-		{touched[expr_] :> expr, untouched[expr_] :> expr}
-]
-
-
-(* ::Text:: *)
-(*If multiple steps are requested, we just use Nest.*)
-
-
-SetReplaceAll[set_List, rules_ ? setReplaceRulesQ, n_Integer ? stepCountQ] :=
-	Nest[SetReplaceAll[#, rules] &, set, n]
-
-
-(* ::Text:: *)
-(*If infinite number of steps is requested, we simply do SetReplaceFixedPoint, because that would yield the same result.*)
-
-
-SetReplaceAll[set_List, rules_ ? setReplaceRulesQ, \[Infinity]] :=
-	SetReplaceFixedPoint[set, rules]

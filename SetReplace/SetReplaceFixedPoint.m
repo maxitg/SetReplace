@@ -23,17 +23,17 @@ SetReplaceFixedPoint::usage = usageString[
 	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
 	"\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
 	"\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), \[Ellipsis]}] performs SetReplace repeatedly ",
-	"until the set no longer changes, and returns the final set.",
+	"until no further events can be matched, and returns the final set.",
 	"\n",
-	"Fixed point requires not only the elements, but also the order of elements to be ",
-	"fixed. Will go into infinite loop if fixed point does not exist."];
+	"Will go into infinite loop if fixed point does not exist."];
 
 
 (* ::Section:: *)
 (*Syntax Information*)
 
 
-SyntaxInformation[SetReplaceFixedPoint] = {"ArgumentsPattern" -> {_, _}};
+SyntaxInformation[SetReplaceFixedPoint] =
+	{"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 
 
 (* ::Section:: *)
@@ -48,25 +48,21 @@ SetReplaceFixedPoint[args___] := 0 /;
 	!Developer`CheckArgumentCount[SetReplaceFixedPoint[args], 2, 2] && False
 
 
-(* ::Subsection:: *)
-(*Set is a list*)
+(* ::Section:: *)
+(*Options*)
 
 
-SetReplaceFixedPoint[set_, rules_] := 0 /; !ListQ[set] &&
-	Message[SetReplace::setNotList, SetReplaceFixedPoint]
-
-
-(* ::Subsection:: *)
-(*Rules are valid*)
-
-
-SetReplaceFixedPoint[set_, rules_] := 0 /; !setReplaceRulesQ[rules] &&
-	Message[SetReplace::invalidRules, SetReplaceFixedPoint]
+Options[SetReplaceFixedPoint] := Options[SetSubstitutionSystem]
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
-SetReplaceFixedPoint[set_List, rules_ ? setReplaceRulesQ] :=
-	SetReplace[set, rules, \[Infinity], Method -> "WolframLanguage"]
+SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] := Module[{result},
+	result = Check[
+		setSubstitutionSystem[
+			rules, set, Infinity, Infinity, SetReplaceFixedPoint, o][-1],
+		$Failed];
+	result /; result =!= $Failed
+]
