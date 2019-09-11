@@ -35,7 +35,7 @@ SetSubstitutionSystem::usage = usageString[
 
 $SetReplaceMethods::usage = usageString[
 	"$SetReplaceMethods gives the list of available values for Method option of ",
-	"SetReplace."];
+	"SetReplace and related functions."];
 
 
 (* ::Section:: *)

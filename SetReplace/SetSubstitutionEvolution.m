@@ -35,7 +35,7 @@ SetSubstitutionEvolution::usage = usageString[
 	"\n",
 	"SetSubstitutionEvolution[`...`][`g`] yields the set at generation `g`.",
 	"\n",
-	"SetSubstitutionEvolution[`...`][\"Step\", `s`] yields the set after `s` ",
+	"SetSubstitutionEvolution[`...`][\"SetAfterEvent\", `s`] yields the set after `s` ",
 	"substitution events.",
 	"\n",
 	"SetSubstitutionEvolution[`...`][\"Properties\"] yields the list of all ",
