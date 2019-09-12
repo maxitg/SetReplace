@@ -82,11 +82,19 @@ SetSubstitutionEvolution /:
 (*Implementation*)
 
 
-$properties = {
-	"Generation", "SetAfterEvent", "Rules", "GenerationsCount", "EventsCount",
-	"AtomsCountFinal", "AtomsCountTotal",
-	"ExpressionsCountFinal", "ExpressionsCountTotal",
-	"Properties"};
+$propertyArgumentCounts = <|
+	"Generation" -> {1, 1},
+	"SetAfterEvent" -> {1, 1},
+	"Rules" -> {0, 0},
+	"GenerationsCount" -> {0, 0},
+	"EventsCount" -> {0, 0},
+	"AtomsCountFinal" -> {0, 0},
+	"AtomsCountTotal" -> {0, 0},
+	"ExpressionsCountFinal" -> {0, 0},
+	"ExpressionsCountTotal" -> {0, 0},
+	"CausalGraph" -> {0, Infinity},
+	"Properties" -> {0, 0}
+|>;
 
 
 (* ::Subsection:: *)
@@ -102,40 +110,46 @@ SetSubstitutionEvolution::unknownProperty =
 
 
 SetSubstitutionEvolution[data_ ? evolutionDataQ][s : Except[_Integer], ___] := 0 /;
-	!MemberQ[$properties, s] &&
+	!MemberQ[Keys[$propertyArgumentCounts], s] &&
 	Message[SetSubstitutionEvolution::unknownProperty, s]
 
 
 (* ::Subsubsection:: *)
-(*Unknown property arguments*)
-
-
-$propertiesWithArguments = {"Generation", "SetAfterEvent"};
-
-
-SetSubstitutionEvolution::unknownArg = "Property `` does not accept any arguments.";
-
-
-SetSubstitutionEvolution[data_ ? evolutionDataQ][s_String, args__] := 0 /;
-	MemberQ[$properties, s] && !MemberQ[$propertiesWithArguments, s] &&
-	Message[SetSubstitutionEvolution::unknownArg, s]
+(*Property argument counts*)
 
 
 SetSubstitutionEvolution::pargx =
-	"A single integer argument expected for property \"`1`\", i.e., " <>
-	"SetSubstitutionEvolution[...][\"`1`\", n]."
+	"Property \"`1`\" requested with `2` argument`3`; " <>
+	"`4``5``6``7` argument`8` `9` expected."
+
+
+makePargxMessage[property_, givenArgs_, expectedArgs_] := Message[
+	SetSubstitutionEvolution::pargx,
+	property,
+	givenArgs,
+	If[givenArgs == 1, "", "s"],
+	If[expectedArgs[[1]] != expectedArgs[[2]], "between ", ""],
+	expectedArgs[[1]],
+	If[expectedArgs[[1]] != expectedArgs[[2]], " and ", ""],
+	If[expectedArgs[[1]] != expectedArgs[[2]], expectedArgs[[2]], ""],
+	If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "s", ""],
+	If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "are", "is"]
+]
 
 
 SetSubstitutionEvolution[data_ ? evolutionDataQ][s_String, args___] := 0 /;
-	MemberQ[$propertiesWithArguments, s] && Length[{args}] != 1 &&
-	Message[SetSubstitutionEvolution::pargx, s]
+	With[{argumentsCountRange = $propertyArgumentCounts[s]},
+		Not[MissingQ[argumentsCountRange]] &&
+		Not[argumentsCountRange[[1]] <= Length[{args}] <= argumentsCountRange[[2]]] &&
+		makePargxMessage[s, Length[{args}], argumentsCountRange]]
 
 
 (* ::Subsection:: *)
 (*Properties*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["Properties"] := $properties
+SetSubstitutionEvolution[data_ ? evolutionDataQ]["Properties"] :=
+	Keys[$propertyArgumentCounts]
 
 
 (* ::Subsection:: *)
@@ -311,6 +325,59 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["ExpressionsCountFinal"] :=
 
 SetSubstitutionEvolution[data_ ? evolutionDataQ]["ExpressionsCountTotal"] :=
 	Length[data[$atomLists]]
+
+
+(* ::Subsection:: *)
+(*CausalGraph*)
+
+
+(* ::Text:: *)
+(*This produces a causal network for the system. This is a Graph with all events as vertices, and directed edges connecting them if the same event is a creator and a destroyer for the same expression (i.e., if two events are causally related).*)
+
+
+(* ::Subsubsection:: *)
+(*Argument checks*)
+
+
+(* ::Text:: *)
+(*We need to check: (1) arguments given are actually options, (2) they are valid options for the Graph object.*)
+
+
+SetSubstitutionEvolution::nonopt =
+	"Options expected (instead of `1`) " <>
+	"beyond position 1 for \"CausalGraph\" property. " <>
+	"An option must be a rule or a list of rules.";
+
+
+SetSubstitutionEvolution[data_ ? evolutionDataQ]["CausalGraph", o___] := 0 /;
+	!MatchQ[{o}, OptionsPattern[]] &&
+	Message[SetSubstitutionEvolution::nonopt, Last[{o}]]
+
+
+SetSubstitutionEvolution::optx =
+	"Unknown option `1` for \"CausalGraph\" property. " <>
+	"Only Graph options are accepted.";
+
+
+SetSubstitutionEvolution[data_ ? evolutionDataQ][
+		"CausalGraph", o : OptionsPattern[]] := 0 /;
+	With[{incorrectOptions = Complement[{o}, FilterRules[{o}, Options[Graph]]]},
+		incorrectOptions != {} &&
+		Message[SetSubstitutionEvolution::optx, Last[incorrectOptions]]]
+
+
+(* ::Subsubsection:: *)
+(*Implementation*)
+
+
+SetSubstitutionEvolution[data_ ? evolutionDataQ][
+		"CausalGraph", o : OptionsPattern[]] /;
+			(Complement[{o}, FilterRules[{o}, Options[Graph]]] == {}) :=
+	Graph[
+		DeleteCases[Union[data[$creatorEvents], data[$destroyerEvents]], 0 | Infinity],
+		Select[FreeQ[#, 0 | Infinity] &] @
+			Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
+		o]
 
 
 (* ::Section:: *)

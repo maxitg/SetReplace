@@ -52,17 +52,43 @@ $systemsToTest = {
     3}
 };
 
+(* Fixed number of events *)
+
 VerificationTest[
   SetReplace[##, Method -> "WolframLanguage"],
   SetReplace[##, Method -> "C++"],
   SameTest -> $sameSetQ
 ] & @@@ $systemsToTest[[All, {1, 2, 3}]]
 
+(* Fixed number of generations *)
+
 VerificationTest[
   SetReplaceAll[##, Method -> "WolframLanguage"],
   SetReplaceAll[##, Method -> "C++"],
   SameTest -> $sameSetQ
 ] & @@@ $systemsToTest[[All, {1, 2, 4}]]
+
+(* Causal graphs consistency *)
+
+VerificationTest[
+  SetSubstitutionSystem[##, Method -> "WolframLanguage"]["CausalGraph"],
+  SetSubstitutionSystem[##, Method -> "C++"]["CausalGraph"]
+] & @@@ $systemsToTest[[All, {2, 1, 4}]]
+
+(** Causal graphs properties check **)
+
+VerificationTest[
+  AcyclicGraphQ[SetSubstitutionSystem[##]["CausalGraph"]]
+] & @@@ $systemsToTest[[All, {2, 1, 4}]]
+
+VerificationTest[
+  LoopFreeGraphQ[SetSubstitutionSystem[##]["CausalGraph"]]
+] & @@@ $systemsToTest[[All, {2, 1, 4}]]
+
+VerificationTest[
+  VertexCount[SetSubstitutionSystem[##]["CausalGraph"]],
+  SetSubstitutionSystem[##]["EventsCount"]
+] & @@@ $systemsToTest[[All, {2, 1, 4}]]
 
 (** Complex matching **)
 
@@ -135,24 +161,27 @@ graphFromHyperedges[edges_] := Graph[
   UndirectedEdge @@@ Flatten[Partition[#, 2, 1] & /@ edges, 1]];
 
 randomConnectedGraphs[edgeCount_, edgeLength_, graphCount_] := (
-  Select[ConnectedGraphQ @* graphFromHyperedges]
-    @ Table[
-      With[{k = edgeCount}, Table[RandomInteger[edgeLength k], k, edgeLength]],
-      graphCount]
+  #[[All, 1]] & @ Select[#[[2]] &] @ ParallelMap[
+    {#, ConnectedGraphQ @ graphFromHyperedges @ #} &,
+    BlockRandom[
+      Table[
+        With[{k = edgeCount}, Table[RandomInteger[edgeLength k], k, edgeLength]],
+        graphCount],
+      RandomSeeding -> ToString[{"randomConnectedGraphs", edgeCount, edgeLength, graphCount}]]]
 )
 
-DistributeDefinitions["SetReplace`"];
-
 (* Here we generate random graphs and try replacing them to nothing *)
-randomSameGraphMatchTest[edgeCount_, edgeLength_, graphCount_, method_] := BlockRandom[Module[{
+randomSameGraphMatchTest[edgeCount_, edgeLength_, graphCount_, method_] := Module[{
     tests},
   tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
   Union[
     ParallelMap[
-        SetReplace[#, FromAnonymousRules[RandomSample[#] -> {}], Method -> method] &,
-        tests]]
+        SetReplace[#[[1]], FromAnonymousRules[#[[2]] -> {}], Method -> method] &,
+        BlockRandom[
+          {#, RandomSample[#]} & /@ tests,
+          RandomSeeding -> ToString[{"randomSameGraphMatchTest", edgeCount, edgeLength, graphCount, method}]]]]
       === {{}}
-]]
+]
 
 VerificationTest[
   randomSameGraphMatchTest[10, 2, 10000, "C++"],
@@ -186,7 +215,7 @@ VerificationTest[
 
 (* Here we generate pairs of different graphs, and check they are not being matched *)
 randomDistinctGraphMatchTest[
-      edgeCount_, edgeLength_, graphCount_, method_] := BlockRandom[Module[{
+      edgeCount_, edgeLength_, graphCount_, method_] := Module[{
     tests},
   tests = Select[!IsomorphicGraphQ @@ (graphFromHyperedges /@ #) &]
     @ Partition[
@@ -199,7 +228,7 @@ randomDistinctGraphMatchTest[
     SetReplace[#[[1]], FromAnonymousRules[#[[2]] -> {}], Method -> method] == {}
       && SetReplace[#[[2]], FromAnonymousRules[#[[1]] -> {}], Method -> method] == {} &,
     tests]]
-]]
+]
 
 VerificationTest[
   randomDistinctGraphMatchTest[10, 2, 10000, "C++"],
@@ -234,18 +263,20 @@ VerificationTest[
 (* Here we make initial condition degenerate, and check it still matches, i.e.,
    {{0, 0}} should still match {{0, 1}} *)
 randomDegenerateGraphMatchTest[
-      edgeCount_, edgeLength_, graphCount_, method_] := BlockRandom[Module[{
+      edgeCount_, edgeLength_, graphCount_, method_] := Module[{
     tests},
   tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
 Union[
   ParallelMap[
       SetReplace[
-        # /. RandomChoice[Flatten[#]] -> RandomChoice[Flatten[#]],
-        FromAnonymousRules[RandomSample[#] -> {}],
+        #[[1]] /. #[[2]] -> #[[3]],
+        FromAnonymousRules[#[[4]] -> {}],
         Method -> method] &,
-      tests]]
+      BlockRandom[
+        {#, RandomChoice[Flatten[#]], RandomChoice[Flatten[#]], RandomSample[#]} & /@ tests,
+        RandomSeeding -> ToString[{"randomDegenerateGraphMatchTest", edgeCount, edgeLength, graphCount, method}]]]]
     === {{}}
-]]
+]
 
 VerificationTest[
   randomDegenerateGraphMatchTest[10, 2, 10000, "C++"],
