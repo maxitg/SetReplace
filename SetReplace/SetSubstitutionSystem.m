@@ -186,7 +186,7 @@ setSubstitutionSystem[
 		method = OptionValue[Method], canonicalRules, failedQ = False},
 	canonicalRules = toCanonicalRules[rules];
 	If[MatchQ[method, Automatic | "C++"]
-			&& MatchQ[set, {{___ ? AtomQ}...}]
+			&& MatchQ[set, {{___}...}]
 			&& MatchQ[canonicalRules, {___ ? simpleRuleQ}],
 		If[$cppSetReplaceAvailable,
 			Return[
