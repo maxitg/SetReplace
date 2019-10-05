@@ -71,23 +71,23 @@ VerificationTest[
 (* Causal graphs consistency *)
 
 VerificationTest[
-  SetSubstitutionSystem[##, Method -> "WolframLanguage"]["CausalGraph"],
-  SetSubstitutionSystem[##, Method -> "C++"]["CausalGraph"]
+  WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "WolframLanguage"],
+  WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "C++"]
 ] & @@@ $systemsToTest[[All, {2, 1, 4}]]
 
 (** Causal graphs properties check **)
 
 VerificationTest[
-  AcyclicGraphQ[SetSubstitutionSystem[##]["CausalGraph"]]
+  AcyclicGraphQ[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]]
 ] & @@@ $systemsToTest[[All, {2, 1, 4}]]
 
 VerificationTest[
-  LoopFreeGraphQ[SetSubstitutionSystem[##]["CausalGraph"]]
+  LoopFreeGraphQ[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]]
 ] & @@@ $systemsToTest[[All, {2, 1, 4}]]
 
 VerificationTest[
-  VertexCount[SetSubstitutionSystem[##]["CausalGraph"]],
-  SetSubstitutionSystem[##]["EventsCount"]
+  VertexCount[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]],
+  WolframModel[<|"PatternRules" -> #1|>, #2, #3, "EventsCount"]
 ] & @@@ $systemsToTest[[All, {2, 1, 4}]]
 
 (** Complex matching **)

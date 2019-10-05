@@ -62,7 +62,7 @@ SetReplace[args___] := 0 /;
 (*Options*)
 
 
-Options[SetReplace] := Options[SetSubstitutionSystem]
+Options[SetReplace] := Options[setSubstitutionSystem]
 
 
 (* ::Section:: *)

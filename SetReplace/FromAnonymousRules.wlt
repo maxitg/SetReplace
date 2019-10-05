@@ -83,8 +83,8 @@ VerificationTest[
 
 VerificationTest[
   SetReplace[
-    {{10 -> 30} -> 20, {30, 40}},
-    FromAnonymousRules[{{1 -> 3} -> 2, {3, 4}} -> {{1, 2, 3}, {3, 4, 5}}]][[1]],
+    {10 -> 20, {30, 40}},
+    FromAnonymousRules[{1 -> 2, {3, 4}} -> {{1, 2, 3}, {3, 4, 5}}]][[1]],
   {10, 20, 30}
 ]
 
@@ -94,6 +94,13 @@ VerificationTest[
       {{Graph[{3 -> 4}], Graph[{3 -> 4}]}, Graph[{1 -> 2}]} ->
       {Graph[{3 -> 4}], Graph[{1 -> 2}], Graph[{3 -> 4}]}}]],
   {2, 1, 2}
+]
+
+VerificationTest[
+  SetReplace[
+    {{v[1], v[2]}, {v[2], v[3]}},
+    FromAnonymousRules[{{v[1], v[2]}, {v[2], v[3]}} -> {{v[1], v[3]}}]],
+  {{v[1], v[3]}}
 ]
 
 EndTestSection[]

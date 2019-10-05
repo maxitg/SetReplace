@@ -49,7 +49,7 @@ SetReplaceList[args___] := 0 /;
 (*Options*)
 
 
-Options[SetReplaceList] := Options[SetSubstitutionSystem]
+Options[SetReplaceList] := Options[setSubstitutionSystem]
 
 
 (* ::Section:: *)

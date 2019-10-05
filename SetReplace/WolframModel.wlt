@@ -1,4 +1,4 @@
-BeginTestSection["SetSubstitutionSystem"]
+BeginTestSection["WolframModel"]
 
 (* Argument checks *)
 

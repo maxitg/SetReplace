@@ -12,7 +12,6 @@ Package["SetReplace`"]
 
 
 PackageExport["WolframModel"]
-PackageExport["$WolframModelMethods"]
 
 
 (* ::Section:: *)
@@ -42,7 +41,7 @@ SyntaxInformation[WolframModel] =
 (*Options*)
 
 
-Options[WolframModel] = {Method -> Automatic};
+Options[WolframModel] = Options[setSubstitutionSystem];
 
 
 (* ::Section:: *)
