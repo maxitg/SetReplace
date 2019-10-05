@@ -80,7 +80,8 @@ fromStepsSpec[generations_Integer] := {generations, Infinity}
 fromStepsSpec[Infinity] := {Infinity, Infinity}
 
 
-fromStepsSpec[spec_Association] := {spec["Generations"], spec["Events"]}
+fromStepsSpec[spec_Association] :=
+	{Lookup[spec, "Generations", Infinity], Lookup[spec, "Events", Infinity]}
 
 
 (* ::Subsection:: *)
