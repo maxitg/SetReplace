@@ -22,6 +22,9 @@ Package["SetReplace`"]
 PackageExport["FromAnonymousRules"]
 
 
+PackageScope["fromAnonymousRules"]
+
+
 (* ::Section:: *)
 (*Documentation*)
 
@@ -56,23 +59,23 @@ FromAnonymousRules[args___] := 0 /;
 (*Argument is a list of rules or a single rule*)
 
 
-FromAnonymousRules::notRules =
-	"First argument of FromAnonymousRules must be either a Rule or a list of rules.";
-
-
-FromAnonymousRules[rules_] := 0 /;
-	!MatchQ[rules, {___Rule} | _Rule] && Message[FromAnonymousRules::notRules]
+fromAnonymousRules[rules_, caller_] := 0 /;
+	!MatchQ[rules, {___Rule} | _Rule] && makeMessage[caller, "notRules", rules]
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
+(* ::Subsection:: *)
+(*fromAnonymousRules*)
+
+
 (* ::Text:: *)
 (*We are going to find all non-lists in the rules, map them to symbols, and then replace original rules with these symbols using patterns and modules accordingly.*)
 
 
-FromAnonymousRules[rule : _Rule] := Module[
+fromAnonymousRules[rule : _Rule, caller_] := Module[
 		{leftSymbols, rightSymbols, symbols, newVertexNames, vertexPatterns,
 		 newLeft, leftVertices, rightVertices, rightOnlyVertices},
 	{leftSymbols, rightSymbols} = Union @ Cases[#, _ ? AtomQ, All] & /@ List @@ rule;
@@ -95,4 +98,15 @@ FromAnonymousRules[rule : _Rule] := Module[
 ]
 
 
-FromAnonymousRules[rules : {___Rule}] := FromAnonymousRules /@ rules
+fromAnonymousRules[rules : {___Rule}, caller_] :=
+	fromAnonymousRules[#, caller] & /@ rules
+
+
+(* ::Subsection:: *)
+(*FromAnonymousRules*)
+
+
+FromAnonymousRules[rules_] := Module[{result},
+	result = Check[fromAnonymousRules[rules, FromAnonymousRules], $Failed];
+	result /; result =!= $Failed
+]

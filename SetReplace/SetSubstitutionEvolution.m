@@ -14,6 +14,9 @@ Package["SetReplace`"]
 PackageExport["SetSubstitutionEvolution"]
 
 
+PackageScope["propertyEvaluate"]
+
+
 (* ::Text:: *)
 (*Keys in the data association.*)
 
@@ -83,6 +86,10 @@ SetSubstitutionEvolution /:
 
 
 $propertyArgumentCounts = <|
+	"EvolutionObject" -> {0, 0},
+	"FinalState" -> {0, 0},
+	"StatesList" -> {0, 0},
+	"UpdatedStatesList" -> {0, 0},
 	"Generation" -> {1, 1},
 	"SetAfterEvent" -> {1, 1},
 	"Rules" -> {0, 0},
@@ -105,26 +112,22 @@ $propertyArgumentCounts = <|
 (*Unknown property*)
 
 
-SetSubstitutionEvolution::unknownProperty =
-	"Property `` must be one of SetSubstitutionEvolution[...][\"Properties\"].";
-
-
-SetSubstitutionEvolution[data_ ? evolutionDataQ][s : Except[_Integer], ___] := 0 /;
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		s : Except[_Integer],
+		___] := 0 /;
 	!MemberQ[Keys[$propertyArgumentCounts], s] &&
-	Message[SetSubstitutionEvolution::unknownProperty, s]
+	makeMessage[caller, "unknownProperty", s]
 
 
 (* ::Subsubsection:: *)
 (*Property argument counts*)
 
 
-SetSubstitutionEvolution::pargx =
-	"Property \"`1`\" requested with `2` argument`3`; " <>
-	"`4``5``6``7` argument`8` `9` expected."
-
-
-makePargxMessage[property_, givenArgs_, expectedArgs_] := Message[
-	SetSubstitutionEvolution::pargx,
+makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := makeMessage[
+	caller,
+	"pargx",
 	property,
 	givenArgs,
 	If[givenArgs == 1, "", "s"],
@@ -137,33 +140,52 @@ makePargxMessage[property_, givenArgs_, expectedArgs_] := Message[
 ]
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ][s_String, args___] := 0 /;
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		s_String,
+		args___] := 0 /;
 	With[{argumentsCountRange = $propertyArgumentCounts[s]},
 		Not[MissingQ[argumentsCountRange]] &&
 		Not[argumentsCountRange[[1]] <= Length[{args}] <= argumentsCountRange[[2]]] &&
-		makePargxMessage[s, Length[{args}], argumentsCountRange]]
+		makePargxMessage[s, caller, Length[{args}], argumentsCountRange]]
 
 
 (* ::Subsection:: *)
 (*Properties*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["Properties"] :=
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ], caller_, "Properties"] :=
 	Keys[$propertyArgumentCounts]
+
+
+(* ::Subsection:: *)
+(*EvolutionObject*)
+
+
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"EvolutionObject"] := SetSubstitutionEvolution[data]
 
 
 (* ::Subsection:: *)
 (*Rules*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["Rules"] := data[$rules]
+propertyEvaluate[SetSubstitutionEvolution[data_ ? evolutionDataQ], caller_, "Rules"] :=
+	data[$rules]
 
 
 (* ::Subsection:: *)
 (*GenerationsCount*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["GenerationsCount"] := Max[
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"GenerationsCount"] := Max[
 	0,
 	Max @ data[$generations],
 	1 + Max @ data[$generations][[
@@ -175,7 +197,8 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["GenerationsCount"] := Max[
 (*EventsCount*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["EventsCount"] :=
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ], caller_, "EventsCount"] :=
 	Max[0, DeleteCases[Join[data[$destroyerEvents], data[$creatorEvents]], Infinity]]
 
 
@@ -187,29 +210,37 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["EventsCount"] :=
 (*Argument checks*)
 
 
-SetSubstitutionEvolution::eventTooLarge = "Event `` requested out of `` total.";
-
-
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_Integer] := 0 /;
-	With[{eventsCount = SetSubstitutionEvolution[data]["EventsCount"]},
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"SetAfterEvent",
+		s_Integer] := 0 /;
+	With[{eventsCount =
+			propertyEvaluate[SetSubstitutionEvolution[data], caller, "EventsCount"]},
 		!(- eventsCount - 1 <= s <= eventsCount) &&
-		Message[SetSubstitutionEvolution::eventTooLarge, s, eventsCount]]
+		makeMessage[caller, "eventTooLarge", s, eventsCount]]
 
 
-SetSubstitutionEvolution::eventNotInteger = "Event `` must be an integer.";
-
-
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_] := 0 /;
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"SetAfterEvent",
+		s_] := 0 /;
 	!IntegerQ[s] &&
-	Message[SetSubstitutionEvolution::eventNotInteger, s]
+	makeMessage[caller, "eventNotInteger", s]
 
 
 (* ::Subsubsection:: *)
 (*Positive steps*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_Integer] /;
-		0 <= s <= SetSubstitutionEvolution[data]["EventsCount"] :=
+propertyEvaluate[
+			SetSubstitutionEvolution[data_ ? evolutionDataQ],
+			caller_,
+			"SetAfterEvent",
+			s_Integer] /;
+		0 <= s <=
+			propertyEvaluate[SetSubstitutionEvolution[data], caller, "EventsCount"] :=
 	data[$atomLists][[Intersection[
 		Position[data[$creatorEvents], _ ? (# <= s &)][[All, 1]],
 		Position[data[$destroyerEvents], _ ? (# > s &)][[All, 1]]]]]
@@ -219,10 +250,41 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_Integer] /;
 (*Negative steps*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_Integer] /;
-		- SetSubstitutionEvolution[data]["EventsCount"] - 1 <= s < 0 :=
-	SetSubstitutionEvolution[data][
-		"SetAfterEvent", s + 1 + SetSubstitutionEvolution[data]["EventsCount"]]
+propertyEvaluate[
+			SetSubstitutionEvolution[data_ ? evolutionDataQ],
+			caller_,
+			"SetAfterEvent",
+			s_Integer] /;
+		- propertyEvaluate[
+			SetSubstitutionEvolution[data], caller, "EventsCount"] - 1 <= s < 0 :=
+	propertyEvaluate[
+		SetSubstitutionEvolution[data],
+		caller,
+		"SetAfterEvent",
+		s + 1 +
+			propertyEvaluate[SetSubstitutionEvolution[data], caller, "EventsCount"]]
+
+
+(* ::Subsection:: *)
+(*FinalState*)
+
+
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"FinalState"] := SetSubstitutionEvolution[data]["SetAfterEvent", -1]
+
+
+(* ::Subsection:: *)
+(*UpdatedStatesList*)
+
+
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"UpdatedStatesList"] :=
+	SetSubstitutionEvolution[data]["SetAfterEvent", #] & /@
+		Range @ SetSubstitutionEvolution[data]["EventsCount"]
 
 
 (* ::Subsection:: *)
@@ -237,30 +299,37 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["SetAfterEvent", s_Integer] /;
 (*Argument checks*)
 
 
-SetSubstitutionEvolution::generationTooLarge =
-	"Generation `` requested out of `` total.";
-
-
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["Generation", g_Integer] := 0 /;
-	With[{generationsCount = SetSubstitutionEvolution[data]["GenerationsCount"]},
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"Generation",
+		g_Integer] := 0 /;
+	With[{generationsCount = propertyEvaluate[
+			SetSubstitutionEvolution[data], caller, "GenerationsCount"]},
 		!(- generationsCount - 1 <= g <= generationsCount) &&
-		Message[SetSubstitutionEvolution::generationTooLarge, g, generationsCount]]
+		makeMessage[caller, "generationTooLarge", g, generationsCount]]
 
 
-SetSubstitutionEvolution::generationNotInteger = "Generation `` must be an integer.";
-
-
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["Generation", g_] := 0 /;
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"Generation",
+		g_] := 0 /;
 	!IntegerQ[g] &&
-	Message[SetSubstitutionEvolution::generationNotInteger, g]
+	makeMessage[caller, "generationNotInteger", g]
 
 
 (* ::Subsubsection:: *)
 (*Positive generations*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["Generation", g_Integer] /;
-		0 <= g <= SetSubstitutionEvolution[data]["GenerationsCount"] := With[{
+propertyEvaluate[
+			SetSubstitutionEvolution[data_ ? evolutionDataQ],
+			caller_,
+			"Generation",
+			g_Integer] /;
+		0 <= g <= propertyEvaluate[
+			SetSubstitutionEvolution[data], caller, "GenerationsCount"] := With[{
 	futureEventsToInfinity = Dispatch @ Thread[Union[
 			data[$creatorEvents][[
 				Position[data[$generations], _ ? (# > g &)][[All, 1]]]],
@@ -281,33 +350,57 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["Generation", g_Integer] /;
 (*Negative generations*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["Generation", g_Integer] /;
-		- SetSubstitutionEvolution[data]["GenerationsCount"] - 1 <= g < 0 :=
-	SetSubstitutionEvolution[data][
-		"Generation", g + 1 + SetSubstitutionEvolution[data]["GenerationsCount"]]
+propertyEvaluate[
+			SetSubstitutionEvolution[data_ ? evolutionDataQ],
+			caller_,
+			"Generation",
+			g_Integer] /;
+		- propertyEvaluate[
+			SetSubstitutionEvolution[data], caller, "GenerationsCount"] - 1 <= g < 0 :=
+	propertyEvaluate[
+		SetSubstitutionEvolution[data],
+		caller,
+		"Generation",
+		g + 1 + SetSubstitutionEvolution[data]["GenerationsCount"]]
 
 
 (* ::Subsubsection:: *)
 (*Omit "Generation"*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ][g_Integer] :=
-	SetSubstitutionEvolution[data]["Generation", g]
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ], caller_, g_Integer] :=
+	propertyEvaluate[SetSubstitutionEvolution[data], caller, "Generation", g]
+
+
+(* ::Subsection:: *)
+(*StatesList*)
+
+
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"StatesList"] :=
+	SetSubstitutionEvolution[data]["Generation", #] & /@
+		Range @ SetSubstitutionEvolution[data]["GenerationsCount"]
 
 
 (* ::Subsection:: *)
 (*AtomsCountFinal*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["AtomsCountFinal"] :=
-	Length[Union @@ SetSubstitutionEvolution[data]["SetAfterEvent", -1]]
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ], caller_, "AtomsCountFinal"] :=
+	Length[Union @@
+		propertyEvaluate[SetSubstitutionEvolution[data], caller, "SetAfterEvent", -1]]
 
 
 (* ::Subsection:: *)
 (*AtomsCountTotal*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["AtomsCountTotal"] :=
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ], caller_, "AtomsCountTotal"] :=
 	Length[Union @@ data[$atomLists]]
 
 
@@ -315,15 +408,22 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["AtomsCountTotal"] :=
 (*ExpressionsCountFinal*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["ExpressionsCountFinal"] :=
-	Length[SetSubstitutionEvolution[data]["SetAfterEvent", -1]]
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"ExpressionsCountFinal"] :=
+	Length[propertyEvaluate[
+		SetSubstitutionEvolution[data], caller, "SetAfterEvent", -1]]
 
 
 (* ::Subsection:: *)
 (*ExpressionsCountTotal*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["ExpressionsCountTotal"] :=
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"ExpressionsCountTotal"] :=
 	Length[data[$atomLists]]
 
 
@@ -343,41 +443,53 @@ SetSubstitutionEvolution[data_ ? evolutionDataQ]["ExpressionsCountTotal"] :=
 (*We need to check: (1) arguments given are actually options, (2) they are valid options for the Graph object.*)
 
 
-SetSubstitutionEvolution::nonopt =
-	"Options expected (instead of `1`) " <>
-	"beyond position 1 for \"CausalGraph\" property. " <>
-	"An option must be a rule or a list of rules.";
-
-
-SetSubstitutionEvolution[data_ ? evolutionDataQ]["CausalGraph", o___] := 0 /;
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"CausalGraph",
+		o___] := 0 /;
 	!MatchQ[{o}, OptionsPattern[]] &&
-	Message[SetSubstitutionEvolution::nonopt, Last[{o}]]
+	makeMessage[caller, "nonopt", Last[{o}]]
 
 
-SetSubstitutionEvolution::optx =
-	"Unknown option `1` for \"CausalGraph\" property. " <>
-	"Only Graph options are accepted.";
-
-
-SetSubstitutionEvolution[data_ ? evolutionDataQ][
-		"CausalGraph", o : OptionsPattern[]] := 0 /;
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"CausalGraph",
+		o : OptionsPattern[]] := 0 /;
 	With[{incorrectOptions = Complement[{o}, FilterRules[{o}, Options[Graph]]]},
 		incorrectOptions != {} &&
-		Message[SetSubstitutionEvolution::optx, Last[incorrectOptions]]]
+		makeMessage[caller, "optx", Last[incorrectOptions]]]
 
 
 (* ::Subsubsection:: *)
 (*Implementation*)
 
 
-SetSubstitutionEvolution[data_ ? evolutionDataQ][
-		"CausalGraph", o : OptionsPattern[]] /;
+propertyEvaluate[
+		SetSubstitutionEvolution[data_ ? evolutionDataQ],
+		caller_,
+		"CausalGraph",
+		o : OptionsPattern[]] /;
 			(Complement[{o}, FilterRules[{o}, Options[Graph]]] == {}) :=
 	Graph[
 		DeleteCases[Union[data[$creatorEvents], data[$destroyerEvents]], 0 | Infinity],
 		Select[FreeQ[#, 0 | Infinity] &] @
 			Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
 		o]
+
+
+(* ::Subsection:: *)
+(*Public properties call*)
+
+
+SetSubstitutionEvolution[data_ ? evolutionDataQ][property___] := Module[{result},
+	result = Check[
+		propertyEvaluate[
+			SetSubstitutionEvolution[data], SetSubstitutionEvolution, property],
+		$Failed];
+	result /; result =!= $Failed
+]
 
 
 (* ::Section:: *)

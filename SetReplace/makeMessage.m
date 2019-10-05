@@ -56,3 +56,43 @@ messageTemplate["cppNotImplemented"] =
 
 messageTemplate["noCpp"] =
 	"C++ implementation was not compiled for your system type.";
+
+
+messageTemplate["notRules"] =
+	"The rule specification `2` should be either a Rule, or a List of rules.";
+
+
+messageTemplate["unknownProperty"] =
+	"Property \"`2`\" should be one of \"Properties\".";
+
+
+messageTemplate["pargx"] =
+	"Property \"`2`\" requested with `3` argument`4`; " <>
+	"`5``6``7``8` argument`9` `10` expected.";
+
+
+messageTemplate["eventTooLarge"] =
+	"Event `2` requested out of `3` total.";
+
+
+messageTemplate["eventNotInteger"] =
+	"Event `2` must be an integer.";
+
+
+messageTemplate["generationTooLarge"] =
+	"Generation `2` requested out of `3` total.";
+
+
+messageTemplate["generationNotInteger"] =
+	"Generation `2` must be an integer.";
+
+
+messageTemplate["nonopt"] =
+	"Options expected (instead of `2`) " <>
+	"beyond position 1 for \"CausalGraph\" property. " <>
+	"An option must be a rule or a list of rules.";
+
+
+messageTemplate["optx"] =
+	"Unknown option `2` for \"CausalGraph\" property. " <>
+	"Only Graph options are accepted.";
