@@ -284,7 +284,7 @@ propertyEvaluate[
 		caller_,
 		"UpdatedStatesList"] :=
 	SetSubstitutionEvolution[data]["SetAfterEvent", #] & /@
-		Range @ SetSubstitutionEvolution[data]["EventsCount"]
+		Range[0, SetSubstitutionEvolution[data]["EventsCount"]]
 
 
 (* ::Subsection:: *)
@@ -382,7 +382,7 @@ propertyEvaluate[
 		caller_,
 		"StatesList"] :=
 	SetSubstitutionEvolution[data]["Generation", #] & /@
-		Range @ SetSubstitutionEvolution[data]["GenerationsCount"]
+		Range[0, SetSubstitutionEvolution[data]["GenerationsCount"]]
 
 
 (* ::Subsection:: *)
