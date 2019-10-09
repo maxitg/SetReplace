@@ -214,7 +214,20 @@ VerificationTest[
     <|"PatternRules" -> {{a_, b_}, {b_, c_}} :> {{a, c}}|>,
     Partition[Range[17], 2, 1],
     4]["Rules"],
-  {{a_, b_}, {b_, c_}} :> {{a, c}}
+  <|"PatternRules" -> {{a_, b_}, {b_, c_}} :> {{a, c}}|>
+]
+
+VerificationTest[
+  WolframModel[
+    {{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}} -> {{1, 3}, {3, 2}}},
+    Partition[Range[17], 2, 1],
+    4]["Rules"],
+  {{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}} -> {{1, 3}, {3, 2}}}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 4]["Rules"],
+  1 -> 2
 ]
 
 (* GenerationsCount *)

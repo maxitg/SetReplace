@@ -110,7 +110,9 @@ WolframModel[
 				Method -> OptionValue[Method]],
 			$Failed];
 		result = If[evolution =!= $Failed,
-			If[ListQ[property], evolution /@ property, evolution @ property],
+			If[ListQ[property], evolution /@ property, evolution @ property] /.
+				HoldPattern[SetSubstitutionEvolution[data_Association]] :>
+					SetSubstitutionEvolution[Join[data, <|$rules -> rulesSpec|>]],
 			$Failed];
 		result /; result =!= $Failed
 	]
