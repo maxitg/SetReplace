@@ -212,6 +212,10 @@ wolframModelPropertyQ[property_String] /;
 	MemberQ[$WolframModelProperties, property] := True
 
 
+wolframModelPropertyQ[{property___String}] /;
+	And @@ (wolframModelPropertyQ /@ {property}) := True
+
+
 wolframModelPropertyQ[_] := False
 
 
@@ -297,7 +301,8 @@ WolframModel[
 
 
 WolframModel::invalidProperty =
-	"Property specification `1` should be one of $WolframModelProperties.";
+	"Property specification `1` should be one of $WolframModelProperties " <>
+	"or a List of them.";
 
 
 WolframModel[
