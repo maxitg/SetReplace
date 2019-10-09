@@ -424,6 +424,55 @@ VerificationTest[
   {WolframModel::invalidProperty}
 ]
 
+(** Missing arguments **)
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 1 -> 2, 2 -> 3],
+  WolframModel[1 -> 2, {1}, 1 -> 2, 2 -> 3],
+  {WolframModel::invalidSteps}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, "sdfds" -> 2, "xcvxcv" -> 3],
+  WolframModel[1 -> 2, {1}, "sdfds" -> 2, "xcvxcv" -> 3],
+  {WolframModel::optx}
+]
+
+VerificationTest[
+  WolframModel[{1}, 1 -> 2],
+  WolframModel[{1}, 1 -> 2],
+  {WolframModel::invalidRules}
+]
+
+VerificationTest[
+  WolframModel[1, 1 -> 2],
+  WolframModel[1, 1 -> 2],
+  {WolframModel::invalidRules}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, "CausalGraph"],
+  WolframModel[1 -> 2, "CausalGraph"],
+  {WolframModel::invalidState}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, "CausalGraph"],
+  Graph[{1}, {}]
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, "CausalGraph", 1],
+  WolframModel[1 -> 2, {1}, "CausalGraph", 1],
+  {WolframModel::invalidSteps}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, 1, "CausalGraph"],
+  WolframModel[1 -> 2, 1, "CausalGraph"],
+  {WolframModel::invalidState}
+]
+
 (* Implementation *)
 
 (** Simple examples **)
