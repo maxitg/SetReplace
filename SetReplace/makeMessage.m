@@ -42,7 +42,7 @@ messageTemplate["invalidRules"] =
 
 
 messageTemplate["nonIntegerIterations"] =
-	"The number of `2` `3` should be an integer or infinity.";
+	"The number of `2` `3` should be a non-negative integer or infinity.";
 
 
 messageTemplate["invalidMethod"] =

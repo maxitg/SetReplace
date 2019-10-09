@@ -125,8 +125,12 @@ WolframModel[
 WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
 		o : OptionsPattern[]][
-		initSpec_ ? wolframModelInitSpecQ] :=
-	WolframModel[rulesSpec, initSpec, 1, "FinalState", o]
+		initSpec_ ? wolframModelInitSpecQ] := Module[{method, result},
+	method = Quiet[Check[OptionValue[Method], $Failed]];
+	result = If[method === $Failed,
+		$Failed,
+		Check[WolframModel[rulesSpec, initSpec, 1, "FinalState", o], $Failed]];
+	result /; result =!= $Failed]
 
 
 (* ::Subsection:: *)
@@ -153,7 +157,12 @@ $WolframModelProperties = Complement[$propertiesParameterless, {"Properties", "R
 
 
 WolframModel[args___] := 0 /;
-	!Developer`CheckArgumentCount[WolframModel[args], 1, Infinity] && False
+	!Developer`CheckArgumentCount[WolframModel[args], 1, 4] && False
+
+
+WolframModel[args0___][args1___] := 0 /;
+	Length[{args1}] != 1 &&
+	Message[WolframModel::argx, "WolframModel[\[Ellipsis]]", Length[{args1}], 1]
 
 
 (* ::Subsection:: *)
@@ -221,15 +230,24 @@ WolframModel::invalidState =
 WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
 		initSpec_ ? (Not[wolframModelInitSpecQ[#]] && Head[#] =!= Rule &),
-		args___] := 0 /;
+		args___ ? (Head[#] =!= Rule &) /; 0 <= Length[{args}] <= 2,
+		o : OptionsPattern[]] := 0 /;
 	Message[WolframModel::invalidState, initSpec]
 
 
 WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
+		o : OptionsPattern[]] := 0 /;
+	OptionValue[Method] && False
+
+
+WolframModel[
+		rulesSpec_ ? wolframModelRulesSpecQ,
 		o : OptionsPattern[]][
-		initSpec_ ? (Not @* wolframModelInitSpecQ)] := 0 /;
-	Message[WolframModel::invalidState, initSpec]
+		initSpec_ ? (Not @* wolframModelInitSpecQ)] := 0 /; Module[{method},
+	method = Quiet[Check[OptionValue[Method], $Failed]];
+	If[method =!= $Failed,
+		Message[WolframModel::invalidState, initSpec]]]
 
 
 (* ::Subsubsection:: *)
@@ -244,7 +262,9 @@ WolframModel::invalidRules =
 
 WolframModel[
 		rulesSpec_ ? (Not @* wolframModelRulesSpecQ),
-		args___] := 0 /;
+		init : Except[_Rule],
+		args___ ? (Head[#] =!= Rule &) /; 0 <= Length[{args}] <= 2,
+		o : OptionsPattern[]] := 0 /;
 	Message[WolframModel::invalidRules, rulesSpec]
 
 
@@ -267,7 +287,8 @@ WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
 		initSpec_ ? wolframModelInitSpecQ,
 		stepsSpec_ ? (Not[wolframModelStepsSpecQ[#]] && Head[#] =!= Rule &),
-		args___] := 0 /;
+		args___ ? (Head[#] =!= Rule &) /; 0 <= Length[{args}] <= 1,
+		o : OptionsPattern[]] := 0 /;
 	Message[WolframModel::invalidSteps, stepsSpec]
 
 
