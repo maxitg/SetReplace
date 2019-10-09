@@ -94,13 +94,12 @@ WolframModel[
 			initSpec_ ? wolframModelInitSpecQ,
 			stepsSpec : _ ? wolframModelStepsSpecQ : 1,
 			property : _ ? wolframModelPropertyQ : "EvolutionObject",
-			o : OptionsPattern[]] := Module[{
-		patternRules, initialSet, generations, events, method, evolution, result},
-	patternRules = fromRulesSpec[rulesSpec];
-	initialSet = fromInitSpec[initSpec];
-	{generations, events} = fromStepsSpec[stepsSpec];
-	method = Check[OptionValue[Method], $Failed, OptionValue::nodef];
-	result = If[method =!= $Failed,
+			o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] :=
+	Module[{
+			patternRules, initialSet, generations, events, evolution, result},
+		patternRules = fromRulesSpec[rulesSpec];
+		initialSet = fromInitSpec[initSpec];
+		{generations, events} = fromStepsSpec[stepsSpec];
 		evolution = Check[
 			setSubstitutionSystem[
 				patternRules,
@@ -110,12 +109,11 @@ WolframModel[
 				WolframModel,
 				Method -> OptionValue[Method]],
 			$Failed];
-		If[evolution =!= $Failed,
+		result = If[evolution =!= $Failed,
 			If[ListQ[property], evolution /@ property, evolution @ property],
-			$Failed],
-		$Failed];
-	result /; result =!= $Failed
-]
+			$Failed];
+		result /; result =!= $Failed
+	]
 
 
 (* ::Subsection:: *)
@@ -124,12 +122,9 @@ WolframModel[
 
 WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
-		o : OptionsPattern[]][
-		initSpec_ ? wolframModelInitSpecQ] := Module[{method, result},
-	method = Quiet[Check[OptionValue[Method], $Failed]];
-	result = If[method === $Failed,
-		$Failed,
-		Check[WolframModel[rulesSpec, initSpec, 1, "FinalState", o], $Failed]];
+		o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}][
+		initSpec_ ? wolframModelInitSpecQ] := Module[{result},
+	result = Check[WolframModel[rulesSpec, initSpec, 1, "FinalState", o], $Failed];
 	result /; result =!= $Failed]
 
 
@@ -155,6 +150,38 @@ WolframModel[args___] := 0 /;
 WolframModel[args0___][args1___] := 0 /;
 	Length[{args1}] != 1 &&
 	Message[WolframModel::argx, "WolframModel[\[Ellipsis]]", Length[{args1}], 1]
+
+
+(* ::Subsection:: *)
+(*Options*)
+
+
+unrecognizedOptions[func_, opts_] := FilterRules[opts, Except[Options[func]]]
+
+
+expr : WolframModel[
+		rulesSpec_ ? wolframModelRulesSpecQ,
+		initSpec : _ ? wolframModelInitSpecQ,
+		stepsSpec : _ ? wolframModelStepsSpecQ : 1,
+		property : _ ? wolframModelPropertyQ : "EvolutionObject",
+		o : OptionsPattern[]] := 0 /; With[{
+	unrecognizedOptions = unrecognizedOptions[WolframModel, {o}]},
+	If[unrecognizedOptions =!= {},
+		Message[
+			WolframModel::optx,
+			unrecognizedOptions[[1]],
+			Defer @ expr]]]
+
+
+expr : WolframModel[
+		rulesSpec_ ? wolframModelRulesSpecQ,
+		o : OptionsPattern[]] := 0 /; With[{
+	unrecognizedOptions = unrecognizedOptions[WolframModel, {o}]},
+	If[unrecognizedOptions =!= {},
+		Message[
+			WolframModel::optx,
+			unrecognizedOptions[[1]],
+			Defer @ expr]]]
 
 
 (* ::Subsection:: *)
@@ -223,27 +250,18 @@ WolframModel::invalidState =
 	"The initial state specification `1` should be a List.";
 
 
-WolframModel[
+expr : WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
-		initSpec_ ? (Not[wolframModelInitSpecQ[#]] && Head[#] =!= Rule &),
-		args___ ? (Head[#] =!= Rule &) /; 0 <= Length[{args}] <= 2,
-		o : OptionsPattern[]] := 0 /;
+		initSpec : Except[OptionsPattern[]] ? (Not[wolframModelInitSpecQ[#]] &),
+		args___] /; Quiet[Developer`CheckArgumentCount[expr, 1, 4]] := 0 /;
 	Message[WolframModel::invalidState, initSpec]
 
 
 WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
-		o : OptionsPattern[]] := 0 /;
-	OptionValue[Method] && False
-
-
-WolframModel[
-		rulesSpec_ ? wolframModelRulesSpecQ,
-		o : OptionsPattern[]][
-		initSpec_ ? (Not @* wolframModelInitSpecQ)] := 0 /; Module[{method},
-	method = Quiet[Check[OptionValue[Method], $Failed]];
-	If[method =!= $Failed,
-		Message[WolframModel::invalidState, initSpec]]]
+		o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}][
+		initSpec_ ? (Not @* wolframModelInitSpecQ)] := 0 /;
+	Message[WolframModel::invalidState, initSpec]
 
 
 (* ::Subsubsection:: *)
@@ -256,17 +274,9 @@ WolframModel::invalidRules =
 	"rules is either a Rule, RuleDelayed, or a List of them."
 
 
-WolframModel[
+expr : WolframModel[
 		rulesSpec_ ? (Not @* wolframModelRulesSpecQ),
-		init : Except[_Rule],
-		args___ ? (Head[#] =!= Rule &) /; 0 <= Length[{args}] <= 2,
-		o : OptionsPattern[]] := 0 /;
-	Message[WolframModel::invalidRules, rulesSpec]
-
-
-WolframModel[
-		rulesSpec_ ? (Not @* wolframModelRulesSpecQ),
-		o : OptionsPattern[]] := 0 /;
+		args___] /; Quiet[Developer`CheckArgumentCount[expr, 1, 4]] := 0 /;
 	Message[WolframModel::invalidRules, rulesSpec]
 
 
@@ -279,12 +289,11 @@ WolframModel::invalidSteps =
 	"with \"Generations\" key, \"Events\" key, or both.";
 
 
-WolframModel[
+expr : WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
 		initSpec_ ? wolframModelInitSpecQ,
-		stepsSpec_ ? (Not[wolframModelStepsSpecQ[#]] && Head[#] =!= Rule &),
-		args___ ? (Head[#] =!= Rule &) /; 0 <= Length[{args}] <= 1,
-		o : OptionsPattern[]] := 0 /;
+		stepsSpec : Except[OptionsPattern[]] ? (Not[wolframModelStepsSpecQ[#]] &),
+		args___] /; Quiet[Developer`CheckArgumentCount[expr, 1, 4]] := 0 /;
 	Message[WolframModel::invalidSteps, stepsSpec]
 
 
@@ -301,6 +310,6 @@ WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
 		initSpec_ ? wolframModelInitSpecQ,
 		stepsSpec_ ? wolframModelStepsSpecQ,
-		property : _ ? (Not[wolframModelPropertyQ[#]] && Head[#] =!= Rule &),
-		o : OptionsPattern[]] := 0 /;
+		property : Except[OptionsPattern[]] ? (Not[wolframModelPropertyQ[#]] &),
+		o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] := 0 /;
 	Message[WolframModel::invalidProperty, property]
