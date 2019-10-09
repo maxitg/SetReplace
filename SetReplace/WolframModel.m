@@ -111,8 +111,8 @@ WolframModel[
 			$Failed];
 		result = If[evolution =!= $Failed,
 			If[ListQ[property], evolution /@ property, evolution @ property] /.
-				HoldPattern[SetSubstitutionEvolution[data_Association]] :>
-					SetSubstitutionEvolution[Join[data, <|$rules -> rulesSpec|>]],
+				HoldPattern[WolframModelEvolutionObject[data_Association]] :>
+					WolframModelEvolutionObject[Join[data, <|$rules -> rulesSpec|>]],
 			$Failed];
 		result /; result =!= $Failed
 	]

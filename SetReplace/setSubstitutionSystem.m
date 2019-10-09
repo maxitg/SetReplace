@@ -5,7 +5,7 @@
 
 
 (* ::Text:: *)
-(*This is a main function of the package. This function calls either C++ or WolframLanguage implementation, and can produce a SetSubstitutionEvolution object that contains information about evolution of the network step-by-step. All SetReplace* and WolframModel functions use argument checks and implementation done here.*)
+(*This is a main function of the package. This function calls either C++ or WolframLanguage implementation, and can produce a WolframModelEvolutionObject that contains information about evolution of the network step-by-step. All SetReplace* and WolframModel functions use argument checks and implementation done here.*)
 
 
 Package["SetReplace`"]

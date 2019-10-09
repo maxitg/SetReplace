@@ -166,7 +166,7 @@ VerificationTest[
 
 VerificationTest[
   WolframModel[1 -> 2, {1}],
-  _SetSubstitutionEvolution,
+  _WolframModelEvolutionObject,
   SameTest -> MatchQ
 ]
 
@@ -261,7 +261,7 @@ VerificationTest[
 
 VerificationTest[
   WolframModel[<|"PatternRules" -> {1 -> 2, a_ :> Module[{b}, b]}|>, {1}],
-  _SetSubstitutionEvolution,
+  _WolframModelEvolutionObject,
   SameTest -> MatchQ
 ]
 

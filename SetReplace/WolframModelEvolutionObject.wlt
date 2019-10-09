@@ -1,25 +1,25 @@
-BeginTestSection["SetSubstitutionEvolution"]
+BeginTestSection["WolframModelEvolutionObject"]
 
 (** Argument checks **)
 
 (* Corrupt object *)
 
 VerificationTest[
-  SetSubstitutionEvolution[],
-  SetSubstitutionEvolution[],
-  {SetSubstitutionEvolution::argx}
+  WolframModelEvolutionObject[],
+  WolframModelEvolutionObject[],
+  {WolframModelEvolutionObject::argx}
 ]
 
 VerificationTest[
-  SetSubstitutionEvolution[<||>],
-  SetSubstitutionEvolution[<||>],
-  {SetSubstitutionEvolution::corrupt}
+  WolframModelEvolutionObject[<||>],
+  WolframModelEvolutionObject[<||>],
+  {WolframModelEvolutionObject::corrupt}
 ]
 
 VerificationTest[
-  SetSubstitutionEvolution[<|a -> 1, b -> 2|>],
-  SetSubstitutionEvolution[<|a -> 1, b -> 2|>],
-  {SetSubstitutionEvolution::corrupt}
+  WolframModelEvolutionObject[<|a -> 1, b -> 2|>],
+  WolframModelEvolutionObject[<|a -> 1, b -> 2|>],
+  {WolframModelEvolutionObject::corrupt}
 ]
 
 (* Incorrect property arguments *)
@@ -33,7 +33,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["$$$UnknownProperty$$$,,,"],
-  {SetSubstitutionEvolution::unknownProperty}
+  {WolframModelEvolutionObject::unknownProperty}
 ]
 
 VerificationTest[
@@ -45,7 +45,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["GenerationsCount", 3],
-  {SetSubstitutionEvolution::pargx}
+  {WolframModelEvolutionObject::pargx}
 ]
 
 VerificationTest[
@@ -57,7 +57,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["GenerationsCount", 3, 3],
-  {SetSubstitutionEvolution::pargx}
+  {WolframModelEvolutionObject::pargx}
 ]
 
 VerificationTest[
@@ -69,7 +69,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["Generation", 3, 3],
-  {SetSubstitutionEvolution::pargx}
+  {WolframModelEvolutionObject::pargx}
 ]
 
 VerificationTest[
@@ -81,7 +81,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["Generation"],
-  {SetSubstitutionEvolution::pargx}
+  {WolframModelEvolutionObject::pargx}
 ]
 
 VerificationTest[
@@ -93,7 +93,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["SetAfterEvent"],
-  {SetSubstitutionEvolution::pargx}
+  {WolframModelEvolutionObject::pargx}
 ]
 
 (* Incorrect step arguments *)
@@ -107,7 +107,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["SetAfterEvent", 16],
-  {SetSubstitutionEvolution::eventTooLarge}
+  {WolframModelEvolutionObject::eventTooLarge}
 ]
 
 VerificationTest[
@@ -119,7 +119,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["SetAfterEvent", -17],
-  {SetSubstitutionEvolution::eventTooLarge}
+  {WolframModelEvolutionObject::eventTooLarge}
 ]
 
 VerificationTest[
@@ -131,7 +131,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["SetAfterEvent", 1.2],
-  {SetSubstitutionEvolution::eventNotInteger}
+  {WolframModelEvolutionObject::eventNotInteger}
 ]
 
 VerificationTest[
@@ -143,7 +143,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["SetAfterEvent", "good"],
-  {SetSubstitutionEvolution::eventNotInteger}
+  {WolframModelEvolutionObject::eventNotInteger}
 ]
 
 (* Incorrect generation arguments *)
@@ -157,7 +157,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["Generation", 5],
-  {SetSubstitutionEvolution::generationTooLarge}
+  {WolframModelEvolutionObject::generationTooLarge}
 ]
 
 VerificationTest[
@@ -169,7 +169,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["Generation", -6],
-  {SetSubstitutionEvolution::generationTooLarge}
+  {WolframModelEvolutionObject::generationTooLarge}
 ]
 
 VerificationTest[
@@ -181,7 +181,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["Generation", 2.3],
-  {SetSubstitutionEvolution::generationNotInteger}
+  {WolframModelEvolutionObject::generationNotInteger}
 ]
 
 (** Boxes **)
@@ -429,7 +429,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["CausalGraph", 1],
-  {SetSubstitutionEvolution::nonopt}
+  {WolframModelEvolutionObject::nonopt}
 ]
 
 VerificationTest[
@@ -441,7 +441,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["CausalGraph", 1, "str" -> 3],
-  {SetSubstitutionEvolution::nonopt}
+  {WolframModelEvolutionObject::nonopt}
 ]
 
 VerificationTest[
@@ -453,7 +453,7 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["CausalGraph", "BadOpt" -> "NotExist"],
-  {SetSubstitutionEvolution::optx}
+  {WolframModelEvolutionObject::optx}
 ]
 
 VerificationTest[

@@ -177,7 +177,7 @@ setSubstitutionSystem$wl[rules_, set_, generations_, steps_] := Module[{
 			outputWithMetadata[[1]],
 			If[outputWithMetadata[[2]] == {}, {}, outputWithMetadata[[2, 1]]]],
 		First];
-	SetSubstitutionEvolution[<|
+	WolframModelEvolutionObject[<|
 		$creatorEvents -> result[[All, 2]],
 		$destroyerEvents -> result[[All, 3]],
 		$generations -> result[[All, 4]],
