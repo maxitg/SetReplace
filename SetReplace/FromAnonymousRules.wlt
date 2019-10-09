@@ -29,6 +29,24 @@ VerificationTest[
 (** Simple examples **)
 
 VerificationTest[
+  SetReplace[{1}, FromAnonymousRules[4 -> 5]],
+  {1},
+  SameTest -> Not @* SameQ
+]
+
+VerificationTest[
+  SetReplace[{1}, FromAnonymousRules[4 -> {5, 5}]],
+  {1},
+  SameTest -> Not @* SameQ
+]
+
+VerificationTest[
+  SetReplace[{1}, FromAnonymousRules[{4} -> 9]],
+  {9},
+  SameTest -> Not @* SameQ
+]
+
+VerificationTest[
   FromAnonymousRules[{{} -> {}}],
   {{} :> {}}
 ]

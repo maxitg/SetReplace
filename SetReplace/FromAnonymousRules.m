@@ -83,7 +83,7 @@ fromAnonymousRules[rule : _Rule, caller_] := Module[
 		{leftSymbols, rightSymbols, symbols, newVertexNames, vertexPatterns,
 		 newLeft, leftVertices, rightVertices, rightOnlyVertices},
 	{leftSymbols, rightSymbols} =
-		Union[Cases[#, _ ? AtomQ, 1], Cases[#, _, {2}]] & /@ List @@ rule;
+		Union[Cases[#, _ ? AtomQ, {0, 1}], Cases[#, _, {2}]] & /@ List @@ rule;
 	symbols = Union[leftSymbols, rightSymbols];
 	newVertexNames =
 		ToHeldExpression /@ StringTemplate["v``"] /@ Range @ Length @ symbols;
