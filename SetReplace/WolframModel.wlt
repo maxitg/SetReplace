@@ -83,7 +83,7 @@ VerificationTest[
 (** Simple examples **)
 
 VerificationTest[
-  WolframModel[{1} :> {1}, {1}]["EventsCount"],
+  WolframModel[{1} -> {1}, {1}]["EventsCount"],
   1
 ]
 

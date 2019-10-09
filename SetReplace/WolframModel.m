@@ -134,33 +134,51 @@ WolframModel[args___] := 0 /;
 	!Developer`CheckArgumentCount[WolframModel[args], 1, Infinity] && False
 
 
-(* ::Text:: *)
-(*TODO: implement following checks*)
-
-
 (* ::Subsection:: *)
 (*Rules*)
 
 
-wolframModelRulesSpecQ[rulesSpec_] := True
+wolframModelRulesSpecQ[rulesSpec_ ? anonymousRulesQ] := True
+
+
+wolframModelRulesSpecQ[<|"PatternRules" -> rules_ ? setReplaceRulesQ|>] := True
+
+
+wolframModelRulesSpecQ[_] := False
 
 
 (* ::Subsection:: *)
 (*Init*)
 
 
-wolframModelInitSpecQ[init_] := True
+wolframModelInitSpecQ[init_ ? ListQ] := True
+
+
+wolframModelInitSpecQ[_] := False
 
 
 (* ::Subsection:: *)
 (*Steps*)
 
 
-wolframModelStepsSpecQ[stepsSpec_] := True
+wolframModelStepsSpecQ[stepsSpec_ ? stepCountQ] := True
+
+
+wolframModelStepsSpecQ[stepsSpec_Association] /;
+	SubsetQ[{"Generations", "Events"}, Keys[stepsSpec]] &&
+	stepCountQ[Lookup[stepsSpec, "Generations", Infinity]] &&
+	stepCountQ[Lookup[stepsSpec, "Events", Infinity]] := True
+
+
+wolframModelStepsSpecQ[_] := False
 
 
 (* ::Subsection:: *)
 (*Property*)
 
 
-wolframModelPropertyQ[property_] := True
+wolframModelPropertyQ[property_String] /;
+	MemberQ[$propertiesParameterless, property] := True
+
+
+wolframModelPropertyQ[_] := False

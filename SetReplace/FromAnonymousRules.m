@@ -22,6 +22,7 @@ Package["SetReplace`"]
 PackageExport["FromAnonymousRules"]
 
 
+PackageScope["anonymousRulesQ"]
 PackageScope["fromAnonymousRules"]
 
 
@@ -59,8 +60,11 @@ FromAnonymousRules[args___] := 0 /;
 (*Argument is a list of rules or a single rule*)
 
 
+anonymousRulesQ[rules_] := MatchQ[rules, {___Rule} | _Rule]
+
+
 fromAnonymousRules[rules_, caller_] := 0 /;
-	!MatchQ[rules, {___Rule} | _Rule] && makeMessage[caller, "notRules", rules]
+	!anonymousRulesQ[rules] && makeMessage[caller, "notRules", rules]
 
 
 (* ::Section:: *)

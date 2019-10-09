@@ -14,6 +14,8 @@ Package["SetReplace`"]
 PackageExport["$SetReplaceMethods"]
 
 
+PackageScope["setReplaceRulesQ"]
+PackageScope["stepCountQ"]
 PackageScope["setSubstitutionSystem"]
 
 

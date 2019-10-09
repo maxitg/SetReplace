@@ -17,6 +17,9 @@ PackageExport["SetSubstitutionEvolution"]
 PackageScope["propertyEvaluate"]
 
 
+PackageScope["$propertiesParameterless"]
+
+
 (* ::Text:: *)
 (*Keys in the data association.*)
 
@@ -102,6 +105,9 @@ $propertyArgumentCounts = <|
 	"CausalGraph" -> {0, Infinity},
 	"Properties" -> {0, 0}
 |>;
+
+
+$propertiesParameterless = Keys @ Select[#[[1]] == 0 &] @ $propertyArgumentCounts
 
 
 (* ::Subsection:: *)
