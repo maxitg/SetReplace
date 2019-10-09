@@ -397,8 +397,10 @@ propertyEvaluate[
 
 propertyEvaluate[
 		SetSubstitutionEvolution[data_ ? evolutionDataQ], caller_, "AtomsCountFinal"] :=
-	Length[Union @@
-		propertyEvaluate[SetSubstitutionEvolution[data], caller, "SetAfterEvent", -1]]
+	Length[Union @ Cases[
+		propertyEvaluate[SetSubstitutionEvolution[data], caller, "SetAfterEvent", -1],
+		_ ? AtomQ,
+		All]]
 
 
 (* ::Subsection:: *)
@@ -407,7 +409,7 @@ propertyEvaluate[
 
 propertyEvaluate[
 		SetSubstitutionEvolution[data_ ? evolutionDataQ], caller_, "AtomsCountTotal"] :=
-	Length[Union @@ data[$atomLists]]
+	Length[Union @ Cases[data[$atomLists], _ ? AtomQ, All]]
 
 
 (* ::Subsection:: *)
