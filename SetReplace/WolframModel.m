@@ -12,6 +12,7 @@ Package["SetReplace`"]
 
 
 PackageExport["WolframModel"]
+PackageExport["$WolframModelProperties"]
 
 
 (* ::Section:: *)
@@ -27,6 +28,10 @@ WolframModel::usage = usageString[
 	"of the evolution.",
 	"\n",
 	"WolframModel[`rules`] represents the operator form for a Wolfram Model."];
+
+
+$WolframModelProperties::usage = usageString[
+	"$WolframModelProperties gives the list of available properties of WolframModel."];
 
 
 (* ::Section:: *)
@@ -73,10 +78,7 @@ fromInitSpec[initSpec_] := initSpec
 (*Steps*)
 
 
-fromStepsSpec[generations_Integer] := {generations, Infinity}
-
-
-fromStepsSpec[Infinity] := {Infinity, Infinity}
+fromStepsSpec[generations : (_Integer | Infinity)] := {generations, Infinity}
 
 
 fromStepsSpec[spec_Association] :=
@@ -120,6 +122,13 @@ WolframModel[
 
 WolframModel /: RulePlot[
 		WolframModel[rulesSpec_ ? wolframModelRulesQ, o : OptionsPattern[]]] := 0
+
+
+(* ::Subsection:: *)
+(*$WolframModelProperties*)
+
+
+$WolframModelProperties = Complement[$propertiesParameterless, {"Properties", "Rules"}];
 
 
 (* ::Section:: *)
@@ -178,7 +187,89 @@ wolframModelStepsSpecQ[_] := False
 
 
 wolframModelPropertyQ[property_String] /;
-	MemberQ[$propertiesParameterless, property] := True
+	MemberQ[$WolframModelProperties, property] := True
 
 
 wolframModelPropertyQ[_] := False
+
+
+(* ::Subsection:: *)
+(*Incorrect arguments messages*)
+
+
+(* ::Subsubsection:: *)
+(*Init*)
+
+
+WolframModel::invalidState =
+	"The initial state specification `1` should be a List.";
+
+
+WolframModel[
+		rulesSpec_ ? wolframModelRulesSpecQ,
+		initSpec_ ? (Not @* wolframModelInitSpecQ),
+		args___] := 0 /;
+	Message[WolframModel::invalidState, initSpec]
+
+
+WolframModel[
+		rulesSpec_ ? wolframModelRulesSpecQ,
+		o : OptionsPattern[]][
+		initSpec_ ? (Not @* wolframModelInitSpecQ)] := 0 /;
+	Message[WolframModel::invalidState, initSpec]
+
+
+(* ::Subsubsection:: *)
+(*Rules*)
+
+
+WolframModel::invalidRules =
+	"The rule specification `1` should be either a Rule, " ~~
+	"a List of rules, or <|\"PatternRules\" -> rules|>, where " ~~
+	"rules is either a Rule, RuleDelayed, or a List of them."
+
+
+WolframModel[
+		rulesSpec_ ? (Not @* wolframModelRulesSpecQ),
+		args___] := 0 /;
+	Message[WolframModel::invalidRules, rulesSpec]
+
+
+WolframModel[
+		rulesSpec_ ? (Not @* wolframModelRulesSpecQ),
+		o : OptionsPattern[]] := 0 /;
+	Message[WolframModel::invalidRules, rulesSpec]
+
+
+(* ::Subsubsection:: *)
+(*Steps*)
+
+
+WolframModel::invalidSteps =
+	"The steps specification `1` should be an Integer, Infinity, or an association " <>
+	"with \"Generations\" key, \"Events\" key, or both.";
+
+
+WolframModel[
+		rulesSpec_ ? wolframModelRulesSpecQ,
+		initSpec_ ? wolframModelInitSpecQ,
+		stepsSpec_ ? (Not @* wolframModelStepsSpecQ),
+		args___] := 0 /;
+	Message[WolframModel::invalidSteps, stepsSpec]
+
+
+(* ::Subsubsection:: *)
+(*Property*)
+
+
+WolframModel::invalidProperty =
+	"Property specification `1` should be one of $WolframModelProperties.";
+
+
+WolframModel[
+		rulesSpec_ ? wolframModelRulesSpecQ,
+		initSpec_ ? wolframModelInitSpecQ,
+		stepsSpec_ ? wolframModelStepsSpecQ,
+		property : _ ? (Not @* wolframModelPropertyQ),
+		o : OptionsPattern[]] := 0 /;
+	Message[WolframModel::invalidProperty, property]

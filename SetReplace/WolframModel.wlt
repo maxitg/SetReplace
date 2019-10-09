@@ -21,13 +21,13 @@ VerificationTest[
 VerificationTest[
   WolframModel[1 -> 2, 1],
   WolframModel[1 -> 2, 1],
-  {WolframModel::setNotList}
+  {WolframModel::invalidState}
 ]
 
 VerificationTest[
   WolframModel[1 -> 2, 1, Method -> "C++"],
   WolframModel[1 -> 2, 1, Method -> "C++"],
-  {WolframModel::setNotList}
+  {WolframModel::invalidState}
 ]
 
 (** Rules are valid **)
@@ -55,19 +55,19 @@ VerificationTest[
 VerificationTest[
   WolframModel[{1 -> 2}, {1}, -1],
   WolframModel[{1 -> 2}, {1}, -1],
-  {WolframModel::nonIntegerIterations}
+  {WolframModel::invalidSteps}
 ]
 
 VerificationTest[
   WolframModel[{1 -> 2}, {1}, -1, Method -> "C++"],
   WolframModel[{1 -> 2}, {1}, -1, Method -> "C++"],
-  {WolframModel::nonIntegerIterations}
+  {WolframModel::invalidSteps}
 ]
 
 VerificationTest[
   WolframModel[{1 -> 2}, {1}, 1.5],
   WolframModel[{1 -> 2}, {1}, 1.5],
-  {WolframModel::nonIntegerIterations}
+  {WolframModel::invalidSteps}
 ]
 
 (** Method is valid **)
