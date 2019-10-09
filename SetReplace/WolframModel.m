@@ -134,14 +134,6 @@ WolframModel[
 
 
 (* ::Subsection:: *)
-(*Rule plot*)
-
-
-WolframModel /: RulePlot[
-		WolframModel[rulesSpec_ ? wolframModelRulesQ, o : OptionsPattern[]]] := 0
-
-
-(* ::Subsection:: *)
 (*$WolframModelProperties*)
 
 
