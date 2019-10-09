@@ -2,80 +2,426 @@ BeginTestSection["WolframModel"]
 
 (* Argument checks *)
 
-(** Argument count **)
+(** Argument counts, simple rule and inits **)
+
+VerificationTest[
+  WolframModel,
+  WolframModel
+]
 
 VerificationTest[
   WolframModel[],
   WolframModel[],
-  {WolframModel::argm}
+  {WolframModel::argb}
 ]
 
 VerificationTest[
-  WolframModel[Method -> "C++"],
-  WolframModel[Method -> "C++"],
-  {WolframModel::argm}
-]
-
-(** Set is a list **)
-
-VerificationTest[
-  WolframModel[1 -> 2, 1],
-  WolframModel[1 -> 2, 1],
-  {WolframModel::invalidState}
-]
-
-VerificationTest[
-  WolframModel[1 -> 2, 1, Method -> "C++"],
-  WolframModel[1 -> 2, 1, Method -> "C++"],
-  {WolframModel::invalidState}
-]
-
-(** Rules are valid **)
-
-VerificationTest[
-  WolframModel[1, {1}],
-  WolframModel[1, {1}],
+  WolframModel[x],
+  WolframModel[x],
   {WolframModel::invalidRules}
 ]
 
 VerificationTest[
-  WolframModel[1, {1}, Method -> "C++"],
-  WolframModel[1, {1}, Method -> "C++"],
+  WolframModel[x, y],
+  WolframModel[x, y],
   {WolframModel::invalidRules}
 ]
 
 VerificationTest[
-  WolframModel[{1}, {1}],
-  WolframModel[{1}, {1}],
+  WolframModel[x, y, z],
+  WolframModel[x, y, z],
   {WolframModel::invalidRules}
 ]
 
-(** Step count is valid **)
-
 VerificationTest[
-  WolframModel[{1 -> 2}, {1}, -1],
-  WolframModel[{1 -> 2}, {1}, -1],
-  {WolframModel::invalidSteps}
+  WolframModel[x, y, z, w],
+  WolframModel[x, y, z, w],
+  {WolframModel::invalidRules}
 ]
 
 VerificationTest[
-  WolframModel[{1 -> 2}, {1}, -1, Method -> "C++"],
-  WolframModel[{1 -> 2}, {1}, -1, Method -> "C++"],
-  {WolframModel::invalidSteps}
+  WolframModel[x, y, z, w, a],
+  WolframModel[x, y, z, w, a],
+  {WolframModel::argb}
 ]
 
 VerificationTest[
-  WolframModel[{1 -> 2}, {1}, 1.5],
-  WolframModel[{1 -> 2}, {1}, 1.5],
-  {WolframModel::invalidSteps}
+  WolframModel[x, y, z, w, a, b],
+  WolframModel[x, y, z, w, a, b],
+  {WolframModel::argb}
 ]
 
-(** Method is valid **)
+VerificationTest[
+  WolframModel[f -> 3],
+  WolframModel[f -> 3],
+  {WolframModel::argb}
+]
 
 VerificationTest[
-  WolframModel[{{0}} -> {{1}}, {{0}}, Method -> StringJoin[ToString /@ $SetReplaceMethods]],
-  WolframModel[{{0}} -> {{1}}, {{0}}, Method -> StringJoin[ToString /@ $SetReplaceMethods]],
+  WolframModel[x, f -> 3],
+  WolframModel[x, f -> 3],
+  {WolframModel::invalidRules}
+]
+
+VerificationTest[
+  WolframModel[x, y, f -> 3],
+  WolframModel[x, y, f -> 3],
+  {WolframModel::invalidRules}
+]
+
+VerificationTest[
+  WolframModel[x, y, z, f -> 3],
+  WolframModel[x, y, z, f -> 3],
+  {WolframModel::invalidRules}
+]
+
+VerificationTest[
+  WolframModel[x, y, z, w, f -> 3],
+  WolframModel[x, y, z, w, f -> 3],
+  {WolframModel::invalidRules}
+]
+
+VerificationTest[
+  WolframModel[x, y, z, w, a, f -> 3],
+  WolframModel[x, y, z, w, a, f -> 3],
+  {WolframModel::argb}
+]
+
+VerificationTest[
+  WolframModel[x, y, z, w, a, b, f -> 3],
+  WolframModel[x, y, z, w, a, b, f -> 3],
+  {WolframModel::argb}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2],
+  WolframModel[1 -> 2]
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, f -> 2],
+  WolframModel[1 -> 2, f -> 2],
+  {WolframModel::optx}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, f -> 2][1],
+  WolframModel[1 -> 2, f -> 2][1],
+  {WolframModel::optx}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, f -> 2][{1}],
+  WolframModel[1 -> 2, f -> 2][{1}],
+  {WolframModel::optx}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, Method -> "C++"][{1}],
+  WolframModel[1 -> 2, Method -> "C++"][{1}],
+  {WolframModel::cppNotImplemented}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, Method -> "$$$InvalidMethod$$$"][{1}],
+  WolframModel[1 -> 2, Method -> "$$$InvalidMethod$$$"][{1}],
   {WolframModel::invalidMethod}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, 4],
+  WolframModel[1 -> 2, 4],
+  {WolframModel::invalidState}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, 4, g -> 2],
+  WolframModel[1 -> 2, 4, g -> 2],
+  {WolframModel::invalidState}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2][4],
+  WolframModel[1 -> 2][4],
+  {WolframModel::invalidState}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, g -> 2][4],
+  WolframModel[1 -> 2, g -> 2][4],
+  {WolframModel::optx}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2][4, g -> 2],
+  WolframModel[1 -> 2][4, g -> 2],
+  {WolframModel::argx}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2][{1}],
+  {_ ? AtomQ},
+  SameTest -> MatchQ
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}],
+  _SetSubstitutionEvolution,
+  SameTest -> MatchQ
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, f -> 2][{1}],
+  WolframModel[1 -> 2, f -> 2][{1}],
+  {WolframModel::optx}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2][{1}, f -> 2],
+  WolframModel[1 -> 2][{1}, f -> 2],
+  {WolframModel::argx}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2][{1}, x],
+  WolframModel[1 -> 2][{1}, x],
+  {WolframModel::argx}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, x][{1}],
+  WolframModel[1 -> 2, x][{1}],
+  {WolframModel::invalidState}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, Method -> "$$$InvalidMethod$$$"][{1}],
+  WolframModel[1 -> 2, Method -> "$$$InvalidMethod$$$"][{1}],
+  {WolframModel::invalidMethod}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, Method -> "WolframLanguage"][{1}],
+  {_ ? AtomQ},
+  SameTest -> MatchQ
+]
+
+VerificationTest[
+  WolframModel[1 -> 2][{1}, Method -> "WolframLanguage"],
+  WolframModel[1 -> 2][{1}, Method -> "WolframLanguage"],
+  {WolframModel::argx}
+]
+
+(** PatternRules **)
+
+VerificationTest[
+  WolframModel[<|"PatternRules" -> 1 -> 2|>][{1}],
+  {2}
+]
+
+VerificationTest[
+  WolframModel[<|"PatternRule" -> 1 -> 2|>],
+  WolframModel[<|"PatternRule" -> 1 -> 2|>],
+  {WolframModel::invalidRules}
+]
+
+VerificationTest[
+  WolframModel[<|"PatternRule" -> 1 -> 2|>][{1}],
+  WolframModel[<|"PatternRule" -> 1 -> 2|>][{1}],
+  {WolframModel::invalidRules}
+]
+
+VerificationTest[
+  WolframModel[<|"PatternRules" -> 1 -> 2, "f" -> 2|>],
+  WolframModel[<|"PatternRules" -> 1 -> 2, "f" -> 2|>],
+  {WolframModel::invalidRules}
+]
+
+VerificationTest[
+  WolframModel[<|"PatternRules" -> 1 -> 2, "f" -> 2|>][{1}],
+  WolframModel[<|"PatternRules" -> 1 -> 2, "f" -> 2|>][{1}],
+  {WolframModel::invalidRules}
+]
+
+VerificationTest[
+  WolframModel[<|"PatternRules" -> 1 -> 2|>],
+  WolframModel[<|"PatternRules" -> 1 -> 2|>]
+]
+
+VerificationTest[
+  WolframModel[<|"PatternRules" -> {1 -> 2, a_ :> Module[{b}, b]}|>][{1}],
+  {2}
+]
+
+VerificationTest[
+  WolframModel[<|"PatternRules" -> {1 -> 2, a_ :> Module[{b}, b]}|>][{2}],
+  {_ ? AtomQ},
+  SameTest -> MatchQ
+]
+
+VerificationTest[
+  WolframModel[<|"PatternRules" -> {1 -> 2, a_ :> Module[{b}, b]}|>, {1}],
+  _SetSubstitutionEvolution,
+  SameTest -> MatchQ
+]
+
+VerificationTest[
+  WolframModel[<|"PatternRules" -> {1 -> 2, a_ :> Module[{b}, b]}|>, {1}, x],
+  WolframModel[<|"PatternRules" -> {1 -> 2, a_ :> Module[{b}, b]}|>, {1}, x],
+  {WolframModel::invalidSteps}
+]
+
+(** Steps **)
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2]["GenerationsCount"],
+  2
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, x],
+  WolframModel[1 -> 2, {1}, 2, x],
+  {WolframModel::invalidProperty}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2.2],
+  WolframModel[1 -> 2, {1}, 2.2],
+  {WolframModel::invalidSteps}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, "sdfsdf"],
+  WolframModel[1 -> 2, {1}, "sdfsdf"],
+  {WolframModel::invalidSteps}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 0]["EventsCount"],
+  0
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, -1],
+  WolframModel[1 -> 2, {1}, -1],
+  {WolframModel::invalidSteps}
+]
+
+VerificationTest[
+  WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, 3] /@ {"GenerationsCount", "EventsCount"},
+  {3, 7}
+]
+
+VerificationTest[
+  WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> 3|>] /@ {"GenerationsCount", "EventsCount"},
+  {3, 7}
+]
+
+VerificationTest[
+  WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Events" -> 6|>] /@ {"GenerationsCount", "EventsCount"},
+  {3, 6}
+]
+
+VerificationTest[
+  WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> 3, "Events" -> 6|>] /@ {"GenerationsCount", "EventsCount"},
+  {3, 6}
+]
+
+VerificationTest[
+  WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> 2, "Events" -> 6|>] /@ {"GenerationsCount", "EventsCount"},
+  {2, 3}
+]
+
+VerificationTest[
+  WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <||>] /@ {"GenerationsCount", "EventsCount"},
+  {2, 3}
+]
+
+VerificationTest[
+  WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <|"x" -> 2|>],
+  WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <|"x" -> 2|>],
+  {WolframModel::invalidSteps}
+]
+
+VerificationTest[
+  WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <|"x" -> 2, "Generations" -> 2|>],
+  WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <|"x" -> 2, "Generations" -> 2|>],
+  {WolframModel::invalidSteps}
+]
+
+VerificationTest[
+  WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> \[Infinity], "Events" -> 12|>] /@ {"GenerationsCount", "EventsCount"},
+  {4, 12}
+]
+
+(** Properties **)
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, "CausalGraph"],
+  Graph[{1, 2}, {1 -> 2}]
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, "123"],
+  WolframModel[1 -> 2, {1}, 2, "123"],
+  {WolframModel::invalidProperty}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, "Generation"],
+  WolframModel[1 -> 2, {1}, 2, "Generation"],
+  {WolframModel::invalidProperty}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, #] & /@ $WolframModelProperties // Length,
+  Length[$WolframModelProperties]
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, $WolframModelProperties] // Length,
+  WolframModel[1 -> 2, {1}, 2, #] & /@ $WolframModelProperties // Length
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, 2],
+  WolframModel[1 -> 2, {1}, 2, 2],
+  {WolframModel::invalidProperty}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, {2, 3}],
+  WolframModel[1 -> 2, {1}, 2, {2, 3}],
+  {WolframModel::invalidProperty}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, {"CausalGraph", 3}],
+  WolframModel[1 -> 2, {1}, 2, {"CausalGraph", 3}],
+  {WolframModel::invalidProperty}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, {3, "CausalGraph"}],
+  WolframModel[1 -> 2, {1}, 2, {3, "CausalGraph"}],
+  {WolframModel::invalidProperty}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, {"CausalGraph", "CausalGraph"}],
+  ConstantArray[Graph[{1, 2}, {1 -> 2}], 2]
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, "Rules"],
+  WolframModel[1 -> 2, {1}, 2, "Rules"],
+  {WolframModel::invalidProperty}
+]
+
+VerificationTest[
+  WolframModel[1 -> 2, {1}, 2, "Properties"],
+  WolframModel[1 -> 2, {1}, 2, "Properties"],
+  {WolframModel::invalidProperty}
 ]
 
 (* Implementation *)
