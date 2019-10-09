@@ -131,7 +131,7 @@ WolframModel /: RulePlot[
 
 
 WolframModel[args___] := 0 /;
-	!Developer`CheckArgumentCount[SetSubstitutionSystem[args], 1, Infinity] && False
+	!Developer`CheckArgumentCount[WolframModel[args], 1, Infinity] && False
 
 
 (* ::Text:: *)
