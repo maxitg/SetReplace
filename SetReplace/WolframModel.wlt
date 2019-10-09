@@ -289,3 +289,18 @@ VerificationTest[
 ]
 
 EndTestSection[]
+
+
+BeginTestSection["$WolframModelProperties"]
+
+VerificationTest[
+  ListQ[$WolframModelProperties]
+]
+
+VerificationTest[
+  AllTrue[
+    $WolframModelProperties,
+    Head[WolframModel[{{0}} -> {{1}}, {{0}}, 1, #]] =!= WolframModel &]
+]
+
+EndTestSection[]

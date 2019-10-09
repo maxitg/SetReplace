@@ -46,7 +46,7 @@ SyntaxInformation[WolframModel] =
 (*Options*)
 
 
-Options[WolframModel] = Options[setSubstitutionSystem];
+Options[WolframModel] := Options[setSubstitutionSystem];
 
 
 (* ::Section:: *)
@@ -95,13 +95,26 @@ WolframModel[
 			stepsSpec : _ ? wolframModelStepsSpecQ : 1,
 			property : _ ? wolframModelPropertyQ : "EvolutionObject",
 			o : OptionsPattern[]] := Module[{
-		patternRules, initialSet, generations, events, evolution},
+		patternRules, initialSet, generations, events, method, evolution, result},
 	patternRules = fromRulesSpec[rulesSpec];
 	initialSet = fromInitSpec[initSpec];
 	{generations, events} = fromStepsSpec[stepsSpec];
-	evolution = setSubstitutionSystem[
-		patternRules, initialSet, generations, events, WolframModel, o];
-	If[ListQ[property], evolution /@ property, evolution @ property]
+	method = Check[OptionValue[Method], $Failed, OptionValue::nodef];
+	result = If[method =!= $Failed,
+		evolution = Check[
+			setSubstitutionSystem[
+				patternRules,
+				initialSet,
+				generations,
+				events,
+				WolframModel,
+				Method -> OptionValue[Method]],
+			$Failed];
+		If[evolution =!= $Failed,
+			If[ListQ[property], evolution /@ property, evolution @ property],
+			$Failed],
+		$Failed];
+	result /; result =!= $Failed
 ]
 
 
@@ -207,7 +220,7 @@ WolframModel::invalidState =
 
 WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
-		initSpec_ ? (Not @* wolframModelInitSpecQ),
+		initSpec_ ? (Not[wolframModelInitSpecQ[#]] && Head[#] =!= Rule &),
 		args___] := 0 /;
 	Message[WolframModel::invalidState, initSpec]
 
@@ -253,7 +266,7 @@ WolframModel::invalidSteps =
 WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
 		initSpec_ ? wolframModelInitSpecQ,
-		stepsSpec_ ? (Not @* wolframModelStepsSpecQ),
+		stepsSpec_ ? (Not[wolframModelStepsSpecQ[#]] && Head[#] =!= Rule &),
 		args___] := 0 /;
 	Message[WolframModel::invalidSteps, stepsSpec]
 
@@ -270,6 +283,6 @@ WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
 		initSpec_ ? wolframModelInitSpecQ,
 		stepsSpec_ ? wolframModelStepsSpecQ,
-		property : _ ? (Not @* wolframModelPropertyQ),
+		property : _ ? (Not[wolframModelPropertyQ[#]] && Head[#] =!= Rule &),
 		o : OptionsPattern[]] := 0 /;
 	Message[WolframModel::invalidProperty, property]
