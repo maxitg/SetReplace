@@ -5,7 +5,7 @@
 
 
 (* ::Text:: *)
-(*Implementation of SetSubstitutionSystem in Wolfram Language. Works better with larger vertex degrees, but is otherwise much slower.*)
+(*Implementation of setSubstitutionSystem in Wolfram Language. Works better with larger vertex degrees, but is otherwise much slower.*)
 
 
 Package["SetReplace`"]

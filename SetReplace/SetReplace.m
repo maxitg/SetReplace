@@ -5,7 +5,7 @@
 
 
 (* ::Text:: *)
-(*This function behaves similarly to StringReplace. The implementation is done with SetSubstitutionSystem, which is a more general function.*)
+(*This function behaves similarly to StringReplace. The implementation is done with WolframModel, which is a more general function.*)
 
 
 Package["SetReplace`"]

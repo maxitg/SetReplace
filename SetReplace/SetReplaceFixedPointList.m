@@ -63,5 +63,6 @@ SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] := Module[{result},
 		setSubstitutionSystem[
 			rules, set, Infinity, Infinity, SetReplaceFixedPointList, o],
 		$Failed];
-	result["SetAfterEvent", #] & /@ Range[0, result["EventsCount"]] /; result =!= $Failed
+	result["SetAfterEvent", #] & /@ Range[0, result["EventsCount"]] /;
+		result =!= $Failed
 ]

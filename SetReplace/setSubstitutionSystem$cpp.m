@@ -5,7 +5,7 @@
 
 
 (* ::Text:: *)
-(*Interface to the C++ implementation of SetReplace.*)
+(*Interface to the C++ implementation of setSubstitutionSystem.*)
 
 
 Package["SetReplace`"]

@@ -20,9 +20,9 @@ PackageExport["$WolframModelProperties"]
 
 
 WolframModel::usage = usageString[
-	"WolframModel[`rules`, `init`, `t`] generates an object representing the evolution ",
-	"of the Wolfram Model with the specified rules from the initial condition `init` ",
-	"for `t` generations.",
+	"WolframModel[`rules`, `init`, `t`] generates an object representing the ",
+	"evolution of the Wolfram Model with the specified rules from the initial ",
+	"condition `init` for `t` generations.",
 	"\n",
 	"WolframModel[`rules`, `init`, `t`, `prop`] gives the property `prop` ",
 	"of the evolution.",
@@ -134,7 +134,8 @@ WolframModel[
 (*$WolframModelProperties*)
 
 
-$WolframModelProperties = Complement[$propertiesParameterless, {"Properties", "Rules"}];
+$WolframModelProperties =
+	Complement[$propertiesParameterless, {"Properties", "Rules"}];
 
 
 (* ::Section:: *)
@@ -287,8 +288,8 @@ expr : WolframModel[
 
 
 WolframModel::invalidSteps =
-	"The steps specification `1` should be an Integer, Infinity, or an association " <>
-	"with \"Generations\" key, \"Events\" key, or both.";
+	"The steps specification `1` should be an Integer, Infinity, " <>
+	"or an association with \"Generations\" key, \"Events\" key, or both.";
 
 
 expr : WolframModel[
