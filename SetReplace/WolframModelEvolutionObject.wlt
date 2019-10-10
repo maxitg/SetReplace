@@ -388,6 +388,22 @@ VerificationTest[
   2
 ]
 
+VerificationTest[
+  WolframModel[
+    1 -> 2,
+    {1},
+    5]["AtomsCountFinal"],
+  1
+]
+
+VerificationTest[
+  WolframModel[
+    1 -> 1,
+    {1},
+    5]["AtomsCountFinal"],
+  1
+]
+
 (* AtomsCountTotal *)
 
 VerificationTest[
@@ -396,6 +412,22 @@ VerificationTest[
     Partition[Range[17], 2, 1],
     4]["AtomsCountTotal"],
   17
+]
+
+VerificationTest[
+  WolframModel[
+    1 -> 2,
+    {1},
+    5]["AtomsCountTotal"],
+  6
+]
+
+VerificationTest[
+  WolframModel[
+    1 -> 1,
+    {1},
+    5]["AtomsCountTotal"],
+  1
 ]
 
 (* ExpressionsCountFinal *)
