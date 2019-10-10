@@ -668,6 +668,24 @@ VerificationTest[
     Method -> "WolframLanguage"]
 ]
 
+VerificationTest[
+  WolframModel[
+    {{v[1], v[2]}, {v[2], v[3]}} -> {{v[1], v[3]}},
+    {{v[1], v[2]}, {v[2], v[3]}},
+    "FinalState",
+    Method -> "WolframLanguage"],
+  {{v[1], v[3]}}
+]
+
+VerificationTest[
+  WolframModel[
+    {{v[1], v[2]}, {v[2], v[3]}} -> {{v[1], v[3]}},
+    {{v[1], v[2]}, {v[2], v[3]}},
+    "FinalState",
+    Method -> "C++"],
+  {{v[1], v[3]}}
+]
+
 EndTestSection[]
 
 
