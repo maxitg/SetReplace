@@ -207,6 +207,19 @@ VerificationTest[
   SameTest -> (#2[#1] &)
 ]
 
+(* EvolutionObject *)
+
+VerificationTest[
+  WolframModel[
+    {{1, 2}, {2, 3}} -> {{1, 3}},
+    Partition[Range[17], 2, 1],
+    4]["EvolutionObject"],
+  WolframModel[
+    {{1, 2}, {2, 3}} -> {{1, 3}},
+    Partition[Range[17], 2, 1],
+    4]
+]
+
 (* Rules *)
 
 VerificationTest[
@@ -314,6 +327,48 @@ VerificationTest[
     4]["SetAfterEvent", 15]
 ]
 
+(* FinalState *)
+
+VerificationTest[
+  WolframModel[
+    {{1, 2}, {2, 3}} -> {{1, 3}},
+    Partition[Range[17], 2, 1],
+    4]["FinalState"],
+  WolframModel[
+    {{1, 2}, {2, 3}} -> {{1, 3}},
+    Partition[Range[17], 2, 1],
+    4]["SetAfterEvent", -1]
+]
+
+VerificationTest[
+  WolframModel[
+    {{1, 2}, {2, 3}} -> {{1, 3}},
+    Partition[Range[17], 2, 1],
+    0]["FinalState"],
+  Partition[Range[17], 2, 1]
+]
+
+(* UpdatedStatesList *)
+
+VerificationTest[
+  WolframModel[
+    {{1, 2}, {2, 3}} -> {{1, 3}},
+    Partition[Range[17], 2, 1],
+    4]["UpdatedStatesList"],
+  WolframModel[
+    {{1, 2}, {2, 3}} -> {{1, 3}},
+    Partition[Range[17], 2, 1],
+    4]["SetAfterEvent", #] & /@ Range[0, 15]
+]
+
+VerificationTest[
+  WolframModel[
+    {{1, 2}, {2, 3}} -> {{1, 3}},
+    Partition[Range[17], 2, 1],
+    0]["UpdatedStatesList"],
+  {Partition[Range[17], 2, 1]}
+]
+
 (* Generation *)
 
 VerificationTest[
@@ -376,6 +431,27 @@ VerificationTest[
     {{1, 2}, {2, 3}} -> {{1, 3}},
     Partition[Range[17], 2, 1],
     4]["Generation", 4]
+]
+
+(* StatesList *)
+
+VerificationTest[
+  WolframModel[
+    {{1, 2}, {2, 3}} -> {{1, 3}},
+    Partition[Range[17], 2, 1],
+    4]["StatesList"],
+  WolframModel[
+    {{1, 2}, {2, 3}} -> {{1, 3}},
+    Partition[Range[17], 2, 1],
+    4]["Generation", #] & /@ Range[0, 4]
+]
+
+VerificationTest[
+  WolframModel[
+    {{1, 2}, {2, 3}} -> {{1, 3}},
+    Partition[Range[17], 2, 1],
+    0]["StatesList"],
+  {Partition[Range[17], 2, 1]}
 ]
 
 (* AtomsCountFinal *)
