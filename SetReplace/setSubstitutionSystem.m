@@ -5,7 +5,7 @@
 
 
 (* ::Text:: *)
-(*This is a main function of the package. This function calls either C++ or WolframLanguage implementation, and can produce a WolframModelEvolutionObject that contains information about evolution of the network step-by-step. All SetReplace* and WolframModel functions use argument checks and implementation done here.*)
+(*This is a main function of the package. This function calls either C++ or Wolfram Language implementation, and can produce a WolframModelEvolutionObject that contains information about evolution of the network step-by-step. All SetReplace* and WolframModel functions use argument checks and implementation done here.*)
 
 
 Package["SetReplace`"]
@@ -83,8 +83,8 @@ setSubstitutionSystem[
 (*Method is valid*)
 
 
-$cppMethod = "C++";
-$wlMethod = "WolframLanguage";
+$cppMethod = "LowLevel";
+$wlMethod = "Symbolic";
 
 
 $SetReplaceMethods = {Automatic, $cppMethod, $wlMethod};
@@ -152,17 +152,17 @@ setSubstitutionSystem[
 			o : OptionsPattern[]] := Module[{
 		method = OptionValue[Method], canonicalRules, failedQ = False},
 	canonicalRules = toCanonicalRules[rules];
-	If[MatchQ[method, Automatic | "C++"]
+	If[MatchQ[method, Automatic | $cppMethod]
 			&& MatchQ[set, {{___}...}]
 			&& MatchQ[canonicalRules, {___ ? simpleRuleQ}],
 		If[$cppSetReplaceAvailable,
 			Return[
 				setSubstitutionSystem$cpp[rules, set, generations, steps]]]];
-	If[MatchQ[method, "C++"],
+	If[MatchQ[method, $cppMethod],
 		failedQ = True;
 		If[!$cppSetReplaceAvailable,
-			makeMessage[caller, "noCpp"],
-			makeMessage[caller, "cppNotImplemented"]]];
+			makeMessage[caller, "noLowLevel"],
+			makeMessage[caller, "lowLevelNotImplemented"]]];
 	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
 		setSubstitutionSystem$wl[rules, set, generations, steps]]

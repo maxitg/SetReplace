@@ -643,7 +643,7 @@ VerificationTest[
       {1, 6}, {3, 4}},
     {{0, 0}, {0, 0}, {0, 0}},
     3,
-    Method -> "WolframLanguage"]["CausalGraph"],
+    Method -> "Symbolic"]["CausalGraph"],
   WolframModel[
     {{0, 1}, {0, 2}, {0, 3}} ->
       {{4, 5}, {5, 6}, {6, 4}, {4, 6}, {6, 5}, {5, 4},
@@ -651,7 +651,7 @@ VerificationTest[
       {1, 6}, {3, 4}},
     {{0, 0}, {0, 0}, {0, 0}},
     3,
-    Method -> "C++"]["CausalGraph"]
+    Method -> "LowLevel"]["CausalGraph"]
 ]
 
 EndTestSection[]

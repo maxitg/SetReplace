@@ -55,24 +55,24 @@ $systemsToTest = {
 (* Fixed number of events *)
 
 VerificationTest[
-  SetReplace[##, Method -> "WolframLanguage"],
-  SetReplace[##, Method -> "C++"],
+  SetReplace[##, Method -> "Symbolic"],
+  SetReplace[##, Method -> "LowLevel"],
   SameTest -> $sameSetQ
 ] & @@@ $systemsToTest[[All, {1, 2, 3}]]
 
 (* Fixed number of generations *)
 
 VerificationTest[
-  SetReplaceAll[##, Method -> "WolframLanguage"],
-  SetReplaceAll[##, Method -> "C++"],
+  SetReplaceAll[##, Method -> "Symbolic"],
+  SetReplaceAll[##, Method -> "LowLevel"],
   SameTest -> $sameSetQ
 ] & @@@ $systemsToTest[[All, {1, 2, 4}]]
 
 (* Causal graphs consistency *)
 
 VerificationTest[
-  WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "WolframLanguage"],
-  WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "C++"]
+  WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "Symbolic"],
+  WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "LowLevel"]
 ] & @@@ $systemsToTest[[All, {2, 1, 4}]]
 
 (** Causal graphs properties check **)
@@ -99,7 +99,7 @@ graphsForMatching = {
   {{2, 3}, {3, 1}, {4, 2}, {4, 5}},
   {{1, 5}, {2, 1}, {2, 3}, {2, 4}, {2, 5}, {3, 1}, {4, 2}, {4, 5}}
 };
-methods = {"C++", "WolframLanguage"};
+methods = {"LowLevel", "Symbolic"};
 
 Table[VerificationTest[
   SetReplace[
@@ -184,32 +184,32 @@ randomSameGraphMatchTest[edgeCount_, edgeLength_, graphCount_, method_] := Modul
 ]
 
 VerificationTest[
-  randomSameGraphMatchTest[10, 2, 10000, "C++"],
+  randomSameGraphMatchTest[10, 2, 10000, "LowLevel"],
   True
 ]
 
 VerificationTest[
-  randomSameGraphMatchTest[10, 3, 5000, "C++"],
+  randomSameGraphMatchTest[10, 3, 5000, "LowLevel"],
   True
 ]
 
 VerificationTest[
-  randomSameGraphMatchTest[10, 6, 1000, "C++"],
+  randomSameGraphMatchTest[10, 6, 1000, "LowLevel"],
   True
 ]
 
 VerificationTest[
-  randomSameGraphMatchTest[6, 2, 5000, "WolframLanguage"],
+  randomSameGraphMatchTest[6, 2, 5000, "Symbolic"],
   True
 ]
 
 VerificationTest[
-  randomSameGraphMatchTest[6, 3, 500, "WolframLanguage"],
+  randomSameGraphMatchTest[6, 3, 500, "Symbolic"],
   True
 ]
 
 VerificationTest[
-  randomSameGraphMatchTest[6, 10, 100, "WolframLanguage"],
+  randomSameGraphMatchTest[6, 10, 100, "Symbolic"],
   True
 ]
 
@@ -231,32 +231,32 @@ randomDistinctGraphMatchTest[
 ]
 
 VerificationTest[
-  randomDistinctGraphMatchTest[10, 2, 10000, "C++"],
+  randomDistinctGraphMatchTest[10, 2, 10000, "LowLevel"],
   True
 ]
 
 VerificationTest[
-  randomDistinctGraphMatchTest[10, 3, 10000, "C++"],
+  randomDistinctGraphMatchTest[10, 3, 10000, "LowLevel"],
   True
 ]
 
 VerificationTest[
-  randomDistinctGraphMatchTest[10, 6, 10000, "C++"],
+  randomDistinctGraphMatchTest[10, 6, 10000, "LowLevel"],
   True
 ]
 
 VerificationTest[
-  randomDistinctGraphMatchTest[6, 2, 5000, "WolframLanguage"],
+  randomDistinctGraphMatchTest[6, 2, 5000, "Symbolic"],
   True
 ]
 
 VerificationTest[
-  randomDistinctGraphMatchTest[6, 3, 5000, "WolframLanguage"],
+  randomDistinctGraphMatchTest[6, 3, 5000, "Symbolic"],
   True
 ]
 
 VerificationTest[
-  randomDistinctGraphMatchTest[6, 6, 5000, "WolframLanguage"],
+  randomDistinctGraphMatchTest[6, 6, 5000, "Symbolic"],
   True
 ]
 
@@ -279,32 +279,32 @@ Union[
 ]
 
 VerificationTest[
-  randomDegenerateGraphMatchTest[10, 2, 10000, "C++"],
+  randomDegenerateGraphMatchTest[10, 2, 10000, "LowLevel"],
   True
 ]
 
 VerificationTest[
-  randomDegenerateGraphMatchTest[10, 3, 5000, "C++"],
+  randomDegenerateGraphMatchTest[10, 3, 5000, "LowLevel"],
   True
 ]
 
 VerificationTest[
-  randomDegenerateGraphMatchTest[10, 6, 1000, "C++"],
+  randomDegenerateGraphMatchTest[10, 6, 1000, "LowLevel"],
   True
 ]
 
 VerificationTest[
-  randomDegenerateGraphMatchTest[6, 2, 5000, "WolframLanguage"],
+  randomDegenerateGraphMatchTest[6, 2, 5000, "Symbolic"],
   True
 ]
 
 VerificationTest[
-  randomDegenerateGraphMatchTest[6, 3, 500, "WolframLanguage"],
+  randomDegenerateGraphMatchTest[6, 3, 500, "Symbolic"],
   True
 ]
 
 VerificationTest[
-  randomDegenerateGraphMatchTest[6, 10, 100, "WolframLanguage"],
+  randomDegenerateGraphMatchTest[6, 10, 100, "Symbolic"],
   True
 ]
 

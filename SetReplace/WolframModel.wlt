@@ -117,9 +117,9 @@ VerificationTest[
 ]
 
 VerificationTest[
-  WolframModel[1 -> 2, Method -> "C++"][{1}],
-  WolframModel[1 -> 2, Method -> "C++"][{1}],
-  {WolframModel::cppNotImplemented}
+  WolframModel[1 -> 2, Method -> "LowLevel"][{1}],
+  WolframModel[1 -> 2, Method -> "LowLevel"][{1}],
+  {WolframModel::lowLevelNotImplemented}
 ]
 
 VerificationTest[
@@ -201,14 +201,14 @@ VerificationTest[
 ]
 
 VerificationTest[
-  WolframModel[1 -> 2, Method -> "WolframLanguage"][{1}],
+  WolframModel[1 -> 2, Method -> "Symbolic"][{1}],
   {_ ? AtomQ},
   SameTest -> MatchQ
 ]
 
 VerificationTest[
-  WolframModel[1 -> 2][{1}, Method -> "WolframLanguage"],
-  WolframModel[1 -> 2][{1}, Method -> "WolframLanguage"],
+  WolframModel[1 -> 2][{1}, Method -> "Symbolic"],
+  WolframModel[1 -> 2][{1}, Method -> "Symbolic"],
   {WolframModel::argx}
 ]
 
@@ -533,12 +533,12 @@ VerificationTest[
 ]
 
 VerificationTest[
-  WolframModel[<|"PatternRules" -> ({{1}} :> {})|>, {{1}}, Method -> "C++"][-1],
+  WolframModel[<|"PatternRules" -> ({{1}} :> {})|>, {{1}}, Method -> "LowLevel"][-1],
   {}
 ]
 
 VerificationTest[
-  WolframModel[<|"PatternRules" -> ({{1}} :> {})|>, {{1}}, Method -> "WolframLanguage"][-1],
+  WolframModel[<|"PatternRules" -> ({{1}} :> {})|>, {{1}}, Method -> "Symbolic"][-1],
   {}
 ]
 
@@ -660,12 +660,12 @@ VerificationTest[
     <|"PatternRules" -> {{{1}} -> {{2}}}|>,
     {{1}, {1}, {1}},
     1,
-    Method -> "C++"],
+    Method -> "LowLevel"],
   WolframModel[
     <|"PatternRules" -> {{{1}} -> {{2}}}|>,
     {{1}, {1}, {1}},
     1,
-    Method -> "WolframLanguage"]
+    Method -> "Symbolic"]
 ]
 
 VerificationTest[
@@ -673,7 +673,7 @@ VerificationTest[
     {{v[1], v[2]}, {v[2], v[3]}} -> {{v[1], v[3]}},
     {{v[1], v[2]}, {v[2], v[3]}},
     "FinalState",
-    Method -> "WolframLanguage"],
+    Method -> "Symbolic"],
   {{v[1], v[3]}}
 ]
 
@@ -682,7 +682,7 @@ VerificationTest[
     {{v[1], v[2]}, {v[2], v[3]}} -> {{v[1], v[3]}},
     {{v[1], v[2]}, {v[2], v[3]}},
     "FinalState",
-    Method -> "C++"],
+    Method -> "LowLevel"],
   {{v[1], v[3]}}
 ]
 

@@ -28,7 +28,7 @@ VerificationTest[
     $init,
     $rule,
     100,
-    Method -> "WolframLanguage"],
+    Method -> "Symbolic"],
   {0},
   SameTest -> (ListQ[#1] && ListQ[#2] &),
   TimeConstraint -> 60,

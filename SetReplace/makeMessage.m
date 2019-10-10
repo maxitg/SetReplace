@@ -49,13 +49,13 @@ messageTemplate["invalidMethod"] =
 	"Method should be one of " <> ToString[$SetReplaceMethods, InputForm] <> ".";
 
 
-messageTemplate["cppNotImplemented"] =
-	"C++ implementation is only available for local rules, " <>
+messageTemplate["lowLevelNotImplemented"] =
+	"Low level implementation is only available for local rules, " <>
 	"and only for sets of lists (hypergraphs).";
 
 
-messageTemplate["noCpp"] =
-	"C++ implementation was not compiled for your system type.";
+messageTemplate["noLowLevel"] =
+	"Low level implementation was not compiled for your system type.";
 
 
 messageTemplate["notRules"] =

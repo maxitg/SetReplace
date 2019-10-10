@@ -11,8 +11,8 @@ VerificationTest[
 ]
 
 VerificationTest[
-	SetReplace[Method -> "C++"],
-	SetReplace[Method -> "C++"],
+	SetReplace[Method -> "LowLevel"],
+	SetReplace[Method -> "LowLevel"],
 	{SetReplace::argt}
 ]
 
@@ -25,8 +25,8 @@ VerificationTest[
 ]
 
 VerificationTest[
-	SetReplace[1, 1 -> 2, Method -> "C++"],
-	SetReplace[1, 1 -> 2, Method -> "C++"],
+	SetReplace[1, 1 -> 2, Method -> "LowLevel"],
+	SetReplace[1, 1 -> 2, Method -> "LowLevel"],
 	{SetReplace::setNotList}
 ]
 
@@ -39,8 +39,8 @@ VerificationTest[
 ]
 
 VerificationTest[
-	SetReplace[{1}, 1, Method -> "C++"],
-	SetReplace[{1}, 1, Method -> "C++"],
+	SetReplace[{1}, 1, Method -> "LowLevel"],
+	SetReplace[{1}, 1, Method -> "LowLevel"],
 	{SetReplace::invalidRules}
 ]
 
@@ -59,8 +59,8 @@ VerificationTest[
 ]
 
 VerificationTest[
-	SetReplace[{1}, {1 -> 2}, -1, Method -> "C++"],
-	SetReplace[{1}, {1 -> 2}, -1, Method -> "C++"],
+	SetReplace[{1}, {1 -> 2}, -1, Method -> "LowLevel"],
+	SetReplace[{1}, {1 -> 2}, -1, Method -> "LowLevel"],
 	{SetReplace::nonIntegerIterations}
 ]
 
@@ -128,12 +128,12 @@ VerificationTest[
 ]
 
 VerificationTest[
-	SetReplace[{{1}}, {{1}} :> {}, Method -> "C++"],
+	SetReplace[{{1}}, {{1}} :> {}, Method -> "LowLevel"],
 	{}
 ]
 
 VerificationTest[
-	SetReplace[{{1}}, {{1}} :> {}, Method -> "WolframLanguage"],
+	SetReplace[{{1}}, {{1}} :> {}, Method -> "Symbolic"],
 	{}
 ]
 
@@ -179,31 +179,31 @@ VerificationTest[
 
 (*** infinite number of steps is supported ***)
 VerificationTest[
-	SetReplace[{{1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Infinity, Method -> "C++"],
+	SetReplace[{{1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Infinity, Method -> "LowLevel"],
 	{{1, 3}}
 ]
 
-(** Examples not supported by C++ implementation **)
+(** Examples not supported by LowLevel implementation **)
 
 (*** not a hypergraph ***)
 VerificationTest[
-	SetReplace[{1}, {1 -> 2}, Method -> "C++"],
-	SetReplace[{1}, {1 -> 2}, Method -> "C++"],
-	{SetReplace::cppNotImplemented}
+	SetReplace[{1}, {1 -> 2}, Method -> "LowLevel"],
+	SetReplace[{1}, {1 -> 2}, Method -> "LowLevel"],
+	{SetReplace::lowLevelNotImplemented}
 ]
 
 (*** rule is not local ***)
 VerificationTest[
-	SetReplace[{{1, 2}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}, {2, 4}}, Method -> "C++"],
-	SetReplace[{{1, 2}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}, {2, 4}}, Method -> "C++"],
-	{SetReplace::cppNotImplemented}
+	SetReplace[{{1, 2}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}, {2, 4}}, Method -> "LowLevel"],
+	SetReplace[{{1, 2}, {3, 4}}, {{1, 2}, {3, 4}} -> {{1, 3}, {2, 4}}, Method -> "LowLevel"],
+	{SetReplace::lowLevelNotImplemented}
 ]
 
 (*** nothing -> something ***)
 VerificationTest[
-	SetReplace[{{1, 2}, {3, 4}}, {} -> {{1, 3}, {2, 4}}, Method -> "C++"],
-	SetReplace[{{1, 2}, {3, 4}}, {} -> {{1, 3}, {2, 4}}, Method -> "C++"],
-	{SetReplace::cppNotImplemented}
+	SetReplace[{{1, 2}, {3, 4}}, {} -> {{1, 3}, {2, 4}}, Method -> "LowLevel"],
+	SetReplace[{{1, 2}, {3, 4}}, {} -> {{1, 3}, {2, 4}}, Method -> "LowLevel"],
+	{SetReplace::lowLevelNotImplemented}
 ]
 
 EndTestSection[]
