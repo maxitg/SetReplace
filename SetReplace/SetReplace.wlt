@@ -168,12 +168,12 @@ VerificationTest[
 ]
 
 VerificationTest[
-	SetReplace[{{2, 2}, 1}, FromAnonymousRules[{{{3, 3}, 1} -> {3, 1, 3}}]],
+	SetReplace[{{2, 2}, 1}, ToPatternRules[{{{3, 3}, 1} -> {3, 1, 3}}]],
 	{2, 1, 2}
 ]
 
 VerificationTest[
-	SetReplace[{{{2, 2}, 1}}, FromAnonymousRules[{{{3, 3}, 1} -> {3, 1, 3}}]],
+	SetReplace[{{{2, 2}, 1}}, ToPatternRules[{{{3, 3}, 1} -> {3, 1, 3}}]],
 	{{{2, 2}, 1}}
 ]
 

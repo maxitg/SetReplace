@@ -9,19 +9,19 @@ $sameSetQ[x_, y_] := Module[{xAtoms, yAtoms},
 ]
 
 $systemsToTest = {
-  {{{0, 1}}, FromAnonymousRules[{{0, 1}} -> {{0, 2}, {2, 1}}], 100, 6},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}}}], 100, 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}}}], 100, 100},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {1, 2}}}], 100, 6},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 1}}}], 100, 6},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 2}}}], 100, 6},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{1}, {2}, {1, 3}}}], 100, 6},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {2}, {1, 2}}}], 100, 6},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {3}, {1, 2}}}], 100, 6},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {3}, {1, 2, 4}}}], 100, 6},
-  {{{1}}, FromAnonymousRules[{{{1}} -> {{2}, {2}, {2}, {1, 2}}}], 100, 4},
-  {{{1}, {1}, {1}}, FromAnonymousRules[{{{1}} -> {{2}, {1, 2}}}], 100, 34},
-  {{{1, 1}}, FromAnonymousRules[{{{1, 2}} -> {{1, 3}, {2, 3}}}], 100, 6},
+  {{{0, 1}}, ToPatternRules[{{0, 1}} -> {{0, 2}, {2, 1}}], 100, 6},
+  {{{1}}, ToPatternRules[{{{1}} -> {{1}}}], 100, 100},
+  {{{1}}, ToPatternRules[{{{1}} -> {{2}}}], 100, 100},
+  {{{1}}, ToPatternRules[{{{1}} -> {{2}, {1, 2}}}], 100, 6},
+  {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 1}}}], 100, 6},
+  {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 2}}}], 100, 6},
+  {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 3}}}], 100, 6},
+  {{{1}}, ToPatternRules[{{{1}} -> {{2}, {2}, {1, 2}}}], 100, 6},
+  {{{1}}, ToPatternRules[{{{1}} -> {{2}, {3}, {1, 2}}}], 100, 6},
+  {{{1}}, ToPatternRules[{{{1}} -> {{2}, {3}, {1, 2, 4}}}], 100, 6},
+  {{{1}}, ToPatternRules[{{{1}} -> {{2}, {2}, {2}, {1, 2}}}], 100, 4},
+  {{{1}, {1}, {1}}, ToPatternRules[{{{1}} -> {{2}, {1, 2}}}], 100, 34},
+  {{{1, 1}}, ToPatternRules[{{{1, 2}} -> {{1, 3}, {2, 3}}}], 100, 6},
   {{{0, 1}, {0, 2}, {0, 3}},
     {{{a_, b_}, {a_, c_}, {a_, d_}} :>
       Module[{$0, $1, $2}, {
@@ -104,7 +104,7 @@ methods = {"C++", "WolframLanguage"};
 Table[VerificationTest[
   SetReplace[
     graph,
-    FromAnonymousRules[graph -> {}],
+    ToPatternRules[graph -> {}],
     1,
     Method -> method],
   {}
@@ -113,7 +113,7 @@ Table[VerificationTest[
 VerificationTest[
   SetReplace[
     {{1, 2}, {2, 3, 4}},
-    FromAnonymousRules[{{2, 3, 4}, {1, 2}} -> {}],
+    ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
     1,
     Method -> #],
   {}
@@ -122,7 +122,7 @@ VerificationTest[
 VerificationTest[
   SetReplace[
     {{1, 2}, {2, 2, 3}},
-    FromAnonymousRules[{{2, 3, 4}, {1, 2}} -> {}],
+    ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
     1,
     Method -> #],
   {}
@@ -131,7 +131,7 @@ VerificationTest[
 VerificationTest[
   SetReplace[
     {{1, 2}, {2, 1, 3}},
-    FromAnonymousRules[{{2, 3, 4}, {1, 2}} -> {}],
+    ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
     1,
     Method -> #],
   {}
@@ -140,7 +140,7 @@ VerificationTest[
 VerificationTest[
   SetReplace[
     {{1, 2}, {1, 1, 3}},
-    FromAnonymousRules[{{2, 3, 4}, {1, 2}} -> {}],
+    ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
     1,
     Method -> #],
   {{1, 2}, {1, 1, 3}}
@@ -149,7 +149,7 @@ VerificationTest[
 VerificationTest[
   SetReplace[
     {{1, 2}, {2, 1}},
-    FromAnonymousRules[{{1, 2}, {2, 3}} -> {{1, 3}}],
+    ToPatternRules[{{1, 2}, {2, 3}} -> {{1, 3}}],
     1,
     Method -> #],
   {{1, 1}}
@@ -176,7 +176,7 @@ randomSameGraphMatchTest[edgeCount_, edgeLength_, graphCount_, method_] := Modul
   tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
   Union[
     ParallelMap[
-        SetReplace[#[[1]], FromAnonymousRules[#[[2]] -> {}], Method -> method] &,
+        SetReplace[#[[1]], ToPatternRules[#[[2]] -> {}], Method -> method] &,
         BlockRandom[
           {#, RandomSample[#]} & /@ tests,
           RandomSeeding -> ToString[{"randomSameGraphMatchTest", edgeCount, edgeLength, graphCount, method}]]]]
@@ -225,8 +225,8 @@ randomDistinctGraphMatchTest[
   Not[Or @@ ParallelMap[
     (* degenerate graphs can still match if not isomorphic, i.e., {{0, 0}} will match {{0, 1}},
        that's why we need to try replacing both ways *)
-    SetReplace[#[[1]], FromAnonymousRules[#[[2]] -> {}], Method -> method] == {}
-      && SetReplace[#[[2]], FromAnonymousRules[#[[1]] -> {}], Method -> method] == {} &,
+    SetReplace[#[[1]], ToPatternRules[#[[2]] -> {}], Method -> method] == {}
+      && SetReplace[#[[2]], ToPatternRules[#[[1]] -> {}], Method -> method] == {} &,
     tests]]
 ]
 
@@ -270,7 +270,7 @@ Union[
   ParallelMap[
       SetReplace[
         #[[1]] /. #[[2]] -> #[[3]],
-        FromAnonymousRules[#[[4]] -> {}],
+        ToPatternRules[#[[4]] -> {}],
         Method -> method] &,
       BlockRandom[
         {#, RandomChoice[Flatten[#]], RandomChoice[Flatten[#]], RandomSample[#]} & /@ tests,

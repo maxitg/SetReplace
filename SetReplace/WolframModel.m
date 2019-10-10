@@ -61,7 +61,7 @@ Options[WolframModel] := Options[setSubstitutionSystem];
 (*Rules*)
 
 
-fromRulesSpec[rulesSpec : _List | _Rule] := FromAnonymousRules[rulesSpec]
+fromRulesSpec[rulesSpec : _List | _Rule] := ToPatternRules[rulesSpec]
 
 
 fromRulesSpec[<|"PatternRules" -> rules_|>] := rules

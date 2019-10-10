@@ -91,7 +91,7 @@ VerificationTest[
 VerificationTest[
   Length @ SetReplaceAll[
     {{0, 1}, {0, 2}, {0, 3}}, 
-    FromAnonymousRules[
+    ToPatternRules[
       {{0, 1}, {0, 2}, {0, 3}} ->
       {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}],
     4],
@@ -101,7 +101,7 @@ VerificationTest[
 VerificationTest[
   Length @ SetReplaceAll[
     {{0, 0}, {0, 0}, {0, 0}}, 
-    FromAnonymousRules[
+    ToPatternRules[
       {{0, 1}, {0, 2}, {0, 3}} ->
       {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}],
     4],
@@ -111,7 +111,7 @@ VerificationTest[
 VerificationTest[
   Length @ SetReplaceAll[
     {{0, 1}, {0, 2}, {0, 3}}, 
-    FromAnonymousRules[
+    ToPatternRules[
       {{0, 1}, {0, 2}, {0, 3}} ->
       {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5},
        {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}}],
@@ -122,7 +122,7 @@ VerificationTest[
 VerificationTest[
   Length @ SetReplaceAll[
     {{0, 1}, {0, 2}, {0, 3}},
-    FromAnonymousRules[
+    ToPatternRules[
       {{0, 1}, {0, 2}, {0, 3}} ->
       {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5},
        {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}}],
@@ -130,7 +130,7 @@ VerificationTest[
     Method -> "C++"],
   Length @ SetReplaceAll[
     {{0, 1}, {0, 2}, {0, 3}},
-    FromAnonymousRules[
+    ToPatternRules[
       {{0, 1}, {0, 2}, {0, 3}} ->
       {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5},
        {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}}],
