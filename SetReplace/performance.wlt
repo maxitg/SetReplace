@@ -28,7 +28,7 @@ VerificationTest[
     $init,
     $rule,
     100,
-    Method -> "WolframLanguage"],
+    Method -> "Symbolic"],
   {0},
   SameTest -> (ListQ[#1] && ListQ[#2] &),
   TimeConstraint -> 60,
@@ -43,7 +43,7 @@ VerificationTest[
      timing varies around +-0.05, so using tolerance 0.2 to avoid random failures *)
   AbsoluteTiming[TimeConstrained[SetReplace[
       {{0}},
-      FromAnonymousRules[{{{0}} -> {{0}, {0}, {0}}, {{0}, {0}, {0}} -> {{0}}}],
+      ToPatternRules[{{{0}} -> {{0}, {0}, {0}}, {{0}, {0}, {0}} -> {{0}}}],
       30], 1]][[1]],
   1.0,
   SameTest -> (Abs[#1 - #2] < 0.2 &),

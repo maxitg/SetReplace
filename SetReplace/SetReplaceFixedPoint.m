@@ -52,7 +52,7 @@ SetReplaceFixedPoint[args___] := 0 /;
 (*Options*)
 
 
-Options[SetReplaceFixedPoint] := Options[SetSubstitutionSystem]
+Options[SetReplaceFixedPoint] := Options[setSubstitutionSystem]
 
 
 (* ::Section:: *)

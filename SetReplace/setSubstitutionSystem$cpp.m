@@ -5,7 +5,7 @@
 
 
 (* ::Text:: *)
-(*Interface to the C++ implementation of SetReplace.*)
+(*Interface to the C++ implementation of setSubstitutionSystem.*)
 
 
 Package["SetReplace`"]
@@ -167,7 +167,7 @@ setSubstitutionSystem$cpp[rules_, set_, generations_, steps_] /;
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
 	inverseGlobalMap = Association @ Thread[resultAtoms
 		-> (Lookup[inversePartialGlobalMap, #, Unique["v"]] & /@ resultAtoms)];
-	SetSubstitutionEvolution[Join[
+	WolframModelEvolutionObject[Join[
 		cppOutput,
 		<|$atomLists ->
 				ReleaseHold @ Map[inverseGlobalMap, cppOutput[$atomLists], {2}],

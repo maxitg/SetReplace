@@ -41,7 +41,7 @@ If[CreateLibrary[
 		"Compiler" -> ToExpression @ $TryEnvironment["COMPILER", Automatic],
 		"CompilerInstallation" -> $TryEnvironment["COMPILER_INSTALLATION", Automatic]
 	] === $Failed,
-	Print["Compilation failed. Paclet will be created without C++ implementation."]];
+	Print["Compilation failed. Paclet will be created without low level implementation."]];
 SetDirectory["../.."];
 
 

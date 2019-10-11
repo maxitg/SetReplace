@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 (* ::Title:: *)
-(*FromAnonymousRules*)
+(*ToPatternRules*)
 
 
 (* ::Text:: *)
@@ -19,25 +19,29 @@
 Package["SetReplace`"]
 
 
-PackageExport["FromAnonymousRules"]
+PackageExport["ToPatternRules"]
+
+
+PackageScope["anonymousRulesQ"]
+PackageScope["toPatternRules"]
 
 
 (* ::Section:: *)
 (*Documentation*)
 
 
-FromAnonymousRules::usage = usageString[
-	"FromAnonymousRules[`r`] converts a list of anonymous rules `r` into a list of ",
+ToPatternRules::usage = usageString[
+	"ToPatternRules[`r`] converts a list of anonymous rules `r` into a list of ",
 	"rules that can be supplied into SetReplace.",
 	"\n",
-	"As an example, try FromAnonymousRules[{{{1, 2}} -> {{1, 2, 3}}}]."];
+	"As an example, try ToPatternRules[{{{1, 2}} -> {{1, 2, 3}}}]."];
 
 
 (* ::Section:: *)
 (*Syntax Information*)
 
 
-SyntaxInformation[FromAnonymousRules] = {"ArgumentsPattern" -> {_}};
+SyntaxInformation[ToPatternRules] = {"ArgumentsPattern" -> {_}};
 
 
 (* ::Section:: *)
@@ -48,34 +52,38 @@ SyntaxInformation[FromAnonymousRules] = {"ArgumentsPattern" -> {_}};
 (*Argument count*)
 
 
-FromAnonymousRules[args___] := 0 /;
-	!Developer`CheckArgumentCount[FromAnonymousRules[args], 1, 1] && False
+ToPatternRules[args___] := 0 /;
+	!Developer`CheckArgumentCount[ToPatternRules[args], 1, 1] && False
 
 
 (* ::Subsection:: *)
 (*Argument is a list of rules or a single rule*)
 
 
-FromAnonymousRules::notRules =
-	"First argument of FromAnonymousRules must be either a Rule or a list of rules.";
+anonymousRulesQ[rules_] := MatchQ[rules, {___Rule} | _Rule]
 
 
-FromAnonymousRules[rules_] := 0 /;
-	!MatchQ[rules, {___Rule} | _Rule] && Message[FromAnonymousRules::notRules]
+toPatternRules[rules_, caller_] := 0 /;
+	!anonymousRulesQ[rules] && makeMessage[caller, "notRules", rules]
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
+(* ::Subsection:: *)
+(*toPatternRules*)
+
+
 (* ::Text:: *)
 (*We are going to find all non-lists in the rules, map them to symbols, and then replace original rules with these symbols using patterns and modules accordingly.*)
 
 
-FromAnonymousRules[rule : _Rule] := Module[
+toPatternRules[rule : _Rule, caller_] := Module[
 		{leftSymbols, rightSymbols, symbols, newVertexNames, vertexPatterns,
 		 newLeft, leftVertices, rightVertices, rightOnlyVertices},
-	{leftSymbols, rightSymbols} = Union @ Cases[#, _ ? AtomQ, All] & /@ List @@ rule;
+	{leftSymbols, rightSymbols} =
+		Union[Cases[#, _ ? AtomQ, {0, 1}], Cases[#, _, {2}]] & /@ List @@ rule;
 	symbols = Union[leftSymbols, rightSymbols];
 	newVertexNames =
 		ToHeldExpression /@ StringTemplate["v``"] /@ Range @ Length @ symbols;
@@ -95,4 +103,15 @@ FromAnonymousRules[rule : _Rule] := Module[
 ]
 
 
-FromAnonymousRules[rules : {___Rule}] := FromAnonymousRules /@ rules
+toPatternRules[rules : {___Rule}, caller_] :=
+	toPatternRules[#, caller] & /@ rules
+
+
+(* ::Subsection:: *)
+(*ToPatternRules*)
+
+
+ToPatternRules[rules_] := Module[{result},
+	result = Check[toPatternRules[rules, ToPatternRules], $Failed];
+	result /; result =!= $Failed
+]

@@ -58,12 +58,12 @@ VerificationTest[
 ]
 
 VerificationTest[
-  SetReplaceList[{{1}, {2}, {3}}, {{{2}} -> {{5}}, {{3}} :> {{6}}, {{5}} :> {{9}}}, 2, Method -> "C++"],
+  SetReplaceList[{{1}, {2}, {3}}, {{{2}} -> {{5}}, {{3}} :> {{6}}, {{5}} :> {{9}}}, 2, Method -> "LowLevel"],
   {{{1}, {2}, {3}}, {{1}, {3}, {5}}, {{1}, {5}, {6}}}
 ]
 
 VerificationTest[
-  SetReplaceList[{{1}, {2}, {3}}, {{{2}} -> {{5}}, {{3}} :> {{6}}, {{5}} :> {{9}}}, 2, Method -> "WolframLanguage"],
+  SetReplaceList[{{1}, {2}, {3}}, {{{2}} -> {{5}}, {{3}} :> {{6}}, {{5}} :> {{9}}}, 2, Method -> "Symbolic"],
   {{{1}, {2}, {3}}, {{1}, {3}, {5}}, {{1}, {5}, {6}}}
 ]
 

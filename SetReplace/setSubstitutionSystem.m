@@ -1,36 +1,26 @@
 (* ::Package:: *)
 
 (* ::Title:: *)
-(*SetSubstitutionSystem*)
+(*setSubstitutionSystem*)
 
 
 (* ::Text:: *)
-(*This is a main function of the package. This function is similar to SetReplaceAll, except it produces a SetSubstitutionEvolution object that contains information about evolution of the network step-by-step. All SetReplace* functions use argument checks and implementation done here.*)
+(*This is a main function of the package. This function calls either C++ or Wolfram Language implementation, and can produce a WolframModelEvolutionObject that contains information about evolution of the network step-by-step. All SetReplace* and WolframModel functions use argument checks and implementation done here.*)
 
 
 Package["SetReplace`"]
 
 
-PackageExport["SetSubstitutionSystem"]
 PackageExport["$SetReplaceMethods"]
 
 
+PackageScope["setReplaceRulesQ"]
+PackageScope["stepCountQ"]
 PackageScope["setSubstitutionSystem"]
 
 
 (* ::Section:: *)
 (*Documentation*)
-
-
-SetSubstitutionSystem::usage = usageString[
-	"SetSubstitutionSystem[`r`, `s`, `g`] computes ",
-	"evolution of the set substitution system described by rules `r` ",
-	"and initial set `s` for `g` generations. ",
-	"All non-intersecting subsets are replaced ",
-	"at once at each next generation ",
-	"which is different from the behavior of SetReplace.",
-	"\n",
-	"SetSubstitutionSystem[`r`, `s`] runs evolution for one generation."];
 
 
 $SetReplaceMethods::usage = usageString[
@@ -39,27 +29,11 @@ $SetReplaceMethods::usage = usageString[
 
 
 (* ::Section:: *)
-(*SyntaxInformation*)
-
-
-SyntaxInformation[SetSubstitutionSystem] =
-	{"ArgumentsPattern" -> {_, _, _., OptionsPattern[]}};
-
-
-(* ::Section:: *)
 (*Argument Checks*)
 
 
 (* ::Text:: *)
-(*Argument checks here except for argument count produce messages for the caller instead of SetSubstitutionSystem itself. That is because setSubstitutionSystem is used by all SetReplace* functions, which want to produce their own messages.*)
-
-
-(* ::Subsection:: *)
-(*Argument count*)
-
-
-SetSubstitutionSystem[args___] := 0 /;
-	!Developer`CheckArgumentCount[SetSubstitutionSystem[args], 2, 3] && False
+(*Argument checks here produce messages for the caller which is specified as an argument. That is because setSubstitutionSystem is used by all SetReplace* and WolframModel functions, which need to produce their own messages.*)
 
 
 (* ::Subsection:: *)
@@ -109,8 +83,8 @@ setSubstitutionSystem[
 (*Method is valid*)
 
 
-$cppMethod = "C++";
-$wlMethod = "WolframLanguage";
+$cppMethod = "LowLevel";
+$wlMethod = "Symbolic";
 
 
 $SetReplaceMethods = {Automatic, $cppMethod, $wlMethod};
@@ -120,13 +94,6 @@ setSubstitutionSystem[
 		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
 	!MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
 	makeMessage[caller, "invalidMethod"]
-
-
-(* ::Section:: *)
-(*Options*)
-
-
-Options[SetSubstitutionSystem] = {Method -> Automatic};
 
 
 (* ::Section:: *)
@@ -166,10 +133,10 @@ simpleRuleQ[___] := False
 
 
 (* ::Text:: *)
-(*This is a more general function than SetSubstitutionSystem because it accepts both the number of generations and the number of steps as an input, and runs until the first of the two is reached. it also takes a caller function as an argument, which is used for message generation.*)
+(*This function accepts both the number of generations and the number of steps as an input, and runs until the first of the two is reached. it also takes a caller function as an argument, which is used for message generation.*)
 
 
-Options[setSubstitutionSystem] := Options[SetSubstitutionSystem]
+Options[setSubstitutionSystem] = {Method -> Automatic};
 
 
 (* ::Text:: *)
@@ -185,33 +152,18 @@ setSubstitutionSystem[
 			o : OptionsPattern[]] := Module[{
 		method = OptionValue[Method], canonicalRules, failedQ = False},
 	canonicalRules = toCanonicalRules[rules];
-	If[MatchQ[method, Automatic | "C++"]
-			&& MatchQ[set, {{___ ? AtomQ}...}]
+	If[MatchQ[method, Automatic | $cppMethod]
+			&& MatchQ[set, {{___}...}]
 			&& MatchQ[canonicalRules, {___ ? simpleRuleQ}],
 		If[$cppSetReplaceAvailable,
 			Return[
 				setSubstitutionSystem$cpp[rules, set, generations, steps]]]];
-	If[MatchQ[method, "C++"],
+	If[MatchQ[method, $cppMethod],
 		failedQ = True;
 		If[!$cppSetReplaceAvailable,
-			makeMessage[caller, "noCpp"],
-			makeMessage[caller, "cppNotImplemented"]]];
+			makeMessage[caller, "noLowLevel"],
+			makeMessage[caller, "lowLevelNotImplemented"]]];
 	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
 		setSubstitutionSystem$wl[rules, set, generations, steps]]
 ]
-
-
-(* ::Subsection:: *)
-(*SetSubstitutionSystem*)
-
-
-SetSubstitutionSystem[
-		rules_, set_, generations : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] :=
-	Module[{result},
-		result = Check[
-			setSubstitutionSystem[
-				rules, set, generations, Infinity, SetSubstitutionSystem, o],
-			$Failed];
-		result /; result =!= $Failed
-	]

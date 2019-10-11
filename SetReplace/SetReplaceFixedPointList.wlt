@@ -45,12 +45,12 @@ VerificationTest[
 ]
 
 VerificationTest[
-  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "C++"],
+  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "LowLevel"],
   {{{1, 2}, {2, 3}, {3, 1}}, {{3, 1}, {1, 3}}, {{3, 3}}}
 ]
 
 VerificationTest[
-  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "WolframLanguage"],
+  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "Symbolic"],
   {{{1, 2}, {2, 3}, {3, 1}}, {{3, 1}, {1, 3}}, {{3, 3}}}
 ]
 

@@ -5,7 +5,7 @@
 
 
 (* ::Text:: *)
-(*Implementation of SetSubstitutionSystem in Wolfram Language. Works better with larger vertex degrees, but is otherwise much slower.*)
+(*Implementation of setSubstitutionSystem in Wolfram Language. Works better with larger vertex degrees, but is otherwise much slower.*)
 
 
 Package["SetReplace`"]
@@ -177,7 +177,7 @@ setSubstitutionSystem$wl[rules_, set_, generations_, steps_] := Module[{
 			outputWithMetadata[[1]],
 			If[outputWithMetadata[[2]] == {}, {}, outputWithMetadata[[2, 1]]]],
 		First];
-	SetSubstitutionEvolution[<|
+	WolframModelEvolutionObject[<|
 		$creatorEvents -> result[[All, 2]],
 		$destroyerEvents -> result[[All, 3]],
 		$generations -> result[[All, 4]],
