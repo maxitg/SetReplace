@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 (* ::Title:: *)
-(*HypergraphPlot*)
+(*OrderedHypergraphPlot*)
 
 
 (* ::Text:: *)
@@ -15,15 +15,15 @@
 Package["SetReplace`"]
 
 
-PackageExport["HypergraphPlot"]
+PackageExport["OrderedHypergraphPlot"]
 
 
 (* ::Section:: *)
 (*Documentation*)
 
 
-HypergraphPlot::usage = usageString[
-	"HypergraphPlot[`s`, `opts`] plots a list of vertex lists `s` as a ",
+OrderedHypergraphPlot::usage = usageString[
+	"OrderedHypergraphPlot[`s`, `opts`] plots a list of vertex lists `s` as a ",
 	"hypergraph with each hyperedge represented as a sequence of same-color arrows. ",
 	"Graph options `opts` can be used."];
 
@@ -32,7 +32,7 @@ HypergraphPlot::usage = usageString[
 (*Syntax Information*)
 
 
-SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
+SyntaxInformation[OrderedHypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
 
 
 (* ::Section:: *)
@@ -43,48 +43,48 @@ SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}
 (*Argument count*)
 
 
-HypergraphPlot[args___] := 0 /;
-	!Developer`CheckArgumentCount[HypergraphPlot[args], 1, 1] && False
+OrderedHypergraphPlot[args___] := 0 /;
+	!Developer`CheckArgumentCount[OrderedHypergraphPlot[args], 1, 1] && False
 
 
 (* ::Subsection:: *)
 (*Valid edges*)
 
 
-HypergraphPlot::invalidEdges =
-	"First argument of HypergraphPlot must be list of lists, where elements " ~~
+OrderedHypergraphPlot::invalidEdges =
+	"First argument of OrderedHypergraphPlot must be list of lists, where elements " ~~
 	"represent vertices."; 
 
 
-HypergraphPlot[edges_, o : OptionsPattern[]] := 0 /;
-	!MatchQ[edges, {___List}] && Message[HypergraphPlot::invalidEdges]
+OrderedHypergraphPlot[edges_, o : OptionsPattern[]] := 0 /;
+	!MatchQ[edges, {___List}] && Message[OrderedHypergraphPlot::invalidEdges]
 
 
 (* ::Subsection:: *)
 (*PlotStyle is an indexed ColorDataFunction*)
 
 
-HypergraphPlot::unsupportedPlotStyle =
+OrderedHypergraphPlot::unsupportedPlotStyle =
 	"Only indexed ColorDataFunction, i.e., ColorData[n] is supported as a plot style.";
 
 
 correctOptionsQ[o___] := Module[
-		{plotStyle = OptionValue[HypergraphPlot, {o}, PlotStyle]},
+		{plotStyle = OptionValue[OrderedHypergraphPlot, {o}, PlotStyle]},
 	Head[plotStyle] === ColorDataFunction &&
 	plotStyle[[2]] === "Indexed"
 ]
 
 
-HypergraphPlot[edges : {___List}, o : OptionsPattern[]] := 0 /;
+OrderedHypergraphPlot[edges : {___List}, o : OptionsPattern[]] := 0 /;
 	!correctOptionsQ[o] &&
-	Message[HypergraphPlot::unsupportedPlotStyle]
+	Message[OrderedHypergraphPlot::unsupportedPlotStyle]
 
 
 (* ::Section:: *)
 (*Options*)
 
 
-Options[HypergraphPlot] = Join[Options[Graph], {PlotStyle -> ColorData[97]}];
+Options[OrderedHypergraphPlot] = Join[Options[Graph], {PlotStyle -> ColorData[97]}];
 
 
 (* ::Section:: *)
@@ -99,7 +99,7 @@ Options[HypergraphPlot] = Join[Options[Graph], {PlotStyle -> ColorData[97]}];
 (*We can then use that to produce hash -> color association, which we use to properly color the edges.*)
 
 
-HypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
+OrderedHypergraphPlot[edges : {___List}, o : OptionsPattern[]] /;
 	correctOptionsQ[o] := Module[
 		{normalEdges, vertices, edgeColors, shapeHashes, hashesToColors,
 		 graphEdges, graphOptions, graphBoxes, arrowheads, arrowheadOffset,
