@@ -45,26 +45,30 @@ VerificationTest[
 (** PlotStyle is an indexed ColorDataFunction **)
 
 VerificationTest[
-  HypergraphPlot[{{1, 2}, {2, 3}, {3, 1}}, PlotStyle -> Red],
-  HypergraphPlot[{{1, 2}, {2, 3}, {3, 1}}, PlotStyle -> Red],
-  {HypergraphPlot::unsupportedPlotStyle}
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, PlotStyle -> Red],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, PlotStyle -> Red],
+  {HypergraphPlot::notColor}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2}, {2, 3}, {3, 1}}, PlotStyle -> 23],
-  HypergraphPlot[{{1, 2}, {2, 3}, {3, 1}}, PlotStyle -> 23],
-  {HypergraphPlot::unsupportedPlotStyle}
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, PlotStyle -> 23],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, PlotStyle -> 23],
+  {HypergraphPlot::notColor}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2}, {2, 3}, {3, 1}}, PlotStyle -> ColorData["DarkRainbow"]],
-  HypergraphPlot[{{1, 2}, {2, 3}, {3, 1}}, PlotStyle -> ColorData["DarkRainbow"]],
-  {HypergraphPlot::unsupportedPlotStyle}
+  FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, PlotStyle -> ColorData[1]], ColorData[1, 1]],
+  False
 ]
 
 VerificationTest[
-  Head[HypergraphPlot[{{1, 2}, {2, 3}, {3, 1}}, PlotStyle -> ColorData[1]]],
-  Graphics
+  FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, PlotStyle -> ColorData[1]], ColorData[1, 2]],
+  False
+]
+
+VerificationTest[
+  FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, PlotStyle -> ColorData[1]], ColorData[1, 3]],
+  True
 ]
 
 (* Implementation *)

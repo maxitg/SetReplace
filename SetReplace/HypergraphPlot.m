@@ -78,6 +78,28 @@ Options[HypergraphPlot] = Join[{
 
 
 (* ::Subsection:: *)
+(*parsePlotStyle*)
+
+
+HypergraphPlot::notColor =
+	"PlotStyle `1` at index `2` should return a color instead of `3`.";
+
+
+parsePlotStyle[hyperedgeCount_, style_] := Module[{result, failedQ = False},
+	result = If[!failedQ,
+		Module[{color},
+			color = style[#];
+			If[!ColorQ[color],
+				Message[HypergraphPlot::notColor, style, #, color];
+				failedQ = True];
+				color
+		]
+	] & /@ Range[hyperedgeCount];
+	If[failedQ, $Failed, result]
+]
+
+
+(* ::Subsection:: *)
 (*parseHyperedgeLayout*)
 
 
@@ -137,15 +159,16 @@ hyperedgeToEdges[hyperedge_, "Unordered"] := UndirectedEdge @@@ Subsets[hyperedg
 
 
 HypergraphPlot[set : {___List}, o : OptionsPattern[]] := Module[{
-		failedQ = False, hyperedges, edges, hypoedges, emptyEdges, hyperedgeLayouts,
-		result, edgesForEmbedding, graphForEmbedding, coordinateRules,
+		failedQ = False, hyperedges, edges, hypoedges, emptyEdges, hyperedgeColors,
+		hyperedgeLayouts, result, edgesForEmbedding, graphForEmbedding, coordinateRules,
 		vertices, vertexColors, edgesWithColors, graphPlotOptions, graphForPlotting},
 	hyperedges = Select[Length[#] > 2 &][set];
 	edges = Select[Length[#] == 2 &][set];
 	hypoedges = Select[Length[#] == 1 &][set];
 	emptyEdges = Select[Length[#] == 0 &][set];
+	hyperedgeColors = parsePlotStyle[Length[hyperedges], OptionValue[PlotStyle]];
 	hyperedgeLayouts = parseHyperedgeLayout[hyperedges, OptionValue["HyperedgeLayout"]];
-	If[hyperedgeLayouts === $Failed, failedQ = True];
+	If[hyperedgeLayouts === $Failed || hyperedgeColors === $Failed, failedQ = True];
 	If[!failedQ,
 		edgesForEmbedding = Join[
 			DirectedEdge @@@ edges,
@@ -160,7 +183,7 @@ HypergraphPlot[set : {___List}, o : OptionsPattern[]] := Module[{
 		vertexColors = (# -> ColorData[97, Count[set, {#}] + 1] & /@ vertices);
 		edgesWithColors = Annotation[#[[1]], EdgeStyle -> #[[2]]] & /@
 			Sort @ Flatten @ MapIndexed[
-				Thread[#1 -> OptionValue[PlotStyle][#2[[1]]]] &,
+				Thread[#1 -> hyperedgeColors[[#2[[1]]]]] &,
 				DirectedEdge @@@ Partition[#, 2, 1] & /@ hyperedges];
 		graphForPlotting = EdgeTaggedGraph[
 			vertices,
