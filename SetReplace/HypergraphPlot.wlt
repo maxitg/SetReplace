@@ -42,7 +42,7 @@ VerificationTest[
   {HypergraphPlot::invalidEdges}
 ]
 
-(** PlotStyle is an indexed ColorDataFunction **)
+(** Valid PlotStyle **)
 
 VerificationTest[
   HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, PlotStyle -> Red],
@@ -69,6 +69,103 @@ VerificationTest[
 VerificationTest[
   FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, PlotStyle -> ColorData[1]], ColorData[1, 3]],
   True
+]
+
+(** Valid HyperedgeLayout **)
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> None],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> None],
+  {HypergraphPlot::invalidHyperedgeLayout}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> "$$$Incorrect$$$"],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> "$$$Incorrect$$$"],
+  {HypergraphPlot::unknownHyperedgeLayout}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {"$$$Incorrect$$$"}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {"$$$Incorrect$$$"}],
+  {HypergraphPlot::unknownHyperedgeLayout}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {{1, 2, 3} -> "$$$Incorrect$$$"}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {{1, 2, 3} -> "$$$Incorrect$$$"}],
+  {HypergraphPlot::unknownHyperedgeLayout}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {None, {1, 2, 3} -> "Ordered"}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {None, {1, 2, 3} -> "Ordered"}],
+  {HypergraphPlot::invalidHyperedgeLayout}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {"$$$Incorrect$$$", {1, 2, 3} -> "Ordered"}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {"$$$Incorrect$$$", {1, 2, 3} -> "Ordered"}],
+  {HypergraphPlot::unknownHyperedgeLayout}
+]
+
+VerificationTest[
+  HypergraphPlot[
+    {{1, 2, 3}, {3, 4, 5}},
+    "HyperedgeLayout" -> {{3, 4, 5} -> "Ordered", {1, 2, 3} -> "$$$Incorrect$$$"}],
+  HypergraphPlot[
+    {{1, 2, 3}, {3, 4, 5}},
+    "HyperedgeLayout" -> {{3, 4, 5} -> "Ordered", {1, 2, 3} -> "$$$Incorrect$$$"}],
+  {HypergraphPlot::unknownHyperedgeLayout}
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> "Ordered"]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> "Cyclic"]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> "Unordered"]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {"Ordered"}]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {{1, 2, 3} -> "Cyclic"}]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {"Cyclic", {1, 2, 3} -> "Ordered"}]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[
+    {{1, 2, 3}, {3, 4, 5}},
+    "HyperedgeLayout" -> {{3, 4, 5} -> "Unordered", {1, 2, 3} -> "Cyclic"}]],
+  Graphics
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {"Cyclic", {1, 2, 3} -> 123}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {"Cyclic", {1, 2, 3} -> 123}],
+  {HypergraphPlot::unknownHyperedgeLayout}
+]
+
+(*** {1, 2, 4} never appears in the hypergraph, so is never used. ***)
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeLayout" -> {"Cyclic", {1, 2, 4} -> 123}]],
+  Graphics
 ]
 
 (* Implementation *)
