@@ -69,7 +69,8 @@ HypergraphPlot[edges_, o : OptionsPattern[]] := 0 /;
 
 Options[HypergraphPlot] = Join[{
 	"HyperedgeLayout" -> "Ordered",
-	PlotStyle -> (ColorData[97][# + 1] &)},
+	PlotStyle -> (ColorData[97][# + 1] &),
+	DirectedEdges -> True},
 	Options[GraphPlot]];
 
 
@@ -177,7 +178,11 @@ HypergraphPlot[set : {___List}, o : OptionsPattern[]] := Module[{
 		graphForEmbedding = Graph[edgesForEmbedding];
 		coordinateRules = Thread[
 			VertexList[graphForEmbedding] ->
-				GraphEmbedding[graphForEmbedding, OptionValue[GraphLayout]]];
+				GraphEmbedding[
+					graphForEmbedding,
+					Replace[
+						OptionValue[GraphLayout],
+						Automatic -> "SpringElectricalEmbedding"]]];
 		
 		vertices = Union @ Flatten @ set;
 		vertexColors = (# -> ColorData[97, Count[set, {#}] + 1] & /@ vertices);
@@ -187,7 +192,9 @@ HypergraphPlot[set : {___List}, o : OptionsPattern[]] := Module[{
 				DirectedEdge @@@ Partition[#, 2, 1] & /@ hyperedges];
 		graphForPlotting = EdgeTaggedGraph[
 			vertices,
-			Join[Rule @@@ edges, edgesWithColors]];
+			Join[
+				If[OptionValue[DirectedEdges], DirectedEdge, UndirectedEdge] @@@ edges,
+				edgesWithColors]];
 	];
 	graphPlotOptions =
 		FilterRules[FilterRules[{o}, Options[GraphPlot]], Except[PlotStyle]];
