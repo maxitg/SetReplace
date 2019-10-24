@@ -65,4 +65,33 @@ VerificationTest[
   TimeConstraint -> 3
 ]
 
+(** HypergraphPlot **)
+
+$largeSet = WolframModel[
+  {{1, 2, 3}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5, 3}},
+  {{0, 0, 0}},
+  7,
+  "FinalState"];
+
+{$normalPlotTiming, $normalPlotMemory} =
+  AbsoluteTiming[MaxMemoryUsed[GraphPlot[Rule @@@ Catenate[Partition[#, 2, 1] & /@ $largeSet]]]];
+
+VerificationTest[
+  Head[HypergraphPlot[$largeSet, "HyperedgeLayout" -> "Ordered"]],
+  Graphics,
+  TimeConstraint -> (2 $normalPlotTiming),
+  MemoryConstraint -> (5 $normalPlotMemory)]
+
+VerificationTest[
+  Head[HypergraphPlot[$largeSet, "HyperedgeLayout" -> "Cyclic"]],
+  Graphics,
+  TimeConstraint -> (2 $normalPlotTiming),
+  MemoryConstraint -> (5 $normalPlotMemory)]
+
+VerificationTest[
+  Head[HypergraphPlot[$largeSet, "HyperedgeLayout" -> "Unordered"]],
+  Graphics,
+  TimeConstraint -> (2 $normalPlotTiming),
+  MemoryConstraint -> (5 $normalPlotMemory)]
+
 EndTestSection[]
