@@ -204,4 +204,80 @@ VerificationTest[
   FreeQ[HypergraphPlot[{{1}, {1}}], ColorData[97, #]] & /@ {1, 2, 3},
   {True, True, False}]
 
+(* HyperedgeLayout *)
+
+diskCoordinates[graphics_] := Sort[
+  #[[1, 1, Cases[#, Disk[i_, ___] :> i, All]]] & @
+    Cases[graphics, GraphicsComplex[___], All]]
+
+$layoutTestHypergraphs = {
+  {{1, 2, 3}, {3, 4, 5}},
+  {{1, 2, 3, 4, 5}, {5, 6, 7, 8, 9}},
+  {{1, 2, 3, 4, 5, 6, 7, 8, 9}, {1, 4, 7}},
+  {{1, 2, 3, 4, 5, 6}, {1, 2, 3, 4}},
+  {{1, 2, 3}, {3, 4, 5}, {1, 2, 3, 4}}
+};
+
+VerificationTest[
+  diskCoordinates[HypergraphPlot[#, "HyperedgeLayout" -> "Ordered"]],
+  Sort @ GraphEmbedding[
+    Rule @@@ Catenate[Partition[#, 2, 1] & /@ #],
+    "SpringElectricalEmbedding"],
+  SameTest -> Equal
+] & /@ $layoutTestHypergraphs
+
+VerificationTest[
+  diskCoordinates[HypergraphPlot[#, "HyperedgeLayout" -> "Cyclic"]],
+  Sort @ GraphEmbedding[
+    Rule @@@ Catenate[Append[Partition[#, 2, 1], #[[{-1, 1}]]] & /@ #],
+    "SpringElectricalEmbedding"],
+  SameTest -> Equal
+] & /@ $layoutTestHypergraphs
+
+VerificationTest[
+  diskCoordinates[HypergraphPlot[#, "HyperedgeLayout" -> "Unordered"]],
+  Sort @ GraphEmbedding[
+    Rule @@@ Catenate[Subsets[#, {2}] & /@ #],
+    "SpringElectricalEmbedding"],
+  SameTest -> Equal
+] & /@ $layoutTestHypergraphs
+
+VerificationTest[
+  diskCoordinates[HypergraphPlot[#, "HyperedgeLayout" -> "Ordered"]],
+  diskCoordinates[HypergraphPlot[#, "HyperedgeLayout" -> "Cyclic"]],
+  SameTest -> (Not @* Equal)
+] & /@ $layoutTestHypergraphs
+
+VerificationTest[
+  diskCoordinates[HypergraphPlot[#, "HyperedgeLayout" -> "Ordered"]],
+  diskCoordinates[HypergraphPlot[#, "HyperedgeLayout" -> "Unordered"]],
+  SameTest -> (Not @* Equal)
+] & /@ $layoutTestHypergraphs
+
+VerificationTest[
+  diskCoordinates[HypergraphPlot[#, "HyperedgeLayout" -> "Unordered"]],
+  diskCoordinates[HypergraphPlot[#, "HyperedgeLayout" -> "Cyclic"]],
+  SameTest -> (Not @* Equal)
+] & /@ $layoutTestHypergraphs
+
+VerificationTest[
+  diskCoordinates[HypergraphPlot[
+    {{1, 2, 3, 4, 5, 6}, {1, 2, 3, 4}},
+    "HyperedgeLayout" -> {"Ordered", {_, _, _, _} -> "Cyclic"}]],
+  Sort @ GraphEmbedding[
+    {1 -> 2, 2 -> 3, 3 -> 4, 4 -> 5, 5 -> 6, 1 -> 2, 2 -> 3, 3 -> 4, 4 -> 1},
+    "SpringElectricalEmbedding"],
+  SameTest -> Equal
+]
+
+VerificationTest[
+  diskCoordinates[HypergraphPlot[
+    {{1, 2, 3, 4, 5, 6}, {1, 2, 3, 4}},
+    "HyperedgeLayout" -> {"Ordered", {_, _, _, _} -> "Cyclic"}]],
+  diskCoordinates[HypergraphPlot[
+    {{1, 2, 3, 4, 5, 6}, {1, 2, 3, 4}},
+    "HyperedgeLayout" -> {"Ordered"}]],
+  SameTest -> (Not @* Equal)
+]
+
 EndTestSection[]
