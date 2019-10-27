@@ -68,34 +68,35 @@ toNormalRules[input_List :> output_Module] := Module[
 
 toNormalRules[rules_List] := Module[{
 		ruleNames, separateNormalRules, longestRuleLength, untouchedNames,
-		input, output},
+		finalMatchName, input, output},
 	ruleNames = Table[Unique[], Length[rules]];
 	separateNormalRules = toNormalRules /@ rules;
 	longestRuleLength = Max[Map[Length, separateNormalRules[[All, All, 1]], {2}]];
 	untouchedNames = Table[Unique[], longestRuleLength + 1];
-	input = List[
-		Shortest[Alternatives @@ Catenate[Transpose @ PadRight[
+	finalMatchName = Unique[];
+	input = With[{match = finalMatchName}, List[
+		match : Shortest[Alternatives @@ Catenate[Transpose @ PadRight[
 			MapIndexed[
 				With[{patternName = ruleNames[[#2[[1]]]]},
 					Function[patternContent,
 						Pattern[patternName, patternContent]] /@ #] &,
 				Map[
-					PatternSequence @@ Riffle[
+					PatternSequence @@ If[# == {}, #, Riffle[
 						#,
 						Pattern[#, ___] & /@ untouchedNames,
-						{1, 2 Length[#] - 1, 2}] &,
+						{1, 2 Length[#] - 1, 2}]] &,
 					separateNormalRules[[All, All, 1]],
 					{2}]],
 			Automatic,
 			nothing] /. nothing -> Nothing]],
-		With[{lastPatternName = Last @ untouchedNames}, Pattern[lastPatternName, ___]]];
+		With[{lastPatternName = Last @ untouchedNames}, Pattern[lastPatternName, ___]]]];
 	output = Hold @ Catenate @ # & @ Prepend[
 		With[{ruleName = #[[1]], outputRule = #[[2]]},
 			Hold[Replace[{ruleName}, outputRule]]] & /@
 				Transpose[{
 					ruleNames,
 					With[{outputExpression = (Hold /@ #)[[2]]},
-							Except[{}] :> outputExpression] & /@
+							{finalMatchName} :> outputExpression] & /@
 						separateNormalRules[[All, 1]]}],
 		untouchedNames];
 	With[{evaluatedOutput = output}, input :> evaluatedOutput] //. Hold[expr_] :> expr
