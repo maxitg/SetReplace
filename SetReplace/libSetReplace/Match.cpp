@@ -16,13 +16,17 @@ namespace SetReplace {
             else return 0;
         }
         
-        int compareSortedIDs(const Match& first, const Match& second) {
+        int compareSortedIDs(const Match& first, const Match& second, bool reverseOrder = false) {
             std::vector<ExpressionID> thisExpressions = first.inputExpressions;
             std::sort(thisExpressions.begin(), thisExpressions.end());
             
             std::vector<ExpressionID> otherExpressions = second.inputExpressions;
             std::sort(otherExpressions.begin(), otherExpressions.end());
             
+            if (reverseOrder) {
+                std::reverse(thisExpressions.begin(), thisExpressions.end());
+                std::reverse(otherExpressions.begin(), otherExpressions.end());
+            }
             return compareVectors(thisExpressions, otherExpressions);
         }
         
@@ -32,15 +36,16 @@ namespace SetReplace {
     }
     
     bool Match::operator<(const Match& other) const {
-        // First rule goes first
-        if (rule != other.rule) return rule < other.rule;
-
-        // Then, find which Match has oldest (lowest ID) expressions
-        int sortedComparison = compareSortedIDs(*this, other);
+        // First, find which Match has oldest (lowest ID) expressions
+        int sortedComparison = compareSortedIDs(*this, other, true);
         if (sortedComparison != 0) return sortedComparison < 0;
 
-        // Finally, if sets of expressions are the same, use smaller permutation
-        return compareUnsortedIDs(*this, other) < 0;
+        // Then, if sets of expressions are the same, use smaller permutation
+        int unsortedComparison = compareUnsortedIDs(*this, other);
+        if (unsortedComparison != 0) return unsortedComparison < 0;
+        
+        // Finally, first rule goes first
+        return rule < other.rule;
     }
     
     class Matcher::Implementation {
