@@ -35,6 +35,21 @@ VerificationTest[
   MemoryConstraint -> 5*^6
 ]
 
+(** Naming function performance **)
+
+VerificationTest[
+  WolframModel[
+    <|"PatternRules" -> $rule|>,
+    $init,
+    <|"Events" -> 1000|>,
+    "FinalState",
+    "NodeNamingFunction" -> All],
+  {0},
+  SameTest -> (ListQ[#1] && ListQ[#2] &),
+  TimeConstraint -> 3,
+  MemoryConstraint -> 10*^6
+]
+
 (** C++ aborting **)
 
 (* assumes example below runs slow, may need to be replaced in the future *)

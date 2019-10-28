@@ -46,7 +46,9 @@ SyntaxInformation[WolframModel] =
 (*Options*)
 
 
-Options[WolframModel] := Options[setSubstitutionSystem];
+Options[WolframModel] := Join[
+	{"NodeNamingFunction" -> Automatic},
+	Options[setSubstitutionSystem]];
 
 
 (* ::Section:: *)
@@ -86,6 +88,56 @@ fromStepsSpec[spec_Association] :=
 
 
 (* ::Subsection:: *)
+(*renameNodes*)
+
+
+$nodeNamingFunctions = {Automatic, None, All};
+
+
+renameNodes[evolution_, _, None] := evolution
+
+
+renameNodesExceptExisting[
+		evolution_, patternRulesQ_, existing_List] := Module[{
+			evolutionAtoms, existingAtoms, atomsToName, newNames},
+	{evolutionAtoms, existingAtoms} = DeleteDuplicates @ If[patternRulesQ,
+			Cases[#, _ ? AtomQ, All],
+			Catenate[If[AtomQ[#], {#}, #] & /@ #]] & /@
+		{evolution[[1]][$atomLists], existing};
+	atomsToName = DeleteCases[evolutionAtoms, Alternatives @@ existingAtoms];
+	newNames = Take[
+		Complement[Range[Length[atomsToName] + Length[existingAtoms]], existingAtoms],
+		Length[atomsToName]];
+	WolframModelEvolutionObject[Join[
+		evolution[[1]],
+		<|$atomLists ->
+			(evolution[[1]][$atomLists] /.
+				Dispatch @ Thread[atomsToName -> newNames])|>]]
+]
+
+
+renameNodes[evolution_, patternRulesQ_, All] :=
+	renameNodesExceptExisting[evolution, patternRulesQ, {}]
+
+
+renameNodes[evolution_, True, Automatic] := renameNodes[evolution, True, None]
+
+
+renameNodes[evolution_, False, Automatic] :=
+	renameNodesExceptExisting[evolution, False, evolution[0]]
+
+
+WolframModel::unknownNodeNamingFunction =
+	"NodeNamingFunction `1` should be one of `2`.";
+
+
+renameNodes[evolution_, _, func_] := (
+	Message[WolframModel::unknownNodeNamingFunction, func, $nodeNamingFunctions];
+	$Failed
+)
+
+
+(* ::Subsection:: *)
 (*Normal form*)
 
 
@@ -96,7 +148,8 @@ WolframModel[
 			property : _ ? wolframModelPropertyQ : "EvolutionObject",
 			o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] :=
 	Module[{
-			patternRules, initialSet, generations, events, evolution, result},
+			patternRules, initialSet, generations, events, evolution,
+			renamedNodesEvolution, result},
 		patternRules = fromRulesSpec[rulesSpec];
 		initialSet = fromInitSpec[initSpec];
 		{generations, events} = fromStepsSpec[stepsSpec];
@@ -109,8 +162,18 @@ WolframModel[
 				WolframModel,
 				Method -> OptionValue[Method]],
 			$Failed];
-		result = If[evolution =!= $Failed,
-			If[ListQ[property], evolution /@ property, evolution @ property] /.
+		renamedNodesEvolution = If[evolution =!= $Failed,
+			Check[
+				renameNodes[
+					evolution,
+					AssociationQ[rulesSpec],
+					OptionValue["NodeNamingFunction"]],
+				$Failed],
+			$Failed];
+		result = If[renamedNodesEvolution =!= $Failed,
+			If[ListQ[property],
+					renamedNodesEvolution /@ property,
+					renamedNodesEvolution @ property] /.
 				HoldPattern[WolframModelEvolutionObject[data_Association]] :>
 					WolframModelEvolutionObject[Join[data, <|$rules -> rulesSpec|>]],
 			$Failed];
