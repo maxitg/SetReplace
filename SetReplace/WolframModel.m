@@ -46,7 +46,9 @@ SyntaxInformation[WolframModel] =
 (*Options*)
 
 
-Options[WolframModel] := Options[setSubstitutionSystem];
+Options[WolframModel] := Join[
+	{"NodeNamingFunction" -> All},
+	Options[setSubstitutionSystem]];
 
 
 (* ::Section:: *)
@@ -86,6 +88,36 @@ fromStepsSpec[spec_Association] :=
 
 
 (* ::Subsection:: *)
+(*renameNodes*)
+
+
+$nodeNamingFunctions = {Automatic, All};
+
+
+renameNodes[evolution_, Automatic] := evolution
+
+
+renameNodes[evolution_, All] := Module[{originalAtoms, newAtoms},
+	originalAtoms = DeleteDuplicates @ Cases[evolution[[1]][$atomLists], _ ? AtomQ, All];
+	newAtoms = Range[Length[originalAtoms]];
+	WolframModelEvolutionObject[Join[
+		evolution[[1]],
+		<|$atomLists ->
+			(evolution[[1]][$atomLists] /. Thread[originalAtoms -> newAtoms])|>]]
+]
+
+
+WolframModel::unknownNodeNamingFunction =
+	"NodeNamingFunction `1` should be one of `2`.";
+
+
+renameNodes[evolution_, func_] := (
+	Message[WolframModel::unknownNodeNamingFunction, func, $nodeNamingFunctions];
+	$Failed
+)
+
+
+(* ::Subsection:: *)
 (*Normal form*)
 
 
@@ -96,7 +128,8 @@ WolframModel[
 			property : _ ? wolframModelPropertyQ : "EvolutionObject",
 			o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] :=
 	Module[{
-			patternRules, initialSet, generations, events, evolution, result},
+			patternRules, initialSet, generations, events, evolution,
+			renamedNodesEvolution, result},
 		patternRules = fromRulesSpec[rulesSpec];
 		initialSet = fromInitSpec[initSpec];
 		{generations, events} = fromStepsSpec[stepsSpec];
@@ -109,8 +142,15 @@ WolframModel[
 				WolframModel,
 				Method -> OptionValue[Method]],
 			$Failed];
-		result = If[evolution =!= $Failed,
-			If[ListQ[property], evolution /@ property, evolution @ property] /.
+		renamedNodesEvolution = If[evolution =!= $Failed,
+			Check[
+				renameNodes[evolution, OptionValue["NodeNamingFunction"]],
+				$Failed],
+			$Failed];
+		result = If[renamedNodesEvolution =!= $Failed,
+			If[ListQ[property],
+					renamedNodesEvolution /@ property,
+					renamedNodesEvolution @ property] /.
 				HoldPattern[WolframModelEvolutionObject[data_Association]] :>
 					WolframModelEvolutionObject[Join[data, <|$rules -> rulesSpec|>]],
 			$Failed];
