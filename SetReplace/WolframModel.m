@@ -103,7 +103,8 @@ renameNodes[evolution_, _, All] := Module[{originalAtoms, newAtoms},
 	WolframModelEvolutionObject[Join[
 		evolution[[1]],
 		<|$atomLists ->
-			(evolution[[1]][$atomLists] /. Thread[originalAtoms -> newAtoms])|>]]
+			(evolution[[1]][$atomLists] /.
+				Dispatch @ Thread[originalAtoms -> newAtoms])|>]]
 ]
 
 

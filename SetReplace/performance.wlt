@@ -47,7 +47,7 @@ VerificationTest[
   {0},
   SameTest -> (ListQ[#1] && ListQ[#2] &),
   TimeConstraint -> 3,
-  MemoryConstraint -> 5*^6
+  MemoryConstraint -> 10*^6
 ]
 
 (** C++ aborting **)
