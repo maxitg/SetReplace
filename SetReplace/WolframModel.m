@@ -106,7 +106,7 @@ renameNodesExceptExisting[
 		{evolution[[1]][$atomLists], existing};
 	atomsToName = DeleteCases[evolutionAtoms, Alternatives @@ existingAtoms];
 	newNames = Take[
-		Complement[Range[Length[atomsToName] + Length[existing]], existingAtoms],
+		Complement[Range[Length[atomsToName] + Length[existingAtoms]], existingAtoms],
 		Length[atomsToName]];
 	WolframModelEvolutionObject[Join[
 		evolution[[1]],
