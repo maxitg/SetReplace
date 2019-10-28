@@ -47,7 +47,7 @@ SyntaxInformation[WolframModel] =
 
 
 Options[WolframModel] := Join[
-	{"NodeNamingFunction" -> All},
+	{"NodeNamingFunction" -> Automatic},
 	Options[setSubstitutionSystem]];
 
 
@@ -91,13 +91,13 @@ fromStepsSpec[spec_Association] :=
 (*renameNodes*)
 
 
-$nodeNamingFunctions = {Automatic, All};
+$nodeNamingFunctions = {Automatic, None, All};
 
 
-renameNodes[evolution_, Automatic] := evolution
+renameNodes[evolution_, _, None] := evolution
 
 
-renameNodes[evolution_, All] := Module[{originalAtoms, newAtoms},
+renameNodes[evolution_, _, All] := Module[{originalAtoms, newAtoms},
 	originalAtoms = DeleteDuplicates @ Cases[evolution[[1]][$atomLists], _ ? AtomQ, All];
 	newAtoms = Range[Length[originalAtoms]];
 	WolframModelEvolutionObject[Join[
@@ -107,11 +107,17 @@ renameNodes[evolution_, All] := Module[{originalAtoms, newAtoms},
 ]
 
 
+renameNodes[evolution_, True, Automatic] := renameNodes[evolution, True, None]
+
+
+renameNodes[evolution_, False, Automatic] := renameNodes[evolution, False, All]
+
+
 WolframModel::unknownNodeNamingFunction =
 	"NodeNamingFunction `1` should be one of `2`.";
 
 
-renameNodes[evolution_, func_] := (
+renameNodes[evolution_, _, func_] := (
 	Message[WolframModel::unknownNodeNamingFunction, func, $nodeNamingFunctions];
 	$Failed
 )
@@ -144,7 +150,10 @@ WolframModel[
 			$Failed];
 		renamedNodesEvolution = If[evolution =!= $Failed,
 			Check[
-				renameNodes[evolution, OptionValue["NodeNamingFunction"]],
+				renameNodes[
+					evolution,
+					AssociationQ[rulesSpec],
+					OptionValue["NodeNamingFunction"]],
 				$Failed],
 			$Failed];
 		result = If[renamedNodesEvolution =!= $Failed,
