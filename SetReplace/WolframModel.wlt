@@ -768,6 +768,16 @@ VerificationTest[
     {namingFunction, {All, None}}])
 ]
 
+(*** For anonymous rules, all level-2 expressions must be atomized, similar to ToPatternRules behavior ***)
+VerificationTest[
+  WolframModel[
+    {{s[1], s[2]}} -> {{s[1], s[3]}, {s[3], s[2]}},
+    {{s[1], s[2]}},
+    1,
+    "FinalState"],
+  {{1, 3}, {3, 2}}
+]
+
 EndTestSection[]
 
 

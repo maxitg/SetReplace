@@ -97,8 +97,10 @@ $nodeNamingFunctions = {Automatic, None, All};
 renameNodes[evolution_, _, None] := evolution
 
 
-renameNodes[evolution_, _, All] := Module[{originalAtoms, newAtoms},
-	originalAtoms = DeleteDuplicates @ Cases[evolution[[1]][$atomLists], _ ? AtomQ, All];
+renameNodes[evolution_, patternRulesQ_, All] := Module[{originalAtoms, newAtoms},
+	originalAtoms = DeleteDuplicates @ If[patternRulesQ,
+		Cases[evolution[[1]][$atomLists], _ ? AtomQ, All],
+		Catenate[If[AtomQ[#], {#}, #] & /@ evolution[[1]][$atomLists]]];
 	newAtoms = Range[Length[originalAtoms]];
 	WolframModelEvolutionObject[Join[
 		evolution[[1]],
