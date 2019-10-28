@@ -686,13 +686,20 @@ VerificationTest[
   {{v[1], v[3]}}
 ]
 
+(** NodeNamingFunction **)
+
 VerificationTest[
   WolframModel[
     {{1, 3}} -> {{1, 2}, {2, 3}},
     {{0, 0}},
     2,
     "FinalState"],
-  {{1, 3}, {3, 2}, {2, 4}, {4, 1}}
+  WolframModel[
+    {{1, 3}} -> {{1, 2}, {2, 3}},
+    {{0, 0}},
+    2,
+    "FinalState",
+    "NodeNamingFunction" -> Automatic]
 ]
 
 VerificationTest[
@@ -701,9 +708,29 @@ VerificationTest[
     {{0, 0}},
     2,
     "FinalState",
-    "NodeNamingFunction" -> #],
+    "NodeNamingFunction" -> Automatic],
+  {{0, 2}, {2, 1}, {1, 3}, {3, 0}}
+]
+
+VerificationTest[
+  WolframModel[
+    {{1, 3}} -> {{1, 2}, {2, 3}},
+    {{2, 2}},
+    2,
+    "FinalState",
+    "NodeNamingFunction" -> Automatic],
+  {{2, 3}, {3, 1}, {1, 4}, {4, 2}}
+]
+
+VerificationTest[
+  WolframModel[
+    {{1, 3}} -> {{1, 2}, {2, 3}},
+    {{0, 0}},
+    2,
+    "FinalState",
+    "NodeNamingFunction" -> All],
   {{1, 3}, {3, 2}, {2, 4}, {4, 1}}
-] & /@ {Automatic, All}
+]
 
 VerificationTest[
   WolframModel[
@@ -759,6 +786,12 @@ $namingTestModel = {
 VerificationTest[
   # == Range[Length[#]] & @ Union @ Flatten[
     WolframModel[##, "NodeNamingFunction" -> All] & @@
+      $namingTestModel]
+]
+
+VerificationTest[
+  # == Range[0, Length[#] - 1] & @ Union @ Flatten[
+    WolframModel[##, "NodeNamingFunction" -> Automatic] & @@
       $namingTestModel]
 ]
 
