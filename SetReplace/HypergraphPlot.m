@@ -69,9 +69,8 @@ HypergraphPlot[edges_, o : OptionsPattern[]] := 0 /;
 
 Options[HypergraphPlot] = Join[{
 	"HyperedgeType" -> "Ordered",
-	PlotStyle -> (ColorData[97][# + 1] &),
-	DirectedEdges -> True},
-	Options[GraphPlot]];
+	PlotStyle -> ColorData[97]},
+	DeleteCases[Options[GraphPlot], DirectedEdges -> _]];
 
 
 (* ::Section:: *)
@@ -160,22 +159,17 @@ hyperedgeToEdges[hyperedge_, "Unordered"] := UndirectedEdge @@@ Subsets[hyperedg
 
 
 HypergraphPlot[set : {___List}, o : OptionsPattern[]] := Module[{
-		failedQ = False, hyperedges, edges, hypoedges, emptyEdges, hyperedgeColors,
-		hyperedgeTypes, result, edgesForEmbedding, graphForEmbedding, coordinateRules,
+		failedQ = False, hyperedgeColors,
+		hyperedgeTypes, result, graphForEmbedding, coordinateRules,
 		vertices, vertexColors, edgesWithColors, graphPlotOptions, graphForPlotting},
-	hyperedges = Select[Length[#] > 2 &][set];
-	edges = Select[Length[#] == 2 &][set];
-	hypoedges = Select[Length[#] == 1 &][set];
-	emptyEdges = Select[Length[#] == 0 &][set];
-	hyperedgeColors = parsePlotStyle[Length[hyperedges], OptionValue[PlotStyle]];
-	hyperedgeTypes = parseHyperedgeType[hyperedges, OptionValue["HyperedgeType"]];
+	hyperedgeTypes = parseHyperedgeType[set, OptionValue["HyperedgeType"]];
+	hyperedgeColors = parsePlotStyle[Length[set], OptionValue[PlotStyle]];
 	If[hyperedgeTypes === $Failed || hyperedgeColors === $Failed, failedQ = True];
+	
 	If[!failedQ,
-		edgesForEmbedding = Join[
-			DirectedEdge @@@ edges,
+		graphForEmbedding = Graph[
 			Catenate[hyperedgeToEdges[#1, #2] & @@@
-				Transpose[{hyperedges, hyperedgeTypes}]]];
-		graphForEmbedding = Graph[edgesForEmbedding];
+				Transpose[{set, hyperedgeTypes}]]];
 		coordinateRules = Thread[
 			VertexList[graphForEmbedding] ->
 				GraphEmbedding[
@@ -186,15 +180,12 @@ HypergraphPlot[set : {___List}, o : OptionsPattern[]] := Module[{
 		
 		vertices = Union @ Flatten @ set;
 		vertexColors = (# -> ColorData[97, Count[set, {#}] + 1] & /@ vertices);
+		
 		edgesWithColors = Annotation[#[[1]], EdgeStyle -> #[[2]]] & /@
 			Sort @ Flatten @ MapIndexed[
 				Thread[#1 -> hyperedgeColors[[#2[[1]]]]] &,
-				DirectedEdge @@@ Partition[#, 2, 1] & /@ hyperedges];
-		graphForPlotting = EdgeTaggedGraph[
-			vertices,
-			Join[
-				If[OptionValue[DirectedEdges], DirectedEdge, UndirectedEdge] @@@ edges,
-				edgesWithColors]];
+				DirectedEdge @@@ Partition[#, 2, 1] & /@ set];
+		graphForPlotting = EdgeTaggedGraph[vertices, edgesWithColors];
 	];
 	graphPlotOptions =
 		FilterRules[FilterRules[{o}, Options[GraphPlot]], Except[PlotStyle]];
