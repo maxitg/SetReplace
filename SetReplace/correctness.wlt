@@ -308,4 +308,59 @@ VerificationTest[
   True
 ]
 
+(** Evaluation order **)
+
+VerificationTest[
+  SetReplace[{{1}, {2}, {3}, {4}, {5}}, {{{2}, {3}, {4}} -> {{X}}, {{3}} -> {{X}}}],
+  {{1}, {2}, {4}, {5}, {X}}
+]
+
+VerificationTest[
+  Table[
+    WolframModel[
+        <|"PatternRules" -> {{{1, 2}, {2, 3}} -> {{R1}}, {{4, 5}, {5, 6}} -> {{R2}}}|>,
+        #,
+        <|"Events" -> 1|>,
+        "FinalState",
+        Method -> method][[-1, 1]] & /@
+      Permutations[{{1, 2}, {2, 3}, {4, 5}, {5, 6}}],
+    {method, {"LowLevel", "Symbolic"}}],
+  ConstantArray[{
+      R1, R1, R1, R2, R1, R2, R1, R1, R1, R2, R1, R2,
+      R1, R2, R1, R2, R2, R2, R1, R2, R1, R2, R2, R2},
+    2]
+]
+
+VerificationTest[
+  Table[
+    WolframModel[
+        <|"PatternRules" -> {{1, 2, x_}, {1, 2, z_}} :> {{x, z}}|>,
+        #,
+        <|"Events" -> 1|>,
+        "FinalState",
+        Method -> method][[-1]] & /@
+      Permutations[{{1, 2, x}, {1, 2, y}, {1, 2, z}}],
+    {method, {"LowLevel", "Symbolic"}}],
+  ConstantArray[
+    {{x, y}, {x, z}, {y, x}, {y, z}, {z, x}, {z, y}},
+    2]
+]
+
+VerificationTest[
+  Table[
+    WolframModel[
+        <|"PatternRules" -> {
+          {{1, 2, x_}, {1, 3, z_}} :> {{1, x, z}},
+          {{1, 2, x_}, {1, 2, z_}} :> {{2, x, z}}}|>,
+        #,
+        <|"Events" -> 1|>,
+        "FinalState",
+        Method -> method][[-1]] & /@
+      Permutations[{{1, 2, x}, {1, 2, y}, {1, 3, z}}],
+    {method, {"LowLevel", "Symbolic"}}],
+  ConstantArray[
+    {{2, x, y}, {1, x, z}, {2, y, x}, {1, y, z}, {1, x, z}, {1, y, z}},
+    2]
+]
+
 EndTestSection[]

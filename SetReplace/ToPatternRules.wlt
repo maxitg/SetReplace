@@ -76,7 +76,7 @@ VerificationTest[
     ToPatternRules[{
       {{1, 2}, {2, 3}} -> {{1, 3}},
       {{1, 2}} -> {{1, 1, 2, 2}}}], 2],
-  {{"v1", "v1", "v3", "v3"}}
+  {{"v1", "v1", "v2", "v2"}, {"v2", "v2", "v3", "v3"}}
 ]
 
 (** Creating vertices **)
