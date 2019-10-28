@@ -77,19 +77,19 @@ $largeSet = WolframModel[
   AbsoluteTiming[MaxMemoryUsed[GraphPlot[Rule @@@ Catenate[Partition[#, 2, 1] & /@ $largeSet]]]];
 
 VerificationTest[
-  Head[HypergraphPlot[$largeSet, "HyperedgeLayout" -> "Ordered"]],
+  Head[HypergraphPlot[$largeSet, "HyperedgeType" -> "Ordered"]],
   Graphics,
   TimeConstraint -> (2 $normalPlotTiming),
   MemoryConstraint -> (5 $normalPlotMemory)]
 
 VerificationTest[
-  Head[HypergraphPlot[$largeSet, "HyperedgeLayout" -> "Cyclic"]],
+  Head[HypergraphPlot[$largeSet, "HyperedgeType" -> "Cyclic"]],
   Graphics,
   TimeConstraint -> (2 $normalPlotTiming),
   MemoryConstraint -> (5 $normalPlotMemory)]
 
 VerificationTest[
-  Head[HypergraphPlot[$largeSet, "HyperedgeLayout" -> "Unordered"]],
+  Head[HypergraphPlot[$largeSet, "HyperedgeType" -> "Unordered"]],
   Graphics,
   TimeConstraint -> (2 $normalPlotTiming),
   MemoryConstraint -> (5 $normalPlotMemory)]

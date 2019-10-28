@@ -64,11 +64,11 @@ HypergraphPlot[edges_, o : OptionsPattern[]] := 0 /;
 
 
 (* ::Text:: *)
-(*"HyperedgeLayout" can be set to: "Unordered" (sequence of edges), "Cyclic" (same, but last vertex connected to the first), and "Ordered" (all vertices connected in a complete graph).*)
+(*"HyperedgeType" can be set to: "Unordered" (sequence of edges), "Cyclic" (same, but last vertex connected to the first), and "Ordered" (all vertices connected in a complete graph).*)
 
 
 Options[HypergraphPlot] = Join[{
-	"HyperedgeLayout" -> "Ordered",
+	"HyperedgeType" -> "Ordered",
 	PlotStyle -> (ColorData[97][# + 1] &),
 	DirectedEdges -> True},
 	Options[GraphPlot]];
@@ -101,43 +101,43 @@ parsePlotStyle[hyperedgeCount_, style_] := Module[{result, failedQ = False},
 
 
 (* ::Subsection:: *)
-(*parseHyperedgeLayout*)
+(*parseHyperedgeType*)
 
 
-$hyperedgeLayouts = {"Ordered", "Cyclic", "Unordered"};
+$hyperedgeTypes = {"Ordered", "Cyclic", "Unordered"};
 
 
-HypergraphPlot::unknownHyperedgeLayout = "HyperedgeLayout `1` should be one of `2`.";
+HypergraphPlot::unknownHyperedgeType = "HyperedgeType `1` should be one of `2`.";
 
 
-parseHyperedgeLayout[hyperedges_, opt : _String | _Rule] :=
-	parseHyperedgeLayout[hyperedges, {opt}]
+parseHyperedgeType[hyperedges_, opt : _String | _Rule] :=
+	parseHyperedgeType[hyperedges, {opt}]
 
 
-parseHyperedgeLayout[hyperedges_, opt : {(_String | _Rule)...}] := Module[{
+parseHyperedgeType[hyperedges_, opt : {(_String | _Rule)...}] := Module[{
 		result, incorrectCase},
 	result = Replace[
 		hyperedges,
 		Reverse @ Prepend[
 			Replace[opt, s_String :> _ -> s, {1}],
-			_ -> OptionValue[HypergraphPlot, "HyperedgeLayout"]],
+			_ -> OptionValue[HypergraphPlot, "HyperedgeType"]],
 		{1}];
 	If[!MissingQ[incorrectCase = FirstCase[
-			result, Except[Alternatives @@ $hyperedgeLayouts], Missing[], {1}]],
-		Message[HypergraphPlot::unknownHyperedgeLayout,
-			incorrectCase, $hyperedgeLayouts];
+			result, Except[Alternatives @@ $hyperedgeTypes], Missing[], {1}]],
+		Message[HypergraphPlot::unknownHyperedgeType,
+			incorrectCase, $hyperedgeTypes];
 		$Failed,
 		result
 	]
 ]
 
 
-HypergraphPlot::invalidHyperedgeLayout =
-	"HyperedgeLayout `1` should be a string or a list of rules.";
+HypergraphPlot::invalidHyperedgeType =
+	"HyperedgeType `1` should be a string or a list of rules.";
 
 
-parseHyperedgeLayout[hyperedges_, opt_] := (
-	Message[HypergraphPlot::invalidHyperedgeLayout, opt];
+parseHyperedgeType[hyperedges_, opt_] := (
+	Message[HypergraphPlot::invalidHyperedgeType, opt];
 	$Failed)
 
 
@@ -161,20 +161,20 @@ hyperedgeToEdges[hyperedge_, "Unordered"] := UndirectedEdge @@@ Subsets[hyperedg
 
 HypergraphPlot[set : {___List}, o : OptionsPattern[]] := Module[{
 		failedQ = False, hyperedges, edges, hypoedges, emptyEdges, hyperedgeColors,
-		hyperedgeLayouts, result, edgesForEmbedding, graphForEmbedding, coordinateRules,
+		hyperedgeTypes, result, edgesForEmbedding, graphForEmbedding, coordinateRules,
 		vertices, vertexColors, edgesWithColors, graphPlotOptions, graphForPlotting},
 	hyperedges = Select[Length[#] > 2 &][set];
 	edges = Select[Length[#] == 2 &][set];
 	hypoedges = Select[Length[#] == 1 &][set];
 	emptyEdges = Select[Length[#] == 0 &][set];
 	hyperedgeColors = parsePlotStyle[Length[hyperedges], OptionValue[PlotStyle]];
-	hyperedgeLayouts = parseHyperedgeLayout[hyperedges, OptionValue["HyperedgeLayout"]];
-	If[hyperedgeLayouts === $Failed || hyperedgeColors === $Failed, failedQ = True];
+	hyperedgeTypes = parseHyperedgeType[hyperedges, OptionValue["HyperedgeType"]];
+	If[hyperedgeTypes === $Failed || hyperedgeColors === $Failed, failedQ = True];
 	If[!failedQ,
 		edgesForEmbedding = Join[
 			DirectedEdge @@@ edges,
 			Catenate[hyperedgeToEdges[#1, #2] & @@@
-				Transpose[{hyperedges, hyperedgeLayouts}]]];
+				Transpose[{hyperedges, hyperedgeTypes}]]];
 		graphForEmbedding = Graph[edgesForEmbedding];
 		coordinateRules = Thread[
 			VertexList[graphForEmbedding] ->
