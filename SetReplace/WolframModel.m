@@ -97,23 +97,34 @@ $nodeNamingFunctions = {Automatic, None, All};
 renameNodes[evolution_, _, None] := evolution
 
 
-renameNodes[evolution_, patternRulesQ_, All] := Module[{originalAtoms, newAtoms},
-	originalAtoms = DeleteDuplicates @ If[patternRulesQ,
-		Cases[evolution[[1]][$atomLists], _ ? AtomQ, All],
-		Catenate[If[AtomQ[#], {#}, #] & /@ evolution[[1]][$atomLists]]];
-	newAtoms = Range[Length[originalAtoms]];
+renameNodesExceptExisting[
+		evolution_, patternRulesQ_, existing_List] := Module[{
+			evolutionAtoms, existingAtoms, atomsToName, newNames},
+	{evolutionAtoms, existingAtoms} = DeleteDuplicates @ If[patternRulesQ,
+			Cases[#, _ ? AtomQ, All],
+			Catenate[If[AtomQ[#], {#}, #] & /@ #]] & /@
+		{evolution[[1]][$atomLists], existing};
+	atomsToName = Complement[evolutionAtoms, existingAtoms];
+	newNames = Take[
+		Complement[Range[Length[atomsToName] + Length[existing]], existingAtoms],
+		Length[atomsToName]];
 	WolframModelEvolutionObject[Join[
 		evolution[[1]],
 		<|$atomLists ->
 			(evolution[[1]][$atomLists] /.
-				Dispatch @ Thread[originalAtoms -> newAtoms])|>]]
+				Dispatch @ Thread[atomsToName -> newNames])|>]]
 ]
+
+
+renameNodes[evolution_, patternRulesQ_, All] :=
+	renameNodesExceptExisting[evolution, patternRulesQ, {}]
 
 
 renameNodes[evolution_, True, Automatic] := renameNodes[evolution, True, None]
 
 
-renameNodes[evolution_, False, Automatic] := renameNodes[evolution, False, All]
+renameNodes[evolution_, False, Automatic] :=
+	renameNodesExceptExisting[evolution, False, evolution[0]]
 
 
 WolframModel::unknownNodeNamingFunction =
