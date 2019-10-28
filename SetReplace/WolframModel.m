@@ -104,7 +104,7 @@ renameNodesExceptExisting[
 			Cases[#, _ ? AtomQ, All],
 			Catenate[If[AtomQ[#], {#}, #] & /@ #]] & /@
 		{evolution[[1]][$atomLists], existing};
-	atomsToName = Complement[evolutionAtoms, existingAtoms];
+	atomsToName = DeleteCases[evolutionAtoms, Alternatives @@ existingAtoms];
 	newNames = Take[
 		Complement[Range[Length[atomsToName] + Length[existing]], existingAtoms],
 		Length[atomsToName]];

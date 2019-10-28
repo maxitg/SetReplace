@@ -807,7 +807,8 @@ VerificationTest[
     {{s[1], s[2]}} -> {{s[1], s[3]}, {s[3], s[2]}},
     {{s[1], s[2]}},
     1,
-    "FinalState"],
+    "FinalState",
+    "NodeNamingFunction" -> All],
   {{1, 3}, {3, 2}}
 ]
 
