@@ -686,6 +686,88 @@ VerificationTest[
   {{v[1], v[3]}}
 ]
 
+VerificationTest[
+  WolframModel[
+    {{1, 3}} -> {{1, 2}, {2, 3}},
+    {{0, 0}},
+    2,
+    "FinalState"],
+  {{1, 3}, {3, 2}, {2, 4}, {4, 1}}
+]
+
+VerificationTest[
+  WolframModel[
+    {{1, 3}} -> {{1, 2}, {2, 3}},
+    {{0, 0}},
+    2,
+    "FinalState",
+    "NodeNamingFunction" -> #],
+  {{1, 3}, {3, 2}, {2, 4}, {4, 1}}
+] & /@ {Automatic, All}
+
+VerificationTest[
+  WolframModel[
+    {{1, 3}} -> {{1, 2}, {2, 3}},
+    {{0, 0}},
+    2,
+    "FinalState",
+    "NodeNamingFunction" -> None],
+  {{0, x_Symbol}, {x_Symbol, y_Symbol}, {y_Symbol, z_Symbol}, {z_Symbol, 0}},
+  SameTest -> MatchQ
+]
+
+VerificationTest[
+  WolframModel[
+    <|"PatternRules" -> {{a_, b_}} :> Module[{c}, {{a, c}, {c, b}}]|>,
+    {{0, 0}},
+    2,
+    "FinalState",
+    "NodeNamingFunction" -> All],
+  {{1, 3}, {3, 2}, {2, 4}, {4, 1}}
+]
+
+VerificationTest[
+  WolframModel[
+    <|"PatternRules" -> {{a_, b_}} :> Module[{c}, {{a, c}, {c, b}}]|>,
+    {{0, 0}},
+    2,
+    "FinalState",
+    "NodeNamingFunction" -> #],
+  {{0, x_Symbol}, {x_Symbol, y_Symbol}, {y_Symbol, z_Symbol}, {z_Symbol, 0}},
+  SameTest -> MatchQ
+] & /@ {Automatic, None}
+
+VerificationTest[
+  WolframModel[
+    <|"PatternRules" -> {{a_, b_}} :> Module[{c}, {{a, c}, {c, b}}]|>,
+    {{0, 0}},
+    2,
+    "FinalState"],
+  {{0, x_Symbol}, {x_Symbol, y_Symbol}, {y_Symbol, z_Symbol}, {z_Symbol, 0}},
+  SameTest -> MatchQ
+]
+
+$namingTestModel = {
+  {{0, 1}, {0, 2}, {0, 3}} ->
+    {{1, 2}, {2, 1}, {1, 3}, {3, 1}, {2, 3}, {3, 2},
+      {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}},
+  {{0, 0},
+  {0, 0}, {0, 0}},
+  5,
+  "FinalState"};
+
+VerificationTest[
+  # == Range[Length[#]] & @ Union @ Flatten[
+    WolframModel[##, "NodeNamingFunction" -> All] & @@
+      $namingTestModel]
+]
+
+VerificationTest[
+  (#[[1]] /. Thread[Rule @@ Flatten /@ #]) == #[[2]] & @ (Table[
+    WolframModel[##, "NodeNamingFunction" -> namingFunction] & @@ $namingTestModel,
+    {namingFunction, {All, None}}])
+]
+
 EndTestSection[]
 
 
