@@ -192,6 +192,12 @@ parseGraphLayout[opt_] := (
 (*embedEdges*)
 
 
+edgeSort[UndirectedEdge[a_, b_]] := Sort[UndirectedEdge[a, b]]
+
+
+edgeSort[DirectedEdge[a_, b_]] := DirectedEdge[a, b]
+
+
 embedEdges[
 			edgeLayout :
 				"Normal" | "DividedEdgeBundling" |
@@ -204,17 +210,16 @@ embedEdges[
 	vertices = vertexCoordinateRules[[All, 1]];
 	normalEdges =
 		hyperedgeToEdges[#1, #2] & @@@ Transpose[{set, hyperedgeTypes}];
+	
 	normalEdgeCoordinateRules = Reap[GraphPlot[
-		Graph[
-			vertices,
-			Catenate @ normalEdges],
+		Graph[vertices, Catenate @ normalEdges],
 		GraphLayout -> {"EdgeLayout" -> Replace[edgeLayout, "Normal" -> Automatic]},
-		EdgeShapeFunction -> (Sow[#2 -> #] &),
+		EdgeShapeFunction -> (Sow[edgeSort[#2] -> #] &),
 		VertexCoordinates -> vertexCoordinateRules[[All, 2]]]][[2, 1]];
-	normalEdgeIndices = Sort @ Catenate @ MapIndexed[# -> #2 &, normalEdges, {2}];
-	indexedSegments = Association[Rule @@@ Sort @ Transpose[{
-		normalEdgeIndices[[All, 2]],
-		normalEdgeCoordinateRules[[All, 2]]}]];
+	normalEdgeIndices = Catenate @ MapIndexed[edgeSort[#] -> #2 &, normalEdges, {2}];
+	indexedSegments = Association[Rule @@@ Transpose[{
+		Sort[normalEdgeIndices][[All, 2]],
+		Sort[normalEdgeCoordinateRules][[All, 2]]}]];
 	Thread[{
 		MapIndexed[indexedSegments[#2] &, Range /@ Length /@ normalEdges, {2}],
 		set}]
@@ -225,12 +230,18 @@ embedEdges[
 (*drawEdges*)
 
 
-drawEdges[edgeEmbedding_, shapeFunction_, style_] :=
-	Map[Line, edgeEmbedding[[All, 1]], {2}]
-
-
-(* ::Subsection:: *)
-(*drawVertices*)
+drawEdges[edgeEmbedding_, colors_, types_] := Module[{meanArrowLength, graphicsSize},
+	meanArrowLength = Median[
+		Total[EuclideanDistance @@@ Partition[#, 2, 1]] & /@
+			Catenate @ edgeEmbedding[[All, 1]]];
+	graphicsSize =
+		#2 - #1 & @@ CoordinateBounds[Flatten[edgeEmbedding[[All, 1]], 2]][[1]];
+	{Arrowheads[0.07 meanArrowLength / graphicsSize],
+		Function[edgePart, {#2, If[#3 == "Unordered", Line, Arrow][edgePart]}] /@
+					# & @@@
+				Transpose[{#[[1, All, 1]], #[[2]], #[[3]]}] & @
+			{edgeEmbedding, colors, types}}
+]
 
 
 (* ::Subsection:: *)
@@ -271,7 +282,13 @@ HypergraphPlot[set : {___List}, o : OptionsPattern[]] := Module[{
 				set,
 				hyperedgeTypes,
 				vertexCoordinateRules];
-			edgeGraphics = drawEdges[edgeEmbedding, shapeFunction, style];
+			If[Head[edgeEmbedding] === embedEdges, failedQ = True];,
+			
+			failedQ = True
+		];
+		If[!failedQ,
+			edgeGraphics =
+				drawEdges[edgeEmbedding, hyperedgeColors, hyperedgeTypes];
 			
 			vertices = Union @ Flatten @ set;
 			vertexColors = (# -> ColorData[97, Count[set, {#}] + 1] & /@ vertices);
@@ -290,9 +307,7 @@ HypergraphPlot[set : {___List}, o : OptionsPattern[]] := Module[{
 						GraphLayout -> {"PackingLayout" -> packingLayout},
 						VertexCoordinates ->
 							(VertexList[graphForPlotting] /.
-								vertexCoordinateRules)}]]];,
-			
-			failedQ = True
+								vertexCoordinateRules)}]]];
 		];
 	];
 	result /; !failedQ && Head[result] =!= GraphPlot
