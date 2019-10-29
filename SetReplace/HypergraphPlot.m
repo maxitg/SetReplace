@@ -69,8 +69,15 @@ HypergraphPlot[edges_, o : OptionsPattern[]] := 0 /;
 
 Options[HypergraphPlot] = Join[{
 	"HyperedgeType" -> "Ordered",
-	PlotStyle -> ColorData[97]},
-	DeleteCases[Options[GraphPlot], DirectedEdges -> _]];
+	PlotStyle -> ColorData[97],
+	DataRange -> Automatic,
+	GraphLayout -> Automatic,
+	VertexCoordinates -> Automatic,
+	VertexLabels -> Automatic,
+	VertexShapeFunction -> Automatic,
+	VertexSize -> Automatic,
+	VertexStyle -> Automatic},
+	Options[Graphics]];
 
 
 (* ::Section:: *)
@@ -155,45 +162,138 @@ hyperedgeToEdges[hyperedge_, "Unordered"] := UndirectedEdge @@@ Subsets[hyperedg
 
 
 (* ::Subsection:: *)
+(*parseGraphLayout*)
+
+
+$graphLayoutStages = {"VertexLayout", "EdgeLayout", "PackingLayout"};
+
+
+parseGraphLayout[Automatic] := {Automatic, Automatic, Automatic}
+
+
+parseGraphLayout[vertexLayout_String] := {vertexLayout, Automatic, Automatic}
+
+
+parseGraphLayout[rules_List] /;
+		SubsetQ[$graphLayoutStages, Keys[Association[rules]]] :=
+	Lookup[Association[rules], #, Automatic] & /@ $graphLayoutStages
+
+
+HypergraphPlot::invalidGraphLayout =
+	"GraphLayout `1` should be Automatic, a string, or a list of rules with keys `2`.";
+
+
+parseGraphLayout[opt_] := (
+	Message[HypergraphPlot::invalidGraphLayout, opt, $graphLayoutStages];
+	ConstantArray[$Failed, 3])
+
+
+(* ::Subsection:: *)
+(*embedEdges*)
+
+
+embedEdges[
+			edgeLayout :
+				"Normal" | "DividedEdgeBundling" |
+				"HierarchicalEdgeBundling" | "StraightLine",
+			set_,
+			hyperedgeTypes_,
+			vertexCoordinateRules_] := Module[{
+		vertices, normalEdges, normalEdgeCoordinateRules, normalEdgeIndices,
+		indexedSegments},
+	vertices = vertexCoordinateRules[[All, 1]];
+	normalEdges =
+		hyperedgeToEdges[#1, #2] & @@@ Transpose[{set, hyperedgeTypes}];
+	normalEdgeCoordinateRules = Reap[GraphPlot[
+		Graph[
+			vertices,
+			Catenate @ normalEdges],
+		GraphLayout -> {"EdgeLayout" -> Replace[edgeLayout, "Normal" -> Automatic]},
+		EdgeShapeFunction -> (Sow[#2 -> #] &),
+		VertexCoordinates -> vertexCoordinateRules[[All, 2]]]][[2, 1]];
+	normalEdgeIndices = Sort @ Catenate @ MapIndexed[# -> #2 &, normalEdges, {2}];
+	indexedSegments = Association[Rule @@@ Sort @ Transpose[{
+		normalEdgeIndices[[All, 2]],
+		normalEdgeCoordinateRules[[All, 2]]}]];
+	Thread[{
+		MapIndexed[indexedSegments[#2] &, Range /@ Length /@ normalEdges, {2}],
+		set}]
+]
+
+
+(* ::Subsection:: *)
+(*drawEdges*)
+
+
+drawEdges[edgeEmbedding_, shapeFunction_, style_] :=
+	Map[Line, edgeEmbedding[[All, 1]], {2}]
+
+
+(* ::Subsection:: *)
+(*drawVertices*)
+
+
+(* ::Subsection:: *)
 (*HypergraphPlot*)
 
 
 HypergraphPlot[set : {___List}, o : OptionsPattern[]] := Module[{
-		failedQ = False, hyperedgeColors,
-		hyperedgeTypes, result, graphForEmbedding, coordinateRules,
-		vertices, vertexColors, edgesWithColors, graphPlotOptions, graphForPlotting},
+		failedQ = False, hyperedgeColors, vertexLayout, edgeLayout, packingLayout,
+		hyperedgeTypes, graphForEmbedding, embedding, vertexCoordinateRules,
+		vertices, vertexColors, graphPlotOptions, graphForPlotting,
+		edgeEmbedding, edgeGraphics, result},
 	hyperedgeTypes = parseHyperedgeType[set, OptionValue["HyperedgeType"]];
 	hyperedgeColors = parsePlotStyle[Length[set], OptionValue[PlotStyle]];
-	If[hyperedgeTypes === $Failed || hyperedgeColors === $Failed, failedQ = True];
+	{vertexLayout, edgeLayout, packingLayout} =
+		parseGraphLayout[OptionValue[GraphLayout]];
+	If[hyperedgeTypes === $Failed ||
+			hyperedgeColors === $Failed ||
+			vertexLayout === $Failed,
+		failedQ = True];
 	
 	If[!failedQ,
 		graphForEmbedding = Graph[
 			Catenate[hyperedgeToEdges[#1, #2] & @@@
 				Transpose[{set, hyperedgeTypes}]]];
-		coordinateRules = Thread[
-			VertexList[graphForEmbedding] ->
-				GraphEmbedding[
-					graphForEmbedding,
-					Replace[
-						OptionValue[GraphLayout],
-						Automatic -> "SpringElectricalEmbedding"]]];
-		
-		vertices = Union @ Flatten @ set;
-		vertexColors = (# -> ColorData[97, Count[set, {#}] + 1] & /@ vertices);
-		
-		edgesWithColors = Annotation[#[[1]], EdgeStyle -> #[[2]]] & /@
-			Sort @ Flatten @ MapIndexed[
-				Thread[#1 -> hyperedgeColors[[#2[[1]]]]] &,
-				DirectedEdge @@@ Partition[#, 2, 1] & /@ set];
-		graphForPlotting = EdgeTaggedGraph[vertices, edgesWithColors];
+		embedding = If[OptionValue[VertexCoordinates] === Automatic,
+			GraphEmbedding[
+				graphForEmbedding,
+				Replace[vertexLayout, Automatic -> "SpringElectricalEmbedding"]],
+			OptionValue[VertexCoordinates]];
+		If[MatchQ[
+				embedding,
+				{Repeated[
+					{Repeated[_ ? NumericQ, {2}]},
+					{VertexCount[graphForEmbedding]}]}],
+			vertexCoordinateRules = Thread[VertexList[graphForEmbedding] -> embedding];
+			edgeEmbedding = embedEdges[
+				Replace[edgeLayout, Automatic -> "Normal"],
+				set,
+				hyperedgeTypes,
+				vertexCoordinateRules];
+			edgeGraphics = drawEdges[edgeEmbedding, shapeFunction, style];
+			
+			vertices = Union @ Flatten @ set;
+			vertexColors = (# -> ColorData[97, Count[set, {#}] + 1] & /@ vertices);
+			
+			graphForPlotting = Graph[vertices, {}];
+			graphPlotOptions = FilterRules[
+				FilterRules[{o}, Options[GraphPlot]],
+				Except[GraphLayout | VertexCoordinates]];
+			result = Show[
+				Graphics[edgeGraphics],
+				GraphPlot[
+					graphForPlotting,
+					Join[
+						graphPlotOptions, {
+						VertexStyle -> vertexColors,
+						GraphLayout -> {"PackingLayout" -> packingLayout},
+						VertexCoordinates ->
+							(VertexList[graphForPlotting] /.
+								vertexCoordinateRules)}]]];,
+			
+			failedQ = True
+		];
 	];
-	graphPlotOptions =
-		FilterRules[FilterRules[{o}, Options[GraphPlot]], Except[PlotStyle]];
-	GraphPlot[
-		graphForPlotting,
-		Join[
-			graphPlotOptions, {
-			VertexStyle -> vertexColors,
-			VertexCoordinates ->
-				(VertexList[graphForPlotting] /. coordinateRules)}]] /; !failedQ
+	result /; !failedQ && Head[result] =!= GraphPlot
 ]
