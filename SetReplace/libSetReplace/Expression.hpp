@@ -1,6 +1,8 @@
 #ifndef Expression_hpp
 #define Expression_hpp
 
+#include <functional>
+#include <memory>
 #include <vector>
 #include <unordered_set>
 
