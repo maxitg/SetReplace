@@ -10,9 +10,11 @@ HypergraphPlot::usage = usageString[
 SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
 
 Options[HypergraphPlot] = Join[{
+	"EdgeType" -> "Ordered",
 	GraphLayout -> "SpringElectricalEmbedding"},
 	Options[Show]];
 
+$edgeTypes = {"Ordered"};
 $graphLayouts = {"SpringElectricalEmbedding"};
 
 (* Messages *)
@@ -23,8 +25,8 @@ HypergraphPlot::notImplemented =
 HypergraphPlot::invalidEdges =
 	"First argument of HypergraphPlot must be list of lists, where elements represent vertices.";
 
-HypergraphPlot::unknownLayout =
-	"Graph layout `1` should be one of `2`.";
+HypergraphPlot::invalidFiniteOption =
+	"Value `2` of option `1` should be one of `3`.";
 
 (* Evaluation *)
 
@@ -52,28 +54,35 @@ hypergraphPlot$parse[args : PatternSequence[edges_, o : OptionsPattern[]]] := Wi
 	$Failed /; Length[unknownOptions] > 0
 ]
 
-hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{graphLayout, recognizedQ},
-	graphLayout = OptionValue[HypergraphPlot, {o}, GraphLayout];
-	recognizedQ = MemberQ[$graphLayouts, graphLayout];
+supportedFiniteOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, recognizedQ},
+	value = OptionValue[func, {opts}, optionToCheck];
+	recognizedQ = MemberQ[validValues, value];
 	If[!recognizedQ,
-		Message[HypergraphPlot::unknownLayout, graphLayout, $graphLayouts]
+		Message[Message[func, "invalidFiniteOption"], optionToCheck, value, validValues]
 	];
-	$Failed /; !recognizedQ
+	recognizedQ
 ]
 
+hypergraphPlot$parse[edges_, o : OptionsPattern[]] /; (
+		!supportedFiniteOptionQ[HypergraphPlot, ##, {o}] & @@@ {
+			{"EdgeType", $edgeTypes},
+			{GraphLayout, $graphLayouts}}) :=
+	$Failed
+
 hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
-	hypergraphPlot[edges, OptionValue[HypergraphPlot, {o}, GraphLayout], {o}]
+	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Show]]] & @@
+		(OptionValue[HypergraphPlot, {o}, #] & /@ {"EdgeType", GraphLayout})
 
 (* Implementation *)
 
-hypergraphPlot[edges_, layout_, showOptions_] :=
-	Show[drawEmbedding @ hypergraphEmbedding[layout] @ edges, showOptions]
+hypergraphPlot[edges_, edgeType_, layout_, showOptions_] :=
+	Show[drawEmbedding @ hypergraphEmbedding[edgeType, layout] @ edges, showOptions]
 
 (** hypergraphEmbedding produces an embedding of vertices and edges. The format is {vertices, edges},
 			where both vertices and edges are associations of the form <|vertex -> {graphicsPrimitive, ...}, ...|>,
 			where graphicsPrimitive is either a Point, a Line, or a Polygon. **)
 
-hypergraphEmbedding["SpringElectricalEmbedding"][edges_] := Module[{vertices},
+hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding"][edges_] := Module[{vertices},
 	vertices = Union[Flatten[edges]];
 	{
 		# -> {Point[RandomReal[1, 2]]} & /@ vertices,
