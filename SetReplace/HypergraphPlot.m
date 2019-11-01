@@ -9,14 +9,22 @@ HypergraphPlot::usage = usageString[
 
 SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
 
-Options[HypergraphPlot] = Options[Graphics];
+Options[HypergraphPlot] = Join[{
+	GraphLayout -> "SpringElectricalEmbedding"},
+	Options[Show]];
+
+$graphLayouts = {"SpringElectricalEmbedding"};
 
 (* Messages *)
 
-HypergraphPlot::notImplemented = "Not implemented: `1`.";
+HypergraphPlot::notImplemented =
+	"Not implemented: `1`.";
 
 HypergraphPlot::invalidEdges =
 	"First argument of HypergraphPlot must be list of lists, where elements represent vertices.";
+
+HypergraphPlot::unknownLayout =
+	"Graph layout `1` should be one of `2`.";
 
 (* Evaluation *)
 
@@ -44,18 +52,28 @@ hypergraphPlot$parse[args : PatternSequence[edges_, o : OptionsPattern[]]] := Wi
 	$Failed /; Length[unknownOptions] > 0
 ]
 
-hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] := hypergraphPlot[edges, {o}]
+hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{graphLayout, recognizedQ},
+	graphLayout = OptionValue[HypergraphPlot, {o}, GraphLayout];
+	recognizedQ = MemberQ[$graphLayouts, graphLayout];
+	If[!recognizedQ,
+		Message[HypergraphPlot::unknownLayout, graphLayout, $graphLayouts]
+	];
+	$Failed /; !recognizedQ
+]
+
+hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
+	hypergraphPlot[edges, OptionValue[HypergraphPlot, {o}, GraphLayout], {o}]
 
 (* Implementation *)
 
-hypergraphPlot[edges_, graphicsOptions_] :=
-	Graphics[(styleShapes @ embeddingShapes @ hypergraphEmbedding @ edges)[[All, All, 2]], graphicsOptions]
+hypergraphPlot[edges_, layout_, showOptions_] :=
+	Show[drawEmbedding @ hypergraphEmbedding[layout] @ edges, showOptions]
 
 (** hypergraphEmbedding produces an embedding of vertices and edges. The format is {vertices, edges},
 			where both vertices and edges are associations of the form <|vertex -> {graphicsPrimitive, ...}, ...|>,
 			where graphicsPrimitive is either a Point, a Line, or a Polygon. **)
 
-hypergraphEmbedding[edges_] := Module[{vertices},
+hypergraphEmbedding["SpringElectricalEmbedding"][edges_] := Module[{vertices},
 	vertices = Union[Flatten[edges]];
 	{
 		# -> {Point[RandomReal[1, 2]]} & /@ vertices,
@@ -63,6 +81,7 @@ hypergraphEmbedding[edges_] := Module[{vertices},
 	}
 ]
 
-embeddingShapes[embedding_] := embedding
-
-styleShapes[shapes_] := shapes
+drawEmbedding[embedding_] := Graphics[embedding[[{2, 1}, All, 2]] /. {
+	Point[p_] :> {Opacity[.7], Disk[p, 0.03]},
+	Polygon[pts_] :> {Opacity[.3], Polygon[pts]}
+}]
