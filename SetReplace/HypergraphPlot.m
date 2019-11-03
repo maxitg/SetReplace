@@ -154,7 +154,23 @@ normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 	{vertexEmbedding, edgeEmbedding}
 ]
 
-drawEmbedding[embedding_] := Graphics[embedding[[{2, 1}, All, 2]] /. {
-	Point[p_] :> {Opacity[.7], Disk[p, 0.03]},
-	Polygon[pts_] :> {Opacity[.3], Polygon[pts]}
-}]
+drawEmbedding[embedding_] := Module[{embeddingShapes, points, lines, polygons},
+	embeddingShapes = embedding[[{2, 1}, All, 2]];
+	{points, lines, polygons, polygonBoundaries} = Cases[embeddingShapes, #, All] & /@ {
+		Point[p_] :> {
+			Directive[Hue[0.6, 0.2, 0.8], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]],
+			Disk[p, 0.03]},
+		Line[pts_] :> {
+			Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]],
+			Line[pts]},
+		Polygon[pts_] :> {
+			Opacity[0.3],
+			Lighter[Hue[0.6, 0.7, 0.5], 0.7],
+			Polygon[pts]},
+		Polygon[pts_] :> {
+			EdgeForm[White],
+			Transparent,
+			Polygon[pts]}
+	};
+	Graphics[{polygons, polygonBoundaries, lines, points}]
+]
