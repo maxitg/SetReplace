@@ -10,12 +10,12 @@ HypergraphPlot::usage = usageString[
 SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
 
 Options[HypergraphPlot] = Join[{
-	"EdgeType" -> "Ordered",
-	GraphLayout -> "SpringElectricalEmbedding"},
+	"EdgeType" -> "CyclicOpen",
+	GraphLayout -> "SpringElectricalPolygons"},
 	Options[Graphics]];
 
 $edgeTypes = {"Ordered", "CyclicClosed", "CyclicOpen"};
-$graphLayouts = {"SpringElectricalEmbedding"};
+$graphLayouts = {"SpringElectricalEmbedding", "SpringElectricalPolygons"};
 
 (* Messages *)
 
@@ -97,6 +97,22 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding"][edges_] := 
 			layout]]
 ]
 
+hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons"][edges_] := Module[{
+		embeddingWithNoRegions, vertexEmbedding, edgePoints, edgeRegions, edgePolygons, edgeEmbedding},
+	embeddingWithNoRegions = hypergraphEmbedding[edgeType, "SpringElectricalEmbedding"][edges];
+	vertexEmbedding = embeddingWithNoRegions[[1]];
+	edgePoints = Flatten[#, 2] & /@ Apply[List, (embeddingWithNoRegions[[2, All, 2]]), {2}];
+	edgeRegions = ConvexHullMesh /@ edgePoints;
+	edgePolygons = Map[
+		Polygon,
+		MapThread[
+			Table[#[[polygon]], {polygon, #2}] &,
+			{MeshCoordinates /@ edgeRegions, MeshCells[#, 2][[All, 1]] & /@ edgeRegions}],
+		{2}];
+	edgeEmbedding = MapThread[#1[[1]] -> Join[#1[[2]], #2] &, {embeddingWithNoRegions[[2]], edgePolygons}];
+	{vertexEmbedding, edgeEmbedding}
+]
+
 toNormalEdges["Ordered"][hyperedge_] :=
 	DirectedEdge @@@ Partition[hyperedge, 2, 1]
 
@@ -119,18 +135,21 @@ graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_] :
 ]
 
 normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
-		vertexEmbedding, edgeEmbedding, normalEdgeToLinePoints, normalEdgeToHyperedge, indexedHyperedges, lineSegments},
+		vertexEmbedding, indexedHyperedges, normalEdgeToIndexedHyperedge, normalEdgeToLinePoints, lineSegments,
+		indexedHyperedgesToLineSegments, edgeEmbedding},
 	vertexEmbedding = #[[1]] -> {Point[#[[2]]]} & /@ normalEmbedding[[1]];
 
-	normalEdgeToLinePoints = Sort[If[Head[#] === DirectedEdge, #, Sort[#]] & /@ normalEmbedding[[2]]];
+	indexedHyperedges = MapIndexed[{#, #2} &, edges];
 	(* vertices in the normalEdges should already be sorted by now. *)
-	normalEdgeToHyperedge = Sort[Catenate[MapThread[Thread[#2 -> Defer[#]] &, {edges, normalEdges}]]];
+	normalEdgeToIndexedHyperedge = Sort[Catenate[MapThread[Thread[#2 -> Defer[#]] &, {indexedHyperedges, normalEdges}]]];
 
-	indexedHyperedges = MapIndexed[{#, #2} &, normalEdgeToHyperedge[[All, 2]]];
+	normalEdgeToLinePoints = Sort[If[Head[#] === DirectedEdge, #, Sort[#]] & /@ normalEmbedding[[2]]];
 	lineSegments = Line /@ normalEdgeToLinePoints[[All, 2]];
 
-	edgeEmbedding =
-		#[[1, 1]] -> #[[2]] & /@ Normal[Merge[Thread[indexedHyperedges -> lineSegments], Identity]];
+	indexedHyperedgesToLineSegments =
+		#[[1, 1]] -> #[[2]] & /@
+			Normal[Merge[Thread[normalEdgeToIndexedHyperedge[[All, 2]] -> lineSegments], Identity]];
+	edgeEmbedding = #[[1, 1]] -> #[[2]] & /@ indexedHyperedgesToLineSegments;
 
 	{vertexEmbedding, edgeEmbedding}
 ]
