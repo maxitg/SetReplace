@@ -12,9 +12,9 @@ SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}
 Options[HypergraphPlot] = Join[{
 	"EdgeType" -> "Ordered",
 	GraphLayout -> "SpringElectricalEmbedding"},
-	Options[Show]];
+	Options[Graphics]];
 
-$edgeTypes = {"Ordered"};
+$edgeTypes = {"Ordered", "CyclicClosed", "CyclicOpen"};
 $graphLayouts = {"SpringElectricalEmbedding"};
 
 (* Messages *)
@@ -34,7 +34,7 @@ func : HypergraphPlot[args___] := Module[{result = hypergraphPlot$parse[args]},
 	If[Head[result] === hypergraphPlot$failing,
 		Message[HypergraphPlot::notImplemented, Defer[func]];
 		result = $Failed];
-	result /; Head[result] =!= $Failed
+	result /; result =!= $Failed
 ]
 
 (* Arguments parsing *)
@@ -54,40 +54,85 @@ hypergraphPlot$parse[args : PatternSequence[edges_, o : OptionsPattern[]]] := Wi
 	$Failed /; Length[unknownOptions] > 0
 ]
 
-supportedFiniteOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, recognizedQ},
-	value = OptionValue[func, {opts}, optionToCheck];
-	recognizedQ = MemberQ[validValues, value];
-	If[!recognizedQ,
-		Message[Message[func, "invalidFiniteOption"], optionToCheck, value, validValues]
-	];
-	recognizedQ
-]
-
-hypergraphPlot$parse[edges_, o : OptionsPattern[]] /; (
-		!supportedFiniteOptionQ[HypergraphPlot, ##, {o}] & @@@ {
+hypergraphPlot$parse[edges_, o : OptionsPattern[]] /;
+		! (And @@ (supportedOptionQ[HypergraphPlot, ##, {o}] & @@@ {
 			{"EdgeType", $edgeTypes},
-			{GraphLayout, $graphLayouts}}) :=
+			{GraphLayout, $graphLayouts}})) :=
 	$Failed
 
 hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
-	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Show]]] & @@
+	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
 		(OptionValue[HypergraphPlot, {o}, #] & /@ {"EdgeType", GraphLayout})
+
+supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, supportedQ},
+	value = OptionValue[func, {opts}, optionToCheck];
+	supportedQ = MemberQ[validValues, value];
+	If[!supportedQ,
+		Message[MessageName[func, "invalidFiniteOption"], optionToCheck, value, validValues]
+	];
+	supportedQ
+]
 
 (* Implementation *)
 
-hypergraphPlot[edges_, edgeType_, layout_, showOptions_] :=
-	Show[drawEmbedding @ hypergraphEmbedding[edgeType, layout] @ edges, showOptions]
+hypergraphPlot[edges_, edgeType_, layout_, graphicsOptions_] :=
+	Show[drawEmbedding @ hypergraphEmbedding[edgeType, layout] @ edges, graphicsOptions]
 
 (** hypergraphEmbedding produces an embedding of vertices and edges. The format is {vertices, edges},
 			where both vertices and edges are associations of the form <|vertex -> {graphicsPrimitive, ...}, ...|>,
 			where graphicsPrimitive is either a Point, a Line, or a Polygon. **)
 
-hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding"][edges_] := Module[{vertices},
+hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding"][edges_] := Module[{
+		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
 	vertices = Union[Flatten[edges]];
-	{
-		# -> {Point[RandomReal[1, 2]]} & /@ vertices,
-		# -> {Line[RandomReal[1, {2, 2}]], Polygon[RandomReal[1, {3, 2}]]} & /@ edges
-	}
+	vertexEmbeddingNormalEdges = toNormalEdges[edgeType] /@ edges;
+	edgeEmbeddingNormalEdges = If[edgeType === "CyclicOpen", Most /@ # &, Identity][vertexEmbeddingNormalEdges];
+	normalToHypergraphEmbedding[
+		edges,
+		edgeEmbeddingNormalEdges,
+		graphEmbedding[
+			vertices,
+			Catenate[vertexEmbeddingNormalEdges],
+			Catenate[edgeEmbeddingNormalEdges],
+			layout]]
+]
+
+toNormalEdges["Ordered"][hyperedge_] :=
+	DirectedEdge @@@ Partition[hyperedge, 2, 1]
+
+toNormalEdges["CyclicOpen" | "CyclicClosed"][hyperedge_] :=
+	DirectedEdge @@@ Append[Partition[hyperedge, 2, 1], hyperedge[[{-1, 1}]]]
+
+graphEmbedding[vertices_, edges_, edges_, layout_, coordinates_ : Automatic] := Reap[
+	GraphPlot[
+		Graph[vertices, edges],
+		GraphLayout -> layout,
+		VertexCoordinates -> coordinates,
+		VertexShapeFunction -> (Sow[#2 -> #, "v"] &),
+		EdgeShapeFunction -> (Sow[#2 -> #, "e"] &)],
+	{"v", "e"}
+][[2, All, 1]]
+
+graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_] := Module[{embedding},
+	embedding = GraphEmbedding[Graph[vertices, vertexEmbeddingEdges], layout];
+	graphEmbedding[vertices, edgeEmbeddingEdges, edgeEmbeddingEdges, layout, embedding]
+]
+
+normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
+		vertexEmbedding, edgeEmbedding, normalEdgeToLinePoints, normalEdgeToHyperedge, indexedHyperedges, lineSegments},
+	vertexEmbedding = #[[1]] -> {Point[#[[2]]]} & /@ normalEmbedding[[1]];
+
+	normalEdgeToLinePoints = Sort[If[Head[#] === DirectedEdge, #, Sort[#]] & /@ normalEmbedding[[2]]];
+	(* vertices in the normalEdges should already be sorted by now. *)
+	normalEdgeToHyperedge = Sort[Catenate[MapThread[Thread[#2 -> Defer[#]] &, {edges, normalEdges}]]];
+
+	indexedHyperedges = MapIndexed[{#, #2} &, normalEdgeToHyperedge[[All, 2]]];
+	lineSegments = Line /@ normalEdgeToLinePoints[[All, 2]];
+
+	edgeEmbedding =
+		#[[1, 1]] -> #[[2]] & /@ Normal[Merge[Thread[indexedHyperedges -> lineSegments], Identity]];
+
+	{vertexEmbedding, edgeEmbedding}
 ]
 
 drawEmbedding[embedding_] := Graphics[embedding[[{2, 1}, All, 2]] /. {
