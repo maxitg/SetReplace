@@ -161,12 +161,13 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons"][edges_] := M
 	vertexEmbedding = embeddingWithNoRegions[[1]];
 	edgePoints =
 		Flatten[#, 2] & /@ (embeddingWithNoRegions[[2, All, 2]] /. {Line[pts_] :> {pts}, Point[pts_] :> {{pts}}});
-	edgeRegions = ConvexHullMesh /@ edgePoints;
 	edgePolygons = Map[
 		Polygon,
-		MapThread[
-			Table[#[[polygon]], {polygon, #2}] &,
-			{MeshCoordinates /@ edgeRegions, MeshCells[#, 2][[All, 1]] & /@ edgeRegions}],
+		Map[
+			With[{region = ConvexHullMesh[#]},
+				Table[MeshCoordinates[region][[polygon]], {polygon, MeshCells[region, 2][[All, 1]]}]
+			] &,
+			edgePoints],
 		{2}];
 	edgeEmbedding = MapThread[#1[[1]] -> Join[#1[[2]], #2] &, {embeddingWithNoRegions[[2]], edgePolygons}];
 	{vertexEmbedding, edgeEmbedding}
