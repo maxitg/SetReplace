@@ -100,12 +100,17 @@ hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
 
 hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
 	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
-		(OptionValue[HypergraphPlot, {o}, #] & /@ {"EdgeType", GraphLayout, VertexCoordinates, VertexLabels})
+		(OptionValue[HypergraphPlot, {o}, #] & /@ {
+			"EdgeType", GraphHighlight, GraphLayout, VertexCoordinates, VertexLabels})
 
 (* Implementation *)
 
-hypergraphPlot[edges_, edgeType_, layout_, vertexCoordinates_, vertexLabels_, graphicsOptions_] :=
-	Show[drawEmbedding[vertexLabels] @ hypergraphEmbedding[edgeType, layout, vertexCoordinates] @ edges, graphicsOptions]
+hypergraphPlot[edges_, edgeType_, highlight_, layout_, vertexCoordinates_, vertexLabels_, graphicsOptions_] := Show[
+	drawEmbedding[vertexLabels, highlight] @
+		hypergraphEmbedding[edgeType, layout, vertexCoordinates] @
+		edges,
+	graphicsOptions
+]
 
 (** Embedding **)
 (** hypergraphEmbedding produces an embedding of vertices and edges. The format is {vertices, edges},
@@ -229,18 +234,28 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons", vertexCoordi
 
 (** Drawing **)
 
-drawEmbedding[vertexLabels_][embedding_] := Module[{
+$highlightColor = Hue[1.0, 1.0, 0.7];
+$edgeColor = Hue[0.6, 0.7, 0.5];
+$vertexColor = Hue[0.6, 0.2, 0.8];
+
+drawEmbedding[vertexLabels_, highlight_][embedding_] := Module[{
 		plotRange, vertexSize, arrowheadsSize, embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries,
 		edgePoints, labels, singleVertexEdgeCounts, getSingleVertexEdgeRadius},
 	plotRange = #2 - #1 & @@ MinMax[embedding[[1, All, 2, 1, 1, 1]]];
 	vertexSize = computeVertexSize[plotRange];
 	arrowheadsSize = computeArrowheadsSize[Length[embedding[[1]]], plotRange, vertexSize];
 
-	embeddingShapes = embedding[[All, All, 2]];
+	embeddingShapes = Map[
+		#[[2]] /. (h : (Point | Line | Polygon))[pts_] :> highlighted[h[pts], MemberQ[highlight, #[[1]]]] &,
+		embedding,
+		{2}];
 
 	vertexPoints = Cases[embeddingShapes[[1]], #, All] & /@ {
-		Point[p_] :> {
-			Directive[Hue[0.6, 0.2, 0.8], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]],
+		highlighted[Point[p_], h_] :> {
+			If[h,
+				Directive[$highlightColor, EdgeForm[Directive[$highlightColor, Opacity[1]]]],
+				Directive[$vertexColor, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]]
+			],
 			Disk[p, vertexSize]}
 	};
 
@@ -250,20 +265,29 @@ drawEmbedding[vertexLabels_][embedding_] := Module[{
 	);
 
 	{lines, polygons, polygonBoundaries, edgePoints} = Cases[embeddingShapes[[2]], #, All] & /@ {
-		Line[pts_] :> {
-			Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]],
+		highlighted[Line[pts_], h_] :> {
+			If[h,
+				Directive[Opacity[1], $highlightColor],
+				Directive[Opacity[0.7], $edgeColor]
+			],
 			Arrowheads[arrowheadsSize],
 			Arrow[pts]},
-		Polygon[pts_] :> {
+		highlighted[Polygon[pts_], h_] :> {
 			Opacity[0.3],
-			Lighter[Hue[0.6, 0.7, 0.5], 0.7],
+			If[h,
+				$highlightColor,
+				Lighter[$edgeColor, 0.7]
+			],
 			Polygon[pts]},
-		Polygon[pts_] :> {
+		highlighted[Polygon[pts_], h_] :> {
 			EdgeForm[White],
 			Transparent,
 			Polygon[pts]},
-		Point[p_] :> {
-			Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]],
+		highlighted[Point[p_], h_] :> {
+			If[h,
+				Directive[Opacity[1], $highlightColor],
+				Directive[Opacity[0.7], $edgeColor]
+			],
 			Circle[p, getSingleVertexEdgeRadius[p]]}
 	};
 
