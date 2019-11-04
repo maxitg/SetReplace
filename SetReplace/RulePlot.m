@@ -49,7 +49,10 @@ singleRulePlot[rule_] := Module[{vertexCoordinateRules, ruleSidePlots},
     List @@ rule;
   plotRange =
     CoordinateBounds[Catenate[List @@ (Transpose[completePlotRange[#]] & /@ ruleSidePlots)], Scaled[0.1]];
-  Show[#, PlotRange -> plotRange] & /@ (ruleSidePlots[[1]] -> ruleSidePlots[[2]])
+  Framed[
+      Show[#, PlotRange -> plotRange],
+      BaseStyle -> Directive[Gray, Dotted]] & /@
+    (ruleSidePlots[[1]] -> ruleSidePlots[[2]])
 ]
 
 ruleCoordinateRules[in_ -> out_] :=
