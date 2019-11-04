@@ -255,4 +255,15 @@ VerificationTest[
     All]]
 ]
 
+(* VertexCoordinates *)
+
+VerificationTest[
+  And @@ (MemberQ[
+      diskCoordinates[HypergraphPlot[
+        {{1, 2, 3}, {3, 4, 5}, {3, 3}},
+        VertexCoordinates -> {1 -> {0, 0}, 2 -> {1, 0}}]],
+      #] & /@
+    {{0., 0.}, {1., 0.}})
+]
+
 EndTestSection[]
