@@ -90,8 +90,11 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding"][edges_] := 
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
 	vertices = Union[Flatten[edges]];
 	vertexEmbeddingNormalEdges = toNormalEdges[edgeType] /@ edges;
-	edgeEmbeddingNormalEdges = If[edgeType === "CyclicOpen", Most /@ # &, Identity][vertexEmbeddingNormalEdges];
-	normalToHypergraphEmbedding[
+	edgeEmbeddingNormalEdges = If[edgeType === "CyclicOpen",
+		If[# === {}, Identity[#], Most[#]] & /@ # &,
+		Identity][
+			vertexEmbeddingNormalEdges];
+	Echo @ normalToHypergraphEmbedding[
 		edges,
 		edgeEmbeddingNormalEdges,
 		graphEmbedding[
@@ -104,8 +107,10 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding"][edges_] := 
 toNormalEdges["Ordered"][hyperedge_] :=
 	DirectedEdge @@@ Partition[hyperedge, 2, 1]
 
-toNormalEdges["CyclicOpen" | "CyclicClosed"][hyperedge_] :=
+toNormalEdges["CyclicOpen" | "CyclicClosed"][hyperedge : Except[{}]] :=
 	DirectedEdge @@@ Append[Partition[hyperedge, 2, 1], hyperedge[[{-1, 1}]]]
+
+toNormalEdges["CyclicOpen" | "CyclicClosed"][{}] := {}
 
 graphEmbedding[vertices_, edges_, edges_, layout_, coordinates_ : Automatic] := Replace[
 	Reap[
@@ -127,7 +132,7 @@ graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_] :
 
 normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 		vertexEmbedding, indexedHyperedges, normalEdgeToIndexedHyperedge, normalEdgeToLinePoints, lineSegments,
-		indexedHyperedgesToLineSegments, edgeEmbedding},
+		indexedHyperedgesToLineSegments, edgeEmbedding, singleVertexEdges},
 	vertexEmbedding = #[[1]] -> {Point[#[[2]]]} & /@ normalEmbedding[[1]];
 
 	indexedHyperedges = MapIndexed[{#, #2} &, edges];
@@ -142,7 +147,10 @@ normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 			Normal[Merge[Thread[normalEdgeToIndexedHyperedge[[All, 2]] -> lineSegments], Identity]];
 	edgeEmbedding = #[[1, 1]] -> #[[2]] & /@ indexedHyperedgesToLineSegments;
 
-	{vertexEmbedding, edgeEmbedding}
+	singleVertexEdges = Cases[edges[[Position[normalEdges, {}, 1][[All, 1]]]], Except[{}], 1];
+	singleVertexEdgeEmbedding = (# -> (#[[1]] /. vertexEmbedding)) & /@ singleVertexEdges;
+
+	{vertexEmbedding, Join[edgeEmbedding, singleVertexEdgeEmbedding]}
 ]
 
 (*** SpringElectricalPolygons ***)
@@ -151,7 +159,8 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons"][edges_] := M
 		embeddingWithNoRegions, vertexEmbedding, edgePoints, edgeRegions, edgePolygons, edgeEmbedding},
 	embeddingWithNoRegions = hypergraphEmbedding[edgeType, "SpringElectricalEmbedding"][edges];
 	vertexEmbedding = embeddingWithNoRegions[[1]];
-	edgePoints = Flatten[#, 2] & /@ Apply[List, (embeddingWithNoRegions[[2, All, 2]]), {2}];
+	edgePoints =
+		Flatten[#, 2] & /@ (embeddingWithNoRegions[[2, All, 2]] /. {Line[pts_] :> {pts}, Point[pts_] :> {{pts}}});
 	edgeRegions = ConvexHullMesh /@ edgePoints;
 	edgePolygons = Map[
 		Polygon,
@@ -166,16 +175,26 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons"][edges_] := M
 (** Drawing **)
 
 drawEmbedding[vertexLabels_][embedding_] := Module[{
-		plotRange, vertexSize, arrowheadsSize, embeddingShapes, points, lines, polygons, labels},
+		plotRange, vertexSize, arrowheadsSize, embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries,
+		edgePoints, labels, singleVertexEdgeCounts, getSingleVertexEdgeRadius},
 	plotRange = #2 - #1 & @@ MinMax[embedding[[1, All, 2, 1, 1, 1]]];
 	vertexSize = computeVertexSize[plotRange];
 	arrowheadsSize = computeArrowheadsSize[Length[embedding[[1]]], plotRange, vertexSize];
 
-	embeddingShapes = embedding[[{2, 1}, All, 2]];
-	{points, lines, polygons, polygonBoundaries} = Cases[embeddingShapes, #, All] & /@ {
+	embeddingShapes = embedding[[All, All, 2]];
+
+	vertexPoints = Cases[embeddingShapes[[1]], #, All] & /@ {
 		Point[p_] :> {
 			Directive[Hue[0.6, 0.2, 0.8], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]],
-			Disk[p, vertexSize]},
+			Disk[p, vertexSize]}
+	};
+
+	singleVertexEdgeCounts = <||>;
+	getSingleVertexEdgeRadius[coords_] := (
+		singleVertexEdgeCounts[coords] = Lookup[singleVertexEdgeCounts, Key[coords], vertexSize] + vertexSize
+	);
+
+	{lines, polygons, polygonBoundaries, edgePoints} = Cases[embeddingShapes[[2]], #, All] & /@ {
 		Line[pts_] :> {
 			Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]],
 			Arrowheads[arrowheadsSize],
@@ -187,7 +206,10 @@ drawEmbedding[vertexLabels_][embedding_] := Module[{
 		Polygon[pts_] :> {
 			EdgeForm[White],
 			Transparent,
-			Polygon[pts]}
+			Polygon[pts]},
+		Point[p_] :> {
+			Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]],
+			Circle[p, getSingleVertexEdgeRadius[p]]}
 	};
 
 	(* would only work if coordinates consist of a single point *)
@@ -199,7 +221,7 @@ drawEmbedding[vertexLabels_][embedding_] := Module[{
 			VertexLabels -> vertexLabels,
 			VertexShapeFunction -> None,
 			EdgeShapeFunction -> None]];
-	Show[Graphics[{polygons, polygonBoundaries, lines, points}], labels]
+	Show[Graphics[{polygons, polygonBoundaries, lines, vertexPoints, edgePoints}], labels]
 ]
 
 (*** Arrowhead and vertex sizes are approximately the same as GraphPlot ***)

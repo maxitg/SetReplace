@@ -128,6 +128,11 @@ VerificationTest[
 ]
 
 VerificationTest[
+  Head[HypergraphPlot[{{}}]],
+  Graphics
+]
+
+VerificationTest[
   Head[HypergraphPlot[{{1}}]],
   Graphics
 ]
@@ -149,6 +154,11 @@ VerificationTest[
 
 VerificationTest[
   Head[HypergraphPlot[{{1, 2}, {1}}]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2}, {1}, {}}]],
   Graphics
 ]
 
