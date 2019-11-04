@@ -12,6 +12,7 @@ SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}
 Options[HypergraphPlot] = Join[{
 	"EdgeType" -> "CyclicOpen",
 	GraphLayout -> "SpringElectricalPolygons",
+	VertexCoordinates -> {},
 	VertexLabels -> None},
 	Options[Graphics]];
 
@@ -28,6 +29,9 @@ HypergraphPlot::invalidEdges =
 
 HypergraphPlot::invalidFiniteOption =
 	"Value `2` of option `1` should be one of `3`.";
+
+HypergraphPlot::invalidCoordinates =
+	"Coordinates `1` should be a list of rules from vertices to pairs of numbers.";
 
 (* Evaluation *)
 
@@ -61,10 +65,6 @@ hypergraphPlot$parse[edges_, o : OptionsPattern[]] /;
 			{GraphLayout, $graphLayouts}})) :=
 	$Failed
 
-hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
-	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
-		(OptionValue[HypergraphPlot, {o}, #] & /@ {"EdgeType", GraphLayout, VertexLabels})
-
 supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, supportedQ},
 	value = OptionValue[func, {opts}, optionToCheck];
 	supportedQ = MemberQ[validValues, value];
@@ -74,10 +74,25 @@ supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, s
 	supportedQ
 ]
 
+hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
+		result, vertexCoordinates},
+	vertexCoordinates = OptionValue[HypergraphPlot, {o}, VertexCoordinates];
+	result = If[!MatchQ[vertexCoordinates,
+			Automatic |
+			{(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
+		Message[HypergraphPlot::invalidCoordinates, vertexCoordinates];
+		$Failed];
+	result /; result === $Failed
+]
+
+hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
+	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
+		(OptionValue[HypergraphPlot, {o}, #] & /@ {"EdgeType", GraphLayout, VertexCoordinates, VertexLabels})
+
 (* Implementation *)
 
-hypergraphPlot[edges_, edgeType_, layout_, vertexLabels_, graphicsOptions_] :=
-	Show[drawEmbedding[vertexLabels] @ hypergraphEmbedding[edgeType, layout] @ edges, graphicsOptions]
+hypergraphPlot[edges_, edgeType_, layout_, vertexCoordinates_, vertexLabels_, graphicsOptions_] :=
+	Show[drawEmbedding[vertexLabels] @ hypergraphEmbedding[edgeType, layout, vertexCoordinates] @ edges, graphicsOptions]
 
 (** Embedding **)
 (** hypergraphEmbedding produces an embedding of vertices and edges. The format is {vertices, edges},
@@ -86,7 +101,7 @@ hypergraphPlot[edges_, edgeType_, layout_, vertexLabels_, graphicsOptions_] :=
 
 (*** SpringElectricalEmbedding ***)
 
-hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding"][edges_] := Module[{
+hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", vertexCoordinates_][edges_] := Module[{
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
 	vertices = Union[Flatten[edges]];
 	vertexEmbeddingNormalEdges = toNormalEdges[edgeType] /@ edges;
@@ -101,7 +116,8 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding"][edges_] := 
 			vertices,
 			Catenate[vertexEmbeddingNormalEdges],
 			Catenate[edgeEmbeddingNormalEdges],
-			layout]]
+			layout,
+			vertexCoordinates]]
 ]
 
 toNormalEdges["Ordered"][hyperedge_] :=
@@ -112,7 +128,37 @@ toNormalEdges["CyclicOpen" | "CyclicClosed"][hyperedge : Except[{}]] :=
 
 toNormalEdges["CyclicOpen" | "CyclicClosed"][{}] := {}
 
-graphEmbedding[vertices_, edges_, edges_, layout_, coordinates_ : Automatic] := Replace[
+graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{embedding},
+	embedding = constrainedGraphEmbedding[Graph[vertices, vertexEmbeddingEdges], layout, coordinateRules];
+	graphEmbedding[vertices, edgeEmbeddingEdges, layout, embedding]
+]
+
+constrainedGraphEmbedding[graph_, layout_, coordinateRules_] := Module[{
+		indexGraph, vertexToIndex, relevantCoordinateRules, graphPlot, graphPlotCoordinateRules, displacement},
+	indexGraph = IndexGraph[graph];
+	vertexToIndex = Thread[VertexList[graph] -> VertexList[indexGraph]];
+	relevantCoordinateRules =
+		Normal[Merge[Select[MemberQ[vertexToIndex[[All, 1]], #[[1]]] &][coordinateRules], Last]];
+	graphPlot = GraphPlot[
+		indexGraph, {
+		Method -> layout,
+		PlotTheme -> "Classic",
+		If[Length[relevantCoordinateRules] > 1,
+			VertexCoordinateRules ->
+				Thread[(relevantCoordinateRules[[All, 1]] /. vertexToIndex) ->
+					relevantCoordinateRules[[All, 2]]],
+			Nothing]}];
+	graphPlotCoordinateRules = VertexCoordinateRules /. Cases[graphPlot, _Rule, Infinity];
+	If[Length[relevantCoordinateRules] != 1,
+		graphPlotCoordinateRules,
+		displacement =
+			relevantCoordinateRules[[1, 2]] -
+			(relevantCoordinateRules[[1, 1]] /. Thread[VertexList[graph] -> graphPlotCoordinateRules]);
+		# + displacement & /@ graphPlotCoordinateRules
+	]
+]
+
+graphEmbedding[vertices_, edges_, layout_, coordinates_] := Replace[
 	Reap[
 		GraphPlot[
 			Graph[vertices, edges],
@@ -125,14 +171,9 @@ graphEmbedding[vertices_, edges_, edges_, layout_, coordinates_ : Automatic] := 
 	{1}
 ]
 
-graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_] := Module[{embedding},
-	embedding = GraphEmbedding[Graph[vertices, vertexEmbeddingEdges], layout];
-	graphEmbedding[vertices, edgeEmbeddingEdges, edgeEmbeddingEdges, layout, embedding]
-]
-
 normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 		vertexEmbedding, indexedHyperedges, normalEdgeToIndexedHyperedge, normalEdgeToLinePoints, lineSegments,
-		indexedHyperedgesToLineSegments, edgeEmbedding, singleVertexEdges},
+		indexedHyperedgesToLineSegments, edgeEmbedding, singleVertexEdges, singleVertexEdgeEmbedding},
 	vertexEmbedding = #[[1]] -> {Point[#[[2]]]} & /@ normalEmbedding[[1]];
 
 	indexedHyperedges = MapIndexed[{#, #2} &, edges];
@@ -155,16 +196,16 @@ normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 
 (*** SpringElectricalPolygons ***)
 
-hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons"][edges_] := Module[{
-		embeddingWithNoRegions, vertexEmbedding, edgePoints, edgeRegions, edgePolygons, edgeEmbedding},
-	embeddingWithNoRegions = hypergraphEmbedding[edgeType, "SpringElectricalEmbedding"][edges];
+hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons", vertexCoordinates_][edges_] := Module[{
+		embeddingWithNoRegions, vertexEmbedding, edgePoints, edgePolygons, edgeEmbedding},
+	embeddingWithNoRegions = hypergraphEmbedding[edgeType, "SpringElectricalEmbedding", vertexCoordinates][edges];
 	vertexEmbedding = embeddingWithNoRegions[[1]];
 	edgePoints =
 		Flatten[#, 2] & /@ (embeddingWithNoRegions[[2, All, 2]] /. {Line[pts_] :> {pts}, Point[pts_] :> {{pts}}});
 	edgePolygons = Map[
 		Polygon,
 		Map[
-			With[{region = ConvexHullMesh[#]},
+			With[{region = ConvexHullMesh[Map[# + RandomReal[1.*^-10] &, #, {2}]]},
 				Table[MeshCoordinates[region][[polygon]], {polygon, MeshCells[region, 2][[All, 1]]}]
 			] &,
 			edgePoints],

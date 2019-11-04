@@ -113,6 +113,31 @@ VerificationTest[
   {HypergraphPlot::optx}
 ]
 
+(* Valid coordinates *)
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> $$$invalid$$$],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> $$$invalid$$$],
+  {HypergraphPlot::invalidCoordinates}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {{0, 0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {{0, 0}}],
+  {HypergraphPlot::invalidCoordinates}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0}}],
+  {HypergraphPlot::invalidCoordinates}
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0, 0}}]],
+  Graphics
+]
+
 (* Implementation *)
 
 (** Simple examples **)
@@ -160,30 +185,6 @@ $layoutTestHypergraphs = {
   {{1, 2, 3, 4, 5, 6}, {1, 2, 3, 4}},
   {{1, 2, 3}, {3, 4, 5}, {1, 2, 3, 4}}
 };
-
-VerificationTest[
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "Ordered"]],
-  Sort @ GraphEmbedding[
-    Rule @@@ Catenate[Partition[#, 2, 1] & /@ #],
-    "SpringElectricalEmbedding"],
-  SameTest -> Equal
-] & /@ $layoutTestHypergraphs
-
-VerificationTest[
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "CyclicOpen"]],
-  Sort @ GraphEmbedding[
-    Rule @@@ Catenate[Append[Partition[#, 2, 1], #[[{-1, 1}]]] & /@ #],
-    "SpringElectricalEmbedding"],
-  SameTest -> Equal
-] & /@ $layoutTestHypergraphs
-
-VerificationTest[
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "CyclicClosed"]],
-  Sort @ GraphEmbedding[
-    Rule @@@ Catenate[Append[Partition[#, 2, 1], #[[{-1, 1}]]] & /@ #],
-    "SpringElectricalEmbedding"],
-  SameTest -> Equal
-] & /@ $layoutTestHypergraphs
 
 VerificationTest[
   diskCoordinates[HypergraphPlot[#, "EdgeType" -> "Ordered"]],
@@ -253,6 +254,33 @@ VerificationTest[
     Circle[___],
     Missing[],
     All]]
+]
+
+(* VertexCoordinates *)
+
+VerificationTest[
+  And @@ (MemberQ[
+      diskCoordinates[HypergraphPlot[
+        {{1, 2, 3}, {3, 4, 5}, {3, 3}},
+        VertexCoordinates -> {1 -> {0, 0}, 2 -> {1, 0}}]],
+      #] & /@
+    {{0., 0.}, {1., 0.}})
+]
+
+VerificationTest[
+  Chop @ diskCoordinates[HypergraphPlot[
+    {{1, 2, 3}, {3, 4, 5}},
+    VertexCoordinates -> {3 -> {0, 0}}]],
+  Table[{0, 0}, 5],
+  SameTest -> (Not @* Equal)
+]
+
+VerificationTest[
+  Chop @ diskCoordinates[HypergraphPlot[
+    {{1, 2, 3}, {3, 4, 5}},
+    VertexCoordinates -> {3 -> {1, 0}, 3 -> {0, 0}}]],
+  Table[{0, 0}, 5],
+  SameTest -> (Not @* Equal)
 ]
 
 EndTestSection[]
