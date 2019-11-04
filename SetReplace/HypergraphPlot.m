@@ -12,6 +12,7 @@ SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}
 Options[HypergraphPlot] = Join[{
 	"EdgeType" -> "CyclicOpen",
 	GraphLayout -> "SpringElectricalPolygons",
+	VertexCoordinates -> Automatic,
 	VertexLabels -> None},
 	Options[Graphics]];
 
@@ -28,6 +29,9 @@ HypergraphPlot::invalidEdges =
 
 HypergraphPlot::invalidFiniteOption =
 	"Value `2` of option `1` should be one of `3`.";
+
+HypergraphPlot::invalidCoordinates =
+	"Coordinates `1` should be either Automatic, or a list of rules from vertices to pairs of numbers.";
 
 (* Evaluation *)
 
@@ -61,10 +65,6 @@ hypergraphPlot$parse[edges_, o : OptionsPattern[]] /;
 			{GraphLayout, $graphLayouts}})) :=
 	$Failed
 
-hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
-	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
-		(OptionValue[HypergraphPlot, {o}, #] & /@ {"EdgeType", GraphLayout, VertexLabels})
-
 supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, supportedQ},
 	value = OptionValue[func, {opts}, optionToCheck];
 	supportedQ = MemberQ[validValues, value];
@@ -73,6 +73,21 @@ supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, s
 	];
 	supportedQ
 ]
+
+hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
+		result, vertexCoordinates},
+	vertexCoordinates = OptionValue[HypergraphPlot, {o}, VertexCoordinates];
+	result = If[!MatchQ[vertexCoordinates,
+			Automatic |
+			{(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
+		Message[HypergraphPlot::invalidCoordinates, vertexCoordinates];
+		$Failed];
+	result /; result === $Failed
+]
+
+hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
+	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
+		(OptionValue[HypergraphPlot, {o}, #] & /@ {"EdgeType", GraphLayout, VertexLabels})
 
 (* Implementation *)
 
@@ -132,7 +147,7 @@ graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_] :
 
 normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 		vertexEmbedding, indexedHyperedges, normalEdgeToIndexedHyperedge, normalEdgeToLinePoints, lineSegments,
-		indexedHyperedgesToLineSegments, edgeEmbedding, singleVertexEdges},
+		indexedHyperedgesToLineSegments, edgeEmbedding, singleVertexEdges, singleVertexEdgeEmbedding},
 	vertexEmbedding = #[[1]] -> {Point[#[[2]]]} & /@ normalEmbedding[[1]];
 
 	indexedHyperedges = MapIndexed[{#, #2} &, edges];
