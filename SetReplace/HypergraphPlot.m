@@ -116,7 +116,8 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", vertexCoord
 			vertices,
 			Catenate[vertexEmbeddingNormalEdges],
 			Catenate[edgeEmbeddingNormalEdges],
-			layout]]
+			layout,
+			vertexCoordinates]]
 ]
 
 toNormalEdges["Ordered"][hyperedge_] :=
@@ -127,7 +128,30 @@ toNormalEdges["CyclicOpen" | "CyclicClosed"][hyperedge : Except[{}]] :=
 
 toNormalEdges["CyclicOpen" | "CyclicClosed"][{}] := {}
 
-graphEmbedding[vertices_, edges_, edges_, layout_, coordinates_ : Automatic] := Replace[
+graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{embedding},
+	embedding = constrainedGraphEmbedding[Graph[vertices, vertexEmbeddingEdges], layout, coordinateRules];
+	graphEmbedding[vertices, edgeEmbeddingEdges, layout, embedding]
+]
+
+constrainedGraphEmbedding[graph_, layout_, coordinateRules_] := Module[{
+		indexGraph, vertexToIndex, relevantCoordinateRules, graphPlot},
+	indexGraph = IndexGraph[graph];
+	vertexToIndex = Thread[VertexList[graph] -> VertexList[indexGraph]];
+	relevantCoordinateRules =
+		Select[MemberQ[vertexToIndex[[All, 1]], #[[1]]] &][coordinateRules];
+	graphPlot = GraphPlot[
+		indexGraph, {
+		Method -> layout,
+		PlotTheme -> "Classic",
+		If[relevantCoordinateRules =!= {},
+			VertexCoordinateRules ->
+				Thread[(relevantCoordinateRules[[All, 1]] /. vertexToIndex) ->
+					relevantCoordinateRules[[All, 2]]],
+			Nothing]}];
+	VertexCoordinateRules /. Cases[graphPlot, _Rule, Infinity]
+]
+
+graphEmbedding[vertices_, edges_, layout_, coordinates_] := Replace[
 	Reap[
 		GraphPlot[
 			Graph[vertices, edges],
@@ -138,11 +162,6 @@ graphEmbedding[vertices_, edges_, edges_, layout_, coordinates_ : Automatic] := 
 		{"v", "e"}][[2]],
 	el : Except[{}] :> el[[1]],
 	{1}
-]
-
-graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_] := Module[{embedding},
-	embedding = GraphEmbedding[Graph[vertices, vertexEmbeddingEdges], layout];
-	graphEmbedding[vertices, edgeEmbeddingEdges, edgeEmbeddingEdges, layout, embedding]
 ]
 
 normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
