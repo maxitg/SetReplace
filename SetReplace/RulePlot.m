@@ -33,7 +33,7 @@ rulePlot$parse[{
 
 rulePlot[rule_Rule] := rulePlot[{rule}]
 
-rulePlot[rules_List] := Column[singleRulePlot /@ rules]
+rulePlot[rules_List] := GraphicsRow[singleRulePlot /@ rules, Frame -> All, FrameStyle -> GrayLevel[0.8]]
 
 singleRulePlot[rule_] := Module[{vertexCoordinateRules, ruleSidePlots},
   vertexCoordinateRules = ruleCoordinateRules[rule];
@@ -54,10 +54,7 @@ singleRulePlot[rule_] := Module[{vertexCoordinateRules, ruleSidePlots},
     List @@ rule;
   plotRange =
     CoordinateBounds[Catenate[List @@ (Transpose[completePlotRange[#]] & /@ ruleSidePlots)], $padding];
-  Framed[
-      Show[#, PlotRange -> plotRange],
-      BaseStyle -> Directive[Gray, Dotted]] & /@
-    (ruleSidePlots[[1]] -> ruleSidePlots[[2]])
+  combinedRuleParts[ruleSidePlots, plotRange]
 ]
 
 ruleCoordinateRules[in_ -> out_] :=
@@ -76,3 +73,28 @@ completePlotRange[graphics_] := Last @ Last @ Reap[Rasterize[
     DisplayFunction -> Identity,
     ImageSize -> 0],
   ImageResolution -> 1]]
+
+$openArrowhead = Graphics[{Dashing[None], Line[{{-1, 1/3}, {0, 0}, {-1, -1/3}}]}];
+arrow[pts_] = Graphics[{Arrowheads[{{0.03, 1, {$openArrowhead, 1}}}], GrayLevel[0.2], Dotted, Arrow[pts]}];
+
+combinedRuleParts[sides_, plotRange_] := Module[{xRange},
+  maxRange = Max[plotRange[[1, 2]] - plotRange[[1, 1]], plotRange[[2, 2]] - plotRange[[2, 1]]];
+  {xRange, yRange} = Mean[#] + maxRange * {-0.5, 0.5} & /@ plotRange;
+  xDisplacement = 1.5 (xRange[[2]] - xRange[[1]]);
+  frame = Graphics[{Gray, Dotted, Line[{
+    {xRange[[1]], yRange[[1]]},
+    {xRange[[2]], yRange[[1]]},
+    {xRange[[2]], yRange[[2]]},
+    {xRange[[1]], yRange[[2]]},
+    {xRange[[1]], yRange[[1]]}}]}];
+  Show[
+    sides[[1]],
+    frame,
+    Graphics[Translate[frame[[1]], {xDisplacement, 0}]],
+    arrow[{
+      {xRange[[2]] + 0.05 xDisplacement, Mean[yRange]},
+      {xRange[[1]] + 0.95 xDisplacement, Mean[yRange]}}],
+    Graphics[Translate[sides[[2, 1]], {xDisplacement, 0}]],
+    PlotRange -> {{xRange[[1]] - 0.01 xDisplacement, xRange[[2]] + 1.01 xDisplacement}, {yRange[[1]] - 0.01 xDisplacement, yRange[[2]] + 0.01 xDisplacement}},
+    ImageSize -> 300 {1, 1 / 2.5}]
+]
