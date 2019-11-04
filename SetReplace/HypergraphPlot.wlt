@@ -113,6 +113,31 @@ VerificationTest[
   {HypergraphPlot::optx}
 ]
 
+(* Valid coordinates *)
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> $$$invalid$$$],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> $$$invalid$$$],
+  {HypergraphPlot::invalidCoordinates}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {{0, 0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {{0, 0}}],
+  {HypergraphPlot::invalidCoordinates}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0}}],
+  {HypergraphPlot::invalidCoordinates}
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0, 0}}]],
+  Graphics
+]
+
 (* Implementation *)
 
 (** Simple examples **)
