@@ -162,15 +162,21 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons"][edges_] := M
 
 (** Drawing **)
 
-drawEmbedding[vertexLabels_][embedding_] := Module[{embeddingShapes, points, lines, polygons, labels},
+drawEmbedding[vertexLabels_][embedding_] := Module[{
+		plotRange, vertexSize, arrowheadsSize, embeddingShapes, points, lines, polygons, labels},
+	plotRange = #2 - #1 & @@ MinMax[embedding[[1, All, 2, 1, 1, 1]]];
+	vertexSize = computeVertexSize[plotRange];
+	arrowheadsSize = computeArrowheadsSize[Length[embedding[[1]]], plotRange, vertexSize];
+
 	embeddingShapes = embedding[[{2, 1}, All, 2]];
 	{points, lines, polygons, polygonBoundaries} = Cases[embeddingShapes, #, All] & /@ {
 		Point[p_] :> {
 			Directive[Hue[0.6, 0.2, 0.8], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]],
-			Disk[p, 0.03]},
+			Disk[p, vertexSize]},
 		Line[pts_] :> {
 			Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]],
-			Line[pts]},
+			Arrowheads[arrowheadsSize],
+			Arrow[pts]},
 		Polygon[pts_] :> {
 			Opacity[0.3],
 			Lighter[Hue[0.6, 0.7, 0.5], 0.7],
@@ -192,3 +198,9 @@ drawEmbedding[vertexLabels_][embedding_] := Module[{embeddingShapes, points, lin
 			EdgeShapeFunction -> None]];
 	Show[Graphics[{polygons, polygonBoundaries, lines, points}], labels]
 ]
+
+(*** Arrowhead and vertex sizes are approximately the same as GraphPlot ***)
+computeArrowheadsSize[vertexCount_ ? (# <= 20 &), plotRange_, vertexSize_] := Medium
+computeArrowheadsSize[vertexCount_ ? (# > 20 &), plotRange_, vertexSize_] := 1.25 * 2 * vertexSize / plotRange
+
+computeVertexSize[plotRange_] := 0.15 - 2. * 1 / (plotRange + 13.7)
