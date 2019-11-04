@@ -107,15 +107,18 @@ toNormalEdges["Ordered"][hyperedge_] :=
 toNormalEdges["CyclicOpen" | "CyclicClosed"][hyperedge_] :=
 	DirectedEdge @@@ Append[Partition[hyperedge, 2, 1], hyperedge[[{-1, 1}]]]
 
-graphEmbedding[vertices_, edges_, edges_, layout_, coordinates_ : Automatic] := Reap[
-	GraphPlot[
-		Graph[vertices, edges],
-		GraphLayout -> layout,
-		VertexCoordinates -> coordinates,
-		VertexShapeFunction -> (Sow[#2 -> #, "v"] &),
-		EdgeShapeFunction -> (Sow[#2 -> #, "e"] &)],
-	{"v", "e"}
-][[2, All, 1]]
+graphEmbedding[vertices_, edges_, edges_, layout_, coordinates_ : Automatic] := Replace[
+	Reap[
+		GraphPlot[
+			Graph[vertices, edges],
+			GraphLayout -> layout,
+			VertexCoordinates -> coordinates,
+			VertexShapeFunction -> (Sow[#2 -> #, "v"] &),
+			EdgeShapeFunction -> (Sow[#2 -> #, "e"] &)],
+		{"v", "e"}][[2]],
+	el : Except[{}] :> el[[1]],
+	{1}
+]
 
 graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_] := Module[{embedding},
 	embedding = GraphEmbedding[Graph[vertices, vertexEmbeddingEdges], layout];
