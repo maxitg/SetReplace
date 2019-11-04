@@ -11,6 +11,7 @@ SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}
 
 Options[HypergraphPlot] = Join[{
 	"EdgeType" -> "CyclicOpen",
+	GraphHighlight -> {},
 	GraphLayout -> "SpringElectricalPolygons",
 	VertexCoordinates -> {},
 	VertexLabels -> None},
@@ -32,6 +33,9 @@ HypergraphPlot::invalidFiniteOption =
 
 HypergraphPlot::invalidCoordinates =
 	"Coordinates `1` should be a list of rules from vertices to pairs of numbers.";
+
+HypergraphPlot::invalidHighlight =
+	"GraphHighlight value `1` should be a list of vertices and edges.";
 
 (* Evaluation *)
 
@@ -85,6 +89,15 @@ hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
 	result /; result === $Failed
 ]
 
+hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
+		highlight, validQ},
+	highlight = OptionValue[HypergraphPlot, {o}, GraphHighlight];
+	vertices = Union[Catenate[edges]];
+	validQ = ListQ[highlight] && (And @@ (MemberQ[Join[vertices, edges], #] & /@ highlight));
+	If[!validQ, Message[HypergraphPlot::invalidHighlight, highlight]];
+	$Failed /; !validQ
+]
+
 hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
 	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
 		(OptionValue[HypergraphPlot, {o}, #] & /@ {"EdgeType", GraphLayout, VertexCoordinates, VertexLabels})
@@ -103,7 +116,7 @@ hypergraphPlot[edges_, edgeType_, layout_, vertexCoordinates_, vertexLabels_, gr
 
 hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", vertexCoordinates_][edges_] := Module[{
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
-	vertices = Union[Flatten[edges]];
+	vertices = Union[Catenate[edges]];
 	vertexEmbeddingNormalEdges = toNormalEdges[edgeType] /@ edges;
 	edgeEmbeddingNormalEdges = If[edgeType === "CyclicOpen",
 		If[# === {}, Identity[#], Most[#]] & /@ # &,
