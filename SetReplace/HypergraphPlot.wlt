@@ -117,50 +117,24 @@ VerificationTest[
 
 (** Simple examples **)
 
-VerificationTest[
-  Head[HypergraphPlot[{{1, 3}, {2, 4}}]],
-  Graphics
-]
+$edgeTypes = {"Ordered", "CyclicOpen", "CyclicClosed"};
 
-VerificationTest[
-  Head[HypergraphPlot[{}]],
-  Graphics
-]
+$simpleHypergraphs = {
+  {{1, 3}, {2, 4}},
+  {},
+  {{}},
+  {{1}},
+  {{1}, {1}},
+  {{1}, {2}},
+  {{1}, {1}, {2}},
+  {{1, 2}, {1}},
+  {{1, 2}, {1}, {}}
+};
 
-VerificationTest[
-  Head[HypergraphPlot[{{}}]],
+Table[VerificationTest[
+  Head[HypergraphPlot[hypergraph, "EdgeType" -> #]],
   Graphics
-]
-
-VerificationTest[
-  Head[HypergraphPlot[{{1}}]],
-  Graphics
-]
-
-VerificationTest[
-  Head[HypergraphPlot[{{1}, {1}}]],
-  Graphics
-]
-
-VerificationTest[
-  Head[HypergraphPlot[{{1}, {2}}]],
-  Graphics
-]
-
-VerificationTest[
-  Head[HypergraphPlot[{{1}, {1}, {2}}]],
-  Graphics
-]
-
-VerificationTest[
-  Head[HypergraphPlot[{{1, 2}, {1}}]],
-  Graphics
-]
-
-VerificationTest[
-  Head[HypergraphPlot[{{1, 2}, {1}, {}}]],
-  Graphics
-]
+] & /@ $edgeTypes, {hypergraph, $simpleHypergraphs}]
 
 (** Large graphs **)
 

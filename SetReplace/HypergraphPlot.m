@@ -94,7 +94,7 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding"][edges_] := 
 		If[# === {}, Identity[#], Most[#]] & /@ # &,
 		Identity][
 			vertexEmbeddingNormalEdges];
-	Echo @ normalToHypergraphEmbedding[
+	normalToHypergraphEmbedding[
 		edges,
 		edgeEmbeddingNormalEdges,
 		graphEmbedding[
