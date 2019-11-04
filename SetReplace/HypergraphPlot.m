@@ -79,9 +79,12 @@ supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, s
 hypergraphPlot[edges_, edgeType_, layout_, vertexLabels_, graphicsOptions_] :=
 	Show[drawEmbedding[vertexLabels] @ hypergraphEmbedding[edgeType, layout] @ edges, graphicsOptions]
 
+(** Embedding **)
 (** hypergraphEmbedding produces an embedding of vertices and edges. The format is {vertices, edges},
 			where both vertices and edges are associations of the form <|vertex -> {graphicsPrimitive, ...}, ...|>,
 			where graphicsPrimitive is either a Point, a Line, or a Polygon. **)
+
+(*** SpringElectricalEmbedding ***)
 
 hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding"][edges_] := Module[{
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
@@ -96,22 +99,6 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding"][edges_] := 
 			Catenate[vertexEmbeddingNormalEdges],
 			Catenate[edgeEmbeddingNormalEdges],
 			layout]]
-]
-
-hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons"][edges_] := Module[{
-		embeddingWithNoRegions, vertexEmbedding, edgePoints, edgeRegions, edgePolygons, edgeEmbedding},
-	embeddingWithNoRegions = hypergraphEmbedding[edgeType, "SpringElectricalEmbedding"][edges];
-	vertexEmbedding = embeddingWithNoRegions[[1]];
-	edgePoints = Flatten[#, 2] & /@ Apply[List, (embeddingWithNoRegions[[2, All, 2]]), {2}];
-	edgeRegions = ConvexHullMesh /@ edgePoints;
-	edgePolygons = Map[
-		Polygon,
-		MapThread[
-			Table[#[[polygon]], {polygon, #2}] &,
-			{MeshCoordinates /@ edgeRegions, MeshCells[#, 2][[All, 1]] & /@ edgeRegions}],
-		{2}];
-	edgeEmbedding = MapThread[#1[[1]] -> Join[#1[[2]], #2] &, {embeddingWithNoRegions[[2]], edgePolygons}];
-	{vertexEmbedding, edgeEmbedding}
 ]
 
 toNormalEdges["Ordered"][hyperedge_] :=
@@ -154,6 +141,26 @@ normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 
 	{vertexEmbedding, edgeEmbedding}
 ]
+
+(*** SpringElectricalPolygons ***)
+
+hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons"][edges_] := Module[{
+		embeddingWithNoRegions, vertexEmbedding, edgePoints, edgeRegions, edgePolygons, edgeEmbedding},
+	embeddingWithNoRegions = hypergraphEmbedding[edgeType, "SpringElectricalEmbedding"][edges];
+	vertexEmbedding = embeddingWithNoRegions[[1]];
+	edgePoints = Flatten[#, 2] & /@ Apply[List, (embeddingWithNoRegions[[2, All, 2]]), {2}];
+	edgeRegions = ConvexHullMesh /@ edgePoints;
+	edgePolygons = Map[
+		Polygon,
+		MapThread[
+			Table[#[[polygon]], {polygon, #2}] &,
+			{MeshCoordinates /@ edgeRegions, MeshCells[#, 2][[All, 1]] & /@ edgeRegions}],
+		{2}];
+	edgeEmbedding = MapThread[#1[[1]] -> Join[#1[[2]], #2] &, {embeddingWithNoRegions[[2]], edgePolygons}];
+	{vertexEmbedding, edgeEmbedding}
+]
+
+(** Drawing **)
 
 drawEmbedding[vertexLabels_][embedding_] := Module[{embeddingShapes, points, lines, polygons, labels},
 	embeddingShapes = embedding[[{2, 1}, All, 2]];
