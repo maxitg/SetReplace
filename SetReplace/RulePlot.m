@@ -1,5 +1,10 @@
 Package["SetReplace`"]
 
+(* Parameters *)
+
+$nodeSizeAmplification = 3;
+$padding = Scaled[0.1];
+
 (* Messages *)
 
 RulePlot::patternRules =
@@ -33,7 +38,7 @@ rulePlot[rules_List] := Column[singleRulePlot /@ rules]
 singleRulePlot[rule_] := Module[{vertexCoordinateRules, ruleSidePlots},
   vertexCoordinateRules = ruleCoordinateRules[rule];
   roughPlotRange = #2 - #1 & @@ MinMax[vertexCoordinateRules[[All, 2]]];
-  vertexSize = computeVertexSize[roughPlotRange];
+  vertexSize = $nodeSizeAmplification * computeVertexSize[roughPlotRange];
   arrowheadsSize = computeArrowheadsSize[Length[vertexCoordinateRules], roughPlotRange, vertexSize];
   sharedVertices = sharedRuleVertices[rule];
   ruleSidePlots = hypergraphPlot[
@@ -48,7 +53,7 @@ singleRulePlot[rule_] := Module[{vertexCoordinateRules, ruleSidePlots},
       arrowheadsSize] & /@
     List @@ rule;
   plotRange =
-    CoordinateBounds[Catenate[List @@ (Transpose[completePlotRange[#]] & /@ ruleSidePlots)], Scaled[0.1]];
+    CoordinateBounds[Catenate[List @@ (Transpose[completePlotRange[#]] & /@ ruleSidePlots)], $padding];
   Framed[
       Show[#, PlotRange -> plotRange],
       BaseStyle -> Directive[Gray, Dotted]] & /@
