@@ -231,4 +231,28 @@ VerificationTest[
     All]]
 ] & /@ $layoutTestHypergraphs
 
+(* Single-vertex edges *)
+
+VerificationTest[
+  HypergraphPlot[{{1}, {1, 2}}],
+  HypergraphPlot[{{1, 2}}],
+  SameTest -> (Not @* SameQ)
+]
+
+VerificationTest[
+  MissingQ[FirstCase[
+    HypergraphPlot[{{1, 2}}, VertexLabels -> None],
+    Circle[___],
+    Missing[],
+    All]]
+]
+
+VerificationTest[
+  !MissingQ[FirstCase[
+    HypergraphPlot[{{1}, {1, 2}}, VertexLabels -> Automatic],
+    Circle[___],
+    Missing[],
+    All]]
+]
+
 EndTestSection[]
