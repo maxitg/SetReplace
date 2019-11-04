@@ -116,25 +116,25 @@ VerificationTest[
 (* Valid coordinates *)
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> $$$invalid$$$],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> $$$invalid$$$],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> $$$invalid$$$],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> $$$invalid$$$],
   {HypergraphPlot::invalidCoordinates}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {{0, 0}}],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {{0, 0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {{0, 0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {{0, 0}}],
   {HypergraphPlot::invalidCoordinates}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0}}],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0}}],
   {HypergraphPlot::invalidCoordinates}
 ]
 
 VerificationTest[
-  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0, 0}}]],
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0, 0}}]],
   Graphics
 ]
 
@@ -291,13 +291,13 @@ VerificationTest[
     All]]
 ]
 
-(* VertexCoordinates *)
+(* VertexCoordinateRules *)
 
 VerificationTest[
   And @@ (MemberQ[
       diskCoordinates[HypergraphPlot[
         {{1, 2, 3}, {3, 4, 5}, {3, 3}},
-        VertexCoordinates -> {1 -> {0, 0}, 2 -> {1, 0}}]],
+        VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}}]],
       #] & /@
     {{0., 0.}, {1., 0.}})
 ]
@@ -305,7 +305,7 @@ VerificationTest[
 VerificationTest[
   Chop @ diskCoordinates[HypergraphPlot[
     {{1, 2, 3}, {3, 4, 5}},
-    VertexCoordinates -> {3 -> {0, 0}}]],
+    VertexCoordinateRules -> {3 -> {0, 0}}]],
   Table[{0, 0}, 5],
   SameTest -> (Not @* Equal)
 ]
@@ -313,7 +313,7 @@ VerificationTest[
 VerificationTest[
   Chop @ diskCoordinates[HypergraphPlot[
     {{1, 2, 3}, {3, 4, 5}},
-    VertexCoordinates -> {3 -> {1, 0}, 3 -> {0, 0}}]],
+    VertexCoordinateRules -> {3 -> {1, 0}, 3 -> {0, 0}}]],
   Table[{0, 0}, 5],
   SameTest -> (Not @* Equal)
 ]

@@ -2,6 +2,11 @@ Package["SetReplace`"]
 
 PackageExport["HypergraphPlot"]
 
+PackageScope["hypergraphEmbedding"]
+PackageScope["hypergraphPlot"]
+PackageScope["computeVertexSize"]
+PackageScope["computeArrowheadsSize"]
+
 (* Documentation *)
 
 HypergraphPlot::usage = usageString[
@@ -13,7 +18,7 @@ Options[HypergraphPlot] = Join[{
 	"EdgeType" -> "CyclicOpen",
 	GraphHighlight -> {},
 	GraphLayout -> "SpringElectricalPolygons",
-	VertexCoordinates -> {},
+	VertexCoordinateRules -> {},
 	VertexLabels -> None},
 	Options[Graphics]];
 
@@ -80,7 +85,7 @@ supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, s
 
 hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
 		result, vertexCoordinates},
-	vertexCoordinates = OptionValue[HypergraphPlot, {o}, VertexCoordinates];
+	vertexCoordinates = OptionValue[HypergraphPlot, {o}, VertexCoordinateRules];
 	result = If[!MatchQ[vertexCoordinates,
 			Automatic |
 			{(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
@@ -101,12 +106,21 @@ hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
 hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
 	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
 		(OptionValue[HypergraphPlot, {o}, #] & /@ {
-			"EdgeType", GraphHighlight, GraphLayout, VertexCoordinates, VertexLabels})
+			"EdgeType", GraphHighlight, GraphLayout, VertexCoordinateRules, VertexLabels})
 
 (* Implementation *)
 
-hypergraphPlot[edges_, edgeType_, highlight_, layout_, vertexCoordinates_, vertexLabels_, graphicsOptions_] := Show[
-	drawEmbedding[vertexLabels, highlight] @
+hypergraphPlot[
+		edges_,
+		edgeType_,
+		highlight_,
+		layout_,
+		vertexCoordinates_,
+		vertexLabels_,
+		graphicsOptions_,
+		vertexSize_ : Automatic,
+		arrowheadsSize_ : Automatic] := Show[
+	drawEmbedding[vertexLabels, highlight, vertexSize, arrowheadsSize] @
 		hypergraphEmbedding[edgeType, layout, vertexCoordinates] @
 		edges,
 	graphicsOptions
@@ -238,12 +252,13 @@ $highlightColor = Hue[1.0, 1.0, 0.7];
 $edgeColor = Hue[0.6, 0.7, 0.5];
 $vertexColor = Hue[0.6, 0.2, 0.8];
 
-drawEmbedding[vertexLabels_, highlight_][embedding_] := Module[{
+drawEmbedding[vertexLabels_, highlight_, explicitVertexSize_, explicitArrowheadsSize_][embedding_] := Module[{
 		plotRange, vertexSize, arrowheadsSize, embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries,
 		edgePoints, labels, singleVertexEdgeCounts, getSingleVertexEdgeRadius},
 	plotRange = #2 - #1 & @@ MinMax[embedding[[1, All, 2, 1, 1, 1]]];
-	vertexSize = computeVertexSize[plotRange];
-	arrowheadsSize = computeArrowheadsSize[Length[embedding[[1]]], plotRange, vertexSize];
+	vertexSize = Replace[explicitVertexSize, Automatic -> computeVertexSize[plotRange]];
+	arrowheadsSize =
+		Replace[explicitArrowheadsSize, Automatic -> computeArrowheadsSize[Length[embedding[[1]]], plotRange, vertexSize]];
 
 	embeddingShapes = Map[
 		#[[2]] /. (h : (Point | Line | Polygon))[pts_] :> highlighted[h[pts], MemberQ[highlight, #[[1]]]] &,
