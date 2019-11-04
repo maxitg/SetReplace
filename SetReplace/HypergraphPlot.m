@@ -134,21 +134,28 @@ graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, c
 ]
 
 constrainedGraphEmbedding[graph_, layout_, coordinateRules_] := Module[{
-		indexGraph, vertexToIndex, relevantCoordinateRules, graphPlot},
+		indexGraph, vertexToIndex, relevantCoordinateRules, graphPlot, graphPlotCoordinateRules, displacement},
 	indexGraph = IndexGraph[graph];
 	vertexToIndex = Thread[VertexList[graph] -> VertexList[indexGraph]];
 	relevantCoordinateRules =
-		Select[MemberQ[vertexToIndex[[All, 1]], #[[1]]] &][coordinateRules];
+		Normal[Merge[Select[MemberQ[vertexToIndex[[All, 1]], #[[1]]] &][coordinateRules], Last]];
 	graphPlot = GraphPlot[
 		indexGraph, {
 		Method -> layout,
 		PlotTheme -> "Classic",
-		If[relevantCoordinateRules =!= {},
+		If[Length[relevantCoordinateRules] > 1,
 			VertexCoordinateRules ->
 				Thread[(relevantCoordinateRules[[All, 1]] /. vertexToIndex) ->
 					relevantCoordinateRules[[All, 2]]],
 			Nothing]}];
-	VertexCoordinateRules /. Cases[graphPlot, _Rule, Infinity]
+	graphPlotCoordinateRules = VertexCoordinateRules /. Cases[graphPlot, _Rule, Infinity];
+	If[Length[relevantCoordinateRules] != 1,
+		graphPlotCoordinateRules,
+		displacement =
+			relevantCoordinateRules[[1, 2]] -
+			(relevantCoordinateRules[[1, 1]] /. Thread[VertexList[graph] -> graphPlotCoordinateRules]);
+		# + displacement & /@ graphPlotCoordinateRules
+	]
 ]
 
 graphEmbedding[vertices_, edges_, layout_, coordinates_] := Replace[

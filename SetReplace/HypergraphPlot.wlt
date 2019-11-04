@@ -267,4 +267,20 @@ VerificationTest[
     {{0., 0.}, {1., 0.}})
 ]
 
+VerificationTest[
+  Chop @ diskCoordinates[HypergraphPlot[
+    {{1, 2, 3}, {3, 4, 5}},
+    VertexCoordinates -> {3 -> {0, 0}}]],
+  Table[{0, 0}, 5],
+  SameTest -> (Not @* Equal)
+]
+
+VerificationTest[
+  Chop @ diskCoordinates[HypergraphPlot[
+    {{1, 2, 3}, {3, 4, 5}},
+    VertexCoordinates -> {3 -> {1, 0}, 3 -> {0, 0}}]],
+  Table[{0, 0}, 5],
+  SameTest -> (Not @* Equal)
+]
+
 EndTestSection[]
