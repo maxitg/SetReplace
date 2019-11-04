@@ -198,7 +198,7 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons", vertexCoordi
 	edgePolygons = Map[
 		Polygon,
 		Map[
-			With[{region = ConvexHullMesh[#]},
+			With[{region = ConvexHullMesh[Map[# + RandomReal[1.*^-10] &, #, {2}]]},
 				Table[MeshCoordinates[region][[polygon]], {polygon, MeshCells[region, 2][[All, 1]]}]
 			] &,
 			edgePoints],

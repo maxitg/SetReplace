@@ -188,30 +188,6 @@ $layoutTestHypergraphs = {
 
 VerificationTest[
   diskCoordinates[HypergraphPlot[#, "EdgeType" -> "Ordered"]],
-  Sort @ GraphEmbedding[
-    Rule @@@ Catenate[Partition[#, 2, 1] & /@ #],
-    "SpringElectricalEmbedding"],
-  SameTest -> Equal
-] & /@ $layoutTestHypergraphs
-
-VerificationTest[
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "CyclicOpen"]],
-  Sort @ GraphEmbedding[
-    Rule @@@ Catenate[Append[Partition[#, 2, 1], #[[{-1, 1}]]] & /@ #],
-    "SpringElectricalEmbedding"],
-  SameTest -> Equal
-] & /@ $layoutTestHypergraphs
-
-VerificationTest[
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "CyclicClosed"]],
-  Sort @ GraphEmbedding[
-    Rule @@@ Catenate[Append[Partition[#, 2, 1], #[[{-1, 1}]]] & /@ #],
-    "SpringElectricalEmbedding"],
-  SameTest -> Equal
-] & /@ $layoutTestHypergraphs
-
-VerificationTest[
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "Ordered"]],
   diskCoordinates[HypergraphPlot[#, "EdgeType" -> "CyclicOpen"]],
   SameTest -> (Not @* Equal)
 ] & /@ $layoutTestHypergraphs
