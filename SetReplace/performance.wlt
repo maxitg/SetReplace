@@ -76,22 +76,16 @@ $largeSet = WolframModel[
 {$normalPlotTiming, $normalPlotMemory} =
   AbsoluteTiming[MaxMemoryUsed[GraphPlot[Rule @@@ Catenate[Partition[#, 2, 1] & /@ $largeSet]]]];
 
-VerificationTest[
-  Head[HypergraphPlot[$largeSet, "HyperedgeType" -> "Ordered"]],
-  Graphics,
-  TimeConstraint -> (2 $normalPlotTiming),
-  MemoryConstraint -> (5 $normalPlotMemory)]
+$edgeTypes = {"Ordered", "CyclicOpen", "CyclicClosed"};
+$layouts = {"SpringElectricalEmbedding", "SpringElectricalPolygons"};
 
-VerificationTest[
-  Head[HypergraphPlot[$largeSet, "HyperedgeType" -> "Cyclic"]],
-  Graphics,
-  TimeConstraint -> (2 $normalPlotTiming),
-  MemoryConstraint -> (5 $normalPlotMemory)]
-
-VerificationTest[
-  Head[HypergraphPlot[$largeSet, "HyperedgeType" -> "Unordered"]],
-  Graphics,
-  TimeConstraint -> (2 $normalPlotTiming),
-  MemoryConstraint -> (5 $normalPlotMemory)]
+Table[
+  VerificationTest[
+    Head[HypergraphPlot[$largeSet, "EdgeType" -> edgeType, GraphLayout -> layout]],
+    Graphics,
+    TimeConstraint -> (3 $normalPlotTiming),
+    MemoryConstraint -> (5 $normalPlotMemory)],
+  {edgeType, $edgeTypes},
+  {layout, $layouts}]
 
 EndTestSection[]
