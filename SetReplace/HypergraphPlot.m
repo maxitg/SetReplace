@@ -11,7 +11,8 @@ SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}
 
 Options[HypergraphPlot] = Join[{
 	"EdgeType" -> "CyclicOpen",
-	GraphLayout -> "SpringElectricalPolygons"},
+	GraphLayout -> "SpringElectricalPolygons",
+	VertexLabels -> None},
 	Options[Graphics]];
 
 $edgeTypes = {"Ordered", "CyclicClosed", "CyclicOpen"};
@@ -62,7 +63,7 @@ hypergraphPlot$parse[edges_, o : OptionsPattern[]] /;
 
 hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
 	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
-		(OptionValue[HypergraphPlot, {o}, #] & /@ {"EdgeType", GraphLayout})
+		(OptionValue[HypergraphPlot, {o}, #] & /@ {"EdgeType", GraphLayout, VertexLabels})
 
 supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, supportedQ},
 	value = OptionValue[func, {opts}, optionToCheck];
@@ -75,8 +76,8 @@ supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, s
 
 (* Implementation *)
 
-hypergraphPlot[edges_, edgeType_, layout_, graphicsOptions_] :=
-	Show[drawEmbedding @ hypergraphEmbedding[edgeType, layout] @ edges, graphicsOptions]
+hypergraphPlot[edges_, edgeType_, layout_, vertexLabels_, graphicsOptions_] :=
+	Show[drawEmbedding[vertexLabels] @ hypergraphEmbedding[edgeType, layout] @ edges, graphicsOptions]
 
 (** hypergraphEmbedding produces an embedding of vertices and edges. The format is {vertices, edges},
 			where both vertices and edges are associations of the form <|vertex -> {graphicsPrimitive, ...}, ...|>,
@@ -154,7 +155,7 @@ normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 	{vertexEmbedding, edgeEmbedding}
 ]
 
-drawEmbedding[embedding_] := Module[{embeddingShapes, points, lines, polygons},
+drawEmbedding[vertexLabels_][embedding_] := Module[{embeddingShapes, points, lines, polygons, labels},
 	embeddingShapes = embedding[[{2, 1}, All, 2]];
 	{points, lines, polygons, polygonBoundaries} = Cases[embeddingShapes, #, All] & /@ {
 		Point[p_] :> {
@@ -172,5 +173,15 @@ drawEmbedding[embedding_] := Module[{embeddingShapes, points, lines, polygons},
 			Transparent,
 			Polygon[pts]}
 	};
-	Graphics[{polygons, polygonBoundaries, lines, points}]
+
+	(* would only work if coordinates consist of a single point *)
+	labels = If[VertexLabels === None,
+		Nothing,
+		GraphPlot[
+			Graph[embedding[[1, All, 1]], {}],
+			VertexCoordinates -> embedding[[1, All, 2, 1, 1]],
+			VertexLabels -> vertexLabels,
+			VertexShapeFunction -> None,
+			EdgeShapeFunction -> None]];
+	Show[Graphics[{polygons, polygonBoundaries, lines, points}], labels]
 ]
