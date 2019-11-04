@@ -90,7 +90,7 @@ hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
 ]
 
 hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
-		highlight, validQ},
+		highlight, vertices, validQ},
 	highlight = OptionValue[HypergraphPlot, {o}, GraphHighlight];
 	vertices = Union[Catenate[edges]];
 	validQ = ListQ[highlight] && (And @@ (MemberQ[Join[vertices, edges], #] & /@ highlight));
