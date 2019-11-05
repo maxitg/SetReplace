@@ -35,11 +35,11 @@ rulePlot[rule_Rule] := rulePlot[{rule}]
 
 rulePlot[rules_List] := GraphicsRow[singleRulePlot /@ rules, Frame -> All, FrameStyle -> GrayLevel[0.8]]
 
-singleRulePlot[rule_] := Module[{vertexCoordinateRules, ruleSidePlots},
+$vertexSize = 0.1;
+$arrowheadsLength = 0.3;
+
+singleRulePlot[rule_] := Module[{vertexCoordinateRules, sharedVertices, ruleSidePlots, plotRange},
   vertexCoordinateRules = ruleCoordinateRules[rule];
-  roughPlotRange = #2 - #1 & @@ MinMax[vertexCoordinateRules[[All, 2]]];
-  vertexSize = $nodeSizeAmplification * computeVertexSize[roughPlotRange];
-  arrowheadsSize = computeArrowheadsSize[Length[vertexCoordinateRules], roughPlotRange, vertexSize];
   sharedVertices = sharedRuleVertices[rule];
   ruleSidePlots = hypergraphPlot[
       #,
@@ -49,8 +49,8 @@ singleRulePlot[rule_] := Module[{vertexCoordinateRules, ruleSidePlots},
       vertexCoordinateRules,
       None,
       {},
-      vertexSize,
-      arrowheadsSize] & /@
+      $vertexSize,
+      $arrowheadsLength] & /@
     List @@ rule;
   plotRange =
     CoordinateBounds[Catenate[List @@ (Transpose[completePlotRange[#]] & /@ ruleSidePlots)], $padding];

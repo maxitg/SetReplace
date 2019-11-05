@@ -4,8 +4,6 @@ PackageExport["HypergraphPlot"]
 
 PackageScope["hypergraphEmbedding"]
 PackageScope["hypergraphPlot"]
-PackageScope["computeVertexSize"]
-PackageScope["computeArrowheadsSize"]
 
 (* Documentation *)
 
@@ -110,6 +108,9 @@ hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
 
 (* Implementation *)
 
+$vertexSize = 0.06;
+$arrowheadLength = 0.15;
+
 hypergraphPlot[
 		edges_,
 		edgeType_,
@@ -118,8 +119,8 @@ hypergraphPlot[
 		vertexCoordinates_,
 		vertexLabels_,
 		graphicsOptions_,
-		vertexSize_ : Automatic,
-		arrowheadsSize_ : Automatic] := Show[
+		vertexSize_ : $vertexSize,
+		arrowheadsSize_ : $arrowheadLength] := Show[
 	drawEmbedding[vertexLabels, highlight, vertexSize, arrowheadsSize] @
 		hypergraphEmbedding[edgeType, layout, vertexCoordinates] @
 		edges,
@@ -160,32 +161,33 @@ toNormalEdges["CyclicOpen" | "CyclicClosed"][hyperedge : Except[{}]] :=
 
 toNormalEdges["CyclicOpen" | "CyclicClosed"][{}] := {}
 
-graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{embedding},
-	embedding = constrainedGraphEmbedding[Graph[vertices, vertexEmbeddingEdges], layout, coordinateRules];
-	graphEmbedding[vertices, edgeEmbeddingEdges, layout, embedding]
+graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
+		relevantCoordinateRules, vertexCoordinates, unscaledEmbedding},
+	relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
+	vertexCoordinates = constrainedGraphEmbedding[Graph[vertices, vertexEmbeddingEdges], layout, relevantCoordinateRules];
+	unscaledEmbedding = graphEmbedding[vertices, edgeEmbeddingEdges, layout, vertexCoordinates];
+	rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules]
 ]
 
 constrainedGraphEmbedding[graph_, layout_, coordinateRules_] := Module[{
-		indexGraph, vertexToIndex, relevantCoordinateRules, graphPlot, graphPlotCoordinateRules, displacement},
+		indexGraph, vertexToIndex, graphPlot, graphPlotCoordinateRules, displacement},
 	indexGraph = IndexGraph[graph];
 	vertexToIndex = Thread[VertexList[graph] -> VertexList[indexGraph]];
-	relevantCoordinateRules =
-		Normal[Merge[Select[MemberQ[vertexToIndex[[All, 1]], #[[1]]] &][coordinateRules], Last]];
 	graphPlot = GraphPlot[
 		indexGraph, {
 		Method -> layout,
 		PlotTheme -> "Classic",
-		If[Length[relevantCoordinateRules] > 1,
+		If[Length[coordinateRules] > 1,
 			VertexCoordinateRules ->
-				Thread[(relevantCoordinateRules[[All, 1]] /. vertexToIndex) ->
-					relevantCoordinateRules[[All, 2]]],
+				Thread[(coordinateRules[[All, 1]] /. vertexToIndex) ->
+					coordinateRules[[All, 2]]],
 			Nothing]}];
 	graphPlotCoordinateRules = VertexCoordinateRules /. Cases[graphPlot, _Rule, Infinity];
-	If[Length[relevantCoordinateRules] != 1,
+	If[Length[coordinateRules] != 1,
 		graphPlotCoordinateRules,
 		displacement =
-			relevantCoordinateRules[[1, 2]] -
-			(relevantCoordinateRules[[1, 1]] /. Thread[VertexList[graph] -> graphPlotCoordinateRules]);
+			coordinateRules[[1, 2]] -
+			(coordinateRules[[1, 1]] /. Thread[VertexList[graph] -> graphPlotCoordinateRules]);
 		# + displacement & /@ graphPlotCoordinateRules
 	]
 ]
@@ -226,6 +228,26 @@ normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 	{vertexEmbedding, Join[edgeEmbedding, singleVertexEdgeEmbedding]}
 ]
 
+rescaleEmbedding[unscaledEmbedding_, {_, __}] := unscaledEmbedding
+
+rescaleEmbedding[unscaledEmbedding_, {v_ -> pivotPoint_}] :=
+	rescaleEmbedding[unscaledEmbedding, pivotPoint, 1 / edgeScale[unscaledEmbedding]]
+
+rescaleEmbedding[unscaledEmbedding_, {}] := rescaleEmbedding[unscaledEmbedding, {0 -> {0.0, 0.0}}]
+
+$selfLoopsScale = 0.7;
+edgeScale[{vertexEmbedding_, edgeEmbedding : Except[{}]}] := Module[{selfLoops},
+	selfLoops = Select[#[[1, 1]] == #[[1, 2]] &][edgeEmbedding][[All, 2]];
+	Mean[RegionMeasure /@ Line /@ N /@ If[selfLoops =!= {}, $selfLoopsScale * selfLoops, edgeEmbedding[[All, 2]]]]
+]
+
+edgeScale[{vertexEmbedding_, {}}] :=
+	RegionMeasure[Line[Transpose[MinMax /@ Transpose[vertexEmbedding[[All, 2]]]]]] /
+		(Sqrt[N[Length[vertexEmbedding]] / 2])
+
+rescaleEmbedding[embedding_, center_, factor_] := embedding /.
+	coords : {Repeated[_ ? NumericQ, {2}]} :> (coords - center) * factor + center
+
 (*** SpringElectricalPolygons ***)
 
 hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons", vertexCoordinates_][edges_] := Module[{
@@ -252,14 +274,44 @@ $highlightColor = Hue[1.0, 1.0, 0.7];
 $edgeColor = Hue[0.6, 0.7, 0.5];
 $vertexColor = Hue[0.6, 0.2, 0.8];
 
-drawEmbedding[vertexLabels_, highlight_, explicitVertexSize_, explicitArrowheadsSize_][embedding_] := Module[{
-		plotRange, vertexSize, arrowheadsSize, embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries,
-		edgePoints, labels, singleVertexEdgeCounts, getSingleVertexEdgeRadius},
-	plotRange = #2 - #1 & @@ MinMax[embedding[[1, All, 2, 1, 1, 1]]];
-	vertexSize = Replace[explicitVertexSize, Automatic -> computeVertexSize[plotRange]];
-	arrowheadsSize =
-		Replace[explicitArrowheadsSize, Automatic -> computeArrowheadsSize[Length[embedding[[1]]], plotRange, vertexSize]];
+arrow[arrowheadLength_, vertexSize_][pts_] := Module[{truncatedPts},
+	truncatedPts = lineTake[pts, vertexSize ;; - vertexSize];
+	{
+		Line[truncatedPts],
+		If[Length[truncatedPts] > 1,
+			arrowhead[Last[truncatedPts], Normalize[truncatedPts[[-1]] - truncatedPts[[-2]]], arrowheadLength],
+			Nothing]
+	}
+]
 
+$arrowheadShape = Polygon[{
+	{-1., -0.262947}, {-0.985386, -0.233288}, {-0.953077, -0.161575}, {-0.936254, -0.118193}, {-0.921201, -0.0748117},
+	{-0.911019, -0.0340858}, {-0.907478, 0.}, {-0.911019, 0.0309873}, {-0.921201, 0.0708274}, {-0.936254, 0.11598},
+	{-0.953077, 0.162019}, {-0.985386, 0.240371}, {-1., 0.273572}, {0., 0.}, {-1., -0.262947}}];
+
+arrowhead[endPt_, direction_, length_] :=
+	(Translate[#, endPt] &) @
+	(Rotate[#, {{1, 0}, direction}] &) @
+	(Scale[#, length, {0, 0}] &) @
+	$arrowheadShape
+
+lineTake[pts_, start_ ;; end_] := Reverse[lineDrop[Reverse[lineDrop[pts, start]], -end]]
+
+lineDrop[pts_, length_] /; Length[pts] > 2 := With[{
+		firstSegmentLength = EuclideanDistance @@ pts[[{1, 2}]]},
+	If[firstSegmentLength <= length,
+		lineDrop[Rest[pts], length - firstSegmentLength],
+		Join[lineDrop[pts[[{1, 2}]], length], Drop[pts, 2]]
+	]
+]
+
+lineDrop[{pt1_, pt2_}, length_] := {pt1 + Normalize[pt2 - pt1] * length, pt2}
+
+lineDrop[pts : ({_} | {}), _] := pts
+
+drawEmbedding[vertexLabels_, highlight_, vertexSize_, arrowheadLength_][embedding_] := Module[{
+		embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries, edgePoints, labels, singleVertexEdgeCounts,
+		getSingleVertexEdgeRadius},
 	embeddingShapes = Map[
 		#[[2]] /. (h : (Point | Line | Polygon))[pts_] :> highlighted[h[pts], MemberQ[highlight, #[[1]]]] &,
 		embedding,
@@ -285,8 +337,7 @@ drawEmbedding[vertexLabels_, highlight_, explicitVertexSize_, explicitArrowheads
 				Directive[Opacity[1], $highlightColor],
 				Directive[Opacity[0.7], $edgeColor]
 			],
-			Arrowheads[arrowheadsSize],
-			Arrow[pts]},
+			arrow[arrowheadLength, vertexSize][pts]},
 		highlighted[Polygon[pts_], h_] :> {
 			Opacity[0.3],
 			If[h,
@@ -317,9 +368,3 @@ drawEmbedding[vertexLabels_, highlight_, explicitVertexSize_, explicitArrowheads
 			EdgeShapeFunction -> None]];
 	Show[Graphics[{polygons, polygonBoundaries, lines, vertexPoints, edgePoints}], labels]
 ]
-
-(*** Arrowhead and vertex sizes are approximately the same as GraphPlot ***)
-computeArrowheadsSize[vertexCount_ ? (# <= 20 &), plotRange_, vertexSize_] := Medium
-computeArrowheadsSize[vertexCount_ ? (# > 20 &), plotRange_, vertexSize_] := 1.25 * 2 * vertexSize / plotRange
-
-computeVertexSize[plotRange_] := 0.15 - 2. * 1 / (plotRange + 13.7)
