@@ -138,6 +138,41 @@ VerificationTest[
   Graphics
 ]
 
+(* Valid GraphHighlight *)
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> $$$invalid$$$],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> $$$invalid$$$],
+  {HypergraphPlot::invalidHighlight}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {6}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {6}],
+  {HypergraphPlot::invalidHighlight}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {{1, 2}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {{1, 2}}],
+  {HypergraphPlot::invalidHighlight}
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {{1, 2, 3}}]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {4, {1, 2, 3}}]],
+  Graphics
+]
+
 (* Implementation *)
 
 (** Simple examples **)
@@ -282,5 +317,12 @@ VerificationTest[
   Table[{0, 0}, 5],
   SameTest -> (Not @* Equal)
 ]
+
+(* GraphHighlight *)
+
+VerificationTest[
+  Length[Union @ Cases[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {#}], _ ? ColorQ, All]] >
+    Length[Union @ Cases[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}], _ ? ColorQ, All]]
+] & /@ {4, {1, 2, 3}}
 
 EndTestSection[]

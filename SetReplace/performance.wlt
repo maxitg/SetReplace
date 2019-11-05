@@ -84,7 +84,7 @@ Table[
     Head[HypergraphPlot[$largeSet, "EdgeType" -> edgeType, GraphLayout -> layout]],
     Graphics,
     TimeConstraint -> (3 $normalPlotTiming),
-    MemoryConstraint -> (5 $normalPlotMemory)],
+    MemoryConstraint -> (6 $normalPlotMemory)],
   {edgeType, $edgeTypes},
   {layout, $layouts}]
 
