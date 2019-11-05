@@ -274,20 +274,24 @@ $highlightColor = Hue[1.0, 1.0, 0.7];
 $edgeColor = Hue[0.6, 0.7, 0.5];
 $vertexColor = Hue[0.6, 0.2, 0.8];
 
-arrow[arrowheadLength_, vertexSize_][pts_] := Module[{truncatedPts},
-	truncatedPts = lineTake[pts, vertexSize ;; - vertexSize];
+arrow[arrowheadLength_, vertexSize_][pts_] := Module[{ptsStartToArrowEnd, ptsStartToLineEnd},
+	ptsStartToArrowEnd = lineTake[pts, vertexSize ;; - vertexSize];
+	ptsStartToLineEnd = lineTake[ptsStartToArrowEnd, 0 ;; - arrowheadLength];
 	{
-		Line[truncatedPts],
-		If[Length[truncatedPts] > 1,
-			arrowhead[Last[truncatedPts], Normalize[truncatedPts[[-1]] - truncatedPts[[-2]]], arrowheadLength],
+		Line[ptsStartToLineEnd],
+		If[Length[ptsStartToArrowEnd] > 1,
+			arrowhead[
+				Last[ptsStartToArrowEnd],
+				Normalize[ptsStartToArrowEnd[[-1]] - ptsStartToLineEnd[[-1]]],
+				arrowheadLength],
 			Nothing]
 	}
 ]
 
 $arrowheadShape = Polygon[{
-	{-1., -0.262947}, {-0.985386, -0.233288}, {-0.953077, -0.161575}, {-0.936254, -0.118193}, {-0.921201, -0.0748117},
-	{-0.911019, -0.0340858}, {-0.907478, 0.}, {-0.911019, 0.0309873}, {-0.921201, 0.0708274}, {-0.936254, 0.11598},
-	{-0.953077, 0.162019}, {-0.985386, 0.240371}, {-1., 0.273572}, {0., 0.}, {-1., -0.262947}}];
+	{-1.10196, -0.289756}, {-1.08585, -0.257073}, {-1.05025, -0.178048}, {-1.03171, -0.130243}, {-1.01512, -0.0824391},
+	{-1.0039, -0.037561}, {-1., 0.}, {-1.0039, 0.0341466}, {-1.01512, 0.0780486}, {-1.03171, 0.127805},
+	{-1.05025, 0.178538}, {-1.08585, 0.264878}, {-1.10196, 0.301464}, {0., 0.}, {-1.10196, -0.289756}}];
 
 arrowhead[endPt_, direction_, length_] :=
 	(Translate[#, endPt] &) @
