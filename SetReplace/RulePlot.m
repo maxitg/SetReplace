@@ -75,9 +75,9 @@ completePlotRange[graphics_] := Last @ Last @ Reap[Rasterize[
   ImageResolution -> 1]]
 
 $openArrowhead = Graphics[{Dashing[None], Line[{{-1, 1/3}, {0, 0}, {-1, -1/3}}]}];
-arrow[pts_] = Graphics[{Arrowheads[{{0.03, 1, {$openArrowhead, 1}}}], GrayLevel[0.2], Dotted, Arrow[pts]}];
+arrow[pts_] := Graphics[{Arrowheads[{{0.03, 1, {$openArrowhead, 1}}}], GrayLevel[0.2], Dotted, Arrow[pts]}];
 
-combinedRuleParts[sides_, plotRange_] := Module[{xRange},
+combinedRuleParts[sides_, plotRange_] := Module[{maxRange, xRange, yRange, xDisplacement, frame},
   maxRange = Max[plotRange[[1, 2]] - plotRange[[1, 1]], plotRange[[2, 2]] - plotRange[[2, 1]]];
   {xRange, yRange} = Mean[#] + maxRange * {-0.5, 0.5} & /@ plotRange;
   xDisplacement = 1.5 (xRange[[2]] - xRange[[1]]);
