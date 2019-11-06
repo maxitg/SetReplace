@@ -61,9 +61,18 @@ singleRulePlot[rule_] := Module[{vertexCoordinateRules, sharedVertices, ruleSide
   combinedRuleParts[ruleSidePlots, plotRange]
 ]
 
+connectedQ[edges_] := ConnectedGraphQ[Graph[UndirectedEdge @@@ Catenate[Partition[#, 2, 1] & /@ edges]]]
+
+layoutReferenceSide[in_, out_] := Module[{inConnectedQ, outConnectedQ},
+  {inConnectedQ, outConnectedQ} = connectedQ /@ {in, out};
+  If[inConnectedQ && !outConnectedQ, Return[out]];
+  If[outConnectedQ && !inConnectedQ, Return[in]];
+  If[Length[in] > Length[out], in, out]
+]
+
 ruleCoordinateRules[in_ -> out_] :=
   #[[1]] -> #[[2, 1, 1]] & /@
-    hypergraphEmbedding["CyclicOpen", "SpringElectricalEmbedding", {}][If[Length[in] > Length[out], in, out]][[1]]
+    hypergraphEmbedding["CyclicOpen", "SpringElectricalEmbedding", {}][layoutReferenceSide[in, out]][[1]]
 
 sharedRuleVertices[in_ -> out_] := Intersection @@ (Catenate /@ {in, out})
 
