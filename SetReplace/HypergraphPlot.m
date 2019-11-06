@@ -268,44 +268,10 @@ $highlightColor = Hue[1.0, 1.0, 0.7];
 $edgeColor = Hue[0.6, 0.7, 0.5];
 $vertexColor = Hue[0.6, 0.2, 0.8];
 
-arrow[arrowheadLength_, vertexSize_][pts_] := Module[{ptsStartToArrowEnd, ptsStartToLineEnd},
-	ptsStartToArrowEnd = lineTake[pts, vertexSize ;; - vertexSize];
-	ptsStartToLineEnd = lineTake[ptsStartToArrowEnd, 0 ;; - arrowheadLength];
-	{
-		Line[ptsStartToLineEnd],
-		If[Length[ptsStartToArrowEnd] > 1,
-			arrowhead[
-				Last[ptsStartToArrowEnd],
-				Normalize[ptsStartToArrowEnd[[-1]] - ptsStartToLineEnd[[-1]]],
-				arrowheadLength],
-			Nothing]
-	}
-]
-
 $arrowheadShape = Polygon[{
 	{-1.10196, -0.289756}, {-1.08585, -0.257073}, {-1.05025, -0.178048}, {-1.03171, -0.130243}, {-1.01512, -0.0824391},
 	{-1.0039, -0.037561}, {-1., 0.}, {-1.0039, 0.0341466}, {-1.01512, 0.0780486}, {-1.03171, 0.127805},
 	{-1.05025, 0.178538}, {-1.08585, 0.264878}, {-1.10196, 0.301464}, {0., 0.}, {-1.10196, -0.289756}}];
-
-arrowhead[endPt_, direction_, length_] :=
-	(Translate[#, endPt] &) @
-	(Rotate[#, {{1, 0}, direction}] &) @
-	(Scale[#, length, {0, 0}] &) @
-	$arrowheadShape
-
-lineTake[pts_, start_ ;; end_] := Reverse[lineDrop[Reverse[lineDrop[pts, start]], -end]]
-
-lineDrop[pts_, length_] /; Length[pts] > 2 := With[{
-		firstSegmentLength = EuclideanDistance @@ pts[[{1, 2}]]},
-	If[firstSegmentLength <= length,
-		lineDrop[Rest[pts], length - firstSegmentLength],
-		Join[lineDrop[pts[[{1, 2}]], length], Drop[pts, 2]]
-	]
-]
-
-lineDrop[{pt1_, pt2_}, length_] := {pt1 + Normalize[pt2 - pt1] * length, pt2}
-
-lineDrop[pts : ({_} | {}), _] := pts
 
 drawEmbedding[vertexLabels_, highlight_, vertexSize_, arrowheadLength_][embedding_] := Module[{
 		embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries, edgePoints, labels, singleVertexEdgeCounts,
@@ -335,7 +301,7 @@ drawEmbedding[vertexLabels_, highlight_, vertexSize_, arrowheadLength_][embeddin
 				Directive[Opacity[1], $highlightColor],
 				Directive[Opacity[0.7], $edgeColor]
 			],
-			arrow[arrowheadLength, vertexSize][pts]},
+			arrow[$arrowheadShape, arrowheadLength, vertexSize][pts]},
 		highlighted[Polygon[pts_], h_] :> {
 			Opacity[0.3],
 			If[h,
