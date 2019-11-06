@@ -37,11 +37,14 @@ correctOptionsQ[args_, opts_] := knownOptionsQ[RulePlot, Defer[RulePlot[WolframM
 
 rulePlot[rule_Rule] := rulePlot[{rule}]
 
-rulePlot[rules_List] := GraphicsRow[singleRulePlot /@ rules, Frame -> All, FrameStyle -> GrayLevel[0.8]]
+rulePlot[rules_List] :=
+  Graphics[First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, True]]] & @
+    (singleRulePlot /@ rules)
 
 $vertexSize = 0.1;
 $arrowheadsLength = 0.3;
 
+(* returns {shapes, plotRange} *)
 singleRulePlot[rule_] := Module[{vertexCoordinateRules, sharedVertices, ruleSidePlots, plotRange},
   vertexCoordinateRules = ruleCoordinateRules[rule];
   sharedVertices = sharedRuleVertices[rule];
@@ -58,7 +61,7 @@ singleRulePlot[rule_] := Module[{vertexCoordinateRules, sharedVertices, ruleSide
     List @@ rule;
   plotRange =
     CoordinateBounds[Catenate[List @@ (Transpose[completePlotRange[#]] & /@ ruleSidePlots)], $padding];
-  combinedRuleParts[ruleSidePlots, plotRange]
+  combinedRuleParts[ruleSidePlots[[All, 1]], plotRange]
 ]
 
 connectedQ[edges_] := ConnectedGraphQ[Graph[UndirectedEdge @@@ Catenate[Partition[#, 2, 1] & /@ edges]]]
@@ -87,29 +90,56 @@ completePlotRange[graphics_] := Last @ Last @ Reap[Rasterize[
     ImageSize -> 0],
   ImageResolution -> 1]]
 
-$openArrowhead = Graphics[Line[{{-1, 0.7}, {0, 0}, {-1, -0.7}}]];
-arrow[pts_] := Graphics[{Arrowheads[{{0.03, 1, {$openArrowhead, 0}}}], GrayLevel[0.2], Arrow[pts]}];
+$ruleArrowShape = {Line[{{-1, 0.7}, {0, 0}, {-1, -0.7}}], Line[{{-1, 0}, {0, 0}}]};
 
-combinedRuleParts[sides_, plotRange_] := Module[{maxRange, xRange, yRange, xDisplacement, frame},
+(* returns {shapes, plotRange} *)
+combinedRuleParts[sides_, plotRange_] := Module[{maxRange, xRange, yRange, xDisplacement, frame, separator},
   maxRange = Max[plotRange[[1, 2]] - plotRange[[1, 1]], plotRange[[2, 2]] - plotRange[[2, 1]]];
   {xRange, yRange} = Mean[#] + maxRange * {-0.5, 0.5} & /@ plotRange;
   xDisplacement = 1.5 (xRange[[2]] - xRange[[1]]);
-  frame = Graphics[{Gray, Dotted, Line[{
+  frame = {Gray, Dotted, Line[{
     {xRange[[1]], yRange[[1]]},
     {xRange[[2]], yRange[[1]]},
     {xRange[[2]], yRange[[2]]},
     {xRange[[1]], yRange[[2]]},
-    {xRange[[1]], yRange[[1]]}}]}];
-  Show[
-    sides[[1]],
-    frame,
-    Graphics[Translate[frame[[1]], {xDisplacement, 0}]],
-    arrow[{
-      {xRange[[2]] + 0.05 xDisplacement, Mean[yRange]},
-      {xRange[[1]] + 0.95 xDisplacement, Mean[yRange]}}],
-    Graphics[Translate[sides[[2, 1]], {xDisplacement, 0}]],
-    PlotRange -> {
-      {xRange[[1]] - 0.01 xDisplacement, xRange[[2]] + 1.01 xDisplacement},
-      {yRange[[1]] - 0.01 xDisplacement, yRange[[2]] + 0.01 xDisplacement}},
-    ImageSize -> 300 {1, 1 / 2.5}]
+    {xRange[[1]], yRange[[1]]}}]};
+  separator = arrow[$ruleArrowShape, 0.15, 0][{{0.15, 0.5}, {0.85, 0.5}}];
+  graphicsRiffle[
+    Append[#, frame] & /@ sides, ConstantArray[{xRange, yRange}, 2], separator, {{0, 1}, {0, 1}}, 0.5, 0.2, False]
+]
+
+aspectRatio[{{xMin_, xMax_}, {yMin_, yMax_}}] := (yMax - yMin) / (xMax - xMin)
+
+frame[{{xMin_, xMax_}, {yMin_, yMax_}}] := Line[{{xMin, yMin}, {xMax, yMin}, {xMax, yMax}, {xMin, yMax}, {xMin, yMin}}]
+
+$gridColor = GrayLevel[0.8];
+
+(* returns {shapes, plotRange} *)
+graphicsRiffle[
+      shapeLists_, plotRanges_, separator_, separatorPlotRange_, relativeSeparatorWidth_, padding_, gridQ_] := Module[{
+    scaledShapes, scaledSeparator, widthWithExtraSeparator, shapesWithExtraSeparator, totalWidth},
+  scaledShapes = MapThread[
+    Scale[
+      Translate[#1, -#2[[All, 1]]],
+      1 / (#2[[2, 2]] - #2[[2, 1]]),
+      {0, 0}] &,
+    {shapeLists, plotRanges}];
+  scaledSeparator = Scale[
+    Translate[separator, {0, 0.5} - {#[[1, 1]], (#[[2, 2]] + #[[2, 1]]) / 2} & @ separatorPlotRange],
+    relativeSeparatorWidth / (separatorPlotRange[[1, 2]] - separatorPlotRange[[1, 1]]),
+    {0, 0.5}];
+  {widthWithExtraSeparator, shapesWithExtraSeparator} = Reap[Fold[
+    With[{shapeWidth = 1 / aspectRatio[plotRanges[[#2]]]},
+      Sow[Translate[scaledShapes[[#2]], {#, 0}]];
+      Sow[Translate[scaledSeparator, {# + shapeWidth, 0}]];
+      If[gridQ, Sow[{$gridColor, Line[{{#, 0}, {#, 1}}] & @ (# + shapeWidth + relativeSeparatorWidth / 2)}]];
+      # + shapeWidth + relativeSeparatorWidth
+    ] &,
+    0,
+    Range[Length[scaledShapes]]]];
+  totalWidth = widthWithExtraSeparator - relativeSeparatorWidth;
+  {
+    {Most[shapesWithExtraSeparator[[1]]], If[gridQ, {$gridColor, frame[{{0, totalWidth}, {0, 1}}]}, Nothing]},
+    {{-padding, totalWidth + padding}, {-padding, 1 + padding}}
+  }
 ]
