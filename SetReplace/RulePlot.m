@@ -12,7 +12,7 @@ RulePlot::patternRules =
 
 (* Evaluation *)
 
-WolframModel /: func : RulePlot[WolframModel[args___]] := Module[{result = rulePlot$parse[{args}]},
+WolframModel /: func : RulePlot[WolframModel[args___], opts___] := Module[{result = rulePlot$parse[{args}, {opts}]},
   If[Head[result] === rulePlot$parse,
     result = $Failed];
   result /; result =!= $Failed
@@ -22,12 +22,16 @@ WolframModel /: func : RulePlot[WolframModel[args___]] := Module[{result = ruleP
 
 rulePlot$parse[{
   rulesSpec_ ? wolframModelRulesSpecQ,
-  o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}}] := Module[{},
+  o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}},
+  {opts : OptionsPattern[]}] := Module[{},
     If[AssociationQ[rulesSpec],
       Message[RulePlot::patternRules, rulesSpec];
-      Return[$Failed]];
-    rulePlot[rulesSpec]
+      Return[$Failed]
+    ];
+    rulePlot[rulesSpec] /; correctOptionsQ[{rulesSpec, o}, {opts}]
 ]
+
+correctOptionsQ[args_, opts_] := knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], opts]
 
 (* Implementation *)
 
@@ -95,6 +99,8 @@ combinedRuleParts[sides_, plotRange_] := Module[{maxRange, xRange, yRange, xDisp
       {xRange[[2]] + 0.05 xDisplacement, Mean[yRange]},
       {xRange[[1]] + 0.95 xDisplacement, Mean[yRange]}}],
     Graphics[Translate[sides[[2, 1]], {xDisplacement, 0}]],
-    PlotRange -> {{xRange[[1]] - 0.01 xDisplacement, xRange[[2]] + 1.01 xDisplacement}, {yRange[[1]] - 0.01 xDisplacement, yRange[[2]] + 0.01 xDisplacement}},
+    PlotRange -> {
+      {xRange[[1]] - 0.01 xDisplacement, xRange[[2]] + 1.01 xDisplacement},
+      {yRange[[1]] - 0.01 xDisplacement, yRange[[2]] + 0.01 xDisplacement}},
     ImageSize -> 300 {1, 1 / 2.5}]
 ]

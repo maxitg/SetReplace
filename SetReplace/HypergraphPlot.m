@@ -58,6 +58,9 @@ hypergraphPlot$parse[edges : Except[{___List}], o : OptionsPattern[]] := (
 	$Failed
 )
 
+hypergraphPlot$parse[args : PatternSequence[edges_, o : OptionsPattern[]]] :=
+	$Failed /; !knownOptionsQ[HypergraphPlot, Defer[HypergraphPlot[args]], {o}]
+
 hypergraphPlot$parse[args : PatternSequence[edges_, o : OptionsPattern[]]] := With[{
 		unknownOptions = Complement @@ {{o}, Options[HypergraphPlot]}[[All, All, 1]]},
 	If[Length[unknownOptions] > 0,
@@ -71,15 +74,6 @@ hypergraphPlot$parse[edges_, o : OptionsPattern[]] /;
 			{"EdgeType", $edgeTypes},
 			{GraphLayout, $graphLayouts}})) :=
 	$Failed
-
-supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, supportedQ},
-	value = OptionValue[func, {opts}, optionToCheck];
-	supportedQ = MemberQ[validValues, value];
-	If[!supportedQ,
-		Message[MessageName[func, "invalidFiniteOption"], optionToCheck, value, validValues]
-	];
-	supportedQ
-]
 
 hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
 		result, vertexCoordinates},
