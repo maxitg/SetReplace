@@ -89,7 +89,7 @@ hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
 hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
 		highlight, vertices, validQ},
 	highlight = OptionValue[HypergraphPlot, {o}, GraphHighlight];
-	vertices = Union[Catenate[edges]];
+	vertices = vertexList[edges];
 	validQ = ListQ[highlight] && (And @@ (MemberQ[Join[vertices, edges], #] & /@ highlight));
 	If[!validQ, Message[HypergraphPlot::invalidHighlight, highlight]];
 	$Failed /; !validQ
@@ -128,9 +128,9 @@ hypergraphPlot[
 
 (*** SpringElectricalEmbedding ***)
 
-hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", vertexCoordinates_][edges_] := Module[{
+hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", coordinateRules_][edges_] := Module[{
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
-	vertices = Union[Catenate[edges]];
+	vertices = vertexList[edges];
 	vertexEmbeddingNormalEdges = toNormalEdges[edgeType] /@ edges;
 	edgeEmbeddingNormalEdges = If[edgeType === "CyclicOpen",
 		If[# === {}, Identity[#], Most[#]] & /@ # &,
@@ -144,7 +144,7 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", vertexCoord
 			Catenate[vertexEmbeddingNormalEdges],
 			Catenate[edgeEmbeddingNormalEdges],
 			layout,
-			vertexCoordinates]]
+			coordinateRules]]
 ]
 
 toNormalEdges["Ordered"][hyperedge_] :=
