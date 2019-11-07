@@ -4,7 +4,7 @@ Package["SetReplace`"]
 
 $allowedOptions = Join[
   FilterRules[Options[RulePlot], Options[Graphics]][[All, 1]], {
-  Frame, FrameStyle}];
+  Frame, FrameStyle, PlotLegends}];
 
 (* Parameters *)
 
@@ -38,7 +38,7 @@ rulePlot$parse[{
           rulesSpec,
           ##,
           FilterRules[{opts}, FilterRules[Options[Graphics], Except[Frame]]]] & @@
-        OptionValue[RulePlot, {opts}, {Frame, FrameStyle}] /;
+        OptionValue[RulePlot, {opts}, {Frame, FrameStyle, PlotLegends}] /;
       correctOptionsQ[{rulesSpec, o}, {opts}]
 ]
 
@@ -50,11 +50,13 @@ correctOptionsQ[args_, opts_] :=
 
 rulePlot[rule_Rule, args___] := rulePlot[{rule}, args]
 
-rulePlot[rules_List, frameQ_, frameStyle_, graphicsOpts_] :=
-  Graphics[
-      First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, If[frameQ, frameStyle, None]]],
-      graphicsOpts] & @
-    (singleRulePlot /@ rules)
+rulePlot[rules_List, frameQ_, frameStyle_, plotLegends_, graphicsOpts_] :=
+  If[PlotLegends === None, Identity, Legended[#, Replace[plotLegends, "Text" -> Placed[StandardForm[rules], Below]]] &][
+    Graphics[
+        First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, If[frameQ, frameStyle, None]]],
+        graphicsOpts] & @
+      (singleRulePlot /@ rules)
+  ]
 
 $vertexSize = 0.1;
 $arrowheadsLength = 0.3;
