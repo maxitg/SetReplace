@@ -2,9 +2,26 @@ Package["SetReplace`"]
 
 (* Documentation *)
 
+$newOptions = {
+  "EdgeType" -> "CyclicOpen",
+  GraphLayout -> "SpringElectricalPolygons",
+  VertexCoordinateRules -> {},
+  VertexLabels -> None
+};
+
 $allowedOptions = Join[
   FilterRules[Options[RulePlot], Options[Graphics]][[All, 1]], {
-  Frame, FrameStyle, PlotLegends, Spacings}];
+  Frame, FrameStyle, PlotLegends, Spacings},
+  $newOptions[[All, 1]]];
+
+Unprotect[RulePlot];
+Options[RulePlot] = Join[Options[RulePlot], $newOptions];
+
+SyntaxInformation[RulePlot] = Join[
+  FilterRules[SyntaxInformation[RulePlot], Except["OptionNames"]],
+  {"OptionNames" -> Join[("OptionNames" /. SyntaxInformation[RulePlot]), $newOptions[[All, 1]]]}
+]
+Protect[RulePlot];
 
 (* Parameters *)
 
@@ -39,14 +56,19 @@ rulePlot$parse[{
           rulesSpec,
           ##,
           FilterRules[{opts}, FilterRules[Options[Graphics], Except[Frame]]]] & @@
-        OptionValue[RulePlot, {opts}, {Frame, FrameStyle, PlotLegends, Spacings}] /;
+        OptionValue[
+          RulePlot,
+          {opts},
+          {"EdgeType", GraphLayout, VertexCoordinateRules, VertexLabels, Frame, FrameStyle, PlotLegends, Spacings}] /;
       correctOptionsQ[{rulesSpec, o}, {opts}]
 ]
 
-correctOptionsQ[args_, opts_] :=
-  knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], opts, $allowedOptions] &&
-  supportedOptionQ[RulePlot, Frame, {True, False}, opts] &&
-  correctSpacingsQ[opts]
+correctOptionsQ[args_, {opts___}] :=
+  knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], {opts}, $allowedOptions] &&
+  supportedOptionQ[RulePlot, Frame, {True, False}, {opts}] &&
+  correctSpacingsQ[{opts}] &&
+  correctHypergraphPlotOptionsQ[
+    RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[HypergraphPlot]]]
 
 correctSpacingsQ[opts_] := Module[{spacings, correctQ},
   spacings = OptionValue[RulePlot, opts, Spacings];
@@ -59,28 +81,41 @@ correctSpacingsQ[opts_] := Module[{spacings, correctQ},
 
 rulePlot[rule_Rule, args___] := rulePlot[{rule}, args]
 
-rulePlot[rules_List, frameQ_, frameStyle_, plotLegends_, spacings_, graphicsOpts_] :=
+rulePlot[
+    rules_List,
+    edgeType_,
+    graphLayout_,
+    vertexCoordinateRules_,
+    vertexLabels_,
+    frameQ_,
+    frameStyle_,
+    plotLegends_,
+    spacings_,
+    graphicsOpts_] :=
   If[PlotLegends === None, Identity, Legended[#, Replace[plotLegends, "Text" -> Placed[StandardForm[rules], Below]]] &][
     Graphics[
         First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, If[frameQ, frameStyle, None]]],
         graphicsOpts] & @
-      (singleRulePlot[spacings] /@ rules)
+      (singleRulePlot[edgeType, graphLayout, vertexCoordinateRules, vertexLabels, spacings] /@ rules)
   ]
 
 $vertexSize = 0.1;
 $arrowheadsLength = 0.3;
 
 (* returns {shapes, plotRange} *)
-singleRulePlot[spacings_][rule_] := Module[{vertexCoordinateRules, sharedVertices, ruleSidePlots, plotRange},
-  vertexCoordinateRules = ruleCoordinateRules[rule];
+singleRulePlot[edgeType_, graphLayout_, externalVertexCoordinateRules_, vertexLabels_, spacings_][rule_] := Module[{
+    vertexCoordinateRules, sharedVertices, ruleSidePlots, plotRange},
+  vertexCoordinateRules = Join[
+    ruleCoordinateRules[edgeType, graphLayout, externalVertexCoordinateRules, rule],
+    externalVertexCoordinateRules];
   sharedVertices = sharedRuleVertices[rule];
   ruleSidePlots = hypergraphPlot[
       #,
-      "CyclicOpen",
+      edgeType,
       sharedVertices,
-      "SpringElectricalPolygons",
+      graphLayout,
       vertexCoordinateRules,
-      None,
+      vertexLabels,
       {},
       $vertexSize,
       $arrowheadsLength] & /@
@@ -99,9 +134,9 @@ layoutReferenceSide[in_, out_] := Module[{inConnectedQ, outConnectedQ},
   If[Length[in] > Length[out], in, out]
 ]
 
-ruleCoordinateRules[in_ -> out_] :=
+ruleCoordinateRules[edgeType_, graphLayout_, externalVertexCoordinateRules_, in_ -> out_] :=
   #[[1]] -> #[[2, 1, 1]] & /@
-    hypergraphEmbedding["CyclicOpen", "SpringElectricalEmbedding", {}][layoutReferenceSide[in, out]][[1]]
+    hypergraphEmbedding[edgeType, graphLayout, externalVertexCoordinateRules][layoutReferenceSide[in, out]][[1]]
 
 sharedRuleVertices[in_ -> out_] := Intersection @@ (Catenate /@ {in, out})
 

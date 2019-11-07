@@ -2,6 +2,7 @@ Package["SetReplace`"]
 
 PackageExport["HypergraphPlot"]
 
+PackageScope["correctHypergraphPlotOptionsQ"]
 PackageScope["hypergraphEmbedding"]
 PackageScope["hypergraphPlot"]
 
@@ -25,13 +26,10 @@ $graphLayouts = {"SpringElectricalEmbedding", "SpringElectricalPolygons"};
 
 (* Messages *)
 
-HypergraphPlot::notImplemented =
-	"Not implemented: `1`.";
-
-HypergraphPlot::invalidEdges =
+General::invalidEdges =
 	"First argument of HypergraphPlot must be list of lists, where elements represent vertices.";
 
-HypergraphPlot::invalidCoordinates =
+General::invalidCoordinates =
 	"Coordinates `1` should be a list of rules from vertices to pairs of numbers.";
 
 HypergraphPlot::invalidHighlight =
@@ -40,9 +38,6 @@ HypergraphPlot::invalidHighlight =
 (* Evaluation *)
 
 func : HypergraphPlot[args___] := Module[{result = hypergraphPlot$parse[args]},
-	If[Head[result] === hypergraphPlot$failing,
-		Message[HypergraphPlot::notImplemented, Defer[func]];
-		result = $Failed];
 	result /; result =!= $Failed
 ]
 
@@ -55,47 +50,40 @@ hypergraphPlot$parse[edges : Except[{___List}], o : OptionsPattern[]] := (
 	$Failed
 )
 
-hypergraphPlot$parse[args : PatternSequence[edges_, o : OptionsPattern[]]] :=
-	$Failed /; !knownOptionsQ[HypergraphPlot, Defer[HypergraphPlot[args]], {o}]
+hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
+	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
+			(OptionValue[HypergraphPlot, {o}, #] & /@ {
+				"EdgeType", GraphHighlight, GraphLayout, VertexCoordinateRules, VertexLabels}) /;
+		correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}]
 
-hypergraphPlot$parse[args : PatternSequence[edges_, o : OptionsPattern[]]] := With[{
-		unknownOptions = Complement @@ {{o}, Options[HypergraphPlot]}[[All, All, 1]]},
-	If[Length[unknownOptions] > 0,
-		Message[HypergraphPlot::optx, unknownOptions[[1]], Defer[HypergraphPlot[args]]]
-	];
-	$Failed /; Length[unknownOptions] > 0
-]
+hypergraphPlot$parse[___] := $Failed
 
-hypergraphPlot$parse[edges_, o : OptionsPattern[]] /;
-		! (And @@ (supportedOptionQ[HypergraphPlot, ##, {o}] & @@@ {
+correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
+	knownOptionsQ[head, expr, opts] &&
+	(And @@ (supportedOptionQ[head, ##, opts] & @@@ {
 			{"EdgeType", $edgeTypes},
-			{GraphLayout, $graphLayouts}})) :=
-	$Failed
+			{GraphLayout, $graphLayouts}})) &&
+	correctCoordinateRulesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinateRules]] &&
+	correctHighlightQ[edges, OptionValue[HypergraphPlot, opts, GraphHighlight]]
 
-hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
-		result, vertexCoordinates},
-	vertexCoordinates = OptionValue[HypergraphPlot, {o}, VertexCoordinateRules];
-	result = If[!MatchQ[vertexCoordinates,
+correctCoordinateRulesQ[head_, coordinateRules_] :=
+	If[!MatchQ[coordinateRules,
 			Automatic |
 			{(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
-		Message[HypergraphPlot::invalidCoordinates, vertexCoordinates];
-		$Failed];
-	result /; result === $Failed
-]
+		Message[head::invalidCoordinates, coordinateRules];
+		False,
+		True
+	]
 
-hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
-		highlight, vertices, validQ},
-	highlight = OptionValue[HypergraphPlot, {o}, GraphHighlight];
+correctHighlightQ[edges : Except[Automatic], highlight_] := Module[{
+		vertices, validQ},
 	vertices = vertexList[edges];
 	validQ = ListQ[highlight] && (And @@ (MemberQ[Join[vertices, edges], #] & /@ highlight));
 	If[!validQ, Message[HypergraphPlot::invalidHighlight, highlight]];
-	$Failed /; !validQ
+	validQ
 ]
 
-hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
-	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
-		(OptionValue[HypergraphPlot, {o}, #] & /@ {
-			"EdgeType", GraphHighlight, GraphLayout, VertexCoordinateRules, VertexLabels})
+correctHighlightQ[Automatic, _] := True
 
 (* Implementation *)
 
