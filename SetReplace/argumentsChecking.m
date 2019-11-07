@@ -12,8 +12,9 @@ supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, s
   supportedQ
 ]
 
-knownOptionsQ[func_, funcCall_, opts_] := With[{
-    unknownOptions = Complement @@ {opts, Options[func]}[[All, All, 1]]},
+knownOptionsQ[func_, funcCall_, opts_, allowedOptions_ : Automatic] := With[{
+    unknownOptions =
+      Complement @@ {opts, If[allowedOptions === Automatic, Options[func], allowedOptions]}[[All, All, 1]]},
   If[Length[unknownOptions] > 0,
     Message[func::optx, unknownOptions[[1]], funcCall]
   ];

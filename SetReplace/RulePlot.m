@@ -1,5 +1,9 @@
 Package["SetReplace`"]
 
+(* Documentation *)
+
+$allowedOptions = FilterRules[Options[RulePlot], Options[Graphics]];
+
 (* Parameters *)
 
 $nodeSizeAmplification = 3;
@@ -28,17 +32,18 @@ rulePlot$parse[{
       Message[RulePlot::patternRules, rulesSpec];
       Return[$Failed]
     ];
-    rulePlot[rulesSpec] /; correctOptionsQ[{rulesSpec, o}, {opts}]
+    rulePlot[rulesSpec, {opts}] /; correctOptionsQ[{rulesSpec, o}, {opts}]
 ]
 
-correctOptionsQ[args_, opts_] := knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], opts]
+correctOptionsQ[args_, opts_] :=
+  knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], opts, $allowedOptions]
 
 (* Implementation *)
 
-rulePlot[rule_Rule] := rulePlot[{rule}]
+rulePlot[rule_Rule, opts_] := rulePlot[{rule}, opts]
 
-rulePlot[rules_List] :=
-  Graphics[First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, True]]] & @
+rulePlot[rules_List, opts_] :=
+  Graphics[First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, True]], opts] & @
     (singleRulePlot /@ rules)
 
 $vertexSize = 0.1;
