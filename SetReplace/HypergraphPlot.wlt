@@ -228,25 +228,19 @@ VerificationTest[
 ] & /@ $layoutTestHypergraphs
 
 VerificationTest[
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "CyclicOpen"]],
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "CyclicClosed"]],
-  SameTest -> Equal
-] & /@ $layoutTestHypergraphs
-
-VerificationTest[
-  MissingQ[FirstCase[
+  Length[Union[Cases[
     HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"],
     Polygon[___],
-    Missing[],
-    All]]
+    All]]],
+  1
 ] & /@ $layoutTestHypergraphs
 
 VerificationTest[
-  !MissingQ[FirstCase[
+  Length[Union[Cases[
     HypergraphPlot[#, GraphLayout -> "SpringElectricalPolygons"],
     Polygon[___],
-    Missing[],
-    All]]
+    All]]],
+  1 + Length[#]
 ] & /@ $layoutTestHypergraphs
 
 (* VertexLabels *)
