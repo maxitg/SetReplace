@@ -235,6 +235,8 @@ edgeScale[{vertexEmbedding_, edgeEmbedding : Except[{}]}] := Module[{selfLoops},
 	Mean[RegionMeasure /@ Line /@ N /@ If[selfLoops =!= {}, $selfLoopsScale * selfLoops, edgeEmbedding[[All, 2]]]]
 ]
 
+edgeScale[{{}, _}] := 1
+
 edgeScale[{vertexEmbedding_, {}}] :=
 	RegionMeasure[Line[Transpose[MinMax /@ Transpose[vertexEmbedding[[All, 2]]]]]] /
 		(Sqrt[N[Length[vertexEmbedding]] / 2])
