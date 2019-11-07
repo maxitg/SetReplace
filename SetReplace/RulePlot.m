@@ -2,7 +2,9 @@ Package["SetReplace`"]
 
 (* Documentation *)
 
-$allowedOptions = FilterRules[Options[RulePlot], Options[Graphics]];
+$allowedOptions = Join[
+  FilterRules[Options[RulePlot], Options[Graphics]][[All, 1]], {
+  Frame, FrameStyle}];
 
 (* Parameters *)
 
@@ -32,18 +34,26 @@ rulePlot$parse[{
       Message[RulePlot::patternRules, rulesSpec];
       Return[$Failed]
     ];
-    rulePlot[rulesSpec, {opts}] /; correctOptionsQ[{rulesSpec, o}, {opts}]
+    rulePlot[
+          rulesSpec,
+          ##,
+          FilterRules[{opts}, FilterRules[Options[Graphics], Except[Frame]]]] & @@
+        OptionValue[RulePlot, {opts}, {Frame, FrameStyle}] /;
+      correctOptionsQ[{rulesSpec, o}, {opts}]
 ]
 
 correctOptionsQ[args_, opts_] :=
-  knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], opts, $allowedOptions]
+  knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], opts, $allowedOptions] &&
+  supportedOptionQ[RulePlot, Frame, {True, False}, opts]
 
 (* Implementation *)
 
-rulePlot[rule_Rule, opts_] := rulePlot[{rule}, opts]
+rulePlot[rule_Rule, args___] := rulePlot[{rule}, args]
 
-rulePlot[rules_List, opts_] :=
-  Graphics[First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, True]], opts] & @
+rulePlot[rules_List, frameQ_, frameStyle_, graphicsOpts_] :=
+  Graphics[
+      First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, If[frameQ, frameStyle, None]]],
+      graphicsOpts] & @
     (singleRulePlot /@ rules)
 
 $vertexSize = 0.1;
@@ -110,19 +120,25 @@ combinedRuleParts[sides_, plotRange_] := Module[{maxRange, xRange, yRange, xDisp
     {xRange[[1]], yRange[[1]]}}]};
   separator = arrow[$ruleArrowShape, 0.15, 0][{{0.15, 0.5}, {0.85, 0.5}}];
   graphicsRiffle[
-    Append[#, frame] & /@ sides, ConstantArray[{xRange, yRange}, 2], separator, {{0, 1}, {0, 1}}, 0.5, 0.2, False]
+    Append[#, frame] & /@ sides, ConstantArray[{xRange, yRange}, 2], separator, {{0, 1}, {0, 1}}, 0.5, 0.2, None]
 ]
 
 aspectRatio[{{xMin_, xMax_}, {yMin_, yMax_}}] := (yMax - yMin) / (xMax - xMin)
 
 frame[{{xMin_, xMax_}, {yMin_, yMax_}}] := Line[{{xMin, yMin}, {xMax, yMin}, {xMax, yMax}, {xMin, yMax}, {xMin, yMin}}]
 
-$gridColor = GrayLevel[0.8];
+$defaultGridColor = GrayLevel[0.8];
 
 (* returns {shapes, plotRange} *)
 graphicsRiffle[
-      shapeLists_, plotRanges_, separator_, separatorPlotRange_, relativeSeparatorWidth_, padding_, gridQ_] := Module[{
-    scaledShapes, scaledSeparator, widthWithExtraSeparator, shapesWithExtraSeparator, totalWidth},
+      shapeLists_,
+      plotRanges_,
+      separator_,
+      separatorPlotRange_,
+      relativeSeparatorWidth_,
+      padding_,
+      gridStyle_] := Module[{
+    scaledShapes, scaledSeparator, widthWithExtraSeparator, shapesWithExtraSeparator, totalWidth, explicitGridStyle},
   scaledShapes = MapThread[
     Scale[
       Translate[#1, -#2[[All, 1]]],
@@ -133,18 +149,22 @@ graphicsRiffle[
     Translate[separator, {0, 0.5} - {#[[1, 1]], (#[[2, 2]] + #[[2, 1]]) / 2} & @ separatorPlotRange],
     relativeSeparatorWidth / (separatorPlotRange[[1, 2]] - separatorPlotRange[[1, 1]]),
     {0, 0.5}];
+  explicitGridStyle = Replace[gridStyle, Automatic -> $defaultGridColor];
   {widthWithExtraSeparator, shapesWithExtraSeparator} = Reap[Fold[
     With[{shapeWidth = 1 / aspectRatio[plotRanges[[#2]]]},
       Sow[Translate[scaledShapes[[#2]], {#, 0}]];
       Sow[Translate[scaledSeparator, {# + shapeWidth, 0}]];
-      If[gridQ, Sow[{$gridColor, Line[{{#, 0}, {#, 1}}] & @ (# + shapeWidth + relativeSeparatorWidth / 2)}]];
+      If[gridStyle =!= None,
+        Sow[{explicitGridStyle, Line[{{#, 0}, {#, 1}}] & @ (# + shapeWidth + relativeSeparatorWidth / 2)}]];
       # + shapeWidth + relativeSeparatorWidth
     ] &,
     0,
     Range[Length[scaledShapes]]]];
   totalWidth = widthWithExtraSeparator - relativeSeparatorWidth;
   {
-    {Most[shapesWithExtraSeparator[[1]]], If[gridQ, {$gridColor, frame[{{0, totalWidth}, {0, 1}}]}, Nothing]},
+    {
+      Most[shapesWithExtraSeparator[[1]]],
+      If[gridStyle =!= None, {explicitGridStyle, frame[{{0, totalWidth}, {0, 1}}]}, Nothing]},
     {{-padding, totalWidth + padding}, {-padding, 1 + padding}}
   }
 ]

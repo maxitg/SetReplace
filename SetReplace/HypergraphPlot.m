@@ -31,9 +31,6 @@ HypergraphPlot::notImplemented =
 HypergraphPlot::invalidEdges =
 	"First argument of HypergraphPlot must be list of lists, where elements represent vertices.";
 
-HypergraphPlot::invalidFiniteOption =
-	"Value `2` of option `1` should be one of `3`.";
-
 HypergraphPlot::invalidCoordinates =
 	"Coordinates `1` should be a list of rules from vertices to pairs of numbers.";
 
