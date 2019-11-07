@@ -226,8 +226,11 @@ edgeScale[{vertexEmbedding_, {}}] :=
 	RegionMeasure[Line[Transpose[MinMax /@ Transpose[vertexEmbedding[[All, 2]]]]]] /
 		(Sqrt[N[Length[vertexEmbedding]] / 2])
 
-rescaleEmbedding[embedding_, center_, factor_] := embedding /.
-	coords : {Repeated[_ ? NumericQ, {2}]} :> (coords - center) * factor + center
+rescaleEmbedding[embedding_, center_, factor_] := Map[
+	(#[[1]] -> (#[[2]] /. coords : {Repeated[_ ? NumericQ, {2}]} :> (coords - center) * factor + center)) &,
+	embedding,
+	{2}
+]
 
 (*** SpringElectricalPolygons ***)
 

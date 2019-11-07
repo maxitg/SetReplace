@@ -34,6 +34,9 @@ $ruleSidesSpacing = 0.2;
 RulePlot::patternRules =
   "RulePlot for pattern rules `1` is not implemented.";
 
+RulePlot::notHypergraphRule =
+  "Rule `1` should be a rule operating on hyperedges (set elements should be lists)."
+
 (* Evaluation *)
 
 WolframModel /: func : RulePlot[WolframModel[args___], opts___] := Module[{result = rulePlot$parse[{args}, {opts}]},
@@ -45,7 +48,7 @@ WolframModel /: func : RulePlot[WolframModel[args___], opts___] := Module[{resul
 (* Arguments parsing *)
 
 rulePlot$parse[{
-  rulesSpec_ ? wolframModelRulesSpecQ,
+  rulesSpec_ ? hypergraphRulesSpecQ,
   o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}},
   {opts : OptionsPattern[]}] := Module[{},
     If[AssociationQ[rulesSpec],
@@ -62,6 +65,17 @@ rulePlot$parse[{
           {"EdgeType", GraphLayout, VertexCoordinateRules, VertexLabels, Frame, FrameStyle, PlotLegends, Spacings}] /;
       correctOptionsQ[{rulesSpec, o}, {opts}]
 ]
+
+hypergraphRulesSpecQ[rulesSpec_List ? wolframModelRulesSpecQ] := Fold[# && hypergraphRulesSpecQ[#2] &, True, rulesSpec]
+
+hypergraphRulesSpecQ[ruleSpec_Rule ? wolframModelRulesSpecQ] := If[
+  And @@ (Depth[#] >= 3 & /@ ruleSpec),
+  True,
+  Message[RulePlot::notHypergraphRule, ruleSpec];
+  False
+]
+
+hypergraphRulesSpecQ[rulesSpec_] := False
 
 correctOptionsQ[args_, {opts___}] :=
   knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], {opts}, $allowedOptions] &&
