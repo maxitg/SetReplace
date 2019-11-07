@@ -141,42 +141,19 @@ toNormalEdges["CyclicOpen" | "CyclicClosed"][hyperedge : Except[{}]] :=
 toNormalEdges["CyclicOpen" | "CyclicClosed"][{}] := {}
 
 graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
-		relevantCoordinateRules, vertexCoordinates, unscaledEmbedding},
+		relevantCoordinateRules, vertexCoordinateRules, unscaledEmbedding},
 	relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
-	vertexCoordinates = constrainedGraphEmbedding[Graph[vertices, vertexEmbeddingEdges], layout, relevantCoordinateRules];
-	unscaledEmbedding = graphEmbedding[vertices, edgeEmbeddingEdges, layout, vertexCoordinates];
+	vertexCoordinateRules = graphEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules][[1]];
+	unscaledEmbedding = graphEmbedding[vertices, edgeEmbeddingEdges, layout, vertexCoordinateRules];
 	rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules]
 ]
 
-constrainedGraphEmbedding[graph_, layout_, coordinateRules_] := Module[{
-		indexGraph, vertexToIndex, graphPlot, graphPlotCoordinateRules, displacement},
-	indexGraph = IndexGraph[graph];
-	vertexToIndex = Thread[VertexList[graph] -> VertexList[indexGraph]];
-	graphPlot = GraphPlot[
-		indexGraph, {
-		Method -> layout,
-		PlotTheme -> "Classic",
-		If[Length[coordinateRules] > 1,
-			VertexCoordinateRules ->
-				Thread[(coordinateRules[[All, 1]] /. vertexToIndex) ->
-					coordinateRules[[All, 2]]],
-			Nothing]}];
-	graphPlotCoordinateRules = VertexCoordinateRules /. Cases[graphPlot, _Rule, Infinity];
-	If[Length[coordinateRules] != 1,
-		graphPlotCoordinateRules,
-		displacement =
-			coordinateRules[[1, 2]] -
-			(coordinateRules[[1, 1]] /. Thread[VertexList[graph] -> graphPlotCoordinateRules]);
-		# + displacement & /@ graphPlotCoordinateRules
-	]
-]
-
-graphEmbedding[vertices_, edges_, layout_, coordinates_] := Replace[
+graphEmbedding[vertices_, edges_, layout_, coordinateRules_] := Replace[
 	Reap[
 		GraphPlot[
 			Graph[vertices, edges],
 			GraphLayout -> layout,
-			VertexCoordinates -> coordinates,
+			VertexCoordinateRules -> coordinateRules,
 			VertexShapeFunction -> (Sow[#2 -> #, "v"] &),
 			EdgeShapeFunction -> (Sow[#2 -> #, "e"] &)],
 		{"v", "e"}][[2]],
