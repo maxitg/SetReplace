@@ -94,7 +94,7 @@ $ruleArrowShape = {Line[{{-1, 0.7}, {0, 0}, {-1, -0.7}}], Line[{{-1, 0}, {0, 0}}
 
 (* returns {shapes, plotRange} *)
 combinedRuleParts[sides_, plotRange_] := Module[{maxRange, xRange, yRange, xDisplacement, frame, separator},
-  maxRange = Max[plotRange[[1, 2]] - plotRange[[1, 1]], plotRange[[2, 2]] - plotRange[[2, 1]]];
+  maxRange = Max[plotRange[[1, 2]] - plotRange[[1, 1]], plotRange[[2, 2]] - plotRange[[2, 1]], 1];
   {xRange, yRange} = Mean[#] + maxRange * {-0.5, 0.5} & /@ plotRange;
   xDisplacement = 1.5 (xRange[[2]] - xRange[[1]]);
   frame = {Gray, Dotted, Line[{
