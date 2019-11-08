@@ -83,7 +83,7 @@ Table[
   VerificationTest[
     Head[HypergraphPlot[$largeSet, "EdgeType" -> edgeType, GraphLayout -> layout]],
     Graphics,
-    TimeConstraint -> (3 $normalPlotTiming),
+    TimeConstraint -> (4 $normalPlotTiming),
     MemoryConstraint -> (6 $normalPlotMemory)],
   {edgeType, $edgeTypes},
   {layout, $layouts}]
