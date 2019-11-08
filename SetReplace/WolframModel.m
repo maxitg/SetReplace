@@ -338,7 +338,7 @@ WolframModel[
 (*Rules*)
 
 
-WolframModel::invalidRules =
+General::invalidRules =
 	"The rule specification `1` should be either a Rule, " ~~
 	"a List of rules, or <|\"PatternRules\" -> rules|>, where " ~~
 	"rules is either a Rule, RuleDelayed, or a List of them.";
@@ -346,7 +346,7 @@ WolframModel::invalidRules =
 
 expr : WolframModel[
 		rulesSpec_ ? (Not @* wolframModelRulesSpecQ),
-		args___] /; Quiet[Developer`CheckArgumentCount[expr, 1, 4]] := 0 /;
+		args___] /; Quiet[Developer`CheckArgumentCount[expr, 2, 4]] := 0 /;
 	Message[WolframModel::invalidRules, rulesSpec]
 
 

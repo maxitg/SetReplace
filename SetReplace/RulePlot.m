@@ -39,7 +39,7 @@ RulePlot::notHypergraphRule =
 
 (* Evaluation *)
 
-WolframModel /: func : RulePlot[WolframModel[args___], opts___] := Module[{result = rulePlot$parse[{args}, {opts}]},
+WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`CheckArgumentCount[wm, 1, 1]], opts___] := Module[{result = rulePlot$parse[{args}, {opts}]},
   If[Head[result] === rulePlot$parse,
     result = $Failed];
   result /; result =!= $Failed
@@ -75,7 +75,10 @@ hypergraphRulesSpecQ[ruleSpec_Rule ? wolframModelRulesSpecQ] := If[
   False
 ]
 
-hypergraphRulesSpecQ[rulesSpec_] := False
+hypergraphRulesSpecQ[rulesSpec_] := (
+  Message[RulePlot::invalidRules, rulesSpec];
+  False
+)
 
 correctOptionsQ[args_, {opts___}] :=
   knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], {opts}, $allowedOptions] &&
