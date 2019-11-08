@@ -312,6 +312,14 @@ VerificationTest[
   SameTest -> (Not @* Equal)
 ]
 
+(** Same coordinates should not produce any messages **)
+VerificationTest[
+  And @@ Cases[
+    HypergraphPlot[{{1, 2, 3}}, VertexCoordinateRules -> {1 -> {1, 0}, 2 -> {1, 0}}],
+    Rotate[_, {v1_, v2_}] :> v1 != {0, 0} && v2 != {0, 0},
+    All]
+]
+
 (* GraphHighlight *)
 
 VerificationTest[

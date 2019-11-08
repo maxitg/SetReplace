@@ -17,6 +17,8 @@ arrow[shape_, arrowheadLength_, vertexSize_][pts_] := Module[{ptsStartToArrowEnd
   }
 ]
 
+arrowhead[shape_, endPt_, {0 | 0., 0 | 0.}, length_] := {}
+
 arrowhead[shape_, endPt_, direction_, length_] :=
   (Translate[#, endPt] &) @
   (Rotate[#, {{1, 0}, direction}] &) @
