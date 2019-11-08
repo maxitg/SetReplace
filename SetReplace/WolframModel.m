@@ -13,8 +13,10 @@ Package["SetReplace`"]
 
 PackageExport["WolframModel"]
 PackageExport["$WolframModelProperties"]
-PackageExport["unrecognizedOptions"]
-PackageExport["wolframModelRulesSpecQ"]
+
+
+PackageScope["unrecognizedOptions"]
+PackageScope["wolframModelRulesSpecQ"]
 
 
 (* ::Section:: *)
