@@ -319,4 +319,49 @@ VerificationTest[
     Length[Union @ Cases[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}], _ ? ColorQ, All]]
 ] & /@ {4, {1, 2, 3}}
 
+(* Scaling consistency *)
+(* Vertex sizes, arrow sizes, average edge lengths, and loop lengths should always be the same. *)
+
+VerificationTest[
+  SameQ @@ (
+    Union[Cases[HypergraphPlot[#], Disk[_, r_] :> r, All]] & /@
+      {{{1}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
+]
+
+VerificationTest[
+  SameQ @@ (
+    Union[Cases[HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"], p : Polygon[___] :> Area[p], All]] & /@
+      {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
+]
+
+VerificationTest[
+  Equal @@ (
+    Mean[Cases[
+        HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"],
+        Line[pts_] :> EuclideanDistance @@ pts,
+        All]] & /@
+      {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3, 4, 5, 1}}})
+]
+
+$selfLoopLength = FirstCase[
+  HypergraphPlot[{{1, 1}}, GraphLayout -> "SpringElectricalEmbedding"],
+  Line[pts_] :> RegionMeasure[Line[pts]],
+  Missing[],
+  All];
+
+VerificationTest[
+  And @@ (
+    MemberQ[
+        Cases[
+          HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"],
+          Line[pts_] :> RegionMeasure[Line[pts]],
+          All],
+        $selfLoopLength] & /@ {
+      {{1, 1}},
+      {{1, 2, 3}, {1, 1}},
+      {{1, 2, 3}, {3, 4, 5}, {5, 5}},
+      {{1, 2, 3}, {3, 4, 5}, {5, 6, 1, 1}},
+      {{1, 2, 3, 4, 5, 5, 1}}})
+]
+
 EndTestSection[]
