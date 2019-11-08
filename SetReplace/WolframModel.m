@@ -341,7 +341,7 @@ WolframModel[
 WolframModel::invalidRules =
 	"The rule specification `1` should be either a Rule, " ~~
 	"a List of rules, or <|\"PatternRules\" -> rules|>, where " ~~
-	"rules is either a Rule, RuleDelayed, or a List of them."
+	"rules is either a Rule, RuleDelayed, or a List of them.";
 
 
 expr : WolframModel[

@@ -9,7 +9,7 @@ PackageScope["hypergraphPlot"]
 (* Documentation *)
 
 HypergraphPlot::usage = usageString[
-	"HypergraphPlot[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph."]
+	"HypergraphPlot[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph."];
 
 SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
 

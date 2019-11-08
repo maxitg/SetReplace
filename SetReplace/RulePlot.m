@@ -20,7 +20,7 @@ Options[RulePlot] = Join[Options[RulePlot], $newOptions];
 SyntaxInformation[RulePlot] = Join[
   FilterRules[SyntaxInformation[RulePlot], Except["OptionNames"]],
   {"OptionNames" -> Join[("OptionNames" /. SyntaxInformation[RulePlot]), $newOptions[[All, 1]]]}
-]
+];
 Protect[RulePlot];
 
 (* Parameters *)
@@ -35,7 +35,7 @@ RulePlot::patternRules =
   "RulePlot for pattern rules `1` is not implemented.";
 
 RulePlot::notHypergraphRule =
-  "Rule `1` should be a rule operating on hyperedges (set elements should be lists)."
+  "Rule `1` should be a rule operating on hyperedges (set elements should be lists).";
 
 (* Evaluation *)
 
