@@ -39,11 +39,12 @@ RulePlot::notHypergraphRule =
 
 (* Evaluation *)
 
-WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`CheckArgumentCount[wm, 1, 1]], opts___] := Module[{result = rulePlot$parse[{args}, {opts}]},
-  If[Head[result] === rulePlot$parse,
-    result = $Failed];
-  result /; result =!= $Failed
-]
+WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`CheckArgumentCount[wm, 1, 1]], opts___] :=
+  Module[{result = rulePlot$parse[{args}, {opts}]},
+    If[Head[result] === rulePlot$parse,
+      result = $Failed];
+    result /; result =!= $Failed
+  ]
 
 (* Arguments parsing *)
 
@@ -96,10 +97,8 @@ correctSpacingsQ[opts_] := Module[{spacings, correctQ},
 
 (* Implementation *)
 
-rulePlot[rule_Rule, args___] := rulePlot[{rule}, args]
-
 rulePlot[
-    rules_List,
+    rules_,
     edgeType_,
     graphLayout_,
     vertexCoordinateRules_,
@@ -110,11 +109,37 @@ rulePlot[
     spacings_,
     graphicsOpts_] :=
   If[PlotLegends === None, Identity, Legended[#, Replace[plotLegends, "Text" -> Placed[StandardForm[rules], Below]]] &][
-    Graphics[
-        First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, If[frameQ, frameStyle, None]]],
-        graphicsOpts] & @
-      (singleRulePlot[edgeType, graphLayout, vertexCoordinateRules, vertexLabels, spacings] /@ rules)
+    rulePlot[
+      rules, edgeType, graphLayout, vertexCoordinateRules, vertexLabels, frameQ, frameStyle, spacings, graphicsOpts]
   ]
+
+rulePlot[
+    rule_Rule,
+    edgeType_,
+    graphLayout_,
+    vertexCoordinateRules_,
+    vertexLabels_,
+    frameQ_,
+    frameStyle_,
+    spacings_,
+    graphicsOpts_] :=
+  rulePlot[
+    {rule}, edgeType, graphLayout, vertexCoordinateRules, vertexLabels, frameQ, frameStyle, spacings, graphicsOpts]
+
+rulePlot[
+    rules_List,
+    edgeType_,
+    graphLayout_,
+    vertexCoordinateRules_,
+    vertexLabels_,
+    frameQ_,
+    frameStyle_,
+    spacings_,
+    graphicsOpts_] :=
+  Graphics[
+      First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, If[frameQ, frameStyle, None]]],
+      graphicsOpts] & @
+    (singleRulePlot[edgeType, graphLayout, vertexCoordinateRules, vertexLabels, spacings] /@ rules)
 
 $vertexSize = 0.1;
 $arrowheadsLength = 0.3;
