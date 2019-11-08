@@ -199,7 +199,7 @@ edgeScale[{vertexEmbedding_, edgeEmbedding : Except[{}]}] := Module[{selfLoops},
 	Mean[lineLength /@ N /@ If[selfLoops =!= {}, $selfLoopsScale * selfLoops, edgeEmbedding[[All, 2]]]]
 ]
 
-edgeScale[{{}, _}] := 1
+edgeScale[{{} | {_ -> _}, _}] := 1
 
 edgeScale[{vertexEmbedding_, {}}] :=
 	lineLength[Transpose[MinMax /@ Transpose[vertexEmbedding[[All, 2]]]]] /
