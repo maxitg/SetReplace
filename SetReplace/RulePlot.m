@@ -48,23 +48,18 @@ WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`Ch
 (* Arguments parsing *)
 
 rulePlot$parse[{
-  rulesSpec_ ? hypergraphRulesSpecQ,
-  o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}},
-  {opts : OptionsPattern[]}] := Module[{},
-    If[AssociationQ[rulesSpec],
-      Message[RulePlot::patternRules, rulesSpec];
-      Return[$Failed]
-    ];
-    rulePlot[
-          rulesSpec,
-          ##,
-          FilterRules[{opts}, FilterRules[Options[Graphics], Except[Frame]]]] & @@
-        OptionValue[
-          RulePlot,
-          {opts},
-          {"EdgeType", GraphLayout, VertexCoordinateRules, VertexLabels, Frame, FrameStyle, PlotLegends, Spacings}] /;
-      correctOptionsQ[{rulesSpec, o}, {opts}]
-]
+    rulesSpec_ ? hypergraphRulesSpecQ,
+    o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}},
+    {opts : OptionsPattern[]}] :=
+  rulePlot[
+        rulesSpec,
+        ##,
+        FilterRules[{opts}, FilterRules[Options[Graphics], Except[Frame]]]] & @@
+      OptionValue[
+        RulePlot,
+        {opts},
+        {"EdgeType", GraphLayout, VertexCoordinateRules, VertexLabels, Frame, FrameStyle, PlotLegends, Spacings}] /;
+    correctOptionsQ[{rulesSpec, o}, {opts}]
 
 hypergraphRulesSpecQ[rulesSpec_List ? wolframModelRulesSpecQ] := Fold[# && hypergraphRulesSpecQ[#2] &, True, rulesSpec]
 
@@ -74,6 +69,11 @@ hypergraphRulesSpecQ[ruleSpec_Rule ? wolframModelRulesSpecQ] := If[
   Message[RulePlot::notHypergraphRule, ruleSpec];
   False
 ]
+
+hypergraphRulesSpecQ[rulesSpec_Association ? wolframModelRulesSpecQ] := (
+  Message[RulePlot::patternRules, rulesSpec];
+  False
+)
 
 hypergraphRulesSpecQ[rulesSpec_] := (
   Message[RulePlot::invalidRules, rulesSpec];
