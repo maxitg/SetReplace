@@ -191,20 +191,22 @@ rescaleEmbedding[unscaledEmbedding_, {v_ -> pivotPoint_}] :=
 
 rescaleEmbedding[unscaledEmbedding_, {}] := rescaleEmbedding[unscaledEmbedding, {0 -> {0.0, 0.0}}]
 
+lineLength[pts_] := Total[EuclideanDistance @@@ Partition[pts, 2, 1]]
+
 $selfLoopsScale = 0.7;
 edgeScale[{vertexEmbedding_, edgeEmbedding : Except[{}]}] := Module[{selfLoops},
 	selfLoops = Select[#[[1, 1]] == #[[1, 2]] &][edgeEmbedding][[All, 2]];
-	Mean[RegionMeasure /@ Line /@ N /@ If[selfLoops =!= {}, $selfLoopsScale * selfLoops, edgeEmbedding[[All, 2]]]]
+	Mean[lineLength /@ N /@ If[selfLoops =!= {}, $selfLoopsScale * selfLoops, edgeEmbedding[[All, 2]]]]
 ]
 
 edgeScale[{{}, _}] := 1
 
 edgeScale[{vertexEmbedding_, {}}] :=
-	RegionMeasure[Line[Transpose[MinMax /@ Transpose[vertexEmbedding[[All, 2]]]]]] /
+	lineLength[Transpose[MinMax /@ Transpose[vertexEmbedding[[All, 2]]]]] /
 		(Sqrt[N[Length[vertexEmbedding]] / 2])
 
 rescaleEmbedding[embedding_, center_, factor_] := Map[
-	(#[[1]] -> (#[[2]] /. coords : {Repeated[_ ? NumericQ, {2}]} :> (coords - center) * factor + center)) &,
+	(#[[1]] -> (#[[2]] /. coords : {Repeated[_Real, {2}]} :> (coords - center) * factor + center)) &,
 	embedding,
 	{2}
 ]
