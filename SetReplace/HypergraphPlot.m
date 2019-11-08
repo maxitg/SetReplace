@@ -143,7 +143,10 @@ toNormalEdges["CyclicOpen" | "CyclicClosed"][{}] := {}
 graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
 		relevantCoordinateRules, vertexCoordinateRules, unscaledEmbedding},
 	relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
-	vertexCoordinateRules = graphEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules][[1]];
+	vertexCoordinateRules = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
+		relevantCoordinateRules,
+		graphEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules][[1]]
+	];
 	unscaledEmbedding = graphEmbedding[vertices, edgeEmbeddingEdges, layout, vertexCoordinateRules];
 	rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules]
 ]
