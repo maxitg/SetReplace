@@ -25,7 +25,8 @@ Protect[RulePlot];
 
 (* Parameters *)
 
-$nodeSizeAmplification = 3;
+$vertexSize = 0.1;
+$arrowheadsLength = 0.3;
 $graphPadding = Scaled[0.1];
 $ruleSidesSpacing = 0.2;
 
@@ -36,6 +37,9 @@ RulePlot::patternRules =
 
 RulePlot::notHypergraphRule =
   "Rule `1` should be a rule operating on hyperedges (set elements should be lists).";
+
+RulePlot::invalidSpacings =
+  "Spacings `1` should be either a single number, or a two-by-two list.";
 
 (* Evaluation *)
 
@@ -140,9 +144,6 @@ rulePlot[
       First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, If[frameQ, frameStyle, None]]],
       graphicsOpts] & @
     (singleRulePlot[edgeType, graphLayout, vertexCoordinateRules, vertexLabels, spacings] /@ rules)
-
-$vertexSize = 0.1;
-$arrowheadsLength = 0.3;
 
 (* returns {shapes, plotRange} *)
 singleRulePlot[edgeType_, graphLayout_, externalVertexCoordinateRules_, vertexLabels_, spacings_][rule_] := Module[{
