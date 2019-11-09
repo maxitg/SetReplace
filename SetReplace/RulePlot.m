@@ -69,7 +69,7 @@ rulePlot$parse[{
 hypergraphRulesSpecQ[rulesSpec_List ? wolframModelRulesSpecQ] := Fold[# && hypergraphRulesSpecQ[#2] &, True, rulesSpec]
 
 hypergraphRulesSpecQ[ruleSpec_Rule ? wolframModelRulesSpecQ] := If[
-  And @@ (Depth[#] >= 3 & /@ ruleSpec),
+  MatchQ[ruleSpec, {___List} -> {___List}],
   True,
   Message[RulePlot::notHypergraphRule, ruleSpec];
   False
@@ -164,7 +164,7 @@ singleRulePlot[edgeType_, graphLayout_, externalVertexCoordinateRules_, vertexLa
       $arrowheadsLength] & /@
     List @@ rule;
   plotRange =
-    CoordinateBounds[Catenate[List @@ (Transpose[completePlotRange[#]] & /@ ruleSidePlots)], $graphPadding];
+    CoordinateBounds[Catenate[List @@ (Transpose[PlotRange[#]] & /@ ruleSidePlots)], $graphPadding];
   combinedRuleParts[ruleSidePlots[[All, 1]], plotRange, spacings]
 ]
 
@@ -182,17 +182,6 @@ ruleCoordinateRules[edgeType_, graphLayout_, externalVertexCoordinateRules_, in_
     hypergraphEmbedding[edgeType, graphLayout, externalVertexCoordinateRules][layoutReferenceSide[in, out]][[1]]
 
 sharedRuleVertices[in_ -> out_] := Intersection @@ (Catenate /@ {in, out})
-
-(* https://mathematica.stackexchange.com/a/18040 *)
-completePlotRange[graphics_] := Last @ Last @ Reap[Rasterize[
-  Show[
-    graphics,
-    Axes -> True,
-    Frame -> False,
-    Ticks -> ((Sow[{##}]; Automatic) &),
-    DisplayFunction -> Identity,
-    ImageSize -> 0],
-  ImageResolution -> 1]]
 
 $ruleArrowShape = {Line[{{-1, 0.7}, {0, 0}, {-1, -0.7}}], Line[{{-1, 0}, {0, 0}}]};
 
