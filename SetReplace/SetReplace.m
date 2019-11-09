@@ -72,7 +72,7 @@ Options[SetReplace] := Options[setSubstitutionSystem]
 SetReplace[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] :=
 	Module[{result},
 		result = Check[
-			setSubstitutionSystem[rules, set, Infinity, events, SetReplace, o][-1],
+			setSubstitutionSystem[rules, set, Infinity, events, SetReplace, False, o][-1],
 			$Failed];
 		result /; result =!= $Failed
 	]

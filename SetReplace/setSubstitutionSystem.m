@@ -41,7 +41,7 @@ $SetReplaceMethods::usage = usageString[
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!ListQ[set] &&
 	makeMessage[caller, "setNotList", set]
 
@@ -55,7 +55,7 @@ setReplaceRulesQ[rules_] :=
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!setReplaceRulesQ[rules] &&
 	makeMessage[caller, "invalidRules", rules]
 
@@ -68,13 +68,13 @@ stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!stepCountQ[generations] &&
 	makeMessage[caller, "nonIntegerIterations", "generations", generations]
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!stepCountQ[maxEvents] &&
 	makeMessage[caller, "nonIntegerIterations", "replacements", maxEvents]
 
@@ -91,7 +91,7 @@ $SetReplaceMethods = {Automatic, $cppMethod, $wlMethod};
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
 	makeMessage[caller, "invalidMethod"]
 
@@ -149,6 +149,7 @@ setSubstitutionSystem[
 			generations_ ? stepCountQ,
 			steps_ ? stepCountQ,
 			caller_,
+			returnOnAbortQ_,
 			o : OptionsPattern[]] := Module[{
 		method = OptionValue[Method], canonicalRules, failedQ = False},
 	canonicalRules = toCanonicalRules[rules];
@@ -165,5 +166,5 @@ setSubstitutionSystem[
 			makeMessage[caller, "lowLevelNotImplemented"]]];
 	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
-		setSubstitutionSystem$wl[rules, set, generations, steps]]
+		setSubstitutionSystem$wl[rules, set, generations, steps, returnOnAbortQ]]
 ]

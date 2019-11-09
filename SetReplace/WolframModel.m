@@ -164,6 +164,7 @@ WolframModel[
 				generations,
 				events,
 				WolframModel,
+				True,
 				Method -> OptionValue[Method]],
 			$Failed];
 		renamedNodesEvolution = If[evolution =!= $Failed,
