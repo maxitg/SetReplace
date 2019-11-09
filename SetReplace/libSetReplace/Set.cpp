@@ -15,7 +15,7 @@ namespace SetReplace {
         const std::vector<Rule> rules_;
         
         // Events will never be created with inputs of this generation.
-        const Generation maxGeneration_;
+        Generation maxGeneration_ = 0;
         
         std::unordered_map<ExpressionID, SetExpression> expressions_;
         
@@ -32,16 +32,17 @@ namespace SetReplace {
         
         Matcher matcher_;
         
+        std::vector<ExpressionID> unindexedExpressions_;
+        
     public:
         Implementation(const std::vector<Rule>& rules,
-                       const std::vector<AtomsVector>& initialExpressions,
-                       const std::function<bool()> shouldAbort,
-                       const Generation maxGeneration) :
-            Implementation(rules, initialExpressions, shouldAbort, maxGeneration, [this](const int expressionID) {
+                       const std::vector<AtomsVector>& initialExpressions) :
+            Implementation(rules, initialExpressions, [this](const int expressionID) {
                 return expressions_.at(expressionID).atoms;
             }) {}
         
-        int replaceOnce() {
+        int replaceOnce(const std::function<bool()> shouldAbort) {
+            indexNewExpressions(shouldAbort);
             if (matcher_.matchCount() == 0) return 0;
             Match match = matcher_.nextMatch();
             
@@ -77,10 +78,11 @@ namespace SetReplace {
             return 1;
         }
         
-        int replace(const int substitutionCount) {
+        int replace(const Generation maxGeneration, const int substitutionCount, const std::function<bool()> shouldAbort) {
+            updateMaxGeneration(maxGeneration);
             int count = 0;
             for (int i = 0; i < substitutionCount; ++i) {
-                if (replaceOnce()) {
+                if (replaceOnce(shouldAbort)) {
                     ++count;
                 } else {
                     return count;
@@ -109,13 +111,10 @@ namespace SetReplace {
     private:
         Implementation(const std::vector<Rule>& rules,
                        const std::vector<AtomsVector>& initialExpressions,
-                       const std::function<bool()> shouldAbort,
-                       const Generation maxGeneration,
                        const std::function<AtomsVector(ExpressionID)>& getAtomsVector) :
         rules_(rules),
-        maxGeneration_(maxGeneration),
         atomsIndex_(getAtomsVector),
-        matcher_(rules_, atomsIndex_, getAtomsVector, shouldAbort) {
+        matcher_(rules_, atomsIndex_, getAtomsVector) {
             for (const auto& expression : initialExpressions) {
                 for (const auto& atom : expression) {
                     if (atom <= 0) throw Error::NonPositiveAtoms;
@@ -123,6 +122,25 @@ namespace SetReplace {
                 }
             }
             addExpressions(initialExpressions, initialConditionEvent, initialGeneration);
+        }
+        
+        void updateMaxGeneration(const Generation newMaxGeneration) {
+            const auto previousMaxGeneration = maxGeneration_;
+            maxGeneration_ = newMaxGeneration;
+            if (newMaxGeneration > previousMaxGeneration) {
+                for (int expressionID = 0; expressionID < expressions_.size(); ++expressionID) {
+                    if (expressions_[expressionID].generation == previousMaxGeneration) {
+                        unindexedExpressions_.push_back(expressionID);
+                    }
+                }
+            }
+        }
+        
+        void indexNewExpressions(const std::function<bool()> shouldAbort) {
+            // Atoms index must be updated first, because the matcher uses it to discover expressions.
+            atomsIndex_.addExpressions(unindexedExpressions_);
+            matcher_.addMatchesInvolvingExpressions(unindexedExpressions_, shouldAbort);
+            unindexedExpressions_.clear();
         }
         
         std::vector<AtomsVector> nameAnonymousAtoms(const std::vector<AtomsVector>& atomVectors) {
@@ -149,9 +167,9 @@ namespace SetReplace {
             
             // If generation is at least maxGeneration_, we will never use these expressions as inputs, so no need adding them to the index.
             if (generation < maxGeneration_) {
-                // Atoms index must be updated first, because the matcher uses it to discover expressions.
-                atomsIndex_.addExpressions(ids);
-                matcher_.addMatchesInvolvingExpressions(ids);
+                for (const auto id : ids) {
+                    unindexedExpressions_.push_back(id);
+                }
             }
             return ids;
         }
@@ -176,18 +194,16 @@ namespace SetReplace {
     };
     
     Set::Set(const std::vector<Rule>& rules,
-             const std::vector<AtomsVector>& initialExpressions,
-             const std::function<bool()> shouldAbort,
-             const Generation maxGeneration) {
-        implementation_ = std::make_shared<Implementation>(rules, initialExpressions, shouldAbort, maxGeneration);
+             const std::vector<AtomsVector>& initialExpressions) {
+        implementation_ = std::make_shared<Implementation>(rules, initialExpressions);
     }
     
-    int Set::replaceOnce() {
-        return implementation_->replaceOnce();
+    int Set::replaceOnce(const std::function<bool()> shouldAbort) {
+        return implementation_->replaceOnce(shouldAbort);
     }
     
-    int Set::replace(const int substitutionCount) {
-        return implementation_->replace(substitutionCount);
+    int Set::replace(const Generation maxGeneration, const int substitutionCount, const std::function<bool()> shouldAbort) {
+        return implementation_->replace(maxGeneration, substitutionCount, shouldAbort);
     }
     
     std::vector<SetExpression> Set::expressions() const {

@@ -19,24 +19,22 @@ namespace SetReplace {
         
         /** @brief Creates a new set with a given set of evolution rules, and initial condition.
          * @param rules substittion rules used for evolution. Note, these rules cannot be changed.
-         * @param initialExpressions initial condition, which will be indexed at constraction, so this operation is not instant.
-         * @param shouldAbort function that should return true if Wolfram Language abort is in progress.
-         * @param maxGeneration largest generation created. Events will never be created which have this generation expressions as inputs.
+         * @param initialExpressions initial condition. It will be lazily indexed before the first replacement.
          */
         Set(const std::vector<Rule>& rules,
-            const std::vector<AtomsVector>& initialExpressions,
-            const std::function<bool()> shouldAbort,
-            const Generation maxGeneration = std::numeric_limits<Generation>::max());
+            const std::vector<AtomsVector>& initialExpressions);
         
         /** @brief Perform a single substitution, create the corresponding event, and output expressions.
+         * @param shouldAbort function that should return true if Wolfram Language abort is in progress.
          * @return 1 if substitution was made, 0 if no matches were found.
          */
-        int replaceOnce();
+        int replaceOnce(const std::function<bool()> shouldAbort);
         
-        /** @brief Run replaceOnce() substitutionCount times.
+        /** @brief Run replaceOnce() substitutionCount times, or until the next expression produced has generation larger than maxGeneration.
+         * @param shouldAbort function that should return true if Wolfram Language abort is in progress.
          * @return The number of subtitutions made, could be between 0 and substitutionCount.
          */
-        int replace(const int substitutionCount = std::numeric_limits<int>::max());
+        int replace(const Generation maxGeneration, const int substitutionCount, const std::function<bool()> shouldAbort);
         
         /** @brief List of all expressions in the set, past and present.
          */
