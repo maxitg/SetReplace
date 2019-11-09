@@ -120,19 +120,43 @@ namespace SetReplace {
         
         return output;
     }
-    
-    int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
-        if (argc != 3) {
+
+    int setCreate(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+        if (argc != 2) {
             return LIBRARY_FUNCTION_ERROR;
         }
         
         std::vector<Rule> rules;
         std::vector<AtomsVector> initialExpressions;
-        std::pair<Generation, int> generationsAndSteps;
         try {
             rules = getRules(libData, MArgument_getMTensor(argv[0]));
             initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
-            generationsAndSteps = getGenerationsAndSteps(libData, MArgument_getMTensor(argv[2]));
+        } catch (...) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+        
+        auto setPtr = new Set(rules, initialExpressions);
+        MArgument_setInteger(result, (int64_t)setPtr);
+        return LIBRARY_NO_ERROR;
+    }
+
+    int setDelete(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+        if (argc != 1) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+        delete (Set*)MArgument_getInteger(argv[0]);
+        return LIBRARY_NO_ERROR;
+    }
+    
+    int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+        if (argc != 2) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+        
+        auto setPtr = (Set*)MArgument_getInteger(argv[0]);
+        std::pair<Generation, int> generationsAndSteps;
+        try {
+            generationsAndSteps = getGenerationsAndSteps(libData, MArgument_getMTensor(argv[1]));
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -141,9 +165,22 @@ namespace SetReplace {
             return static_cast<bool>(libData->AbortQ());
         };
         try {
-            Set set(rules, initialExpressions, shouldAbort, generationsAndSteps.first);
-            set.replace(generationsAndSteps.second);
-            const auto expressions = set.expressions();
+            setPtr->replace(generationsAndSteps.first, generationsAndSteps.second, shouldAbort);
+        } catch (...) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+        
+        return LIBRARY_NO_ERROR;
+    }
+
+    int setExpressions(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+        if (argc != 1) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+        
+        auto setPtr = (Set*)MArgument_getInteger(argv[0]);
+        try {
+            const auto expressions = setPtr->expressions();
             MArgument_setMTensor(result, putSet(expressions, libData));
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
@@ -165,6 +202,18 @@ EXTERN_C void WolframLibrary_uninitialize(WolframLibraryData libData) {
     return;
 }
 
+EXTERN_C int setCreate(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    return SetReplace::setCreate(libData, argc, argv, result);
+}
+
+EXTERN_C int setDelete(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    return SetReplace::setDelete(libData, argc, argv, result);
+}
+
 EXTERN_C int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
     return SetReplace::setReplace(libData, argc, argv, result);
+}
+
+EXTERN_C int setExpressions(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    return SetReplace::setExpressions(libData, argc, argv, result);
 }

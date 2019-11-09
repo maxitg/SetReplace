@@ -19,16 +19,45 @@ PackageScope["setSubstitutionSystem$cpp"]
 (*Load libSetReplace*)
 
 
-With[{libraryFile = FindLibrary["libSetReplace"]},
-	$cpp$setReplace = If[libraryFile =!= $Failed,
-		LibraryFunctionLoad[
-			libraryFile,
-			"setReplace",
-			{{Integer, 1}, (* rules *)
-				{Integer, 1}, (* initial set *)
-				{Integer, 1}}, (* {generations, steps} *)
-			{Integer, 1}],
-		$Failed]];
+$libraryFile = FindLibrary["libSetReplace"];
+
+
+$cpp$setCreate = If[$libraryFile =!= $Failed,
+	LibraryFunctionLoad[
+		$libraryFile,
+		"setCreate",
+		{{Integer, 1}, (* rules *)
+			{Integer, 1}}, (* initial set *)
+		Integer], (* set ptr *)
+	$Failed];
+
+
+$cpp$setDelete = If[$libraryFile =!= $Failed,
+	LibraryFunctionLoad[
+		$libraryFile,
+		"setDelete",
+		{Integer}, (* set ptr *)
+		"Void"],
+	$Failed];
+
+
+$cpp$setReplace = If[$libraryFile =!= $Failed,
+	LibraryFunctionLoad[
+		$libraryFile,
+		"setReplace",
+		{Integer, (* set ptr *)
+			{Integer, 1}}, (* {generations, steps} *)
+		"Void"],
+	$Failed];
+
+
+$cpp$setExpressions = If[$libraryFile =!= $Failed,
+	LibraryFunctionLoad[
+		$libraryFile,
+		"setExpressions",
+		{Integer}, (* set ptr *)
+		{Integer, 1}], (* expressions *)
+	$Failed];
 
 
 (* ::Section:: *)
@@ -143,7 +172,7 @@ setSubstitutionSystem$cpp[rules_, set_, generations_, steps_] /;
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
-		mappedSet, localIndices, mappedRules, cppOutput, resultAtoms,
+		mappedSet, localIndices, mappedRules, setPtr, cppOutput, resultAtoms,
 		inversePartialGlobalMap, inverseGlobalMap},
 	canonicalRules = toCanonicalRules[rules];
 	setAtoms = Hold /@ Union[Flatten[set]];
@@ -159,10 +188,12 @@ setSubstitutionSystem$cpp[rules_, set_, generations_, steps_] /;
 			globalIndex,
 			localIndices[[K]]],
 		{K, Length[canonicalRules]}];
-	cppOutput = decodeExpressions @ $cpp$setReplace[
+	setPtr = $cpp$setCreate[
 		encodeNestedLists[List @@@ mappedRules],
-		encodeNestedLists[mappedSet],
-		{generations, steps} /. {\[Infinity] -> $maxInt}];
+		encodeNestedLists[mappedSet]];
+	$cpp$setReplace[setPtr, {generations, steps} /. {\[Infinity] -> $maxInt}];
+	cppOutput = decodeExpressions @ $cpp$setExpressions[setPtr];
+	$cpp$setDelete[setPtr];
 	resultAtoms = Union[Flatten[cppOutput[$atomLists]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
 	inverseGlobalMap = Association @ Thread[resultAtoms

@@ -39,13 +39,12 @@ namespace SetReplace {
          */
         Matcher(const std::vector<Rule>& rules,
                 AtomsIndex& atomsIndex,
-                const std::function<AtomsVector(ExpressionID)> getAtomsVector,
-                const std::function<bool()> shouldAbort);
+                const std::function<AtomsVector(ExpressionID)> getAtomsVector);
         
         /** @brief Finds and adds to the index all matches involving specified expressions.
          * @details Calls shouldAbort() frequently, and throws Error::Aborted if that returns true. Otherwise might take significant time to evaluate depending on the system.
          */
-        void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs);
+        void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort);
         
         /** @brief Removes matches containing specified expression IDs from the index.
          */

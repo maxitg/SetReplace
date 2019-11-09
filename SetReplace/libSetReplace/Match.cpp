@@ -53,7 +53,6 @@ namespace SetReplace {
         const std::vector<Rule>& rules_;
         AtomsIndex& atomsIndex_;
         const std::function<AtomsVector(ExpressionID)> getAtomsVector_;
-        const std::function<bool()> shouldAbort_;
         
         std::set<Match> matches_; // sorted by priority, i.e., the first match is returned first.
         
@@ -68,13 +67,12 @@ namespace SetReplace {
     public:
         Implementation(const std::vector<Rule>& rules,
                        AtomsIndex& atomsIndex,
-                       const std::function<AtomsVector(ExpressionID)> getAtomsVector,
-                       const std::function<bool()> shouldAbort) :
-            rules_(rules), atomsIndex_(atomsIndex), getAtomsVector_(getAtomsVector), shouldAbort_(shouldAbort) {}
+                       const std::function<AtomsVector(ExpressionID)> getAtomsVector) :
+            rules_(rules), atomsIndex_(atomsIndex), getAtomsVector_(getAtomsVector) {}
         
-        void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs) {
+        void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort) {
             for (int i = 0; i < rules_.size(); ++i) {
-                addMatchesForRule(expressionIDs, i);
+                addMatchesForRule(expressionIDs, i, shouldAbort);
             }
         }
         
@@ -123,20 +121,21 @@ namespace SetReplace {
         
     private:
         
-        void addMatchesForRule(const std::vector<ExpressionID>& expressionIDs, const RuleID& ruleID) {
+        void addMatchesForRule(const std::vector<ExpressionID>& expressionIDs, const RuleID& ruleID, const std::function<bool()> shouldAbort) {
             for (int i = 0; i < rules_[ruleID].inputs.size(); ++i) {
                 Match emptyMatch{ruleID, std::vector<ExpressionID>(rules_[ruleID].inputs.size(), -1)};
-                completeMatchesStartingWithInput(emptyMatch, rules_[ruleID].inputs, i, expressionIDs);
+                completeMatchesStartingWithInput(emptyMatch, rules_[ruleID].inputs, i, expressionIDs, shouldAbort);
             }
         }
         
         void completeMatchesStartingWithInput(const Match& incompleteMatch,
                                               const std::vector<AtomsVector>& partiallyMatchedInputs,
                                               const int nextInputIdx,
-                                              const std::vector<ExpressionID>& potentialExpressionIDs) {
+                                              const std::vector<ExpressionID>& potentialExpressionIDs,
+                                              const std::function<bool()> shouldAbort) {
             for (const auto expressionID : potentialExpressionIDs) {
                 if (isExpressionUnused(incompleteMatch, expressionID)) {
-                    attemptMatchExpressionToInput(incompleteMatch, partiallyMatchedInputs, nextInputIdx, expressionID);
+                    attemptMatchExpressionToInput(incompleteMatch, partiallyMatchedInputs, nextInputIdx, expressionID, shouldAbort);
                 }
             }
         }
@@ -151,9 +150,10 @@ namespace SetReplace {
         void attemptMatchExpressionToInput(const Match& incompleteMatch,
                                            const std::vector<AtomsVector>& partiallyMatchedInputs,
                                            const int nextInputIdx,
-                                           const ExpressionID potentialExpressionID) {
+                                           const ExpressionID potentialExpressionID,
+                                           const std::function<bool()> shouldAbort) {
             // If WL wants to abort, abort
-            if (shouldAbort_()) {
+            if (shouldAbort()) {
                 throw Error::Aborted;
             }
             
@@ -179,7 +179,8 @@ namespace SetReplace {
                 completeMatchesStartingWithInput(newMatch,
                                                  newInputs,
                                                  nextInputIdxAndCandidateExpressions.first,
-                                                 nextInputIdxAndCandidateExpressions.second);
+                                                 nextInputIdxAndCandidateExpressions.second,
+                                                 shouldAbort);
             }
         }
         
@@ -259,13 +260,12 @@ namespace SetReplace {
     
     Matcher::Matcher(const std::vector<Rule>& rules,
                      AtomsIndex& atomsIndex,
-                     const std::function<AtomsVector(ExpressionID)> getAtomsVector,
-                     const std::function<bool()> shouldAbort) {
-        implementation_ = std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector, shouldAbort);
+                     const std::function<AtomsVector(ExpressionID)> getAtomsVector) {
+        implementation_ = std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector);
     }
     
-    void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs) {
-        implementation_->addMatchesInvolvingExpressions(expressionIDs);
+    void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort) {
+        implementation_->addMatchesInvolvingExpressions(expressionIDs, shouldAbort);
     }
     
     void Matcher::removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs) {
