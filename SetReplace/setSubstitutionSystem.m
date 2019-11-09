@@ -158,7 +158,7 @@ setSubstitutionSystem[
 			&& MatchQ[canonicalRules, {___ ? simpleRuleQ}],
 		If[$cppSetReplaceAvailable,
 			Return[
-				setSubstitutionSystem$cpp[rules, set, generations, steps]]]];
+				setSubstitutionSystem$cpp[rules, set, generations, steps, returnOnAbortQ]]]];
 	If[MatchQ[method, $cppMethod],
 		failedQ = True;
 		If[!$cppSetReplaceAvailable,
