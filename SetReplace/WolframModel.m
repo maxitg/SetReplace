@@ -165,7 +165,8 @@ WolframModel[
 				events,
 				WolframModel,
 				True,
-				Method -> OptionValue[Method]],
+				Method -> OptionValue[Method],
+				TimeConstraint -> OptionValue[TimeConstraint]],
 			$Failed];
 		renamedNodesEvolution = If[evolution =!= $Failed,
 			Check[

@@ -96,6 +96,16 @@ setSubstitutionSystem[
 	makeMessage[caller, "invalidMethod"]
 
 
+(* ::Subsection:: *)
+(*TimeConstraint is valid*)
+
+
+setSubstitutionSystem[
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+	!MatchQ[OptionValue[TimeConstraint], _ ? (# > 0 &)] &&
+	Message[caller::timc, OptionValue[TimeConstraint]]
+
+
 (* ::Section:: *)
 (*Implementation*)
 
@@ -136,7 +146,7 @@ simpleRuleQ[___] := False
 (*This function accepts both the number of generations and the number of steps as an input, and runs until the first of the two is reached. it also takes a caller function as an argument, which is used for message generation.*)
 
 
-Options[setSubstitutionSystem] = {Method -> Automatic};
+Options[setSubstitutionSystem] = {Method -> Automatic, TimeConstraint -> Infinity};
 
 
 (* ::Text:: *)
@@ -151,14 +161,15 @@ setSubstitutionSystem[
 			caller_,
 			returnOnAbortQ_,
 			o : OptionsPattern[]] := Module[{
-		method = OptionValue[Method], canonicalRules, failedQ = False},
+		method = OptionValue[Method], timeConstraint = OptionValue[TimeConstraint], canonicalRules, failedQ = False},
+	If[(timeConstraint > 0) =!= True, Return[$Failed]];
 	canonicalRules = toCanonicalRules[rules];
 	If[MatchQ[method, Automatic | $cppMethod]
 			&& MatchQ[set, {{___}...}]
 			&& MatchQ[canonicalRules, {___ ? simpleRuleQ}],
 		If[$cppSetReplaceAvailable,
 			Return[
-				setSubstitutionSystem$cpp[rules, set, generations, steps, returnOnAbortQ]]]];
+				setSubstitutionSystem$cpp[rules, set, generations, steps, returnOnAbortQ, timeConstraint]]]];
 	If[MatchQ[method, $cppMethod],
 		failedQ = True;
 		If[!$cppSetReplaceAvailable,
@@ -166,5 +177,5 @@ setSubstitutionSystem[
 			makeMessage[caller, "lowLevelNotImplemented"]]];
 	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
-		setSubstitutionSystem$wl[rules, set, generations, steps, returnOnAbortQ]]
+		setSubstitutionSystem$wl[rules, set, generations, steps, returnOnAbortQ, timeConstraint]]
 ]

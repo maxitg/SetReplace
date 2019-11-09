@@ -168,7 +168,7 @@ $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
 $maxInt = 2^31 - 1;
 
 
-setSubstitutionSystem$cpp[rules_, set_, generations_, steps_, returnOnAbortQ_] /;
+setSubstitutionSystem$cpp[rules_, set_, generations_, steps_, returnOnAbortQ_, timeConstraint_] /;
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
@@ -191,10 +191,12 @@ setSubstitutionSystem$cpp[rules_, set_, generations_, steps_, returnOnAbortQ_] /
 	setPtr = $cpp$setCreate[
 		encodeNestedLists[List @@@ mappedRules],
 		encodeNestedLists[mappedSet]];
-	CheckAbort[
-		$cpp$setReplace[setPtr, {generations, steps} /. {\[Infinity] -> $maxInt}],
-		If[!returnOnAbortQ, Abort[]]
-	];
+	TimeConstrained[
+		CheckAbort[
+			$cpp$setReplace[setPtr, {generations, steps} /. {\[Infinity] -> $maxInt}],
+			If[!returnOnAbortQ, Abort[]]],
+		timeConstraint,
+		If[!returnOnAbortQ, Return[$Aborted]]];
 	cppOutput = decodeExpressions @ $cpp$setExpressions[setPtr];
 	$cpp$setDelete[setPtr];
 	resultAtoms = Union[Flatten[cppOutput[$atomLists]]];
