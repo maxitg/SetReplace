@@ -116,25 +116,25 @@ VerificationTest[
 (* Valid coordinates *)
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> $$$invalid$$$],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> $$$invalid$$$],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> $$$invalid$$$],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> $$$invalid$$$],
   {HypergraphPlot::invalidCoordinates}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {{0, 0}}],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {{0, 0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {{0, 0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {{0, 0}}],
   {HypergraphPlot::invalidCoordinates}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0}}],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0}}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0}}],
   {HypergraphPlot::invalidCoordinates}
 ]
 
 VerificationTest[
-  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0, 0}}]],
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0, 0}}]],
   Graphics
 ]
 
@@ -228,25 +228,19 @@ VerificationTest[
 ] & /@ $layoutTestHypergraphs
 
 VerificationTest[
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "CyclicOpen"]],
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "CyclicClosed"]],
-  SameTest -> Equal
-] & /@ $layoutTestHypergraphs
-
-VerificationTest[
-  MissingQ[FirstCase[
+  Length[Union[Cases[
     HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"],
     Polygon[___],
-    Missing[],
-    All]]
+    All]]],
+  1
 ] & /@ $layoutTestHypergraphs
 
 VerificationTest[
-  !MissingQ[FirstCase[
+  Length[Union[Cases[
     HypergraphPlot[#, GraphLayout -> "SpringElectricalPolygons"],
     Polygon[___],
-    Missing[],
-    All]]
+    All]]],
+  1 + Length[#]
 ] & /@ $layoutTestHypergraphs
 
 (* VertexLabels *)
@@ -291,13 +285,13 @@ VerificationTest[
     All]]
 ]
 
-(* VertexCoordinates *)
+(* VertexCoordinateRules *)
 
 VerificationTest[
   And @@ (MemberQ[
       diskCoordinates[HypergraphPlot[
         {{1, 2, 3}, {3, 4, 5}, {3, 3}},
-        VertexCoordinates -> {1 -> {0, 0}, 2 -> {1, 0}}]],
+        VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}}]],
       #] & /@
     {{0., 0.}, {1., 0.}})
 ]
@@ -305,7 +299,7 @@ VerificationTest[
 VerificationTest[
   Chop @ diskCoordinates[HypergraphPlot[
     {{1, 2, 3}, {3, 4, 5}},
-    VertexCoordinates -> {3 -> {0, 0}}]],
+    VertexCoordinateRules -> {3 -> {0, 0}}]],
   Table[{0, 0}, 5],
   SameTest -> (Not @* Equal)
 ]
@@ -313,9 +307,17 @@ VerificationTest[
 VerificationTest[
   Chop @ diskCoordinates[HypergraphPlot[
     {{1, 2, 3}, {3, 4, 5}},
-    VertexCoordinates -> {3 -> {1, 0}, 3 -> {0, 0}}]],
+    VertexCoordinateRules -> {3 -> {1, 0}, 3 -> {0, 0}}]],
   Table[{0, 0}, 5],
   SameTest -> (Not @* Equal)
+]
+
+(** Same coordinates should not produce any messages **)
+VerificationTest[
+  And @@ Cases[
+    HypergraphPlot[{{1, 2, 3}}, VertexCoordinateRules -> {1 -> {1, 0}, 2 -> {1, 0}}],
+    Rotate[_, {v1_, v2_}] :> v1 != {0, 0} && v2 != {0, 0},
+    All]
 ]
 
 (* GraphHighlight *)
@@ -324,5 +326,50 @@ VerificationTest[
   Length[Union @ Cases[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {#}], _ ? ColorQ, All]] >
     Length[Union @ Cases[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}], _ ? ColorQ, All]]
 ] & /@ {4, {1, 2, 3}}
+
+(* Scaling consistency *)
+(* Vertex sizes, arrow sizes, average edge lengths, and loop lengths should always be the same. *)
+
+VerificationTest[
+  SameQ @@ (
+    Union[Cases[HypergraphPlot[#], Disk[_, r_] :> r, All]] & /@
+      {{{1}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
+]
+
+VerificationTest[
+  SameQ @@ (
+    Union[Cases[HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"], p : Polygon[___] :> Area[p], All]] & /@
+      {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
+]
+
+VerificationTest[
+  Equal @@ (
+    Mean[Cases[
+        HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"],
+        Line[pts_] :> EuclideanDistance @@ pts,
+        All]] & /@
+      {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3, 4, 5, 1}}})
+]
+
+$selfLoopLength = FirstCase[
+  HypergraphPlot[{{1, 1}}, GraphLayout -> "SpringElectricalEmbedding"],
+  Line[pts_] :> RegionMeasure[Line[pts]],
+  Missing[],
+  All];
+
+VerificationTest[
+  And @@ (
+    MemberQ[
+        Cases[
+          HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"],
+          Line[pts_] :> RegionMeasure[Line[pts]],
+          All],
+        $selfLoopLength] & /@ {
+      {{1, 1}},
+      {{1, 2, 3}, {1, 1}},
+      {{1, 2, 3}, {3, 4, 5}, {5, 5}},
+      {{1, 2, 3}, {3, 4, 5}, {5, 6, 1, 1}},
+      {{1, 2, 3, 4, 5, 5, 1}}})
+]
 
 EndTestSection[]

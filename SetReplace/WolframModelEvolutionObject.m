@@ -107,7 +107,7 @@ $propertyArgumentCounts = <|
 |>;
 
 
-$propertiesParameterless = Keys @ Select[#[[1]] == 0 &] @ $propertyArgumentCounts
+$propertiesParameterless = Keys @ Select[#[[1]] == 0 &] @ $propertyArgumentCounts;
 
 
 (* ::Subsection:: *)

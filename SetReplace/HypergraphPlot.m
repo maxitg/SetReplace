@@ -2,10 +2,14 @@ Package["SetReplace`"]
 
 PackageExport["HypergraphPlot"]
 
+PackageScope["correctHypergraphPlotOptionsQ"]
+PackageScope["hypergraphEmbedding"]
+PackageScope["hypergraphPlot"]
+
 (* Documentation *)
 
 HypergraphPlot::usage = usageString[
-	"HypergraphPlot[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph."]
+	"HypergraphPlot[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph."];
 
 SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
 
@@ -13,7 +17,7 @@ Options[HypergraphPlot] = Join[{
 	"EdgeType" -> "CyclicOpen",
 	GraphHighlight -> {},
 	GraphLayout -> "SpringElectricalPolygons",
-	VertexCoordinates -> {},
+	VertexCoordinateRules -> {},
 	VertexLabels -> None},
 	Options[Graphics]];
 
@@ -22,16 +26,10 @@ $graphLayouts = {"SpringElectricalEmbedding", "SpringElectricalPolygons"};
 
 (* Messages *)
 
-HypergraphPlot::notImplemented =
-	"Not implemented: `1`.";
-
-HypergraphPlot::invalidEdges =
+General::invalidEdges =
 	"First argument of HypergraphPlot must be list of lists, where elements represent vertices.";
 
-HypergraphPlot::invalidFiniteOption =
-	"Value `2` of option `1` should be one of `3`.";
-
-HypergraphPlot::invalidCoordinates =
+General::invalidCoordinates =
 	"Coordinates `1` should be a list of rules from vertices to pairs of numbers.";
 
 HypergraphPlot::invalidHighlight =
@@ -40,9 +38,6 @@ HypergraphPlot::invalidHighlight =
 (* Evaluation *)
 
 func : HypergraphPlot[args___] := Module[{result = hypergraphPlot$parse[args]},
-	If[Head[result] === hypergraphPlot$failing,
-		Message[HypergraphPlot::notImplemented, Defer[func]];
-		result = $Failed];
 	result /; result =!= $Failed
 ]
 
@@ -55,58 +50,57 @@ hypergraphPlot$parse[edges : Except[{___List}], o : OptionsPattern[]] := (
 	$Failed
 )
 
-hypergraphPlot$parse[args : PatternSequence[edges_, o : OptionsPattern[]]] := With[{
-		unknownOptions = Complement @@ {{o}, Options[HypergraphPlot]}[[All, All, 1]]},
-	If[Length[unknownOptions] > 0,
-		Message[HypergraphPlot::optx, unknownOptions[[1]], Defer[HypergraphPlot[args]]]
-	];
-	$Failed /; Length[unknownOptions] > 0
-]
-
-hypergraphPlot$parse[edges_, o : OptionsPattern[]] /;
-		! (And @@ (supportedOptionQ[HypergraphPlot, ##, {o}] & @@@ {
-			{"EdgeType", $edgeTypes},
-			{GraphLayout, $graphLayouts}})) :=
-	$Failed
-
-supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, supportedQ},
-	value = OptionValue[func, {opts}, optionToCheck];
-	supportedQ = MemberQ[validValues, value];
-	If[!supportedQ,
-		Message[MessageName[func, "invalidFiniteOption"], optionToCheck, value, validValues]
-	];
-	supportedQ
-]
-
-hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
-		result, vertexCoordinates},
-	vertexCoordinates = OptionValue[HypergraphPlot, {o}, VertexCoordinates];
-	result = If[!MatchQ[vertexCoordinates,
-			Automatic |
-			{(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
-		Message[HypergraphPlot::invalidCoordinates, vertexCoordinates];
-		$Failed];
-	result /; result === $Failed
-]
-
-hypergraphPlot$parse[edges_, o : OptionsPattern[]] := Module[{
-		highlight, vertices, validQ},
-	highlight = OptionValue[HypergraphPlot, {o}, GraphHighlight];
-	vertices = Union[Catenate[edges]];
-	validQ = ListQ[highlight] && (And @@ (MemberQ[Join[vertices, edges], #] & /@ highlight));
-	If[!validQ, Message[HypergraphPlot::invalidHighlight, highlight]];
-	$Failed /; !validQ
-]
-
 hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
 	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
-		(OptionValue[HypergraphPlot, {o}, #] & /@ {
-			"EdgeType", GraphHighlight, GraphLayout, VertexCoordinates, VertexLabels})
+			(OptionValue[HypergraphPlot, {o}, #] & /@ {
+				"EdgeType", GraphHighlight, GraphLayout, VertexCoordinateRules, VertexLabels}) /;
+		correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}]
+
+hypergraphPlot$parse[___] := $Failed
+
+correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
+	knownOptionsQ[head, expr, opts] &&
+	(And @@ (supportedOptionQ[head, ##, opts] & @@@ {
+			{"EdgeType", $edgeTypes},
+			{GraphLayout, $graphLayouts}})) &&
+	correctCoordinateRulesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinateRules]] &&
+	correctHighlightQ[edges, OptionValue[HypergraphPlot, opts, GraphHighlight]]
+
+correctCoordinateRulesQ[head_, coordinateRules_] :=
+	If[!MatchQ[coordinateRules,
+			Automatic |
+			{(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
+		Message[head::invalidCoordinates, coordinateRules];
+		False,
+		True
+	]
+
+correctHighlightQ[edges : Except[Automatic], highlight_] := Module[{
+		vertices, validQ},
+	vertices = vertexList[edges];
+	validQ = ListQ[highlight] && (And @@ (MemberQ[Join[vertices, edges], #] & /@ highlight));
+	If[!validQ, Message[HypergraphPlot::invalidHighlight, highlight]];
+	validQ
+]
+
+correctHighlightQ[Automatic, _] := True
 
 (* Implementation *)
 
-hypergraphPlot[edges_, edgeType_, highlight_, layout_, vertexCoordinates_, vertexLabels_, graphicsOptions_] := Show[
-	drawEmbedding[vertexLabels, highlight] @
+$vertexSize = 0.06;
+$arrowheadLength = 0.15;
+
+hypergraphPlot[
+		edges_,
+		edgeType_,
+		highlight_,
+		layout_,
+		vertexCoordinates_,
+		vertexLabels_,
+		graphicsOptions_,
+		vertexSize_ : $vertexSize,
+		arrowheadsSize_ : $arrowheadLength] := Show[
+	drawEmbedding[vertexLabels, highlight, vertexSize, arrowheadsSize] @
 		hypergraphEmbedding[edgeType, layout, vertexCoordinates] @
 		edges,
 	graphicsOptions
@@ -119,9 +113,9 @@ hypergraphPlot[edges_, edgeType_, highlight_, layout_, vertexCoordinates_, verte
 
 (*** SpringElectricalEmbedding ***)
 
-hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", vertexCoordinates_][edges_] := Module[{
+hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", coordinateRules_][edges_] := Module[{
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
-	vertices = Union[Catenate[edges]];
+	vertices = vertexList[edges];
 	vertexEmbeddingNormalEdges = toNormalEdges[edgeType] /@ edges;
 	edgeEmbeddingNormalEdges = If[edgeType === "CyclicOpen",
 		If[# === {}, Identity[#], Most[#]] & /@ # &,
@@ -135,7 +129,7 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", vertexCoord
 			Catenate[vertexEmbeddingNormalEdges],
 			Catenate[edgeEmbeddingNormalEdges],
 			layout,
-			vertexCoordinates]]
+			coordinateRules]]
 ]
 
 toNormalEdges["Ordered"][hyperedge_] :=
@@ -146,42 +140,23 @@ toNormalEdges["CyclicOpen" | "CyclicClosed"][hyperedge : Except[{}]] :=
 
 toNormalEdges["CyclicOpen" | "CyclicClosed"][{}] := {}
 
-graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{embedding},
-	embedding = constrainedGraphEmbedding[Graph[vertices, vertexEmbeddingEdges], layout, coordinateRules];
-	graphEmbedding[vertices, edgeEmbeddingEdges, layout, embedding]
+graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
+		relevantCoordinateRules, vertexCoordinateRules, unscaledEmbedding},
+	relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
+	vertexCoordinateRules = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
+		relevantCoordinateRules,
+		graphEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules][[1]]
+	];
+	unscaledEmbedding = graphEmbedding[vertices, edgeEmbeddingEdges, layout, vertexCoordinateRules];
+	rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules]
 ]
 
-constrainedGraphEmbedding[graph_, layout_, coordinateRules_] := Module[{
-		indexGraph, vertexToIndex, relevantCoordinateRules, graphPlot, graphPlotCoordinateRules, displacement},
-	indexGraph = IndexGraph[graph];
-	vertexToIndex = Thread[VertexList[graph] -> VertexList[indexGraph]];
-	relevantCoordinateRules =
-		Normal[Merge[Select[MemberQ[vertexToIndex[[All, 1]], #[[1]]] &][coordinateRules], Last]];
-	graphPlot = GraphPlot[
-		indexGraph, {
-		Method -> layout,
-		PlotTheme -> "Classic",
-		If[Length[relevantCoordinateRules] > 1,
-			VertexCoordinateRules ->
-				Thread[(relevantCoordinateRules[[All, 1]] /. vertexToIndex) ->
-					relevantCoordinateRules[[All, 2]]],
-			Nothing]}];
-	graphPlotCoordinateRules = VertexCoordinateRules /. Cases[graphPlot, _Rule, Infinity];
-	If[Length[relevantCoordinateRules] != 1,
-		graphPlotCoordinateRules,
-		displacement =
-			relevantCoordinateRules[[1, 2]] -
-			(relevantCoordinateRules[[1, 1]] /. Thread[VertexList[graph] -> graphPlotCoordinateRules]);
-		# + displacement & /@ graphPlotCoordinateRules
-	]
-]
-
-graphEmbedding[vertices_, edges_, layout_, coordinates_] := Replace[
+graphEmbedding[vertices_, edges_, layout_, coordinateRules_] := Replace[
 	Reap[
 		GraphPlot[
 			Graph[vertices, edges],
 			GraphLayout -> layout,
-			VertexCoordinates -> coordinates,
+			VertexCoordinateRules -> coordinateRules,
 			VertexShapeFunction -> (Sow[#2 -> #, "v"] &),
 			EdgeShapeFunction -> (Sow[#2 -> #, "e"] &)],
 		{"v", "e"}][[2]],
@@ -212,6 +187,33 @@ normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 	{vertexEmbedding, Join[edgeEmbedding, singleVertexEdgeEmbedding]}
 ]
 
+rescaleEmbedding[unscaledEmbedding_, {_, __}] := unscaledEmbedding
+
+rescaleEmbedding[unscaledEmbedding_, {v_ -> pivotPoint_}] :=
+	rescaleEmbedding[unscaledEmbedding, pivotPoint, 1 / edgeScale[unscaledEmbedding]]
+
+rescaleEmbedding[unscaledEmbedding_, {}] := rescaleEmbedding[unscaledEmbedding, {0 -> {0.0, 0.0}}]
+
+lineLength[pts_] := Total[EuclideanDistance @@@ Partition[pts, 2, 1]]
+
+$selfLoopsScale = 0.7;
+edgeScale[{vertexEmbedding_, edgeEmbedding : Except[{}]}] := Module[{selfLoops},
+	selfLoops = Select[#[[1, 1]] == #[[1, 2]] &][edgeEmbedding][[All, 2]];
+	Mean[lineLength /@ N /@ If[selfLoops =!= {}, $selfLoopsScale * selfLoops, edgeEmbedding[[All, 2]]]]
+]
+
+edgeScale[{{} | {_ -> _}, _}] := 1
+
+edgeScale[{vertexEmbedding_, {}}] :=
+	lineLength[Transpose[MinMax /@ Transpose[vertexEmbedding[[All, 2]]]]] /
+		(Sqrt[N[Length[vertexEmbedding]] / 2])
+
+rescaleEmbedding[embedding_, center_, factor_] := Map[
+	(#[[1]] -> (#[[2]] /. coords : {Repeated[_Real, {2}]} :> (coords - center) * factor + center)) &,
+	embedding,
+	{2}
+]
+
 (*** SpringElectricalPolygons ***)
 
 hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons", vertexCoordinates_][edges_] := Module[{
@@ -238,13 +240,14 @@ $highlightColor = Hue[1.0, 1.0, 0.7];
 $edgeColor = Hue[0.6, 0.7, 0.5];
 $vertexColor = Hue[0.6, 0.2, 0.8];
 
-drawEmbedding[vertexLabels_, highlight_][embedding_] := Module[{
-		plotRange, vertexSize, arrowheadsSize, embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries,
-		edgePoints, labels, singleVertexEdgeCounts, getSingleVertexEdgeRadius},
-	plotRange = #2 - #1 & @@ MinMax[embedding[[1, All, 2, 1, 1, 1]]];
-	vertexSize = computeVertexSize[plotRange];
-	arrowheadsSize = computeArrowheadsSize[Length[embedding[[1]]], plotRange, vertexSize];
+$arrowheadShape = Polygon[{
+	{-1.10196, -0.289756}, {-1.08585, -0.257073}, {-1.05025, -0.178048}, {-1.03171, -0.130243}, {-1.01512, -0.0824391},
+	{-1.0039, -0.037561}, {-1., 0.}, {-1.0039, 0.0341466}, {-1.01512, 0.0780486}, {-1.03171, 0.127805},
+	{-1.05025, 0.178538}, {-1.08585, 0.264878}, {-1.10196, 0.301464}, {0., 0.}, {-1.10196, -0.289756}}];
 
+drawEmbedding[vertexLabels_, highlight_, vertexSize_, arrowheadLength_][embedding_] := Module[{
+		embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries, edgePoints, labels, singleVertexEdgeCounts,
+		getSingleVertexEdgeRadius},
 	embeddingShapes = Map[
 		#[[2]] /. (h : (Point | Line | Polygon))[pts_] :> highlighted[h[pts], MemberQ[highlight, #[[1]]]] &,
 		embedding,
@@ -270,8 +273,7 @@ drawEmbedding[vertexLabels_, highlight_][embedding_] := Module[{
 				Directive[Opacity[1], $highlightColor],
 				Directive[Opacity[0.7], $edgeColor]
 			],
-			Arrowheads[arrowheadsSize],
-			Arrow[pts]},
+			arrow[$arrowheadShape, arrowheadLength, vertexSize][pts]},
 		highlighted[Polygon[pts_], h_] :> {
 			Opacity[0.3],
 			If[h,
@@ -302,9 +304,3 @@ drawEmbedding[vertexLabels_, highlight_][embedding_] := Module[{
 			EdgeShapeFunction -> None]];
 	Show[Graphics[{polygons, polygonBoundaries, lines, vertexPoints, edgePoints}], labels]
 ]
-
-(*** Arrowhead and vertex sizes are approximately the same as GraphPlot ***)
-computeArrowheadsSize[vertexCount_ ? (# <= 20 &), plotRange_, vertexSize_] := Medium
-computeArrowheadsSize[vertexCount_ ? (# > 20 &), plotRange_, vertexSize_] := 1.25 * 2 * vertexSize / plotRange
-
-computeVertexSize[plotRange_] := 0.15 - 2. * 1 / (plotRange + 13.7)

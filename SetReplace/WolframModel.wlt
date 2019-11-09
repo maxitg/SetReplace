@@ -18,7 +18,7 @@ VerificationTest[
 VerificationTest[
   WolframModel[x],
   WolframModel[x],
-  {WolframModel::invalidRules}
+  {}
 ]
 
 VerificationTest[
@@ -60,7 +60,7 @@ VerificationTest[
 VerificationTest[
   WolframModel[x, f -> 3],
   WolframModel[x, f -> 3],
-  {WolframModel::invalidRules}
+  {}
 ]
 
 VerificationTest[
@@ -222,25 +222,25 @@ VerificationTest[
 VerificationTest[
   WolframModel[<|"PatternRule" -> 1 -> 2|>],
   WolframModel[<|"PatternRule" -> 1 -> 2|>],
-  {WolframModel::invalidRules}
+  {}
 ]
 
 VerificationTest[
   WolframModel[<|"PatternRule" -> 1 -> 2|>][{1}],
   WolframModel[<|"PatternRule" -> 1 -> 2|>][{1}],
-  {WolframModel::invalidRules}
+  {}
 ]
 
 VerificationTest[
   WolframModel[<|"PatternRules" -> 1 -> 2, "f" -> 2|>],
   WolframModel[<|"PatternRules" -> 1 -> 2, "f" -> 2|>],
-  {WolframModel::invalidRules}
+  {}
 ]
 
 VerificationTest[
   WolframModel[<|"PatternRules" -> 1 -> 2, "f" -> 2|>][{1}],
   WolframModel[<|"PatternRules" -> 1 -> 2, "f" -> 2|>][{1}],
-  {WolframModel::invalidRules}
+  {}
 ]
 
 VerificationTest[

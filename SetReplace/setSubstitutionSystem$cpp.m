@@ -28,7 +28,7 @@ With[{libraryFile = FindLibrary["libSetReplace"]},
 				{Integer, 1}, (* initial set *)
 				{Integer, 1}}, (* {generations, steps} *)
 			{Integer, 1}],
-		$Failed]]
+		$Failed]];
 
 
 (* ::Section:: *)
