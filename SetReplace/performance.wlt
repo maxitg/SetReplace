@@ -11,12 +11,11 @@ $rule =
       {$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]};
 
 VerificationTest[
-  SetReplace[
+  Head[SetReplace[
     $init,
     $rule,
-    1000],
-  {0},
-  SameTest -> (ListQ[#1] && ListQ[#2] &),
+    1000]],
+  List,
   TimeConstraint -> 3,
   MemoryConstraint -> 5*^6
 ]
@@ -24,13 +23,12 @@ VerificationTest[
 (** WL performance **)
 
 VerificationTest[
-  SetReplace[
+  Head[SetReplace[
     $init,
     $rule,
     100,
-    Method -> "Symbolic"],
-  {0},
-  SameTest -> (ListQ[#1] && ListQ[#2] &),
+    Method -> "Symbolic"]],
+  List,
   TimeConstraint -> 60,
   MemoryConstraint -> 5*^6
 ]
@@ -38,14 +36,13 @@ VerificationTest[
 (** Naming function performance **)
 
 VerificationTest[
-  WolframModel[
+  Head[WolframModel[
     <|"PatternRules" -> $rule|>,
     $init,
     <|"Events" -> 1000|>,
     "FinalState",
-    "NodeNamingFunction" -> All],
-  {0},
-  SameTest -> (ListQ[#1] && ListQ[#2] &),
+    "NodeNamingFunction" -> All]],
+  List,
   TimeConstraint -> 3,
   MemoryConstraint -> 10*^6
 ]
