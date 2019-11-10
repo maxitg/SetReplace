@@ -111,9 +111,22 @@ toNormalRules[rules_List] := Module[{
 (*This function just does the replacements, but it does not keep track of any metadata (generations and events).*)
 
 
-setReplace$wl[set_, rules_, n_] := Quiet[
-	ReplaceRepeated[List @@ set, toNormalRules @ rules, MaxIterations -> n],
-	ReplaceRepeated::rrlim]
+setReplace$wl[set_, rules_, n_, returnOnAbortQ_, timeConstraint_] := Module[{normalRules, partialResult},
+	normalRules = toNormalRules @ rules;
+	partialResult = set;
+	TimeConstrained[
+		CheckAbort[
+			FixedPoint[AbortProtect[partialResult = ReplaceAll[#, normalRules]] &, List @@ set, n],
+			If[returnOnAbortQ,
+				partialResult,
+				Abort[]
+			]],
+		timeConstraint,
+		If[returnOnAbortQ,
+			partialResult,
+			Return[$Aborted]
+		]]
+]
 
 
 (* ::Subsection:: *)
@@ -193,7 +206,7 @@ addMetadataManagement[
 (*This function runs a modified version of the set replace system that also keeps track of metadata such as generations and events. It uses setReplace$wl to evaluate that modified system.*)
 
 
-setSubstitutionSystem$wl[rules_, set_, generations_, steps_] := Module[{
+setSubstitutionSystem$wl[rules_, set_, generations_, steps_, returnOnAbortQ_, timeConstraint_] := Module[{
 		setWithMetadata, rulesWithMetadata, outputWithMetadata, result,
 		nextExpressionID = 1, nextEventID = 1, nextExpression},
 	nextExpression = nextExpressionID++ &;
@@ -201,7 +214,8 @@ setSubstitutionSystem$wl[rules_, set_, generations_, steps_] := Module[{
 	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
 	rulesWithMetadata = addMetadataManagement[
 		#, nextEventID++ &, nextExpression, generations] & /@ toCanonicalRules[rules];
-	outputWithMetadata = Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, steps]];
+	outputWithMetadata = Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, steps, returnOnAbortQ, timeConstraint]];
+	If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
 	result = SortBy[
 		Join[
 			outputWithMetadata[[1]],

@@ -78,6 +78,14 @@ VerificationTest[
 	{SetReplace::invalidMethod}
 ]
 
+(** TimeConstraint is valid **)
+
+VerificationTest[
+  SetReplace[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], 100, TimeConstraint -> #],
+  SetReplace[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], 100, TimeConstraint -> #],
+  {SetReplace::timc}
+] & /@ {0, -1, "x"}
+
 (* Implementation *)
 
 (** Simple examples **)
@@ -205,5 +213,17 @@ VerificationTest[
 	SetReplace[{{1, 2}, {3, 4}}, {} -> {{1, 3}, {2, 4}}, Method -> "LowLevel"],
 	{SetReplace::lowLevelNotImplemented}
 ]
+
+(* TimeConstraint *)
+
+VerificationTest[
+	SetReplace[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], 100000, Method -> #, TimeConstraint -> 0.1],
+	$Aborted
+] & /@ $SetReplaceMethods
+
+VerificationTest[
+	TimeConstrained[SetReplace[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], 100000, Method -> #], 0.1],
+	$Aborted
+] & /@ $SetReplaceMethods
 
 EndTestSection[]

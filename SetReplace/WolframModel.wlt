@@ -212,6 +212,12 @@ VerificationTest[
   {WolframModel::argx}
 ]
 
+VerificationTest[
+  WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{0, 0}}, 100, TimeConstraint -> #],
+  WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{0, 0}}, 100, TimeConstraint -> #],
+  {WolframModel::timc}
+] & /@ {0, -1, "x"}
+
 (** PatternRules **)
 
 VerificationTest[
@@ -811,6 +817,34 @@ VerificationTest[
     "NodeNamingFunction" -> All],
   {{1, 3}, {3, 2}}
 ]
+
+(** TimeConstraint **)
+
+$timeConstraintRule = {{1, 2}} -> {{1, 3}, {3, 2}};
+$timeConstraintInit = {{0, 0}};
+
+(*** Check that aborted evaluation still produces correct evolutions. ***)
+Table[VerificationTest[
+  And @@ Table[
+    With[{
+        output =
+          WolframModel[$timeConstraintRule, $timeConstraintInit, 100, Method -> method, TimeConstraint -> time]},
+      WolframModel[$timeConstraintRule, $timeConstraintInit, <|"Events" -> output["EventsCount"]|>] === output],
+    100],
+  TimeConstraint -> 60
+], {method, $SetReplaceMethods}, {time, {1.*^-100, 0.1}}]
+
+(*** This does not work with TimeConstrained though, $Aborted is returned in that case. ***)
+VerificationTest[
+  TimeConstrained[WolframModel[$timeConstraintRule, $timeConstraintInit, 100, Method -> #], 0.1],
+  $Aborted
+] & /@ $SetReplaceMethods
+
+(*** $Aborted should be returned if not an evolution object is asked for. ***)
+VerificationTest[
+  WolframModel[$timeConstraintRule, $timeConstraintInit, 100, "FinalState", Method -> #, TimeConstraint -> 0.1],
+  $Aborted
+] & /@ $SetReplaceMethods
 
 EndTestSection[]
 

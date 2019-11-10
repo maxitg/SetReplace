@@ -164,8 +164,11 @@ WolframModel[
 				generations,
 				events,
 				WolframModel,
-				Method -> OptionValue[Method]],
+				property === "EvolutionObject",
+				Method -> OptionValue[Method],
+				TimeConstraint -> OptionValue[TimeConstraint]],
 			$Failed];
+		If[evolution === $Aborted, Return[$Aborted]];
 		renamedNodesEvolution = If[evolution =!= $Failed,
 			Check[
 				renameNodes[

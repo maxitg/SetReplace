@@ -41,7 +41,7 @@ $SetReplaceMethods::usage = usageString[
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!ListQ[set] &&
 	makeMessage[caller, "setNotList", set]
 
@@ -55,7 +55,7 @@ setReplaceRulesQ[rules_] :=
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!setReplaceRulesQ[rules] &&
 	makeMessage[caller, "invalidRules", rules]
 
@@ -68,13 +68,13 @@ stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!stepCountQ[generations] &&
 	makeMessage[caller, "nonIntegerIterations", "generations", generations]
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!stepCountQ[maxEvents] &&
 	makeMessage[caller, "nonIntegerIterations", "replacements", maxEvents]
 
@@ -91,9 +91,19 @@ $SetReplaceMethods = {Automatic, $cppMethod, $wlMethod};
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
 	makeMessage[caller, "invalidMethod"]
+
+
+(* ::Subsection:: *)
+(*TimeConstraint is valid*)
+
+
+setSubstitutionSystem[
+		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+	!MatchQ[OptionValue[TimeConstraint], _ ? (# > 0 &)] &&
+	Message[caller::timc, OptionValue[TimeConstraint]]
 
 
 (* ::Section:: *)
@@ -136,7 +146,7 @@ simpleRuleQ[___] := False
 (*This function accepts both the number of generations and the number of steps as an input, and runs until the first of the two is reached. it also takes a caller function as an argument, which is used for message generation.*)
 
 
-Options[setSubstitutionSystem] = {Method -> Automatic};
+Options[setSubstitutionSystem] = {Method -> Automatic, TimeConstraint -> Infinity};
 
 
 (* ::Text:: *)
@@ -149,15 +159,17 @@ setSubstitutionSystem[
 			generations_ ? stepCountQ,
 			steps_ ? stepCountQ,
 			caller_,
+			returnOnAbortQ_,
 			o : OptionsPattern[]] := Module[{
-		method = OptionValue[Method], canonicalRules, failedQ = False},
+		method = OptionValue[Method], timeConstraint = OptionValue[TimeConstraint], canonicalRules, failedQ = False},
+	If[(timeConstraint > 0) =!= True, Return[$Failed]];
 	canonicalRules = toCanonicalRules[rules];
 	If[MatchQ[method, Automatic | $cppMethod]
 			&& MatchQ[set, {{___}...}]
 			&& MatchQ[canonicalRules, {___ ? simpleRuleQ}],
 		If[$cppSetReplaceAvailable,
 			Return[
-				setSubstitutionSystem$cpp[rules, set, generations, steps]]]];
+				setSubstitutionSystem$cpp[rules, set, generations, steps, returnOnAbortQ, timeConstraint]]]];
 	If[MatchQ[method, $cppMethod],
 		failedQ = True;
 		If[!$cppSetReplaceAvailable,
@@ -165,5 +177,5 @@ setSubstitutionSystem[
 			makeMessage[caller, "lowLevelNotImplemented"]]];
 	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
-		setSubstitutionSystem$wl[rules, set, generations, steps]]
+		setSubstitutionSystem$wl[rules, set, generations, steps, returnOnAbortQ, timeConstraint]]
 ]

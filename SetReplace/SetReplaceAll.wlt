@@ -147,4 +147,16 @@ VerificationTest[
   {{0, 4}}
 ]
 
+(* TimeConstraint *)
+
+VerificationTest[
+  SetReplaceAll[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], 100, Method -> #, TimeConstraint -> 0.1],
+  $Aborted
+] & /@ $SetReplaceMethods
+
+VerificationTest[
+  TimeConstrained[SetReplaceAll[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], 100, Method -> #], 0.1],
+  $Aborted
+] & /@ $SetReplaceMethods
+
 EndTestSection[]
