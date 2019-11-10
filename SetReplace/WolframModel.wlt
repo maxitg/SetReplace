@@ -840,6 +840,12 @@ VerificationTest[
   $Aborted
 ] & /@ $SetReplaceMethods
 
+(*** $Aborted should be returned if not an evolution object is asked for. ***)
+VerificationTest[
+  WolframModel[$timeConstraintRule, $timeConstraintInit, 100, "FinalState", Method -> #, TimeConstraint -> 0.1],
+  $Aborted
+] & /@ $SetReplaceMethods
+
 EndTestSection[]
 
 
