@@ -78,7 +78,7 @@ correctCoordinateRulesQ[head_, coordinateRules_] :=
 correctHighlightQ[edges : Except[Automatic], highlight_] := Module[{
 		vertices, validQ},
 	vertices = vertexList[edges];
-	validQ = ListQ[highlight] && (And @@ (MemberQ[Join[vertices, edges], #] & /@ highlight));
+	validQ = ListQ[highlight];
 	If[!validQ, Message[HypergraphPlot::invalidHighlight, highlight]];
 	validQ
 ]
@@ -99,12 +99,12 @@ hypergraphPlot[
 		vertexLabels_,
 		graphicsOptions_,
 		vertexSize_ : $vertexSize,
-		arrowheadsSize_ : $arrowheadLength] := Show[
+		arrowheadsSize_ : $arrowheadLength] := Catch[Show[
 	drawEmbedding[vertexLabels, highlight, vertexSize, arrowheadsSize] @
 		hypergraphEmbedding[edgeType, layout, vertexCoordinates] @
 		edges,
 	graphicsOptions
-]
+]]
 
 (** Embedding **)
 (** hypergraphEmbedding produces an embedding of vertices and edges. The format is {vertices, edges},
@@ -246,12 +246,17 @@ $arrowheadShape = Polygon[{
 	{-1.05025, 0.178538}, {-1.08585, 0.264878}, {-1.10196, 0.301464}, {0., 0.}, {-1.10196, -0.289756}}];
 
 drawEmbedding[vertexLabels_, highlight_, vertexSize_, arrowheadLength_][embedding_] := Module[{
-		embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries, edgePoints, labels, singleVertexEdgeCounts,
-		getSingleVertexEdgeRadius},
+		highlightCounts, embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries, edgePoints, labels,
+		singleVertexEdgeCounts, getSingleVertexEdgeRadius},
+	highlightCounts = Counts[highlight];
 	embeddingShapes = Map[
-		#[[2]] /. (h : (Point | Line | Polygon))[pts_] :> highlighted[h[pts], MemberQ[highlight, #[[1]]]] &,
+		With[{highlightedQ = If[MissingQ[highlightCounts[#[[1]]]], False, highlightCounts[#[[1]]]-- > 0]},
+			#[[2]] /. (h : (Point | Line | Polygon))[pts_] :> highlighted[h[pts], highlightedQ]] &,
 		embedding,
 		{2}];
+	If[AnyTrue[highlightCounts, # > 0 &],
+		Message[HypergraphPlot::invalidHighlight, highlight];
+		Throw[$Failed]];
 
 	vertexPoints = Cases[embeddingShapes[[1]], #, All] & /@ {
 		highlighted[Point[p_], h_] :> {
