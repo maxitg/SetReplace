@@ -153,8 +153,30 @@ VerificationTest[
 ]
 
 VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1, 1}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1, 1}],
+  {HypergraphPlot::invalidHighlight}
+]
+
+VerificationTest[
   HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {{1, 2}}],
   HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {{1, 2}}],
+  {HypergraphPlot::invalidHighlight}
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}}]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}, {1, 2, 3}}]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}]],
+  Head[HypergraphPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}]],
   {HypergraphPlot::invalidHighlight}
 ]
 
@@ -326,6 +348,15 @@ VerificationTest[
   Length[Union @ Cases[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {#}], _ ? ColorQ, All]] >
     Length[Union @ Cases[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}], _ ? ColorQ, All]]
 ] & /@ {4, {1, 2, 3}}
+
+(** Test multi-edge highlighting **)
+VerificationTest[
+  Differences[
+    Length[Union[Cases[#, _?ColorQ, All]]] & /@
+      (HypergraphPlot[{{1, 2}, {1, 2}}, GraphLayout -> "SpringElectricalEmbedding", GraphHighlight -> #] &) /@
+      {{}, {{1, 2}}, {{1, 2}, {1, 2}}}],
+  {1, -1}
+]
 
 (* Scaling consistency *)
 (* Vertex sizes, arrow sizes, average edge lengths, and loop lengths should always be the same. *)
