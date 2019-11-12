@@ -7,13 +7,13 @@ BeginTestSection["HypergraphPlot"]
 VerificationTest[
   HypergraphPlot[],
   HypergraphPlot[],
-  {HypergraphPlot::argx}
+  {HypergraphPlot::argt}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2}}, {{1, 2}}],
-  HypergraphPlot[{{1, 2}}, {{1, 2}}],
-  {HypergraphPlot::argx}
+  HypergraphPlot[{{1, 2}}, {{1, 2}}, {{1, 2}}],
+  HypergraphPlot[{{1, 2}}, {{1, 2}}, {{1, 2}}],
+  {HypergraphPlot::argt}
 ]
 
 (** Valid edges **)
@@ -45,63 +45,63 @@ VerificationTest[
 (** Valid EdgeType **)
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> None],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> None],
-  {HypergraphPlot::invalidFiniteOption}
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, None],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, None],
+  {HypergraphPlot::invalidEdgeType}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> "$$$Incorrect$$$"],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> "$$$Incorrect$$$"],
-  {HypergraphPlot::invalidFiniteOption}
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "$$$Incorrect$$$"],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "$$$Incorrect$$$"],
+  {HypergraphPlot::invalidEdgeType}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> {"$$$Incorrect$$$"}],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> {"$$$Incorrect$$$"}],
-  {HypergraphPlot::invalidFiniteOption}
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {"$$$Incorrect$$$"}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {"$$$Incorrect$$$"}],
+  {HypergraphPlot::invalidEdgeType}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> {{1, 2, 3} -> "$$$Incorrect$$$"}],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> {{1, 2, 3} -> "$$$Incorrect$$$"}],
-  {HypergraphPlot::invalidFiniteOption}
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3} -> "$$$Incorrect$$$"}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3} -> "$$$Incorrect$$$"}],
+  {HypergraphPlot::invalidEdgeType}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> {None, {1, 2, 3} -> "Ordered"}],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> {None, {1, 2, 3} -> "Ordered"}],
-  {HypergraphPlot::invalidFiniteOption}
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {None, {1, 2, 3} -> "Ordered"}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {None, {1, 2, 3} -> "Ordered"}],
+  {HypergraphPlot::invalidEdgeType}
 ]
 
 VerificationTest[
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> {"$$$Incorrect$$$", {1, 2, 3} -> "Ordered"}],
-  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> {"$$$Incorrect$$$", {1, 2, 3} -> "Ordered"}],
-  {HypergraphPlot::invalidFiniteOption}
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {"$$$Incorrect$$$", {1, 2, 3} -> "Ordered"}],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {"$$$Incorrect$$$", {1, 2, 3} -> "Ordered"}],
+  {HypergraphPlot::invalidEdgeType}
 ]
 
 VerificationTest[
   HypergraphPlot[
     {{1, 2, 3}, {3, 4, 5}},
-    "EdgeType" -> {{3, 4, 5} -> "Ordered", {1, 2, 3} -> "$$$Incorrect$$$"}],
+    {{3, 4, 5} -> "Ordered", {1, 2, 3} -> "$$$Incorrect$$$"}],
   HypergraphPlot[
     {{1, 2, 3}, {3, 4, 5}},
-    "EdgeType" -> {{3, 4, 5} -> "Ordered", {1, 2, 3} -> "$$$Incorrect$$$"}],
-  {HypergraphPlot::invalidFiniteOption}
+    {{3, 4, 5} -> "Ordered", {1, 2, 3} -> "$$$Incorrect$$$"}],
+  {HypergraphPlot::invalidEdgeType}
 ]
 
 VerificationTest[
-  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> "Ordered"]],
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered"]],
   Graphics
 ]
 
 VerificationTest[
-  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> "CyclicOpen"]],
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "CyclicOpen"]],
   Graphics
 ]
 
 VerificationTest[
-  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgeType" -> "CyclicClosed"]],
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "CyclicClosed"]],
   Graphics
 ]
 
@@ -111,6 +111,18 @@ VerificationTest[
   HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "$$$InvalidOption###" -> True],
   HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "$$$InvalidOption###" -> True],
   {HypergraphPlot::optx}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered", "$$$InvalidOption###" -> True],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered", "$$$InvalidOption###" -> True],
+  {HypergraphPlot::optx}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "$$$Incorrect$$$", "$$$InvalidOption###" -> True],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "$$$Incorrect$$$", "$$$InvalidOption###" -> True],
+  {HypergraphPlot::invalidEdgeType}
 ]
 
 (* Valid coordinates *)
@@ -135,6 +147,11 @@ VerificationTest[
 
 VerificationTest[
   Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0, 0}}]],
+  Graphics
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered", VertexCoordinateRules -> {1 -> {0, 0}}]],
   Graphics
 ]
 
@@ -239,7 +256,7 @@ $simpleHypergraphs = {
 };
 
 Table[VerificationTest[
-  Head[HypergraphPlot[hypergraph, "EdgeType" -> #]],
+  Head[HypergraphPlot[hypergraph, #]],
   Graphics
 ] & /@ $edgeTypes, {hypergraph, $simpleHypergraphs}]
 
@@ -269,8 +286,8 @@ $layoutTestHypergraphs = {
 };
 
 VerificationTest[
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "Ordered"]],
-  diskCoordinates[HypergraphPlot[#, "EdgeType" -> "CyclicOpen"]],
+  diskCoordinates[HypergraphPlot[#, "Ordered"]],
+  diskCoordinates[HypergraphPlot[#, "CyclicOpen"]],
   SameTest -> (Not @* Equal)
 ] & /@ $layoutTestHypergraphs
 
