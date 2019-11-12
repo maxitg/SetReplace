@@ -96,12 +96,7 @@ VerificationTest[
 ]
 
 VerificationTest[
-  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "CyclicOpen"]],
-  Graphics
-]
-
-VerificationTest[
-  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "CyclicClosed"]],
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Cyclic"]],
   Graphics
 ]
 
@@ -241,7 +236,7 @@ VerificationTest[
 
 (** Simple examples **)
 
-$edgeTypes = {"Ordered", "CyclicOpen", "CyclicClosed"};
+$edgeTypes = {"Ordered", "Cyclic"};
 
 $simpleHypergraphs = {
   {{1, 3}, {2, 4}},
@@ -287,7 +282,7 @@ $layoutTestHypergraphs = {
 
 VerificationTest[
   diskCoordinates[HypergraphPlot[#, "Ordered"]],
-  diskCoordinates[HypergraphPlot[#, "CyclicOpen"]],
+  diskCoordinates[HypergraphPlot[#, "Cyclic"]],
   SameTest -> (Not @* Equal)
 ] & /@ $layoutTestHypergraphs
 

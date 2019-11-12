@@ -67,7 +67,7 @@ VerificationTest[
   Not[
     Or @@ SameQ @@@ Subsets[
       Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> #]] & /@
-        {"Ordered", "CyclicOpen", "CyclicClosed"},
+        {"Ordered", "Cyclic"},
       {2}]]
 ]
 
