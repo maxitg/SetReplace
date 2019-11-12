@@ -195,6 +195,31 @@ VerificationTest[
   Graphics
 ]
 
+(* Valid GraphHighlightStyle *)
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> None],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> None],
+  {HypergraphPlot::invalidHighlightStyle}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> 2],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> 2],
+  {HypergraphPlot::invalidHighlightStyle}
+]
+
+VerificationTest[
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> "Dashed"],
+  HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> "Dashed"],
+  {HypergraphPlot::invalidHighlightStyle}
+]
+
+VerificationTest[
+  Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> Black]],
+  Graphics
+]
+
 (* Implementation *)
 
 (** Simple examples **)
@@ -356,6 +381,16 @@ VerificationTest[
       (HypergraphPlot[{{1, 2}, {1, 2}}, GraphLayout -> "SpringElectricalEmbedding", GraphHighlight -> #] &) /@
       {{}, {{1, 2}}, {{1, 2}, {1, 2}}}],
   {1, -1}
+]
+
+(* GraphHighlightStyle *)
+
+VerificationTest[
+  With[{
+      color = RGBColor[0.4, 0.6, 0.2]},
+    FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> #, GraphHighlightStyle -> color], color] & /@
+      {{}, {4}, {{1, 2, 3}}}],
+  {True, False, False}
 ]
 
 (* Scaling consistency *)
