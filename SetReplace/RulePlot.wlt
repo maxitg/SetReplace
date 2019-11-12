@@ -74,13 +74,13 @@ VerificationTest[
 VerificationTest[
   RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> "Invalid"],
   RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> "Invalid"],
-  {RulePlot::invalidFiniteOption}
+  {RulePlot::invalidEdgeType}
 ]
 
 VerificationTest[
   RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> 3],
   RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> 3],
-  {RulePlot::invalidFiniteOption}
+  {RulePlot::invalidEdgeType}
 ]
 
 (** GraphhighlightStyle **)
