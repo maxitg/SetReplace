@@ -90,9 +90,17 @@ hypergraphRulesSpecQ[rulesSpec_] := (
 correctOptionsQ[args_, {opts___}] :=
   knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], {opts}, $allowedOptions] &&
   supportedOptionQ[RulePlot, Frame, {True, False}, {opts}] &&
+  correctEdgeTypeQ[OptionValue[RulePlot, {opts}, "EdgeType"]] &&
   correctSpacingsQ[{opts}] &&
   correctHypergraphPlotOptionsQ[
     RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[HypergraphPlot]]]
+
+correctEdgeTypeQ[edgeType : Alternatives @@ $edgeTypes] := True
+
+correctEdgeTypeQ[edgeType_] := (
+  Message[RulePlot::invalidEdgeType, edgeType, $edgeTypes];
+  False
+)
 
 correctSpacingsQ[opts_] := Module[{spacings, correctQ},
   spacings = OptionValue[RulePlot, opts, Spacings];
