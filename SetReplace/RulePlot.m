@@ -147,15 +147,14 @@ rulePlot[
 
 (* returns {shapes, plotRange} *)
 singleRulePlot[edgeType_, graphLayout_, externalVertexCoordinateRules_, vertexLabels_, spacings_][rule_] := Module[{
-    vertexCoordinateRules, sharedVertices, ruleSidePlots, plotRange},
+    vertexCoordinateRules, ruleSidePlots, plotRange},
   vertexCoordinateRules = Join[
     ruleCoordinateRules[edgeType, graphLayout, externalVertexCoordinateRules, rule],
     externalVertexCoordinateRules];
-  sharedVertices = sharedRuleVertices[rule];
   ruleSidePlots = hypergraphPlot[
       #,
       edgeType,
-      sharedVertices,
+      sharedRuleElements[rule],
       graphLayout,
       vertexCoordinateRules,
       vertexLabels,
@@ -181,7 +180,7 @@ ruleCoordinateRules[edgeType_, graphLayout_, externalVertexCoordinateRules_, in_
   #[[1]] -> #[[2, 1, 1]] & /@
     hypergraphEmbedding[edgeType, graphLayout, externalVertexCoordinateRules][layoutReferenceSide[in, out]][[1]]
 
-sharedRuleVertices[in_ -> out_] := Intersection @@ (Catenate /@ {in, out})
+sharedRuleElements[in_ -> out_] := multisetIntersection @@ (Join[vertexList[#], #] & /@ {in, out})
 
 $ruleArrowShape = {Line[{{-1, 0.7}, {0, 0}, {-1, -0.7}}], Line[{{-1, 0}, {0, 0}}]};
 
