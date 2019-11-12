@@ -3,7 +3,7 @@ Package["SetReplace`"]
 (* Documentation *)
 
 $newOptions = {
-  "EdgeType" -> "CyclicOpen",
+  "EdgeType" -> "Ordered",
   GraphHighlightStyle -> RGBColor[0.5, 0.5, 0.95],
   GraphLayout -> "SpringElectricalPolygons",
   VertexCoordinateRules -> {},
