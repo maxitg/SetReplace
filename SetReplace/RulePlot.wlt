@@ -99,25 +99,25 @@ VerificationTest[
   {True, False, False, False, True}
 ]
 
-(** GraphLayout **)
+(** HyperedgeRendering **)
 
 VerificationTest[
   Not[
     Or @@ SameQ @@@ Subsets[
-      Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], GraphLayout -> #]] & /@
-        {"SpringElectricalEmbedding", "SpringElectricalPolygons"},
+      Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> #]] & /@
+        {"Subgraphs", "Polygons"},
       {2}]]
 ]
 
 VerificationTest[
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], GraphLayout -> "Invalid"],
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], GraphLayout -> "Invalid"],
+  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> "Invalid"],
+  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> "Invalid"],
   {RulePlot::invalidFiniteOption}
 ]
 
 VerificationTest[
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], GraphLayout -> 3],
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], GraphLayout -> 3],
+  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> 3],
+  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> 3],
   {RulePlot::invalidFiniteOption}
 ]
 
