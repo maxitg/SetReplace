@@ -17,14 +17,15 @@ SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, _., OptionsPatter
 Options[HypergraphPlot] = Join[{
 	GraphHighlight -> {},
 	GraphHighlightStyle -> Hue[1.0, 1.0, 0.7],
-	GraphLayout -> "SpringElectricalPolygons",
+	"HyperedgeRendering" -> "Polygons",
 	VertexCoordinateRules -> {},
 	VertexLabels -> None},
 	Options[Graphics]];
 
 $edgeTypes = {"Ordered", "Cyclic"};
 $defaultEdgeType = "Ordered";
-$graphLayouts = {"SpringElectricalEmbedding", "SpringElectricalPolygons"};
+$graphLayout = "SpringElectricalEmbedding";
+$hyperedgeRenderings = {"Subgraphs", "Polygons"};
 
 (* Messages *)
 
@@ -70,7 +71,7 @@ hypergraphPlot$parse[
 		edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] :=
 	hypergraphPlot[edges, edgeType, ##, FilterRules[{o}, Options[Graphics]]] & @@
 			(OptionValue[HypergraphPlot, {o}, #] & /@ {
-				GraphHighlight, GraphHighlightStyle, GraphLayout, VertexCoordinateRules, VertexLabels}) /;
+				GraphHighlight, GraphHighlightStyle, "HyperedgeRendering", VertexCoordinateRules, VertexLabels}) /;
 		correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}]
 
 hypergraphPlot$parse[___] := $Failed
@@ -78,7 +79,7 @@ hypergraphPlot$parse[___] := $Failed
 correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	knownOptionsQ[head, expr, opts] &&
 	(And @@ (supportedOptionQ[head, ##, opts] & @@@ {
-			{GraphLayout, $graphLayouts}})) &&
+			{"HyperedgeRendering", $hyperedgeRenderings}})) &&
 	correctCoordinateRulesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinateRules]] &&
 	correctHighlightQ[edges, OptionValue[HypergraphPlot, opts, GraphHighlight]] &&
 	correctHighlightStyleQ[head, OptionValue[HypergraphPlot, opts, GraphHighlightStyle]]
@@ -115,14 +116,14 @@ hypergraphPlot[
 		edgeType_,
 		highlight_,
 		highlightColor_,
-		layout_,
+		hyperedgeRendering_,
 		vertexCoordinates_,
 		vertexLabels_,
 		graphicsOptions_,
 		vertexSize_ : $vertexSize,
 		arrowheadsSize_ : $arrowheadLength] := Catch[Show[
 	drawEmbedding[vertexLabels, highlight, highlightColor, vertexSize, arrowheadsSize] @
-		hypergraphEmbedding[edgeType, layout, vertexCoordinates] @
+		hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @
 		edges,
 	graphicsOptions
 ]]
@@ -134,13 +135,13 @@ hypergraphPlot[
 
 (*** SpringElectricalEmbedding ***)
 
-hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", coordinateRules_] :=
-	hypergraphEmbedding[edgeType, edgeType, layout, coordinateRules]
+hypergraphEmbedding[edgeType_, hyperedgeRendering : "Subgraphs", coordinateRules_] :=
+	hypergraphEmbedding[edgeType, edgeType, hyperedgeRendering, coordinateRules]
 
 hypergraphEmbedding[
 			vertexLayoutEdgeType_,
 			edgeLayoutEdgeType_,
-			layout : "SpringElectricalEmbedding",
+			hyperedgeRendering : "Subgraphs",
 			coordinateRules_][
 			edges_] := Module[{
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
@@ -154,7 +155,7 @@ hypergraphEmbedding[
 			vertices,
 			Catenate[vertexEmbeddingNormalEdges],
 			Catenate[edgeEmbeddingNormalEdges],
-			layout,
+			$graphLayout,
 			coordinateRules]]
 ]
 
@@ -242,10 +243,10 @@ rescaleEmbedding[embedding_, center_, factor_] := Map[
 
 (*** SpringElectricalPolygons ***)
 
-hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons", vertexCoordinates_][edges_] := Module[{
+hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinates_][edges_] := Module[{
 		embeddingWithNoRegions, vertexEmbedding, edgePoints, edgePolygons, edgeEmbedding},
 	embeddingWithNoRegions =
-		hypergraphEmbedding["Cyclic", edgeType, "SpringElectricalEmbedding", vertexCoordinates][edges];
+		hypergraphEmbedding["Cyclic", edgeType, "Subgraphs", vertexCoordinates][edges];
 	vertexEmbedding = embeddingWithNoRegions[[1]];
 	edgePoints =
 		Flatten[#, 2] & /@ (embeddingWithNoRegions[[2, All, 2]] /. {Line[pts_] :> {pts}, Point[pts_] :> {{pts}}});
