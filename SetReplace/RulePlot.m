@@ -4,6 +4,7 @@ Package["SetReplace`"]
 
 $newOptions = {
   "EdgeType" -> "CyclicOpen",
+  GraphHighlightStyle -> Black,
   GraphLayout -> "SpringElectricalPolygons",
   VertexCoordinateRules -> {},
   VertexLabels -> None
@@ -63,7 +64,8 @@ rulePlot$parse[{
       OptionValue[
         RulePlot,
         {opts},
-        {"EdgeType", GraphLayout, VertexCoordinateRules, VertexLabels, Frame, FrameStyle, PlotLegends, Spacings}] /;
+        {"EdgeType", GraphHighlightStyle, GraphLayout, VertexCoordinateRules, VertexLabels, Frame, FrameStyle,
+          PlotLegends, Spacings}] /;
     correctOptionsQ[{rulesSpec, o}, {opts}]
 
 hypergraphRulesSpecQ[rulesSpec_List ? wolframModelRulesSpecQ] := Fold[# && hypergraphRulesSpecQ[#2] &, True, rulesSpec]
@@ -104,6 +106,7 @@ correctSpacingsQ[opts_] := Module[{spacings, correctQ},
 rulePlot[
     rules_,
     edgeType_,
+    graphHighlightStyle_,
     graphLayout_,
     vertexCoordinateRules_,
     vertexLabels_,
@@ -114,12 +117,14 @@ rulePlot[
     graphicsOpts_] :=
   If[PlotLegends === None, Identity, Legended[#, Replace[plotLegends, "Text" -> Placed[StandardForm[rules], Below]]] &][
     rulePlot[
-      rules, edgeType, graphLayout, vertexCoordinateRules, vertexLabels, frameQ, frameStyle, spacings, graphicsOpts]
+      rules, edgeType, graphHighlightStyle, graphLayout, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
+        spacings, graphicsOpts]
   ]
 
 rulePlot[
     rule_Rule,
     edgeType_,
+    graphHighlightStyle_,
     graphLayout_,
     vertexCoordinateRules_,
     vertexLabels_,
@@ -128,11 +133,13 @@ rulePlot[
     spacings_,
     graphicsOpts_] :=
   rulePlot[
-    {rule}, edgeType, graphLayout, vertexCoordinateRules, vertexLabels, frameQ, frameStyle, spacings, graphicsOpts]
+    {rule}, edgeType, graphHighlightStyle, graphLayout, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
+      spacings, graphicsOpts]
 
 rulePlot[
     rules_List,
     edgeType_,
+    graphHighlightStyle_,
     graphLayout_,
     vertexCoordinateRules_,
     vertexLabels_,
@@ -143,10 +150,17 @@ rulePlot[
   Graphics[
       First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, If[frameQ, frameStyle, None]]],
       graphicsOpts] & @
-    (singleRulePlot[edgeType, graphLayout, vertexCoordinateRules, vertexLabels, spacings] /@ rules)
+    (singleRulePlot[edgeType, graphHighlightStyle, graphLayout, vertexCoordinateRules, vertexLabels, spacings] /@ rules)
 
 (* returns {shapes, plotRange} *)
-singleRulePlot[edgeType_, graphLayout_, externalVertexCoordinateRules_, vertexLabels_, spacings_][rule_] := Module[{
+singleRulePlot[
+      edgeType_,
+      graphHighlightStyle_,
+      graphLayout_,
+      externalVertexCoordinateRules_,
+      vertexLabels_,
+      spacings_][
+      rule_] := Module[{
     vertexCoordinateRules, ruleSidePlots, plotRange},
   vertexCoordinateRules = Join[
     ruleCoordinateRules[edgeType, graphLayout, externalVertexCoordinateRules, rule],
@@ -155,6 +169,7 @@ singleRulePlot[edgeType_, graphLayout_, externalVertexCoordinateRules_, vertexLa
       #,
       edgeType,
       sharedRuleElements[rule],
+      graphHighlightStyle,
       graphLayout,
       vertexCoordinateRules,
       vertexLabels,
