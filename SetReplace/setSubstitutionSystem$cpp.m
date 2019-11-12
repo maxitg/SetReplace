@@ -117,13 +117,13 @@ ruleAtoms[left_ :> right : Except[_Module]] :=
 
 ruleAtoms[left_ :> right_Module] := Module[{
 		leftVertices, patterns, leftAtoms, patternSymbols, createdAtoms, rightAtoms},
-	leftVertices = Union @ Flatten[left];
+	leftVertices = Union @ Catenate[left];
 	leftAtoms = Select[leftVertices, AtomQ];
 	patterns = Complement[leftVertices, leftAtoms];
 	patternSymbols = Map[Hold, patterns, {2}][[All, 1]];
 	createdAtoms = Map[Hold, Hold[right], {3}][[1, 1]];
 	rightAtoms = Complement[
-		Union @ Flatten @ Map[Hold, Hold[right], {4}][[1, 2]],
+		Union @ Catenate @ Map[Hold, Hold[right], {4}][[1, 2]],
 		Join[patternSymbols, createdAtoms]];
 	(* {global, local} *)
 	{Union @ Join[Hold /@ leftAtoms, rightAtoms],
@@ -175,9 +175,9 @@ setSubstitutionSystem$cpp[rules_, set_, generations_, steps_, returnOnAbortQ_, t
 		mappedSet, localIndices, mappedRules, setPtr, cppOutput, resultAtoms,
 		inversePartialGlobalMap, inverseGlobalMap},
 	canonicalRules = toCanonicalRules[rules];
-	setAtoms = Hold /@ Union[Flatten[set]];
+	setAtoms = Hold /@ Union[Catenate[set]];
 	atomsInRules = ruleAtoms /@ canonicalRules;
-	globalAtoms = Union @ Flatten @ {setAtoms, atomsInRules[[All, 1]]};
+	globalAtoms = Union @ Join[setAtoms, Catenate[atomsInRules[[All, 1]]]];
 	globalIndex = Association @ Thread[globalAtoms -> Range[Length[globalAtoms]]];
 	mappedSet = Map[globalIndex, Map[Hold, set, {2}], {2}];
 	localIndices =
@@ -199,7 +199,7 @@ setSubstitutionSystem$cpp[rules_, set_, generations_, steps_, returnOnAbortQ_, t
 		If[!returnOnAbortQ, Return[$Aborted]]];
 	cppOutput = decodeExpressions @ $cpp$setExpressions[setPtr];
 	$cpp$setDelete[setPtr];
-	resultAtoms = Union[Flatten[cppOutput[$atomLists]]];
+	resultAtoms = Union[Catenate[cppOutput[$atomLists]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
 	inverseGlobalMap = Association @ Thread[resultAtoms
 		-> (Lookup[inversePartialGlobalMap, #, Unique["v"]] & /@ resultAtoms)];
