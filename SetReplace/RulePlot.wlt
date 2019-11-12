@@ -83,6 +83,22 @@ VerificationTest[
   {RulePlot::invalidFiniteOption}
 ]
 
+(** GraphhighlightStyle **)
+
+VerificationTest[
+  RulePlot[WolframModel[{{1, 2, 3}, {3, 4, 5}} -> {{3, 4, 5}, {5, 6, 7}}], GraphHighlightStyle -> 1],
+  RulePlot[WolframModel[{{1, 2, 3}, {3, 4, 5}} -> {{3, 4, 5}, {5, 6, 7}}], GraphHighlightStyle -> 1],
+  {RulePlot::invalidHighlightStyle}
+]
+
+VerificationTest[
+  With[{
+      color = RGBColor[0.4, 0.6, 0.2]},
+    FreeQ[RulePlot[WolframModel[#], GraphHighlightStyle -> color], color] & /@
+      {{{1}} -> {{2}}, {{1}} -> {{1}}, {{1, 2}} -> {{1, 2}}, {{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}}],
+  {True, False, False, False, True}
+]
+
 (** GraphLayout **)
 
 VerificationTest[
@@ -270,8 +286,9 @@ VerificationTest[
 (** Shared vertices are colored **)
 
 VerificationTest[
-  Length[Union[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], _ ? ColorQ, All]]] > 
-    Length[Union[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{4, 5, 6}}]], _ ? ColorQ, All]]]
+  Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], _ ? ColorQ, All],
+  Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{4, 5, 6}}]], _ ? ColorQ, All],
+  SameTest -> Not @* SameQ
 ]
 
 EndTestSection[]
