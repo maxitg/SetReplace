@@ -437,12 +437,16 @@ $selfLoopLength = FirstCase[
 
 VerificationTest[
   And @@ (
-    MemberQ[
-        Cases[
-          HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"],
-          Line[pts_] :> RegionMeasure[Line[pts]],
-          All],
-        $selfLoopLength] & /@ {
+    Abs[
+          First[
+              Nearest[
+                Cases[
+                  HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"],
+                  Line[pts_] :> RegionMeasure[Line[pts]],
+                  All],
+                $selfLoopLength]] -
+            $selfLoopLength] <
+        1.*^-10 & /@ {
       {{1, 1}},
       {{1, 2, 3}, {1, 1}},
       {{1, 2, 3}, {3, 4, 5}, {5, 5}},
