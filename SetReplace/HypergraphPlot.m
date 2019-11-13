@@ -268,10 +268,7 @@ drawEmbedding[vertexLabels_, highlight_, highlightColor_, vertexSize_, arrowhead
 
 	vertexPoints = Cases[embeddingShapes[[1]], #, All] & /@ {
 		highlighted[Point[p_], h_] :> {
-			If[h,
-				Directive[highlightColor, EdgeForm[Directive[highlightColor, Opacity[1]]]],
-				Directive[$vertexColor, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]]
-			],
+			Directive[If[h, highlightColor, $vertexColor], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]],
 			Disk[p, vertexSize]}
 	};
 
