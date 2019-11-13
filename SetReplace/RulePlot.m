@@ -4,7 +4,7 @@ Package["SetReplace`"]
 
 $newOptions = {
   "EdgeType" -> "CyclicOpen",
-  GraphHighlightStyle -> Black,
+  GraphHighlightStyle -> RGBColor[0.5, 0.5, 0.95],
   GraphLayout -> "SpringElectricalPolygons",
   VertexCoordinateRules -> {},
   VertexLabels -> None
