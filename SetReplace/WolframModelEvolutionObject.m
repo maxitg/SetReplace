@@ -531,8 +531,7 @@ WolframModelEvolutionObject[args___] := 0 /;
 
 
 WolframModelEvolutionObject::corrupt =
-	"WolframModelEvolutionObject does not have a correct format. " ~~
-	"Use SetSubstitutionSystem for construction.";
+	"WolframModelEvolutionObject does not have a correct format. Use WolframModel for construction.";
 
 
 evolutionDataQ[data_Association] := Sort[Keys[data]] ===

@@ -692,6 +692,29 @@ VerificationTest[
   {{v[1], v[3]}}
 ]
 
+(** Nested lists as vertices **)
+
+VerificationTest[
+  Head[
+    WolframModel[{{{2, 2, 1}, {2, 2, 2}} -> {{1, 1, 3}, {1, 1, 1}, {2, 1, 2}, {3, 3, 2}}}, {Table[{0, 0, 0}, 3]}, 2]],
+  WolframModelEvolutionObject
+]
+
+VerificationTest[
+  WolframModel[
+    {{{2, 2, 1}, {2, 2, 2}} -> {{1, 1, 3}, {1, 1, 1}, {2, 1, 2}, {3, 3, 2}}},
+    {{{2}, {2}, 1}, {{2}, {2}, {2}}},
+    1,
+    "FinalState",
+    Method -> #],
+  {{1, 1, 2}, {1, 1, 1}, {{2}, 1, {2}}, {2, 2, {2}}}
+] & /@ $SetReplaceMethods
+
+VerificationTest[
+  WolframModel[{{{1, 1, 1}} -> {{1, 1, 1, 1}}}, {Table[{0, 0, 0}, 3]}, 2, "FinalState", Method -> #],
+  {ConstantArray[{0, 0, 0}, 4]}
+] & /@ $SetReplaceMethods
+
 (** NodeNamingFunction **)
 
 VerificationTest[
