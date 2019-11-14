@@ -22,8 +22,8 @@ Options[HypergraphPlot] = Join[{
 	VertexLabels -> None},
 	Options[Graphics]];
 
-$edgeTypes = {"Ordered", "CyclicClosed", "CyclicOpen"};
-$defaultEdgeType = "CyclicOpen";
+$edgeTypes = {"Ordered", "Cyclic"};
+$defaultEdgeType = "Ordered";
 $graphLayouts = {"SpringElectricalEmbedding", "SpringElectricalPolygons"};
 
 (* Messages *)
@@ -134,14 +134,19 @@ hypergraphPlot[
 
 (*** SpringElectricalEmbedding ***)
 
-hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", coordinateRules_][edges_] := Module[{
+hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", coordinateRules_] :=
+	hypergraphEmbedding[edgeType, edgeType, layout, coordinateRules]
+
+hypergraphEmbedding[
+			vertexLayoutEdgeType_,
+			edgeLayoutEdgeType_,
+			layout : "SpringElectricalEmbedding",
+			coordinateRules_][
+			edges_] := Module[{
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
 	vertices = vertexList[edges];
-	vertexEmbeddingNormalEdges = toNormalEdges[edgeType] /@ edges;
-	edgeEmbeddingNormalEdges = If[edgeType === "CyclicOpen",
-		If[# === {}, Identity[#], Most[#]] & /@ # &,
-		Identity][
-			vertexEmbeddingNormalEdges];
+	{vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges} =
+		(toNormalEdges[#] /@ edges) & /@ {vertexLayoutEdgeType, edgeLayoutEdgeType};
 	normalToHypergraphEmbedding[
 		edges,
 		edgeEmbeddingNormalEdges,
@@ -156,10 +161,10 @@ hypergraphEmbedding[edgeType_, layout : "SpringElectricalEmbedding", coordinateR
 toNormalEdges["Ordered"][hyperedge_] :=
 	DirectedEdge @@@ Partition[hyperedge, 2, 1]
 
-toNormalEdges["CyclicOpen" | "CyclicClosed"][hyperedge : Except[{}]] :=
+toNormalEdges["Cyclic"][hyperedge : Except[{}]] :=
 	DirectedEdge @@@ Append[Partition[hyperedge, 2, 1], hyperedge[[{-1, 1}]]]
 
-toNormalEdges["CyclicOpen" | "CyclicClosed"][{}] := {}
+toNormalEdges["Cyclic"][{}] := {}
 
 graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
 		relevantCoordinateRules, vertexCoordinateRules, unscaledEmbedding},
@@ -239,7 +244,8 @@ rescaleEmbedding[embedding_, center_, factor_] := Map[
 
 hypergraphEmbedding[edgeType_, layout : "SpringElectricalPolygons", vertexCoordinates_][edges_] := Module[{
 		embeddingWithNoRegions, vertexEmbedding, edgePoints, edgePolygons, edgeEmbedding},
-	embeddingWithNoRegions = hypergraphEmbedding[edgeType, "SpringElectricalEmbedding", vertexCoordinates][edges];
+	embeddingWithNoRegions =
+		hypergraphEmbedding["Cyclic", edgeType, "SpringElectricalEmbedding", vertexCoordinates][edges];
 	vertexEmbedding = embeddingWithNoRegions[[1]];
 	edgePoints =
 		Flatten[#, 2] & /@ (embeddingWithNoRegions[[2, All, 2]] /. {Line[pts_] :> {pts}, Point[pts_] :> {{pts}}});

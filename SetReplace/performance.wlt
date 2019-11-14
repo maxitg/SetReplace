@@ -73,7 +73,7 @@ $largeSet = WolframModel[
 {$normalPlotTiming, $normalPlotMemory} =
   AbsoluteTiming[MaxMemoryUsed[GraphPlot[Rule @@@ Catenate[Partition[#, 2, 1] & /@ $largeSet]]]];
 
-$edgeTypes = {"Ordered", "CyclicOpen", "CyclicClosed"};
+$edgeTypes = {"Ordered", "Cyclic"};
 $layouts = {"SpringElectricalEmbedding", "SpringElectricalPolygons"};
 
 Table[
