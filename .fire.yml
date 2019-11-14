@@ -6,6 +6,8 @@ pipeline:
         phase: install
         cache: []
         image: setreplace/ci
+        commands:
+          - echo "do nothing"
 
     - step:
         phase: build
