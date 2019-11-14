@@ -1,0 +1,19 @@
+version: 2
+
+pipeline:
+  steps:
+    - step:
+        phase: install
+        image: setreplace/ci
+
+    - step:
+        phase: build
+        name: build
+        commands:
+          - ./build.wls && ./install.wls
+
+    - step:
+        phase: test
+        name: unit tests
+        commands:
+          - ./test.wls
