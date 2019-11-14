@@ -78,7 +78,7 @@ $layouts = {"SpringElectricalEmbedding", "SpringElectricalPolygons"};
 
 Table[
   VerificationTest[
-    Head[HypergraphPlot[$largeSet, "EdgeType" -> edgeType, GraphLayout -> layout]],
+    Head[HypergraphPlot[$largeSet, edgeType, GraphLayout -> layout]],
     Graphics,
     TimeConstraint -> (4 $normalPlotTiming),
     MemoryConstraint -> (7 $normalPlotMemory)],

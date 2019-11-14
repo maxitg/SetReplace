@@ -3,6 +3,7 @@ Package["SetReplace`"]
 PackageExport["HypergraphPlot"]
 
 PackageScope["correctHypergraphPlotOptionsQ"]
+PackageScope["$edgeTypes"]
 PackageScope["hypergraphEmbedding"]
 PackageScope["hypergraphPlot"]
 
@@ -11,10 +12,9 @@ PackageScope["hypergraphPlot"]
 HypergraphPlot::usage = usageString[
 	"HypergraphPlot[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph."];
 
-SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
+SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, _., OptionsPattern[]}};
 
 Options[HypergraphPlot] = Join[{
-	"EdgeType" -> "CyclicOpen",
 	GraphHighlight -> {},
 	GraphHighlightStyle -> Hue[1.0, 1.0, 0.7],
 	GraphLayout -> "SpringElectricalPolygons",
@@ -23,12 +23,16 @@ Options[HypergraphPlot] = Join[{
 	Options[Graphics]];
 
 $edgeTypes = {"Ordered", "CyclicClosed", "CyclicOpen"};
+$defaultEdgeType = "CyclicOpen";
 $graphLayouts = {"SpringElectricalEmbedding", "SpringElectricalPolygons"};
 
 (* Messages *)
 
 General::invalidEdges =
 	"First argument of HypergraphPlot must be list of lists, where elements represent vertices.";
+
+General::invalidEdgeType =
+	"Edge type `1` should be one of `2`.";
 
 General::invalidCoordinates =
 	"Coordinates `1` should be a list of rules from vertices to pairs of numbers.";
@@ -47,17 +51,26 @@ func : HypergraphPlot[args___] := Module[{result = hypergraphPlot$parse[args]},
 
 (* Arguments parsing *)
 
-hypergraphPlot$parse[args___] /; !Developer`CheckArgumentCount[HypergraphPlot[args], 1, 1] := $Failed
+hypergraphPlot$parse[args___] /; !Developer`CheckArgumentCount[HypergraphPlot[args], 1, 2] := $Failed
 
-hypergraphPlot$parse[edges : Except[{___List}], o : OptionsPattern[]] := (
+hypergraphPlot$parse[edges : Except[{___List}], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
 	Message[HypergraphPlot::invalidEdges];
 	$Failed
 )
 
-hypergraphPlot$parse[edges : {___List}, o : OptionsPattern[]] :=
-	hypergraphPlot[edges, ##, FilterRules[{o}, Options[Graphics]]] & @@
+hypergraphPlot$parse[
+		edges : {___List},
+		edgeType : Except[Alternatives[Alternatives @@ $edgeTypes, OptionsPattern[]]],
+		o : OptionsPattern[]] := (
+	Message[HypergraphPlot::invalidEdgeType, edgeType, $edgeTypes];
+	$Failed
+)
+
+hypergraphPlot$parse[
+		edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] :=
+	hypergraphPlot[edges, edgeType, ##, FilterRules[{o}, Options[Graphics]]] & @@
 			(OptionValue[HypergraphPlot, {o}, #] & /@ {
-				"EdgeType", GraphHighlight, GraphHighlightStyle, GraphLayout, VertexCoordinateRules, VertexLabels}) /;
+				GraphHighlight, GraphHighlightStyle, GraphLayout, VertexCoordinateRules, VertexLabels}) /;
 		correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}]
 
 hypergraphPlot$parse[___] := $Failed
@@ -65,7 +78,6 @@ hypergraphPlot$parse[___] := $Failed
 correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	knownOptionsQ[head, expr, opts] &&
 	(And @@ (supportedOptionQ[head, ##, opts] & @@@ {
-			{"EdgeType", $edgeTypes},
 			{GraphLayout, $graphLayouts}})) &&
 	correctCoordinateRulesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinateRules]] &&
 	correctHighlightQ[edges, OptionValue[HypergraphPlot, opts, GraphHighlight]] &&
