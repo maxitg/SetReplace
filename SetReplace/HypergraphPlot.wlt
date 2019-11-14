@@ -288,7 +288,7 @@ VerificationTest[
 
 VerificationTest[
   Length[Union[Cases[
-    HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"],
+    HypergraphPlot[#, "HyperedgeRendering" -> "Subgraphs"],
     Polygon[___],
     All]]],
   1
@@ -296,7 +296,7 @@ VerificationTest[
 
 VerificationTest[
   Length[Union[Cases[
-    HypergraphPlot[#, GraphLayout -> "SpringElectricalPolygons"],
+    HypergraphPlot[#, "HyperedgeRendering" -> "Polygons"],
     Polygon[___],
     All]]],
   1 + Length[#]
@@ -390,7 +390,7 @@ VerificationTest[
 VerificationTest[
   Differences[
     Length[Union[Cases[#, _?ColorQ, All]]] & /@
-      (HypergraphPlot[{{1, 2}, {1, 2}}, GraphLayout -> "SpringElectricalEmbedding", GraphHighlight -> #] &) /@
+      (HypergraphPlot[{{1, 2}, {1, 2}}, "HyperedgeRendering" -> "Subgraphs", GraphHighlight -> #] &) /@
       {{}, {{1, 2}}, {{1, 2}, {1, 2}}}],
   {1, -1}
 ]
@@ -416,21 +416,21 @@ VerificationTest[
 
 VerificationTest[
   SameQ @@ (
-    Union[Cases[HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"], p : Polygon[___] :> Area[p], All]] & /@
+    Union[Cases[HypergraphPlot[#, "HyperedgeRendering" -> "Subgraphs"], p : Polygon[___] :> Area[p], All]] & /@
       {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
 ]
 
 VerificationTest[
   Equal @@ (
     Mean[Cases[
-        HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"],
+        HypergraphPlot[#, "HyperedgeRendering" -> "Subgraphs"],
         Line[pts_] :> EuclideanDistance @@ pts,
         All]] & /@
       {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3, 4, 5, 1}}})
 ]
 
 $selfLoopLength = FirstCase[
-  HypergraphPlot[{{1, 1}}, GraphLayout -> "SpringElectricalEmbedding"],
+  HypergraphPlot[{{1, 1}}, "HyperedgeRendering" -> "Subgraphs"],
   Line[pts_] :> RegionMeasure[Line[pts]],
   Missing[],
   All];
@@ -441,7 +441,7 @@ VerificationTest[
           First[
               Nearest[
                 Cases[
-                  HypergraphPlot[#, GraphLayout -> "SpringElectricalEmbedding"],
+                  HypergraphPlot[#, "HyperedgeRendering" -> "Subgraphs"],
                   Line[pts_] :> RegionMeasure[Line[pts]],
                   All],
                 $selfLoopLength]] -

@@ -5,7 +5,7 @@ Package["SetReplace`"]
 $newOptions = {
   "EdgeType" -> "Ordered",
   GraphHighlightStyle -> RGBColor[0.5, 0.5, 0.95],
-  GraphLayout -> "SpringElectricalPolygons",
+  "HyperedgeRendering" -> "Polygons",
   VertexCoordinateRules -> {},
   VertexLabels -> None
 };
@@ -64,7 +64,7 @@ rulePlot$parse[{
       OptionValue[
         RulePlot,
         {opts},
-        {"EdgeType", GraphHighlightStyle, GraphLayout, VertexCoordinateRules, VertexLabels, Frame, FrameStyle,
+        {"EdgeType", GraphHighlightStyle, "HyperedgeRendering", VertexCoordinateRules, VertexLabels, Frame, FrameStyle,
           PlotLegends, Spacings}] /;
     correctOptionsQ[{rulesSpec, o}, {opts}]
 
@@ -115,7 +115,7 @@ rulePlot[
     rules_,
     edgeType_,
     graphHighlightStyle_,
-    graphLayout_,
+    hyperedgeRendering_,
     vertexCoordinateRules_,
     vertexLabels_,
     frameQ_,
@@ -125,7 +125,7 @@ rulePlot[
     graphicsOpts_] :=
   If[PlotLegends === None, Identity, Legended[#, Replace[plotLegends, "Text" -> Placed[StandardForm[rules], Below]]] &][
     rulePlot[
-      rules, edgeType, graphHighlightStyle, graphLayout, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
+      rules, edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
         spacings, graphicsOpts]
   ]
 
@@ -133,7 +133,7 @@ rulePlot[
     rule_Rule,
     edgeType_,
     graphHighlightStyle_,
-    graphLayout_,
+    hyperedgeRendering_,
     vertexCoordinateRules_,
     vertexLabels_,
     frameQ_,
@@ -141,14 +141,14 @@ rulePlot[
     spacings_,
     graphicsOpts_] :=
   rulePlot[
-    {rule}, edgeType, graphHighlightStyle, graphLayout, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
+    {rule}, edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
       spacings, graphicsOpts]
 
 rulePlot[
     rules_List,
     edgeType_,
     graphHighlightStyle_,
-    graphLayout_,
+    hyperedgeRendering_,
     vertexCoordinateRules_,
     vertexLabels_,
     frameQ_,
@@ -158,27 +158,28 @@ rulePlot[
   Graphics[
       First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, If[frameQ, frameStyle, None]]],
       graphicsOpts] & @
-    (singleRulePlot[edgeType, graphHighlightStyle, graphLayout, vertexCoordinateRules, vertexLabels, spacings] /@ rules)
+    (singleRulePlot[edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, spacings] /@
+        rules)
 
 (* returns {shapes, plotRange} *)
 singleRulePlot[
       edgeType_,
       graphHighlightStyle_,
-      graphLayout_,
+      hyperedgeRendering_,
       externalVertexCoordinateRules_,
       vertexLabels_,
       spacings_][
       rule_] := Module[{
     vertexCoordinateRules, ruleSidePlots, plotRange},
   vertexCoordinateRules = Join[
-    ruleCoordinateRules[edgeType, graphLayout, externalVertexCoordinateRules, rule],
+    ruleCoordinateRules[edgeType, hyperedgeRendering, externalVertexCoordinateRules, rule],
     externalVertexCoordinateRules];
   ruleSidePlots = hypergraphPlot[
       #,
       edgeType,
       sharedRuleElements[rule],
       graphHighlightStyle,
-      graphLayout,
+      hyperedgeRendering,
       vertexCoordinateRules,
       vertexLabels,
       {},
@@ -199,9 +200,9 @@ layoutReferenceSide[in_, out_] := Module[{inConnectedQ, outConnectedQ},
   If[Length[in] > Length[out], in, out]
 ]
 
-ruleCoordinateRules[edgeType_, graphLayout_, externalVertexCoordinateRules_, in_ -> out_] :=
+ruleCoordinateRules[edgeType_, hyperedgeRendering_, externalVertexCoordinateRules_, in_ -> out_] :=
   #[[1]] -> #[[2, 1, 1]] & /@
-    hypergraphEmbedding[edgeType, graphLayout, externalVertexCoordinateRules][layoutReferenceSide[in, out]][[1]]
+    hypergraphEmbedding[edgeType, hyperedgeRendering, externalVertexCoordinateRules][layoutReferenceSide[in, out]][[1]]
 
 sharedRuleElements[in_ -> out_] := multisetIntersection @@ (Join[vertexList[#], #] & /@ {in, out})
 
