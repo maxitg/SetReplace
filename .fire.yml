@@ -4,6 +4,7 @@ pipeline:
   steps:
     - step:
         phase: install
+        cache:
         image: setreplace/ci
 
     - step:
