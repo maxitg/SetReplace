@@ -4,6 +4,7 @@ pipeline:
   steps:
     - step:
         phase: install
+        name: clone
         cache: []
         image: setreplace/ci
         commands:
@@ -13,12 +14,11 @@ pipeline:
         phase: build
         name: build
         commands:
-          - ls
           - ./build.wls
           - ./install.wls
 
     - step:
         phase: test
-        name: unit tests
+        name: test
         commands:
           - ./test.wls
