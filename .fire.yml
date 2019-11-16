@@ -13,7 +13,9 @@ pipeline:
         phase: build
         name: build
         commands:
-          - ./build.wls&&./install.wls
+          - ls
+          - ./build.wls
+          - ./install.wls
 
     - step:
         phase: test
