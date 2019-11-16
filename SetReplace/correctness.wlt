@@ -1,366 +1,315 @@
-BeginTestSection["correctness"]
+<|
+  "correctness" -> <|
+    "init" -> (
+      sameSetQ[x_, y_] := Module[{xAtoms, yAtoms},
+        {xAtoms, yAtoms} = DeleteDuplicates[Flatten[#]] & /@ {x, y};
+        If[Length[xAtoms] != Length[yAtoms], Return[False]];
+        (x /. Thread[xAtoms -> yAtoms]) === y
+      ];
 
-(** C++ / WL implementation consistancy **)
+      $systemsToTest = {
+        {{{0, 1}}, ToPatternRules[{{0, 1}} -> {{0, 2}, {2, 1}}], 100, 6},
+        {{{1}}, ToPatternRules[{{{1}} -> {{1}}}], 100, 100},
+        {{{1}}, ToPatternRules[{{{1}} -> {{2}}}], 100, 100},
+        {{{1}}, ToPatternRules[{{{1}} -> {{2}, {1, 2}}}], 100, 6},
+        {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 1}}}], 100, 6},
+        {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 2}}}], 100, 6},
+        {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 3}}}], 100, 6},
+        {{{1}}, ToPatternRules[{{{1}} -> {{2}, {2}, {1, 2}}}], 100, 6},
+        {{{1}}, ToPatternRules[{{{1}} -> {{2}, {3}, {1, 2}}}], 100, 6},
+        {{{1}}, ToPatternRules[{{{1}} -> {{2}, {3}, {1, 2, 4}}}], 100, 6},
+        {{{1}}, ToPatternRules[{{{1}} -> {{2}, {2}, {2}, {1, 2}}}], 100, 4},
+        {{{1}, {1}, {1}}, ToPatternRules[{{{1}} -> {{2}, {1, 2}}}], 100, 34},
+        {{{1, 1}}, ToPatternRules[{{{1, 2}} -> {{1, 3}, {2, 3}}}], 100, 6},
+        {{{0, 1}, {0, 2}, {0, 3}},
+          {{{a_, b_}, {a_, c_}, {a_, d_}} :>
+            Module[{$0, $1, $2}, {
+              {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
+              {$0, b}, {$1, c}, {$2, d}}]},
+          30,
+          3},
+        {{{0, 0}, {0, 0}, {0, 0}},
+          {{{a_, b_}, {a_, c_}, {a_, d_}} :>
+            Module[{$0, $1, $2}, {
+              {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
+              {$0, b}, {$1, c}, {$2, d}}]},
+          30,
+          3},
+        {{{0, 1}, {0, 2}, {0, 3}},
+          {{{a_, b_}, {a_, c_}, {a_, d_}} :>
+            Module[{$0, $1, $2}, {
+              {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
+              {$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
+          30,
+          3},
+        {{{0, 0}, {0, 0}, {0, 0}},
+          {{{a_, b_}, {a_, c_}, {a_, d_}} :>
+            Module[{$0, $1, $2}, {
+              {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
+              {$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
+          30,
+          3}
+      };
 
-$sameSetQ[x_, y_] := Module[{xAtoms, yAtoms},
-  {xAtoms, yAtoms} = DeleteDuplicates[Flatten[#]] & /@ {x, y};
-  If[Length[xAtoms] != Length[yAtoms], Return[False]];
-  (x /. Thread[xAtoms -> yAtoms]) === y
-]
+      $graphsForMatching = {
+        {{1, 2}, {2, 3}, {3, 4}, {4, 5}},
+        {{1, 2}, {2, 3}, {3, 4}, {4, 1}},
+        {{1, 2}, {2, 3}, {3, 4}, {1, 5}},
+        {{2, 3}, {3, 1}, {4, 2}, {4, 5}},
+        {{1, 5}, {2, 1}, {2, 3}, {2, 4}, {2, 5}, {3, 1}, {4, 2}, {4, 5}}
+      };
 
-$systemsToTest = {
-  {{{0, 1}}, ToPatternRules[{{0, 1}} -> {{0, 2}, {2, 1}}], 100, 6},
-  {{{1}}, ToPatternRules[{{{1}} -> {{1}}}], 100, 100},
-  {{{1}}, ToPatternRules[{{{1}} -> {{2}}}], 100, 100},
-  {{{1}}, ToPatternRules[{{{1}} -> {{2}, {1, 2}}}], 100, 6},
-  {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 1}}}], 100, 6},
-  {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 2}}}], 100, 6},
-  {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 3}}}], 100, 6},
-  {{{1}}, ToPatternRules[{{{1}} -> {{2}, {2}, {1, 2}}}], 100, 6},
-  {{{1}}, ToPatternRules[{{{1}} -> {{2}, {3}, {1, 2}}}], 100, 6},
-  {{{1}}, ToPatternRules[{{{1}} -> {{2}, {3}, {1, 2, 4}}}], 100, 6},
-  {{{1}}, ToPatternRules[{{{1}} -> {{2}, {2}, {2}, {1, 2}}}], 100, 4},
-  {{{1}, {1}, {1}}, ToPatternRules[{{{1}} -> {{2}, {1, 2}}}], 100, 34},
-  {{{1, 1}}, ToPatternRules[{{{1, 2}} -> {{1, 3}, {2, 3}}}], 100, 6},
-  {{{0, 1}, {0, 2}, {0, 3}},
-    {{{a_, b_}, {a_, c_}, {a_, d_}} :>
-      Module[{$0, $1, $2}, {
-        {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
-        {$0, b}, {$1, c}, {$2, d}}]},
-    30,
-    3},
-  {{{0, 0}, {0, 0}, {0, 0}},
-    {{{a_, b_}, {a_, c_}, {a_, d_}} :>
-      Module[{$0, $1, $2}, {
-        {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
-        {$0, b}, {$1, c}, {$2, d}}]},
-    30,
-    3},
-  {{{0, 1}, {0, 2}, {0, 3}},
-    {{{a_, b_}, {a_, c_}, {a_, d_}} :>
-      Module[{$0, $1, $2}, {
-        {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
-        {$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
-    30,
-    3},
-  {{{0, 0}, {0, 0}, {0, 0}},
-    {{{a_, b_}, {a_, c_}, {a_, d_}} :>
-      Module[{$0, $1, $2}, {
-        {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
-        {$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
-    30,
-    3}
-};
+      $methods = DeleteCases[$SetReplaceMethods, Automatic];
 
-(* Fixed number of events *)
+      graphFromHyperedges[edges_] := Graph[
+        UndirectedEdge @@@ Flatten[Partition[#, 2, 1] & /@ edges, 1]];
 
-VerificationTest[
-  SetReplace[##, Method -> "Symbolic"],
-  SetReplace[##, Method -> "LowLevel"],
-  SameTest -> $sameSetQ
-] & @@@ $systemsToTest[[All, {1, 2, 3}]]
+      randomConnectedGraphs[edgeCount_, edgeLength_, graphCount_] := (
+        #[[All, 1]] & @ Select[#[[2]] &] @ Map[
+          {#, ConnectedGraphQ @ graphFromHyperedges @ #} &,
+          BlockRandom[
+            Table[
+              With[{k = edgeCount}, Table[RandomInteger[edgeLength k], k, edgeLength]],
+              graphCount],
+            RandomSeeding -> ToString[{"randomConnectedGraphs", edgeCount, edgeLength, graphCount}]]]
+      );
 
-(* Fixed number of generations *)
+      (* Here we generate random graphs and try replacing them to nothing *)
+      randomSameGraphMatchTests[edgeCount_, edgeLength_, graphCount_, method_] := Module[{
+          tests},
+        tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
+        Map[
+          With[{set1 = #[[1]], set2 = #[[2]]},
+            VerificationTest[SetReplace[set1, ToPatternRules[set2 -> {}], Method -> method], {}]] &,
+          BlockRandom[
+            {#, RandomSample[#]} & /@ tests,
+            RandomSeeding -> ToString[{"randomSameGraphMatchTest", edgeCount, edgeLength, graphCount, method}]]]
+      ];
 
-VerificationTest[
-  SetReplaceAll[##, Method -> "Symbolic"],
-  SetReplaceAll[##, Method -> "LowLevel"],
-  SameTest -> $sameSetQ
-] & @@@ $systemsToTest[[All, {1, 2, 4}]]
+      (* Here we generate pairs of different graphs, and check they are not being matched *)
+      randomDistinctGraphMatchTests[
+            edgeCount_, edgeLength_, graphCount_, method_] := Module[{
+          tests},
+        tests = Select[!IsomorphicGraphQ @@ (graphFromHyperedges /@ #) &]
+          @ Partition[
+            Select[SimpleGraphQ @* graphFromHyperedges]
+              @ randomConnectedGraphs[edgeCount, edgeLength, graphCount],
+            2];
+        Map[
+          (* degenerate graphs can still match if not isomorphic, i.e., {{0, 0}} will match {{0, 1}},
+             that's why we need to try replacing both ways *)
+          With[{set1 = #[[1]], set2 = #[[2]]},
+            VerificationTest[SetReplace[set1, ToPatternRules[set2 -> {}], Method -> method] != {}
+              || SetReplace[set2, ToPatternRules[set1 -> {}], Method -> method] != {}]] &,
+          tests]
+      ];
 
-(* Causal graphs consistency *)
+      (* Here we make initial condition degenerate, and check it still matches, i.e.,
+         {{0, 0}} should still match {{0, 1}} *)
+      randomDegenerateGraphMatchTests[
+            edgeCount_, edgeLength_, graphCount_, method_] := Module[{
+          tests},
+        tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
+      Map[
+          With[{set1 = #[[1]], identifiedVertex1 = #[[2]], identifiedVertex2 = #[[3]], set2 = #[[4]]},
+            VerificationTest[
+              SetReplace[
+                set1 /. identifiedVertex1 -> identifiedVertex2,
+                ToPatternRules[set2 -> {}],
+                Method -> method],
+              {}]] &,
+          BlockRandom[
+            {#, RandomChoice[Flatten[#]], RandomChoice[Flatten[#]], RandomSample[#]} & /@ tests,
+            RandomSeeding -> ToString[{"randomDegenerateGraphMatchTest", edgeCount, edgeLength, graphCount, method}]]]
+      ];
+    ),
+    "tests" -> Join[
+      (* Fixed number of events *)
 
-VerificationTest[
-  WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "Symbolic"],
-  WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "LowLevel"]
-] & @@@ $systemsToTest[[All, {2, 1, 4}]]
+      VerificationTest[
+        SetReplace[##, Method -> "Symbolic"],
+        SetReplace[##, Method -> "LowLevel"],
+        SameTest -> sameSetQ
+      ] & @@@ $systemsToTest[[All, {1, 2, 3}]],
 
-(** Causal graphs properties check **)
+      (* Fixed number of generations *)
 
-VerificationTest[
-  AcyclicGraphQ[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]]
-] & @@@ $systemsToTest[[All, {2, 1, 4}]]
+      VerificationTest[
+        SetReplaceAll[##, Method -> "Symbolic"],
+        SetReplaceAll[##, Method -> "LowLevel"],
+        SameTest -> sameSetQ
+      ] & @@@ $systemsToTest[[All, {1, 2, 4}]],
 
-VerificationTest[
-  LoopFreeGraphQ[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]]
-] & @@@ $systemsToTest[[All, {2, 1, 4}]]
+      (* Causal graphs consistency *)
 
-VerificationTest[
-  VertexCount[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]],
-  WolframModel[<|"PatternRules" -> #1|>, #2, #3, "EventsCount"]
-] & @@@ $systemsToTest[[All, {2, 1, 4}]]
+      VerificationTest[
+        WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "Symbolic"],
+        WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "LowLevel"]
+      ] & @@@ $systemsToTest[[All, {2, 1, 4}]],
 
-(** Complex matching **)
+      (** Causal graphs properties check **)
 
-graphsForMatching = {
-  {{1, 2}, {2, 3}, {3, 4}, {4, 5}},
-  {{1, 2}, {2, 3}, {3, 4}, {4, 1}},
-  {{1, 2}, {2, 3}, {3, 4}, {1, 5}},
-  {{2, 3}, {3, 1}, {4, 2}, {4, 5}},
-  {{1, 5}, {2, 1}, {2, 3}, {2, 4}, {2, 5}, {3, 1}, {4, 2}, {4, 5}}
-};
-methods = {"LowLevel", "Symbolic"};
+      VerificationTest[
+        AcyclicGraphQ[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]]
+      ] & @@@ $systemsToTest[[All, {2, 1, 4}]],
 
-Table[VerificationTest[
-  SetReplace[
-    graph,
-    ToPatternRules[graph -> {}],
-    1,
-    Method -> method],
-  {}
-], {graph, graphsForMatching}, {method, methods}]
+      VerificationTest[
+        LoopFreeGraphQ[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]]
+      ] & @@@ $systemsToTest[[All, {2, 1, 4}]],
 
-VerificationTest[
-  SetReplace[
-    {{1, 2}, {2, 3, 4}},
-    ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
-    1,
-    Method -> #],
-  {}
-] & /@ methods
+      VerificationTest[
+        VertexCount[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]],
+        WolframModel[<|"PatternRules" -> #1|>, #2, #3, "EventsCount"]
+      ] & @@@ $systemsToTest[[All, {2, 1, 4}]],
 
-VerificationTest[
-  SetReplace[
-    {{1, 2}, {2, 2, 3}},
-    ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
-    1,
-    Method -> #],
-  {}
-] & /@ methods
+      (** Complex matching **)
 
-VerificationTest[
-  SetReplace[
-    {{1, 2}, {2, 1, 3}},
-    ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
-    1,
-    Method -> #],
-  {}
-] & /@ methods
+      Catenate[Table[With[{graph = graph, method = method}, VerificationTest[
+        SetReplace[
+          graph,
+          ToPatternRules[graph -> {}],
+          1,
+          Method -> method],
+        {}
+      ]], {graph, $graphsForMatching}, {method, $methods}]],
 
-VerificationTest[
-  SetReplace[
-    {{1, 2}, {1, 1, 3}},
-    ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
-    1,
-    Method -> #],
-  {{1, 2}, {1, 1, 3}}
-] & /@ methods
+      VerificationTest[
+        SetReplace[
+          {{1, 2}, {2, 3, 4}},
+          ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
+          1,
+          Method -> #],
+        {}
+      ] & /@ $methods,
 
-VerificationTest[
-  SetReplace[
-    {{1, 2}, {2, 1}},
-    ToPatternRules[{{1, 2}, {2, 3}} -> {{1, 3}}],
-    1,
-    Method -> #],
-  {{1, 1}}
-] & /@ methods
+      VerificationTest[
+        SetReplace[
+          {{1, 2}, {2, 2, 3}},
+          ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
+          1,
+          Method -> #],
+        {}
+      ] & /@ $methods,
 
-(** Random tests **)
+      VerificationTest[
+        SetReplace[
+          {{1, 2}, {2, 1, 3}},
+          ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
+          1,
+          Method -> #],
+        {}
+      ] & /@ $methods,
 
-graphFromHyperedges[edges_] := Graph[
-  UndirectedEdge @@@ Flatten[Partition[#, 2, 1] & /@ edges, 1]];
+      VerificationTest[
+        SetReplace[
+          {{1, 2}, {1, 1, 3}},
+          ToPatternRules[{{2, 3, 4}, {1, 2}} -> {}],
+          1,
+          Method -> #],
+        {{1, 2}, {1, 1, 3}}
+      ] & /@ $methods,
 
-randomConnectedGraphs[edgeCount_, edgeLength_, graphCount_] := (
-  #[[All, 1]] & @ Select[#[[2]] &] @ ParallelMap[
-    {#, ConnectedGraphQ @ graphFromHyperedges @ #} &,
-    BlockRandom[
-      Table[
-        With[{k = edgeCount}, Table[RandomInteger[edgeLength k], k, edgeLength]],
-        graphCount],
-      RandomSeeding -> ToString[{"randomConnectedGraphs", edgeCount, edgeLength, graphCount}]]]
-)
+      VerificationTest[
+        SetReplace[
+          {{1, 2}, {2, 1}},
+          ToPatternRules[{{1, 2}, {2, 3}} -> {{1, 3}}],
+          1,
+          Method -> #],
+        {{1, 1}}
+      ] & /@ $methods,
 
-(* Here we generate random graphs and try replacing them to nothing *)
-randomSameGraphMatchTest[edgeCount_, edgeLength_, graphCount_, method_] := Module[{
-    tests},
-  tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
-  Union[
-    ParallelMap[
-        SetReplace[#[[1]], ToPatternRules[#[[2]] -> {}], Method -> method] &,
-        BlockRandom[
-          {#, RandomSample[#]} & /@ tests,
-          RandomSeeding -> ToString[{"randomSameGraphMatchTest", edgeCount, edgeLength, graphCount, method}]]]]
-      === {{}}
-]
+      (** Random tests **)
 
-VerificationTest[
-  randomSameGraphMatchTest[10, 2, 10000, "LowLevel"],
-  True
-]
+      randomSameGraphMatchTests[10, 2, 10000, "LowLevel"],
 
-VerificationTest[
-  randomSameGraphMatchTest[10, 3, 5000, "LowLevel"],
-  True
-]
+      randomSameGraphMatchTests[10, 3, 5000, "LowLevel"],
 
-VerificationTest[
-  randomSameGraphMatchTest[10, 6, 1000, "LowLevel"],
-  True
-]
+      randomSameGraphMatchTests[10, 6, 1000, "LowLevel"],
 
-VerificationTest[
-  randomSameGraphMatchTest[6, 2, 5000, "Symbolic"],
-  True
-]
+      randomSameGraphMatchTests[6, 2, 5000, "Symbolic"],
 
-VerificationTest[
-  randomSameGraphMatchTest[6, 3, 500, "Symbolic"],
-  True
-]
+      randomSameGraphMatchTests[6, 3, 500, "Symbolic"],
 
-VerificationTest[
-  randomSameGraphMatchTest[6, 10, 100, "Symbolic"],
-  True
-]
+      randomSameGraphMatchTests[6, 10, 100, "Symbolic"],
 
-(* Here we generate pairs of different graphs, and check they are not being matched *)
-randomDistinctGraphMatchTest[
-      edgeCount_, edgeLength_, graphCount_, method_] := Module[{
-    tests},
-  tests = Select[!IsomorphicGraphQ @@ (graphFromHyperedges /@ #) &]
-    @ Partition[
-      Select[SimpleGraphQ @* graphFromHyperedges]
-        @ randomConnectedGraphs[edgeCount, edgeLength, graphCount],
-      2];
-  Not[Or @@ ParallelMap[
-    (* degenerate graphs can still match if not isomorphic, i.e., {{0, 0}} will match {{0, 1}},
-       that's why we need to try replacing both ways *)
-    SetReplace[#[[1]], ToPatternRules[#[[2]] -> {}], Method -> method] == {}
-      && SetReplace[#[[2]], ToPatternRules[#[[1]] -> {}], Method -> method] == {} &,
-    tests]]
-]
+      randomDistinctGraphMatchTests[10, 2, 10000, "LowLevel"],
 
-VerificationTest[
-  randomDistinctGraphMatchTest[10, 2, 10000, "LowLevel"],
-  True
-]
+      randomDistinctGraphMatchTests[10, 3, 10000, "LowLevel"],
 
-VerificationTest[
-  randomDistinctGraphMatchTest[10, 3, 10000, "LowLevel"],
-  True
-]
+      randomDistinctGraphMatchTests[10, 6, 10000, "LowLevel"],
 
-VerificationTest[
-  randomDistinctGraphMatchTest[10, 6, 10000, "LowLevel"],
-  True
-]
+      randomDistinctGraphMatchTests[6, 2, 5000, "Symbolic"],
 
-VerificationTest[
-  randomDistinctGraphMatchTest[6, 2, 5000, "Symbolic"],
-  True
-]
+      randomDistinctGraphMatchTests[6, 3, 5000, "Symbolic"],
 
-VerificationTest[
-  randomDistinctGraphMatchTest[6, 3, 5000, "Symbolic"],
-  True
-]
+      randomDistinctGraphMatchTests[6, 6, 5000, "Symbolic"],
 
-VerificationTest[
-  randomDistinctGraphMatchTest[6, 6, 5000, "Symbolic"],
-  True
-]
+      randomDegenerateGraphMatchTests[10, 2, 10000, "LowLevel"],
 
-(* Here we make initial condition degenerate, and check it still matches, i.e.,
-   {{0, 0}} should still match {{0, 1}} *)
-randomDegenerateGraphMatchTest[
-      edgeCount_, edgeLength_, graphCount_, method_] := Module[{
-    tests},
-  tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
-Union[
-  ParallelMap[
-      SetReplace[
-        #[[1]] /. #[[2]] -> #[[3]],
-        ToPatternRules[#[[4]] -> {}],
-        Method -> method] &,
-      BlockRandom[
-        {#, RandomChoice[Flatten[#]], RandomChoice[Flatten[#]], RandomSample[#]} & /@ tests,
-        RandomSeeding -> ToString[{"randomDegenerateGraphMatchTest", edgeCount, edgeLength, graphCount, method}]]]]
-    === {{}}
-]
+      randomDegenerateGraphMatchTests[10, 3, 5000, "LowLevel"],
 
-VerificationTest[
-  randomDegenerateGraphMatchTest[10, 2, 10000, "LowLevel"],
-  True
-]
+      randomDegenerateGraphMatchTests[10, 6, 1000, "LowLevel"],
 
-VerificationTest[
-  randomDegenerateGraphMatchTest[10, 3, 5000, "LowLevel"],
-  True
-]
+      randomDegenerateGraphMatchTests[6, 2, 5000, "Symbolic"],
 
-VerificationTest[
-  randomDegenerateGraphMatchTest[10, 6, 1000, "LowLevel"],
-  True
-]
+      randomDegenerateGraphMatchTests[6, 3, 500, "Symbolic"],
 
-VerificationTest[
-  randomDegenerateGraphMatchTest[6, 2, 5000, "Symbolic"],
-  True
-]
+      randomDegenerateGraphMatchTests[6, 10, 100, "Symbolic"],
 
-VerificationTest[
-  randomDegenerateGraphMatchTest[6, 3, 500, "Symbolic"],
-  True
-]
+      (** Evaluation order **)
 
-VerificationTest[
-  randomDegenerateGraphMatchTest[6, 10, 100, "Symbolic"],
-  True
-]
+      VerificationTest[
+        SetReplace[{{1}, {2}, {3}, {4}, {5}}, {{{2}, {3}, {4}} -> {{X}}, {{3}} -> {{X}}}, Method -> #],
+        {{1}, {2}, {4}, {5}, {X}}
+      ] & /@ $methods,
 
-(** Evaluation order **)
+      {VerificationTest[
+        Table[
+          WolframModel[
+              <|"PatternRules" -> {{{1, 2}, {2, 3}} -> {{R1}}, {{4, 5}, {5, 6}} -> {{R2}}}|>,
+              #,
+              <|"Events" -> 1|>,
+              "FinalState",
+              Method -> method][[-1, 1]] & /@
+            Permutations[{{1, 2}, {2, 3}, {4, 5}, {5, 6}}],
+          {method, $methods}],
+        ConstantArray[{
+            R1, R1, R1, R2, R1, R2, R1, R1, R1, R2, R1, R2,
+            R1, R2, R1, R2, R2, R2, R1, R2, R1, R2, R2, R2},
+          2]
+      ]},
 
-VerificationTest[
-  SetReplace[{{1}, {2}, {3}, {4}, {5}}, {{{2}, {3}, {4}} -> {{X}}, {{3}} -> {{X}}}],
-  {{1}, {2}, {4}, {5}, {X}}
-]
+      {VerificationTest[
+        Table[
+          WolframModel[
+              <|"PatternRules" -> {{1, 2, x_}, {1, 2, z_}} :> {{x, z}}|>,
+              #,
+              <|"Events" -> 1|>,
+              "FinalState",
+              Method -> method][[-1]] & /@
+            Permutations[{{1, 2, x}, {1, 2, y}, {1, 2, z}}],
+          {method, $methods}],
+        ConstantArray[
+          {{x, y}, {x, z}, {y, x}, {y, z}, {z, x}, {z, y}},
+          2]
+      ]},
 
-VerificationTest[
-  Table[
-    WolframModel[
-        <|"PatternRules" -> {{{1, 2}, {2, 3}} -> {{R1}}, {{4, 5}, {5, 6}} -> {{R2}}}|>,
-        #,
-        <|"Events" -> 1|>,
-        "FinalState",
-        Method -> method][[-1, 1]] & /@
-      Permutations[{{1, 2}, {2, 3}, {4, 5}, {5, 6}}],
-    {method, {"LowLevel", "Symbolic"}}],
-  ConstantArray[{
-      R1, R1, R1, R2, R1, R2, R1, R1, R1, R2, R1, R2,
-      R1, R2, R1, R2, R2, R2, R1, R2, R1, R2, R2, R2},
-    2]
-]
-
-VerificationTest[
-  Table[
-    WolframModel[
-        <|"PatternRules" -> {{1, 2, x_}, {1, 2, z_}} :> {{x, z}}|>,
-        #,
-        <|"Events" -> 1|>,
-        "FinalState",
-        Method -> method][[-1]] & /@
-      Permutations[{{1, 2, x}, {1, 2, y}, {1, 2, z}}],
-    {method, {"LowLevel", "Symbolic"}}],
-  ConstantArray[
-    {{x, y}, {x, z}, {y, x}, {y, z}, {z, x}, {z, y}},
-    2]
-]
-
-VerificationTest[
-  Table[
-    WolframModel[
-        <|"PatternRules" -> {
-          {{1, 2, x_}, {1, 3, z_}} :> {{1, x, z}},
-          {{1, 2, x_}, {1, 2, z_}} :> {{2, x, z}}}|>,
-        #,
-        <|"Events" -> 1|>,
-        "FinalState",
-        Method -> method][[-1]] & /@
-      Permutations[{{1, 2, x}, {1, 2, y}, {1, 3, z}}],
-    {method, {"LowLevel", "Symbolic"}}],
-  ConstantArray[
-    {{2, x, y}, {1, x, z}, {2, y, x}, {1, y, z}, {1, x, z}, {1, y, z}},
-    2]
-]
-
-EndTestSection[]
+      {VerificationTest[
+        Table[
+          WolframModel[
+              <|"PatternRules" -> {
+                {{1, 2, x_}, {1, 3, z_}} :> {{1, x, z}},
+                {{1, 2, x_}, {1, 2, z_}} :> {{2, x, z}}}|>,
+              #,
+              <|"Events" -> 1|>,
+              "FinalState",
+              Method -> method][[-1]] & /@
+            Permutations[{{1, 2, x}, {1, 2, y}, {1, 3, z}}],
+          {method, $methods}],
+        ConstantArray[
+          {{2, x, y}, {1, x, z}, {2, y, x}, {1, y, z}, {1, x, z}, {1, y, z}},
+          2]
+      ]}
+    ]
+  |>
+|>
