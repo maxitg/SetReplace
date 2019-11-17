@@ -29,11 +29,17 @@ Check[
 		KeyMap[ReleaseHold, #] & /@
 			ReleaseHold @ Map[Hold, ToExpression[Import[#, "Text"], InputForm, Hold], {5}] & /@ $testFiles);
 	
-	Attributes[test] = Attributes[timeConstrainedTest] = {HoldAll};
+	Attributes[test] = Attributes[constrainedTest] = {HoldAll};
 	
 	$singleTestTimeConstraint = 300;
-	timeConstrainedTest[args___] :=
-		If[FreeQ[Hold[{args}], TimeConstraint], test[args, TimeConstraint -> $singleTestTimeConstraint], test[args]];
+	$singleTestMemoryConstraint = 1*^9;
+	constrainedTest[args___] := With[{
+			timeConstraintOpt =
+				If[FreeQ[Hold[{args}], TimeConstraint], {TimeConstraint -> $singleTestTimeConstraint}, {}],
+			memoryConstraintOpt =
+				If[FreeQ[Hold[{args}], MemoryConstraint], {MemoryConstraint -> $singleTestMemoryConstraint}, {}]},
+		test[args, ##] & @@ Join[timeConstraintOpt, memoryConstraintOpt]
+	];
 		
 	removeHoldFormFromInputString[input_String] := StringReplace[
 		input,
@@ -52,12 +58,12 @@ Check[
 		parallelQ = Lookup[options, "Parallel", True];
 
 		(* Run init, changing VerificationTest to test in all definitions *)
-		runInit[] := ReleaseHold[testGroup["init"] /. VerificationTest -> timeConstrainedTest];
+		runInit[] := ReleaseHold[testGroup["init"] /. VerificationTest -> constrainedTest];
 		runInit[];
 		If[parallelQ, ParallelEvaluate[runInit[]]];
 	
 		(* Make a list of tests, but don't run them yet *)
-		testList = ReleaseHold[testGroup["tests"] /. VerificationTest -> timeConstrainedTest];
+		testList = ReleaseHold[testGroup["tests"] /. VerificationTest -> constrainedTest];
 	
 		(* Run tests in parallel *)
 		testResults = Flatten[If[parallelQ, ParallelMap, Map][# /. test -> VerificationTest &, testList]];
