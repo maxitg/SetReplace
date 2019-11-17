@@ -1,6 +1,9 @@
 <|
   "correctness" -> <|
     "init" -> (
+      Attributes[Global`testUnevaluated] = {HoldAll};
+      Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+
       sameSetQ[x_, y_] := Module[{xAtoms, yAtoms},
         {xAtoms, yAtoms} = DeleteDuplicates[Flatten[#]] & /@ {x, y};
         If[Length[xAtoms] != Length[yAtoms], Return[False]];
@@ -328,6 +331,15 @@
         SetReplace[{1}, ToPatternRules[{{1, 2} -> {}, {1} -> {2}}], Method -> "Symbolic"],
         {_ ? AtomQ},
         SameTest -> MatchQ
+      ],
+
+      (** Check invalid patterns produce a single message. **)
+      testUnevaluated[
+        SetReplace[
+          {{1}},
+          {{{Pattern[1, _], v2_}} :> {}, {{Pattern[2, _], v1_}} :> Module[{v2}, {v2}]},
+          Method -> "Symbolic"],
+        {Pattern::patvar}
       ]
     }
   |>
