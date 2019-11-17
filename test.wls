@@ -40,7 +40,7 @@ Check[
 				If[FreeQ[Hold[{args}], MemoryConstraint], {MemoryConstraint -> $singleTestMemoryConstraint}, {}]},
 		test[args, ##] & @@ Join[timeConstraintOpt, memoryConstraintOpt]
 	];
-		
+
 	removeHoldFormFromInputString[input_String] := StringReplace[
 		input,
 		StartOfString ~~ "HoldForm[" ~~ expr__ ~~ "]" ~~ EndOfString :> expr
@@ -63,10 +63,10 @@ Check[
 		If[parallelQ, ParallelEvaluate[runInit[]]];
 	
 		(* Make a list of tests, but don't run them yet *)
-		testList = ReleaseHold[testGroup["tests"] /. VerificationTest -> constrainedTest];
+		testList = Flatten[ReleaseHold[testGroup["tests"] /. VerificationTest -> constrainedTest]];
 	
 		(* Run tests in parallel *)
-		testResults = Flatten[If[parallelQ, ParallelMap, Map][# /. test -> VerificationTest &, testList]];
+		testResults = If[parallelQ, ParallelMap, Map][# /. test -> VerificationTest &, testList];
 		testReport = TestReport[testResults];
 	
 		$redColor = "\033[0;31m";
