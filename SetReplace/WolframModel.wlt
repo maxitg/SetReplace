@@ -804,8 +804,7 @@
                 output =
                   WolframModel[timeConstraintRule, timeConstraintInit, 100, Method -> method, TimeConstraint -> time]},
               WolframModel[timeConstraintRule, timeConstraintInit, <|"Events" -> output["EventsCount"]|>] === output],
-            100],
-          TimeConstraint -> 60
+            100]
         ]], {method, $SetReplaceMethods}, {time, {1.*^-100, 0.1}}],
 
         (*** This does not work with TimeConstrained though, $Aborted is returned in that case. ***)
