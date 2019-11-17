@@ -343,6 +343,15 @@
           {{{Pattern[1, _], v2_}} :> {}, {{Pattern[2, _], v1_}} :> Module[{v2}, {v2}]},
           Method -> "Symbolic"],
         {Pattern::patvar}
+      ],
+
+      (** Nested Pattern in the inputs **)
+      testUnevaluated[
+        SetReplace[
+          {{1}},
+          {{{Pattern[Pattern[a, _], _], v2_}} :> {}, {{Pattern[2, _], v1_}} :> Module[{v2}, {v2}]},
+          Method -> "Symbolic"],
+        {Pattern::patvar}
       ]
     }
   |>
