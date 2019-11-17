@@ -207,15 +207,16 @@ addMetadataManagement[
 
 
 renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAtoms},
+	Attributes[pattern] = {HoldAll};
 	inputAtoms = Union[
 		Quiet[
 			Cases[
 				# /. Pattern -> pattern,
-				pattern[s_, rest___] :> If[MatchQ[s, _Symbol], s, Message[Pattern::patvar, Pattern[s, rest]]; Throw[$Failed]],
+				pattern[s_, rest___] :> If[MatchQ[Hold[s], Hold[_Symbol]], Hold[s], Message[Pattern::patvar, Pattern[s, rest]]; Throw[$Failed]],
 				All],
 			{RuleDelayed::rhs}]];
 	newInputAtoms = Table[Unique[], Length[inputAtoms]];
-	# /. Thread[inputAtoms -> newInputAtoms]
+	# /. (((HoldPattern[#[[1]]] /. Hold[s_] :> s) -> #[[2]]) & /@ Thread[inputAtoms -> newInputAtoms])
 ] & /@ patternRules]
 
 
