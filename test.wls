@@ -45,9 +45,9 @@ Check[
 		input,
 		StartOfString ~~ "HoldForm[" ~~ expr__ ~~ "]" ~~ EndOfString :> expr
 	];
-	
+
 	$results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
-			testList, testResults, testReport, options, parallelQ},
+			testList, testResults, testReport, options, parallelQ, runInit, failedTests},
 		(* Notify the user which test group we are running *)
 		WriteString["stdout",
 			testGroupName,
@@ -78,6 +78,7 @@ Check[
 		(* Print the summery (green if ok, red if failed) *)
 		WriteString["stdout", If[testReport["AllTestsSucceeded"],
 			$greenColor <> "[ok]" <> $endColor,
+			$successQ = False;
 			StringJoin[
 				$redColor <> "[",
 				ToString @ testReport["TestsFailedCount"],
@@ -87,7 +88,6 @@ Check[
 	
 		(* If tests failed, print why *)
 		failedTests = Join @@ testReport["TestsFailed"];
-		If[Length[failedTests] > 0, $successQ = False];
 		Switch[#["Outcome"],
 			"Failure",
 				WriteString["stdout",

@@ -31,7 +31,8 @@
         Missing[],
         All];
 
-      Global`testUnevaluated = SetReplace`PackageScope`testUnevaluated;
+      Attributes[Global`testUnevaluated] = {HoldAll};
+      Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
     ),
     "tests" -> {
       (* Argument Checks *)
