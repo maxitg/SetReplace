@@ -50,7 +50,7 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
 	testList = ReleaseHold[testGroup["tests"] /. VerificationTest -> timeConstrainedTest];
 
 	(* Run tests in parallel *)
-	testResults = ParallelMap[# /. test -> VerificationTest &, testList];
+	testResults = Flatten[ParallelMap[# /. test -> VerificationTest &, testList]];
 	testReport = TestReport[testResults];
 
 	$redColor = "\033[0;31m";

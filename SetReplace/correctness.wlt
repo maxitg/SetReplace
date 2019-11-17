@@ -123,7 +123,7 @@
             RandomSeeding -> ToString[{"randomDegenerateGraphMatchTest", edgeCount, edgeLength, graphCount, method}]]]
       ];
     ),
-    "tests" -> Join[
+    "tests" -> {
       (* Fixed number of events *)
 
       VerificationTest[
@@ -164,14 +164,14 @@
 
       (** Complex matching **)
 
-      Catenate[Table[With[{graph = graph, method = method}, VerificationTest[
+      Table[With[{graph = graph, method = method}, VerificationTest[
         SetReplace[
           graph,
           ToPatternRules[graph -> {}],
           1,
           Method -> method],
         {}
-      ]], {graph, $graphsForMatching}, {method, $methods}]],
+      ]], {graph, $graphsForMatching}, {method, $methods}],
 
       VerificationTest[
         SetReplace[
@@ -258,12 +258,12 @@
 
       (** Evaluation order **)
 
-      {VerificationTest[
+      VerificationTest[
         SetReplace[{{1}, {2}, {3}, {4}, {5}}, {{{2}, {3}, {4}} -> {{X}}, {{3}} -> {{X}}}],
         {{1}, {2}, {4}, {5}, {X}}
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Table[
           WolframModel[
               <|"PatternRules" -> {{{1, 2}, {2, 3}} -> {{R1}}, {{4, 5}, {5, 6}} -> {{R2}}}|>,
@@ -277,9 +277,9 @@
             R1, R1, R1, R2, R1, R2, R1, R1, R1, R2, R1, R2,
             R1, R2, R1, R2, R2, R2, R1, R2, R1, R2, R2, R2},
           2]
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Table[
           WolframModel[
               <|"PatternRules" -> {{1, 2, x_}, {1, 2, z_}} :> {{x, z}}|>,
@@ -292,9 +292,9 @@
         ConstantArray[
           {{x, y}, {x, z}, {y, x}, {y, z}, {z, x}, {z, y}},
           2]
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Table[
           WolframModel[
               <|"PatternRules" -> {
@@ -309,7 +309,7 @@
         ConstantArray[
           {{2, x, y}, {1, x, z}, {2, y, x}, {1, y, z}, {1, x, z}, {1, y, z}},
           2]
-      ]}
-    ]
+      ]
+    }
   |>
 |>

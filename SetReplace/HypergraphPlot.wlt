@@ -40,218 +40,218 @@
           SameTest -> MatchQ,
           opts];
     ),
-    "tests" -> Join[
+    "tests" -> {
       (* Argument Checks *)
 
       (** Argument count **)
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[],
         {HypergraphPlot::argt}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2}}, {{1, 2}}, {{1, 2}}],
         {HypergraphPlot::argt}
-      ]},
+      ],
 
       (** Valid edges **)
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[1],
         {HypergraphPlot::invalidEdges}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{1, 2}],
         {HypergraphPlot::invalidEdges}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 3}, 2}],
         {HypergraphPlot::invalidEdges}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 3}, 6, {2, 4}}],
         {HypergraphPlot::invalidEdges}
-      ]},
+      ],
 
       (** Valid EdgeType **)
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, None],
         {HypergraphPlot::invalidEdgeType}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "$$$Incorrect$$$"],
         {HypergraphPlot::invalidEdgeType}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {"$$$Incorrect$$$"}],
         {HypergraphPlot::invalidEdgeType}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3} -> "$$$Incorrect$$$"}],
         {HypergraphPlot::invalidEdgeType}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {None, {1, 2, 3} -> "Ordered"}],
         {HypergraphPlot::invalidEdgeType}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, {"$$$Incorrect$$$", {1, 2, 3} -> "Ordered"}],
         {HypergraphPlot::invalidEdgeType}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[
           {{1, 2, 3}, {3, 4, 5}},
           {{3, 4, 5} -> "Ordered", {1, 2, 3} -> "$$$Incorrect$$$"}],
         {HypergraphPlot::invalidEdgeType}
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered"]],
         Graphics
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Cyclic"]],
         Graphics
-      ]},
+      ],
 
       (* Valid options *)
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "$$$InvalidOption###" -> True],
         {HypergraphPlot::optx}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered", "$$$InvalidOption###" -> True],
         {HypergraphPlot::optx}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "$$$Incorrect$$$", "$$$InvalidOption###" -> True],
         {HypergraphPlot::invalidEdgeType}
-      ]},
+      ],
 
       (* Valid coordinates *)
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> $$$invalid$$$],
         {HypergraphPlot::invalidCoordinates}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {{0, 0}}],
         {HypergraphPlot::invalidCoordinates}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0}}],
         {HypergraphPlot::invalidCoordinates}
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0, 0}}]],
         Graphics
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered", VertexCoordinateRules -> {1 -> {0, 0}}]],
         Graphics
-      ]},
+      ],
 
       (* Valid GraphHighlight *)
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> $$$invalid$$$],
         {HypergraphPlot::invalidHighlight}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {6}],
         {HypergraphPlot::invalidHighlight}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1, 1}],
         {HypergraphPlot::invalidHighlight}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {{1, 2}}],
         {HypergraphPlot::invalidHighlight}
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Head[HypergraphPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}}]],
         Graphics
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Head[HypergraphPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}, {1, 2, 3}}]],
         Graphics
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}],
         {HypergraphPlot::invalidHighlight}
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}]],
         Graphics
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {{1, 2, 3}}]],
         Graphics
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {4, {1, 2, 3}}]],
         Graphics
-      ]},
+      ],
 
       (* Valid GraphHighlightStyle *)
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> None],
         {HypergraphPlot::invalidHighlightStyle}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> 2],
         {HypergraphPlot::invalidHighlightStyle}
-      ]},
+      ],
 
-      {testUnevaluated[
+      testUnevaluated[
         HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> "Dashed"],
         {HypergraphPlot::invalidHighlightStyle}
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> Black]],
         Graphics
-      ]},
+      ],
 
       (* Implementation *)
 
       (** Simple examples **)
 
-      Catenate[Table[With[{hypergraph = hypergraph}, VerificationTest[
+      Table[With[{hypergraph = hypergraph}, VerificationTest[
         Head[HypergraphPlot[hypergraph, #]],
         Graphics
-      ]] & /@ $edgeTypes, {hypergraph, $simpleHypergraphs}]],
+      ]] & /@ $edgeTypes, {hypergraph, $simpleHypergraphs}],
 
       (** Large graphs **)
 
@@ -308,56 +308,56 @@
 
       (* Single-vertex edges *)
 
-      {VerificationTest[
+      VerificationTest[
         HypergraphPlot[{{1}, {1, 2}}] =!= HypergraphPlot[{{1, 2}}]
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         MissingQ[FirstCase[
           HypergraphPlot[{{1, 2}}, VertexLabels -> None],
           Circle[___],
           Missing[],
           All]]
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         !MissingQ[FirstCase[
           HypergraphPlot[{{1}, {1, 2}}, VertexLabels -> Automatic],
           Circle[___],
           Missing[],
           All]]
-      ]},
+      ],
 
       (* VertexCoordinateRules *)
 
-      {VerificationTest[
+      VerificationTest[
         And @@ (MemberQ[
             diskCoordinates[HypergraphPlot[
               {{1, 2, 3}, {3, 4, 5}, {3, 3}},
               VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}}]],
             #] & /@
           {{0., 0.}, {1., 0.}})
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Chop @ diskCoordinates[HypergraphPlot[
           {{1, 2, 3}, {3, 4, 5}},
           VertexCoordinateRules -> {3 -> {0, 0}}]] != Table[{0, 0}, 5]
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Chop @ diskCoordinates[HypergraphPlot[
           {{1, 2, 3}, {3, 4, 5}},
           VertexCoordinateRules -> {3 -> {1, 0}, 3 -> {0, 0}}]] != Table[{0, 0}, 5]
-      ]},
+      ],
 
       (** Same coordinates should not produce any messages **)
-      {VerificationTest[
+      VerificationTest[
         And @@ Cases[
           HypergraphPlot[{{1, 2, 3}}, VertexCoordinateRules -> {1 -> {1, 0}, 2 -> {1, 0}}],
           Rotate[_, {v1_, v2_}] :> v1 != {0, 0} && v2 != {0, 0},
           All]
-      ]},
+      ],
 
       (* GraphHighlight *)
 
@@ -367,47 +367,47 @@
       ] & /@ {4, {1, 2, 3}},
 
       (** Test multi-edge highlighting **)
-      {VerificationTest[
+      VerificationTest[
         Differences[
           Length[Union[Cases[#, _?ColorQ, All]]] & /@
             (HypergraphPlot[{{1, 2}, {1, 2}}, "HyperedgeRendering" -> "Subgraphs", GraphHighlight -> #] &) /@
             {{}, {{1, 2}}, {{1, 2}, {1, 2}}}],
         {1, -1}
-      ]},
+      ],
 
       (* GraphHighlightStyle *)
 
-      {VerificationTest[
+      VerificationTest[
         With[{
             color = RGBColor[0.4, 0.6, 0.2]},
           FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> #, GraphHighlightStyle -> color], color] & /@
             {{}, {4}, {{1, 2, 3}}}],
         {True, False, False}
-      ]},
+      ],
 
       (* Scaling consistency *)
       (* Vertex sizes, arrow sizes, average edge lengths, and loop lengths should always be the same. *)
 
-      {VerificationTest[
+      VerificationTest[
         SameQ @@ (
           Union[Cases[HypergraphPlot[#], Disk[_, r_] :> r, All]] & /@
             {{{1}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         SameQ @@ (
           Union[Cases[HypergraphPlot[#, "HyperedgeRendering" -> "Subgraphs"], p : Polygon[___] :> Area[p], All]] & /@
             {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
-      ]},
+      ],
 
-      {VerificationTest[
+      VerificationTest[
         Equal @@ (
           Mean[Cases[
               HypergraphPlot[#, "HyperedgeRendering" -> "Subgraphs"],
               Line[pts_] :> EuclideanDistance @@ pts,
               All]] & /@
             {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3, 4, 5, 1}}})
-      ]},
+      ],
 
       VerificationTest[
         Abs[
@@ -426,6 +426,6 @@
         {{1, 2, 3}, {3, 4, 5}, {5, 5}},
         {{1, 2, 3}, {3, 4, 5}, {5, 6, 1, 1}},
         {{1, 2, 3, 4, 5, 5, 1}}}
-    ]
+    }
   |>
 |>
