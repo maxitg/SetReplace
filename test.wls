@@ -1,126 +1,138 @@
 #!/usr/bin/env wolframscript
 
+(* Disable messages about outdated cloud. *)
+Off[CloudConnect::clver];
+
 << SetReplace`;
 (* Launch kernels preemptively to avoid "Launching kernels..." interrupting test log *)
 CloseKernels[];
 LaunchKernels[];
 ParallelEvaluate[<< SetReplace`];
 
-(* Get test files *)
-
-$testFiles = If[Length @ $ScriptCommandLine >= 2,
-	FileNameJoin[{".", "SetReplace", # <> ".wlt"}] & /@ $ScriptCommandLine[[2 ;; ]],
-	FileNames[FileNameJoin[{".", "SetReplace", "*.wlt"}]]
-];
-
-If[!FileExistsQ[#],
-	Print["Test file ", #, " does not exist."];
-	Exit[1];] & /@ $testFiles;
-
-(* Read tests *)
-
-$testGroups = Join @@ (
-	KeyMap[ReleaseHold, #] & /@
-		ReleaseHold @ Map[Hold, ToExpression[Import[#, "Text"], InputForm, Hold], {5}] & /@ $testFiles);
-
-Attributes[test] = Attributes[timeConstrainedTest] = {HoldAll};
-
-$singleTestTimeConstraint = 300;
-timeConstrainedTest[args___] := test[args, TimeConstraint -> $singleTestTimeConstraint];
-
 $successQ = True;
 
-removeHoldFormFromInputString[input_String] := StringReplace[
-	input,
-	StartOfString ~~ "HoldForm[" ~~ expr__ ~~ "]" ~~ EndOfString :> expr
+Check[
+	(* Get test files *)
+	
+	$testFiles = If[Length @ $ScriptCommandLine >= 2,
+		FileNameJoin[{".", "SetReplace", # <> ".wlt"}] & /@ $ScriptCommandLine[[2 ;; ]],
+		FileNames[FileNameJoin[{".", "SetReplace", "*.wlt"}]]
+	];
+	
+	If[!FileExistsQ[#],
+		Print["Test file ", #, " does not exist."];
+		Exit[1];] & /@ $testFiles;
+	
+	(* Read tests *)
+	
+	$testGroups = Join @@ (
+		KeyMap[ReleaseHold, #] & /@
+			ReleaseHold @ Map[Hold, ToExpression[Import[#, "Text"], InputForm, Hold], {5}] & /@ $testFiles);
+	
+	Attributes[test] = Attributes[timeConstrainedTest] = {HoldAll};
+	
+	$singleTestTimeConstraint = 300;
+	timeConstrainedTest[args___] := test[args, TimeConstraint -> $singleTestTimeConstraint];
+		
+	removeHoldFormFromInputString[input_String] := StringReplace[
+		input,
+		StartOfString ~~ "HoldForm[" ~~ expr__ ~~ "]" ~~ EndOfString :> expr
+	];
+	
+	$results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{testList, testResults, testReport},
+		(* Notify the user which test group we are running *)
+		WriteString["stdout",
+			testGroupName,
+			StringJoin[ConstantArray[" ", Max[40 - StringLength[testGroupName], 1]]]];
+	
+		(* Run init, changing VerificationTest to test in all definitions *)
+		runInit[] := ReleaseHold[testGroup["init"] /. VerificationTest -> timeConstrainedTest];
+		runInit[];
+		ParallelEvaluate[runInit[]];
+	
+		(* Make a list of tests, but don't run them yet *)
+		testList = ReleaseHold[testGroup["tests"] /. VerificationTest -> timeConstrainedTest];
+	
+		(* Run tests in parallel *)
+		testResults = Flatten[ParallelMap[# /. test -> VerificationTest &, testList]];
+		testReport = TestReport[testResults];
+	
+		$redColor = "\033[0;31m";
+		$greenColor = "\033[0;32m";
+		$orangeColor = "\033[0;33m";
+		$yellowColor = "\033[1;33m";
+		$endColor = "\033[0m";
+	
+		(* Print the summery (green if ok, red if failed) *)
+		WriteString["stdout", If[testReport["AllTestsSucceeded"],
+			$greenColor <> "[ok]" <> $endColor,
+			StringJoin[
+				$redColor <> "[",
+				ToString @ testReport["TestsFailedCount"],
+				"/",
+				ToString @ Length @ testReport["TestResults"],
+				" failed]" <> $endColor]], "\n"];
+	
+		(* If tests failed, print why *)
+		failedTests = Join @@ testReport["TestsFailed"];
+		If[Length[failedTests] > 0, $successQ = False];
+		Switch[#["Outcome"],
+			"Failure",
+				WriteString["stdout",
+					$redColor <> "Input" <> $endColor <> "\n",
+					">> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n",
+					$redColor <> "evaluated to" <> $endColor <> "\n",
+					">> ", ToString[#["ActualOutput"], OutputForm], "\n",
+					$redColor <> "instead of expected " <> $endColor <> "\n",
+					">> ", ToString[#["ExpectedOutput"], OutputForm], "\n\n"],
+			"MessagesFailure",
+				WriteString["stdout",
+					$orangeColor <> "Input" <> $endColor <> "\n",
+					">> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n",
+					$orangeColor <> "generated messages" <> $endColor <> "\n",
+					">> ", ToString[#["ActualMessages"], OutputForm], "\n",
+					$orangeColor <> "instead of expected" <> $endColor <> "\n",
+					">> ", ToString[#["ExpectedMessages"], OutputForm], "\n\n"],
+			"Error",
+				WriteString["stdout",
+					$yellowColor <> "Error while evaluating the test with input" <> $endColor <> "\n",
+					">> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n\n"]
+		] & /@ failedTests[[1 ;; UpTo[3]]];
+	
+		(* If too many tests have failed, print how many remain *)
+		If[Length[failedTests] > 3,
+			WriteString["stdout",
+				"Omitting remaining ",
+				Length[failedTests] - 3,
+				" " <> testGroupName,
+				" test failures.\n\n"]
+		];
+	
+		(* Return the report, we'll need it later *)
+		testGroupName -> testReport
+	]], $testGroups]];
+	
+	(* Create a notebook with results *)
+	
+	$reportFile = UsingFrontEnd @ Export[
+		FileNameJoin[Join[FileNameSplit[CreateDirectory[]], {"testReport.nb"}]],
+		Notebook @ Catenate @ Prepend[KeyValueMap[
+			{Cell[Last @ FileNameSplit @ #1, "Section"],
+				Cell[
+					BoxData[RowBox[{"TestReport", "[", "\"" <> #1 <> "\"", "]"}]],
+					"Input"],
+				Cell[BoxData[ToBoxes[#2]], "Output"]} &,
+			$results], {Cell["SetReplace Test Report", "Title"]}]];
+	
+	
+	Print["Report file: ", $reportFile];,
+
+	$successQ = False;
 ];
 
-$results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{testList, testResults, testReport},
-	(* Notify the user which test group we are running *)
-	WriteString["stdout",
-		testGroupName,
-		StringJoin[ConstantArray[" ", Max[40 - StringLength[testGroupName], 1]]]];
-
-	(* Run init, changing VerificationTest to test in all definitions *)
-	runInit[] := ReleaseHold[testGroup["init"] /. VerificationTest -> timeConstrainedTest];
-	runInit[];
-	ParallelEvaluate[runInit[]];
-
-	(* Make a list of tests, but don't run them yet *)
-	testList = ReleaseHold[testGroup["tests"] /. VerificationTest -> timeConstrainedTest];
-
-	(* Run tests in parallel *)
-	testResults = Flatten[ParallelMap[# /. test -> VerificationTest &, testList]];
-	testReport = TestReport[testResults];
-
-	$redColor = "\033[0;31m";
-	$greenColor = "\033[0;32m";
-	$orangeColor = "\033[0;33m";
-	$yellowColor = "\033[1;33m";
-	$endColor = "\033[0m";
-
-	(* Print the summery (green if ok, red if failed) *)
-	WriteString["stdout", If[testReport["AllTestsSucceeded"],
-		$greenColor <> "[ok]" <> $endColor,
-		StringJoin[
-			$redColor <> "[",
-			ToString @ testReport["TestsFailedCount"],
-			"/",
-			ToString @ Length @ testReport["TestResults"],
-			" failed]" <> $endColor]], "\n"];
-
-	(* If tests failed, print why *)
-	failedTests = Join @@ testReport["TestsFailed"];
-	If[Length[failedTests] > 0, $successQ = False];
-	Switch[#["Outcome"],
-		"Failure",
-			WriteString["stdout",
-				$redColor <> "Input" <> $endColor <> "\n",
-				">> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n",
-				$redColor <> "evaluated to" <> $endColor <> "\n",
-				">> ", ToString[#["ActualOutput"], OutputForm], "\n",
-				$redColor <> "instead of expected " <> $endColor <> "\n",
-				">> ", ToString[#["ExpectedOutput"], OutputForm], "\n\n"],
-		"MessagesFailure",
-			WriteString["stdout",
-				$orangeColor <> "Input" <> $endColor <> "\n",
-				">> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n",
-				$orangeColor <> "generated messages" <> $endColor <> "\n",
-				">> ", ToString[#["ActualMessages"], OutputForm], "\n",
-				$orangeColor <> "instead of expected" <> $endColor <> "\n",
-				">> ", ToString[#["ExpectedMessages"], OutputForm], "\n\n"],
-		"Error",
-			WriteString["stdout",
-				$yellowColor <> "Error while evaluating the test with input" <> $endColor <> "\n",
-				">> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n\n"]
-	] & /@ failedTests[[1 ;; UpTo[3]]];
-
-	(* If too many tests have failed, print how many remain *)
-	If[Length[failedTests] > 3,
-		WriteString["stdout",
-			"Omitting remaining ",
-			Length[failedTests] - 3,
-			" " <> testGroupName,
-			" test failures.\n\n"]
-	];
-
-	(* Return the report, we'll need it later *)
-	testGroupName -> testReport
-]], $testGroups]];
-
-(* Create a notebook with results *)
-
-$reportFile = UsingFrontEnd @ Export[
-	FileNameJoin[Join[FileNameSplit[CreateDirectory[]], {"testReport.nb"}]],
-	Notebook @ Catenate @ Prepend[KeyValueMap[
-		{Cell[Last @ FileNameSplit @ #1, "Section"],
-			Cell[
-				BoxData[RowBox[{"TestReport", "[", "\"" <> #1 <> "\"", "]"}]],
-				"Input"],
-			Cell[BoxData[ToBoxes[#2]], "Output"]} &,
-		$results], {Cell["SetReplace Test Report", "Title"]}]];
-
-
-Print["Report file: ", $reportFile];
-
-Exit[If[$successQ, 0, 1]]
+If[$successQ,
+	Print["Tests passed."];
+	Exit[0],
+	Print["Tests failed."];
+	Exit[1]
+]
