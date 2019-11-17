@@ -258,10 +258,10 @@
 
       (** Evaluation order **)
 
-      VerificationTest[
-        SetReplace[{{1}, {2}, {3}, {4}, {5}}, {{{2}, {3}, {4}} -> {{X}}, {{3}} -> {{X}}}, Method -> #],
+      {VerificationTest[
+        SetReplace[{{1}, {2}, {3}, {4}, {5}}, {{{2}, {3}, {4}} -> {{X}}, {{3}} -> {{X}}}],
         {{1}, {2}, {4}, {5}, {X}}
-      ] & /@ $methods,
+      ]},
 
       {VerificationTest[
         Table[
