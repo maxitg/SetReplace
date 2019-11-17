@@ -55,7 +55,7 @@ Check[
 	
 		(* Read options *)
 		options = Association[ReleaseHold[Lookup[testGroup, "options", <||>]]];
-		parallelQ = Lookup[options, "Parallel", False];
+		parallelQ = Lookup[options, "Parallel", True];
 
 		(* Run init, changing VerificationTest to test in all definitions *)
 		runInit[] := ReleaseHold[testGroup["init"] /. VerificationTest -> constrainedTest];
