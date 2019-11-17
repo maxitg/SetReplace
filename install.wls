@@ -1,22 +1,27 @@
 #!/usr/bin/env wolframscript
-(* ::Package:: *)
 
-pacletInfo = Association @@ Import[FileNameJoin[{".", "SetReplace", "PacletInfo.m"}]];
+$successQ = True;
 
+(* If any messages are produced, fail with non-zero exit code. *)
+Check[
+  pacletInfo = Association @@ Import[FileNameJoin[{".", "SetReplace", "PacletInfo.m"}]];
+    
+  filename = pacletInfo[Name] <> "-" <> pacletInfo[Version] <> ".paclet";
+  
+  If[!FileExistsQ[filename],
+  	Print[
+  		"The paclet file ", filename, " was not found. ",
+  		"Run ./build.wls."];
+  	Exit[1];
+  ];
+  
+  If[PacletInformation["SetReplace"] != {}, PacletUninstall["SetReplace"]];
+  
+  If[Head[PacletInstall[filename]] == Paclet,
+  	Print["Installed. Restart running kernels to complete installation."],
+    $successQ = False];,
 
-filename = pacletInfo[Name] <> "-" <> pacletInfo[Version] <> ".paclet";
+  $successQ = False;
+];
 
-
-If[!FileExistsQ[filename],
-	Print[
-		"The paclet file ", filename, " was not found. ",
-		"Run ./build.wls."];
-	Quit[];
-]
-
-
-If[PacletInformation["SetReplace"] != {}, PacletUninstall["SetReplace"]];
-
-
-If[Head[PacletInstall[filename]] == Paclet,
-	Print["Done. Restart running kernels to complete installation."]];
+Exit[If[$successQ, 0, 1]]
