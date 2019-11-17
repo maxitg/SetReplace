@@ -32,7 +32,8 @@ Check[
 	Attributes[test] = Attributes[timeConstrainedTest] = {HoldAll};
 	
 	$singleTestTimeConstraint = 300;
-	timeConstrainedTest[args___] := test[args, TimeConstraint -> $singleTestTimeConstraint];
+	timeConstrainedTest[args___] :=
+		If[FreeQ[Hold[{args}], TimeConstraint], test[args, TimeConstraint -> $singleTestTimeConstraint], test[args]];
 		
 	removeHoldFormFromInputString[input_String] := StringReplace[
 		input,
