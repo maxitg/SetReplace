@@ -1,84 +1,86 @@
-BeginTestSection["SetReplaceFixedPoint"]
+<|
+  "SetReplaceFixedPoint" -> <|
+    "init" -> (
+      Attributes[Global`testUnevaluated] = {HoldAll};
+      Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+    ),
+    "tests" -> {
+      (* Argument Checks *)
 
-(* Argument Checks *)
+      (** Argument count **)
 
-(** Argument count **)
+      testUnevaluated[
+        SetReplaceFixedPoint[{1}],
+        {SetReplaceFixedPoint::argr}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPoint[{1}],
-  SetReplaceFixedPoint[{1}],
-  {SetReplaceFixedPoint::argr}
-]
+      testUnevaluated[
+        SetReplaceFixedPoint[{1}, {1 -> 2}, 3],
+        {SetReplaceFixedPoint::argrx}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPoint[{1}, {1 -> 2}, 3],
-  SetReplaceFixedPoint[{1}, {1 -> 2}, 3],
-  {SetReplaceFixedPoint::argrx}
-]
+      (** Set is a list **)
 
-(** Set is a list **)
+      testUnevaluated[
+        SetReplaceFixedPoint[1, 1 -> 2],
+        {SetReplaceFixedPoint::setNotList}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPoint[1, 1 -> 2],
-  SetReplaceFixedPoint[1, 1 -> 2],
-  {SetReplaceFixedPoint::setNotList}
-]
+      (** Rules are valid **)
 
-(** Rules are valid **)
+      testUnevaluated[
+        SetReplaceFixedPoint[{1}, {1}],
+        {SetReplaceFixedPoint::invalidRules}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPoint[{1}, {1}],
-  SetReplaceFixedPoint[{1}, {1}],
-  {SetReplaceFixedPoint::invalidRules}
-]
+      (* Implementation *)
 
-(* Implementation *)
+      VerificationTest[
+        SetReplaceFixedPoint[{1, 1, 1}, {1 -> 2}],
+        {2, 2, 2}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPoint[{1, 1, 1}, {1 -> 2}],
-  {2, 2, 2}
-]
+      VerificationTest[
+        SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}, {b_, c_}} :> {{a, c}}],
+        {{1, 4}}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}, {b_, c_}} :> {{a, c}}],
-  {{1, 4}}
-]
+      VerificationTest[
+        SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "Symbolic"],
+        {{3, 3}}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "Symbolic"],
-  {{3, 3}}
-]
+      VerificationTest[
+        SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "LowLevel"],
+        {{3, 3}}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "LowLevel"],
-  {{3, 3}}
-]
+      VerificationTest[
+        SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}} :> {}],
+        {}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPoint[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}} :> {}],
-  {}
-]
+      VerificationTest[
+        TimeConstrained[SetReplaceFixedPoint[{}, {} :> {{1, 2}}], 1],
+        $Aborted
+      ],
 
-VerificationTest[
-  TimeConstrained[SetReplaceFixedPoint[{}, {} :> {{1, 2}}], 1],
-  $Aborted
-]
+      VerificationTest[
+        TimeConstrained[SetReplaceFixedPoint[{{1, 2}}, {{1, 2}} :> {{1, 2}}], 1],
+        $Aborted
+      ],
 
-VerificationTest[
-  TimeConstrained[SetReplaceFixedPoint[{{1, 2}}, {{1, 2}} :> {{1, 2}}], 1],
-  $Aborted
-]
+      (* TimeConstraint *)
 
-(* TimeConstraint *)
+      VerificationTest[
+        SetReplaceFixedPoint[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], Method -> #, TimeConstraint -> 0.1],
+        $Aborted
+      ] & /@ $SetReplaceMethods,
 
-VerificationTest[
-  SetReplaceFixedPoint[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], Method -> #, TimeConstraint -> 0.1],
-  $Aborted
-] & /@ $SetReplaceMethods
-
-VerificationTest[
-  TimeConstrained[SetReplaceFixedPoint[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], Method -> #], 0.1],
-  $Aborted
-] & /@ $SetReplaceMethods
-
-EndTestSection[]
+      VerificationTest[
+        TimeConstrained[SetReplaceFixedPoint[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], Method -> #], 0.1],
+        $Aborted
+      ] & /@ $SetReplaceMethods
+    }
+  |>
+|>
