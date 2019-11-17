@@ -279,9 +279,6 @@
         Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], _ ? ColorQ, All] =!=
           Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{4, 5, 6}}]], _ ? ColorQ, All]
       ]
-    },
-    "options" -> {
-      "Parallel" -> False
     }
   |>
 |>
