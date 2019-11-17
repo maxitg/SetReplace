@@ -1,294 +1,284 @@
-BeginTestSection["RulePlot"]
+<|
+  "RulePlot" -> <|
+    "init" -> (
+      Attributes[Global`testUnevaluated] = {HoldAll};
+      Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
 
-(* Rule correctness checking *)
+      $rulesForVertexSizeConsistency = {
+        {{1}} -> {{1}},
+        {{1}} -> {{2}},
+        {{1, 2}} -> {{1}},
+        {{1, 2}} -> {{1, 2}},
+        {{1, 2, 3}} -> {{1}},
+        {{1, 2, 3}} -> {{1, 2}},
+        {{1}, {2}} -> {{2}, {3}},
+        {{1}, {2}, {3}} -> {{2}, {3}, {4}},
+        {{1, 2, 3}} -> {{3, 4, 5}},
+        {{1, 2, 3}} -> {{1, 2}, {2, 3}},
+        {{1, 2, 3}} -> {{2, 3}, {3, 4}}};
+    ),
+    "tests" -> {
+      (* Rule correctness checking *)
 
-VerificationTest[
-  RulePlot[WolframModel[1]],
-  RulePlot[WolframModel[1]],
-  {RulePlot::invalidRules}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[1]],
+        {RulePlot::invalidRules}
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[1 -> 2]],
-  RulePlot[WolframModel[1 -> 2]],
-  {RulePlot::notHypergraphRule}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[1 -> 2]],
+        {RulePlot::notHypergraphRule}
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[{1} -> {2}]],
-  RulePlot[WolframModel[{1} -> {2}]],
-  {RulePlot::notHypergraphRule}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[{1} -> {2}]],
+        {RulePlot::notHypergraphRule}
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[{{1}} -> {2}]],
-  RulePlot[WolframModel[{{1}} -> {2}]],
-  {RulePlot::notHypergraphRule}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[{{1}} -> {2}]],
+        {RulePlot::notHypergraphRule}
+      ],
 
-VerificationTest[
-  Head[RulePlot[WolframModel[{{1}} -> {{2}}]]],
-  Graphics
-]
+      VerificationTest[
+        Head[RulePlot[WolframModel[{{1}} -> {{2}}]]],
+        Graphics
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[<|"PatternRules" -> {{1}} -> {{2}}|>]],
-  RulePlot[WolframModel[<|"PatternRules" -> {{1}} -> {{2}}|>]],
-  {RulePlot::patternRules}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[<|"PatternRules" -> {{1}} -> {{2}}|>]],
+        {RulePlot::patternRules}
+      ],
 
-VerificationTest[
-  Head[RulePlot[WolframModel[{{1}} -> {{2}}, Method -> "$$$AnyMethod$$$"]]],
-  Graphics
-]
+      VerificationTest[
+        Head[RulePlot[WolframModel[{{1}} -> {{2}}, Method -> "$$$AnyMethod$$$"]]],
+        Graphics
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[{{{1}} -> {{2}}, 1}]],
-  RulePlot[WolframModel[{{{1}} -> {{2}}, 1}]],
-  {RulePlot::invalidRules}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[{{{1}} -> {{2}}, 1}]],
+        {RulePlot::invalidRules}
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[{{{1}} -> {{2}}, 1 -> 2}]],
-  RulePlot[WolframModel[{{{1}} -> {{2}}, 1 -> 2}]],
-  {RulePlot::notHypergraphRule}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[{{{1}} -> {{2}}, 1 -> 2}]],
+        {RulePlot::notHypergraphRule}
+      ],
 
-VerificationTest[
-  Head[RulePlot[WolframModel[{{{1}} -> {{2}}, {{1}} -> {{2}}}]]],
-  Graphics
-]
+      VerificationTest[
+        Head[RulePlot[WolframModel[{{{1}} -> {{2}}, {{1}} -> {{2}}}]]],
+        Graphics
+      ],
 
-(* Options *)
+      (* Options *)
 
-(** EdgeType **)
+      (** EdgeType **)
 
-VerificationTest[
-  Not[
-    Or @@ SameQ @@@ Subsets[
-      Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> #]] & /@
-        {"Ordered", "Cyclic"},
-      {2}]]
-]
+      VerificationTest[
+        Not[
+          Or @@ SameQ @@@ Subsets[
+            Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> #]] & /@
+              {"Ordered", "Cyclic"},
+            {2}]]
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> "Invalid"],
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> "Invalid"],
-  {RulePlot::invalidEdgeType}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> "Invalid"],
+        {RulePlot::invalidEdgeType}
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> 3],
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> 3],
-  {RulePlot::invalidEdgeType}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> 3],
+        {RulePlot::invalidEdgeType}
+      ],
 
-(** GraphhighlightStyle **)
+      (** GraphhighlightStyle **)
 
-VerificationTest[
-  RulePlot[WolframModel[{{1, 2, 3}, {3, 4, 5}} -> {{3, 4, 5}, {5, 6, 7}}], GraphHighlightStyle -> 1],
-  RulePlot[WolframModel[{{1, 2, 3}, {3, 4, 5}} -> {{3, 4, 5}, {5, 6, 7}}], GraphHighlightStyle -> 1],
-  {RulePlot::invalidHighlightStyle}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[{{1, 2, 3}, {3, 4, 5}} -> {{3, 4, 5}, {5, 6, 7}}], GraphHighlightStyle -> 1],
+        {RulePlot::invalidHighlightStyle}
+      ],
 
-VerificationTest[
-  With[{
-      color = RGBColor[0.4, 0.6, 0.2]},
-    FreeQ[RulePlot[WolframModel[#], GraphHighlightStyle -> color], color] & /@
-      {{{1}} -> {{2}}, {{1}} -> {{1}}, {{1, 2}} -> {{1, 2}}, {{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}}],
-  {True, False, False, False, True}
-]
+      VerificationTest[
+        With[{
+            color = RGBColor[0.4, 0.6, 0.2]},
+          FreeQ[RulePlot[WolframModel[#], GraphHighlightStyle -> color], color] & /@
+            {{{1}} -> {{2}}, {{1}} -> {{1}}, {{1, 2}} -> {{1, 2}}, {{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}}],
+        {True, False, False, False, True}
+      ],
 
-(** HyperedgeRendering **)
+      (** HyperedgeRendering **)
 
-VerificationTest[
-  Not[
-    Or @@ SameQ @@@ Subsets[
-      Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> #]] & /@
-        {"Subgraphs", "Polygons"},
-      {2}]]
-]
+      VerificationTest[
+        Not[
+          Or @@ SameQ @@@ Subsets[
+            Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> #]] & /@
+              {"Subgraphs", "Polygons"},
+            {2}]]
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> "Invalid"],
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> "Invalid"],
-  {RulePlot::invalidFiniteOption}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> "Invalid"],
+        {RulePlot::invalidFiniteOption}
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> 3],
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> 3],
-  {RulePlot::invalidFiniteOption}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> 3],
+        {RulePlot::invalidFiniteOption}
+      ],
 
-(** VertexCoordinateRules **)
+      (** VertexCoordinateRules **)
 
-VerificationTest[
-  SameQ @@
-    Cases[
-      RulePlot[
-        WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}],
-        VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {2, 0}, 4 -> {3, 0}, 5 -> {4, 0}}],
-      Disk[p_, _] :> p,
-      All][[All, 2]]
-]
+      VerificationTest[
+        SameQ @@
+          Cases[
+            RulePlot[
+              WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}],
+              VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {2, 0}, 4 -> {3, 0}, 5 -> {4, 0}}],
+            Disk[p_, _] :> p,
+            All][[All, 2]]
+      ],
 
-(*** Due to scaling and translation being computed in the frontend instead of ahead of time,
-      coordinates on both sides of the rule might be the same. ***)
-VerificationTest[
-  Length[
-      Union[
-        Cases[
-          RulePlot[
-            WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}],
-            VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {0, 0}, 3 -> {0, 0}, 4 -> {0, 0}, 5 -> {0, 0}}],
-          Disk[p_, _] :> p,
-          All]]]
-    <= 2
-]
+      (*** Due to scaling and translation being computed in the frontend instead of ahead of time,
+            coordinates on both sides of the rule might be the same. ***)
+      VerificationTest[
+        Length[
+            Union[
+              Cases[
+                RulePlot[
+                  WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}],
+                  VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {0, 0}, 3 -> {0, 0}, 4 -> {0, 0}, 5 -> {0, 0}}],
+                Disk[p_, _] :> p,
+                All]]]
+          <= 2
+      ],
 
-VerificationTest[
-  Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexCoordinateRules -> {}]],
-  Graphics
-]
+      VerificationTest[
+        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexCoordinateRules -> {}]],
+        Graphics
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexCoordinateRules -> {1}],
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexCoordinateRules -> {1}],
-  {RulePlot::invalidCoordinates}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexCoordinateRules -> {1}],
+        {RulePlot::invalidCoordinates}
+      ],
 
-(** VertexLabels **)
+      (** VertexLabels **)
 
-VerificationTest[
-  Sort[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexLabels -> Automatic], Text[i_, ___] :> i, All]],
-  {1, 2, 3, 3, 4, 5}
-]
+      VerificationTest[
+        Sort[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexLabels -> Automatic], Text[i_, ___] :> i, All]],
+        {1, 2, 3, 3, 4, 5}
+      ],
 
-VerificationTest[
-  Length[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexLabels -> x], Text[x, ___], All]],
-  6
-]
+      VerificationTest[
+        Length[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexLabels -> x], Text[x, ___], All]],
+        6
+      ],
 
-(** Graphics **)
+      (** Graphics **)
 
-VerificationTest[
-  Background /. AbsoluteOptions[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Background -> Black], Background],
-  Black,
-  SameTest -> Equal
-]
+      VerificationTest[
+        Background /. AbsoluteOptions[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Background -> Black], Background],
+        Black,
+        SameTest -> Equal
+      ],
 
-(** Frame **)
+      (** Frame **)
 
-VerificationTest[
-  Not[
-    Or @@ SameQ @@@ Subsets[
-      Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> #]] & /@ {False, True}, {2}]]
-]
+      VerificationTest[
+        Not[
+          Or @@ SameQ @@@ Subsets[
+            Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> #]] & /@ {False, True}, {2}]]
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> "Invalid"],
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> "Invalid"],
-  {RulePlot::invalidFiniteOption}
-]
+      testUnevaluated[
+        RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> "Invalid"],
+        {RulePlot::invalidFiniteOption}
+      ],
 
-(** FrameStyle **)
+      (** FrameStyle **)
 
-VerificationTest[
-  MemberQ[
-    Cases[
-      RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], FrameStyle -> RGBColor[0.33, 0.66, 0.77]][[1]],
-      _ ? ColorQ,
-      All],
-    RGBColor[0.33, 0.66, 0.77]]
-]
+      VerificationTest[
+        MemberQ[
+          Cases[
+            RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], FrameStyle -> RGBColor[0.33, 0.66, 0.77]][[1]],
+            _ ? ColorQ,
+            All],
+          RGBColor[0.33, 0.66, 0.77]]
+      ],
 
-VerificationTest[
-  Not @ MemberQ[
-    Cases[
-      RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], FrameStyle -> RGBColor[0.33, 0.66, 0.77], Frame -> False][[1]],
-      _ ? ColorQ,
-      All],
-    RGBColor[0.33, 0.66, 0.77]]
-]
+      VerificationTest[
+        Not @ MemberQ[
+          Cases[
+            RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], FrameStyle -> RGBColor[0.33, 0.66, 0.77], Frame -> False][[1]],
+            _ ? ColorQ,
+            All],
+          RGBColor[0.33, 0.66, 0.77]]
+      ],
 
-(** PlotLegends **)
+      (** PlotLegends **)
 
-VerificationTest[
-  MatchQ[
-    RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], PlotLegends -> "Text"],
-    Legended[_, Placed[StandardForm[{{1, 2, 3}} -> {{3, 4, 5}}], Below]]]
-]
+      VerificationTest[
+        MatchQ[
+          RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], PlotLegends -> "Text"],
+          Legended[_, Placed[StandardForm[{{1, 2, 3}} -> {{3, 4, 5}}], Below]]]
+      ],
 
-VerificationTest[
-  MatchQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], PlotLegends -> "test"], Legended[_, "test"]]
-]
+      VerificationTest[
+        MatchQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], PlotLegends -> "test"], Legended[_, "test"]]
+      ],
 
-VerificationTest[
-  Not @ MatchQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], Legended[___]]
-]
+      VerificationTest[
+        Not @ MatchQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], Legended[___]]
+      ],
 
-(** Spacings **)
+      (** Spacings **)
 
-VerificationTest[
-  Not[Or @@ SameQ @@@ Subsets[
-    Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]] & /@
-      {0, 1, {{1, 0}, {0, 0}}, {{0, 1}, {0, 0}}, {{0, 0}, {1, 0}}, {{0, 0}, {0, 1}}},
-    {2}]]
-]
+      VerificationTest[
+        Not[Or @@ SameQ @@@ Subsets[
+          Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]] & /@
+            {0, 1, {{1, 0}, {0, 0}}, {{0, 1}, {0, 0}}, {{0, 0}, {1, 0}}, {{0, 0}, {0, 1}}},
+          {2}]]
+      ],
 
-VerificationTest[
-  And @@ SameQ @@
-    (Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]] & /@ {1, {{1, 1}, {1, 1}}})
-]
+      VerificationTest[
+        SameQ @@
+          (Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]] & /@ {1, {{1, 1}, {1, 1}}})
+      ],
 
-VerificationTest[
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #],
-  RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #],
-  {RulePlot::invalidSpacings}
-] & /@ {
-  "Incorrect",
-  {1, 1},
-  {{1, 2}, 1},
-  {1, {1, 2}},
-  {{1, 2, 3}, {1, 2}},
-  {{1, {2, 3}}, {1, 2}}
-}
+      testUnevaluated[
+        RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #],
+        {RulePlot::invalidSpacings}
+      ] & /@ {
+        "Incorrect",
+        {1, 1},
+        {{1, 2}, 1},
+        {1, {1, 2}},
+        {{1, 2, 3}, {1, 2}},
+        {{1, {2, 3}}, {1, 2}}
+      },
 
-(* Scaling consistency *)
+      (* Scaling consistency *)
 
-(** Vertex amplification **)
+      (** Vertex amplification **)
 
-VerificationTest[
-  First[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], Disk[_, r_] :> r, All]] > 
-    First[Cases[HypergraphPlot[{{1, 2, 3}}], Disk[_, r_] :> r, All]]
-]
+      VerificationTest[
+        First[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], Disk[_, r_] :> r, All]] > 
+          First[Cases[HypergraphPlot[{{1, 2, 3}}], Disk[_, r_] :> r, All]]
+      ],
 
-(** Consistent vertex sizes **)
+      (** Consistent vertex sizes **)
 
-$rules = {
-  {{1}} -> {{1}},
-  {{1}} -> {{2}},
-  {{1, 2}} -> {{1}},
-  {{1, 2}} -> {{1, 2}},
-  {{1, 2, 3}} -> {{1}},
-  {{1, 2, 3}} -> {{1, 2}},
-  {{1}, {2}} -> {{2}, {3}},
-  {{1}, {2}, {3}} -> {{2}, {3}, {4}},
-  {{1, 2, 3}} -> {{3, 4, 5}},
-  {{1, 2, 3}} -> {{1, 2}, {2, 3}},
-  {{1, 2, 3}} -> {{2, 3}, {3, 4}}};
+      VerificationTest[
+        SameQ @@ Cases[RulePlot[WolframModel[#]], Disk[_, r_] :> r, All]
+      ] & /@ $rulesForVertexSizeConsistency,
 
-VerificationTest[
-  And @@ (SameQ @@ Cases[RulePlot[WolframModel[#]], Disk[_, r_] :> r, All] & /@ $rules)
-]
+      (** Shared vertices are colored **)
 
-(** Shared vertices are colored **)
-
-VerificationTest[
-  Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], _ ? ColorQ, All],
-  Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{4, 5, 6}}]], _ ? ColorQ, All],
-  SameTest -> Not @* SameQ
-]
-
-EndTestSection[]
+      VerificationTest[
+        Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], _ ? ColorQ, All] =!=
+          Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{4, 5, 6}}]], _ ? ColorQ, All]
+      ]
+    }
+  |>
+|>
