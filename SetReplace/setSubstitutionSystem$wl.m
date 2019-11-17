@@ -116,7 +116,7 @@ setReplace$wl[set_, rules_, n_, returnOnAbortQ_, timeConstraint_] := Module[{nor
 	partialResult = set;
 	TimeConstrained[
 		CheckAbort[
-			FixedPoint[AbortProtect[partialResult = ReplaceAll[#, normalRules]] &, List @@ set, n],
+			FixedPoint[AbortProtect[partialResult = Replace[#, normalRules]] &, List @@ set, n],
 			If[returnOnAbortQ,
 				partialResult,
 				Abort[]
@@ -203,17 +203,39 @@ addMetadataManagement[
 
 
 (* ::Text:: *)
+(*This function renames all rule inputs to avoid collisions with outputs from other rules.*)
+
+
+renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAtoms},
+	Attributes[pattern] = {HoldFirst};
+	inputAtoms = Union[
+		Quiet[
+			Cases[
+				# /. Pattern -> pattern,
+				p : pattern[s_, rest___] :> If[MatchQ[Hold[s], Hold[_Symbol]],
+					Hold[s],
+					With[{originalP = p /. pattern -> Pattern}, Message[Pattern::patvar, originalP]]; Throw[$Failed]],
+				All],
+			{RuleDelayed::rhs}]];
+	newInputAtoms = Table[Unique[], Length[inputAtoms]];
+	# /. (((HoldPattern[#1] /. Hold[s_] :> s) -> #2) & @@@ Thread[inputAtoms -> newInputAtoms])
+] & /@ patternRules]
+
+
+(* ::Text:: *)
 (*This function runs a modified version of the set replace system that also keeps track of metadata such as generations and events. It uses setReplace$wl to evaluate that modified system.*)
 
 
 setSubstitutionSystem$wl[rules_, set_, generations_, steps_, returnOnAbortQ_, timeConstraint_] := Module[{
-		setWithMetadata, rulesWithMetadata, outputWithMetadata, result,
+		setWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, result,
 		nextExpressionID = 1, nextEventID = 1, nextExpression},
 	nextExpression = nextExpressionID++ &;
 	(* {id, creator, destroyer, generation, atoms} *)
 	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
+	renamedRules = renameRuleInputs[toCanonicalRules[rules]];
+	If[renamedRules === $Failed, Return[$Failed]];
 	rulesWithMetadata = addMetadataManagement[
-		#, nextEventID++ &, nextExpression, generations] & /@ toCanonicalRules[rules];
+		#, nextEventID++ &, nextExpression, generations] & /@ renamedRules;
 	outputWithMetadata = Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, steps, returnOnAbortQ, timeConstraint]];
 	If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
 	result = SortBy[
