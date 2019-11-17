@@ -39,22 +39,27 @@ Check[
 		StartOfString ~~ "HoldForm[" ~~ expr__ ~~ "]" ~~ EndOfString :> expr
 	];
 	
-	$results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{testList, testResults, testReport},
+	$results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
+			testList, testResults, testReport, options, parallelQ},
 		(* Notify the user which test group we are running *)
 		WriteString["stdout",
 			testGroupName,
 			StringJoin[ConstantArray[" ", Max[40 - StringLength[testGroupName], 1]]]];
 	
+		(* Read options *)
+		options = Association[ReleaseHold[Lookup[testGroup, "options", <||>]]];
+		parallelQ = Lookup[options, "Parallel", True];
+
 		(* Run init, changing VerificationTest to test in all definitions *)
 		runInit[] := ReleaseHold[testGroup["init"] /. VerificationTest -> timeConstrainedTest];
 		runInit[];
-		ParallelEvaluate[runInit[]];
+		If[parallelQ, ParallelEvaluate[runInit[]]];
 	
 		(* Make a list of tests, but don't run them yet *)
 		testList = ReleaseHold[testGroup["tests"] /. VerificationTest -> timeConstrainedTest];
 	
 		(* Run tests in parallel *)
-		testResults = Flatten[ParallelMap[# /. test -> VerificationTest &, testList]];
+		testResults = Flatten[If[parallelQ, ParallelMap, Map][# /. test -> VerificationTest &, testList]];
 		testReport = TestReport[testResults];
 	
 		$redColor = "\033[0;31m";
