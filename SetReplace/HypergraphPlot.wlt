@@ -31,14 +31,7 @@
         Missing[],
         All];
 
-      Attributes[testUnevaluated] = {HoldAll};
-      testUnevaluated[input_, messages_, opts___] :=
-        VerificationTest[
-          input,
-          HoldPattern[input],
-          messages,
-          SameTest -> MatchQ,
-          opts];
+      Global`testUnevaluated = SetReplace`PackageScope`testUnevaluated;
     ),
     "tests" -> {
       (* Argument Checks *)
