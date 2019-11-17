@@ -206,11 +206,17 @@ addMetadataManagement[
 (*This function renames all rule inputs to avoid collisions with outputs from other rules.*)
 
 
-renameRuleInputs[patternRules_] := Module[{pattern, inputAtoms, newInputAtoms},
-	inputAtoms = Union[Cases[# /. Pattern -> pattern, pattern[s_, ___] :> s, All]];
+renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAtoms},
+	inputAtoms = Union[
+		Quiet[
+			Cases[
+				# /. Pattern -> pattern,
+				pattern[s_, rest___] :> If[MatchQ[s, _Symbol], s, Message[Pattern::patvar, Pattern[s, rest]]; Throw[$Failed]],
+				All],
+			{RuleDelayed::rhs}]];
 	newInputAtoms = Table[Unique[], Length[inputAtoms]];
 	# /. Thread[inputAtoms -> newInputAtoms]
-] & /@ patternRules
+] & /@ patternRules]
 
 
 (* ::Text:: *)
@@ -218,13 +224,15 @@ renameRuleInputs[patternRules_] := Module[{pattern, inputAtoms, newInputAtoms},
 
 
 setSubstitutionSystem$wl[rules_, set_, generations_, steps_, returnOnAbortQ_, timeConstraint_] := Module[{
-		setWithMetadata, rulesWithMetadata, outputWithMetadata, result,
+		setWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, result,
 		nextExpressionID = 1, nextEventID = 1, nextExpression},
 	nextExpression = nextExpressionID++ &;
 	(* {id, creator, destroyer, generation, atoms} *)
 	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
+	renamedRules = renameRuleInputs[toCanonicalRules[rules]];
+	If[renamedRules === $Failed, Return[$Failed]];
 	rulesWithMetadata = addMetadataManagement[
-		#, nextEventID++ &, nextExpression, generations] & /@ renameRuleInputs[toCanonicalRules[rules]];
+		#, nextEventID++ &, nextExpression, generations] & /@ renamedRules;
 	outputWithMetadata = Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, steps, returnOnAbortQ, timeConstraint]];
 	If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
 	result = SortBy[
