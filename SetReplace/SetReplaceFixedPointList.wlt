@@ -1,84 +1,86 @@
-BeginTestSection["SetReplaceFixedPointList"]
+<|
+  "SetReplaceFixedPointList" -> <|
+    "init" -> (
+      Attributes[Global`testUnevaluated] = {HoldAll};
+      Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+    ),
+    "tests" -> {
+      (* Argument Checks *)
 
-(* Argument Checks *)
+      (** Argument count **)
 
-(** Argument count **)
+      testUnevaluated[
+        SetReplaceFixedPointList[{1}],
+        {SetReplaceFixedPointList::argr}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPointList[{1}],
-  SetReplaceFixedPointList[{1}],
-  {SetReplaceFixedPointList::argr}
-]
+      testUnevaluated[
+        SetReplaceFixedPointList[{1}, {1 -> 2}, 3],
+        {SetReplaceFixedPointList::argrx}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPointList[{1}, {1 -> 2}, 3],
-  SetReplaceFixedPointList[{1}, {1 -> 2}, 3],
-  {SetReplaceFixedPointList::argrx}
-]
+      (** Set is a list **)
 
-(** Set is a list **)
+      testUnevaluated[
+        SetReplaceFixedPointList[1, 1 -> 2],
+        {SetReplaceFixedPointList::setNotList}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPointList[1, 1 -> 2],
-  SetReplaceFixedPointList[1, 1 -> 2],
-  {SetReplaceFixedPointList::setNotList}
-]
+      (** Rules are valid **)
 
-(** Rules are valid **)
+      testUnevaluated[
+        SetReplaceFixedPointList[{1}, {1}],
+        {SetReplaceFixedPointList::invalidRules}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPointList[{1}, {1}],
-  SetReplaceFixedPointList[{1}, {1}],
-  {SetReplaceFixedPointList::invalidRules}
-]
+      (* Implementation *)
 
-(* Implementation *)
+      VerificationTest[
+        SetReplaceFixedPointList[{1, 1, 1}, {1 -> 2}],
+        {{1, 1, 1}, {1, 1, 2}, {1, 2, 2}, {2, 2, 2}}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPointList[{1, 1, 1}, {1 -> 2}],
-  {{1, 1, 1}, {1, 1, 2}, {1, 2, 2}, {2, 2, 2}}
-]
+      VerificationTest[
+        SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}, {b_, c_}} :> {{a, c}}],
+        {{{1, 2}, {2, 3}, {3, 4}}, {{3, 4}, {1, 3}}, {{1, 4}}}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}, {b_, c_}} :> {{a, c}}],
-  {{{1, 2}, {2, 3}, {3, 4}}, {{3, 4}, {1, 3}}, {{1, 4}}}
-]
+      VerificationTest[
+        SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "LowLevel"],
+        {{{1, 2}, {2, 3}, {3, 1}}, {{3, 1}, {1, 3}}, {{3, 3}}}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "LowLevel"],
-  {{{1, 2}, {2, 3}, {3, 1}}, {{3, 1}, {1, 3}}, {{3, 3}}}
-]
+      VerificationTest[
+        SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "Symbolic"],
+        {{{1, 2}, {2, 3}, {3, 1}}, {{3, 1}, {1, 3}}, {{3, 3}}}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 1}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, Method -> "Symbolic"],
-  {{{1, 2}, {2, 3}, {3, 1}}, {{3, 1}, {1, 3}}, {{3, 3}}}
-]
+      VerificationTest[
+        SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}} :> {}],
+        {{{1, 2}, {2, 3}, {3, 4}}, {{2, 3}, {3, 4}}, {{3, 4}}, {}}
+      ],
 
-VerificationTest[
-  SetReplaceFixedPointList[{{1, 2}, {2, 3}, {3, 4}}, {{a_, b_}} :> {}],
-  {{{1, 2}, {2, 3}, {3, 4}}, {{2, 3}, {3, 4}}, {{3, 4}}, {}}
-]
+      VerificationTest[
+        TimeConstrained[SetReplaceFixedPointList[{}, {} :> {{1, 2}}], 1],
+        $Aborted
+      ],
 
-VerificationTest[
-  TimeConstrained[SetReplaceFixedPointList[{}, {} :> {{1, 2}}], 1],
-  $Aborted
-]
+      VerificationTest[
+        TimeConstrained[SetReplaceFixedPointList[{{1, 2}}, {{1, 2}} :> {{1, 2}}], 1],
+        $Aborted
+      ],
 
-VerificationTest[
-  TimeConstrained[SetReplaceFixedPointList[{{1, 2}}, {{1, 2}} :> {{1, 2}}], 1],
-  $Aborted
-]
+      (* TimeConstraint *)
 
-(* TimeConstraint *)
+      VerificationTest[
+        SetReplaceFixedPointList[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], Method -> #, TimeConstraint -> 0.1],
+        $Aborted
+      ] & /@ $SetReplaceMethods,
 
-VerificationTest[
-  SetReplaceFixedPointList[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], Method -> #, TimeConstraint -> 0.1],
-  $Aborted
-] & /@ $SetReplaceMethods
-
-VerificationTest[
-  TimeConstrained[SetReplaceFixedPointList[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], Method -> #], 0.1],
-  $Aborted
-] & /@ $SetReplaceMethods
-
-EndTestSection[]
+      VerificationTest[
+        TimeConstrained[SetReplaceFixedPointList[{{0, 0}}, ToPatternRules[{{1, 2}} -> {{1, 3}, {3, 2}}], Method -> #], 0.1],
+        $Aborted
+      ] & /@ $SetReplaceMethods
+    }
+  |>
+|>
