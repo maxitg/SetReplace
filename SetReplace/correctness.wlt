@@ -4,6 +4,9 @@
       Attributes[Global`testUnevaluated] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
 
+      (* Assign variables that ToPatternRules would use to confuse setSubstitutionSystem as much as possible. *)
+      v1 = v2 = v3 = v4 = v5 = 1;
+
       sameSetQ[x_, y_] := Module[{xAtoms, yAtoms},
         {xAtoms, yAtoms} = DeleteDuplicates[Flatten[#]] & /@ {x, y};
         If[Length[xAtoms] != Length[yAtoms], Return[False]];

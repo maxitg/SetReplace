@@ -87,7 +87,7 @@
       (** Check new vertices are being held **)
 
       VerificationTest[
-        Module[{v1 = v2 = v3 = v4 = v5 = 1},
+        Module[{v1 = 1, v2 = 1, v3 = 1, v4 = 1, v5 = 1},
           SetReplace[{z + z^z, y + y^y}, ToPatternRules[x + x^x -> x]]
         ],
         {y + y^y, z}
