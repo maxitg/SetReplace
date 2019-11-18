@@ -1,0 +1,92 @@
+<project name='SetReplace' basedir='..'>
+
+  <property name='component' value='${ant.project.name}' />
+  <property name='system_id' value='### Must be set by Jenkins ###' />
+
+  <property environment='env' />
+  <import file='${env.RE_ANTLIBRARY_HOME}/ant-lib.xml' />
+
+  <!--
+    Component (platform-independent)
+  -->
+
+  <target name='Component.SetReplace.execute' extensionOf='Component.execute'>
+
+    <copy todir='${files_directory}/${component}'>
+      <fileset dir='${component}' >
+        <include name='Kernel/**' />
+        <include name='*.m' />
+      </fileset>
+    </copy>
+
+  </target>
+
+  <!--
+    Native libraries
+  -->
+
+  <target name='NativeLibrary.SetReplace.execute' extensionOf='NativeLibrary.execute'>
+
+    <mathematica
+      exe='${mathExe}'
+      fresh='true'
+      quit='true'
+      runfile='${basedir}${file.separator}build.wls'
+      />
+
+  </target>
+
+  <target name='NativeLibrary.SetReplace.MacOSX-x86-64.postbuild' extensionOf='NativeLibrary.postbuild' if='is.osx'>
+
+    <sign dir='${files_directory}'>
+      <include name='**/*.dylib' />
+    </sign>
+
+  </target>
+
+  <target name='NativeLibrary.SetReplace.Windows-x86-64.postbuild' extensionOf='NativeLibrary.postbuild' if='is.windows'>
+
+    <sign dir='${files_directory}'>
+      <include name='**/*.dll' />
+      <include name='**/*.exe' />
+      <include name='**/*.lib' />
+    </sign>
+
+  </target>
+
+  <target name='Paclet.SetReplace.init.custom' extensionOf='Paclet.init.custom'>
+
+    <!--
+      Prevent Paclet.clean from deleting files_directory,
+      since CopyAndUnarchiveArtifact just put all the paclet
+      files in there....
+    -->
+
+    <property name='keep.files_directory' value='true' />
+
+  </target>
+  
+  <target name='Paclet.SetReplace.execute' extensionOf='Paclet.execute'>
+    
+    <mathematica exe="${mathExe}" fresh="true" quit="true"><![CDATA[
+      
+      Print["$Version: ", $Version];
+      Print["$InstallationDirectory: ", $InstallationDirectory];
+      
+      Unset[$MessagePrePrint];
+      Needs["PacletManager`"];
+      
+      src = FileNameJoin[{AntProperty["files_directory"], "SetReplace"}];
+      dest = FileNameJoin[AntProperty["output_directory"]];
+      PackPaclet[src, dest];
+      
+      SetDirectory[dest]
+      If [TrueQ[FileExistsQ[FileNames["SetReplace*.paclet"][[1]]]],
+        Print[FileNames["SetReplace*.paclet"][[1]] " ... OK"],
+        AntFail["Paclet not produced" ]];
+      
+    ]]></mathematica>
+    
+  </target>
+
+</project>
