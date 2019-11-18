@@ -92,23 +92,23 @@ Check[
 			"Failure",
 				WriteString["stdout",
 					$redColor <> "Input" <> $endColor <> "\n",
-					">> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n",
+					"> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n\n",
 					$redColor <> "evaluated to" <> $endColor <> "\n",
-					">> ", ToString[#["ActualOutput"], OutputForm], "\n",
+					"> ", ToString[#["ActualOutput"], OutputForm], "\n\n",
 					$redColor <> "instead of expected " <> $endColor <> "\n",
-					">> ", ToString[#["ExpectedOutput"], OutputForm], "\n\n"],
+					"> ", ToString[#["ExpectedOutput"], OutputForm], "\n\n\n"],
 			"MessagesFailure",
 				WriteString["stdout",
 					$orangeColor <> "Input" <> $endColor <> "\n",
-					">> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n",
+					"> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n\n",
 					$orangeColor <> "generated messages" <> $endColor <> "\n",
-					">> ", ToString[#["ActualMessages"], OutputForm], "\n",
+					"> ", ToString[#["ActualMessages"], OutputForm], "\n\n",
 					$orangeColor <> "instead of expected" <> $endColor <> "\n",
-					">> ", ToString[#["ExpectedMessages"], OutputForm], "\n\n"],
+					"> ", ToString[#["ExpectedMessages"], OutputForm], "\n\n\n"],
 			"Error",
 				WriteString["stdout",
 					$yellowColor <> "Error while evaluating the test with input" <> $endColor <> "\n",
-					">> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n\n"]
+					"> ", removeHoldFormFromInputString[ToString[#["Input"], InputForm]], "\n\n\n"]
 		] & /@ failedTests[[1 ;; UpTo[3]]];
 	
 		(* If too many tests have failed, print how many remain *)

@@ -75,12 +75,9 @@
       (** EdgeType **)
 
       VerificationTest[
-        Not[
-          Or @@ SameQ @@@ Subsets[
-            Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> #]] & /@
-              {"Ordered", "Cyclic"},
-            {2}]]
-      ],
+        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> #]],
+        Graphics
+      ] & /@ {"Ordered", "Cyclic"},
 
       testUnevaluated[
         RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> "Invalid"],
@@ -110,12 +107,9 @@
       (** HyperedgeRendering **)
 
       VerificationTest[
-        Not[
-          Or @@ SameQ @@@ Subsets[
-            Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> #]] & /@
-              {"Subgraphs", "Polygons"},
-            {2}]]
-      ],
+        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> #]],
+        Graphics
+      ] & /@ {"Subgraphs", "Polygons"},
 
       testUnevaluated[
         RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> "Invalid"],
@@ -186,10 +180,9 @@
       (** Frame **)
 
       VerificationTest[
-        Not[
-          Or @@ SameQ @@@ Subsets[
-            Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> #]] & /@ {False, True}, {2}]]
-      ],
+        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> #]],
+        Graphics
+      ] & /@ {False, True},
 
       testUnevaluated[
         RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> "Invalid"],
@@ -235,16 +228,14 @@
       (** Spacings **)
 
       VerificationTest[
-        Not[Or @@ SameQ @@@ Subsets[
-          Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]] & /@
-            {0, 1, {{1, 0}, {0, 0}}, {{0, 1}, {0, 0}}, {{0, 0}, {1, 0}}, {{0, 0}, {0, 1}}},
-          {2}]]
-      ],
+        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]],
+        Graphics
+      ] & /@ {0, 1, {{1, 0}, {0, 0}}, {{0, 1}, {0, 0}}, {{0, 0}, {1, 0}}, {{0, 0}, {0, 1}}},
 
       VerificationTest[
-        SameQ @@
-          (Rasterize[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]] & /@ {1, {{1, 1}, {1, 1}}})
-      ],
+        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]],
+        Graphics
+      ] & /@ {1, {{1, 1}, {1, 1}}},
 
       testUnevaluated[
         RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #],

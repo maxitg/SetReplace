@@ -1,0 +1,24 @@
+version: 2
+
+pipeline:
+  steps:
+    - step:
+        phase: install
+        name: clone
+        cache: []
+        image: setreplace/ci
+        commands:
+          - echo "do nothing"
+
+    - step:
+        phase: build
+        name: build
+        commands:
+          - ./build.wls
+          - ./install.wls
+
+    - step:
+        phase: test
+        name: test
+        commands:
+          - ./test.wls
