@@ -1,5 +1,7 @@
 # SetReplace
 
+I love Max
+
 ## Set | Network Substitution Systems
 
 **SetReplace** is a Wolfram Language package that implements a substitution system such that in each step an unordered subset matching a given pattern is deleted from a multiset and replaced with different subset. If each element of the set consists of pairs of elements, this set can be thought of as a directed graph, and the system becomes a ***network substitution*** (aka *graph rewrite*) ***system***.
