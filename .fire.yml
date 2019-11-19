@@ -6,9 +6,9 @@ pipeline:
         phase: install
         name: clone
         cache: []
-        image: setreplace/ci
+        image: maxitg/set-replace:ci
         commands:
-          - echo "do nothing"
+          - echo "cloned"
 
     - step:
         phase: build
