@@ -25,7 +25,7 @@ Options[HypergraphPlot] = Join[{
 $edgeTypes = {"Ordered", "Cyclic"};
 $defaultEdgeType = "Ordered";
 $graphLayout = "SpringElectricalEmbedding";
-$hyperedgeRenderings = {"Subgraphs", "Polygons"};
+$hyperedgeRenderings = {"Subgraphs", "Polygons", "Branes"};
 
 (* Messages *)
 
@@ -133,7 +133,7 @@ hypergraphPlot[
 			where both vertices and edges are associations of the form <|vertex -> {graphicsPrimitive, ...}, ...|>,
 			where graphicsPrimitive is either a Point, a Line, or a Polygon. **)
 
-(*** SpringElectricalEmbedding ***)
+(*** Subgraphs ***)
 
 hypergraphEmbedding[edgeType_, hyperedgeRendering : "Subgraphs", coordinateRules_] :=
 	hypergraphEmbedding[edgeType, edgeType, hyperedgeRendering, coordinateRules]
@@ -241,7 +241,7 @@ rescaleEmbedding[embedding_, center_, factor_] := Map[
 	{2}
 ]
 
-(*** SpringElectricalPolygons ***)
+(*** Polygons ***)
 
 hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinates_][edges_] := Module[{
 		embeddingWithNoRegions, vertexEmbedding, edgePoints, edgePolygons, edgeEmbedding},
@@ -261,6 +261,10 @@ hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinate
 	edgeEmbedding = MapThread[#1[[1]] -> Join[#1[[2]], #2] &, {embeddingWithNoRegions[[2]], edgePolygons}];
 	{vertexEmbedding, edgeEmbedding}
 ]
+
+(*** Branes ***)
+
+hypergraphEmbedding[edgeType_, "Branes", vertexCoordinates_][edges_] := {{}, {}}
 
 (** Drawing **)
 
