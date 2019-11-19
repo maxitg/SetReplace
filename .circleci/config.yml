@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build-and-test:
+  test:
     docker:
       - image: maxitg/set-replace:ci
         auth:
