@@ -320,7 +320,7 @@ drawEmbedding[vertexLabels_, highlight_, highlightColor_, vertexSize_, arrowhead
 		singleVertexEdgeCounts[coords] = Lookup[singleVertexEdgeCounts, Key[coords], vertexSize] + vertexSize
 	);
 
-	{lines, polygons, polygonBoundaries, edgePoints} = Cases[embeddingShapes[[2]], #, All] & /@ {
+	{lines, polygons, edgePoints} = Cases[embeddingShapes[[2]], #, All] & /@ {
 		highlighted[Line[pts_], h_] :> {
 			If[h,
 				Directive[Opacity[1], highlightColor],
@@ -333,10 +333,6 @@ drawEmbedding[vertexLabels_, highlight_, highlightColor_, vertexSize_, arrowhead
 				highlightColor,
 				Lighter[$edgeColor, 0.7]
 			],
-			Polygon[pts]},
-		highlighted[Polygon[pts_], h_] :> {
-			EdgeForm[White],
-			Transparent,
 			Polygon[pts]},
 		highlighted[Point[p_], h_] :> {
 			If[h,
@@ -355,5 +351,5 @@ drawEmbedding[vertexLabels_, highlight_, highlightColor_, vertexSize_, arrowhead
 			VertexLabels -> vertexLabels,
 			VertexShapeFunction -> None,
 			EdgeShapeFunction -> None]];
-	Show[Graphics[{polygons, polygonBoundaries, lines, vertexPoints, edgePoints}], labels]
+	Show[Graphics[{polygons, lines, vertexPoints, edgePoints}], labels]
 ]
