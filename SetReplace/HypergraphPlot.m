@@ -264,7 +264,27 @@ hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinate
 
 (*** Branes ***)
 
-hypergraphEmbedding[edgeType_, "Branes", vertexCoordinates_][edges_] := {{}, {}}
+hypergraphEmbedding[edgeType_, "Branes", vertexCoordinates_][edges_] := Module[{
+		edgeGraphs, edgeTriangles, braneVerticesEmbedding, vertexEmbedding, edgeEmbedding},
+	{edgeGraphs, edgeTriangles} = Transpose[polygonGraphAndTriangles /@ edges];
+	braneVerticesEmbedding = graphEmbedding[
+		Union @@ (VertexList /@ edgeGraphs), Catenate[EdgeList /@ edgeGraphs], $graphLayout, vertexCoordinates][[1]];
+	vertexEmbedding = # -> {Point[Replace[#, braneVerticesEmbedding]]} & /@ vertexList[edges];
+	edgeEmbedding =
+		MapThread[#1 -> (Polygon /@ Replace[#3, braneVerticesEmbedding, {2}]) &, {edges, edgeGraphs, edgeTriangles}];
+	{vertexEmbedding, edgeEmbedding}
+]
+
+polygonGraphAndTriangles[edge_ /; Length[edge] >= 3] := Module[{
+		indexMeshRegion, indexLines, indexTriangles, indexVertices, vertexNames, vertexIndexToName, graph},
+	indexMeshRegion = TriangulateMesh[RegularPolygon[Length[edge]]];
+	{indexLines, indexTriangles} = Identity @@@ MeshCells[indexMeshRegion, #] & /@ {1, 2};
+	indexVertices = Union[Catenate[indexLines]];
+	vertexNames = Replace[indexVertices, Append[Thread[Range[Length[edge]] -> edge], _ :> Unique[]], {1}];
+	vertexIndexToName = Thread[indexVertices -> vertexNames];
+	graph = Graph[UndirectedEdge @@@ Replace[indexLines, vertexIndexToName, {2}]];
+	{graph, Replace[indexTriangles, vertexIndexToName, {2}]}
+]
 
 (** Drawing **)
 
