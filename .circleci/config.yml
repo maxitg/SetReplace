@@ -1,0 +1,23 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: maxitg/set-replace:ci
+        auth:
+          username: maxitg
+          password: $DOCKERHUB_PASSWORD
+
+    steps:
+      - checkout
+
+      - run:
+          name: Build
+          command: ./build.wls
+
+      - run:
+          name: Install
+          command: ./install.wls
+
+      - run:
+          name: Test
+          command: ./test.wls
