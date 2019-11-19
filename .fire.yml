@@ -7,9 +7,6 @@ pipeline:
         name: clone
         cache: []
         image: maxitg/set-replace:ci
-        auth:
-          username: maxitg
-          password: $DOCKERHUB_PASSWORD
         commands:
           - echo "cloned"
 
