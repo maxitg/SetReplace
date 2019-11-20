@@ -167,7 +167,13 @@ toNormalEdges["Cyclic"][hyperedge : Except[{}]] :=
 
 toNormalEdges["Cyclic"][{}] := {}
 
-graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
+graphEmbedding[
+			vertices_,
+			vertexEmbeddingEdges_,
+			edgeEmbeddingEdges_,
+			layout_,
+			coordinateRules_,
+			targetEdgeLength_ : 1] := Module[{
 		relevantCoordinateRules, vertexCoordinateRules, unscaledEmbedding},
 	relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
 	vertexCoordinateRules = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
@@ -175,7 +181,7 @@ graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, c
 		graphEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules][[1]]
 	];
 	unscaledEmbedding = graphEmbedding[vertices, edgeEmbeddingEdges, layout, vertexCoordinateRules];
-	rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules]
+	rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules, targetEdgeLength]
 ]
 
 graphEmbedding[vertices_, edges_, layout_, coordinateRules_] := Replace[
@@ -214,12 +220,13 @@ normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 	{vertexEmbedding, Join[edgeEmbedding, singleVertexEdgeEmbedding]}
 ]
 
-rescaleEmbedding[unscaledEmbedding_, {_, __}] := unscaledEmbedding
+rescaleEmbedding[unscaledEmbedding_, {_, __}, targetEdgeLength_] := unscaledEmbedding
 
-rescaleEmbedding[unscaledEmbedding_, {v_ -> pivotPoint_}] :=
-	rescaleEmbedding[unscaledEmbedding, pivotPoint, 1 / edgeScale[unscaledEmbedding]]
+rescaleEmbedding[unscaledEmbedding_, {v_ -> pivotPoint_}, targetEdgeLength_] :=
+	rescaleByFactor[unscaledEmbedding, pivotPoint, targetEdgeLength / edgeScale[unscaledEmbedding]]
 
-rescaleEmbedding[unscaledEmbedding_, {}] := rescaleEmbedding[unscaledEmbedding, {0 -> {0.0, 0.0}}]
+rescaleEmbedding[unscaledEmbedding_, {}, targetEdgeLength_] :=
+	rescaleEmbedding[unscaledEmbedding, {0 -> {0.0, 0.0}}, targetEdgeLength]
 
 lineLength[pts_] := Total[EuclideanDistance @@@ Partition[pts, 2, 1]]
 
@@ -235,7 +242,7 @@ edgeScale[{vertexEmbedding_, {}}] :=
 	lineLength[Transpose[MinMax /@ Transpose[vertexEmbedding[[All, 2]]]]] /
 		(Sqrt[N[Length[vertexEmbedding]] / 2])
 
-rescaleEmbedding[embedding_, center_, factor_] := Map[
+rescaleByFactor[embedding_, center_, factor_] := Map[
 	(#[[1]] -> (#[[2]] /. coords : {Repeated[_Real, {2}]} :> (coords - center) * factor + center)) &,
 	embedding,
 	{2}
@@ -264,11 +271,16 @@ hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinate
 
 (*** Branes ***)
 
+$maxCellLength = 0.1;
+
 hypergraphEmbedding[edgeType_, "Branes", vertexCoordinates_][edges_] := Module[{
-		edgeGraphs, edgeTriangles, braneVerticesEmbedding, vertexEmbedding, edgeEmbedding},
+		edgeGraphs, edgeTriangles, normalVertexList, normalEdgeList, braneVerticesEmbedding, vertexEmbedding,
+		edgeEmbedding},
 	{edgeGraphs, edgeTriangles} = Transpose[polygonGraphAndTriangles /@ edges];
+	normalVertexList = Union @@ (VertexList /@ edgeGraphs);
+	normalEdgeList = Catenate[EdgeList /@ edgeGraphs];
 	braneVerticesEmbedding = graphEmbedding[
-		Union @@ (VertexList /@ edgeGraphs), Catenate[EdgeList /@ edgeGraphs], $graphLayout, vertexCoordinates][[1]];
+		normalVertexList, normalEdgeList, normalEdgeList, $graphLayout, vertexCoordinates, $maxCellLength][[1]];
 	vertexEmbedding = # -> {Point[Replace[#, braneVerticesEmbedding]]} & /@ vertexList[edges];
 	edgeEmbedding =
 		MapThread[#1 -> (Polygon /@ Replace[#3, braneVerticesEmbedding, {2}]) &, {edges, edgeGraphs, edgeTriangles}];
@@ -277,7 +289,8 @@ hypergraphEmbedding[edgeType_, "Branes", vertexCoordinates_][edges_] := Module[{
 
 polygonGraphAndTriangles[edge_ /; Length[edge] >= 3] := Module[{
 		indexMeshRegion, indexLines, indexTriangles, indexVertices, vertexNames, vertexIndexToName, graph},
-	indexMeshRegion = TriangulateMesh[RegularPolygon[Length[edge]]];
+	indexMeshRegion =
+		TriangulateMesh[unitLengthRegularPolygon[Length[edge]], MaxCellMeasure -> {"Length" -> $maxCellLength}];
 	{indexLines, indexTriangles} = Identity @@@ MeshCells[indexMeshRegion, #] & /@ {1, 2};
 	indexVertices = Union[Catenate[indexLines]];
 	vertexNames = Replace[indexVertices, Append[Thread[Range[Length[edge]] -> edge], _ :> Unique[]], {1}];
@@ -285,6 +298,8 @@ polygonGraphAndTriangles[edge_ /; Length[edge] >= 3] := Module[{
 	graph = Graph[UndirectedEdge @@@ Replace[indexLines, vertexIndexToName, {2}]];
 	{graph, Replace[indexTriangles, vertexIndexToName, {2}]}
 ]
+
+unitLengthRegularPolygon[n_] := RegularPolygon[1 / (2 Sin[Pi / n]), n]
 
 (** Drawing **)
 
@@ -297,7 +312,7 @@ $arrowheadShape = Polygon[{
 	{-1.05025, 0.178538}, {-1.08585, 0.264878}, {-1.10196, 0.301464}, {0., 0.}, {-1.10196, -0.289756}}];
 
 drawEmbedding[vertexLabels_, highlight_, highlightColor_, vertexSize_, arrowheadLength_][embedding_] := Module[{
-		highlightCounts, embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries, edgePoints, labels,
+		highlightCounts, embeddingShapes, vertexPoints, lines, polygons, edgePoints, labels,
 		singleVertexEdgeCounts, getSingleVertexEdgeRadius},
 	highlightCounts = Counts[highlight];
 	embeddingShapes = Map[
