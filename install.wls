@@ -15,10 +15,12 @@ Check[
   	Exit[1];
   ];
   
-  If[PacletInformation["SetReplace"] != {}, PacletUninstall["SetReplace"]];
-  
-  If[Head[PacletInstall[filename]] == Paclet,
+  (* This works in both 12.0 and 12.1. *)
+  pacletObjectQ[p_] := PacletObjectQ[p] || Head[p] === PacletManager`Paclet;
+
+  If[pacletObjectQ[PacletInstall[filename, "IgnoreVersion" -> True]],
   	Print["Installed. Restart running kernels to complete installation."],
+    Print["Install failed."];
     $successQ = False];,
 
   $successQ = False;
