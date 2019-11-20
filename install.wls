@@ -15,7 +15,9 @@ Check[
   	Exit[1];
   ];
   
-  If[Head[PacletInstall[filename, IgnoreVersion -> True]] == Paclet,
+  If[PacletInformation["SetReplace"] != {}, PacletUninstall["SetReplace"]];
+  
+  If[Head[PacletInstall[filename]] == Paclet,
   	Print["Installed. Restart running kernels to complete installation."],
     $successQ = False];,
 
