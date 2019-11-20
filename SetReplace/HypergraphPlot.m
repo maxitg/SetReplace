@@ -287,7 +287,7 @@ hypergraphEmbedding[edgeType_, "Branes", vertexCoordinates_][edges_] := Module[{
 	{vertexEmbedding, edgeEmbedding}
 ]
 
-polygonGraphAndTriangles[edge_ /; Length[edge] >= 3] := Module[{
+polygonGraphAndTriangles[edge : {_, _, __}] := Module[{
 		indexMeshRegion, indexLines, indexTriangles, indexVertices, vertexNames, vertexIndexToName, graph},
 	indexMeshRegion =
 		TriangulateMesh[unitLengthRegularPolygon[Length[edge]], MaxCellMeasure -> {"Length" -> $maxCellLength}];
@@ -298,6 +298,13 @@ polygonGraphAndTriangles[edge_ /; Length[edge] >= 3] := Module[{
 	graph = Graph[UndirectedEdge @@@ Replace[indexLines, vertexIndexToName, {2}]];
 	{graph, Replace[indexTriangles, vertexIndexToName, {2}]}
 ]
+
+polygonGraphAndTriangles[{v1_, v2_}] := Module[{intermediateVertexCount},
+	intermediateVertexCount = Max[Round[1 / $maxCellLength] - 1, 1];
+	{PathGraph[Join[{v1}, Table[Unique[], intermediateVertexCount], {v2}]], {}}
+]
+
+polygonGraphAndTriangles[edge : ({_} | {})] := {Graph[edge, {}], {}}
 
 unitLengthRegularPolygon[n_] := RegularPolygon[1 / (2 Sin[Pi / n]), n]
 
