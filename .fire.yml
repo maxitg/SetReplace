@@ -16,6 +16,8 @@ pipeline:
         commands:
           - ./build.wls
           - ./install.wls
+          # Install twice to check re-installation.
+          - ./install.wls
 
     - step:
         phase: test
