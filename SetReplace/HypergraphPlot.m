@@ -159,13 +159,8 @@ hypergraphEmbedding[
 			coordinateRules]]
 ]
 
-toNormalEdges["Ordered"][hyperedge_] :=
-	DirectedEdge @@@ Partition[hyperedge, 2, 1]
-
-toNormalEdges["Cyclic"][hyperedge : Except[{}]] :=
-	DirectedEdge @@@ Append[Partition[hyperedge, 2, 1], hyperedge[[{-1, 1}]]]
-
-toNormalEdges["Cyclic"][{}] := {}
+toNormalEdges[edgeType : ("Ordered" | "Cyclic")][hyperedge_] :=
+	DirectedEdge @@@ Partition[hyperedge, 2, 1, ##] & @@ If[edgeType === "Cyclic", {-1}, {}]
 
 graphEmbedding[
 			vertices_,
@@ -274,37 +269,49 @@ hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinate
 $maxCellLength = 0.1;
 
 hypergraphEmbedding[edgeType_, "Branes", vertexCoordinates_][edges_] := Module[{
-		edgeGraphs, edgeTriangles, normalVertexList, normalEdgeList, braneVerticesEmbedding, vertexEmbedding,
+		edgeGraphs, braneBoundaries, edgeTriangles, normalVertexList, normalEdgeList, braneCoordinateRules, vertexEmbedding,
 		edgeEmbedding},
-	{edgeGraphs, edgeTriangles} = Transpose[polygonGraphAndTriangles /@ edges];
+	{edgeGraphs, braneBoundaries, edgeTriangles} = Transpose[polygonGraphBoundaryAndTriangles[edgeType] /@ edges];
 	normalVertexList = Union @@ (VertexList /@ edgeGraphs);
 	normalEdgeList = Catenate[EdgeList /@ edgeGraphs];
-	braneVerticesEmbedding = graphEmbedding[
+	braneCoordinateRules = graphEmbedding[
 		normalVertexList, normalEdgeList, normalEdgeList, $graphLayout, vertexCoordinates, $maxCellLength][[1]];
-	vertexEmbedding = # -> {Point[Replace[#, braneVerticesEmbedding]]} & /@ vertexList[edges];
-	edgeEmbedding =
-		MapThread[#1 -> (Polygon /@ Replace[#3, braneVerticesEmbedding, {2}]) &, {edges, edgeGraphs, edgeTriangles}];
+	vertexEmbedding = # -> {Point[Replace[#, braneCoordinateRules]]} & /@ vertexList[edges];
+	edgeEmbedding = MapThread[
+		#1 -> Replace[Join[Polygon /@ #4, Line /@ #3], braneCoordinateRules, {3}] &,
+		{edges, edgeGraphs, braneBoundaries, edgeTriangles}];
 	{vertexEmbedding, edgeEmbedding}
 ]
 
-polygonGraphAndTriangles[edge : {_, _, __}] := Module[{
-		indexMeshRegion, indexLines, indexTriangles, indexVertices, vertexNames, vertexIndexToName, graph},
+polygonGraphBoundaryAndTriangles[edgeType_][edge : {_, _, __}] := Module[{
+		indexMeshRegion, indexLines, indexTriangles, indexVertices, vertexNames, vertexIndexToName, graph, indexGraph,
+		indexBoundaries},
 	indexMeshRegion =
 		TriangulateMesh[unitLengthRegularPolygon[Length[edge]], MaxCellMeasure -> {"Length" -> $maxCellLength}];
 	{indexLines, indexTriangles} = Identity @@@ MeshCells[indexMeshRegion, #] & /@ {1, 2};
 	indexVertices = Union[Catenate[indexLines]];
 	vertexNames = Replace[indexVertices, Append[Thread[Range[Length[edge]] -> edge], _ :> Unique[]], {1}];
 	vertexIndexToName = Thread[indexVertices -> vertexNames];
-	graph = Graph[UndirectedEdge @@@ Replace[indexLines, vertexIndexToName, {2}]];
-	{graph, Replace[indexTriangles, vertexIndexToName, {2}]}
+	{graph, indexGraph} = Graph[UndirectedEdge @@@ #] & /@ {Replace[indexLines, vertexIndexToName, {2}], indexLines};
+	indexBoundaries = FindShortestPath[indexGraph, #[[1]], #[[2]]] & /@ toNormalEdges[edgeType][Range[Length[edge]]];
+	{graph, Replace[indexBoundaries, vertexIndexToName, {2}], Replace[indexTriangles, vertexIndexToName, {2}]}
 ]
 
-polygonGraphAndTriangles[{v1_, v2_}] := Module[{intermediateVertexCount},
+polygonGraphBoundaryAndTriangles["Ordered"][{v1_, v2_}] := Module[{intermediateVertexCount},
 	intermediateVertexCount = Max[Round[1 / $maxCellLength] - 1, 1];
-	{PathGraph[Join[{v1}, Table[Unique[], intermediateVertexCount], {v2}]], {}}
+	{PathGraph[#], {#}, {}} & @ Join[{v1}, Table[Unique[], intermediateVertexCount], {v2}]
 ]
 
-polygonGraphAndTriangles[edge : ({_} | {})] := {Graph[edge, {}], {}}
+polygonGraphBoundaryAndTriangles["Cyclic"][{v1_, v2_}] := Module[{there, andBack, triangulation},
+	{there, andBack} = polygonGraphBoundaryAndTriangles["Ordered"] /@ {{v1, v2}, {v2, v1}};
+	triangulation = Catenate[
+		MapThread[
+			{{#1[[1]], #2[[1]], #2[[2]]}, {#2[[2]], #1[[1]], #1[[2]]}} &,
+			Partition[#, 2, 1] & /@ {there[[2, 1]], Reverse @ andBack[[2, 1]]}]][[2 ;; -2]];
+	{Graph[Join[EdgeList[there[[1]]], EdgeList[andBack[[1]]]]], Join[there[[2]], andBack[[2]]], triangulation}
+]
+
+polygonGraphBoundaryAndTriangles[_][edge : ({_} | {})] := {Graph[edge, {}], {}, {}}
 
 unitLengthRegularPolygon[n_] := RegularPolygon[1 / (2 Sin[Pi / n]), n]
 
