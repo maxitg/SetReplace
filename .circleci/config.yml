@@ -19,5 +19,9 @@ jobs:
           command: ./install.wls
 
       - run:
+          name: Reinstall
+          command: ./install.wls
+
+      - run:
           name: Test
           command: ./test.wls
