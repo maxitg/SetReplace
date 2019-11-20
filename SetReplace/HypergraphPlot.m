@@ -284,16 +284,23 @@ hypergraphEmbedding[edgeType_, "Branes", vertexCoordinates_][edges_] := Module[{
 ]
 
 polygonGraphBoundaryAndTriangles[edgeType_][edge : {_, _, __}] := Module[{
-		indexMeshRegion, indexLines, indexTriangles, indexVertices, vertexNames, vertexIndexToName, graph, indexGraph,
-		indexBoundaries},
+		indexMeshRegion, indexLines, indexTriangles, indexVertices, vertexNames, vertexIndexToName, graph,
+		meshCoordinatesToIndices, incorrectlyIndexedRegionBoundary, indexBoundaryGraph, indexBoundaries},
 	indexMeshRegion =
 		TriangulateMesh[unitLengthRegularPolygon[Length[edge]], MaxCellMeasure -> {"Length" -> $maxCellLength}];
 	{indexLines, indexTriangles} = Identity @@@ MeshCells[indexMeshRegion, #] & /@ {1, 2};
 	indexVertices = Union[Catenate[indexLines]];
 	vertexNames = Replace[indexVertices, Append[Thread[Range[Length[edge]] -> edge], _ :> Unique[]], {1}];
 	vertexIndexToName = Thread[indexVertices -> vertexNames];
-	{graph, indexGraph} = Graph[UndirectedEdge @@@ #] & /@ {Replace[indexLines, vertexIndexToName, {2}], indexLines};
-	indexBoundaries = FindShortestPath[indexGraph, #[[1]], #[[2]]] & /@ toNormalEdges[edgeType][Range[Length[edge]]];
+	graph = Graph[UndirectedEdge @@@ Replace[indexLines, vertexIndexToName, {2}]];
+	meshCoordinatesToIndices = Association[Thread[# -> Range[Length[#]]] & @ MeshCoordinates[indexMeshRegion]];
+	incorrectlyIndexedRegionBoundary = RegionBoundary[indexMeshRegion];
+	indexBoundaryGraph = Graph[UndirectedEdge @@@ Map[
+		meshCoordinatesToIndices[MeshCoordinates[incorrectlyIndexedRegionBoundary][[#]]] &,
+		Identity @@@ MeshCells[incorrectlyIndexedRegionBoundary, 1],
+		{2}]];
+	indexBoundaries =
+		FindShortestPath[indexBoundaryGraph, #[[1]], #[[2]]] & /@ toNormalEdges[edgeType][Range[Length[edge]]];
 	{graph, Replace[indexBoundaries, vertexIndexToName, {2}], Replace[indexTriangles, vertexIndexToName, {2}]}
 ]
 
