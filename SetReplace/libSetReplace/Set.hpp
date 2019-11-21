@@ -17,6 +17,15 @@ namespace SetReplace {
          */
         enum Error {Aborted, DisconnectedInputs, NonPositiveAtoms};
         
+        /** @brief Specification of conditions upon which to stop evaluation.
+         */
+        struct StepSpecification {
+            int maxEvents;
+            int maxGenerations;
+            int maxAtoms;
+            int maxExpressions;
+        };
+        
         /** @brief Creates a new set with a given set of evolution rules, and initial condition.
          * @param rules substittion rules used for evolution. Note, these rules cannot be changed.
          * @param initialExpressions initial condition. It will be lazily indexed before the first replacement.
@@ -30,11 +39,11 @@ namespace SetReplace {
          */
         int replaceOnce(const std::function<bool()> shouldAbort);
         
-        /** @brief Run replaceOnce() substitutionCount times, or until the next expression produced has generation larger than maxGeneration.
+        /** @brief Run replaceOnce() stepSpec.maxEvents times, or until the next expression violates constraints imposed by stepSpec.
          * @param shouldAbort function that should return true if Wolfram Language abort is in progress.
-         * @return The number of subtitutions made, could be between 0 and substitutionCount.
+         * @return The number of subtitutions made, could be between 0 and stepSpec.maxEvents.
          */
-        int replace(const Generation maxGeneration, const int substitutionCount, const std::function<bool()> shouldAbort);
+        int replace(const StepSpecification stepSpec, const std::function<bool()> shouldAbort);
         
         /** @brief List of all expressions in the set, past and present.
          */

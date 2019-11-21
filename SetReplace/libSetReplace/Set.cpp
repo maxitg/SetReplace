@@ -14,8 +14,8 @@ namespace SetReplace {
         // If rules do need to be changed, create another instance of Set and copy the expressions over.
         const std::vector<Rule> rules_;
         
-        // Events will never be created with inputs of this generation.
-        Generation maxGeneration_ = 0;
+        // Determines the limiting conditions for the evaluation.
+        StepSpecification stepSpec_ = {0, 0, 0, 0};
         
         std::unordered_map<ExpressionID, SetExpression> expressions_;
         
@@ -42,6 +42,8 @@ namespace SetReplace {
             }) {}
         
         int replaceOnce(const std::function<bool()> shouldAbort) {
+            if (nextEventID_ > stepSpec_.maxEvents) return 0;
+            
             indexNewExpressions(shouldAbort);
             if (matcher_.matchCount() == 0) return 0;
             Match match = matcher_.nextMatch();
@@ -78,17 +80,16 @@ namespace SetReplace {
             return 1;
         }
         
-        int replace(const Generation maxGeneration, const int substitutionCount, const std::function<bool()> shouldAbort) {
-            updateMaxGeneration(maxGeneration);
+        int replace(const StepSpecification stepSpec, const std::function<bool()> shouldAbort) {
+            updateStepSpec(stepSpec);
             int count = 0;
-            for (int i = 0; i < substitutionCount; ++i) {
+            while (true) {
                 if (replaceOnce(shouldAbort)) {
                     ++count;
                 } else {
                     return count;
                 }
             }
-            return count;
         }
         
         std::vector<SetExpression> expressions() const {
@@ -124,10 +125,10 @@ namespace SetReplace {
             addExpressions(initialExpressions, initialConditionEvent, initialGeneration);
         }
         
-        void updateMaxGeneration(const Generation newMaxGeneration) {
-            const auto previousMaxGeneration = maxGeneration_;
-            maxGeneration_ = newMaxGeneration;
-            if (newMaxGeneration > previousMaxGeneration) {
+        void updateStepSpec(const StepSpecification newStepSpec) {
+            const auto previousMaxGeneration = stepSpec_.maxGenerations;
+            stepSpec_ = newStepSpec;
+            if (newStepSpec.maxGenerations > previousMaxGeneration) {
                 for (int expressionID = 0; expressionID < expressions_.size(); ++expressionID) {
                     if (expressions_[expressionID].generation == previousMaxGeneration) {
                         unindexedExpressions_.push_back(expressionID);
@@ -166,7 +167,7 @@ namespace SetReplace {
             const auto ids = assignExpressionIDs(expressions, creatorEvent, generation);
             
             // If generation is at least maxGeneration_, we will never use these expressions as inputs, so no need adding them to the index.
-            if (generation < maxGeneration_) {
+            if (generation < stepSpec_.maxGenerations) {
                 for (const auto id : ids) {
                     unindexedExpressions_.push_back(id);
                 }
@@ -202,8 +203,8 @@ namespace SetReplace {
         return implementation_->replaceOnce(shouldAbort);
     }
     
-    int Set::replace(const Generation maxGeneration, const int substitutionCount, const std::function<bool()> shouldAbort) {
-        return implementation_->replace(maxGeneration, substitutionCount, shouldAbort);
+    int Set::replace(const StepSpecification stepSpec, const std::function<bool()> shouldAbort) {
+        return implementation_->replace(stepSpec, shouldAbort);
     }
     
     std::vector<SetExpression> Set::expressions() const {
