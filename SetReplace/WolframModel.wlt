@@ -296,27 +296,32 @@
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> 3|>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 3|>] /@
+          {"GenerationsCount", "EventsCount"},
         {3, 7}
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Events" -> 6|>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxEvents" -> 6|>] /@
+          {"GenerationsCount", "EventsCount"},
         {3, 6}
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> 3, "Events" -> 6|>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 3, "MaxEvents" -> 6|>] /@
+          {"GenerationsCount", "EventsCount"},
         {3, 6}
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> 2, "Events" -> 6|>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 2, "MaxEvents" -> 6|>] /@
+          {"GenerationsCount", "EventsCount"},
         {2, 3}
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <||>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <||>] /@
+          {"GenerationsCount", "EventsCount"},
         {2, 3}
       ],
 
@@ -326,12 +331,16 @@
       ],
 
       testUnevaluated[
-        WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <|"x" -> 2, "Generations" -> 2|>],
+        WolframModel[
+          {{0, 1}, {1, 2}} -> {{0, 2}},
+          {{0, 1}, {1, 2}, {2, 3}, {3, 4}},
+          <|"x" -> 2, "MaxGenerations" -> 2|>],
         {WolframModel::invalidSteps}
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> \[Infinity], "Events" -> 12|>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> \[Infinity], "MaxEvents" -> 12|>] /@
+          {"GenerationsCount", "EventsCount"},
         {4, 12}
       ],
 
@@ -536,7 +545,12 @@
           <|"PatternRules" -> ({x_List ? (Length[#] == 3 &), y_List ? (Length[#] == 6 &)} :> {x, y, Join[x, y]})|>,
           {"This" -> "that", {2, 3, 4}, {2, 5}, {1, 2, 3, 4, 5, 6}},
           2][-1],
-        {"This" -> "that", {2, 5}, {2, 3, 4, 1, 2, 3, 4, 5, 6}, {2, 3, 4}, {1, 2, 3, 4, 5, 6}, {2, 3, 4, 1, 2, 3, 4, 5, 6}}
+        {"This" -> "that",
+          {2, 5},
+          {2, 3, 4, 1, 2, 3, 4, 5, 6},
+          {2, 3, 4},
+          {1, 2, 3, 4, 5, 6},
+          {2, 3, 4, 1, 2, 3, 4, 5, 6}}
       ],
 
       VerificationTest[
@@ -552,7 +566,12 @@
           <|"PatternRules" -> ({x_List /; (Length[x] == 3), y_List /; (Length[y] == 6)} :> {x, y, Join[x, y]})|>,
           {"This" -> "that", {2, 3, 4}, {2, 5}, {1, 2, 3, 4, 5, 6}},
           2][-1],
-        {"This" -> "that", {2, 5}, {2, 3, 4, 1, 2, 3, 4, 5, 6}, {2, 3, 4}, {1, 2, 3, 4, 5, 6}, {2, 3, 4, 1, 2, 3, 4, 5, 6}}
+        {"This" -> "that",
+          {2, 5},
+          {2, 3, 4, 1, 2, 3, 4, 5, 6},
+          {2, 3, 4},
+          {1, 2, 3, 4, 5, 6},
+          {2, 3, 4, 1, 2, 3, 4, 5, 6}}
       ],
 
       VerificationTest[
@@ -656,7 +675,8 @@
 
       VerificationTest[
         Head[
-          WolframModel[{{{2, 2, 1}, {2, 2, 2}} -> {{1, 1, 3}, {1, 1, 1}, {2, 1, 2}, {3, 3, 2}}}, {Table[{0, 0, 0}, 3]}, 2]],
+          WolframModel[
+            {{{2, 2, 1}, {2, 2, 2}} -> {{1, 1, 3}, {1, 1, 1}, {2, 1, 2}, {3, 3, 2}}}, {Table[{0, 0, 0}, 3]}, 2]],
         WolframModelEvolutionObject
       ],
 
@@ -803,7 +823,8 @@
             With[{
                 output =
                   WolframModel[timeConstraintRule, timeConstraintInit, 100, Method -> method, TimeConstraint -> time]},
-              WolframModel[timeConstraintRule, timeConstraintInit, <|"Events" -> output["EventsCount"]|>] === output],
+              WolframModel[timeConstraintRule, timeConstraintInit, <|"MaxEvents" -> output["EventsCount"]|>] ===
+                output],
             100]
         ]], {method, $SetReplaceMethods}, {time, {1.*^-100, 0.1}}],
 

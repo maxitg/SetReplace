@@ -19,6 +19,14 @@ PackageScope["stepCountQ"]
 PackageScope["setSubstitutionSystem"]
 
 
+PackageScope["$stepSpecKeys"]
+PackageScope["$maxEvents"]
+PackageScope["$maxGenerations"]
+PackageScope["$maxSymbols"]
+PackageScope["$maxVertices"]
+PackageScope["$maxEdges"]
+
+
 (* ::Section:: *)
 (*Documentation*)
 
@@ -41,7 +49,7 @@ $SetReplaceMethods::usage = usageString[
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!ListQ[set] &&
 	makeMessage[caller, "setNotList", set]
 
@@ -55,7 +63,7 @@ setReplaceRulesQ[rules_] :=
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!setReplaceRulesQ[rules] &&
 	makeMessage[caller, "invalidRules", rules]
 
@@ -64,19 +72,33 @@ setSubstitutionSystem[
 (*Step count is valid*)
 
 
+$stepSpecKeys = <|
+	$maxEvents -> "MaxEvents",
+	$maxGenerations -> "MaxGenerations",
+	$maxSymbols -> "MaxSymbols",
+	$maxVertices -> "MaxVertices",
+	$maxEdges -> "MaxEdges"|>;
+
+
+$stepSpecNamesInErrorMessage = <|
+	$maxEvents -> "replacements",
+	$maxGenerations -> "generations",
+	$maxSymbols -> "symbols",
+	$maxVertices -> "vertices",
+	$maxEdges -> "edges"|>;
+
+
 stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
 
 
-setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
-	!stepCountQ[generations] &&
-	makeMessage[caller, "nonIntegerIterations", "generations", generations]
-
-
-setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
-	!stepCountQ[maxEvents] &&
-	makeMessage[caller, "nonIntegerIterations", "replacements", maxEvents]
+stepSpecQ[caller_, spec_] := Catch[
+	KeyValueMap[
+		If[!stepCountQ[#2],
+			makeMessage[caller, "nonIntegerIterations", $stepSpecNamesInErrorMessage[#1], #2];
+			Throw[False]] &,
+		spec];
+	True
+]
 
 
 (* ::Subsection:: *)
@@ -91,7 +113,7 @@ $SetReplaceMethods = {Automatic, $cppMethod, $wlMethod};
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
 	makeMessage[caller, "invalidMethod"]
 
@@ -101,7 +123,7 @@ setSubstitutionSystem[
 
 
 setSubstitutionSystem[
-		rules_, set_, generations_, maxEvents_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+		rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
 	!MatchQ[OptionValue[TimeConstraint], _ ? (# > 0 &)] &&
 	Message[caller::timc, OptionValue[TimeConstraint]]
 
@@ -156,20 +178,24 @@ Options[setSubstitutionSystem] = {Method -> Automatic, TimeConstraint -> Infinit
 setSubstitutionSystem[
 			rules_ ? setReplaceRulesQ,
 			set_List,
-			generations_ ? stepCountQ,
-			steps_ ? stepCountQ,
+			stepSpec_,
 			caller_,
 			returnOnAbortQ_,
-			o : OptionsPattern[]] := Module[{
-		method = OptionValue[Method], timeConstraint = OptionValue[TimeConstraint], canonicalRules, failedQ = False},
+			o : OptionsPattern[]] /; stepSpecQ[caller, stepSpec] := Module[{
+		completeStepSpec,
+		method = OptionValue[Method],
+		timeConstraint = OptionValue[TimeConstraint],
+		canonicalRules,
+		failedQ = False},
 	If[(timeConstraint > 0) =!= True, Return[$Failed]];
+	completeStepSpec = Join[Association[Thread[Keys[$stepSpecKeys] -> Infinity]], stepSpec];
 	canonicalRules = toCanonicalRules[rules];
 	If[MatchQ[method, Automatic | $cppMethod]
 			&& MatchQ[set, {{___}...}]
 			&& MatchQ[canonicalRules, {___ ? simpleRuleQ}],
 		If[$cppSetReplaceAvailable,
 			Return[
-				setSubstitutionSystem$cpp[rules, set, generations, steps, returnOnAbortQ, timeConstraint]]]];
+				setSubstitutionSystem$cpp[rules, set, completeStepSpec, returnOnAbortQ, timeConstraint]]]];
 	If[MatchQ[method, $cppMethod],
 		failedQ = True;
 		If[!$cppSetReplaceAvailable,
@@ -177,5 +203,5 @@ setSubstitutionSystem[
 			makeMessage[caller, "lowLevelNotImplemented"]]];
 	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
-		setSubstitutionSystem$wl[rules, set, generations, steps, returnOnAbortQ, timeConstraint]]
+		setSubstitutionSystem$wl[rules, set, completeStepSpec, returnOnAbortQ, timeConstraint]]
 ]

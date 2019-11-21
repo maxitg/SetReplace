@@ -269,53 +269,55 @@
         {{1}, {2}, {4}, {5}, {X}}
       ],
 
-      VerificationTest[
-        Table[
-          WolframModel[
-              <|"PatternRules" -> {{{1, 2}, {2, 3}} -> {{R1}}, {{4, 5}, {5, 6}} -> {{R2}}}|>,
-              #,
-              <|"Events" -> 1|>,
-              "FinalState",
-              Method -> method][[-1, 1]] & /@
-            Permutations[{{1, 2}, {2, 3}, {4, 5}, {5, 6}}],
-          {method, $methods}],
-        ConstantArray[{
-            R1, R1, R1, R2, R1, R2, R1, R1, R1, R2, R1, R2,
-            R1, R2, R1, R2, R2, R2, R1, R2, R1, R2, R2, R2},
-          2]
-      ],
+      With[{methods = $methods}, {
+        VerificationTest[
+          Table[
+            WolframModel[
+                <|"PatternRules" -> {{{1, 2}, {2, 3}} -> {{R1}}, {{4, 5}, {5, 6}} -> {{R2}}}|>,
+                #,
+                <|"MaxEvents" -> 1|>,
+                "FinalState",
+                Method -> method][[-1, 1]] & /@
+              Permutations[{{1, 2}, {2, 3}, {4, 5}, {5, 6}}],
+            {method, methods}],
+          ConstantArray[{
+              R1, R1, R1, R2, R1, R2, R1, R1, R1, R2, R1, R2,
+              R1, R2, R1, R2, R2, R2, R1, R2, R1, R2, R2, R2},
+            2]
+        ],
 
-      VerificationTest[
-        Table[
-          WolframModel[
-              <|"PatternRules" -> {{1, 2, x_}, {1, 2, z_}} :> {{x, z}}|>,
-              #,
-              <|"Events" -> 1|>,
-              "FinalState",
-              Method -> method][[-1]] & /@
-            Permutations[{{1, 2, x}, {1, 2, y}, {1, 2, z}}],
-          {method, $methods}],
-        ConstantArray[
-          {{x, y}, {x, z}, {y, x}, {y, z}, {z, x}, {z, y}},
-          2]
-      ],
-
-      VerificationTest[
-        Table[
-          WolframModel[
-              <|"PatternRules" -> {
-                {{1, 2, x_}, {1, 3, z_}} :> {{1, x, z}},
-                {{1, 2, x_}, {1, 2, z_}} :> {{2, x, z}}}|>,
-              #,
-              <|"Events" -> 1|>,
-              "FinalState",
-              Method -> method][[-1]] & /@
-            Permutations[{{1, 2, x}, {1, 2, y}, {1, 3, z}}],
-          {method, $methods}],
-        ConstantArray[
-          {{2, x, y}, {1, x, z}, {2, y, x}, {1, y, z}, {1, x, z}, {1, y, z}},
-          2]
-      ],
+        VerificationTest[
+          Table[
+            WolframModel[
+                <|"PatternRules" -> {{1, 2, x_}, {1, 2, z_}} :> {{x, z}}|>,
+                #,
+                <|"MaxEvents" -> 1|>,
+                "FinalState",
+                Method -> method][[-1]] & /@
+              Permutations[{{1, 2, x}, {1, 2, y}, {1, 2, z}}],
+            {method, methods}],
+          ConstantArray[
+            {{x, y}, {x, z}, {y, x}, {y, z}, {z, x}, {z, y}},
+            2]
+        ],
+  
+          VerificationTest[
+            Table[
+              WolframModel[
+                  <|"PatternRules" -> {
+                    {{1, 2, x_}, {1, 3, z_}} :> {{1, x, z}},
+                    {{1, 2, x_}, {1, 2, z_}} :> {{2, x, z}}}|>,
+                  #,
+                  <|"MaxEvents" -> 1|>,
+                  "FinalState",
+                  Method -> method][[-1]] & /@
+                Permutations[{{1, 2, x}, {1, 2, y}, {1, 3, z}}],
+              {method, methods}],
+            ConstantArray[
+              {{2, x, y}, {1, x, z}, {2, y, x}, {1, y, z}, {1, x, z}, {1, y, z}},
+              2]
+        ]
+      }],
 
       (** Potential variable collision between different rule inputs and outputs **)
       VerificationTest[
@@ -323,7 +325,7 @@
           {{{1, 1}, {2, 3}} -> {{2, 1}, {2, 2}, {2, 3}, {4, 2}}, {{1, 2}, {1, 2}} -> {{3, 2}}},
           {{1, 0}, {6, 1}, {1, 0}, {1, 1}, {1, 0}, {7, 1}, {3, 0}, {3, 3}, {3, 1}, {8, 3}, {4, 0}, {4, 4}, {4, 0},
             {9, 4}, {2, 2}, {2, 2}, {2, 0}, {10, 2}, {2, 1}, {2, 2}, {2, 0}, {11, 2}, {5, 1}, {5, 5}, {5, 2}, {12, 5}},
-          <|"Events" -> 1|>,
+          <|"MaxEvents" -> 1|>,
           "FinalState",
           Method -> "Symbolic"],
         {{6, 1}, {1, 1}, {1, 0}, {7, 1}, {3, 0}, {3, 3}, {3, 1}, {8, 3}, {4, 0}, {4, 4}, {4, 0}, {9, 4}, {2, 2}, {2, 2},

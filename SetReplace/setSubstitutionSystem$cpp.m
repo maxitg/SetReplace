@@ -168,7 +168,7 @@ $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
 $maxInt = 2^31 - 1;
 
 
-setSubstitutionSystem$cpp[rules_, set_, generations_, steps_, returnOnAbortQ_, timeConstraint_] /;
+setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_] /;
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
@@ -193,7 +193,7 @@ setSubstitutionSystem$cpp[rules_, set_, generations_, steps_, returnOnAbortQ_, t
 		encodeNestedLists[mappedSet]];
 	TimeConstrained[
 		CheckAbort[
-			$cpp$setReplace[setPtr, {generations, steps} /. {\[Infinity] -> $maxInt}],
+			$cpp$setReplace[setPtr, {stepSpec[$maxGenerations], stepSpec[$maxEvents]} /. {\[Infinity] -> $maxInt}],
 			If[!returnOnAbortQ, Abort[]]],
 		timeConstraint,
 		If[!returnOnAbortQ, Return[$Aborted]]];

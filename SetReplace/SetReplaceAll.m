@@ -69,7 +69,7 @@ SetReplaceAll[
 	Module[{result},
 		result = Check[
 			setSubstitutionSystem[
-				rules, set, generations, Infinity, SetReplaceAll, False, o],
+				rules, set, <|$maxGenerations -> generations|>, SetReplaceAll, False, o],
 			$Failed];
 		If[result === $Aborted, result, result[-1]] /; result =!= $Failed
 	]

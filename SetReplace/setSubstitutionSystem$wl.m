@@ -226,7 +226,7 @@ renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAt
 (*This function runs a modified version of the set replace system that also keeps track of metadata such as generations and events. It uses setReplace$wl to evaluate that modified system.*)
 
 
-setSubstitutionSystem$wl[rules_, set_, generations_, steps_, returnOnAbortQ_, timeConstraint_] := Module[{
+setSubstitutionSystem$wl[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_] := Module[{
 		setWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, result,
 		nextExpressionID = 1, nextEventID = 1, nextExpression},
 	nextExpression = nextExpressionID++ &;
@@ -235,8 +235,8 @@ setSubstitutionSystem$wl[rules_, set_, generations_, steps_, returnOnAbortQ_, ti
 	renamedRules = renameRuleInputs[toCanonicalRules[rules]];
 	If[renamedRules === $Failed, Return[$Failed]];
 	rulesWithMetadata = addMetadataManagement[
-		#, nextEventID++ &, nextExpression, generations] & /@ renamedRules;
-	outputWithMetadata = Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, steps, returnOnAbortQ, timeConstraint]];
+		#, nextEventID++ &, nextExpression, stepSpec[$maxGenerations]] & /@ renamedRules;
+	outputWithMetadata = Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, stepSpec[$maxEvents], returnOnAbortQ, timeConstraint]];
 	If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
 	result = SortBy[
 		Join[
