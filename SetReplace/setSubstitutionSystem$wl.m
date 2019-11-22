@@ -111,19 +111,27 @@ toNormalRules[rules_List] := Module[{
 (*This function just does the replacements, but it does not keep track of any metadata (generations and events).*)
 
 
-setReplace$wl[set_, rules_, n_, returnOnAbortQ_, timeConstraint_] := Module[{normalRules, partialResult},
+setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstraint_] := Module[{
+		normalRules, previousResult},
 	normalRules = toNormalRules @ rules;
-	partialResult = set;
+	previousResult = set;
 	TimeConstrained[
 		CheckAbort[
-			FixedPoint[AbortProtect[partialResult = Replace[#, normalRules]] &, List @@ set, n],
+			FixedPoint[
+				AbortProtect[Module[{newResult, deletedExpressions},
+					{newResult, deletedExpressions} = Reap[Replace[#, normalRules]];
+					If[vertexCount[vertexIndex] > Lookup[stepSpec, $maxFinalVertices, Infinity], Return[previousResult]];
+					Map[Sow, deletedExpressions, {2}];
+					previousResult = newResult]] &,
+				List @@ set,
+				Lookup[stepSpec, $maxEvents, Infinity]],
 			If[returnOnAbortQ,
-				partialResult,
+				previousResult,
 				Abort[]
 			]],
 		timeConstraint,
 		If[returnOnAbortQ,
-			partialResult,
+			previousResult,
 			Return[$Aborted]
 		]]
 ]
@@ -141,7 +149,8 @@ addMetadataManagement[
 			input_List :> output_Module,
 			getNextEvent_,
 			getNextExpression_,
-			maxGeneration_] := Module[{
+			maxGeneration_,
+			vertexIndex_] := Module[{
 		inputIDs = Table[Unique["id"], Length[input]],
 		wholeInputPatternNames = Table[Unique["inputExpression"], Length[input]],
 		inputCreators = Table[Unique["creator"], Length[input]],
@@ -162,7 +171,7 @@ addMetadataManagement[
 							Given that these look just like normal expressions,
 							which just output Nothing at the end,
 							they pass just fine through all the transformation. *)
-						Hold[Sow[#]; Nothing] & @* ({
+						With[{expr = #[[5]]}, Hold[Sow[#]; deleteFromVertexIndex[vertexIndex, expr]; Nothing]] & @* ({
 							#[[1]], #[[2]], nextEvent, #[[3]], #[[4]]} &) /@
 								Transpose[{
 									inputIDs,
@@ -177,7 +186,7 @@ addMetadataManagement[
 								 nextEvent,
 								 Infinity,
 								 Max[0, inputGenerations] + 1,
-								 Hold[o]},
+								 Hold[addToVertexIndex[vertexIndex, o]]},
 								HoldAll],
 							moduleOutput,
 							{2}]],
@@ -223,20 +232,68 @@ renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAt
 
 
 (* ::Text:: *)
+(*This yields unique elements in the expressions upto level 1.*)
+
+
+expressionVertices[expr_] := If[ListQ[expr], Union[expr], Throw[expr, $$nonListExpression]]
+
+
+(* ::Text:: *)
+(*The following is used to keep track of how many times vertices appear in the set.
+	All operations here should evaluate in O(1).*)
+
+
+Attributes[$vertexIndex] = {HoldAll};
+
+
+initVertexIndex[$vertexIndex[index_], set_] := (
+	index = Merge[Association[Thread[expressionVertices[#] -> 1]] & /@ set, Total];
+	set
+);
+initVertexIndex[$noIndex, set_] := set
+
+
+deleteFromVertexIndex[$vertexIndex[index_], expr_] := ((
+			index[#] = Lookup[index, Key[#], 0] - 1;
+			If[index[#] == 0, KeyDropFrom[index, Key[#]]];) & /@
+		expressionVertices[expr];
+	expr
+);
+deleteFromVertexIndex[$noIndex, expr_] := expr
+
+
+addToVertexIndex[$vertexIndex[index_], expr_] := (
+	(index[#] = Lookup[index, Key[#], 0] + 1;) & /@ expressionVertices[expr];
+	expr
+);
+addToVertexIndex[$noIndex, expr_] := expr
+
+
+vertexCount[$vertexIndex[index_]] := Length[index]
+vertexCount[$noIndex] := 0
+
+
+(* ::Text:: *)
 (*This function runs a modified version of the set replace system that also keeps track of metadata such as generations and events. It uses setReplace$wl to evaluate that modified system.*)
 
 
-setSubstitutionSystem$wl[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_] := Module[{
+setSubstitutionSystem$wl[caller_, rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_] := Module[{
 		setWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, result,
-		nextExpressionID = 1, nextEventID = 1, nextExpression},
+		nextExpressionID = 1, nextEventID = 1, expressionsCountsPerVertex, vertexIndex, nextExpression},
 	nextExpression = nextExpressionID++ &;
 	(* {id, creator, destroyer, generation, atoms} *)
 	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
 	renamedRules = renameRuleInputs[toCanonicalRules[rules]];
 	If[renamedRules === $Failed, Return[$Failed]];
+	vertexIndex = If[MissingQ[stepSpec[$maxFinalVertices]], $noIndex, $vertexIndex[expressionsCountsPerVertex]];
+	initVertexIndex[vertexIndex, set];
 	rulesWithMetadata = addMetadataManagement[
-		#, nextEventID++ &, nextExpression, stepSpec[$maxGenerations]] & /@ renamedRules;
-	outputWithMetadata = Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, stepSpec[$maxEvents], returnOnAbortQ, timeConstraint]];
+		#, nextEventID++ &, nextExpression, Lookup[stepSpec, $maxGenerations, Infinity], vertexIndex] & /@ renamedRules;
+	outputWithMetadata = Catch[
+		Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint]],
+		$$nonListExpression,
+		(makeMessage[caller, "nonListExpressions", #, stepSpec[$maxFinalVertices]];
+			Return[$Failed]) &];
 	If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
 	result = SortBy[
 		Join[

@@ -286,9 +286,6 @@ wolframModelInitSpecQ[_] := False
 wolframModelStepsSpecQ[stepsSpec_ ? stepCountQ] := True
 
 
-wolframModelStepsSpecQ[<||>] := False
-
-
 wolframModelStepsSpecQ[stepsSpec_Association] /;
 	SubsetQ[Values[$stepSpecKeys], Keys[stepsSpec]] &&
 	AllTrue[fromStepsSpec[stepsSpec], stepCountQ] := True

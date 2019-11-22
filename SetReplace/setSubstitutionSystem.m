@@ -94,11 +94,14 @@ stepSpecQ[caller_, set_, spec_] :=
 				True,
 				makeMessage[caller, "nonIntegerIterations", $stepSpecNamesInErrorMessage[#1], #2]; False] &,
 			spec] &&
+	If[MissingQ[spec[$maxFinalVertices]] || AllTrue[set, ListQ],
+		True,
+		makeMessage[caller, "nonListExpressions", SelectFirst[set, Not @* ListQ], spec[$maxFinalVertices]]; False] &&
 	And @@ (
 			If[Lookup[spec, #1, Infinity] >= Length[#2],
 				True,
 				makeMessage[caller, "tooSmallStepLimit", $stepSpecNamesInErrorMessage[#1], spec[#1], Length[#2]]; False] & @@@ {
-		{$maxFinalVertices, Union[Catenate[set]]},
+		{$maxFinalVertices, If[MissingQ[spec[$maxFinalVertices]], {}, Union[Catenate[set]]]},
 		{$maxFinalEdges, set}})
 
 
@@ -183,20 +186,18 @@ setSubstitutionSystem[
 			caller_,
 			returnOnAbortQ_,
 			o : OptionsPattern[]] /; stepSpecQ[caller, set, stepSpec] := Module[{
-		completeStepSpec,
 		method = OptionValue[Method],
 		timeConstraint = OptionValue[TimeConstraint],
 		canonicalRules,
 		failedQ = False},
 	If[(timeConstraint > 0) =!= True, Return[$Failed]];
-	completeStepSpec = Join[Association[Thread[Keys[$stepSpecKeys] -> Infinity]], stepSpec];
 	canonicalRules = toCanonicalRules[rules];
 	If[MatchQ[method, Automatic | $cppMethod]
 			&& MatchQ[set, {{___}...}]
 			&& MatchQ[canonicalRules, {___ ? simpleRuleQ}],
 		If[$cppSetReplaceAvailable,
 			Return[
-				setSubstitutionSystem$cpp[rules, set, completeStepSpec, returnOnAbortQ, timeConstraint]]]];
+				setSubstitutionSystem$cpp[rules, set, stepSpec, returnOnAbortQ, timeConstraint]]]];
 	If[MatchQ[method, $cppMethod],
 		failedQ = True;
 		If[!$cppSetReplaceAvailable,
@@ -204,5 +205,5 @@ setSubstitutionSystem[
 			makeMessage[caller, "lowLevelNotImplemented"]]];
 	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
-		setSubstitutionSystem$wl[rules, set, completeStepSpec, returnOnAbortQ, timeConstraint]]
+		setSubstitutionSystem$wl[caller, rules, set, stepSpec, returnOnAbortQ, timeConstraint]]
 ]
