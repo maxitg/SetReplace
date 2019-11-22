@@ -54,6 +54,10 @@ namespace SetReplace {
          */
         const std::unordered_set<ExpressionID> expressionsContainingAtom(const Atom atom) const;
         
+        /** @brief Returns the total number of atoms in the index.
+         */
+        const int atomsCount() const;
+        
     private:
         class Implementation;
         std::shared_ptr<Implementation> implementation_;
