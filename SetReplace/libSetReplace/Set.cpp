@@ -61,6 +61,9 @@ namespace SetReplace {
             auto explicitRuleOutputs = rules_[match.rule].outputs;
             Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, explicitRuleOutputs);
             
+            if (willExceedAtomsLimit(explicitRuleInputs, explicitRuleOutputs)) return 0;
+            // if (willExceedExpressionsLimit(explicitRuleInputs, explicitRuleOutputs)) return 0;
+            
             // Name newly created atoms as well, now all atoms in the output are explicitly named.
             const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
             
@@ -142,6 +145,45 @@ namespace SetReplace {
             atomsIndex_.addExpressions(unindexedExpressions_);
             matcher_.addMatchesInvolvingExpressions(unindexedExpressions_, shouldAbort);
             unindexedExpressions_.clear();
+        }
+        
+        bool willExceedAtomsLimit(const std::vector<std::vector<int>> explicitRuleInputs,
+                                  const std::vector<std::vector<int>> explicitRuleOutputs) const {
+            const int currentAtomsCount = atomsIndex_.atomsCount();
+            
+            std::unordered_map<Atom, int> addedExpressionsCountPerAtom;
+            updateExpressionsCountsInvolvingAtoms(addedExpressionsCountPerAtom, explicitRuleInputs, -1);
+            updateExpressionsCountsInvolvingAtoms(addedExpressionsCountPerAtom, explicitRuleOutputs, +1);
+            
+            int newAtomsCount = currentAtomsCount;
+            for (const auto& atomAndAddedExpressionsCount : addedExpressionsCountPerAtom) {
+                const Atom atom = atomAndAddedExpressionsCount.first;
+                const int addedExpressionsCount = atomAndAddedExpressionsCount.second;
+                const int currentExpressionsCount =
+                    static_cast<int>(atomsIndex_.expressionsContainingAtom(atom).size());
+                if (currentExpressionsCount == 0 && addedExpressionsCount > 0) {
+                    ++newAtomsCount;
+                }
+                else if (currentExpressionsCount > 0 && currentExpressionsCount + addedExpressionsCount == 0) {
+                    --newAtomsCount;
+                }
+            }
+            
+            return newAtomsCount > stepSpec_.maxFinalAtoms;
+        }
+        
+        void updateExpressionsCountsInvolvingAtoms(std::unordered_map<Atom, int>& expressionsCountsPerAtom,
+                                                  const std::vector<std::vector<int>>& deltaExpressions,
+                                                  const int deltaCount) const {
+            for (const auto& inputExpression : deltaExpressions) {
+                std::unordered_set<Atom> expressionAtoms;
+                for (const auto atom : inputExpression) {
+                    expressionAtoms.insert(atom);
+                }
+                for (const auto atom : expressionAtoms) {
+                    expressionsCountsPerAtom[atom] += deltaCount;
+                }
+            }
         }
         
         std::vector<AtomsVector> nameAnonymousAtoms(const std::vector<AtomsVector>& atomVectors) {
