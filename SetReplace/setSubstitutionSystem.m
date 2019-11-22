@@ -5,7 +5,9 @@
 
 
 (* ::Text:: *)
-(*This is a main function of the package. This function calls either C++ or Wolfram Language implementation, and can produce a WolframModelEvolutionObject that contains information about evolution of the network step-by-step. All SetReplace* and WolframModel functions use argument checks and implementation done here.*)
+(*This is a main function of the package. This function calls either C++ or Wolfram Language implementation, and can*)
+(*produce a WolframModelEvolutionObject that contains information about evolution of the network step-by-step.*)
+(*All SetReplace* and WolframModel functions use argument checks and implementation done here.*)
 
 
 Package["SetReplace`"]
@@ -23,7 +25,7 @@ PackageScope["$stepSpecKeys"]
 PackageScope["$maxEvents"]
 PackageScope["$maxGenerations"]
 PackageScope["$maxFinalVertices"]
-PackageScope["$maxFinalEdges"]
+PackageScope["$maxFinalExpressions"]
 
 
 (* ::Section:: *)
@@ -40,7 +42,9 @@ $SetReplaceMethods::usage = usageString[
 
 
 (* ::Text:: *)
-(*Argument checks here produce messages for the caller which is specified as an argument. That is because setSubstitutionSystem is used by all SetReplace* and WolframModel functions, which need to produce their own messages.*)
+(*Argument checks here produce messages for the caller which is specified as an argument. That is because*)
+(*setSubstitutionSystem is used by all SetReplace* and WolframModel functions, which need to produce their own*)
+(*messages.*)
 
 
 (* ::Subsection:: *)
@@ -74,15 +78,16 @@ setSubstitutionSystem[
 $stepSpecKeys = <|
 	$maxEvents -> "MaxEvents",
 	$maxGenerations -> "MaxGenerations",
+	(* these are any level-2 expressions in the set, not just atoms. *)
 	$maxFinalVertices -> "MaxVertices",
-	$maxFinalEdges -> "MaxEdges"|>;
+	$maxFinalExpressions -> "MaxEdges"|>;
 
 
 $stepSpecNamesInErrorMessage = <|
 	$maxEvents -> "replacements",
 	$maxGenerations -> "generations",
 	$maxFinalVertices -> "vertices",
-	$maxFinalEdges -> "edges"|>;
+	$maxFinalExpressions -> "edges"|>;
 
 
 stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
@@ -102,7 +107,7 @@ stepSpecQ[caller_, set_, spec_] :=
 				True,
 				makeMessage[caller, "tooSmallStepLimit", $stepSpecNamesInErrorMessage[#1], spec[#1], Length[#2]]; False] & @@@ {
 		{$maxFinalVertices, If[MissingQ[spec[$maxFinalVertices]], {}, Union[Catenate[set]]]},
-		{$maxFinalEdges, set}})
+		{$maxFinalExpressions, set}})
 
 
 (* ::Subsection:: *)
@@ -169,7 +174,8 @@ simpleRuleQ[___] := False
 
 
 (* ::Text:: *)
-(*This function accepts both the number of generations and the number of steps as an input, and runs until the first of the two is reached. it also takes a caller function as an argument, which is used for message generation.*)
+(*This function accepts both the number of generations and the number of steps as an input, and runs until the first*)
+(*of the two is reached. it also takes a caller function as an argument, which is used for message generation.*)
 
 
 Options[setSubstitutionSystem] = {Method -> Automatic, TimeConstraint -> Infinity};

@@ -122,7 +122,7 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
 					AbortProtect[Module[{newResult, deletedExpressions},
 						{newResult, deletedExpressions} = Reap[Replace[#, normalRules]];
 						If[vertexCount[vertexIndex] > Lookup[stepSpec, $maxFinalVertices, Infinity] ||
-								Length[newResult] > Lookup[stepSpec, $maxFinalEdges, Infinity],
+								Length[newResult] > Lookup[stepSpec, $maxFinalExpressions, Infinity],
 							Throw[previousResult, $$setReplaceResult]];
 						Map[Sow, deletedExpressions, {2}];
 						previousResult = newResult]] &,
