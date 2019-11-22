@@ -23,8 +23,10 @@ namespace SetReplace {
         ExpressionID nextExpressionID_ = 0;
         EventID nextEventID_ = 1;
         
+        int destroyedExpressionsCount_ = 0;
+        
         // Largest generation produced so far.
-        // Note, this is not the same as max of generations of all events,
+        // Note, this is not the same as max of generations of all expressions,
         // because there might exist an event that deletes expressions, but does not create any new ones.
         Generation largestGeneration_ = 0;
         
@@ -62,7 +64,7 @@ namespace SetReplace {
             Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, explicitRuleOutputs);
             
             if (willExceedAtomsLimit(explicitRuleInputs, explicitRuleOutputs)) return 0;
-            // if (willExceedExpressionsLimit(explicitRuleInputs, explicitRuleOutputs)) return 0;
+            if (willExceedExpressionsLimit(explicitRuleInputs, explicitRuleOutputs)) return 0;
             
             // Name newly created atoms as well, now all atoms in the output are explicitly named.
             const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
@@ -186,6 +188,15 @@ namespace SetReplace {
             }
         }
         
+        bool willExceedExpressionsLimit(const std::vector<std::vector<int>> explicitRuleInputs,
+                                        const std::vector<std::vector<int>> explicitRuleOutputs) const {
+            const int currentExpressionsCount = nextExpressionID_ - destroyedExpressionsCount_;
+            const int newExpressionsCount = currentExpressionsCount
+                                            - static_cast<int>(explicitRuleInputs.size())
+                                            + static_cast<int>(explicitRuleOutputs.size());
+            return newExpressionsCount > stepSpec_.maxFinalExpressions;
+        }
+        
         std::vector<AtomsVector> nameAnonymousAtoms(const std::vector<AtomsVector>& atomVectors) {
             std::unordered_map<Atom, Atom> names;
             std::vector<AtomsVector> result = atomVectors;
@@ -231,6 +242,9 @@ namespace SetReplace {
         
         void assignDestroyerEvent(const std::vector<ExpressionID>& expressions, const EventID destroyerEvent) {
             for (const auto id : expressions) {
+                if (expressions_.at(id).destroyerEvent == finalStateEvent) {
+                    ++destroyedExpressionsCount_;
+                }
                 expressions_.at(id).destroyerEvent = destroyerEvent;
             }
         }
