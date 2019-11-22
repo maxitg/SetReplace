@@ -115,25 +115,30 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
 		normalRules, previousResult},
 	normalRules = toNormalRules @ rules;
 	previousResult = set;
-	TimeConstrained[
-		CheckAbort[
-			FixedPoint[
-				AbortProtect[Module[{newResult, deletedExpressions},
-					{newResult, deletedExpressions} = Reap[Replace[#, normalRules]];
-					If[vertexCount[vertexIndex] > Lookup[stepSpec, $maxFinalVertices, Infinity], Return[previousResult]];
-					Map[Sow, deletedExpressions, {2}];
-					previousResult = newResult]] &,
-				List @@ set,
-				Lookup[stepSpec, $maxEvents, Infinity]],
+	Catch[
+		TimeConstrained[
+			CheckAbort[
+				FixedPoint[
+					AbortProtect[Module[{newResult, deletedExpressions},
+						{newResult, deletedExpressions} = Reap[Replace[#, normalRules]];
+						If[vertexCount[vertexIndex] > Lookup[stepSpec, $maxFinalVertices, Infinity] ||
+								Length[newResult] > Lookup[stepSpec, $maxFinalEdges, Infinity],
+							Throw[previousResult, $$setReplaceResult]];
+						Map[Sow, deletedExpressions, {2}];
+						previousResult = newResult]] &,
+					List @@ set,
+					Lookup[stepSpec, $maxEvents, Infinity]],
+				If[returnOnAbortQ,
+					previousResult,
+					Abort[]
+				]],
+			timeConstraint,
 			If[returnOnAbortQ,
 				previousResult,
-				Abort[]
+				Return[$Aborted]
 			]],
-		timeConstraint,
-		If[returnOnAbortQ,
-			previousResult,
-			Return[$Aborted]
-		]]
+		$$setReplaceResult
+	]
 ]
 
 
