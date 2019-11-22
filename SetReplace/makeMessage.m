@@ -45,6 +45,10 @@ messageTemplate["nonIntegerIterations"] =
 	"The number of `2` `3` should be a non-negative integer or infinity.";
 
 
+messageTemplate["tooSmallStepLimit"] =
+	"The maximum number of `2` `3` is smaller than that in initial condition `4`.";
+
+
 messageTemplate["invalidMethod"] =
 	"Method should be one of " <> ToString[$SetReplaceMethods, InputForm] <> ".";
 

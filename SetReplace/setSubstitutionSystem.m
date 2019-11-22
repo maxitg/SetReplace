@@ -91,14 +91,19 @@ $stepSpecNamesInErrorMessage = <|
 stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
 
 
-stepSpecQ[caller_, spec_] := Catch[
-	KeyValueMap[
-		If[!stepCountQ[#2],
-			makeMessage[caller, "nonIntegerIterations", $stepSpecNamesInErrorMessage[#1], #2];
-			Throw[False]] &,
-		spec];
-	True
-]
+stepSpecQ[caller_, set_, spec_] :=
+	And @@ KeyValueMap[
+			If[stepCountQ[#2],
+				True,
+				makeMessage[caller, "nonIntegerIterations", $stepSpecNamesInErrorMessage[#1], #2]; False] &,
+			spec] &&
+	And @@ (
+			If[Lookup[spec, #1, Infinity] >= Length[#2],
+				True,
+				makeMessage[caller, "tooSmallStepLimit", $stepSpecNamesInErrorMessage[#1], spec[#1], Length[#2]]; False] & @@@ {
+		{$maxSymbols, Union[Cases[set, _ ? AtomQ, All]]},
+		{$maxVertices, Union[Catenate[set]]},
+		{$maxEdges, set}})
 
 
 (* ::Subsection:: *)
@@ -181,7 +186,7 @@ setSubstitutionSystem[
 			stepSpec_,
 			caller_,
 			returnOnAbortQ_,
-			o : OptionsPattern[]] /; stepSpecQ[caller, stepSpec] := Module[{
+			o : OptionsPattern[]] /; stepSpecQ[caller, set, stepSpec] := Module[{
 		completeStepSpec,
 		method = OptionValue[Method],
 		timeConstraint = OptionValue[TimeConstraint],
