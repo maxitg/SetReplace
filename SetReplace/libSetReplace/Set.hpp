@@ -22,8 +22,8 @@ namespace SetReplace {
         struct StepSpecification {
             int maxEvents;
             int maxGenerations;
-            int maxAtoms;
-            int maxExpressions;
+            int maxFinalAtoms;
+            int maxFinalExpressions;
         };
         
         /** @brief Creates a new set with a given set of evolution rules, and initial condition.

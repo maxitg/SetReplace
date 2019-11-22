@@ -76,8 +76,8 @@ namespace SetReplace {
             Set::StepSpecification result;
             result.maxEvents = stepSpecElements[0];
             result.maxGenerations = stepSpecElements[1];
-            result.maxAtoms = stepSpecElements[2];
-            result.maxExpressions = stepSpecElements[3];
+            result.maxFinalAtoms = stepSpecElements[2];
+            result.maxFinalExpressions = stepSpecElements[3];
             
             return result;
         }

@@ -22,9 +22,8 @@ PackageScope["setSubstitutionSystem"]
 PackageScope["$stepSpecKeys"]
 PackageScope["$maxEvents"]
 PackageScope["$maxGenerations"]
-PackageScope["$maxSymbols"]
-PackageScope["$maxVertices"]
-PackageScope["$maxEdges"]
+PackageScope["$maxFinalVertices"]
+PackageScope["$maxFinalEdges"]
 
 
 (* ::Section:: *)
@@ -75,17 +74,15 @@ setSubstitutionSystem[
 $stepSpecKeys = <|
 	$maxEvents -> "MaxEvents",
 	$maxGenerations -> "MaxGenerations",
-	$maxSymbols -> "MaxSymbols",
-	$maxVertices -> "MaxVertices",
-	$maxEdges -> "MaxEdges"|>;
+	$maxFinalVertices -> "MaxVertices",
+	$maxFinalEdges -> "MaxEdges"|>;
 
 
 $stepSpecNamesInErrorMessage = <|
 	$maxEvents -> "replacements",
 	$maxGenerations -> "generations",
-	$maxSymbols -> "symbols",
-	$maxVertices -> "vertices",
-	$maxEdges -> "edges"|>;
+	$maxFinalVertices -> "vertices",
+	$maxFinalEdges -> "edges"|>;
 
 
 stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
@@ -101,9 +98,8 @@ stepSpecQ[caller_, set_, spec_] :=
 			If[Lookup[spec, #1, Infinity] >= Length[#2],
 				True,
 				makeMessage[caller, "tooSmallStepLimit", $stepSpecNamesInErrorMessage[#1], spec[#1], Length[#2]]; False] & @@@ {
-		{$maxSymbols, Union[Cases[set, _ ? AtomQ, All]]},
-		{$maxVertices, Union[Catenate[set]]},
-		{$maxEdges, set}})
+		{$maxFinalVertices, Union[Catenate[set]]},
+		{$maxFinalEdges, set}})
 
 
 (* ::Subsection:: *)
