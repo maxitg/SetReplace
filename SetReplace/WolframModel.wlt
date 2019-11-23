@@ -585,6 +585,47 @@
         ]
       }],
 
+      (*** Multiple stop conditions ***)
+
+      Function[method, With[{
+          model = Sequence[{{1, 2}, {1, 3}} -> {{1, 3}, {1, 4}, {2, 4}, {3, 4}}, {{1, 1}, {1, 1}}]}, {
+        VerificationTest[
+          WolframModel[
+            model,
+            <|"MaxGenerations" -> 5, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 84|>,
+            "GenerationsCount",
+            Method -> method],
+          5
+        ],
+
+        VerificationTest[
+          WolframModel[
+            model,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 40, "MaxVertices" -> 42, "MaxEdges" -> 84|>,
+            "EventsCount",
+            Method -> method],
+          40
+        ],
+
+        VerificationTest[
+          WolframModel[
+            model,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 41, "MaxEdges" -> 84|>,
+            "AtomsCountFinal",
+            Method -> method],
+          41
+        ],
+
+        VerificationTest[
+          WolframModel[
+            model,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 83|>,
+            "ExpressionsCountFinal",
+            Method -> method],
+          82
+        ]
+      }]] /@ DeleteCases[$SetReplaceMethods, Automatic],
+
       (** Properties **)
 
       VerificationTest[
