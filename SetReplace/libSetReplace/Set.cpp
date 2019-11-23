@@ -25,6 +25,10 @@ namespace SetReplace {
         
         int destroyedExpressionsCount_ = 0;
         
+        // In another words, vertex degrees.
+        // Note, we cannot use atomsIndex_, because it does not keep last generation expressions.
+        std::unordered_map<Atom, int> expressionsCountsByAtom_;
+        
         // Largest generation produced so far.
         // Note, this is not the same as max of generations of all expressions,
         // because there might exist an event that deletes expressions, but does not create any new ones.
@@ -65,6 +69,8 @@ namespace SetReplace {
             
             if (willExceedAtomsLimit(explicitRuleInputs, explicitRuleOutputs)) return 0;
             if (willExceedExpressionsLimit(explicitRuleInputs, explicitRuleOutputs)) return 0;
+            
+            // At this point, we are committed to modifying the set.
             
             // Name newly created atoms as well, now all atoms in the output are explicitly named.
             const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
@@ -131,9 +137,9 @@ namespace SetReplace {
         }
         
         void updateStepSpec(const StepSpecification newStepSpec) {
-            const auto previousMaxGeneration = stepSpec_.maxGenerations;
+            const auto previousMaxGeneration = stepSpec_.maxGenerationsLocal;
             stepSpec_ = newStepSpec;
-            if (newStepSpec.maxGenerations > previousMaxGeneration) {
+            if (newStepSpec.maxGenerationsLocal > previousMaxGeneration) {
                 for (int expressionID = 0; expressionID < expressions_.size(); ++expressionID) {
                     if (expressions_[expressionID].generation == previousMaxGeneration) {
                         unindexedExpressions_.push_back(expressionID);
@@ -151,18 +157,18 @@ namespace SetReplace {
         
         bool willExceedAtomsLimit(const std::vector<std::vector<int>> explicitRuleInputs,
                                   const std::vector<std::vector<int>> explicitRuleOutputs) const {
-            const int currentAtomsCount = atomsIndex_.atomsCount();
+            const int currentAtomsCount = static_cast<int>(expressionsCountsByAtom_.size());
             
             std::unordered_map<Atom, int> addedExpressionsCountPerAtom;
-            updateExpressionsCountsInvolvingAtoms(addedExpressionsCountPerAtom, explicitRuleInputs, -1);
-            updateExpressionsCountsInvolvingAtoms(addedExpressionsCountPerAtom, explicitRuleOutputs, +1);
+            updateExpressionsCountsByAtom(addedExpressionsCountPerAtom, explicitRuleInputs, -1, false);
+            updateExpressionsCountsByAtom(addedExpressionsCountPerAtom, explicitRuleOutputs, +1, false);
             
             int newAtomsCount = currentAtomsCount;
             for (const auto& atomAndAddedExpressionsCount : addedExpressionsCountPerAtom) {
                 const Atom atom = atomAndAddedExpressionsCount.first;
                 const int addedExpressionsCount = atomAndAddedExpressionsCount.second;
                 const int currentExpressionsCount =
-                    static_cast<int>(atomsIndex_.expressionsContainingAtom(atom).size());
+                    expressionsCountsByAtom_.count(atom) ? static_cast<int>(expressionsCountsByAtom_.at(atom)) : 0;
                 if (currentExpressionsCount == 0 && addedExpressionsCount > 0) {
                     ++newAtomsCount;
                 }
@@ -174,16 +180,20 @@ namespace SetReplace {
             return newAtomsCount > stepSpec_.maxFinalAtoms;
         }
         
-        void updateExpressionsCountsInvolvingAtoms(std::unordered_map<Atom, int>& expressionsCountsPerAtom,
-                                                  const std::vector<std::vector<int>>& deltaExpressions,
-                                                  const int deltaCount) const {
-            for (const auto& inputExpression : deltaExpressions) {
+        static void updateExpressionsCountsByAtom(std::unordered_map<Atom, int>& expressionsCountsByAtom,
+                                                  const std::vector<AtomsVector>& deltaExpressions,
+                                                  const int deltaCount,
+                                                  bool deleteIfZero = true) {
+            for (const auto& expression : deltaExpressions) {
                 std::unordered_set<Atom> expressionAtoms;
-                for (const auto atom : inputExpression) {
+                for (const auto atom : expression) {
                     expressionAtoms.insert(atom);
                 }
                 for (const auto atom : expressionAtoms) {
-                    expressionsCountsPerAtom[atom] += deltaCount;
+                    expressionsCountsByAtom[atom] += deltaCount;
+                    if (deleteIfZero && expressionsCountsByAtom[atom] == 0) {
+                        expressionsCountsByAtom.erase(atom);
+                    }
                 }
             }
         }
@@ -220,11 +230,13 @@ namespace SetReplace {
             const auto ids = assignExpressionIDs(expressions, creatorEvent, generation);
             
             // If generation is at least maxGeneration_, we will never use these expressions as inputs, so no need adding them to the index.
-            if (generation < stepSpec_.maxGenerations) {
+            if (generation < stepSpec_.maxGenerationsLocal) {
                 for (const auto id : ids) {
                     unindexedExpressions_.push_back(id);
                 }
             }
+            
+            updateExpressionsCountsByAtom(expressionsCountsByAtom_, expressions, +1);
             return ids;
         }
         
@@ -247,6 +259,17 @@ namespace SetReplace {
                 }
                 expressions_.at(id).destroyerEvent = destroyerEvent;
             }
+            updateExpressionsCountsByAtom(expressionsCountsByAtom_, expressions, -1);
+        }
+        
+        void updateExpressionsCountsByAtom(std::unordered_map<Atom, int>& expressionsCountsByAtom,
+                                           const std::vector<ExpressionID>& deltaExpressionIDs,
+                                           const int deltaCount) const {
+            std::vector<AtomsVector> expressions;
+            for (const auto id : deltaExpressionIDs) {
+                expressions.push_back(expressions_.at(id).atoms);
+            }
+            updateExpressionsCountsByAtom(expressionsCountsByAtom, expressions, deltaCount);
         }
     };
     

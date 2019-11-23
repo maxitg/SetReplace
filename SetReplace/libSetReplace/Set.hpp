@@ -18,10 +18,15 @@ namespace SetReplace {
         enum Error {Aborted, DisconnectedInputs, NonPositiveAtoms};
         
         /** @brief Specification of conditions upon which to stop evaluation.
+         * @details Each of these is UpTo, i.e., the evolution is terminated when the first of these, fixed point, or an abort is reached.
+         * @var maxEvents Total number of events to produce.
+         * @var maxGenerationsLocal Total number of generations. Local means the expressions of max generation will never even be matched, which means the evaluation order might be different than if the equivalent number of events is specified, and non-default evaluation order is used.
+         * @var maxFinalAtoms The evaluation will be aborted at the first attempt to apply an event, which will cause the number of atoms in the final state to go over the limit.
+         * @var maxFinalExpressions Same as for the atoms above, but for expressions.
          */
         struct StepSpecification {
             int maxEvents;
-            int maxGenerations;
+            int maxGenerationsLocal;
             int maxFinalAtoms;
             int maxFinalExpressions;
         };

@@ -55,10 +55,6 @@ namespace SetReplace {
                 return {};
             }
         }
-        
-        const int atomsCount() const {
-            return static_cast<int>(index_.size());
-        }
     };
     
     AtomsIndex::AtomsIndex(const std::function<AtomsVector(ExpressionID)>& getAtomsVector) {
@@ -75,9 +71,5 @@ namespace SetReplace {
     
     const std::unordered_set<ExpressionID> AtomsIndex::expressionsContainingAtom(const Atom atom) const {
         return implementation_->expressionsContainingAtom(atom);
-    }
-
-    const int AtomsIndex::atomsCount() const {
-        return implementation_->atomsCount();
     }
 }
