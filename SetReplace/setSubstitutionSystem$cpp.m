@@ -197,7 +197,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 		CheckAbort[
 			$cpp$setReplace[
 				setPtr,
-				stepSpec /@ {$maxEvents, $maxGenerations, $maxFinalVertices, $maxFinalExpressions} /.
+				stepSpec /@ {$maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalExpressions} /.
 					{Infinity | (_ ? MissingQ) -> $maxInt}],
 			If[!returnOnAbortQ, Abort[]]],
 		timeConstraint,

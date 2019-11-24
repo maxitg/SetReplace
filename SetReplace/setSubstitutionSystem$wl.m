@@ -293,7 +293,7 @@ setSubstitutionSystem$wl[caller_, rules_, set_, stepSpec_, returnOnAbortQ_, time
 	vertexIndex = If[MissingQ[stepSpec[$maxFinalVertices]], $noIndex, $vertexIndex[expressionsCountsPerVertex]];
 	initVertexIndex[vertexIndex, set];
 	rulesWithMetadata = addMetadataManagement[
-		#, nextEventID++ &, nextExpression, Lookup[stepSpec, $maxGenerations, Infinity], vertexIndex] & /@ renamedRules;
+		#, nextEventID++ &, nextExpression, Lookup[stepSpec, $maxGenerationsLocal, Infinity], vertexIndex] & /@ renamedRules;
 	outputWithMetadata = Catch[
 		Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint]],
 		$$nonListExpression,
