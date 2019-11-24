@@ -84,11 +84,14 @@ fromInitSpec[initSpec_] := initSpec
 (*Steps*)
 
 
-fromStepsSpec[generations : (_Integer | Infinity)] := {generations, Infinity}
+fromStepsSpec[generations : (_Integer | Infinity)] :=
+	fromStepsSpec[<|$stepSpecKeys[$maxGenerationsLocal] -> generations|>]
 
 
-fromStepsSpec[spec_Association] :=
-	{Lookup[spec, "Generations", Infinity], Lookup[spec, "Events", Infinity]}
+fromStepsSpec[spec_Association] := With[{
+		stepSpecInverse = Association[Reverse /@ Normal[$stepSpecKeys]]},
+	KeyMap[# /. stepSpecInverse &, spec]
+]
 
 
 (* ::Subsection:: *)
@@ -152,17 +155,14 @@ WolframModel[
 			property : _ ? wolframModelPropertyQ : "EvolutionObject",
 			o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] :=
 	Module[{
-			patternRules, initialSet, generations, events, evolution,
-			renamedNodesEvolution, result},
+			patternRules, initialSet, evolution, renamedNodesEvolution, result},
 		patternRules = fromRulesSpec[rulesSpec];
 		initialSet = fromInitSpec[initSpec];
-		{generations, events} = fromStepsSpec[stepsSpec];
 		evolution = Check[
 			setSubstitutionSystem[
 				patternRules,
 				initialSet,
-				generations,
-				events,
+				fromStepsSpec[stepsSpec],
 				WolframModel,
 				property === "EvolutionObject",
 				Method -> OptionValue[Method],
@@ -288,9 +288,8 @@ wolframModelStepsSpecQ[stepsSpec_ ? stepCountQ] := True
 
 
 wolframModelStepsSpecQ[stepsSpec_Association] /;
-	SubsetQ[{"Generations", "Events"}, Keys[stepsSpec]] &&
-	stepCountQ[Lookup[stepsSpec, "Generations", Infinity]] &&
-	stepCountQ[Lookup[stepsSpec, "Events", Infinity]] := True
+	SubsetQ[Values[$stepSpecKeys], Keys[stepsSpec]] &&
+	AllTrue[fromStepsSpec[stepsSpec], stepCountQ] := True
 
 
 wolframModelStepsSpecQ[_] := False
@@ -359,7 +358,7 @@ expr : WolframModel[
 
 WolframModel::invalidSteps =
 	"The steps specification `1` should be an Integer, Infinity, " <>
-	"or an association with \"Generations\" key, \"Events\" key, or both.";
+	"or an association with one or more keys from `2`.";
 
 
 expr : WolframModel[
@@ -367,7 +366,7 @@ expr : WolframModel[
 		initSpec_ ? wolframModelInitSpecQ,
 		stepsSpec : Except[OptionsPattern[]] ? (Not[wolframModelStepsSpecQ[#]] &),
 		args___] /; Quiet[Developer`CheckArgumentCount[expr, 1, 4]] := 0 /;
-	Message[WolframModel::invalidSteps, stepsSpec]
+	Message[WolframModel::invalidSteps, stepsSpec, Values[$stepSpecKeys]]
 
 
 (* ::Subsubsection:: *)

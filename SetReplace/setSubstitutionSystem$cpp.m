@@ -46,7 +46,7 @@ $cpp$setReplace = If[$libraryFile =!= $Failed,
 		$libraryFile,
 		"setReplace",
 		{Integer, (* set ptr *)
-			{Integer, 1}}, (* {generations, steps} *)
+			{Integer, 1}}, (* {events, generations, atoms, expressions} *)
 		"Void"],
 	$Failed];
 
@@ -69,7 +69,9 @@ $cpp$setExpressions = If[$libraryFile =!= $Failed,
 
 
 (* ::Text:: *)
-(*The following code turns a nested list into a single list, prepending sizes of each sublist. I.e., {{a}, {b, c, d}} becomes {2, 1, a, 3, b, c, d}, where the first 2 is the length of the entire list, and 1 and 3 are the lengths of sublists.*)
+(*The following code turns a nested list into a single list, prepending sizes of each sublist. I.e., {{a}, {b, c, d}}
+	becomes {2, 1, a, 3, b, c, d}, where the first 2 is the length of the entire list, and 1 and 3 are the lengths of
+	sublists.*)
 
 
 (* ::Text:: *)
@@ -168,7 +170,7 @@ $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
 $maxInt = 2^31 - 1;
 
 
-setSubstitutionSystem$cpp[rules_, set_, generations_, steps_, returnOnAbortQ_, timeConstraint_] /;
+setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_] /;
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
@@ -193,7 +195,10 @@ setSubstitutionSystem$cpp[rules_, set_, generations_, steps_, returnOnAbortQ_, t
 		encodeNestedLists[mappedSet]];
 	TimeConstrained[
 		CheckAbort[
-			$cpp$setReplace[setPtr, {generations, steps} /. {\[Infinity] -> $maxInt}],
+			$cpp$setReplace[
+				setPtr,
+				stepSpec /@ {$maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalExpressions} /.
+					{Infinity | (_ ? MissingQ) -> $maxInt}],
 			If[!returnOnAbortQ, Abort[]]],
 		timeConstraint,
 		If[!returnOnAbortQ, Return[$Aborted]]];

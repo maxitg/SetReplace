@@ -62,7 +62,7 @@ Options[SetReplaceFixedPoint] := Options[setSubstitutionSystem]
 SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] := Module[{result},
 	result = Check[
 		setSubstitutionSystem[
-			rules, set, Infinity, Infinity, SetReplaceFixedPoint, False, o],
+			rules, set, <||>, SetReplaceFixedPoint, False, o],
 		$Failed];
 	If[result === $Aborted, result, result[-1]] /; result =!= $Failed
 ]

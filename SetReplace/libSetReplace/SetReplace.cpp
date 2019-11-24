@@ -63,13 +63,23 @@ namespace SetReplace {
         return set;
     }
     
-    std::pair<int, Generation> getGenerationsAndSteps(WolframLibraryData libData, MTensor& stepsTensor) {
+    Set::StepSpecification getStepSpec(WolframLibraryData libData, MTensor& stepsTensor) {
         mint tensorLength = libData->MTensor_getFlattenedLength(stepsTensor);
-        if (tensorLength != 2) {
+        if (tensorLength != 4) {
             throw LIBRARY_DIMENSION_ERROR;
         } else {
             mint* tensorData = libData->MTensor_getIntegerData(stepsTensor);
-            return {getData(tensorData, 2, 0), getData(tensorData, 2, 1)};
+            std::vector<int> stepSpecElements(4);
+            for (int k = 0; k < 4; ++k) {
+                stepSpecElements[k] = static_cast<int>(getData(tensorData, 4, k));
+            }
+            Set::StepSpecification result;
+            result.maxEvents = stepSpecElements[0];
+            result.maxGenerationsLocal = stepSpecElements[1];
+            result.maxFinalAtoms = stepSpecElements[2];
+            result.maxFinalExpressions = stepSpecElements[3];
+            
+            return result;
         }
     }
     
@@ -154,9 +164,9 @@ namespace SetReplace {
         }
         
         auto setPtr = (Set*)MArgument_getInteger(argv[0]);
-        std::pair<Generation, int> generationsAndSteps;
+        Set::StepSpecification stepSpec;
         try {
-            generationsAndSteps = getGenerationsAndSteps(libData, MArgument_getMTensor(argv[1]));
+            stepSpec = getStepSpec(libData, MArgument_getMTensor(argv[1]));
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -165,7 +175,7 @@ namespace SetReplace {
             return static_cast<bool>(libData->AbortQ());
         };
         try {
-            setPtr->replace(generationsAndSteps.first, generationsAndSteps.second, shouldAbort);
+            setPtr->replace(stepSpec, shouldAbort);
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }

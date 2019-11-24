@@ -53,7 +53,7 @@
             Head[WolframModel[
               <|"PatternRules" -> rule|>,
               init,
-              <|"Events" -> 1000|>,
+              <|"MaxEvents" -> 1000|>,
               "FinalState",
               "NodeNamingFunction" -> All]],
             List,

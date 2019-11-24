@@ -260,6 +260,8 @@
 
       (** Steps **)
 
+      (*** Generations and Events ***)
+
       VerificationTest[
         WolframModel[1 -> 2, {1}, 2]["GenerationsCount"],
         2
@@ -296,27 +298,32 @@
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> 3|>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 3|>] /@
+          {"GenerationsCount", "EventsCount"},
         {3, 7}
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Events" -> 6|>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxEvents" -> 6|>] /@
+          {"GenerationsCount", "EventsCount"},
         {3, 6}
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> 3, "Events" -> 6|>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 3, "MaxEvents" -> 6|>] /@
+          {"GenerationsCount", "EventsCount"},
         {3, 6}
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> 2, "Events" -> 6|>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 2, "MaxEvents" -> 6|>] /@
+          {"GenerationsCount", "EventsCount"},
         {2, 3}
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <||>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <||>] /@
+          {"GenerationsCount", "EventsCount"},
         {2, 3}
       ],
 
@@ -326,14 +333,298 @@
       ],
 
       testUnevaluated[
-        WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <|"x" -> 2, "Generations" -> 2|>],
+        WolframModel[
+          {{0, 1}, {1, 2}} -> {{0, 2}},
+          {{0, 1}, {1, 2}, {2, 3}, {3, 4}},
+          <|"x" -> 2, "MaxGenerations" -> 2|>],
         {WolframModel::invalidSteps}
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"Generations" -> \[Infinity], "Events" -> 12|>] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> \[Infinity], "MaxEvents" -> 12|>] /@
+          {"GenerationsCount", "EventsCount"},
         {4, 12}
       ],
+
+      (*** MaxVertices ***)
+
+      Table[With[{method = method, $simpleGrowingRule = {{1, 2}} -> {{1, 3}, {3, 2}}, $simpleGrowingInit = {{1, 1}}}, {
+        testUnevaluated[
+          WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxVertices" -> x|>, Method -> method],
+          {WolframModel::invalidSteps}
+        ],
+
+        testUnevaluated[
+          WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxVertices" -> 0|>, Method -> method],
+          {WolframModel::tooSmallStepLimit}
+        ],
+
+        VerificationTest[
+          WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxVertices" -> #1|>, "FinalState", Method -> method],
+          #2
+        ] & @@@ {{1, {{1, 1}}}, {2, {{1, 2}, {2, 1}}}, {3, {{2, 1}, {1, 3}, {3, 2}}}},
+
+        VerificationTest[
+          WolframModel[
+            $simpleGrowingRule,
+            $simpleGrowingInit,
+            <|"MaxVertices" -> Infinity, "MaxEvents" -> 100|>,
+            "EventsCount",
+            Method -> method],
+          100
+        ],
+
+        testUnevaluated[
+          WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, #1, <|"MaxVertices" -> #2|>, "FinalState", Method -> method],
+          {WolframModel::tooSmallStepLimit}
+        ] & @@@ {{{{1, 2}}, 1}, {{{1, 2}, {2, 3}}, 2}},
+
+        VerificationTest[
+          WolframModel[
+            {{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 2}, {2, 3}}, <|"MaxVertices" -> 3|>, "FinalState", Method -> method],
+          {{1, 2}, {2, 3}}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{1, 2}} -> {{1, 2}, {2, 2}},
+            {{1, 2}, {2, 3}},
+            <|"MaxVertices" -> 3, "MaxEvents" -> 100|>,
+            "EventsCount",
+            Method -> method],
+          100
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{1, 2}} -> {{1, 2}, {2, 3}, {3, 4}},
+            {{1, 1}},
+            <|"MaxVertices" -> #|>,
+            "AtomsCountFinal",
+            Method -> method] & /@ Range[20],
+          {1, 1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15, 17, 17, 19, 19}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{1, 2}} -> {{1, 3}}, {{1, 2}},
+            <|"MaxVertices" -> 2, "MaxEvents" -> 100|>,
+            "EventsCount",
+            Method -> method],
+          100
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{{1, 2}} -> {{1, 2, 3, 4, 5, 6}}, {{1, 2, 3, 4, 5, 6}} -> {{1, 2}, {2, 6}}},
+            {{1, 2}},
+            <|"MaxVertices" -> #|>,
+            "EventsCount",
+            Method -> method] & /@ Range[2, 11],
+          {0, 0, 0, 0, 2, 3, 3, 3, 3, 7}
+        ],
+
+        testUnevaluated[
+          WolframModel[{1, 2} -> {1, 3, 3, 2}, {1, 2, 2, 3}, <|"MaxVertices" -> #|>, "FinalState", Method -> method],
+          {WolframModel::nonListExpressions}
+        ] & /@ {3, Infinity, 0}
+      }], {method, DeleteCases[$SetReplaceMethods, Automatic]}],
+
+      With[{$incrementingRule = <|"PatternRules" -> {{a_}} :> {a + 1, a + 2}|>}, {
+        testUnevaluated[
+          WolframModel[$incrementingRule, {1}, <|"MaxVertices" -> 4|>, "FinalState"],
+          {WolframModel::nonListExpressions}
+        ],
+      
+        VerificationTest[
+          WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxVertices" -> 12|>, "AtomsCountFinal"],
+          6
+        ],
+
+        testUnevaluated[
+          WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxVertices" -> 13|>, "FinalState"],
+          {WolframModel::nonListExpressions}
+        ],
+
+        VerificationTest[
+          WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <||>, "AtomsCountFinal"],
+          9
+        ],
+
+        testUnevaluated[
+          WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxVertices" -> DirectedInfinity[1]|>, "FinalState"],
+          {WolframModel::nonListExpressions}
+        ]
+      }],
+
+      VerificationTest[
+        WolframModel[
+          <|"PatternRules" -> {{f[a_, x], f[b_, x]}} :> Module[{c}, {{f[a, x], f[c, x]}, {f[c, x], f[b, x]}}]|>,
+          {{f[1, x], f[1, x]}},
+          <|"MaxVertices" -> 4|>,
+          "ExpressionsCountFinal"],
+        4
+      ],
+
+      VerificationTest[
+        WolframModel[
+          <|"PatternRules" -> {{{a_, x}, {b_, x}}} :> Module[{c}, {{{a, x}, {c, x}}, {{c, x}, {b, x}}}]|>,
+          {{{1, x}, {1, x}}},
+          <|"MaxVertices" -> 4|>,
+          "ExpressionsCountFinal"],
+        4
+      ],
+
+      VerificationTest[
+        WolframModel[
+          <|"PatternRules" -> {{$1_, $2_}} :> Module[{$3}, {{$1, $3}, {$3, $2}}]|>,
+          {{1, 1}},
+          <|"MaxVertices" -> 30|>,
+          "AtomsCountFinal"],
+        30
+      ],
+
+      VerificationTest[
+        WolframModel[
+          <|"PatternRules" ->
+            {{{$1_, $11_}, {$2_, $22_}}} :> Module[{$3, $33}, {{{$1, $11}, {$3, $33}}, {{$3, $33}, {$2, $22}}}]|>,
+          {{{1, 2}, {1, 2}}},
+          <|"MaxVertices" -> 30|>,
+          "AtomsCountFinal"],
+        60
+      ],
+
+      (*** MaxEdges ***)
+
+      Table[With[{method = method, $simpleGrowingRule = {{1, 2}} -> {{1, 3}, {3, 2}}, $simpleGrowingInit = {{1, 1}}}, {
+        testUnevaluated[
+          WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxEdges" -> x|>, Method -> method],
+          {WolframModel::invalidSteps}
+        ],
+
+        testUnevaluated[
+          WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxEdges" -> 0|>, Method -> method],
+          {WolframModel::tooSmallStepLimit}
+        ],
+
+        VerificationTest[
+          WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxEdges" -> #1|>, "FinalState", Method -> method],
+          #2
+        ] & @@@ {{1, {{1, 1}}}, {2, {{1, 2}, {2, 1}}}, {3, {{2, 1}, {1, 3}, {3, 2}}}},
+
+        VerificationTest[
+          WolframModel[
+            $simpleGrowingRule,
+            $simpleGrowingInit,
+            <|"MaxEdges" -> Infinity, "MaxEvents" -> 100|>,
+            "EventsCount",
+            Method -> method],
+          100
+        ],
+
+        testUnevaluated[
+          WolframModel[$simpleGrowingRule, #1, <|"MaxEdges" -> #2|>, "FinalState", Method -> method],
+          {WolframModel::tooSmallStepLimit}
+        ] & @@@ {{{{1, 2}, {2, 3}}, 1}, {{{1, 2}, {2, 3}, {3, 4}}, 2}},
+
+        VerificationTest[
+          WolframModel[
+            {{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 2}, {2, 3}, {3, 4}},
+            <|"MaxEdges" -> 3|>,
+            "FinalState",
+            Method -> method],
+          {{1, 2}, {2, 3}, {3, 4}}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{1, 2}} -> {{3, 4}},
+            {{1, 2}, {2, 3}},
+            <|"MaxEdges" -> 3, "MaxEvents" -> 100|>,
+            "EventsCount",
+            Method -> method],
+          100
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{1, 2}} -> {{1, 2}, {1, 2}, {2, 3}},
+            {{1, 1}},
+            <|"MaxEdges" -> #|>,
+            "ExpressionsCountFinal",
+            Method -> method] & /@ Range[20],
+          {1, 1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15, 17, 17, 19, 19}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{{1, 2}, {2, 3}} -> {{1, 2, 3, 4, 5, 6}, {1, 4}, {1, 4}, {4, 6}},
+              {{1, 2, 3, 4, 5, 6}, {1, 4}} -> {{1, 6}}},
+            {{1, 2}, {2, 3}},
+            <|"MaxEdges" -> #|>,
+            "EventsCount",
+            Method -> method] & /@ Range[2, 11],
+          {0, 0, 2, 4, 6, 8, 10, 12, 14, 16}
+        ]
+      }], {method, DeleteCases[$SetReplaceMethods, Automatic]}],
+
+      VerificationTest[
+        WolframModel[{1, 2} -> {1, 3, 3, 2}, {1, 2, 2, 3}, <|"MaxEdges" -> 6|>, "FinalState"],
+        {2, 3, 1, 4, 4, 2}
+      ],
+
+      With[{$incrementingRule = <|"PatternRules" -> {{a_}} :> {a + 1, a + 2}|>}, {
+        VerificationTest[
+          WolframModel[$incrementingRule, {{1}}, <|"MaxEdges" -> 2|>, "FinalState"],
+          {2, 3}
+        ],
+
+        VerificationTest[
+          WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxEdges" -> 12|>, "ExpressionsCountFinal"],
+          12
+        ]
+      }],
+
+      (*** Multiple stop conditions ***)
+
+      Function[method, With[{
+          model = Sequence[{{1, 2}, {1, 3}} -> {{1, 3}, {1, 4}, {2, 4}, {3, 4}}, {{1, 1}, {1, 1}}]}, {
+        VerificationTest[
+          WolframModel[
+            model,
+            <|"MaxGenerations" -> 5, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 84|>,
+            "GenerationsCount",
+            Method -> method],
+          5
+        ],
+
+        VerificationTest[
+          WolframModel[
+            model,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 40, "MaxVertices" -> 42, "MaxEdges" -> 84|>,
+            "EventsCount",
+            Method -> method],
+          40
+        ],
+
+        VerificationTest[
+          WolframModel[
+            model,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 41, "MaxEdges" -> 84|>,
+            "AtomsCountFinal",
+            Method -> method],
+          41
+        ],
+
+        VerificationTest[
+          WolframModel[
+            model,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 83|>,
+            "ExpressionsCountFinal",
+            Method -> method],
+          82
+        ]
+      }]] /@ DeleteCases[$SetReplaceMethods, Automatic],
 
       (** Properties **)
 
@@ -536,7 +827,12 @@
           <|"PatternRules" -> ({x_List ? (Length[#] == 3 &), y_List ? (Length[#] == 6 &)} :> {x, y, Join[x, y]})|>,
           {"This" -> "that", {2, 3, 4}, {2, 5}, {1, 2, 3, 4, 5, 6}},
           2][-1],
-        {"This" -> "that", {2, 5}, {2, 3, 4, 1, 2, 3, 4, 5, 6}, {2, 3, 4}, {1, 2, 3, 4, 5, 6}, {2, 3, 4, 1, 2, 3, 4, 5, 6}}
+        {"This" -> "that",
+          {2, 5},
+          {2, 3, 4, 1, 2, 3, 4, 5, 6},
+          {2, 3, 4},
+          {1, 2, 3, 4, 5, 6},
+          {2, 3, 4, 1, 2, 3, 4, 5, 6}}
       ],
 
       VerificationTest[
@@ -552,7 +848,12 @@
           <|"PatternRules" -> ({x_List /; (Length[x] == 3), y_List /; (Length[y] == 6)} :> {x, y, Join[x, y]})|>,
           {"This" -> "that", {2, 3, 4}, {2, 5}, {1, 2, 3, 4, 5, 6}},
           2][-1],
-        {"This" -> "that", {2, 5}, {2, 3, 4, 1, 2, 3, 4, 5, 6}, {2, 3, 4}, {1, 2, 3, 4, 5, 6}, {2, 3, 4, 1, 2, 3, 4, 5, 6}}
+        {"This" -> "that",
+          {2, 5},
+          {2, 3, 4, 1, 2, 3, 4, 5, 6},
+          {2, 3, 4},
+          {1, 2, 3, 4, 5, 6},
+          {2, 3, 4, 1, 2, 3, 4, 5, 6}}
       ],
 
       VerificationTest[
@@ -656,7 +957,8 @@
 
       VerificationTest[
         Head[
-          WolframModel[{{{2, 2, 1}, {2, 2, 2}} -> {{1, 1, 3}, {1, 1, 1}, {2, 1, 2}, {3, 3, 2}}}, {Table[{0, 0, 0}, 3]}, 2]],
+          WolframModel[
+            {{{2, 2, 1}, {2, 2, 2}} -> {{1, 1, 3}, {1, 1, 1}, {2, 1, 2}, {3, 3, 2}}}, {Table[{0, 0, 0}, 3]}, 2]],
         WolframModelEvolutionObject
       ],
 
@@ -803,7 +1105,8 @@
             With[{
                 output =
                   WolframModel[timeConstraintRule, timeConstraintInit, 100, Method -> method, TimeConstraint -> time]},
-              WolframModel[timeConstraintRule, timeConstraintInit, <|"Events" -> output["EventsCount"]|>] === output],
+              WolframModel[timeConstraintRule, timeConstraintInit, <|"MaxEvents" -> output["EventsCount"]|>] ===
+                output],
             100]
         ]], {method, $SetReplaceMethods}, {time, {1.*^-100, 0.1}}],
 
