@@ -25,6 +25,7 @@ PackageScope["$stepSpecKeys"]
 PackageScope["$maxEvents"]
 PackageScope["$maxGenerationsLocal"]
 PackageScope["$maxFinalVertices"]
+PackageScope["$maxFinalVertexDegree"]
 PackageScope["$maxFinalExpressions"]
 
 
@@ -82,34 +83,42 @@ $stepSpecKeys = <|
 	$maxGenerationsLocal -> "MaxGenerations",
 	(* these are any level-2 expressions in the set, not just atoms. *)
 	$maxFinalVertices -> "MaxVertices",
+	$maxFinalVertexDegree -> "MaxVertexDegree",
 	$maxFinalExpressions -> "MaxEdges"|>;
 
 
 $stepSpecNamesInErrorMessage = <|
-	$maxEvents -> "replacements",
-	$maxGenerationsLocal -> "generations",
-	$maxFinalVertices -> "vertices",
-	$maxFinalExpressions -> "edges"|>;
+	$maxEvents -> "number of replacements",
+	$maxGenerationsLocal -> "number of generations",
+	$maxFinalVertices -> "number of vertices",
+	$maxFinalVertexDegree -> "vertex degree",
+	$maxFinalExpressions -> "number of edges"|>;
 
 
 stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
 
 
 stepSpecQ[caller_, set_, spec_] :=
+	(* Check everything is a non-negative integer. *)
 	And @@ KeyValueMap[
 			If[stepCountQ[#2],
 				True,
 				makeMessage[caller, "nonIntegerIterations", $stepSpecNamesInErrorMessage[#1], #2]; False] &,
 			spec] &&
-	If[MissingQ[spec[$maxFinalVertices]] || AllTrue[set, ListQ],
+	(* Check vertices make sense if vertex constraints are specified. *)
+	If[(MissingQ[spec[$maxFinalVertices]] && MissingQ[spec[$maxFinalVertexDegree]]) || AllTrue[set, ListQ],
 		True,
-		makeMessage[caller, "nonListExpressions", SelectFirst[set, Not @* ListQ], spec[$maxFinalVertices]]; False] &&
+		makeMessage[
+				caller, "nonListExpressions", SelectFirst[set, Not @* ListQ], $stepSpecNamesInErrorMessage[#], spec[#]] & @
+			If[MissingQ[spec[$maxFinalVertices]], $maxFinalVertexDegree, $maxFinalVertices]; False] &&
+	(* Check initial condition does not violate the limits already. *)
 	And @@ (
-			If[Lookup[spec, #1, Infinity] >= Length[#2],
+			If[Lookup[spec, #1, Infinity] >= #2,
 				True,
-				makeMessage[caller, "tooSmallStepLimit", $stepSpecNamesInErrorMessage[#1], spec[#1], Length[#2]]; False] & @@@ {
-		{$maxFinalVertices, If[MissingQ[spec[$maxFinalVertices]], {}, Union[Catenate[set]]]},
-		{$maxFinalExpressions, set}})
+				makeMessage[caller, "tooSmallStepLimit", $stepSpecNamesInErrorMessage[#1], spec[#1], #2]; False] & @@@ {
+		{$maxFinalVertices, If[MissingQ[spec[$maxFinalVertices]], 0, Length[Union[Catenate[set]]]]},
+		{$maxFinalVertexDegree, If[MissingQ[spec[$maxFinalVertexDegree]], 0, Max[Counts[Catenate[Union /@ set]]]]},
+		{$maxFinalExpressions, Length[set]}})
 
 
 (* ::Subsection:: *)

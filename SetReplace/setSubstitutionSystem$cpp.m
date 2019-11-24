@@ -46,7 +46,7 @@ $cpp$setReplace = If[$libraryFile =!= $Failed,
 		$libraryFile,
 		"setReplace",
 		{Integer, (* set ptr *)
-			{Integer, 1}}, (* {events, generations, atoms, expressions} *)
+			{Integer, 1}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
 		"Void"],
 	$Failed];
 
@@ -197,7 +197,8 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 		CheckAbort[
 			$cpp$setReplace[
 				setPtr,
-				stepSpec /@ {$maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalExpressions} /.
+				stepSpec /@ {
+						$maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalVertexDegree, $maxFinalExpressions} /.
 					{Infinity | (_ ? MissingQ) -> $maxInt}],
 			If[!returnOnAbortQ, Abort[]]],
 		timeConstraint,

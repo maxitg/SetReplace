@@ -22,13 +22,15 @@ namespace SetReplace {
          * @var maxEvents Total number of events to produce.
          * @var maxGenerationsLocal Total number of generations. Local means the expressions of max generation will never even be matched, which means the evaluation order might be different than if the equivalent number of events is specified, and non-default evaluation order is used.
          * @var maxFinalAtoms The evaluation will be aborted at the first attempt to apply an event, which will cause the number of atoms in the final state to go over the limit.
+         * @var maxFinalAtomDegree Same as above, but for the maximum number of expressions a single atom is involved in.
          * @var maxFinalExpressions Same as for the atoms above, but for expressions.
          */
         struct StepSpecification {
-            int maxEvents;
-            int maxGenerationsLocal;
-            int maxFinalAtoms;
-            int maxFinalExpressions;
+            int maxEvents = 0;
+            int maxGenerationsLocal = 0;
+            int maxFinalAtoms = 0;
+            int maxFinalAtomDegree = 0;
+            int maxFinalExpressions = 0;
         };
         
         /** @brief Creates a new set with a given set of evolution rules, and initial condition.
