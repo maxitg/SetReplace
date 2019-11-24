@@ -109,8 +109,7 @@ stepSpecQ[caller_, set_, spec_] :=
 	If[(MissingQ[spec[$maxFinalVertices]] && MissingQ[spec[$maxFinalVertexDegree]]) || AllTrue[set, ListQ],
 		True,
 		makeMessage[
-				caller, "nonListExpressions", SelectFirst[set, Not @* ListQ], $stepSpecNamesInErrorMessage[#], spec[#]] & @
-			If[MissingQ[spec[$maxFinalVertices]], $maxFinalVertexDegree, $maxFinalVertices]; False] &&
+				caller, "nonListExpressions", SelectFirst[set, Not @* ListQ]]; False] &&
 	(* Check initial condition does not violate the limits already. *)
 	And @@ (
 			If[Lookup[spec, #1, Infinity] >= #2,

@@ -50,7 +50,7 @@ messageTemplate["tooSmallStepLimit"] =
 
 
 messageTemplate["nonListExpressions"] =
-	"Encountered expression `2` which is not a list, even though the max `3` `4` is specified.";
+	"Encountered expression `2` which is not a list, even though a constraint on vertices is specified.";
 
 
 messageTemplate["invalidMethod"] =

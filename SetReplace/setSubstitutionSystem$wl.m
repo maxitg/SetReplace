@@ -309,7 +309,7 @@ setSubstitutionSystem$wl[caller_, rules_, set_, stepSpec_, returnOnAbortQ_, time
 	outputWithMetadata = Catch[
 		Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint]],
 		$$nonListExpression,
-		(makeMessage[caller, "nonListExpressions", #, stepSpec[$maxFinalVertices]];
+		(makeMessage[caller, "nonListExpressions", #];
 			Return[$Failed]) &];
 	If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
 	result = SortBy[
