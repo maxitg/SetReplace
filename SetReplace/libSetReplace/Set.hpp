@@ -17,6 +17,20 @@ namespace SetReplace {
          */
         enum Error {Aborted, DisconnectedInputs, NonPositiveAtoms};
         
+        /** @brief Specification of conditions upon which to stop evaluation.
+         * @details Each of these is UpTo, i.e., the evolution is terminated when the first of these, fixed point, or an abort is reached.
+         * @var maxEvents Total number of events to produce.
+         * @var maxGenerationsLocal Total number of generations. Local means the expressions of max generation will never even be matched, which means the evaluation order might be different than if the equivalent number of events is specified, and non-default evaluation order is used.
+         * @var maxFinalAtoms The evaluation will be aborted at the first attempt to apply an event, which will cause the number of atoms in the final state to go over the limit.
+         * @var maxFinalExpressions Same as for the atoms above, but for expressions.
+         */
+        struct StepSpecification {
+            int maxEvents;
+            int maxGenerationsLocal;
+            int maxFinalAtoms;
+            int maxFinalExpressions;
+        };
+        
         /** @brief Creates a new set with a given set of evolution rules, and initial condition.
          * @param rules substittion rules used for evolution. Note, these rules cannot be changed.
          * @param initialExpressions initial condition. It will be lazily indexed before the first replacement.
@@ -30,11 +44,11 @@ namespace SetReplace {
          */
         int replaceOnce(const std::function<bool()> shouldAbort);
         
-        /** @brief Run replaceOnce() substitutionCount times, or until the next expression produced has generation larger than maxGeneration.
+        /** @brief Run replaceOnce() stepSpec.maxEvents times, or until the next expression violates constraints imposed by stepSpec.
          * @param shouldAbort function that should return true if Wolfram Language abort is in progress.
-         * @return The number of subtitutions made, could be between 0 and substitutionCount.
+         * @return The number of subtitutions made, could be between 0 and stepSpec.maxEvents.
          */
-        int replace(const Generation maxGeneration, const int substitutionCount, const std::function<bool()> shouldAbort);
+        int replace(const StepSpecification stepSpec, const std::function<bool()> shouldAbort);
         
         /** @brief List of all expressions in the set, past and present.
          */
