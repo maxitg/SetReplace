@@ -84,7 +84,8 @@ fromInitSpec[initSpec_] := initSpec
 (*Steps*)
 
 
-fromStepsSpec[generations : (_Integer | Infinity)] := fromStepsSpec[<|$stepSpecKeys[$maxGenerations] -> generations|>]
+fromStepsSpec[generations : (_Integer | Infinity)] :=
+	fromStepsSpec[<|$stepSpecKeys[$maxGenerationsLocal] -> generations|>]
 
 
 fromStepsSpec[spec_Association] := With[{
