@@ -79,7 +79,7 @@ $stepSpecKeys = <|
 	$maxEvents -> "MaxEvents",
 	(* local means the evolution will keep running until no further matches can be made exceeding the max generation.
 		This might result in a different evolution order. *)
-	$maxGenerationsLocal -> "MaxGeneration",
+	$maxGenerationsLocal -> "MaxGenerations",
 	(* these are any level-2 expressions in the set, not just atoms. *)
 	$maxFinalVertices -> "MaxVertices",
 	$maxFinalExpressions -> "MaxEdges"|>;
