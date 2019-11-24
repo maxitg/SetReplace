@@ -587,6 +587,8 @@
         ]
       }],
 
+      (** MaxVertexDegree **)
+
       Table[With[{
           method = method,
           $simpleGrowingRule = {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
@@ -678,7 +680,7 @@
       }], {method, DeleteCases[$SetReplaceMethods, Automatic]}],
 
       testUnevaluated[
-        WolframModel[{1, 2} -> {1, 3, 3, 2}, {1, 2, 2, 3}, <|"MaxVertexDegree" -> #|>, "FinalState", Method -> method],
+        WolframModel[{1, 2} -> {1, 3, 3, 2}, {1, 2, 2, 3}, <|"MaxVertexDegree" -> #|>, "FinalState"],
         {WolframModel::nonListExpressions}
       ] & /@ {3, Infinity, 0},
 
@@ -730,7 +732,7 @@
         VerificationTest[
           WolframModel[
             model,
-            <|"MaxGenerations" -> 5, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 84|>,
+            <|"MaxGenerations" -> 5, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 84, "MaxVertexDegree" -> 9|>,
             "GenerationsCount",
             Method -> method],
           5
@@ -739,7 +741,7 @@
         VerificationTest[
           WolframModel[
             model,
-            <|"MaxGenerations" -> 6, "MaxEvents" -> 40, "MaxVertices" -> 42, "MaxEdges" -> 84|>,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 40, "MaxVertices" -> 42, "MaxEdges" -> 84, "MaxVertexDegree" -> 9|>,
             "EventsCount",
             Method -> method],
           40
@@ -748,7 +750,7 @@
         VerificationTest[
           WolframModel[
             model,
-            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 41, "MaxEdges" -> 84|>,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 41, "MaxEdges" -> 84, "MaxVertexDegree" -> 9|>,
             "AtomsCountFinal",
             Method -> method],
           41
@@ -757,10 +759,19 @@
         VerificationTest[
           WolframModel[
             model,
-            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 83|>,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 83, "MaxVertexDegree" -> 9|>,
             "ExpressionsCountFinal",
             Method -> method],
           82
+        ],
+
+        VerificationTest[
+          maxVertexDegree @ WolframModel[
+            model,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 84, "MaxVertexDegree" -> 8|>,
+            "FinalState",
+            Method -> method],
+          8
         ]
       }]] /@ DeleteCases[$SetReplaceMethods, Automatic],
 
