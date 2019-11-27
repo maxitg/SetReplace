@@ -15,7 +15,7 @@ namespace SetReplace {
         const std::vector<Rule> rules_;
         
         // Determines the limiting conditions for the evaluation.
-        StepSpecification stepSpec_ = {0, 0, 0, 0};
+        StepSpecification stepSpec_;
         
         std::unordered_map<ExpressionID, SetExpression> expressions_;
         
@@ -25,9 +25,9 @@ namespace SetReplace {
         
         int destroyedExpressionsCount_ = 0;
         
-        // In another words, vertex degrees.
+        // In another words, expressions counts by atom.
         // Note, we cannot use atomsIndex_, because it does not keep last generation expressions.
-        std::unordered_map<Atom, int> expressionsCountsByAtom_;
+        std::unordered_map<Atom, int> atomDegrees_;
         
         // Largest generation produced so far.
         // Note, this is not the same as max of generations of all expressions,
@@ -67,7 +67,7 @@ namespace SetReplace {
             auto explicitRuleOutputs = rules_[match.rule].outputs;
             Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, explicitRuleOutputs);
             
-            if (willExceedAtomsLimit(explicitRuleInputs, explicitRuleOutputs)) return 0;
+            if (willExceedAtomLimits(explicitRuleInputs, explicitRuleOutputs)) return 0;
             if (willExceedExpressionsLimit(explicitRuleInputs, explicitRuleOutputs)) return 0;
             
             // At this point, we are committed to modifying the set.
@@ -155,44 +155,48 @@ namespace SetReplace {
             unindexedExpressions_.clear();
         }
         
-        bool willExceedAtomsLimit(const std::vector<std::vector<int>> explicitRuleInputs,
+        bool willExceedAtomLimits(const std::vector<std::vector<int>> explicitRuleInputs,
                                   const std::vector<std::vector<int>> explicitRuleOutputs) const {
-            const int currentAtomsCount = static_cast<int>(expressionsCountsByAtom_.size());
+            const int currentAtomsCount = static_cast<int>(atomDegrees_.size());
             
-            std::unordered_map<Atom, int> addedExpressionsCountPerAtom;
-            updateExpressionsCountsByAtom(addedExpressionsCountPerAtom, explicitRuleInputs, -1, false);
-            updateExpressionsCountsByAtom(addedExpressionsCountPerAtom, explicitRuleOutputs, +1, false);
+            std::unordered_map<Atom, int> atomDegreeDeltas;
+            updateAtomDegrees(atomDegreeDeltas, explicitRuleInputs, -1, false);
+            updateAtomDegrees(atomDegreeDeltas, explicitRuleOutputs, +1, false);
             
             int newAtomsCount = currentAtomsCount;
-            for (const auto& atomAndAddedExpressionsCount : addedExpressionsCountPerAtom) {
-                const Atom atom = atomAndAddedExpressionsCount.first;
-                const int addedExpressionsCount = atomAndAddedExpressionsCount.second;
-                const int currentExpressionsCount =
-                    expressionsCountsByAtom_.count(atom) ? static_cast<int>(expressionsCountsByAtom_.at(atom)) : 0;
-                if (currentExpressionsCount == 0 && addedExpressionsCount > 0) {
+            for (const auto& atomAndDegreeDelta : atomDegreeDeltas) {
+                const Atom atom = atomAndDegreeDelta.first;
+                const int degreeDelta = atomAndDegreeDelta.second;
+                const int currentDegree = atomDegrees_.count(atom) ? static_cast<int>(atomDegrees_.at(atom)) : 0;
+                if (currentDegree == 0 && degreeDelta > 0) {
                     ++newAtomsCount;
                 }
-                else if (currentExpressionsCount > 0 && currentExpressionsCount + addedExpressionsCount == 0) {
+                else if (currentDegree > 0 && currentDegree + degreeDelta == 0) {
                     --newAtomsCount;
+                }
+                
+                // Check atom degree.
+                if (currentDegree + degreeDelta > stepSpec_.maxFinalAtomDegree) {
+                    return true;
                 }
             }
             
             return newAtomsCount > stepSpec_.maxFinalAtoms;
         }
         
-        static void updateExpressionsCountsByAtom(std::unordered_map<Atom, int>& expressionsCountsByAtom,
-                                                  const std::vector<AtomsVector>& deltaExpressions,
-                                                  const int deltaCount,
-                                                  bool deleteIfZero = true) {
+        static void updateAtomDegrees(std::unordered_map<Atom, int>& atomDegrees,
+                                      const std::vector<AtomsVector>& deltaExpressions,
+                                      const int deltaCount,
+                                      bool deleteIfZero = true) {
             for (const auto& expression : deltaExpressions) {
                 std::unordered_set<Atom> expressionAtoms;
                 for (const auto atom : expression) {
                     expressionAtoms.insert(atom);
                 }
                 for (const auto atom : expressionAtoms) {
-                    expressionsCountsByAtom[atom] += deltaCount;
-                    if (deleteIfZero && expressionsCountsByAtom[atom] == 0) {
-                        expressionsCountsByAtom.erase(atom);
+                    atomDegrees[atom] += deltaCount;
+                    if (deleteIfZero && atomDegrees[atom] == 0) {
+                        atomDegrees.erase(atom);
                     }
                 }
             }
@@ -236,7 +240,7 @@ namespace SetReplace {
                 }
             }
             
-            updateExpressionsCountsByAtom(expressionsCountsByAtom_, expressions, +1);
+            updateAtomDegrees(atomDegrees_, expressions, +1);
             return ids;
         }
         
@@ -247,7 +251,7 @@ namespace SetReplace {
             for (const auto& expression : expressions) {
                 ids.push_back(nextExpressionID_);
                 expressions_.insert(std::make_pair(nextExpressionID_++,
-                                                   SetExpression{expression, creatorEvent, finalStateEvent, generation}));
+                                                   SetExpression{expression,creatorEvent, finalStateEvent, generation}));
             }
             return ids;
         }
@@ -259,17 +263,17 @@ namespace SetReplace {
                 }
                 expressions_.at(id).destroyerEvent = destroyerEvent;
             }
-            updateExpressionsCountsByAtom(expressionsCountsByAtom_, expressions, -1);
+            updateAtomDegrees(atomDegrees_, expressions, -1);
         }
         
-        void updateExpressionsCountsByAtom(std::unordered_map<Atom, int>& expressionsCountsByAtom,
-                                           const std::vector<ExpressionID>& deltaExpressionIDs,
-                                           const int deltaCount) const {
+        void updateAtomDegrees(std::unordered_map<Atom, int>& atomDegrees,
+                               const std::vector<ExpressionID>& deltaExpressionIDs,
+                               const int deltaCount) const {
             std::vector<AtomsVector> expressions;
             for (const auto id : deltaExpressionIDs) {
                 expressions.push_back(expressions_.at(id).atoms);
             }
-            updateExpressionsCountsByAtom(expressionsCountsByAtom, expressions, deltaCount);
+            updateAtomDegrees(atomDegrees, expressions, deltaCount);
         }
     };
     

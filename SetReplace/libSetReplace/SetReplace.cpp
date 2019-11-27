@@ -65,19 +65,21 @@ namespace SetReplace {
     
     Set::StepSpecification getStepSpec(WolframLibraryData libData, MTensor& stepsTensor) {
         mint tensorLength = libData->MTensor_getFlattenedLength(stepsTensor);
-        if (tensorLength != 4) {
+        constexpr int specLength = 5;
+        if (tensorLength != specLength) {
             throw LIBRARY_DIMENSION_ERROR;
         } else {
             mint* tensorData = libData->MTensor_getIntegerData(stepsTensor);
-            std::vector<int> stepSpecElements(4);
-            for (int k = 0; k < 4; ++k) {
-                stepSpecElements[k] = static_cast<int>(getData(tensorData, 4, k));
+            std::vector<int> stepSpecElements(specLength);
+            for (int k = 0; k < specLength; ++k) {
+                stepSpecElements[k] = static_cast<int>(getData(tensorData, specLength, k));
             }
             Set::StepSpecification result;
             result.maxEvents = stepSpecElements[0];
             result.maxGenerationsLocal = stepSpecElements[1];
             result.maxFinalAtoms = stepSpecElements[2];
-            result.maxFinalExpressions = stepSpecElements[3];
+            result.maxFinalAtomDegree = stepSpecElements[3];
+            result.maxFinalExpressions = stepSpecElements[4];
             
             return result;
         }

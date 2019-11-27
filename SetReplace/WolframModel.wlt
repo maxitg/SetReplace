@@ -15,6 +15,8 @@
 
       $timeConstraintRule = {{1, 2}} -> {{1, 3}, {3, 2}};
       $timeConstraintInit = {{0, 0}};
+
+      maxVertexDegree[set_] := Max[Counts[Catenate[Union /@ set]]];
     ),
     "tests" -> {
       (* Argument checks *)
@@ -422,13 +424,13 @@
             "EventsCount",
             Method -> method] & /@ Range[2, 11],
           {0, 0, 0, 0, 2, 3, 3, 3, 3, 7}
-        ],
-
-        testUnevaluated[
-          WolframModel[{1, 2} -> {1, 3, 3, 2}, {1, 2, 2, 3}, <|"MaxVertices" -> #|>, "FinalState", Method -> method],
-          {WolframModel::nonListExpressions}
-        ] & /@ {3, Infinity, 0}
+        ]
       }], {method, DeleteCases[$SetReplaceMethods, Automatic]}],
+
+      testUnevaluated[
+        WolframModel[{1, 2} -> {1, 3, 3, 2}, {1, 2, 2, 3}, <|"MaxVertices" -> #|>, "FinalState"],
+        {WolframModel::nonListExpressions}
+      ] & /@ {3, Infinity, 0},
 
       With[{$incrementingRule = <|"PatternRules" -> {{a_}} :> {a + 1, a + 2}|>}, {
         testUnevaluated[
@@ -585,6 +587,144 @@
         ]
       }],
 
+      (** MaxVertexDegree **)
+
+      Table[With[{
+          method = method,
+          $simpleGrowingRule = {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
+          $simpleGrowingInit = {{1, 1}}}, {
+        testUnevaluated[
+          WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxVertexDegree" -> x|>, Method -> method],
+          {WolframModel::invalidSteps}
+        ],
+
+        testUnevaluated[
+          WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxVertexDegree" -> 0|>, Method -> method],
+          {WolframModel::tooSmallStepLimit}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            $simpleGrowingRule, $simpleGrowingInit, <|"MaxVertexDegree" -> #1|>, "FinalState", Method -> method],
+          #2
+        ] & @@@ {
+          {1, {{1, 1}}},
+          {2, {{1, 1}}},
+          {3, {{1, 2}, {1, 2}, {2, 1}}},
+          {4, {{1, 2}, {2, 1}, {1, 3}, {1, 3}, {3, 2}}}},
+
+        VerificationTest[
+          WolframModel[
+            $simpleGrowingRule,
+            $simpleGrowingInit,
+            <|"MaxVertexDegree" -> Infinity, "MaxEvents" -> 100|>,
+            "EventsCount",
+            Method -> method],
+          100
+        ],
+
+        testUnevaluated[
+          WolframModel[
+            {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, #, <|"MaxVertexDegree" -> #2|>, "FinalState", Method -> method],
+          {WolframModel::tooSmallStepLimit}
+        ] & @@@ {{{{1, 2}, {1, 3}}, 1}, {{{1, 2}, {1, 3}, {1, 4}}, 2}},
+
+        VerificationTest[
+          WolframModel[
+            {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 2}, {1, 3}, {1, 4}},
+            <|"MaxVertexDegree" -> 3|>,
+            "FinalState",
+            Method -> method],
+          {{1, 2}, {1, 3}, {1, 4}}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{1, 2}} -> {{1, 3}, {3, 2}},
+            {{1, 1}},
+            <|"MaxVertexDegree" -> #, "MaxEvents" -> 100|>,
+            "EventsCount",
+            Method -> method] & /@ {1, 2},
+          {0, 100}
+        ],
+
+        VerificationTest[
+          maxVertexDegree @ WolframModel[
+            {{1, 2}} -> {{1, 3}, {1, 4}, {1, 5}},
+            {{1, 1}},
+            <|"MaxVertexDegree" -> #|>,
+            "FinalState",
+            Method -> method] & /@ Range[20],
+          {1, 1, 3, 3, 5, 5, 7, 7, 9, 9, 11, 11, 13, 13, 15, 15, 17, 17, 19, 19}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{1, 2}} -> {{1, 3}},
+            {{1, 2}, {1, 3}},
+            <|"MaxVertexDegree" -> 2, "MaxEvents" -> 100|>,
+            "EventsCount",
+            Method -> method],
+          100
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{{1, 2}} -> {{1, 2, 3}, {1, 3, 4}, {1, 4, 5}}, {{1, 2, 3}, {1, 3, 4}} -> {{1, 2}, {3, 4}}},
+            {{1, 2}},
+            <|"MaxVertexDegree" -> #|>,
+            "EventsCount",
+            Method -> method] & /@ Range[1, 5],
+          {0, 0, 2, 6, 14}
+        ]
+      }], {method, DeleteCases[$SetReplaceMethods, Automatic]}],
+
+      testUnevaluated[
+        WolframModel[{1, 2} -> {1, 3, 3, 2}, {1, 2, 2, 3}, <|"MaxVertexDegree" -> #|>, "FinalState"],
+        {WolframModel::nonListExpressions}
+      ] & /@ {3, Infinity, 0},
+
+      With[{$incrementingRule = <|"PatternRules" -> {{a_}} :> {a + 1, a + 2}|>}, {
+        testUnevaluated[
+          WolframModel[$incrementingRule, {1}, <|"MaxVertexDegree" -> 4|>, "FinalState"],
+          {WolframModel::nonListExpressions}
+        ],
+      
+        VerificationTest[
+          maxVertexDegree[
+            WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxVertexDegree" -> 34|>, "FinalState"]],
+          34
+        ],
+
+        testUnevaluated[
+          WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxVertexDegree" -> 35|>, "FinalState"],
+          {WolframModel::nonListExpressions}
+        ],
+
+        testUnevaluated[
+          WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxVertexDegree" -> DirectedInfinity[1]|>],
+          {WolframModel::nonListExpressions}
+        ]
+      }],
+
+      VerificationTest[
+        WolframModel[
+          <|"PatternRules" -> {{f[a_, x], f[b_, x]}} :> Module[{c}, {{f[a, x], f[b, x]}, {f[b, x], f[c, x]}}]|>,
+          {{f[1, x], f[1, x]}},
+          <|"MaxVertexDegree" -> 4|>,
+          "ExpressionsCountFinal"],
+        8
+      ],
+
+      VerificationTest[
+        WolframModel[
+          <|"PatternRules" -> {{{a_, x}, {b_, x}}} :> Module[{c}, {{{a, x}, {b, x}}, {{b, x}, {c, x}}}]|>,
+          {{{1, x}, {1, x}}},
+          <|"MaxVertexDegree" -> 4|>,
+          "ExpressionsCountFinal"],
+        8
+      ],
+
       (*** Multiple stop conditions ***)
 
       Function[method, With[{
@@ -592,7 +732,7 @@
         VerificationTest[
           WolframModel[
             model,
-            <|"MaxGenerations" -> 5, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 84|>,
+            <|"MaxGenerations" -> 5, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 84, "MaxVertexDegree" -> 9|>,
             "GenerationsCount",
             Method -> method],
           5
@@ -601,7 +741,7 @@
         VerificationTest[
           WolframModel[
             model,
-            <|"MaxGenerations" -> 6, "MaxEvents" -> 40, "MaxVertices" -> 42, "MaxEdges" -> 84|>,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 40, "MaxVertices" -> 42, "MaxEdges" -> 84, "MaxVertexDegree" -> 9|>,
             "EventsCount",
             Method -> method],
           40
@@ -610,7 +750,7 @@
         VerificationTest[
           WolframModel[
             model,
-            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 41, "MaxEdges" -> 84|>,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 41, "MaxEdges" -> 84, "MaxVertexDegree" -> 9|>,
             "AtomsCountFinal",
             Method -> method],
           41
@@ -619,10 +759,19 @@
         VerificationTest[
           WolframModel[
             model,
-            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 83|>,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 83, "MaxVertexDegree" -> 9|>,
             "ExpressionsCountFinal",
             Method -> method],
           82
+        ],
+
+        VerificationTest[
+          maxVertexDegree @ WolframModel[
+            model,
+            <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 84, "MaxVertexDegree" -> 8|>,
+            "FinalState",
+            Method -> method],
+          8
         ]
       }]] /@ DeleteCases[$SetReplaceMethods, Automatic],
 

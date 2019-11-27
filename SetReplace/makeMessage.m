@@ -42,15 +42,15 @@ messageTemplate["invalidRules"] =
 
 
 messageTemplate["nonIntegerIterations"] =
-	"The number of `2` `3` should be a non-negative integer or infinity.";
+	"The `2` `3` should be a non-negative integer or infinity.";
 
 
 messageTemplate["tooSmallStepLimit"] =
-	"The maximum number of `2` `3` is smaller than that in initial condition `4`.";
+	"The maximum `2` `3` is smaller than that in initial condition `4`.";
 
 
 messageTemplate["nonListExpressions"] =
-	"Encountered expression `2` which is not a list, even though the max number of vertices `3` is specified.";
+	"Encountered expression `2` which is not a list, even though a constraint on vertices is specified.";
 
 
 messageTemplate["invalidMethod"] =
