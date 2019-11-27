@@ -120,7 +120,8 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
 			CheckAbort[
 				FixedPoint[
 					AbortProtect[Module[{newResult, deletedExpressions},
-						{newResult, deletedExpressions} = Reap[Replace[#, normalRules]];
+						{newResult, deletedExpressions} = Reap[
+							Catch[Replace[#, normalRules], $$reachedAtomDegreeLimit, Throw[previousResult, $$setReplaceResult] &]];
 						If[vertexCount[vertexIndex] > Lookup[stepSpec, $maxFinalVertices, Infinity] ||
 								Length[newResult] > Lookup[stepSpec, $maxFinalExpressions, Infinity],
 							Throw[previousResult, $$setReplaceResult]];
@@ -155,6 +156,7 @@ addMetadataManagement[
 			getNextEvent_,
 			getNextExpression_,
 			maxGeneration_,
+			maxVertexDegree_,
 			vertexIndex_] := Module[{
 		inputIDs = Table[Unique["id"], Length[input]],
 		wholeInputPatternNames = Table[Unique["inputExpression"], Length[input]],
@@ -191,7 +193,7 @@ addMetadataManagement[
 								 nextEvent,
 								 Infinity,
 								 Max[0, inputGenerations] + 1,
-								 Hold[addToVertexIndex[vertexIndex, o]]},
+								 Hold[addToVertexIndex[vertexIndex, o, maxVertexDegree]]},
 								HoldAll],
 							moduleOutput,
 							{2}]],
@@ -267,11 +269,13 @@ deleteFromVertexIndex[$vertexIndex[index_], expr_] := ((
 deleteFromVertexIndex[$noIndex, expr_] := expr
 
 
-addToVertexIndex[$vertexIndex[index_], expr_] := (
-	(index[#] = Lookup[index, Key[#], 0] + 1;) & /@ expressionVertices[expr];
+addToVertexIndex[$vertexIndex[index_], expr_, limit_] := ((
+			index[#] = Lookup[index, Key[#], 0] + 1;
+			If[index[#] > limit, Throw[#, $$reachedAtomDegreeLimit]]) & /@
+		expressionVertices[expr];
 	expr
 );
-addToVertexIndex[$noIndex, expr_] := expr
+addToVertexIndex[$noIndex, expr_, limit_] := expr
 
 
 vertexCount[$vertexIndex[index_]] := Length[index]
@@ -290,14 +294,22 @@ setSubstitutionSystem$wl[caller_, rules_, set_, stepSpec_, returnOnAbortQ_, time
 	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
 	renamedRules = renameRuleInputs[toCanonicalRules[rules]];
 	If[renamedRules === $Failed, Return[$Failed]];
-	vertexIndex = If[MissingQ[stepSpec[$maxFinalVertices]], $noIndex, $vertexIndex[expressionsCountsPerVertex]];
+	vertexIndex = If[MissingQ[stepSpec[$maxFinalVertices]] && MissingQ[stepSpec[$maxFinalVertexDegree]],
+		$noIndex,
+		$vertexIndex[expressionsCountsPerVertex]];
 	initVertexIndex[vertexIndex, set];
 	rulesWithMetadata = addMetadataManagement[
-		#, nextEventID++ &, nextExpression, Lookup[stepSpec, $maxGenerationsLocal, Infinity], vertexIndex] & /@ renamedRules;
+			#,
+			nextEventID++ &,
+			nextExpression,
+			Lookup[stepSpec, $maxGenerationsLocal, Infinity],
+			Lookup[stepSpec, $maxFinalVertexDegree, Infinity],
+			vertexIndex] & /@
+		renamedRules;
 	outputWithMetadata = Catch[
 		Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint]],
 		$$nonListExpression,
-		(makeMessage[caller, "nonListExpressions", #, stepSpec[$maxFinalVertices]];
+		(makeMessage[caller, "nonListExpressions", #];
 			Return[$Failed]) &];
 	If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
 	result = SortBy[
