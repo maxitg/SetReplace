@@ -4,9 +4,9 @@ $successQ = True;
 
 (* If any messages are produced, fail with non-zero exit code. *)
 Check[
-  pacletInfo = Association @@ Import[FileNameJoin[{".", "SetReplace", "PacletInfo.m"}]];
+  pacletInfoFilename = FileNameJoin[{".", "SetReplace", "PacletInfo.m"}];
     
-  filename = pacletInfo[Name] <> "-" <> pacletInfo[Version] <> ".paclet";
+  filename = PacletManager`CreatePaclet[pacletInfoFilename]["QualifiedName"] <> ".paclet";
   
   If[!FileExistsQ[filename],
   	Print[
