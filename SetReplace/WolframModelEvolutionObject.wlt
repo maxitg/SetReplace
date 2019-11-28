@@ -510,6 +510,46 @@
         16 + 8 + 4 + 2 + 1
       ],
 
+      (* CreatorEvents *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["CreatorEvents"],
+        Join[Table[0, 16], Range[15]]
+      ],
+
+      (* DestroyerEvents *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["DestroyerEvents"],
+        Append[Riffle @@ ConstantArray[Range[15], 2], Infinity]
+      ],
+
+      (* ExpressionGenerations *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["ExpressionGenerations"],
+        Catenate[Table[Table[k, 2^(4 - k)], {k, 0, 4}]]
+      ],
+
+      (* AllExpressions *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["AllExpressions"],
+        Catenate[Table[Partition[Range[1, 17, 2^k], 2, 1], {k, 0, 4}]]
+      ],
+
       (* CausalGraph *)
 
       VerificationTest[
