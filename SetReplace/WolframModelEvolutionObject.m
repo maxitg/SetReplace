@@ -88,23 +88,32 @@ WolframModelEvolutionObject /:
 (*Implementation*)
 
 
-$propertyArgumentCounts = <|
-	"EvolutionObject" -> {0, 0},
-	"FinalState" -> {0, 0},
-	"StatesList" -> {0, 0},
-	"UpdatedStatesList" -> {0, 0},
-	"Generation" -> {1, 1},
-	"SetAfterEvent" -> {1, 1},
-	"Rules" -> {0, 0},
-	"GenerationsCount" -> {0, 0},
-	"EventsCount" -> {0, 0},
-	"AtomsCountFinal" -> {0, 0},
-	"AtomsCountTotal" -> {0, 0},
-	"ExpressionsCountFinal" -> {0, 0},
-	"ExpressionsCountTotal" -> {0, 0},
-	"CausalGraph" -> {0, Infinity},
-	"Properties" -> {0, 0}
+$accessorProperties = <|
+	"CreatorEvents" -> $creatorEvents,
+	"DestroyerEvents" -> $destroyerEvents,
+	"ExpressionGenerations" -> $generations,
+	"AllExpressions" -> $atomLists
 |>;
+
+
+$propertyArgumentCounts = Join[
+	<|
+		"EvolutionObject" -> {0, 0},
+		"FinalState" -> {0, 0},
+		"StatesList" -> {0, 0},
+		"UpdatedStatesList" -> {0, 0},
+		"Generation" -> {1, 1},
+		"SetAfterEvent" -> {1, 1},
+		"Rules" -> {0, 0},
+		"GenerationsCount" -> {0, 0},
+		"EventsCount" -> {0, 0},
+		"AtomsCountFinal" -> {0, 0},
+		"AtomsCountTotal" -> {0, 0},
+		"ExpressionsCountFinal" -> {0, 0},
+		"ExpressionsCountTotal" -> {0, 0},
+		"CausalGraph" -> {0, Infinity},
+		"Properties" -> {0, 0}|>,
+	Association[# -> {0, 0} & /@ Keys[$accessorProperties]]];
 
 
 $propertiesParameterless = Keys @ Select[#[[1]] == 0 &] @ $propertyArgumentCounts;
@@ -207,6 +216,17 @@ propertyEvaluate[
 propertyEvaluate[
 		WolframModelEvolutionObject[data_ ? evolutionDataQ], caller_, "EventsCount"] :=
 	Max[0, DeleteCases[Join[data[$destroyerEvents], data[$creatorEvents]], Infinity]]
+
+
+(* ::Subsection:: *)
+(*Direct Accessors*)
+
+
+propertyEvaluate[
+		WolframModelEvolutionObject[data_ ? evolutionDataQ],
+		caller_,
+		property_ ? (MemberQ[Keys[$accessorProperties], #] &)] :=
+	data[$accessorProperties[property]];
 
 
 (* ::Subsection:: *)
@@ -531,7 +551,8 @@ WolframModelEvolutionObject[args___] := 0 /;
 
 
 WolframModelEvolutionObject::corrupt =
-	"WolframModelEvolutionObject does not have a correct format. Use WolframModel for construction.";
+	"WolframModelEvolutionObject does not have a correct format. " <>
+	"Use WolframModel for construction.";
 
 
 evolutionDataQ[data_Association] := Sort[Keys[data]] ===
