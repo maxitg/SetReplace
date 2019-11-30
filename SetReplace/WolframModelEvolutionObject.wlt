@@ -237,6 +237,14 @@
         4
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["GenerationsCount"],
+        1
+      ],
+
       (* EventsCount *)
 
       VerificationTest[
@@ -245,6 +253,14 @@
           pathGraph17,
           4]["EventsCount"],
         15
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["EventsCount"],
+        2
       ],
 
       (* SetAfterEvent *)
@@ -311,6 +327,14 @@
           4]["SetAfterEvent", 15]
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["SetAfterEvent", #],
+        #2
+      ] & @@@ {{0, {{1, 2}, {2, 3}}}, {1, {{2, 3}}}, {2, {}}},
+
       (* FinalState *)
 
       VerificationTest[
@@ -332,6 +356,14 @@
         pathGraph17
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["FinalState"],
+        {}
+      ],
+
       (* UpdatedStatesList *)
 
       VerificationTest[
@@ -351,6 +383,14 @@
           pathGraph17,
           0]["UpdatedStatesList"],
         {pathGraph17}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["UpdatedStatesList"],
+        {{{1, 2}, {2, 3}}, {{2, 3}}, {}}
       ],
 
       (* Generation *)
@@ -417,6 +457,14 @@
           4]["Generation", 4]
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["Generation", #],
+        #2
+      ] & @@@ {{0, {{1, 2}, {2, 3}}}, {1, {}}},
+
       (* StatesList *)
 
       VerificationTest[
@@ -436,6 +484,14 @@
           pathGraph17,
           0]["StatesList"],
         {pathGraph17}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["StatesList"],
+        {{{1, 2}, {2, 3}}, {}}
       ],
 
       (* AtomsCountFinal *)
@@ -464,6 +520,14 @@
         1
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["AtomsCountFinal"],
+        0
+      ],
+
       (* AtomsCountTotal *)
 
       VerificationTest[
@@ -490,6 +554,14 @@
         1
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["AtomsCountTotal"],
+        3
+      ],
+
       (* ExpressionsCountFinal *)
 
       VerificationTest[
@@ -500,6 +572,14 @@
         1
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["ExpressionsCountFinal"],
+        0
+      ],
+
       (* ExpressionsCountTotal *)
 
       VerificationTest[
@@ -508,6 +588,14 @@
           pathGraph17,
           4]["ExpressionsCountTotal"],
         16 + 8 + 4 + 2 + 1
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["ExpressionsCountTotal"],
+        2
       ],
 
       (* CreatorEvents *)
@@ -558,6 +646,14 @@
           pathGraph17,
           4]["EventGenerations"],
         {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["EventGenerations"],
+        {1, 1}
       ],
 
       (* CausalGraph *)
@@ -661,6 +757,14 @@
             Partition[Range[17], 2, 1],
             2][type]]],
           {Range[12], {1 -> 9, 2 -> 9, 3 -> 10, 4 -> 10, 5 -> 11, 6 -> 11, 7 -> 12, 8 -> 12}}
+        ],
+
+        VerificationTest[
+          Through[{VertexList, Rule @@@ EdgeList[#] &}[WolframModel[
+            {{1, 2}} -> {},
+            {{1, 2}, {2, 3}},
+            2][type]]],
+          {{1, 2}, {}}
         ],
 
         VerificationTest[
