@@ -567,8 +567,8 @@ propertyEvaluate[
 		VertexCoordinates -> MapIndexed[
 			First[#2] -> {
 				Automatic,
-				propertyEvaluate[evolution, caller, "GenerationsCount"] -
-					OptionValue[$layeredCausalGraphOptions, {o}, "LayerHeight"] #1} &,
+				OptionValue[$layeredCausalGraphOptions, {o}, "LayerHeight"]
+					(propertyEvaluate[evolution, caller, "GenerationsCount"] - #1)} &,
 			propertyEvaluate[evolution, caller, "EventGenerations"]],
 		GraphLayout -> "SpringElectricalEmbedding"]
 
