@@ -550,6 +550,16 @@
         Catenate[Table[Partition[Range[1, 17, 2^k], 2, 1], {k, 0, 4}]]
       ],
 
+      (* EventGenerations *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["EventGenerations"],
+        {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4}
+      ],
+
       (* CausalGraph *)
 
       Table[With[{type = type}, {
