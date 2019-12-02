@@ -14,14 +14,17 @@ HypergraphPlot::usage = usageString[
 
 SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, _., OptionsPattern[]}};
 
+(* Automatic style pickes up, and possibly modifies the style it inherits from. *)
 Options[HypergraphPlot] = Join[{
+	"EdgePolygonStyle" -> Automatic, (* inherits from EdgeStyle, with specified small opacity *)
+	EdgeStyle -> Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]],
 	GraphHighlight -> {},
 	GraphHighlightStyle -> Hue[1.0, 1.0, 0.7],
 	"HyperedgeRendering" -> "Polygons",
+	"UnaryEdgeStyle" -> Automatic, (* inherits from EdgeStyle *)
 	VertexCoordinateRules -> {},
 	VertexLabels -> None,
-	VertexStyle -> Directive[Hue[0.6, 0.2, 0.8], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]],
-	EdgeStyle -> Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]]},
+	VertexStyle -> Directive[Hue[0.6, 0.2, 0.8], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]]},
 	Options[Graphics]];
 
 $edgeTypes = {"Ordered", "Cyclic"};
@@ -71,10 +74,16 @@ hypergraphPlot$parse[
 
 hypergraphPlot$parse[
 			edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] := Module[{
-		styles},
-	styles = OptionValue[HypergraphPlot, {o}, #] & /@ <|$vertexPoint -> VertexStyle, $edgeLine -> EdgeStyle|>;
+		optionValue, styles},
+	optionValue[opt_] := OptionValue[HypergraphPlot, {o}, opt];
+	styles = <|
+		$vertexPoint -> optionValue[VertexStyle],
+		$edgeLine -> optionValue[EdgeStyle],
+		$edgePoint -> Replace[optionValue["UnaryEdgeStyle"], Automatic -> optionValue[EdgeStyle]],
+		$edgePolygon ->
+			Replace[optionValue["EdgePolygonStyle"], Automatic -> Directive[optionValue[EdgeStyle], Opacity[0.09]]]|>;
 	hypergraphPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
-			(OptionValue[HypergraphPlot, {o}, #] & /@ {
+			(optionValue /@ {
 				GraphHighlight, GraphHighlightStyle, "HyperedgeRendering", VertexCoordinateRules, VertexLabels}) /;
 		correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}]
 ]
@@ -314,16 +323,12 @@ drawEmbedding[
 			],
 			arrow[$arrowheadShape, arrowheadLength, vertexSize][pts]},
 		highlighted[Polygon[pts_], h_] :> {
-			Opacity[0.3],
-			If[h,
-				highlightColor,
-				Lighter[Hue[0.6, 0.7, 0.5], 0.7]
-			],
+			If[h, Directive[Opacity[0.3], highlightColor], styles[$edgePolygon]],
 			Polygon[pts]},
 		highlighted[Point[p_], h_] :> {
 			If[h,
 				Directive[Opacity[1], highlightColor],
-				Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]]
+				styles[$edgePoint]
 			],
 			Circle[p, getSingleVertexEdgeRadius[p]]}
 	};
