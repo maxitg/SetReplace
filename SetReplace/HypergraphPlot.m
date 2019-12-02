@@ -21,6 +21,7 @@ Options[HypergraphPlot] = Join[{
 	GraphHighlight -> {},
 	GraphHighlightStyle -> Hue[1.0, 1.0, 0.7],
 	"HyperedgeRendering" -> "Polygons",
+	PlotStyle -> Hue[0.6, 0.7, 0.5],
 	"UnaryEdgeStyle" -> Automatic, (* inherits from EdgeStyle *)
 	VertexCoordinateRules -> {},
 	VertexLabels -> None,
@@ -74,14 +75,16 @@ hypergraphPlot$parse[
 
 hypergraphPlot$parse[
 			edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] := Module[{
-		optionValue, styles},
+		optionValue, plotStyle, edgeStyle, styles},
 	optionValue[opt_] := OptionValue[HypergraphPlot, {o}, opt];
+	plotStyle = optionValue[PlotStyle];
 	styles = <|
-		$vertexPoint -> optionValue[VertexStyle],
-		$edgeLine -> optionValue[EdgeStyle],
-		$edgePoint -> Replace[optionValue["UnaryEdgeStyle"], Automatic -> optionValue[EdgeStyle]],
+		$vertexPoint -> Replace[
+			optionValue[VertexStyle], Automatic -> Directive[plotStyle, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]]],
+		$edgeLine -> (edgeStyle = Replace[optionValue[EdgeStyle], Automatic -> Directive[plotStyle, Opacity[0.7]]]),
+		$edgePoint -> Replace[optionValue["UnaryEdgeStyle"], Automatic -> edgeStyle],
 		$edgePolygon ->
-			Replace[optionValue["EdgePolygonStyle"], Automatic -> Directive[optionValue[EdgeStyle], Opacity[0.09]]]|>;
+			Replace[optionValue["EdgePolygonStyle"], Automatic -> Directive[edgeStyle, Opacity[0.09]]]|>;
 	hypergraphPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
 			(optionValue /@ {
 				GraphHighlight, GraphHighlightStyle, "HyperedgeRendering", VertexCoordinateRules, VertexLabels}) /;
