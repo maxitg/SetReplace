@@ -20,7 +20,8 @@ Options[HypergraphPlot] = Join[{
 	"HyperedgeRendering" -> "Polygons",
 	VertexCoordinateRules -> {},
 	VertexLabels -> None,
-	VertexStyle -> Directive[Hue[0.6, 0.2, 0.8], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]]},
+	VertexStyle -> Directive[Hue[0.6, 0.2, 0.8], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]],
+	EdgeStyle -> Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]]},
 	Options[Graphics]];
 
 $edgeTypes = {"Ordered", "Cyclic"};
@@ -71,7 +72,7 @@ hypergraphPlot$parse[
 hypergraphPlot$parse[
 			edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] := Module[{
 		styles},
-	styles = <|$vertexPoint -> OptionValue[HypergraphPlot, {o}, "VertexStyle"]|>;
+	styles = OptionValue[HypergraphPlot, {o}, #] & /@ <|$vertexPoint -> VertexStyle, $edgeLine -> EdgeStyle|>;
 	hypergraphPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
 			(OptionValue[HypergraphPlot, {o}, #] & /@ {
 				GraphHighlight, GraphHighlightStyle, "HyperedgeRendering", VertexCoordinateRules, VertexLabels}) /;
@@ -269,8 +270,6 @@ hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinate
 
 (** Drawing **)
 
-$edgeColor = Hue[0.6, 0.7, 0.5];
-
 $arrowheadShape = Polygon[{
 	{-1.10196, -0.289756}, {-1.08585, -0.257073}, {-1.05025, -0.178048}, {-1.03171, -0.130243}, {-1.01512, -0.0824391},
 	{-1.0039, -0.037561}, {-1., 0.}, {-1.0039, 0.0341466}, {-1.01512, 0.0780486}, {-1.03171, 0.127805},
@@ -311,20 +310,20 @@ drawEmbedding[
 		highlighted[Line[pts_], h_] :> {
 			If[h,
 				Directive[Opacity[1], highlightColor],
-				Directive[Opacity[0.7], $edgeColor]
+				styles[$edgeLine]
 			],
 			arrow[$arrowheadShape, arrowheadLength, vertexSize][pts]},
 		highlighted[Polygon[pts_], h_] :> {
 			Opacity[0.3],
 			If[h,
 				highlightColor,
-				Lighter[$edgeColor, 0.7]
+				Lighter[Hue[0.6, 0.7, 0.5], 0.7]
 			],
 			Polygon[pts]},
 		highlighted[Point[p_], h_] :> {
 			If[h,
 				Directive[Opacity[1], highlightColor],
-				Directive[Opacity[0.7], $edgeColor]
+				Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]]
 			],
 			Circle[p, getSingleVertexEdgeRadius[p]]}
 	};
