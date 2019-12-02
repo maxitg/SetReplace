@@ -17,7 +17,7 @@ SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, _., OptionsPatter
 (* Automatic style pickes up, and possibly modifies the style it inherits from. *)
 Options[HypergraphPlot] = Join[{
 	"EdgePolygonStyle" -> Automatic, (* inherits from EdgeStyle, with specified small opacity *)
-	EdgeStyle -> Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]],
+	EdgeStyle -> Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]], (* inherits from PlotStyle *)
 	GraphHighlight -> {},
 	GraphHighlightStyle -> Hue[1.0, 1.0, 0.7],
 	"HyperedgeRendering" -> "Polygons",
@@ -25,6 +25,7 @@ Options[HypergraphPlot] = Join[{
 	"UnaryEdgeStyle" -> Automatic, (* inherits from EdgeStyle *)
 	VertexCoordinateRules -> {},
 	VertexLabels -> None,
+	(* inherits from PlotStyle *)
 	VertexStyle -> Directive[Hue[0.6, 0.2, 0.8], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]]},
 	Options[Graphics]];
 
