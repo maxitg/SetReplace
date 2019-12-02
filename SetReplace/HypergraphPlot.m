@@ -320,19 +320,13 @@ drawEmbedding[
 
 	{lines, polygons, edgePoints} = Cases[embeddingShapes[[2]], #, All] & /@ {
 		highlighted[Line[pts_], h_] :> {
-			If[h,
-				Directive[Opacity[1], highlightColor],
-				styles[$edgeLine]
-			],
+			If[h, Directive[Opacity[1], highlightColor], styles[$edgeLine]],
 			arrow[$arrowheadShape, arrowheadLength, vertexSize][pts]},
 		highlighted[Polygon[pts_], h_] :> {
 			If[h, Directive[Opacity[0.3], highlightColor], styles[$edgePolygon]],
 			Polygon[pts]},
 		highlighted[Point[p_], h_] :> {
-			If[h,
-				Directive[Opacity[1], highlightColor],
-				styles[$edgePoint]
-			],
+			If[h, Directive[Opacity[1], highlightColor], styles[$edgePoint]],
 			Circle[p, getSingleVertexEdgeRadius[p]]}
 	};
 
