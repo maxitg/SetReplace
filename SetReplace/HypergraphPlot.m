@@ -25,6 +25,8 @@ Options[HypergraphPlot] = Join[{
 	"UnaryEdgeStyle" -> Automatic, (* inherits from EdgeStyle *)
 	VertexCoordinateRules -> {},
 	VertexLabels -> None,
+	VertexSize -> 0.06,
+	"ArrowheadLength" -> 0.15,
 	(* inherits from PlotStyle *)
 	VertexStyle -> Directive[Hue[0.6, 0.2, 0.8], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]]},
 	Options[Graphics]];
@@ -50,6 +52,9 @@ HypergraphPlot::invalidHighlight =
 
 General::invalidHighlightStyle =
 	"GraphHighlightStyle `1` should be a color.";
+
+General::invalidSize =
+	"`1` `2` should be a non-negative number.";
 
 (* Evaluation *)
 
@@ -88,7 +93,13 @@ hypergraphPlot$parse[
 			Replace[optionValue["EdgePolygonStyle"], Automatic -> Directive[edgeStyle, Opacity[0.09]]]|>;
 	hypergraphPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
 			(optionValue /@ {
-				GraphHighlight, GraphHighlightStyle, "HyperedgeRendering", VertexCoordinateRules, VertexLabels}) /;
+				GraphHighlight,
+				GraphHighlightStyle,
+				"HyperedgeRendering",
+				VertexCoordinateRules,
+				VertexLabels,
+				VertexSize,
+				"ArrowheadLength"}) /;
 		correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}]
 ]
 
@@ -100,7 +111,9 @@ correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
 			{"HyperedgeRendering", $hyperedgeRenderings}})) &&
 	correctCoordinateRulesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinateRules]] &&
 	correctHighlightQ[edges, OptionValue[HypergraphPlot, opts, GraphHighlight]] &&
-	correctHighlightStyleQ[head, OptionValue[HypergraphPlot, opts, GraphHighlightStyle]]
+	correctHighlightStyleQ[head, OptionValue[HypergraphPlot, opts, GraphHighlightStyle]] &&
+	correctSizeQ[head, "Vertex size", OptionValue[HypergraphPlot, opts, VertexSize]] &&
+	correctSizeQ[head, "Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"]]
 
 correctCoordinateRulesQ[head_, coordinateRules_] :=
 	If[!MatchQ[coordinateRules,
@@ -124,10 +137,14 @@ correctHighlightQ[Automatic, _] := True
 correctHighlightStyleQ[head_, highlightStyle_] :=
 	If[ColorQ[highlightStyle], True, Message[head::invalidHighlightStyle, highlightStyle]; False]
 
-(* Implementation *)
+correctSizeQ[head_, capitalizedName_, size_ ? (# >= 0 &)] := True
 
-$vertexSize = 0.06;
-$arrowheadLength = 0.15;
+correctSizeQ[head_, capitalizedName_, size_] := (
+	Message[head::invalidSize, capitalizedName, size];
+	False
+)
+
+(* Implementation *)
 
 hypergraphPlot[
 		edges_,
@@ -138,10 +155,10 @@ hypergraphPlot[
 		hyperedgeRendering_,
 		vertexCoordinates_,
 		vertexLabels_,
-		graphicsOptions_,
-		vertexSize_ : $vertexSize,
-		arrowheadsSize_ : $arrowheadLength] := Catch[Show[
-	drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, arrowheadsSize] @
+		vertexSize_,
+		arrowheadLength_,
+		graphicsOptions_] := Catch[Show[
+	drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, arrowheadLength] @
 		hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @
 		edges,
 	graphicsOptions
