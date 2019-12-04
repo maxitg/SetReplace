@@ -80,7 +80,8 @@ hypergraphPlot$parse[
 )
 
 hypergraphPlot$parse[
-			edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] := Module[{
+			edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
+				correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}] := Module[{
 		optionValue, plotStyle, edgeStyle, styles},
 	optionValue[opt_] := OptionValue[HypergraphPlot, {o}, opt];
 	plotStyle = optionValue[PlotStyle];
@@ -99,8 +100,7 @@ hypergraphPlot$parse[
 				VertexCoordinateRules,
 				VertexLabels,
 				VertexSize,
-				"ArrowheadLength"}) /;
-		correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}]
+				"ArrowheadLength"})
 ]
 
 hypergraphPlot$parse[___] := $Failed
