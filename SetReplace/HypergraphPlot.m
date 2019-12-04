@@ -5,7 +5,6 @@ PackageExport["HypergraphPlot"]
 PackageScope["correctHypergraphPlotOptionsQ"]
 PackageScope["$edgeTypes"]
 PackageScope["hypergraphEmbedding"]
-PackageScope["hypergraphPlot"]
 
 (* Documentation *)
 
