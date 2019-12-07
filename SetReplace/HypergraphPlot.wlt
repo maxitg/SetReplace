@@ -238,6 +238,25 @@
         Graphics
       ],
 
+      (* Valid VertexSize and "ArrowheadLength" *)
+
+      {
+        testUnevaluated[
+          HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, # -> $$$invalid$$$],
+          {HypergraphPlot::invalidSize}
+        ],
+
+        testUnevaluated[
+          HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, # -> -1],
+          {HypergraphPlot::invalidSize}
+        ],
+
+        VerificationTest[
+          Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, # -> 1]],
+          Graphics
+        ]
+      } & /@ {VertexSize, "ArrowheadLength"},
+
       (* Implementation *)
 
       (** Simple examples **)
@@ -351,6 +370,126 @@
           HypergraphPlot[{{1, 2, 3}}, VertexCoordinateRules -> {1 -> {1, 0}, 2 -> {1, 0}}],
           Rotate[_, {v1_, v2_}] :> v1 != {0, 0} && v2 != {0, 0},
           All]
+      ],
+
+      (* Styles *)
+
+      With[{color = RGBColor[0.4, 0.6, 0.2]}, {
+        VerificationTest[
+          FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgePolygonStyle" -> color], color],
+          False
+        ],
+
+        VerificationTest[
+          FreeQ[
+            HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeRendering" -> "Subgraphs", "EdgePolygonStyle" -> color],
+            color],
+          True
+        ],
+
+        VerificationTest[
+          FreeQ[HypergraphPlot[{{1, 2, 3}, {3}, {3, 4, 5}}, "UnaryEdgeStyle" -> color], color],
+          False
+        ],
+
+        VerificationTest[
+          FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "UnaryEdgeStyle" -> color], color],
+          True
+        ],
+
+        VerificationTest[
+          FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexStyle -> color], color],
+          False
+        ],
+
+        VerificationTest[
+          FreeQ[HypergraphPlot[{{1}, {3}}, VertexStyle -> color, EdgeStyle -> Transparent], color],
+          False
+        ],
+
+        VerificationTest[
+          FreeQ[HypergraphPlot[{}, VertexStyle -> color], color],
+          True
+        ],
+
+        VerificationTest[
+          FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, EdgeStyle -> color], color],
+          False
+        ],
+
+        VerificationTest[
+          FreeQ[HypergraphPlot[{}, EdgeStyle -> color], color],
+          True
+        ],
+
+        VerificationTest[
+          FreeQ[HypergraphPlot[{{1}}, EdgeStyle -> color, "UnaryEdgeStyle" -> Black], color],
+          True
+        ],
+
+        VerificationTest[
+          FreeQ[HypergraphPlot[{{1}}, EdgeStyle -> color, "UnaryEdgeStyle" -> Automatic], color],
+          False
+        ],
+
+        VerificationTest[
+          FreeQ[HypergraphPlot[{{1, 2, 3}}, EdgeStyle -> color, "EdgePolygonStyle" -> Black], color],
+          False
+        ],
+
+        VerificationTest[
+          FreeQ[HypergraphPlot[{{1, 2, 3}}, EdgeStyle -> Black, "EdgePolygonStyle" -> color], color],
+          False
+        ],
+
+        VerificationTest[
+          FreeQ[
+            HypergraphPlot[{{1, 2, 3}}, PlotStyle -> color, EdgeStyle -> Automatic, VertexStyle -> Automatic], color],
+          False
+        ],
+
+        VerificationTest[
+          FreeQ[
+            HypergraphPlot[{{1, 2, 3}}, PlotStyle -> color, EdgeStyle -> Black, VertexStyle -> Automatic], color],
+          False
+        ],
+
+        VerificationTest[
+          FreeQ[
+            HypergraphPlot[{{1, 2, 3}}, PlotStyle -> color, EdgeStyle -> Automatic, VertexStyle -> Black], color],
+          False
+        ],
+
+        VerificationTest[
+          FreeQ[
+            HypergraphPlot[
+              {{1}}, PlotStyle -> color, EdgeStyle -> Automatic, "UnaryEdgeStyle" -> Black, VertexStyle -> Black],
+            color],
+          True
+        ],
+
+        VerificationTest[
+          FreeQ[
+            HypergraphPlot[
+              {{1, 2, 3}, {3, 4, 5}}, PlotStyle -> color, EdgeStyle -> Black, VertexStyle -> Black],
+            color],
+          True
+        ]
+      }],
+
+      VerificationTest[
+        Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexSize -> 0.3]],
+        Graphics
+      ],
+
+      VerificationTest[
+        Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "ArrowheadLength" -> 0.3]],
+        Graphics
+      ],
+
+      VerificationTest[
+        Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexSize -> 0.4, "ArrowheadLength" -> 0.3]],
+        Graphics
       ],
 
       (* GraphHighlight *)
