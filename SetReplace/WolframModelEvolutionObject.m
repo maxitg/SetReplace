@@ -111,7 +111,9 @@ $propertyArgumentCounts = Join[
 		"AtomsCountTotal" -> {0, 0},
 		"ExpressionsCountFinal" -> {0, 0},
 		"ExpressionsCountTotal" -> {0, 0},
+		"EventGenerations" -> {0, 0},
 		"CausalGraph" -> {0, Infinity},
+		"LayeredCausalGraph" -> {0, Infinity},
 		"Properties" -> {0, 0}|>,
 	Association[# -> {0, 0} & /@ Keys[$accessorProperties]]];
 
@@ -465,11 +467,36 @@ propertyEvaluate[
 
 
 (* ::Subsection:: *)
-(*CausalGraph*)
+(*EventGenerations*)
+
+
+propertyEvaluate[
+		WolframModelEvolutionObject[data_ ? evolutionDataQ],
+		caller_,
+		"EventGenerations"] :=
+	Values @ KeySort @ KeyDrop[
+		Join[
+			Association[Thread[data[$creatorEvents] -> data[$generations]]],
+			Association[Thread[data[$destroyerEvents] -> data[$generations] + 1]]],
+		{0, Infinity}]
+
+
+(* ::Subsection:: *)
+(*CausalGraph / LayeredCausalGraph*)
 
 
 (* ::Text:: *)
 (*This produces a causal network for the system. This is a Graph with all events as vertices, and directed edges connecting them if the same event is a creator and a destroyer for the same expression (i.e., if two events are causally related).*)
+
+
+(* ::Subsubsection:: *)
+(*Options*)
+
+
+$causalGraphOptions = Options[Graph];
+
+
+$layeredCausalGraphOptions = Join[Options[$causalGraphOptions], {"LayerHeight" -> 1}];
 
 
 (* ::Subsubsection:: *)
@@ -483,7 +510,7 @@ propertyEvaluate[
 propertyEvaluate[
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
-		"CausalGraph",
+		"CausalGraph" | "LayeredCausalGraph",
 		o___] := 0 /;
 	!MatchQ[{o}, OptionsPattern[]] &&
 	makeMessage[caller, "nonopt", Last[{o}]]
@@ -492,15 +519,21 @@ propertyEvaluate[
 propertyEvaluate[
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
-		"CausalGraph",
-		o : OptionsPattern[]] := 0 /;
-	With[{incorrectOptions = Complement[{o}, FilterRules[{o}, Options[Graph]]]},
-		incorrectOptions != {} &&
-		makeMessage[caller, "optx", Last[incorrectOptions]]]
+		property : "CausalGraph" | "LayeredCausalGraph",
+		o : OptionsPattern[]] := 0 /; Module[{allOptions, incorrectOptions},
+	allOptions =
+		If[property == "CausalGraph", $causalGraphOptions, $layeredCausalGraphOptions];
+	incorrectOptions = Complement[{o}, FilterRules[{o}, allOptions]];
+	incorrectOptions != {} &&
+		Message[
+			caller::optx,
+			Last[incorrectOptions],
+			Defer[WolframModelEvolutionObject[data][property, o]]]
+]
 
 
 (* ::Subsubsection:: *)
-(*Implementation*)
+(*CausalGraph Implementation*)
 
 
 propertyEvaluate[
@@ -508,13 +541,36 @@ propertyEvaluate[
 		caller_,
 		"CausalGraph",
 		o : OptionsPattern[]] /;
-			(Complement[{o}, FilterRules[{o}, Options[Graph]]] == {}) :=
+			(Complement[{o}, FilterRules[{o}, $causalGraphOptions]] == {}) :=
 	Graph[
 		DeleteCases[
 			Union[data[$creatorEvents], data[$destroyerEvents]], 0 | Infinity],
 		Select[FreeQ[#, 0 | Infinity] &] @
 			Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
 		o]
+
+
+(* ::Subsubsection:: *)
+(*LayeredCausalGraph Implementation*)
+
+
+propertyEvaluate[
+		evolution : WolframModelEvolutionObject[data_ ? evolutionDataQ],
+		caller_,
+		"LayeredCausalGraph",
+		o : OptionsPattern[]] /;
+			(Complement[{o}, FilterRules[{o}, $layeredCausalGraphOptions]] == {}) :=
+	Graph[
+		propertyEvaluate[evolution, caller, "CausalGraph", ##] & @@
+			FilterRules[{o}, $causalGraphOptions],
+		FilterRules[{o}, Options[Graph]],
+		VertexCoordinates -> MapIndexed[
+			First[#2] -> {
+				Automatic,
+				OptionValue[$layeredCausalGraphOptions, {o}, "LayerHeight"]
+					(propertyEvaluate[evolution, caller, "GenerationsCount"] - #1)} &,
+			propertyEvaluate[evolution, caller, "EventGenerations"]],
+		GraphLayout -> "SpringElectricalEmbedding"]
 
 
 (* ::Subsection:: *)

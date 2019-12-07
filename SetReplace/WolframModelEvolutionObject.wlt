@@ -237,6 +237,14 @@
         4
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["GenerationsCount"],
+        1
+      ],
+
       (* EventsCount *)
 
       VerificationTest[
@@ -245,6 +253,14 @@
           pathGraph17,
           4]["EventsCount"],
         15
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["EventsCount"],
+        2
       ],
 
       (* SetAfterEvent *)
@@ -311,6 +327,14 @@
           4]["SetAfterEvent", 15]
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["SetAfterEvent", #],
+        #2
+      ] & @@@ {{0, {{1, 2}, {2, 3}}}, {1, {{2, 3}}}, {2, {}}},
+
       (* FinalState *)
 
       VerificationTest[
@@ -332,6 +356,14 @@
         pathGraph17
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["FinalState"],
+        {}
+      ],
+
       (* UpdatedStatesList *)
 
       VerificationTest[
@@ -351,6 +383,14 @@
           pathGraph17,
           0]["UpdatedStatesList"],
         {pathGraph17}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["UpdatedStatesList"],
+        {{{1, 2}, {2, 3}}, {{2, 3}}, {}}
       ],
 
       (* Generation *)
@@ -417,6 +457,14 @@
           4]["Generation", 4]
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["Generation", #],
+        #2
+      ] & @@@ {{0, {{1, 2}, {2, 3}}}, {1, {}}},
+
       (* StatesList *)
 
       VerificationTest[
@@ -436,6 +484,14 @@
           pathGraph17,
           0]["StatesList"],
         {pathGraph17}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["StatesList"],
+        {{{1, 2}, {2, 3}}, {}}
       ],
 
       (* AtomsCountFinal *)
@@ -464,6 +520,14 @@
         1
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["AtomsCountFinal"],
+        0
+      ],
+
       (* AtomsCountTotal *)
 
       VerificationTest[
@@ -490,6 +554,14 @@
         1
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["AtomsCountTotal"],
+        3
+      ],
+
       (* ExpressionsCountFinal *)
 
       VerificationTest[
@@ -500,6 +572,14 @@
         1
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["ExpressionsCountFinal"],
+        0
+      ],
+
       (* ExpressionsCountTotal *)
 
       VerificationTest[
@@ -508,6 +588,14 @@
           pathGraph17,
           4]["ExpressionsCountTotal"],
         16 + 8 + 4 + 2 + 1
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["ExpressionsCountTotal"],
+        2
       ],
 
       (* CreatorEvents *)
@@ -550,121 +638,151 @@
         Catenate[Table[Partition[Range[1, 17, 2^k], 2, 1], {k, 0, 4}]]
       ],
 
+      (* EventGenerations *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["EventGenerations"],
+        {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["EventGenerations"],
+        {1, 1}
+      ],
+
       (* CausalGraph *)
 
-      VerificationTest[
-        WolframModel[
-          {{1, 2}, {2, 3}} -> {{1, 3}},
-          pathGraph17,
-          4]["CausalGraph", 1],
-        WolframModelEvolutionObject[___]["CausalGraph", 1],
-        {WolframModelEvolutionObject::nonopt},
-        SameTest -> MatchQ
-      ],
-
-      VerificationTest[
-        WolframModel[
-          {{1, 2}, {2, 3}} -> {{1, 3}},
-          pathGraph17,
-          4]["CausalGraph", 1, "str" -> 3],
-        WolframModelEvolutionObject[___]["CausalGraph", 1, "str" -> 3],
-        {WolframModelEvolutionObject::nonopt},
-        SameTest -> MatchQ
-      ],
-
-      VerificationTest[
-        WolframModel[
-          {{1, 2}, {2, 3}} -> {{1, 3}},
-          pathGraph17,
-          4]["CausalGraph", "BadOpt" -> "NotExist"],
-        WolframModelEvolutionObject[___]["CausalGraph", "BadOpt" -> "NotExist"],
-        {WolframModelEvolutionObject::optx},
-        SameTest -> MatchQ
-      ],
-
-      VerificationTest[
-        WolframModel[
-          {{1, 2}, {2, 3}} -> {{1, 3}},
-          pathGraph17,
-          4]["CausalGraph"],
-        Graph[Range[15], {
-          1 -> 9, 2 -> 9, 3 -> 10, 4 -> 10, 5 -> 11, 6 -> 11, 7 -> 12, 8 -> 12,
-          9 -> 13, 10 -> 13, 11 -> 14, 12 -> 14,
-          13 -> 15, 14 -> 15
-        }]
-      ],
-
-      VerificationTest[
-        WolframModel[
-          {{1, 2}, {2, 3}} -> {{1, 3}},
-          pathGraph17,
-          4]["CausalGraph", VertexLabels -> "Name", GraphLayout -> "SpringElectricalEmbedding"],
-        Graph[Range[15], {
-          1 -> 9, 2 -> 9, 3 -> 10, 4 -> 10, 5 -> 11, 6 -> 11, 7 -> 12, 8 -> 12,
-          9 -> 13, 10 -> 13, 11 -> 14, 12 -> 14,
-          13 -> 15, 14 -> 15
-        }, VertexLabels -> "Name", GraphLayout -> "SpringElectricalEmbedding"]
-      ],
-
-      VerificationTest[
-        WolframModel[
-          {{1, 2}, {2, 3}} -> {{1, 3}},
-          pathGraph17,
-          1]["CausalGraph"],
-        Graph[Range[8], {}]
-      ],
-
-      VerificationTest[
-        WolframModel[
-          {{1, 2}, {2, 3}} -> {{1, 3}},
-          Partition[Range[17], 2, 1],
-          2]["CausalGraph"],
-        Graph[Range[12], {1 -> 9, 2 -> 9, 3 -> 10, 4 -> 10, 5 -> 11, 6 -> 11, 7 -> 12, 8 -> 12}]
-      ],
-
-      With[{largeEvolution = $largeEvolution}, {
+      Table[With[{type = type}, {
         VerificationTest[
-          AcyclicGraphQ[ReleaseHold[largeEvolution["CausalGraph"]]]
+          WolframModel[
+            {{1, 2}, {2, 3}} -> {{1, 3}},
+            pathGraph17,
+            4][type, 1],
+          WolframModelEvolutionObject[___][type, 1],
+          {WolframModelEvolutionObject::nonopt},
+          SameTest -> MatchQ
+        ],
+  
+        VerificationTest[
+          WolframModel[
+            {{1, 2}, {2, 3}} -> {{1, 3}},
+            pathGraph17,
+            4][type, 1, "str" -> 3],
+          WolframModelEvolutionObject[___][type, 1, "str" -> 3],
+          {WolframModelEvolutionObject::nonopt},
+          SameTest -> MatchQ
+        ],
+  
+        VerificationTest[
+          WolframModel[
+            {{1, 2}, {2, 3}} -> {{1, 3}},
+            pathGraph17,
+            4][type, "BadOpt" -> "NotExist"],
+          WolframModelEvolutionObject[___][type, "BadOpt" -> "NotExist"],
+          {WolframModelEvolutionObject::optx},
+          SameTest -> MatchQ
+        ],
+  
+        With[{largeEvolution = $largeEvolution}, {
+          VerificationTest[
+            AcyclicGraphQ[ReleaseHold[largeEvolution[type]]]
+          ],
+  
+          VerificationTest[
+            LoopFreeGraphQ[ReleaseHold[largeEvolution[type]]]
+          ],
+  
+          VerificationTest[
+            Count[VertexInDegree[ReleaseHold[largeEvolution[type]]], 3],
+            ReleaseHold[largeEvolution["EventsCount"]] - 1
+          ],
+  
+          VerificationTest[
+            VertexCount[ReleaseHold[largeEvolution[type]]],
+            ReleaseHold[largeEvolution["EventsCount"]]
+          ],
+  
+          VerificationTest[
+            GraphDistance[ReleaseHold[largeEvolution[type]], 1, ReleaseHold[largeEvolution["EventsCount"]]],
+            ReleaseHold[largeEvolution["GenerationsCount"]] - 1
+          ]
+        }] /. HoldPattern[ReleaseHold[Hold[expr_]]] :> expr,
+  
+        VerificationTest[
+          WolframModel[
+            {{0, 1}, {0, 2}, {0, 3}} ->
+              {{4, 5}, {5, 6}, {6, 4}, {4, 6}, {6, 5}, {5, 4},
+              {4, 1}, {5, 2}, {6, 3},
+              {1, 6}, {3, 4}},
+            {{0, 0}, {0, 0}, {0, 0}},
+            3,
+            Method -> "Symbolic"][type],
+          WolframModel[
+            {{0, 1}, {0, 2}, {0, 3}} ->
+              {{4, 5}, {5, 6}, {6, 4}, {4, 6}, {6, 5}, {5, 4},
+              {4, 1}, {5, 2}, {6, 3},
+              {1, 6}, {3, 4}},
+            {{0, 0}, {0, 0}, {0, 0}},
+            3,
+            Method -> "LowLevel"][type]
         ],
 
         VerificationTest[
-          LoopFreeGraphQ[ReleaseHold[largeEvolution["CausalGraph"]]]
+          Through[{VertexList, Rule @@@ EdgeList[#] &}[WolframModel[
+            {{1, 2}, {2, 3}} -> {{1, 3}},
+            pathGraph17,
+            4][type]]],
+          {Range[15],
+            {1 -> 9, 2 -> 9, 3 -> 10, 4 -> 10, 5 -> 11, 6 -> 11, 7 -> 12, 8 -> 12, 9 -> 13, 10 -> 13, 11 -> 14,
+              12 -> 14, 13 -> 15, 14 -> 15}}
         ],
 
         VerificationTest[
-          Count[VertexInDegree[ReleaseHold[largeEvolution["CausalGraph"]]], 3],
-          ReleaseHold[largeEvolution["EventsCount"]] - 1
+          Through[{VertexList, EdgeList}[WolframModel[
+            {{1, 2}, {2, 3}} -> {{1, 3}},
+            pathGraph17,
+            1][type]]],
+          {Range[8], {}}
+        ],
+        
+        VerificationTest[
+          Through[{VertexList, Rule @@@ EdgeList[#] &}[WolframModel[
+            {{1, 2}, {2, 3}} -> {{1, 3}},
+            Partition[Range[17], 2, 1],
+            2][type]]],
+          {Range[12], {1 -> 9, 2 -> 9, 3 -> 10, 4 -> 10, 5 -> 11, 6 -> 11, 7 -> 12, 8 -> 12}}
         ],
 
         VerificationTest[
-          VertexCount[ReleaseHold[largeEvolution["CausalGraph"]]],
-          ReleaseHold[largeEvolution["EventsCount"]]
+          Through[{VertexList, Rule @@@ EdgeList[#] &}[WolframModel[
+            {{1, 2}} -> {},
+            {{1, 2}, {2, 3}},
+            2][type]]],
+          {{1, 2}, {}}
         ],
 
         VerificationTest[
-          GraphDistance[ReleaseHold[largeEvolution["CausalGraph"]], 1, ReleaseHold[largeEvolution["EventsCount"]]],
-          ReleaseHold[largeEvolution["GenerationsCount"]] - 1
+          FilterRules[AbsoluteOptions[WolframModel[
+            {{1, 2}, {2, 3}} -> {{1, 3}},
+            Partition[Range[17], 2, 1],
+            2][type, VertexLabels -> "Name"]], VertexLabels],
+          {VertexLabels -> {"Name"}}
         ]
-      }] /. HoldPattern[ReleaseHold[Hold[expr_]]] :> expr,
+      }], {type, {"CausalGraph", "LayeredCausalGraph"}}],
 
       VerificationTest[
-        WolframModel[
-          {{0, 1}, {0, 2}, {0, 3}} ->
-            {{4, 5}, {5, 6}, {6, 4}, {4, 6}, {6, 5}, {5, 4},
-            {4, 1}, {5, 2}, {6, 3},
-            {1, 6}, {3, 4}},
-          {{0, 0}, {0, 0}, {0, 0}},
-          3,
-          Method -> "Symbolic"]["CausalGraph"],
-        WolframModel[
-          {{0, 1}, {0, 2}, {0, 3}} ->
-            {{4, 5}, {5, 6}, {6, 4}, {4, 6}, {6, 5}, {5, 4},
-            {4, 1}, {5, 2}, {6, 3},
-            {1, 6}, {3, 4}},
-          {{0, 0}, {0, 0}, {0, 0}},
-          3,
-          Method -> "LowLevel"]["CausalGraph"]
-      ]
+        Round[Replace[VertexCoordinates, FilterRules[AbsoluteOptions[WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["LayeredCausalGraph", ##2]], VertexCoordinates]][[All, 2]]],
+        # Floor[Log2[16 - Range[15]]]
+      ] & @@@ {{1}, {2, "LayerHeight" -> 2}}
     }]
   |>
 |>
