@@ -5,7 +5,6 @@ PackageExport["HypergraphPlot"]
 PackageScope["correctHypergraphPlotOptionsQ"]
 PackageScope["$edgeTypes"]
 PackageScope["hypergraphEmbedding"]
-PackageScope["hypergraphPlot"]
 
 (* Documentation *)
 
@@ -14,12 +13,21 @@ HypergraphPlot::usage = usageString[
 
 SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, _., OptionsPattern[]}};
 
+(* Automatic style pickes up, and possibly modifies the style it inherits from. *)
 Options[HypergraphPlot] = Join[{
+	"EdgePolygonStyle" -> Automatic, (* inherits from EdgeStyle, with specified small opacity *)
+	EdgeStyle -> Directive[Opacity[0.7], Hue[0.6, 0.7, 0.5]], (* inherits from PlotStyle *)
 	GraphHighlight -> {},
 	GraphHighlightStyle -> Hue[1.0, 1.0, 0.7],
 	"HyperedgeRendering" -> "Polygons",
+	PlotStyle -> Hue[0.6, 0.7, 0.5],
+	"UnaryEdgeStyle" -> Automatic, (* inherits from EdgeStyle *)
 	VertexCoordinateRules -> {},
-	VertexLabels -> None},
+	VertexLabels -> None,
+	VertexSize -> 0.06,
+	"ArrowheadLength" -> 0.15,
+	(* inherits from PlotStyle *)
+	VertexStyle -> Directive[Hue[0.6, 0.2, 0.8], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]]},
 	Options[Graphics]];
 
 $edgeTypes = {"Ordered", "Cyclic"};
@@ -43,6 +51,9 @@ HypergraphPlot::invalidHighlight =
 
 General::invalidHighlightStyle =
 	"GraphHighlightStyle `1` should be a color.";
+
+General::invalidSize =
+	"`1` `2` should be a non-negative number.";
 
 (* Evaluation *)
 
@@ -68,11 +79,28 @@ hypergraphPlot$parse[
 )
 
 hypergraphPlot$parse[
-		edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] :=
-	hypergraphPlot[edges, edgeType, ##, FilterRules[{o}, Options[Graphics]]] & @@
-			(OptionValue[HypergraphPlot, {o}, #] & /@ {
-				GraphHighlight, GraphHighlightStyle, "HyperedgeRendering", VertexCoordinateRules, VertexLabels}) /;
-		correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}]
+			edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
+				correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}] := Module[{
+		optionValue, plotStyle, edgeStyle, styles},
+	optionValue[opt_] := OptionValue[HypergraphPlot, {o}, opt];
+	plotStyle = optionValue[PlotStyle];
+	styles = <|
+		$vertexPoint -> Replace[
+			optionValue[VertexStyle], Automatic -> Directive[plotStyle, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]]],
+		$edgeLine -> (edgeStyle = Replace[optionValue[EdgeStyle], Automatic -> Directive[plotStyle, Opacity[0.7]]]),
+		$edgePoint -> Replace[optionValue["UnaryEdgeStyle"], Automatic -> edgeStyle],
+		$edgePolygon ->
+			Replace[optionValue["EdgePolygonStyle"], Automatic -> Directive[edgeStyle, Opacity[0.09]]]|>;
+	hypergraphPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
+			(optionValue /@ {
+				GraphHighlight,
+				GraphHighlightStyle,
+				"HyperedgeRendering",
+				VertexCoordinateRules,
+				VertexLabels,
+				VertexSize,
+				"ArrowheadLength"})
+]
 
 hypergraphPlot$parse[___] := $Failed
 
@@ -82,7 +110,9 @@ correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
 			{"HyperedgeRendering", $hyperedgeRenderings}})) &&
 	correctCoordinateRulesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinateRules]] &&
 	correctHighlightQ[edges, OptionValue[HypergraphPlot, opts, GraphHighlight]] &&
-	correctHighlightStyleQ[head, OptionValue[HypergraphPlot, opts, GraphHighlightStyle]]
+	correctHighlightStyleQ[head, OptionValue[HypergraphPlot, opts, GraphHighlightStyle]] &&
+	correctSizeQ[head, "Vertex size", OptionValue[HypergraphPlot, opts, VertexSize]] &&
+	correctSizeQ[head, "Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"]]
 
 correctCoordinateRulesQ[head_, coordinateRules_] :=
 	If[!MatchQ[coordinateRules,
@@ -106,23 +136,28 @@ correctHighlightQ[Automatic, _] := True
 correctHighlightStyleQ[head_, highlightStyle_] :=
 	If[ColorQ[highlightStyle], True, Message[head::invalidHighlightStyle, highlightStyle]; False]
 
-(* Implementation *)
+correctSizeQ[head_, capitalizedName_, size_ ? (# >= 0 &)] := True
 
-$vertexSize = 0.06;
-$arrowheadLength = 0.15;
+correctSizeQ[head_, capitalizedName_, size_] := (
+	Message[head::invalidSize, capitalizedName, size];
+	False
+)
+
+(* Implementation *)
 
 hypergraphPlot[
 		edges_,
 		edgeType_,
+		styles_,
 		highlight_,
 		highlightColor_,
 		hyperedgeRendering_,
 		vertexCoordinates_,
 		vertexLabels_,
-		graphicsOptions_,
-		vertexSize_ : $vertexSize,
-		arrowheadsSize_ : $arrowheadLength] := Catch[Show[
-	drawEmbedding[vertexLabels, highlight, highlightColor, vertexSize, arrowheadsSize] @
+		vertexSize_,
+		arrowheadLength_,
+		graphicsOptions_] := Catch[Show[
+	drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, arrowheadLength] @
 		hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @
 		edges,
 	graphicsOptions
@@ -264,16 +299,20 @@ hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinate
 
 (** Drawing **)
 
-$edgeColor = Hue[0.6, 0.7, 0.5];
-$vertexColor = Hue[0.6, 0.2, 0.8];
-
 $arrowheadShape = Polygon[{
 	{-1.10196, -0.289756}, {-1.08585, -0.257073}, {-1.05025, -0.178048}, {-1.03171, -0.130243}, {-1.01512, -0.0824391},
 	{-1.0039, -0.037561}, {-1., 0.}, {-1.0039, 0.0341466}, {-1.01512, 0.0780486}, {-1.03171, 0.127805},
 	{-1.05025, 0.178538}, {-1.08585, 0.264878}, {-1.10196, 0.301464}, {0., 0.}, {-1.10196, -0.289756}}];
 
-drawEmbedding[vertexLabels_, highlight_, highlightColor_, vertexSize_, arrowheadLength_][embedding_] := Module[{
-		highlightCounts, embeddingShapes, vertexPoints, lines, polygons, polygonBoundaries, edgePoints, labels,
+drawEmbedding[
+			styles_,
+			vertexLabels_,
+			highlight_,
+			highlightColor_,
+			vertexSize_,
+			arrowheadLength_][
+			embedding_] := Module[{
+		highlightCounts, embeddingShapes, vertexPoints, lines, polygons, edgePoints, labels,
 		singleVertexEdgeCounts, getSingleVertexEdgeRadius},
 	highlightCounts = Counts[highlight];
 	embeddingShapes = Map[
@@ -287,7 +326,7 @@ drawEmbedding[vertexLabels_, highlight_, highlightColor_, vertexSize_, arrowhead
 
 	vertexPoints = Cases[embeddingShapes[[1]], #, All] & /@ {
 		highlighted[Point[p_], h_] :> {
-			Directive[If[h, highlightColor, $vertexColor], EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]],
+			If[h, Directive[highlightColor, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]], styles[$vertexPoint]],
 			Disk[p, vertexSize]}
 	};
 
@@ -296,29 +335,15 @@ drawEmbedding[vertexLabels_, highlight_, highlightColor_, vertexSize_, arrowhead
 		singleVertexEdgeCounts[coords] = Lookup[singleVertexEdgeCounts, Key[coords], vertexSize] + vertexSize
 	);
 
-	{lines, polygons, polygonBoundaries, edgePoints} = Cases[embeddingShapes[[2]], #, All] & /@ {
+	{lines, polygons, edgePoints} = Cases[embeddingShapes[[2]], #, All] & /@ {
 		highlighted[Line[pts_], h_] :> {
-			If[h,
-				Directive[Opacity[1], highlightColor],
-				Directive[Opacity[0.7], $edgeColor]
-			],
+			If[h, Directive[Opacity[1], highlightColor], styles[$edgeLine]],
 			arrow[$arrowheadShape, arrowheadLength, vertexSize][pts]},
 		highlighted[Polygon[pts_], h_] :> {
-			Opacity[0.3],
-			If[h,
-				highlightColor,
-				Lighter[$edgeColor, 0.7]
-			],
-			Polygon[pts]},
-		highlighted[Polygon[pts_], h_] :> {
-			EdgeForm[White],
-			Transparent,
+			If[h, Directive[Opacity[0.3], highlightColor], styles[$edgePolygon]],
 			Polygon[pts]},
 		highlighted[Point[p_], h_] :> {
-			If[h,
-				Directive[Opacity[1], highlightColor],
-				Directive[Opacity[0.7], $edgeColor]
-			],
+			If[h, Directive[Opacity[1], highlightColor], styles[$edgePoint]],
 			Circle[p, getSingleVertexEdgeRadius[p]]}
 	};
 
@@ -331,5 +356,5 @@ drawEmbedding[vertexLabels_, highlight_, highlightColor_, vertexSize_, arrowhead
 			VertexLabels -> vertexLabels,
 			VertexShapeFunction -> None,
 			EdgeShapeFunction -> None]];
-	Show[Graphics[{polygons, polygonBoundaries, lines, vertexPoints, edgePoints}], labels]
+	Show[Graphics[{polygons, lines, vertexPoints, edgePoints}], labels]
 ]

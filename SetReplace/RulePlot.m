@@ -174,17 +174,16 @@ singleRulePlot[
   vertexCoordinateRules = Join[
     ruleCoordinateRules[edgeType, hyperedgeRendering, externalVertexCoordinateRules, rule],
     externalVertexCoordinateRules];
-  ruleSidePlots = hypergraphPlot[
+  ruleSidePlots = HypergraphPlot[
       #,
       edgeType,
-      sharedRuleElements[rule],
-      graphHighlightStyle,
-      hyperedgeRendering,
-      vertexCoordinateRules,
-      vertexLabels,
-      {},
-      $vertexSize,
-      $arrowheadsLength] & /@
+      GraphHighlight -> sharedRuleElements[rule],
+      GraphHighlightStyle -> graphHighlightStyle,
+      "HyperedgeRendering" -> hyperedgeRendering,
+      VertexCoordinateRules -> vertexCoordinateRules,
+      VertexLabels -> vertexLabels,
+      VertexSize -> $vertexSize,
+      "ArrowheadLength" -> $arrowheadsLength] & /@
     List @@ rule;
   plotRange =
     CoordinateBounds[Catenate[List @@ (Transpose[PlotRange[#]] & /@ ruleSidePlots)], $graphPadding];
