@@ -4,7 +4,7 @@ PackageScope["vertexList"]
 PackageScope["fromCounts"]
 PackageScope["multisetIntersection"]
 
-vertexList[edges_] := Union[Catenate[edges]]
+vertexList[edges_] := Sort[Union[Catenate[edges]]]
 
 fromCounts[association_] := Catenate @ KeyValueMap[ConstantArray] @ association
 
