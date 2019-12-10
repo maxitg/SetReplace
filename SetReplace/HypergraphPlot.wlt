@@ -33,6 +33,30 @@
 
       Attributes[Global`testUnevaluated] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+
+      {color, color2, color3, color4, color5} =
+        BlockRandom[Table[RGBColor[RandomReal[{0, 1}, 3]], 5], RandomSeeding -> 0];
+
+      testColor[
+          shouldExistQ_,
+          set_,
+          opts_,
+          colors_,
+          renderings_ : {"Subgraphs", "Polygons"},
+          edgeTypes_ : {"Ordered", "Cyclic"}] :=
+        Outer[
+          VerificationTest[
+            With[{
+                plot = HypergraphPlot[set, #1, "HyperedgeRendering" -> #2, Sequence @@ opts]},
+              And @@ (If[shouldExistQ, Not, Identity][FreeQ[plot, #]] & /@ colors)
+            ]
+          ] &,
+          edgeTypes,
+          renderings];
+
+      testColorAbsense[args___] := testColor[False, args];
+
+      testColorPresence[args___] := testColor[True, args];
     ),
     "tests" -> {
       (* Argument Checks *)
@@ -373,81 +397,124 @@
       ],
 
       (* Styles *)
+      testColorPresence[{{1, 2, 3}, {3, 4, 5}}, {"EdgePolygonStyle" -> color}, {color}, {"Polygons"}],
 
-      With[{color = RGBColor[0.4, 0.6, 0.2]}, {
-        VerificationTest[
-          FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "EdgePolygonStyle" -> color], color],
-          False
-        ],
+      testColorAbsense[{{1, 2, 3}, {3, 4, 5}}, {"EdgePolygonStyle" -> color}, {color}, {"Subgraphs"}],
 
-        VerificationTest[
-          FreeQ[
-            HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "HyperedgeRendering" -> "Subgraphs", "EdgePolygonStyle" -> color],
-            color],
-          True
-        ],
+      testColorPresence[{{1, 2, 3}, {3, 4, 5}}, {VertexStyle -> color}, {color}],
 
-        VerificationTest[
-          FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexStyle -> color], color],
-          False
-        ],
+      testColorPresence[{{1}, {3}}, {VertexStyle -> color, EdgeStyle -> Transparent}, {color}],
 
-        VerificationTest[
-          FreeQ[HypergraphPlot[{{1}, {3}}, VertexStyle -> color, EdgeStyle -> Transparent], color],
-          False
-        ],
+      testColorAbsense[{}, {VertexStyle -> color}, {color}],
 
-        VerificationTest[
-          FreeQ[HypergraphPlot[{}, VertexStyle -> color], color],
-          True
-        ],
+      testColorPresence[{{1, 2, 3}, {3, 4, 5}}, {EdgeStyle -> color}, {color}],
 
-        VerificationTest[
-          FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, EdgeStyle -> color], color],
-          False
-        ],
+      testColorAbsense[{}, {EdgeStyle -> color}, {color}],
 
-        VerificationTest[
-          FreeQ[HypergraphPlot[{}, EdgeStyle -> color], color],
-          True
-        ],
+      testColorPresence[{{1, 2, 3}}, {EdgeStyle -> color, "EdgePolygonStyle" -> Black}, {color}, {"Polygons"}],
 
-        VerificationTest[
-          FreeQ[HypergraphPlot[{{1, 2, 3}}, EdgeStyle -> color, "EdgePolygonStyle" -> Black], color],
-          False
-        ],
+      testColorPresence[{{1, 2, 3}}, {EdgeStyle -> Black, "EdgePolygonStyle" -> color}, {color}, {"Polygons"}],
 
-        VerificationTest[
-          FreeQ[HypergraphPlot[{{1, 2, 3}}, EdgeStyle -> Black, "EdgePolygonStyle" -> color], color],
-          False
-        ],
+      testColorPresence[{{1, 2, 3}}, {PlotStyle -> color, EdgeStyle -> Automatic, VertexStyle -> Automatic}, {color}],
 
-        VerificationTest[
-          FreeQ[
-            HypergraphPlot[{{1, 2, 3}}, PlotStyle -> color, EdgeStyle -> Automatic, VertexStyle -> Automatic], color],
-          False
-        ],
+      testColorPresence[{{1, 2, 3}}, {PlotStyle -> color, EdgeStyle -> Black, VertexStyle -> Automatic}, {color}],
 
-        VerificationTest[
-          FreeQ[
-            HypergraphPlot[{{1, 2, 3}}, PlotStyle -> color, EdgeStyle -> Black, VertexStyle -> Automatic], color],
-          False
-        ],
+      testColorPresence[{{1, 2, 3}}, {PlotStyle -> color, EdgeStyle -> Automatic, VertexStyle -> Black}, {color}],
 
-        VerificationTest[
-          FreeQ[
-            HypergraphPlot[{{1, 2, 3}}, PlotStyle -> color, EdgeStyle -> Automatic, VertexStyle -> Black], color],
-          False
-        ],
+      testColorAbsense[{{1, 2, 3}, {3, 4, 5}}, {PlotStyle -> color, EdgeStyle -> Black, VertexStyle -> Black}, {color}],
 
-        VerificationTest[
-          FreeQ[
-            HypergraphPlot[
-              {{1, 2, 3}, {3, 4, 5}}, PlotStyle -> color, EdgeStyle -> Black, VertexStyle -> Black],
-            color],
-          True
-        ]
+      With[{hypergraph = {{1}, {1, 2}, {2, 3, 4}, {4, 5, 6, 7}}}, {
+        testUnevaluated[
+          HypergraphPlot[hypergraph, PlotStyle -> #],
+          {HypergraphPlot::invalidPlotStyle}
+        ] & /@ {{Red, Green, Blue, Yellow}, Table[Red, 7], {Red}},
+
+        testColorAbsense[hypergraph, {PlotStyle -> <|_ -> color, _ -> color2|>}, {color}],
+
+        testColorPresence[hypergraph, {PlotStyle -> <|_ -> color, 1 -> color2|>}, {color, color2}],
+
+        testColorPresence[
+          hypergraph, {PlotStyle -> <|_ -> color, _Integer -> color2, 1 -> color3|>}, {color, color2, color3}],
+
+        testColorPresence[hypergraph, {PlotStyle -> <|_ -> color, _List -> color2|>}, {color, color2}]
       }],
+
+      testColorPresence[
+        {{1}, {2}, {1, 2}, {2, 4}, {2, 3, 4}, {4, 5, 6, 7}, {7, 8, 9}},
+        {PlotStyle -> <|_ -> color, {_} -> color2, {_, _} -> color3, {_, _, _} -> color4, {_, _, _, _} -> color5|>},
+        {color, color2, color3, color4, color5}],
+
+      testColorPresence[
+        {{1}, {1, 2}, {2, 3, 4}, {4, 5, 6, 7}}, {PlotStyle -> <|_ -> color, {1} -> color2|>}, {color, color2}],
+
+      With[{hypergraph = {{1}, {1}, {1, 2}, {2, 4}, {2, 3, 4}, {4, 5, 6, 7}, {7, 8, 9}}}, {
+        testColorPresence[
+          hypergraph,
+          {PlotStyle -> <|_ -> White|>, EdgeStyle -> ColorData[97] /@ Range[7]},
+          ColorData[97] /@ Range[7]],
+
+        testUnevaluated[
+          HypergraphPlot[hypergraph, EdgeStyle -> {RGBColor[1, 0, 0]}],
+          {HypergraphPlot::invalidStyleLength}
+        ],
+
+        testColorPresence[hypergraph, {PlotStyle -> <|_ -> color|>, EdgeStyle -> <|# -> color2|>}, {color, color2}] & /@
+          {_, {_, _, _}, _ ? (FreeQ[4])},
+
+        testColorPresence[hypergraph, {PlotStyle -> <|_ -> color, _ ? (FreeQ[4]) -> color2|>}, {color, color2}],
+
+        testColorPresence[
+          hypergraph,
+          {PlotStyle -> <|_ -> color, _ ? (FreeQ[4]) -> color2|>, EdgeStyle -> <|{1, 2} -> color3|>},
+          {color, color2, color3}],
+
+        testColorPresence[
+          hypergraph,
+          {PlotStyle -> <|_ -> color, _ ? (FreeQ[4]) -> color2|>, VertexStyle -> #},
+          {color, color2, color3}] & /@ {color3, <|3 -> color3|>, <|_ ? OddQ -> color3|>},
+
+        testColorPresence[
+          hypergraph,
+          {PlotStyle -> <|_ -> color, _ ? (FreeQ[4]) -> color2|>, VertexStyle -> ColorData[97] /@ Range[9]},
+          Join[{color, color2}, ColorData[97] /@ Range[9]]],
+
+        testColorPresence[
+          hypergraph,
+          {PlotStyle -> <|_ -> color, _ ? (FreeQ[4]) -> color2|>,
+            EdgeStyle -> <|{1, 2} -> color3|>,
+            "EdgePolygonStyle" -> #},
+          {color, color2, color3, color4},
+          {"Polygons"}] & /@ {color4, <|{2, 3, 4} -> color4|>},
+
+        testColorPresence[
+          hypergraph,
+          {PlotStyle -> <|_ -> color, _ ? (FreeQ[4]) -> color2|>,
+            EdgeStyle -> <|{1, 2} -> color3|>,
+            "EdgePolygonStyle" -> ColorData[97] /@ Range[7]},
+          Join[{color, color2, color3}, ColorData[97] /@ Range[5, 7]],
+          {"Polygons"},
+          {"Ordered"}],
+
+        testColorPresence[
+          hypergraph,
+          {PlotStyle -> <|_ -> color, _ ? (FreeQ[4]) -> color2|>,
+            EdgeStyle -> <|{1, 2} -> color3|>,
+            "EdgePolygonStyle" -> ColorData[97] /@ Range[7]},
+          Join[{color, color2, color3}, ColorData[97] /@ Range[1, 7]],
+          {"Polygons"},
+          {"Cyclic"}],
+
+        testColorAbsense[
+          hypergraph,
+          {PlotStyle -> <|_ -> color, _ ? (FreeQ[4]) -> color2|>,
+            EdgeStyle -> <|{1, 2} -> color3|>,
+            "EdgePolygonStyle" -> ColorData[97] /@ Range[7]},
+          ColorData[97] /@ Range[1, 4],
+          {"Polygons"},
+          {"Ordered"}]
+      }],
+
+      testColorPresence[{{1}, {1, 2}, {2, 3, 4}}, {PlotStyle -> <|_List -> color|>}, {color}],
 
       VerificationTest[
         Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexSize -> 0.3]],
