@@ -388,16 +388,6 @@
         ],
 
         VerificationTest[
-          FreeQ[HypergraphPlot[{{1, 2, 3}, {3}, {3, 4, 5}}, "UnaryEdgeStyle" -> color], color],
-          False
-        ],
-
-        VerificationTest[
-          FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "UnaryEdgeStyle" -> color], color],
-          True
-        ],
-
-        VerificationTest[
           FreeQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexStyle -> color], color],
           False
         ],
@@ -420,16 +410,6 @@
         VerificationTest[
           FreeQ[HypergraphPlot[{}, EdgeStyle -> color], color],
           True
-        ],
-
-        VerificationTest[
-          FreeQ[HypergraphPlot[{{1}}, EdgeStyle -> color, "UnaryEdgeStyle" -> Black], color],
-          True
-        ],
-
-        VerificationTest[
-          FreeQ[HypergraphPlot[{{1}}, EdgeStyle -> color, "UnaryEdgeStyle" -> Automatic], color],
-          False
         ],
 
         VerificationTest[
@@ -458,14 +438,6 @@
           FreeQ[
             HypergraphPlot[{{1, 2, 3}}, PlotStyle -> color, EdgeStyle -> Automatic, VertexStyle -> Black], color],
           False
-        ],
-
-        VerificationTest[
-          FreeQ[
-            HypergraphPlot[
-              {{1}}, PlotStyle -> color, EdgeStyle -> Automatic, "UnaryEdgeStyle" -> Black, VertexStyle -> Black],
-            color],
-          True
         ],
 
         VerificationTest[
