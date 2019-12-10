@@ -293,7 +293,7 @@ normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
 	indexedSingleVertexEdges =
 		With[{
 				indices = Position[normalEdges, {}, 1][[All, 1]]},
-			Transpose[{Cases[edges[[indices]], Except[{}], 1], indices}]];
+			Cases[Transpose[{edges[[indices]], indices}], Except[{{}, _}], 1]];
 	indexedSingleVertexEdgeEmbedding = (# -> (#[[1, 1]] /. vertexEmbedding)) & /@ indexedSingleVertexEdges;
 
 	{vertexEmbedding,
