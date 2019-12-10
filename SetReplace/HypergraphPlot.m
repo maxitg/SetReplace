@@ -13,21 +13,23 @@ HypergraphPlot::usage = usageString[
 
 SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, _., OptionsPattern[]}};
 
+$plotStyleAutomatic = <|
+	_ -> Hue[0.6, 0.2, 0.8], (* vertex style *)
+	_List -> Hue[0.6, 0.7, 0.5]|>; (* edge style *)
+
 (* Automatic style pickes up, and possibly modifies the style it inherits from. *)
 Options[HypergraphPlot] = Join[{
-	"EdgePolygonStyle" -> <||>, (* inherits from EdgeStyle, with specified small opacity *)
-	EdgeStyle -> <||>, (* inherits from PlotStyle *)
+	"EdgePolygonStyle" -> Automatic, (* inherits from EdgeStyle, with specified small opacity *)
+	EdgeStyle -> Automatic, (* inherits from PlotStyle *)
 	GraphHighlight -> {},
 	GraphHighlightStyle -> Hue[1.0, 1.0, 0.7],
 	"HyperedgeRendering" -> "Polygons",
-	PlotStyle -> <|
-		_ -> Hue[0.6, 0.2, 0.8], (* vertex style *)
-		_List -> Hue[0.6, 0.7, 0.5]|>, (* edge style *)
+	PlotStyle -> $plotStyleAutomatic,
 	VertexCoordinateRules -> {},
 	VertexLabels -> None,
 	VertexSize -> 0.06,
 	"ArrowheadLength" -> 0.15,
-	VertexStyle -> <||>}, (* inherits from PlotStyle *)
+	VertexStyle -> Automatic}, (* inherits from PlotStyle *)
 	Options[Graphics]];
 
 $edgeTypes = {"Ordered", "Cyclic"};
@@ -54,6 +56,12 @@ General::invalidHighlightStyle =
 
 General::invalidSize =
 	"`1` `2` should be a non-negative number.";
+
+General::invalidPlotStyle =
+	"PlotStyle `1` should be either a style, or an association <|pattern -> style, ...|>.";
+
+General::invalidStyleLength =
+	"The list of styles `1` should have the same length as the number of `2` `3`.";
 
 (* Evaluation *)
 
@@ -83,17 +91,19 @@ hypergraphPlot$parse[
 				correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}] := Module[{
 		optionValue, plotStyles, edgeStyle, styles},
 	optionValue[opt_] := OptionValue[HypergraphPlot, {o}, opt];
-	plotStyle = optionValue[PlotStyle];
 	vertices = vertexList[edges];
 	(* these are lists, one style for each vertex element *)
 	styles = <|
 		$vertexPoint -> parseStyles[
 			optionValue[VertexStyle],
 			vertices,
-			plotStyle,
+			parseStyles[optionValue[PlotStyle], vertices, $plotStyleAutomatic, Identity],
 			Directive[#, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]] &],
 		$edgeLine -> (edgeStyles = parseStyles[
-			optionValue[EdgeStyle], edges, plotStyle, Directive[#, Opacity[0.7]] &]),
+			optionValue[EdgeStyle],
+			edges,
+			parseStyles[optionValue[PlotStyle], edges, $plotStyleAutomatic, Identity],
+			Directive[#, Opacity[0.7]] &]),
 		$edgePoint -> edgeStyles,
 		$edgePolygon -> parseStyles[optionValue["EdgePolygonStyle"], edges, edgeStyles, Directive[#, Opacity[0.09]] &]|>;
 	hypergraphPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
@@ -106,6 +116,8 @@ hypergraphPlot$parse[
 				VertexSize,
 				"ArrowheadLength"})
 ]
+
+toListStyleSpec[Automatic, elements_] := toListStyleSpec[<||>, elements]
 
 toListStyleSpec[spec : Except[_List | _Association], elements_] := toListStyleSpec[<|_ -> spec|>, elements]
 
@@ -128,7 +140,12 @@ correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	correctHighlightQ[edges, OptionValue[HypergraphPlot, opts, GraphHighlight]] &&
 	correctHighlightStyleQ[head, OptionValue[HypergraphPlot, opts, GraphHighlightStyle]] &&
 	correctSizeQ[head, "Vertex size", OptionValue[HypergraphPlot, opts, VertexSize]] &&
-	correctSizeQ[head, "Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"]]
+	correctSizeQ[head, "Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"]] &&
+	correctPlotStyleQ[head, OptionValue[HypergraphPlot, opts, PlotStyle]] &&
+	correctStyleLengthQ[
+		head, "vertices", Length[vertexList[edges]], OptionValue[HypergraphPlot, opts, VertexStyle]] &&
+	And @@ (correctStyleLengthQ[
+		head, "edges", Length[edges], OptionValue[HypergraphPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
 
 correctCoordinateRulesQ[head_, coordinateRules_] :=
 	If[!MatchQ[coordinateRules,
@@ -158,6 +175,20 @@ correctSizeQ[head_, capitalizedName_, size_] := (
 	Message[head::invalidSize, capitalizedName, size];
 	False
 )
+
+correctPlotStyleQ[head_, style_List] := (
+	Message[head::invalidPlotStyle, style];
+	False
+)
+
+correctPlotStyleQ[__] := True
+
+correctStyleLengthQ[head_, name_, correctLength_, styles_List] /; Length[styles] =!= correctLength := (
+	Message[head::invalidStyleLength, styles, name, correctLength];
+	False
+)
+
+correctStyleLengthQ[__] := True
 
 (* Implementation *)
 
