@@ -51,7 +51,7 @@ SyntaxInformation[WolframModel] =
 
 
 Options[WolframModel] := Join[
-	{"NodeNamingFunction" -> Automatic},
+	{"NodeNamingFunction" -> Automatic, "IncludePartialGenerations" -> True},
 	Options[setSubstitutionSystem]];
 
 
@@ -177,10 +177,15 @@ WolframModel[
 					OptionValue["NodeNamingFunction"]],
 				$Failed],
 			$Failed];
+		propertyEvaluateWithOptions =
+			propertyEvaluate[OptionValue["IncludePartialGenerations"]][renamedNodesEvolution, WolframModel, #] &;
 		result = If[renamedNodesEvolution =!= $Failed,
 			If[ListQ[property],
-					renamedNodesEvolution /@ property,
-					renamedNodesEvolution @ property] /.
+					Catch[
+						Check[propertyEvaluateWithOptions[#], Throw[$Failed, $propertyMessages]] & /@ property,
+						$propertyMessages,
+						$Failed &],
+					propertyEvaluateWithOptions @ property] /.
 				HoldPattern[WolframModelEvolutionObject[data_Association]] :>
 					WolframModelEvolutionObject[Join[data, <|$rules -> rulesSpec|>]],
 			$Failed];
