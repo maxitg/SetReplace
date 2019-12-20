@@ -604,7 +604,13 @@ WolframModelEvolutionObject[
 propertyEvaluate[True][args___] := propertyEvaluate[args]
 
 
-propertyEvaluate[False][evolution_, rest___] := propertyEvaluate[deleteIncompleteGenerations[evolution], rest]
+General::missingMaxCompleteGeneration = "Cannot drop incomplete generations in an object with missing information.";
+
+
+propertyEvaluate[False][evolution_, caller_, rest___] := If[MissingQ[evolution["MaxCompleteGeneration"]],
+	Message[caller::missingMaxCompleteGeneration],
+	propertyEvaluate[deleteIncompleteGenerations[evolution], caller, rest]
+]
 
 
 propertyEvaluate[includePartialGenerations_][evolution_, caller_, ___] :=
