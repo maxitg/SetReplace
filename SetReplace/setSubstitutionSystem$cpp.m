@@ -60,6 +60,15 @@ $cpp$setExpressions = If[$libraryFile =!= $Failed,
 	$Failed];
 
 
+$cpp$maxCompleteGeneration = If[$libraryFile =!= $Failed,
+	LibraryFunctionLoad[
+		$libraryFile,
+		"maxCompleteGeneration",
+		{Integer}, (* set ptr *)
+		Integer], (* generation *)
+	$Failed];
+
+
 (* ::Section:: *)
 (*Implementation*)
 
@@ -174,7 +183,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
-		mappedSet, localIndices, mappedRules, setPtr, cppOutput, resultAtoms,
+		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, resultAtoms,
 		inversePartialGlobalMap, inverseGlobalMap},
 	canonicalRules = toCanonicalRules[rules];
 	setAtoms = Hold /@ Union[Catenate[set]];
@@ -204,6 +213,8 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 		timeConstraint,
 		If[!returnOnAbortQ, Return[$Aborted]]];
 	cppOutput = decodeExpressions @ $cpp$setExpressions[setPtr];
+	maxCompleteGeneration =
+		Replace[$cpp$maxCompleteGeneration[setPtr], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]];
 	$cpp$setDelete[setPtr];
 	resultAtoms = Union[Catenate[cppOutput[$atomLists]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
@@ -213,6 +224,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 		cppOutput,
 		<|$atomLists ->
 				ReleaseHold @ Map[inverseGlobalMap, cppOutput[$atomLists], {2}],
-			$rules -> rules
+			$rules -> rules,
+			$maxCompleteGeneration -> maxCompleteGeneration
 		|>]]
 ]

@@ -29,4 +29,9 @@ EXTERN_C DLLEXPORT int setReplace(WolframLibraryData libData, mint argc, MArgume
  */
 EXTERN_C DLLEXPORT int setExpressions(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result);
 
+/** @brief Returns the largest generation that has both been reached, and has no matches that would produce expressions with that or lower generation.
+ * @details Is abortable, in which case returns LIBRARY_FUNCTION_ERROR.
+ */
+EXTERN_C DLLEXPORT int maxCompleteGeneration(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result);
+
 #endif /* SetReplace_hpp */

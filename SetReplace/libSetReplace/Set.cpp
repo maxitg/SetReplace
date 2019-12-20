@@ -120,6 +120,11 @@ namespace SetReplace {
             return result;
         }
         
+        Generation maxCompleteGeneration(const std::function<bool()> shouldAbort) {
+            indexNewExpressions(shouldAbort);
+            return std::min(smallestGeneration(matcher_.allMatches()), largestGeneration_);
+        }
+        
     private:
         Implementation(const std::vector<Rule>& rules,
                        const std::vector<AtomsVector>& initialExpressions,
@@ -275,6 +280,18 @@ namespace SetReplace {
             }
             updateAtomDegrees(atomDegrees, expressions, deltaCount);
         }
+        
+        Generation smallestGeneration(const std::set<Match>& matches) const {
+            Generation smallestSoFar = std::numeric_limits<Generation>::max();
+            for (const auto& match : matches) {
+                Generation largestForTheMatch = 0;
+                for (const ExpressionID id : match.inputExpressions) {
+                    largestForTheMatch = std::max(largestForTheMatch, expressions_.at(id).generation);
+                }
+                smallestSoFar = std::min(smallestSoFar, largestForTheMatch);
+            }
+            return smallestSoFar;
+        }
     };
     
     Set::Set(const std::vector<Rule>& rules,
@@ -292,5 +309,9 @@ namespace SetReplace {
     
     std::vector<SetExpression> Set::expressions() const {
         return implementation_->expressions();
+    }
+    
+    Generation Set::maxCompleteGeneration(const std::function<bool()> shouldAbort) {
+        return implementation_->maxCompleteGeneration(shouldAbort);
     }
 }

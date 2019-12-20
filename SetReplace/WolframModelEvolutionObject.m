@@ -29,6 +29,7 @@ PackageScope["$destroyerEvents"]
 PackageScope["$generations"]
 PackageScope["$atomLists"]
 PackageScope["$rules"]
+PackageScope["$maxCompleteGeneration"]
 
 
 (* ::Section:: *)
@@ -63,8 +64,12 @@ WolframModelEvolutionObject /:
 		MakeBoxes[
 			evo : WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			format_] := Module[
-	{generationsCount, eventsCount, rules, initialSet},
+	{generationsCount, maxCompleteGeneration, eventsCount, rules, initialSet},
 	generationsCount = evo["GenerationsCount"];
+	maxCompleteGeneration = Replace[evo["MaxCompleteGeneration"], _ ? MissingQ -> "?"];
+	generationsDisplay = If[generationsCount === maxCompleteGeneration,
+		generationsCount,
+		Row[{maxCompleteGeneration, "\[Ellipsis]", generationsCount}]];
 	eventsCount = evo["EventsCount"];
 	rules = data[$rules];
 	initialSet = evo[0];
@@ -73,8 +78,8 @@ WolframModelEvolutionObject /:
 		evo,
 		$graphIcon,
 		(* Always grid *)
-		{{BoxForm`SummaryItem[{"Generations count: ", generationsCount}]},
-		{BoxForm`SummaryItem[{"Events count: ", eventsCount}]}},
+		{{BoxForm`SummaryItem[{"Generations: ", generationsDisplay}]},
+		{BoxForm`SummaryItem[{"Events: ", eventsCount}]}},
 		(* Sometimes grid *)
 		{{BoxForm`SummaryItem[{"Rules: ", Short[rules]}]},
 		{BoxForm`SummaryItem[{"Initial set: ", Short[initialSet]}]}},
@@ -92,7 +97,8 @@ $accessorProperties = <|
 	"CreatorEvents" -> $creatorEvents,
 	"DestroyerEvents" -> $destroyerEvents,
 	"ExpressionGenerations" -> $generations,
-	"AllExpressions" -> $atomLists
+	"AllExpressions" -> $atomLists,
+	"MaxCompleteGeneration" -> $maxCompleteGeneration
 |>;
 
 
@@ -612,7 +618,7 @@ WolframModelEvolutionObject::corrupt =
 
 
 evolutionDataQ[data_Association] := Sort[Keys[data]] ===
-	Sort[{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules}]
+	Sort[{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules, $maxCompleteGeneration}]
 
 
 evolutionDataQ[___] := False
