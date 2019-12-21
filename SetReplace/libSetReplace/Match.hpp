@@ -68,6 +68,9 @@ namespace SetReplace {
                                                      const std::vector<AtomsVector> patternMatches,
                                                      std::vector<AtomsVector>& atomsToReplace);
         
+        /** @brief Returns the set of expression IDs matched in any match. */
+        const std::set<Match>& allMatches() const;
+        
     private:
         class Implementation;
         std::shared_ptr<Implementation> implementation_;

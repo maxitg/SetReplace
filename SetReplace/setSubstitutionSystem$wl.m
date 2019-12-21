@@ -215,6 +215,29 @@ addMetadataManagement[
 
 
 (* ::Subsection:: *)
+(*smallestMatchGeneration*)
+
+
+$generationMetadataIndex = 4;
+
+
+maxCompleteGeneration[output_, rulesNoMetadata_] := Module[{
+		patternToMatch, matches},
+	patternToMatch = toNormalRules[
+		addMetadataManagement[#, Infinity &, Infinity &, Infinity, Infinity, $noIndex] & /@ rulesNoMetadata];
+	matches = Reap[FirstCase[SortBy[output, #[[$generationMetadataIndex]] &], patternToMatch, Sow[$noMatch], {0}]][[2]];
+	Switch[matches,
+		{{$noMatch}},
+			Infinity,
+		{}, (* nothing -> something rule *)
+			0,
+		_,
+			Max[matches[[1, All, $generationMetadataIndex]]]
+	]
+]
+
+
+(* ::Subsection:: *)
 (*setSubstitutionSystem$wl*)
 
 
@@ -288,7 +311,8 @@ vertexCount[$noIndex] := 0
 
 setSubstitutionSystem$wl[caller_, rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_] := Module[{
 		setWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, result,
-		nextExpressionID = 1, nextEventID = 1, expressionsCountsPerVertex, vertexIndex, nextExpression},
+		nextExpressionID = 1, nextEventID = 1, expressionsCountsPerVertex, vertexIndex, nextExpression,
+		intermediateMaxCompleteGenerationObject},
 	nextExpression = nextExpressionID++ &;
 	(* {id, creator, destroyer, generation, atoms} *)
 	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
@@ -317,10 +341,24 @@ setSubstitutionSystem$wl[caller_, rules_, set_, stepSpec_, returnOnAbortQ_, time
 			outputWithMetadata[[1]],
 			If[outputWithMetadata[[2]] == {}, {}, outputWithMetadata[[2, 1]]]],
 		First];
-	WolframModelEvolutionObject[<|
+	intermediateMaxCompleteGenerationObject = WolframModelEvolutionObject[<|
 		$creatorEvents -> result[[All, 2]],
 		$destroyerEvents -> result[[All, 3]],
 		$generations -> result[[All, 4]],
 		$atomLists -> result[[All, 5]],
-		$rules -> rules|>]
+		$rules -> rules,
+		$maxCompleteGeneration -> CheckAbort[
+			maxCompleteGeneration[outputWithMetadata[[1]], renamedRules],
+			If[returnOnAbortQ,
+				Missing["Unknown", $Aborted],
+				Return[$Aborted]
+			]]|>];
+	WolframModelEvolutionObject[
+		Join[
+			intermediateMaxCompleteGenerationObject[[1]],
+			<|$maxCompleteGeneration -> With[{
+					possibleInfinityResult = intermediateMaxCompleteGenerationObject[[1, Key[$maxCompleteGeneration]]]},
+				If[MissingQ[possibleInfinityResult],
+					possibleInfinityResult,
+					Min[possibleInfinityResult, intermediateMaxCompleteGenerationObject["GenerationsCount"]]]]|>]]
 ]

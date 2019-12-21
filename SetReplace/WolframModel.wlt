@@ -4,14 +4,12 @@
       Attributes[Global`testUnevaluated] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
 
-      $namingTestModel = {
-        {{0, 1}, {0, 2}, {0, 3}} ->
-          {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6},
-            {6, 5}, {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}},
-        {{0, 0},
-        {0, 0}, {0, 0}},
-        5,
-        "FinalState"};
+      $interestingRule = {{0, 1}, {0, 2}, {0, 3}} ->
+        {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6},
+          {6, 5}, {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}};
+      $interestingInit = {{0, 0}, {0, 0}, {0, 0}};
+
+      $namingTestModel = {$interestingRule, $interestingInit, 5, "FinalState"};
 
       $timeConstraintRule = {{1, 2}} -> {{1, 3}, {3, 2}};
       $timeConstraintInit = {{0, 0}};
@@ -1270,7 +1268,32 @@
           WolframModel[timeConstraintRule, timeConstraintInit, 100, "FinalState", Method -> #, TimeConstraint -> 0.1],
           $Aborted
         ] & /@ $SetReplaceMethods
-      }]
+      }],
+
+      (** MaxCompleteGeneration **)
+
+      Table[With[{method = method}, {
+        With[{rule = $interestingRule, init = $interestingInit},
+          VerificationTest[
+            WolframModel[rule, init, <|"MaxEvents" -> 10|>, "MaxCompleteGeneration", Method -> method],
+            2
+          ]
+        ],
+
+        VerificationTest[
+          Table[WolframModel[#1, #2, <|"MaxEvents" -> e|>, "MaxCompleteGeneration", Method -> method], {e, 0, #3}],
+          #4
+        ] & @@@ {
+          {{{1}} -> {}, {{1}, {2}, {3}}, 4, {0, 0, 0, 1, 1}},
+          {{{{1}} -> {}, {{3, 4}} -> {{3, 4, 5}}, {{3, 4, 5}} -> {}}, {{1}, {2}, {3, 4}}, 5, {0, 0, 0, 1, 2, 2}},
+          {{{1, 2}, {2, 3}} -> {{1, 2, 3}}, {{1, 2}, {2, 3}, {3, 4}}, 2, {0, 1, 1}},
+          {{{1, 2}, {2, 3}} -> {{1, 2, 3}}, {{1, 2}, {2, 3}, {3, 4}, {4, 5}}, 3, {0, 0, 1, 1}}},
+
+        VerificationTest[
+          WolframModel[{} -> {{1}}, {}, <|"MaxEvents" -> 10|>, "MaxCompleteGeneration"],
+          0
+        ]
+      }], {method, DeleteCases[$SetReplaceMethods, Automatic]}]
     }
   |>,
 

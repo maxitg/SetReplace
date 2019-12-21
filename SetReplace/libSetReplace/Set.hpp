@@ -56,6 +56,11 @@ namespace SetReplace {
          */
         std::vector<SetExpression> expressions() const;
         
+        /** @brief Returns the largest generation that has both been reached, and has no matches that would produce expressions with that or lower generation.
+         * @details Takes O(matches count) + as long as it would take to do the next step (because new expressions need to be indexed).
+         */
+        Generation maxCompleteGeneration(const std::function<bool()> shouldAbort);
+        
     private:
         class Implementation;
         std::shared_ptr<Implementation> implementation_;

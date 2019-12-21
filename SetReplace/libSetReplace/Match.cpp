@@ -119,8 +119,11 @@ namespace SetReplace {
             return *matches_.begin();
         }
         
-    private:
+        const std::set<Match>& allMatches() {
+            return matches_;
+        }
         
+    private:
         void addMatchesForRule(const std::vector<ExpressionID>& expressionIDs, const RuleID& ruleID, const std::function<bool()> shouldAbort) {
             for (int i = 0; i < rules_[ruleID].inputs.size(); ++i) {
                 Match emptyMatch{ruleID, std::vector<ExpressionID>(rules_[ruleID].inputs.size(), -1)};
@@ -314,5 +317,9 @@ namespace SetReplace {
             }
         }
         return true;
+    }
+
+    const std::set<Match>& Matcher::allMatches() const {
+        return implementation_->allMatches();
     }
 }

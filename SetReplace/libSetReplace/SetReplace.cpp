@@ -160,6 +160,12 @@ namespace SetReplace {
         return LIBRARY_NO_ERROR;
     }
     
+    const std::function<bool()> shouldAbort(WolframLibraryData& libData) {
+        return [&libData]() {
+            return static_cast<bool>(libData->AbortQ());
+        };
+    }
+
     int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
         if (argc != 2) {
             return LIBRARY_FUNCTION_ERROR;
@@ -173,11 +179,8 @@ namespace SetReplace {
             return LIBRARY_FUNCTION_ERROR;
         }
         
-        const auto shouldAbort = [&libData]() {
-            return static_cast<bool>(libData->AbortQ());
-        };
         try {
-            setPtr->replace(stepSpec, shouldAbort);
+            setPtr->replace(stepSpec, shouldAbort(libData));
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -194,6 +197,22 @@ namespace SetReplace {
         try {
             const auto expressions = setPtr->expressions();
             MArgument_setMTensor(result, putSet(expressions, libData));
+        } catch (...) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+        
+        return LIBRARY_NO_ERROR;
+    }
+
+    int maxCompleteGeneration(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+        if (argc != 1) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+        
+        auto setPtr = (Set*)MArgument_getInteger(argv[0]);
+        try {
+            const auto maxCompleteGeneration = setPtr->maxCompleteGeneration(shouldAbort(libData));
+            MArgument_setInteger(result, maxCompleteGeneration);
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -228,4 +247,8 @@ EXTERN_C int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, 
 
 EXTERN_C int setExpressions(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
     return SetReplace::setExpressions(libData, argc, argv, result);
+}
+
+EXTERN_C int maxCompleteGeneration(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    return SetReplace::maxCompleteGeneration(libData, argc, argv, result);
 }

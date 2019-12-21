@@ -40,12 +40,12 @@
             Head[SetReplace[
               init,
               rule,
-              100,
+              #,
               Method -> "Symbolic"]],
             List,
             TimeConstraint -> 60,
             MemoryConstraint -> 5*^6
-          ],
+          ] & /@ {14, 100},
   
           (** Naming function performance **)
   
