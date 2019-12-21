@@ -179,15 +179,17 @@ WolframModel[
 			$Failed];
 		propertyEvaluateWithOptions =
 			propertyEvaluate[OptionValue["IncludePartialGenerations"]][renamedNodesEvolution, WolframModel, #] &;
-		result = If[renamedNodesEvolution =!= $Failed,
-			If[ListQ[property],
-					Catch[
-						Check[propertyEvaluateWithOptions[#], Throw[$Failed, $propertyMessages]] & /@ property,
-						$propertyMessages,
-						$Failed &],
-					propertyEvaluateWithOptions @ property] /.
-				HoldPattern[WolframModelEvolutionObject[data_Association]] :>
-					WolframModelEvolutionObject[Join[data, <|$rules -> rulesSpec|>]],
+		result = Check[
+			If[renamedNodesEvolution =!= $Failed,
+				If[ListQ[property],
+						Catch[
+							Check[propertyEvaluateWithOptions[#], Throw[$Failed, $propertyMessages]] & /@ property,
+							$propertyMessages,
+							$Failed &],
+						propertyEvaluateWithOptions @ property] /.
+					HoldPattern[WolframModelEvolutionObject[data_Association]] :>
+						WolframModelEvolutionObject[Join[data, <|$rules -> rulesSpec|>]],
+				$Failed],
 			$Failed];
 		result /; result =!= $Failed
 	]
