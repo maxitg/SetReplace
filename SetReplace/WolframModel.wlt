@@ -1293,7 +1293,105 @@
           WolframModel[{} -> {{1}}, {}, <|"MaxEvents" -> 10|>, "MaxCompleteGeneration"],
           0
         ]
-      }], {method, DeleteCases[$SetReplaceMethods, Automatic]}]
+      }], {method, DeleteCases[$SetReplaceMethods, Automatic]}],
+
+      (** IncludePartialGenerations **)
+
+      Table[With[{
+          models = {
+            {{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
+                {{2, 8, 7}, {9, 3, 10}, {5, 11, 12}, {6, 13, 14}, {10, 13}, {7, 9}, {11, 8}, {12, 14}},
+              {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}},
+              7},
+            {{{1, 1}} -> {{1, 2}, {2, 2}, {2, 2}}, {{1, 1}}, 7},
+            {{{1, 2}, {1, 3}, {1, 4}} -> {{2, 3}, {2, 4}, {3, 3}, {3, 5}, {4, 5}}, {{1, 1}, {1, 1}, {1, 1}}, 8},
+            {{{{1, 2}, {2, 3}} -> {{1, 3}, {2, 4}, {4, 3}}, {{1, 1}, {2, 1}} -> {{1, 1}}},
+              {{1, 1}, {1, 1}},
+              6}},
+          method = method},
+        With[{
+            eventCounts = {#[[1]], Round[Mean[#]], #[[2]] - 1, #[[2]]} & @
+              {WolframModel[#1, #2, #3, "EventsCount"], WolframModel[#1, #2, #3 + 1, "EventsCount"]}}, {
+          Table[With[{property = property}, {
+            VerificationTest[
+              SameQ @@ Table[
+                WolframModel[
+                  #1,
+                  #2,
+                  <|"MaxEvents" -> eventCounts[[k]]|>,
+                  property,
+                  "IncludePartialGenerations" -> False,
+                  Method -> method],
+                {k, 3}]
+            ],
+
+            If[!ListQ[property], VerificationTest[
+              SameQ @@ Table[
+                WolframModel[
+                  #1,
+                  #2,
+                  <|"MaxEvents" -> eventCounts[[k]]|>,
+                  Method -> method][property, "IncludePartialGenerations" -> False],
+                {k, 3}]
+            ], Nothing],
+
+            VerificationTest[
+              Not @* SameQ @@ Table[
+                WolframModel[
+                  #1,
+                  #2,
+                  <|"MaxEvents" -> eventCounts[[k]]|>,
+                  property,
+                  "IncludePartialGenerations" -> False,
+                  Method -> method],
+                {k, {1, 4}}]
+            ],
+
+            If[!ListQ[property], VerificationTest[
+              Not @* SameQ @@ Table[
+                WolframModel[
+                  #1,
+                  #2,
+                  <|"MaxEvents" -> eventCounts[[k]]|>,
+                  Method -> method][property, "IncludePartialGenerations" -> False],
+                {k, {1, 4}}]
+            ], Nothing]
+          }], {property, {"EvolutionObject", "FinalState", {"FinalState", "AtomsCountFinal"}}}]
+        }] & @@@ models
+      ], {method, DeleteCases[$SetReplaceMethods, Automatic]}],
+
+      testUnevaluated[
+        WolframModel[{{1, 2, 3}} -> {{1, 2, 3}}, {{1, 2, 3}}, 1, "IncludePartialGenerations" -> $$$invalid$$$],
+        {WolframModel::invalidFiniteOption}
+      ],
+
+      testUnevaluated[
+        WolframModel[
+          {{1, 2, 3}} -> {{1, 2, 3}},
+          {{1, 2, 3}},
+          1,
+          {"FinalState", "AtomsCountFinal"},
+          "IncludePartialGenerations" -> $$$invalid$$$],
+        {WolframModel::invalidFiniteOption}
+      ],
+
+      With[{evolution = WolframModel[{{1, 2, 3}} -> {{1, 2, 3}}, {{1, 2, 3}}, 1]},
+        testUnevaluated[
+          evolution["AtomsCountFinal", "IncludePartialGenerations" -> $$$invalid$$$],
+          {WolframModelEvolutionObject::invalidFiniteOption}
+        ]
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {}, {{1, 2}, {2, 3}, {3, 4}, {4, 5}}, <|"MaxEvents" -> 3|>, "IncludePartialGenerations" -> False],
+        WolframModel[{{1, 2}} -> {}, {{1, 2}, {2, 3}, {3, 4}, {4, 5}}, <|"MaxEvents" -> 0|>]
+      ],
+
+      VerificationTest[
+        WolframModel[{} -> {{1, 2}}, {}, <|"MaxEvents" -> 3|>, "IncludePartialGenerations" -> False],
+        WolframModel[{} -> {{1, 2}}, {}, <|"MaxEvents" -> 0|>]
+      ]
     }
   |>,
 
