@@ -227,7 +227,7 @@ setSubstitutionSystem[
 		canonicalRules,
 		failedQ = False},
 	If[(timeConstraint > 0) =!= True, Return[$Failed]];
-	If[StringQ[eventOrderingFunction], Return[$Failed]];
+	If[!MatchQ[eventOrderingFunction, Alternatives @@ $EventOrderingFunctions[[All, 2]]], Return[$Failed]];
 	canonicalRules = toCanonicalRules[rules];
 	If[MatchQ[method, Automatic | $cppMethod]
 			&& MatchQ[set, {{___}...}]
