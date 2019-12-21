@@ -1,4 +1,3 @@
-#include "Match.hpp"
 #include "Set.hpp"
 
 #include <algorithm>
@@ -42,8 +41,10 @@ namespace SetReplace {
         
     public:
         Implementation(const std::vector<Rule>& rules,
-                       const std::vector<AtomsVector>& initialExpressions) :
-            Implementation(rules, initialExpressions, [this](const int expressionID) {
+                       const std::vector<AtomsVector>& initialExpressions,
+                       const Matcher::EvaluationType evaluationType,
+                       const unsigned int randomSeed) :
+            Implementation(rules, initialExpressions, evaluationType, randomSeed, [this](const int expressionID) {
                 return expressions_.at(expressionID).atoms;
             }) {}
         
@@ -128,10 +129,12 @@ namespace SetReplace {
     private:
         Implementation(const std::vector<Rule>& rules,
                        const std::vector<AtomsVector>& initialExpressions,
+                       const Matcher::EvaluationType evaluationType,
+                       const unsigned int randomSeed,
                        const std::function<AtomsVector(ExpressionID)>& getAtomsVector) :
         rules_(rules),
         atomsIndex_(getAtomsVector),
-        matcher_(rules_, atomsIndex_, getAtomsVector) {
+        matcher_(rules_, atomsIndex_, getAtomsVector, evaluationType, randomSeed) {
             for (const auto& expression : initialExpressions) {
                 for (const auto& atom : expression) {
                     if (atom <= 0) throw Error::NonPositiveAtoms;
@@ -295,8 +298,10 @@ namespace SetReplace {
     };
     
     Set::Set(const std::vector<Rule>& rules,
-             const std::vector<AtomsVector>& initialExpressions) {
-        implementation_ = std::make_shared<Implementation>(rules, initialExpressions);
+             const std::vector<AtomsVector>& initialExpressions,
+             const Matcher::EvaluationType evaluationType,
+             const unsigned int randomSeed) {
+        implementation_ = std::make_shared<Implementation>(rules, initialExpressions, evaluationType, randomSeed);
     }
     
     int Set::replaceOnce(const std::function<bool()> shouldAbort) {

@@ -1,6 +1,7 @@
 #include "Match.hpp"
 
 #include <algorithm>
+#include <random>
 #include <unordered_map>
 
 namespace SetReplace {
@@ -64,51 +65,49 @@ namespace SetReplace {
         // Matches organized by expression IDs, useful for deleting matches for deleted expressions.
         std::unordered_map<ExpressionID, std::unordered_set<std::set<Match>::const_iterator, IteratorHash>> matchesIndex_;
         
+        std::vector<std::set<Match>::const_iterator> allMatchIterators_;
+        std::unordered_map<std::set<Match>::const_iterator, int, IteratorHash> matchIteratorsToIndices_;
+        
+        EvaluationType evaluationType_;
+        std::mt19937 randomGenerator_;
+        size_t nextRandomMatchIndex_ = -1;
+        
     public:
         Implementation(const std::vector<Rule>& rules,
                        AtomsIndex& atomsIndex,
-                       const std::function<AtomsVector(ExpressionID)> getAtomsVector) :
-            rules_(rules), atomsIndex_(atomsIndex), getAtomsVector_(getAtomsVector) {}
+                       const std::function<AtomsVector(ExpressionID)> getAtomsVector,
+                       const EvaluationType evaluationType,
+                       const unsigned int randomSeed) :
+            rules_(rules),
+            atomsIndex_(atomsIndex),
+            getAtomsVector_(getAtomsVector),
+            evaluationType_(evaluationType),
+            randomGenerator_(randomSeed) {}
         
         void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort) {
             for (int i = 0; i < rules_.size(); ++i) {
                 addMatchesForRule(expressionIDs, i, shouldAbort);
             }
+            
+            chooseNextRandomMatch();
         }
         
+        // Note, deletion changes the ordering of allMatchIterators_, therefore
+        // deletion should be done in deterministic order, otherwise, the random replacements will not be deterministic
         void removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs) {
-            std::unordered_set<std::set<Match>::const_iterator, IteratorHash> matchIteratorsToDelete;
+            std::set<Match> matchesToDelete; // do not use unordered_set, as it will make order undeterministic
             for (const auto& expression : expressionIDs) {
                 const auto& matches = matchesIndex_[expression];
                 for (const auto& matchIterator : matches) {
-                    matchIteratorsToDelete.insert(matchIterator);
+                    matchesToDelete.insert(*matchIterator);
                 }
             }
             
-            std::unordered_set<ExpressionID> involvedExpressions;
-            for (const auto& iterator : matchIteratorsToDelete) {
-                for (const auto& expression : iterator->inputExpressions) {
-                    involvedExpressions.insert(expression);
-                }
+            for (const auto& match : matchesToDelete) {
+                deleteMatch(matches_.find(match));
             }
             
-            for (const auto& expression : involvedExpressions) {
-                auto indexIterator = matchesIndex_[expression].begin();
-                while (indexIterator != matchesIndex_[expression].end()) {
-                    if (matchIteratorsToDelete.count(*indexIterator)) {
-                        indexIterator = matchesIndex_[expression].erase(indexIterator);
-                    } else {
-                        ++indexIterator;
-                    }
-                }
-                if (matchesIndex_[expression].empty()) {
-                    matchesIndex_.erase(expression);
-                }
-            }
-            
-            for (const auto& matchIterator : matchIteratorsToDelete) {
-                matches_.erase(matchIterator);
-            }
+            chooseNextRandomMatch();
         }
         
         int matchCount() const {
@@ -116,7 +115,11 @@ namespace SetReplace {
         }
         
         Match nextMatch() const {
-            return *matches_.begin();
+            if (evaluationType_ == EvaluationType::Random) {
+                return *allMatchIterators_[nextRandomMatchIndex_];
+            } else {
+                return *matches_.begin();
+            }
         }
         
         const std::set<Match>& allMatches() {
@@ -188,10 +191,31 @@ namespace SetReplace {
         }
         
         void insertMatch(const Match& newMatch) {
+            if (matches_.count(newMatch)) return;
+            
             const auto iterator = matches_.insert(newMatch).first;
             for (const auto& expression : newMatch.inputExpressions) {
                 matchesIndex_[expression].insert(iterator);
             }
+            allMatchIterators_.push_back(iterator);
+            matchIteratorsToIndices_[iterator] = (int)allMatchIterators_.size() - 1;
+        }
+        
+        void deleteMatch(const std::set<Match>::const_iterator iterator) {
+            const int deletedIndex = matchIteratorsToIndices_[iterator];
+            matchIteratorsToIndices_.erase(iterator);
+            
+            std::swap(allMatchIterators_[deletedIndex], allMatchIterators_[allMatchIterators_.size() - 1]);
+            allMatchIterators_.pop_back();
+            matchIteratorsToIndices_[allMatchIterators_[deletedIndex]] = deletedIndex;
+            
+            for (const auto& expression : iterator->inputExpressions) {
+                matchesIndex_[expression].erase(iterator);
+                if (matchesIndex_[expression].empty()) {
+                    matchesIndex_.erase(expression);
+                }
+            }
+            matches_.erase(iterator);
         }
         
         static bool isMatchComplete(const Match& match) {
@@ -259,12 +283,26 @@ namespace SetReplace {
                 return {nextInputIdx, nextExpressionsToTry};
             }
         }
+
+        // This should be called every time matches are updated.
+        void chooseNextRandomMatch() {
+            if (evaluationType_ == EvaluationType::Random) {
+                if (allMatchIterators_.size() == 0) {
+                    nextRandomMatchIndex_ = -1;
+                } else {
+                    auto distribution = std::uniform_int_distribution<size_t>(0, allMatchIterators_.size() - 1);
+                    nextRandomMatchIndex_ = distribution(randomGenerator_);
+                }
+            }
+        }
     };
     
     Matcher::Matcher(const std::vector<Rule>& rules,
                      AtomsIndex& atomsIndex,
-                     const std::function<AtomsVector(ExpressionID)> getAtomsVector) {
-        implementation_ = std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector);
+                     const std::function<AtomsVector(ExpressionID)> getAtomsVector,
+                     const EvaluationType evaluationType,
+                     const unsigned int randomSeed) {
+        implementation_ = std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector, evaluationType, randomSeed);
     }
     
     void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort) {
