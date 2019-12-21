@@ -179,9 +179,10 @@ $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
 
 
 $maxInt = 2^31 - 1;
+$maxUnsignedInt = 2^32 - 1;
 
 
-setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_] /;
+setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_] /;
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
@@ -204,8 +205,8 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 	setPtr = $cpp$setCreate[
 		encodeNestedLists[List @@@ mappedRules],
 		encodeNestedLists[mappedSet],
-		1,
-		0];
+		Replace[eventOrderingFunction, {$EventOrderingFunctionSequential -> 0, $EventOrderingFunctionRandom -> 1}],
+		If[eventOrderingFunction === $EventOrderingFunctionRandom, RandomInteger[{0, $maxUnsignedInt}], 0]];
 	TimeConstrained[
 		CheckAbort[
 			$cpp$setReplace[
