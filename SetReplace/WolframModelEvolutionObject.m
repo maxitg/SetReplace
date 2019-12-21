@@ -583,12 +583,57 @@ propertyEvaluate[
 (*Public properties call*)
 
 
-WolframModelEvolutionObject[data_ ? evolutionDataQ][property___] := Module[{result},
+$masterOptions = {"IncludePartialGenerations" -> True};
+
+
+WolframModelEvolutionObject[
+		data_ ? evolutionDataQ][
+		property___ ? (Not[MatchQ[#, OptionsPattern[]]] &),
+		opts : OptionsPattern[]] := Module[{prunedObject, result},
 	result = Check[
-		propertyEvaluate[
-			WolframModelEvolutionObject[data], WolframModelEvolutionObject, property],
+		propertyEvaluate[OptionValue[Join[{opts}, $masterOptions], "IncludePartialGenerations"]][
+			WolframModelEvolutionObject[data],
+			WolframModelEvolutionObject,
+			property,
+			##] & @@ Flatten[FilterRules[{opts}, Except[$masterOptions]]],
 		$Failed];
 	result /; result =!= $Failed
+]
+
+
+propertyEvaluate[True][args___] := propertyEvaluate[args]
+
+
+General::missingMaxCompleteGeneration = "Cannot drop incomplete generations in an object with missing information.";
+
+
+propertyEvaluate[False][evolution_, caller_, rest___] := If[MissingQ[evolution["MaxCompleteGeneration"]],
+	Message[caller::missingMaxCompleteGeneration],
+	propertyEvaluate[deleteIncompleteGenerations[evolution], caller, rest]
+]
+
+
+propertyEvaluate[includePartialGenerations_][evolution_, caller_, ___] :=
+	Message[caller::invalidFiniteOption, "IncludePartialGenerations", includePartialGenerations, {True, False}]
+
+
+deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := Module[{
+		maxCompleteGeneration, expressionsToDelete, lastGenerationExpressions, deleteEventsRules},
+	maxCompleteGeneration = data[$maxCompleteGeneration];
+	{expressionsToDelete, lastGenerationExpressions} =
+		Position[data[$generations], _ ? #][[All, 1]] & /@ {# > maxCompleteGeneration &, # == maxCompleteGeneration &};
+	expressionsToKeep = Complement[Range[Length[data[$generations]]], expressionsToDelete];
+	deleteEventsRules = Dispatch[Thread[
+		Union[data[$creatorEvents][[expressionsToDelete]], data[$destroyerEvents][[lastGenerationExpressions]]] ->
+			Infinity]];
+	WolframModelEvolutionObject[<|
+		$creatorEvents -> data[$creatorEvents][[expressionsToKeep]],
+		$destroyerEvents -> data[$destroyerEvents][[expressionsToKeep]] /. deleteEventsRules,
+		$generations -> data[$generations][[expressionsToKeep]],
+		$atomLists -> data[$atomLists][[expressionsToKeep]],
+		$rules -> data[$rules],
+		$maxCompleteGeneration -> data[$maxCompleteGeneration]
+	|>]
 ]
 
 
