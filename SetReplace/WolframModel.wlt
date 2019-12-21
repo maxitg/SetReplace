@@ -1399,6 +1399,67 @@
       VerificationTest[
         WolframModel[{} -> {{1, 2}}, {}, <|"MaxEvents" -> 3|>, "IncludePartialGenerations" -> False],
         WolframModel[{} -> {{1, 2}}, {}, <|"MaxEvents" -> 0|>]
+      ],
+
+      (** EventOrderingFunction **)
+
+      VerificationTest[
+        Head[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> "Sequential"]],
+        WolframModelEvolutionObject
+      ],
+
+      VerificationTest[
+        Head[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> "Random"]],
+        WolframModelEvolutionObject
+      ],
+
+      testUnevaluated[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> "$$$invalid$$$"],
+        {WolframModel::invalidFiniteOption}
+      ],
+
+      testUnevaluated[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> $$$invalid$$$],
+        {WolframModel::invalidFiniteOption}
+      ],
+
+      testUnevaluated[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> 1],
+        {WolframModel::invalidFiniteOption}
+      ],
+
+      VerificationTest[
+        Head[WolframModel[
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
+          {{1, 1}},
+          3,
+          "EventOrderingFunction" -> "Sequential",
+          Method -> "Symbolic"]],
+        WolframModelEvolutionObject
+      ],
+
+      testUnevaluated[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> "Random", Method -> "Symbolic"],
+        {WolframModel::symbolicRandomUnsupported}
+      ],
+
+      testUnevaluated[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> "$inv$", Method -> "Symbolic"],
+        {WolframModel::invalidFiniteOption}
+      ],
+
+      testUnevaluated[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> $$inv$$, Method -> "Symbolic"],
+        {WolframModel::invalidFiniteOption}
+      ],
+
+      testUnevaluated[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> 1, Method -> "Symbolic"],
+        {WolframModel::invalidFiniteOption}
       ]
     }
   |>,

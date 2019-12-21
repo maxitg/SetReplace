@@ -14,47 +14,56 @@
       ];
 
       $systemsToTest = {
-        {{{0, 1}}, ToPatternRules[{{0, 1}} -> {{0, 2}, {2, 1}}], 100, 6},
-        {{{1}}, ToPatternRules[{{{1}} -> {{1}}}], 100, 100},
-        {{{1}}, ToPatternRules[{{{1}} -> {{2}}}], 100, 100},
-        {{{1}}, ToPatternRules[{{{1}} -> {{2}, {1, 2}}}], 100, 6},
-        {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 1}}}], 100, 6},
-        {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 2}}}], 100, 6},
-        {{{1}}, ToPatternRules[{{{1}} -> {{1}, {2}, {1, 3}}}], 100, 6},
-        {{{1}}, ToPatternRules[{{{1}} -> {{2}, {2}, {1, 2}}}], 100, 6},
-        {{{1}}, ToPatternRules[{{{1}} -> {{2}, {3}, {1, 2}}}], 100, 6},
-        {{{1}}, ToPatternRules[{{{1}} -> {{2}, {3}, {1, 2, 4}}}], 100, 6},
-        {{{1}}, ToPatternRules[{{{1}} -> {{2}, {2}, {2}, {1, 2}}}], 100, 4},
-        {{{1}, {1}, {1}}, ToPatternRules[{{{1}} -> {{2}, {1, 2}}}], 100, 34},
-        {{{1, 1}}, ToPatternRules[{{{1, 2}} -> {{1, 3}, {2, 3}}}], 100, 6},
-        {{{0, 1}, {0, 2}, {0, 3}},
-          {{{a_, b_}, {a_, c_}, {a_, d_}} :>
-            Module[{$0, $1, $2}, {
-              {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
-              {$0, b}, {$1, c}, {$2, d}}]},
-          30,
-          3},
-        {{{0, 0}, {0, 0}, {0, 0}},
-          {{{a_, b_}, {a_, c_}, {a_, d_}} :>
-            Module[{$0, $1, $2}, {
-              {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
-              {$0, b}, {$1, c}, {$2, d}}]},
-          30,
-          3},
-        {{{0, 1}, {0, 2}, {0, 3}},
-          {{{a_, b_}, {a_, c_}, {a_, d_}} :>
-            Module[{$0, $1, $2}, {
-              {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
-              {$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
-          30,
-          3},
-        {{{0, 0}, {0, 0}, {0, 0}},
-          {{{a_, b_}, {a_, c_}, {a_, d_}} :>
-            Module[{$0, $1, $2}, {
-              {$0, $1}, {$1, $2}, {$2, $0}, {$0, $2}, {$2, $1}, {$1, $0},
-              {$0, b}, {$1, c}, {$2, d}, {b, $2}, {d, $0}}]},
-          30,
-          3}
+        {{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, 100, 6, 2000, 10, $branching},
+        {{{{1}} -> {{1}}}, {{1}}, 100, 100, 2000, 2000, $sequential},
+        {{{{1}} -> {{2}}}, {{1}}, 100, 100, 2000, 2000, $sequential},
+        {{{{1}} -> {{2}, {1, 2}}}, {{1}}, 100, 6, 2000, 2000, $sequential},
+        {{{{1}} -> {{1}, {2}, {1, 1}}}, {{1}}, 100, 6, 2000, 10, $branching},
+        {{{{1}} -> {{1}, {2}, {1, 2}}}, {{1}}, 100, 6, 2000, 10, $branching},
+        {{{{1}} -> {{1}, {2}, {1, 3}}}, {{1}}, 100, 6, 2000, 10, $branching},
+        {{{{1}} -> {{2}, {2}, {1, 2}}}, {{1}}, 100, 6, 2000, 10, $branching},
+        {{{{1}} -> {{2}, {3}, {1, 2}}}, {{1}}, 100, 6, 2000, 10, $branching},
+        {{{{1}} -> {{2}, {3}, {1, 2, 4}}}, {{1}}, 100, 6, 2000, 10, $branching},
+        {{{{1}} -> {{2}, {2}, {2}, {1, 2}}}, {{1}}, 100, 4, 2000, 7, $branching},
+        {{{{1}} -> {{2}, {1, 2}}}, {{1}, {1}, {1}}, 100, 34, 2000, 666, $branching},
+        {{{{1, 2}} -> {{1, 3}, {2, 3}}}, {{1, 1}}, 100, 6, 2000, 10, $branching},
+        {{{0, 1}, {0, 2}, {0, 3}} -> {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}},
+          {{0, 1}, {0, 2}, {0, 3}},
+          30, 3, 200, 5,
+          $branching},
+        {{{0, 1}, {0, 2}, {0, 3}} -> {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}},
+          {{0, 0}, {0, 0}, {0, 0}},
+          30, 3, 200, 5,
+          $branching},
+        {{{0, 1}, {0, 2}, {0, 3}} ->
+            {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}},
+          {{0, 1}, {0, 2}, {0, 3}},
+          30, 3, 200, 5,
+          $branching},
+        {{{0, 1}, {0, 2}, {0, 3}} ->
+            {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}},
+          {{0, 0}, {0, 0}, {0, 0}},
+          30, 3, 200, 5,
+          $branching},
+        {{{1, 2}, {1, 3}, {1, 4}} -> {{2, 3}, {2, 4}, {3, 3}, {3, 5}, {4, 5}},
+          {{1, 1}, {1, 1}, {1, 1}},
+          50, 7, 200, 12,
+          $branching},
+        {{{1, 2, 3}, {4, 5, 6}, {1, 4}, {4, 1}} ->
+            {{2, 7, 8}, {3, 9, 10}, {5, 11, 12}, {6, 13, 14}, {7, 11}, {8, 10}, {9, 13}, {10, 8}, {11, 7}, {12, 14},
+              {13, 9}, {14, 12}},
+          {{1, 2, 3}, {4, 5, 6}, {1, 4}, {2, 5}, {3, 6}, {4, 1}, {5, 2}, {6, 3}},
+          8, 2, 200, 7,
+          $branching},
+        {{{1, 2, 2}, {3, 4, 2}} -> {{2, 5, 5}, {5, 3, 2}, {5, 4, 6}, {7, 4, 5}},
+          {{1, 1, 1}, {1, 1, 1}},
+          30, 30, 2000, 2000,
+          $sequential},
+        {{{1, 1, 2}} -> {{3, 2, 2}, {3, 3, 3}, {3, 3, 4}}, {{1, 1, 1}}, 100, 6, 2000, 10, $branching},
+        {{{{1, 2}, {1, 3}, {1, 4}} -> {{2, 3}, {3, 4}, {4, 5}, {5, 2}, {5, 4}}},
+          {{1, 1}, {1, 1}, {1, 1}},
+          40, 10, 200, 16,
+          $branching}
       };
 
       $graphsForMatching = {
@@ -133,40 +142,84 @@
       (* Fixed number of events *)
 
       VerificationTest[
-        SetReplace[##, Method -> "Symbolic"],
-        SetReplace[##, Method -> "LowLevel"],
-        SameTest -> sameSetQ
-      ] & @@@ $systemsToTest[[All, {1, 2, 3}]],
+        WolframModel[#1, #2, <|"MaxEvents" -> #3|>, Method -> "Symbolic"],
+        WolframModel[#1, #2, <|"MaxEvents" -> #3|>, Method -> "LowLevel"]
+      ] & @@@ $systemsToTest,
+
+      (* Fixed number of events same seed consistentcy *)
+
+      VerificationTest[
+        SeedRandom[1655]; WolframModel[#1, #2, <|"MaxEvents" -> #5|>, "EventOrderingFunction" -> "Random"],
+        SeedRandom[1655]; WolframModel[#1, #2, <|"MaxEvents" -> #5|>, "EventOrderingFunction" -> "Random"]
+      ] & @@@ $systemsToTest,
+
+      (* Fixed number of events different seeds difference *)
+
+      VerificationTest[
+        (SeedRandom[1655]; WolframModel[#1, #2, <|"MaxEvents" -> #5|>, "EventOrderingFunction" -> "Random"]) =!=
+          (SeedRandom[1656]; WolframModel[#1, #2, <|"MaxEvents" -> #5|>, "EventOrderingFunction" -> "Random"])
+      ] & @@@ Select[$systemsToTest, #[[7]] =!= $sequential &],
 
       (* Fixed number of generations *)
 
       VerificationTest[
-        SetReplaceAll[##, Method -> "Symbolic"],
-        SetReplaceAll[##, Method -> "LowLevel"],
-        SameTest -> sameSetQ
-      ] & @@@ $systemsToTest[[All, {1, 2, 4}]],
+        WolframModel[#1, #2, #4, Method -> "Symbolic"],
+        WolframModel[#1, #2, #4, Method -> "LowLevel"]
+      ] & @@@ $systemsToTest,
 
-      (* Causal graphs consistency *)
+      (* Fixed number of generations same seed consistentcy *)
 
       VerificationTest[
-        WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "Symbolic"],
-        WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph", Method -> "LowLevel"]
-      ] & @@@ $systemsToTest[[All, {2, 1, 4}]],
+        SeedRandom[1655]; WolframModel[#1, #2, #6, "EventOrderingFunction" -> "Random"],
+        SeedRandom[1655]; WolframModel[#1, #2, #6, "EventOrderingFunction" -> "Random"]
+      ] & @@@ $systemsToTest,
+
+      (* Correct number of generations is obtained *)
+
+      VerificationTest[
+        SeedRandom[1655];
+          WolframModel[#1, #2, #6, {"GenerationsCount", "MaxCompleteGeneration"}, "EventOrderingFunction" -> "Random"],
+        {#6, #6}
+      ] & @@@ $systemsToTest,
+
+      (* Fixed number of generations different seeds difference *)
+      (* Even though final sets might be the same for some of these systems, different evaluation order will make *)
+      (* evolution objects different *)
+
+      VerificationTest[
+        (SeedRandom[1655]; WolframModel[#1, #2, #6, "EventOrderingFunction" -> "Random"]) =!=
+          (SeedRandom[1656]; WolframModel[#1, #2, #6, "EventOrderingFunction" -> "Random"])
+      ] & @@@ Select[$systemsToTest, #[[7]] =!= $sequential &],
 
       (** Causal graphs properties check **)
 
       VerificationTest[
-        AcyclicGraphQ[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]]
-      ] & @@@ $systemsToTest[[All, {2, 1, 4}]],
+        AcyclicGraphQ[WolframModel[#1, #2, #6, "CausalGraph"]]
+      ] & @@@ $systemsToTest,
 
       VerificationTest[
-        LoopFreeGraphQ[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]]
-      ] & @@@ $systemsToTest[[All, {2, 1, 4}]],
+        LoopFreeGraphQ[WolframModel[#1, #2, #6, "CausalGraph"]]
+      ] & @@@ $systemsToTest,
 
       VerificationTest[
-        VertexCount[WolframModel[<|"PatternRules" -> #1|>, #2, #3, "CausalGraph"]],
-        WolframModel[<|"PatternRules" -> #1|>, #2, #3, "EventsCount"]
-      ] & @@@ $systemsToTest[[All, {2, 1, 4}]],
+        VertexCount[WolframModel[#1, #2, #6, "CausalGraph"]],
+        WolframModel[#1, #2, #6, "EventsCount"]
+      ] & @@@ $systemsToTest,
+
+      Table[With[{seed = seed}, {
+        VerificationTest[
+          SeedRandom[seed]; AcyclicGraphQ[WolframModel[#1, #2, #6, "CausalGraph", "EventOrderingFunction" -> "Random"]]
+        ] & @@@ $systemsToTest,
+
+        VerificationTest[
+          SeedRandom[seed]; LoopFreeGraphQ[WolframModel[#1, #2, #6, "CausalGraph", "EventOrderingFunction" -> "Random"]]
+        ] & @@@ $systemsToTest,
+
+        VerificationTest[
+          SeedRandom[seed]; VertexCount[WolframModel[#1, #2, #6, "CausalGraph", "EventOrderingFunction" -> "Random"]],
+          SeedRandom[seed]; WolframModel[#1, #2, #6, "EventsCount", "EventOrderingFunction" -> "Random"]
+        ] & @@@ $systemsToTest
+      }], {seed, 1534, 1634}],
 
       (** Complex matching **)
 
