@@ -502,7 +502,7 @@ propertyEvaluate[
 $causalGraphOptions = Options[Graph];
 
 
-$layeredCausalGraphOptions = Join[Options[$causalGraphOptions], {"LayerHeight" -> 1}];
+$layeredCausalGraphOptions = Options[$causalGraphOptions];
 
 
 (* ::Subsubsection:: *)
