@@ -780,9 +780,9 @@
         Round[Replace[VertexCoordinates, FilterRules[AbsoluteOptions[WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["LayeredCausalGraph", ##2]], VertexCoordinates]][[All, 2]]],
-        # Floor[Log2[16 - Range[15]]]
-      ] & @@@ {{1}, {2, "LayerHeight" -> 2}}
+          4]["LayeredCausalGraph"]], VertexCoordinates]][[All, 2]]],
+        Floor[Log2[16 - Range[15]]]
+      ]
     }]
   |>
 |>
