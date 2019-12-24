@@ -219,7 +219,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 	resultAtoms = Union[Catenate[cppOutput[$atomLists]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
 	inverseGlobalMap = Association @ Thread[resultAtoms
-		-> (Lookup[inversePartialGlobalMap, #, Unique["v"]] & /@ resultAtoms)];
+		-> (Lookup[inversePartialGlobalMap, #, Unique["v", {Temporary}]] & /@ resultAtoms)];
 	WolframModelEvolutionObject[Join[
 		cppOutput,
 		<|$atomLists ->

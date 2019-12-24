@@ -31,8 +31,9 @@
         Missing[],
         All];
 
-      Attributes[Global`testUnevaluated] = {HoldAll};
+      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+      Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
 
       {color, color2, color3, color4, color5} =
         BlockRandom[Table[RGBColor[RandomReal[{0, 1}, 3]], 5], RandomSeeding -> 0];
@@ -59,6 +60,13 @@
       testColorPresence[args___] := testColor[True, args];
     ),
     "tests" -> {
+      (* Symbol Leak *)
+
+      testSymbolLeak[
+        SeedRandom[123];
+        HypergraphPlot[RandomInteger[200, {100, 3}]]
+      ],
+
       (* Argument Checks *)
 
       (** Argument count **)

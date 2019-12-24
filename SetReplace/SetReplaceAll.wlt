@@ -1,10 +1,17 @@
 <|
   "SetReplaceAll" -> <|
     "init" -> (
-      Attributes[Global`testUnevaluated] = {HoldAll};
+      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+      Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
     ),
     "tests" -> {
+      (* Symbol Leak *)
+
+      testSymbolLeak[
+        SetReplaceAll[Range[10], {a_, b_} :> {a + b, a - b, a b}, 7]
+      ],
+      
       (* Argument Checks *)
 
       (** Argument count **)

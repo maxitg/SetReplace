@@ -1,8 +1,9 @@
 <|
   "WolframModel" -> <|
     "init" -> (
-      Attributes[Global`testUnevaluated] = {HoldAll};
+      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+      Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
 
       $interestingRule = {{0, 1}, {0, 2}, {0, 3}} ->
         {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6},
@@ -17,6 +18,13 @@
       maxVertexDegree[set_] := Max[Counts[Catenate[Union /@ set]]];
     ),
     "tests" -> {
+      (* Symbol Leak *)
+
+      testSymbolLeak[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 5, "FinalState", Method -> #1, "NodeNamingFunction" -> #2]
+      ] & @@@ Tuples[{$SetReplaceMethods, {Automatic, All}}],
+
       (* Argument checks *)
 
       (** Argument counts, simple rule and inits **)

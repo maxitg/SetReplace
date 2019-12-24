@@ -1,10 +1,18 @@
 <|
   "ToPatternRules" -> <|
     "init" -> (
-      Attributes[Global`testUnevaluated] = {HoldAll};
+      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+      Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
     ),
     "tests" -> {
+      (* Symbol Leak *)
+
+      testSymbolLeak[
+        SeedRandom[123];
+        ToPatternRules[Rule @@ RandomInteger[100, {2, 50, 3}]]
+      ],
+
       (* Argument Checks *)
 
       (** Argument count **)

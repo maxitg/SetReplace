@@ -1,8 +1,9 @@
 <|
   "RulePlot" -> <|
     "init" -> (
-      Attributes[Global`testUnevaluated] = {HoldAll};
+      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+      Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
 
       $rulesForVertexSizeConsistency = {
         {{1}} -> {{1}},
@@ -18,6 +19,13 @@
         {{1, 2, 3}} -> {{2, 3}, {3, 4}}};
     ),
     "tests" -> {
+      (* Symbol Leak *)
+
+      testSymbolLeak[
+        SeedRandom[123];
+        RulePlot[WolframModel[Rule @@ RandomInteger[100, {2, 50, 3}]]]
+      ],
+
       (* Rule correctness checking *)
 
       testUnevaluated[
