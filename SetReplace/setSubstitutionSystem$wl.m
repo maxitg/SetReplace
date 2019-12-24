@@ -246,7 +246,7 @@ maxCompleteGeneration[output_, rulesNoMetadata_] := Module[{
 
 
 renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAtoms},
-	Attributes[pattern] = {HoldFirst};
+	SetAttributes[pattern, HoldFirst];
 	inputAtoms = Union[
 		Quiet[
 			Cases[
