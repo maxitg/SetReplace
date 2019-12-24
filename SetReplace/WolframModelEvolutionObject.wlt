@@ -1,8 +1,9 @@
 <|
   "WolframModelEvolutionObject" -> <|
     "init" -> (
-      Attributes[Global`testUnevaluated] = {HoldAll};
+      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+      Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
 
       $largeEvolution = Hold[WolframModel[
         {{0, 1}, {0, 2}, {0, 3}} ->
@@ -13,6 +14,12 @@
         7]];
     ),
     "tests" -> With[{pathGraph17 = Partition[Range[17], 2, 1]}, {
+      (* Symbol Leak *)
+
+      testSymbolLeak[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 5] /@ $WolframModelProperties
+      ],
+
       (** Argument checks **)
 
       (* Corrupt object *)

@@ -1,10 +1,17 @@
 <|
   "SetReplaceFixedPointList" -> <|
     "init" -> (
-      Attributes[Global`testUnevaluated] = {HoldAll};
+      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+      Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
     ),
     "tests" -> {
+      (* Symbol Leak *)
+
+      testSymbolLeak[
+        SetReplaceFixedPointList[Range[100], {a_, b_} :> {a + b}]
+      ],
+      
       (* Argument Checks *)
 
       (** Argument count **)
