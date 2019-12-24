@@ -502,7 +502,7 @@ propertyEvaluate[
 $causalGraphOptions = Options[Graph];
 
 
-$layeredCausalGraphOptions = Join[Options[$causalGraphOptions], {"LayerHeight" -> 1}];
+$layeredCausalGraphOptions = Options[$causalGraphOptions];
 
 
 (* ::Subsubsection:: *)
@@ -570,13 +570,12 @@ propertyEvaluate[
 		propertyEvaluate[evolution, caller, "CausalGraph", ##] & @@
 			FilterRules[{o}, $causalGraphOptions],
 		FilterRules[{o}, Options[Graph]],
-		VertexCoordinates -> MapIndexed[
-			First[#2] -> {
-				Automatic,
-				OptionValue[$layeredCausalGraphOptions, {o}, "LayerHeight"]
-					(propertyEvaluate[evolution, caller, "GenerationsCount"] - #1)} &,
-			propertyEvaluate[evolution, caller, "EventGenerations"]],
-		GraphLayout -> "SpringElectricalEmbedding"]
+		GraphLayout -> {
+			"LayeredDigraphEmbedding",
+			"VertexLayerPosition" ->
+				(propertyEvaluate[evolution, caller, "GenerationsCount"] -
+						propertyEvaluate[evolution, caller, "EventGenerations"])}
+	]
 
 
 (* ::Subsection:: *)
