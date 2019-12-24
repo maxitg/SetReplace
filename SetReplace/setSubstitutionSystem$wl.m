@@ -69,11 +69,11 @@ toNormalRules[input_List :> output_Module] := Module[
 toNormalRules[rules_List] := Module[{
 		ruleNames, separateNormalRules, longestRuleLength, untouchedNames,
 		finalMatchName, input, output},
-	ruleNames = Table[Unique[], Length[rules]];
+	ruleNames = Table[Unique["rule", {Temporary}], Length[rules]];
 	separateNormalRules = toNormalRules /@ rules;
 	longestRuleLength = Max[Map[Length, separateNormalRules[[All, All, 1]], {2}]];
-	untouchedNames = Table[Unique[], longestRuleLength + 1];
-	finalMatchName = Unique[];
+	untouchedNames = Table[Unique["untouched", {Temporary}], longestRuleLength + 1];
+	finalMatchName = Unique["match", {Temporary}];
 	input = With[{match = finalMatchName}, List[
 		match : Shortest[Alternatives @@ Catenate[Transpose @ PadRight[
 			MapIndexed[
@@ -158,10 +158,10 @@ addMetadataManagement[
 			maxGeneration_,
 			maxVertexDegree_,
 			vertexIndex_] := Module[{
-		inputIDs = Table[Unique["id"], Length[input]],
-		wholeInputPatternNames = Table[Unique["inputExpression"], Length[input]],
-		inputCreators = Table[Unique["creator"], Length[input]],
-		inputGenerations = Table[Unique["generation"], Length[input]],
+		inputIDs = Table[Unique["id", {Temporary}], Length[input]],
+		wholeInputPatternNames = Table[Unique["inputExpression", {Temporary}], Length[input]],
+		inputCreators = Table[Unique["creator", {Temporary}], Length[input]],
+		inputGenerations = Table[Unique["generation", {Temporary}], Length[input]],
 		nextEvent},
 	With[{
 			heldModule = Map[Hold, Hold[output], {2}]},
@@ -256,7 +256,7 @@ renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAt
 					With[{originalP = p /. pattern -> Pattern}, Message[Pattern::patvar, originalP]]; Throw[$Failed]],
 				All],
 			{RuleDelayed::rhs}]];
-	newInputAtoms = Table[Unique[], Length[inputAtoms]];
+	newInputAtoms = Table[Unique["inputAtom", {Temporary}], Length[inputAtoms]];
 	# /. (((HoldPattern[#1] /. Hold[s_] :> s) -> #2) & @@@ Thread[inputAtoms -> newInputAtoms])
 ] & /@ patternRules]
 
