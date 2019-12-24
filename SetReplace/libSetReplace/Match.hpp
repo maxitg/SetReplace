@@ -34,12 +34,18 @@ namespace SetReplace {
          */
         enum Error {Aborted, DisconnectedInputs, NoMatches};
         
+        /** @brief Determines whether nexxtMatch() will return the smallest Match or a random one.
+         */
+        enum EvaluationType {Sequential, Random};
+                
         /** @brief Creates a new matcher object.
          * @details This is an O(1) operation, does not do any matching yet.
          */
         Matcher(const std::vector<Rule>& rules,
                 AtomsIndex& atomsIndex,
-                const std::function<AtomsVector(ExpressionID)> getAtomsVector);
+                const std::function<AtomsVector(ExpressionID)> getAtomsVector,
+                const EvaluationType evaluationType,
+                const unsigned int randomSeed = 0);
         
         /** @brief Finds and adds to the index all matches involving specified expressions.
          * @details Calls shouldAbort() frequently, and throws Error::Aborted if that returns true. Otherwise might take significant time to evaluate depending on the system.

@@ -27,7 +27,9 @@ $cpp$setCreate = If[$libraryFile =!= $Failed,
 		$libraryFile,
 		"setCreate",
 		{{Integer, 1}, (* rules *)
-			{Integer, 1}}, (* initial set *)
+			{Integer, 1}, (* initial set *)
+			Integer, (* 0 -> sequential evaluation, 1 -> random evaluation *)
+			Integer}, (* random seed *)
 		Integer], (* set ptr *)
 	$Failed];
 
@@ -177,9 +179,10 @@ $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
 
 
 $maxInt = 2^31 - 1;
+$maxUnsignedInt = 2^32 - 1;
 
 
-setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_] /;
+setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_] /;
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
@@ -201,7 +204,9 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 		{K, Length[canonicalRules]}];
 	setPtr = $cpp$setCreate[
 		encodeNestedLists[List @@@ mappedRules],
-		encodeNestedLists[mappedSet]];
+		encodeNestedLists[mappedSet],
+		Replace[eventOrderingFunction, {$EventOrderingFunctionSequential -> 0, $EventOrderingFunctionRandom -> 1}],
+		If[eventOrderingFunction === $EventOrderingFunctionRandom, RandomInteger[{0, $maxUnsignedInt}], 0]];
 	TimeConstrained[
 		CheckAbort[
 			$cpp$setReplace[

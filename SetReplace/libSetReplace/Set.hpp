@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Expression.hpp"
+#include "Match.hpp"
 #include "Rule.hpp"
 
 namespace SetReplace {
@@ -36,9 +37,13 @@ namespace SetReplace {
         /** @brief Creates a new set with a given set of evolution rules, and initial condition.
          * @param rules substittion rules used for evolution. Note, these rules cannot be changed.
          * @param initialExpressions initial condition. It will be lazily indexed before the first replacement.
+         * @param evaluationType whether to use sequential or random evaluation.
+         * @param randomSeed the seed to use for selecting matches in random evaluation case.
          */
         Set(const std::vector<Rule>& rules,
-            const std::vector<AtomsVector>& initialExpressions);
+            const std::vector<AtomsVector>& initialExpressions,
+            const Matcher::EvaluationType evaluationType,
+            const unsigned int randomSeed = 0);
         
         /** @brief Perform a single substitution, create the corresponding event, and output expressions.
          * @param shouldAbort function that should return true if Wolfram Language abort is in progress.

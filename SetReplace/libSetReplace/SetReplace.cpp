@@ -134,20 +134,24 @@ namespace SetReplace {
     }
 
     int setCreate(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
-        if (argc != 2) {
+        if (argc != 4) {
             return LIBRARY_FUNCTION_ERROR;
         }
         
         std::vector<Rule> rules;
         std::vector<AtomsVector> initialExpressions;
+        Matcher::EvaluationType evaluationType;
+        unsigned int randomSeed;
         try {
             rules = getRules(libData, MArgument_getMTensor(argv[0]));
             initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
+            evaluationType = MArgument_getInteger(argv[2]) == 0 ? Matcher::EvaluationType::Sequential : Matcher::EvaluationType::Random;
+            randomSeed = (unsigned int)MArgument_getInteger(argv[3]);
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }
         
-        auto setPtr = new Set(rules, initialExpressions);
+        auto setPtr = new Set(rules, initialExpressions, evaluationType, randomSeed);
         MArgument_setInteger(result, (int64_t)setPtr);
         return LIBRARY_NO_ERROR;
     }

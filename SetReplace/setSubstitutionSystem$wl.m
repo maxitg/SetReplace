@@ -309,7 +309,17 @@ vertexCount[$noIndex] := 0
 (*This function runs a modified version of the set replace system that also keeps track of metadata such as generations and events. It uses setReplace$wl to evaluate that modified system.*)
 
 
-setSubstitutionSystem$wl[caller_, rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_] := Module[{
+General::symbolicRandomUnsupported =
+	"Random event ordering function is not supported in symbolic implementation. Use Method -> \"LowLevel\"";
+
+
+setSubstitutionSystem$wl[
+		caller_, rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, $EventOrderingFunctionRandom] :=
+	Message[caller::symbolicRandomUnsupported]
+
+
+setSubstitutionSystem$wl[
+			caller_, rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, $EventOrderingFunctionSequential] := Module[{
 		setWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, result,
 		nextExpressionID = 1, nextEventID = 1, expressionsCountsPerVertex, vertexIndex, nextExpression,
 		intermediateMaxCompleteGenerationObject},

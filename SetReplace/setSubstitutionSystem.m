@@ -29,6 +29,10 @@ PackageScope["$maxFinalVertexDegree"]
 PackageScope["$maxFinalExpressions"]
 
 
+PackageScope["$EventOrderingFunctionSequential"]
+PackageScope["$EventOrderingFunctionRandom"]
+
+
 (* ::Section:: *)
 (*Documentation*)
 
@@ -147,6 +151,18 @@ setSubstitutionSystem[
 	Message[caller::timc, OptionValue[TimeConstraint]]
 
 
+(* ::Subsection:: *)
+(*EventOrderingFunction is valid*)
+
+
+$EventOrderingFunctions = {"Sequential" -> $EventOrderingFunctionSequential, "Random" -> $EventOrderingFunctionRandom};
+
+
+setSubstitutionSystem[
+		rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+	supportedOptionQ[caller, "EventOrderingFunction", $EventOrderingFunctions[[All, 1]], {o}] && False
+
+
 (* ::Section:: *)
 (*Implementation*)
 
@@ -188,7 +204,10 @@ simpleRuleQ[___] := False
 (*of the two is reached. it also takes a caller function as an argument, which is used for message generation.*)
 
 
-Options[setSubstitutionSystem] = {Method -> Automatic, TimeConstraint -> Infinity};
+Options[setSubstitutionSystem] = {
+	Method -> Automatic,
+	TimeConstraint -> Infinity,
+	"EventOrderingFunction" -> "Sequential"};
 
 
 (* ::Text:: *)
@@ -204,16 +223,18 @@ setSubstitutionSystem[
 			o : OptionsPattern[]] /; stepSpecQ[caller, set, stepSpec] := Module[{
 		method = OptionValue[Method],
 		timeConstraint = OptionValue[TimeConstraint],
+		eventOrderingFunction = Replace[OptionValue["EventOrderingFunction"], $EventOrderingFunctions],
 		canonicalRules,
 		failedQ = False},
 	If[(timeConstraint > 0) =!= True, Return[$Failed]];
+	If[!MatchQ[eventOrderingFunction, Alternatives @@ $EventOrderingFunctions[[All, 2]]], Return[$Failed]];
 	canonicalRules = toCanonicalRules[rules];
 	If[MatchQ[method, Automatic | $cppMethod]
 			&& MatchQ[set, {{___}...}]
 			&& MatchQ[canonicalRules, {___ ? simpleRuleQ}],
 		If[$cppSetReplaceAvailable,
 			Return[
-				setSubstitutionSystem$cpp[rules, set, stepSpec, returnOnAbortQ, timeConstraint]]]];
+				setSubstitutionSystem$cpp[rules, set, stepSpec, returnOnAbortQ, timeConstraint, eventOrderingFunction]]]];
 	If[MatchQ[method, $cppMethod],
 		failedQ = True;
 		If[!$cppSetReplaceAvailable,
@@ -221,5 +242,5 @@ setSubstitutionSystem[
 			makeMessage[caller, "lowLevelNotImplemented"]]];
 	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
-		setSubstitutionSystem$wl[caller, rules, set, stepSpec, returnOnAbortQ, timeConstraint]]
+		setSubstitutionSystem$wl[caller, rules, set, stepSpec, returnOnAbortQ, timeConstraint, eventOrderingFunction]]
 ]

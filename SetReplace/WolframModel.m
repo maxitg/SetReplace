@@ -50,8 +50,10 @@ SyntaxInformation[WolframModel] =
 (*Options*)
 
 
-Options[WolframModel] := Join[
-	{"NodeNamingFunction" -> Automatic, "IncludePartialGenerations" -> True},
+Options[WolframModel] := Join[{
+	"NodeNamingFunction" -> Automatic,
+	"EventOrderingFunction" -> "Sequential", (* Possible values are "Sequential" and "Random" *)
+	"IncludePartialGenerations" -> True},
 	Options[setSubstitutionSystem]];
 
 
@@ -166,7 +168,8 @@ WolframModel[
 				WolframModel,
 				property === "EvolutionObject",
 				Method -> OptionValue[Method],
-				TimeConstraint -> OptionValue[TimeConstraint]],
+				TimeConstraint -> OptionValue[TimeConstraint],
+				"EventOrderingFunction" -> OptionValue["EventOrderingFunction"]],
 			$Failed];
 		If[evolution === $Aborted, Return[$Aborted]];
 		renamedNodesEvolution = If[evolution =!= $Failed,
