@@ -131,11 +131,55 @@ $propertiesParameterless = Keys @ Select[#[[1]] == 0 &] @ $propertyArgumentCount
 (*Argument checks*)
 
 
+(* ::Subsection:: *)
+(*Master options handling*)
+
+
+General::missingMaxCompleteGeneration = "Cannot drop incomplete generations in an object with missing information.";
+
+
+propertyEvaluate[False, boundary_][evolution_, caller_, rest___] := If[MissingQ[evolution["MaxCompleteGeneration"]],
+	Message[caller::missingMaxCompleteGeneration],
+	propertyEvaluate[True, boundary][deleteIncompleteGenerations[evolution], caller, rest]
+]
+
+
+propertyEvaluate[includePartialGenerations : Except[True | False], _][evolution_, caller_, ___] :=
+	Message[caller::invalidFiniteOption, "IncludePartialGenerations", includePartialGenerations, {True, False}]
+
+
+includeBounaryEventsPattern = None | "Initial" | "Final" | All;
+
+
+propertyEvaluate[_, boundary : Except[includeBounaryEventsPattern]][evolution_, caller_, ___] :=
+	Message[caller::invalidFiniteOption, "IncludeBoundaryEvents", boundary, {None, "Initial", "Final", All}]
+
+
+deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := Module[{
+		maxCompleteGeneration, expressionsToDelete, lastGenerationExpressions, deleteEventsRules},
+	maxCompleteGeneration = data[$maxCompleteGeneration];
+	{expressionsToDelete, lastGenerationExpressions} =
+		Position[data[$generations], _ ? #][[All, 1]] & /@ {# > maxCompleteGeneration &, # == maxCompleteGeneration &};
+	expressionsToKeep = Complement[Range[Length[data[$generations]]], expressionsToDelete];
+	deleteEventsRules = Dispatch[Thread[
+		Union[data[$creatorEvents][[expressionsToDelete]], data[$destroyerEvents][[lastGenerationExpressions]]] ->
+			Infinity]];
+	WolframModelEvolutionObject[<|
+		$creatorEvents -> data[$creatorEvents][[expressionsToKeep]],
+		$destroyerEvents -> data[$destroyerEvents][[expressionsToKeep]] /. deleteEventsRules,
+		$generations -> data[$generations][[expressionsToKeep]],
+		$atomLists -> data[$atomLists][[expressionsToKeep]],
+		$rules -> data[$rules],
+		$maxCompleteGeneration -> data[$maxCompleteGeneration]
+	|>]
+]
+
+
 (* ::Subsubsection:: *)
 (*Unknown property*)
 
 
-propertyEvaluate[
+propertyEvaluate[___][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		s : Except[_Integer],
@@ -163,7 +207,7 @@ makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := makeMessage[
 ]
 
 
-propertyEvaluate[
+propertyEvaluate[___][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		s_String,
@@ -178,7 +222,7 @@ propertyEvaluate[
 (*Properties*)
 
 
-propertyEvaluate[
+propertyEvaluate[___][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ], caller_, "Properties"] :=
 	Keys[$propertyArgumentCounts]
 
@@ -187,7 +231,7 @@ propertyEvaluate[
 (*EvolutionObject*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"EvolutionObject"] := WolframModelEvolutionObject[data]
@@ -197,7 +241,7 @@ propertyEvaluate[
 (*Rules*)
 
 
-propertyEvaluate[
+propertyEvaluate[___][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ], caller_, "Rules"] :=
 	data[$rules]
 
@@ -206,7 +250,7 @@ propertyEvaluate[
 (*GenerationsCount*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"GenerationsCount"] := Max[
@@ -221,16 +265,17 @@ propertyEvaluate[
 (*EventsCount*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBoundaryEvents : includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ], caller_, "EventsCount"] :=
-	Max[0, DeleteCases[Join[data[$destroyerEvents], data[$creatorEvents]], Infinity]]
+	Max[0, DeleteCases[Join[data[$destroyerEvents], data[$creatorEvents]], Infinity]] +
+		Switch[includeBoundaryEvents, None, 0, "Initial" | "Final", 1, All, 2]
 
 
 (* ::Subsection:: *)
 (*Direct Accessors*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		property_ ? (MemberQ[Keys[$accessorProperties], #] &)] :=
@@ -245,19 +290,19 @@ propertyEvaluate[
 (*Argument checks*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"SetAfterEvent",
 		s_Integer] := 0 /;
 	With[{eventsCount =
-			propertyEvaluate[
+			propertyEvaluate[True, None][
 				WolframModelEvolutionObject[data], caller, "EventsCount"]},
 		!(- eventsCount - 1 <= s <= eventsCount) &&
 		makeMessage[caller, "eventTooLarge", s, eventsCount]]
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"SetAfterEvent",
@@ -270,12 +315,12 @@ propertyEvaluate[
 (*Positive steps*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 			WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			caller_,
 			"SetAfterEvent",
 			s_Integer] /;
-		0 <= s <= propertyEvaluate[
+		0 <= s <= propertyEvaluate[True, None][
 			WolframModelEvolutionObject[data], caller, "EventsCount"] :=
 	data[$atomLists][[Intersection[
 		Position[data[$creatorEvents], _ ? (# <= s &)][[All, 1]],
@@ -286,18 +331,18 @@ propertyEvaluate[
 (*Negative steps*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 			WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			caller_,
 			"SetAfterEvent",
 			s_Integer] /;
-		- propertyEvaluate[
+		- propertyEvaluate[True, None][
 			WolframModelEvolutionObject[data], caller, "EventsCount"] - 1 <= s < 0 :=
-	propertyEvaluate[
+	propertyEvaluate[True, None][
 		WolframModelEvolutionObject[data],
 		caller,
 		"SetAfterEvent",
-		s + 1 + propertyEvaluate[
+		s + 1 + propertyEvaluate[True, None][
 			WolframModelEvolutionObject[data], caller, "EventsCount"]]
 
 
@@ -305,7 +350,7 @@ propertyEvaluate[
 (*FinalState*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"FinalState"] := WolframModelEvolutionObject[data]["SetAfterEvent", -1]
@@ -315,7 +360,7 @@ propertyEvaluate[
 (*UpdatedStatesList*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"UpdatedStatesList"] :=
@@ -335,18 +380,18 @@ propertyEvaluate[
 (*Argument checks*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"Generation",
 		g_Integer] := 0 /;
-	With[{generationsCount = propertyEvaluate[
+	With[{generationsCount = propertyEvaluate[True, None][
 			WolframModelEvolutionObject[data], caller, "GenerationsCount"]},
 		!(- generationsCount - 1 <= g <= generationsCount) &&
 		makeMessage[caller, "generationTooLarge", g, generationsCount]]
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"Generation",
@@ -359,12 +404,12 @@ propertyEvaluate[
 (*Positive generations*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 			WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			caller_,
 			"Generation",
 			g_Integer] /;
-		0 <= g <= propertyEvaluate[
+		0 <= g <= propertyEvaluate[True, None][
 			WolframModelEvolutionObject[data], caller, "GenerationsCount"] := With[{
 	futureEventsToInfinity = Dispatch @ Thread[Union[
 			data[$creatorEvents][[
@@ -386,16 +431,16 @@ propertyEvaluate[
 (*Negative generations*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 			WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			caller_,
 			"Generation",
 			g_Integer] /;
-		- propertyEvaluate[
+		- propertyEvaluate[True, None][
 			WolframModelEvolutionObject[data],
 			caller,
 			"GenerationsCount"] - 1 <= g < 0 :=
-	propertyEvaluate[
+	propertyEvaluate[True, None][
 		WolframModelEvolutionObject[data],
 		caller,
 		"Generation",
@@ -406,16 +451,16 @@ propertyEvaluate[
 (*Omit "Generation"*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ], caller_, g_Integer] :=
-	propertyEvaluate[WolframModelEvolutionObject[data], caller, "Generation", g]
+	propertyEvaluate[True, None][WolframModelEvolutionObject[data], caller, "Generation", g]
 
 
 (* ::Subsection:: *)
 (*StatesList*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"StatesList"] :=
@@ -427,12 +472,12 @@ propertyEvaluate[
 (*AtomsCountFinal*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"AtomsCountFinal"] :=
 	Length[Union @ Cases[
-		propertyEvaluate[
+		propertyEvaluate[True, None][
 			WolframModelEvolutionObject[data], caller, "SetAfterEvent", -1],
 		_ ? AtomQ,
 		All]]
@@ -442,7 +487,7 @@ propertyEvaluate[
 (*AtomsCountTotal*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"AtomsCountTotal"] :=
@@ -453,11 +498,11 @@ propertyEvaluate[
 (*ExpressionsCountFinal*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"ExpressionsCountFinal"] :=
-	Length[propertyEvaluate[
+	Length[propertyEvaluate[True, None][
 		WolframModelEvolutionObject[data], caller, "SetAfterEvent", -1]]
 
 
@@ -465,7 +510,7 @@ propertyEvaluate[
 (*ExpressionsCountTotal*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"ExpressionsCountTotal"] :=
@@ -476,15 +521,19 @@ propertyEvaluate[
 (*EventGenerations*)
 
 
-propertyEvaluate[
-		WolframModelEvolutionObject[data_ ? evolutionDataQ],
+propertyEvaluate[True, includeBoundaryEvents : includeBounaryEventsPattern][
+		evolution : WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"EventGenerations"] :=
-	Values @ KeySort @ KeyDrop[
-		Join[
-			Association[Thread[data[$creatorEvents] -> data[$generations]]],
-			Association[Thread[data[$destroyerEvents] -> data[$generations] + 1]]],
-		{0, Infinity}]
+	If[MatchQ[includeBoundaryEvents, All | "Final"], Append[evolution["GenerationsCount"] + 1], Identity] @
+		If[MatchQ[includeBoundaryEvents, All | "Initial"], Prepend[0], Identity] @
+		Values @
+		KeySort @
+		KeyDrop[
+			Join[
+				Association[Thread[data[$creatorEvents] -> data[$generations]]],
+				Association[Thread[data[$destroyerEvents] -> data[$generations] + 1]]],
+			{0, Infinity}]
 
 
 (* ::Subsection:: *)
@@ -513,7 +562,7 @@ $layeredCausalGraphOptions = Options[$causalGraphOptions];
 (*We need to check: (1) arguments given are actually options, (2) they are valid options for the Graph object.*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"CausalGraph" | "LayeredCausalGraph",
@@ -522,7 +571,7 @@ propertyEvaluate[
 	makeMessage[caller, "nonopt", Last[{o}]]
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		property : "CausalGraph" | "LayeredCausalGraph",
@@ -542,39 +591,40 @@ propertyEvaluate[
 (*CausalGraph Implementation*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBoundaryEvents : includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"CausalGraph",
 		o : OptionsPattern[]] /;
-			(Complement[{o}, FilterRules[{o}, $causalGraphOptions]] == {}) :=
+			(Complement[{o}, FilterRules[{o}, $causalGraphOptions]] == {}) := With[{
+		eventsToDelete = Alternatives @@ (
+			If[MatchQ[includeBoundaryEvents, All | #1], Nothing, #2] & @@@ {{"Initial", 0}, {"Final", Infinity}})},
 	Graph[
-		DeleteCases[
-			Union[data[$creatorEvents], data[$destroyerEvents]], 0 | Infinity],
-		Select[FreeQ[#, 0 | Infinity] &] @
-			Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
+		DeleteCases[Union[data[$creatorEvents], data[$destroyerEvents]], eventsToDelete],
+		Select[FreeQ[#, eventsToDelete] &] @ Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
 		o]
+]
 
 
 (* ::Subsubsection:: *)
 (*LayeredCausalGraph Implementation*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBoundaryEvents : includeBounaryEventsPattern][
 		evolution : WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"LayeredCausalGraph",
 		o : OptionsPattern[]] /;
 			(Complement[{o}, FilterRules[{o}, $layeredCausalGraphOptions]] == {}) :=
 	Graph[
-		propertyEvaluate[evolution, caller, "CausalGraph", ##] & @@
+		propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "CausalGraph", ##] & @@
 			FilterRules[{o}, $causalGraphOptions],
 		FilterRules[{o}, Options[Graph]],
 		GraphLayout -> {
 			"LayeredDigraphEmbedding",
 			"VertexLayerPosition" ->
-				(propertyEvaluate[evolution, caller, "GenerationsCount"] -
-						propertyEvaluate[evolution, caller, "EventGenerations"])}
+				(propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "GenerationsCount"] -
+						propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "EventGenerations"])}
 	]
 
 
@@ -582,7 +632,10 @@ propertyEvaluate[
 (*Public properties call*)
 
 
-$masterOptions = {"IncludePartialGenerations" -> True};
+$masterOptions = {
+	"IncludePartialGenerations" -> True,
+	"IncludeBoundaryEvents" -> None
+};
 
 
 WolframModelEvolutionObject[
@@ -590,49 +643,14 @@ WolframModelEvolutionObject[
 		property___ ? (Not[MatchQ[#, OptionsPattern[]]] &),
 		opts : OptionsPattern[]] := Module[{prunedObject, result},
 	result = Check[
-		propertyEvaluate[OptionValue[Join[{opts}, $masterOptions], "IncludePartialGenerations"]][
+		(propertyEvaluate @@
+				(OptionValue[Join[{opts}, $masterOptions], #] & /@ {"IncludePartialGenerations", "IncludeBoundaryEvents"}))[
 			WolframModelEvolutionObject[data],
 			WolframModelEvolutionObject,
 			property,
 			##] & @@ Flatten[FilterRules[{opts}, Except[$masterOptions]]],
 		$Failed];
 	result /; result =!= $Failed
-]
-
-
-propertyEvaluate[True][args___] := propertyEvaluate[args]
-
-
-General::missingMaxCompleteGeneration = "Cannot drop incomplete generations in an object with missing information.";
-
-
-propertyEvaluate[False][evolution_, caller_, rest___] := If[MissingQ[evolution["MaxCompleteGeneration"]],
-	Message[caller::missingMaxCompleteGeneration],
-	propertyEvaluate[deleteIncompleteGenerations[evolution], caller, rest]
-]
-
-
-propertyEvaluate[includePartialGenerations_][evolution_, caller_, ___] :=
-	Message[caller::invalidFiniteOption, "IncludePartialGenerations", includePartialGenerations, {True, False}]
-
-
-deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := Module[{
-		maxCompleteGeneration, expressionsToDelete, lastGenerationExpressions, deleteEventsRules},
-	maxCompleteGeneration = data[$maxCompleteGeneration];
-	{expressionsToDelete, lastGenerationExpressions} =
-		Position[data[$generations], _ ? #][[All, 1]] & /@ {# > maxCompleteGeneration &, # == maxCompleteGeneration &};
-	expressionsToKeep = Complement[Range[Length[data[$generations]]], expressionsToDelete];
-	deleteEventsRules = Dispatch[Thread[
-		Union[data[$creatorEvents][[expressionsToDelete]], data[$destroyerEvents][[lastGenerationExpressions]]] ->
-			Infinity]];
-	WolframModelEvolutionObject[<|
-		$creatorEvents -> data[$creatorEvents][[expressionsToKeep]],
-		$destroyerEvents -> data[$destroyerEvents][[expressionsToKeep]] /. deleteEventsRules,
-		$generations -> data[$generations][[expressionsToKeep]],
-		$atomLists -> data[$atomLists][[expressionsToKeep]],
-		$rules -> data[$rules],
-		$maxCompleteGeneration -> data[$maxCompleteGeneration]
-	|>]
 ]
 
 
