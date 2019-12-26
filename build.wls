@@ -28,5 +28,6 @@ If[$success,
 	Print["Build done."];
 	Exit[0];,
 
+  Print["Build failed."];
 	Exit[1];
 ];

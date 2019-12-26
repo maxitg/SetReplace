@@ -22,7 +22,6 @@ buildLibSetReplace::fail = "Compilation failed. Paclet will be created without l
 buildLibSetReplace[] := With[{
     libSetReplaceSource = FileNameJoin[{$repoRoot, "SetReplace", "libSetReplace"}],
     systemID = If[$internalBuildQ, AntProperty["system_id"], $SystemID]},
-  Needs["CCompilerDriver`"];
   If[$internalBuildQ, Off[CreateLibrary::wddirty]];
   If[!StringQ[CreateLibrary[
       FileNames["*.cpp", {libSetReplaceSource}],
