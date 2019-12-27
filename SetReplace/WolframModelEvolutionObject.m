@@ -30,6 +30,7 @@ PackageScope["$generations"]
 PackageScope["$atomLists"]
 PackageScope["$rules"]
 PackageScope["$maxCompleteGeneration"]
+PackageScope["$terminationReason"]
 
 
 (* ::Section:: *)
@@ -680,7 +681,7 @@ WolframModelEvolutionObject::corrupt =
 
 
 evolutionDataQ[data_Association] := Sort[Keys[data]] ===
-	Sort[{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules, $maxCompleteGeneration}]
+	Sort[{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules, $maxCompleteGeneration, $terminationReason}]
 
 
 evolutionDataQ[___] := False

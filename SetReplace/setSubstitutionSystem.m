@@ -27,6 +27,8 @@ PackageScope["$maxGenerationsLocal"]
 PackageScope["$maxFinalVertices"]
 PackageScope["$maxFinalVertexDegree"]
 PackageScope["$maxFinalExpressions"]
+PackageScope["$fixedPoint"]
+PackageScope["$timeConstraint"]
 
 
 PackageScope["$EventOrderingFunctionSequential"]

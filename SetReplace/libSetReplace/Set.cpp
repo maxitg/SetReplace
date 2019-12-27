@@ -15,6 +15,7 @@ namespace SetReplace {
         
         // Determines the limiting conditions for the evaluation.
         StepSpecification stepSpec_;
+        TerminationReason terminationReason_ = TerminationReason::NotTerminated;
         
         std::unordered_map<ExpressionID, SetExpression> expressions_;
         
@@ -49,10 +50,26 @@ namespace SetReplace {
             }) {}
         
         int replaceOnce(const std::function<bool()> shouldAbort) {
-            if (nextEventID_ > stepSpec_.maxEvents) return 0;
+            terminationReason_ = TerminationReason::NotTerminated;
+
+            if (nextEventID_ > stepSpec_.maxEvents) {
+                terminationReason_ = TerminationReason::MaxEvents;
+                return 0;
+            }
             
-            indexNewExpressions(shouldAbort);
-            if (matcher_.matchCount() == 0) return 0;
+            indexNewExpressions([this, &shouldAbort](){
+                const bool isAborted = shouldAbort();
+                if (isAborted) terminationReason_ = TerminationReason::Aborted;
+                return isAborted;
+            });
+            if (matcher_.matchCount() == 0) {
+                if (largestGeneration_ == stepSpec_.maxGenerationsLocal) {
+                    terminationReason_ = TerminationReason::MaxGenerationsLocal;
+                } else {
+                    terminationReason_ = TerminationReason::FixedPoint;
+                }
+                return 0;
+            }
             Match match = matcher_.nextMatch();
             
             const auto& ruleInputs = rules_[match.rule].inputs;
@@ -68,8 +85,14 @@ namespace SetReplace {
             auto explicitRuleOutputs = rules_[match.rule].outputs;
             Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, explicitRuleOutputs);
             
-            if (willExceedAtomLimits(explicitRuleInputs, explicitRuleOutputs)) return 0;
-            if (willExceedExpressionsLimit(explicitRuleInputs, explicitRuleOutputs)) return 0;
+            for (const auto function : {&Implementation::willExceedAtomLimits,
+                                        &Implementation::willExceedExpressionsLimit}) {
+                const auto willExceedAtomLimitsStatus = (this->*function)(explicitRuleInputs, explicitRuleOutputs);
+                if (willExceedAtomLimitsStatus != TerminationReason::NotTerminated) {
+                    terminationReason_ = willExceedAtomLimitsStatus;
+                    return 0;
+                }
+            }
             
             // At this point, we are committed to modifying the set.
             
@@ -126,6 +149,10 @@ namespace SetReplace {
             return std::min(smallestGeneration(matcher_.allMatches()), largestGeneration_);
         }
         
+        TerminationReason terminationReason() const {
+            return terminationReason_;
+        }
+
     private:
         Implementation(const std::vector<Rule>& rules,
                        const std::vector<AtomsVector>& initialExpressions,
@@ -163,7 +190,7 @@ namespace SetReplace {
             unindexedExpressions_.clear();
         }
         
-        bool willExceedAtomLimits(const std::vector<std::vector<int>> explicitRuleInputs,
+        TerminationReason willExceedAtomLimits(const std::vector<std::vector<int>> explicitRuleInputs,
                                   const std::vector<std::vector<int>> explicitRuleOutputs) const {
             const int currentAtomsCount = static_cast<int>(atomDegrees_.size());
             
@@ -185,11 +212,15 @@ namespace SetReplace {
                 
                 // Check atom degree.
                 if (currentDegree + degreeDelta > stepSpec_.maxFinalAtomDegree) {
-                    return true;
+                    return TerminationReason::MaxFinalAtomDegree;
                 }
             }
             
-            return newAtomsCount > stepSpec_.maxFinalAtoms;
+            if (newAtomsCount > stepSpec_.maxFinalAtoms) {
+                return TerminationReason::MaxFinalAtoms;
+            } else {
+                return TerminationReason::NotTerminated;
+            }
         }
         
         static void updateAtomDegrees(std::unordered_map<Atom, int>& atomDegrees,
@@ -210,13 +241,17 @@ namespace SetReplace {
             }
         }
         
-        bool willExceedExpressionsLimit(const std::vector<std::vector<int>> explicitRuleInputs,
+        TerminationReason willExceedExpressionsLimit(const std::vector<std::vector<int>> explicitRuleInputs,
                                         const std::vector<std::vector<int>> explicitRuleOutputs) const {
             const int currentExpressionsCount = nextExpressionID_ - destroyedExpressionsCount_;
             const int newExpressionsCount = currentExpressionsCount
                                             - static_cast<int>(explicitRuleInputs.size())
                                             + static_cast<int>(explicitRuleOutputs.size());
-            return newExpressionsCount > stepSpec_.maxFinalExpressions;
+            if (newExpressionsCount > stepSpec_.maxFinalExpressions) {
+                return TerminationReason::MaxFinalExpressions;
+            } else {
+                return TerminationReason::NotTerminated;
+            }
         }
         
         std::vector<AtomsVector> nameAnonymousAtoms(const std::vector<AtomsVector>& atomVectors) {
@@ -318,5 +353,9 @@ namespace SetReplace {
     
     Generation Set::maxCompleteGeneration(const std::function<bool()> shouldAbort) {
         return implementation_->maxCompleteGeneration(shouldAbort);
+    }
+
+    Set::TerminationReason Set::terminationReason() const {
+        return implementation_->terminationReason();
     }
 }

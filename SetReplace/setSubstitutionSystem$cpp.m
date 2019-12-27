@@ -71,6 +71,15 @@ $cpp$maxCompleteGeneration = If[$libraryFile =!= $Failed,
 	$Failed];
 
 
+$cpp$terminationReason = If[$libraryFile =!= $Failed,
+	LibraryFunctionLoad[
+		$libraryFile,
+		"terminationReason",
+		{Integer}, (* set ptr *)
+		Integer], (* reason *)
+	$Failed];
+
+
 (* ::Section:: *)
 (*Implementation*)
 
@@ -182,11 +191,23 @@ $maxInt = 2^31 - 1;
 $maxUnsignedInt = 2^32 - 1;
 
 
+$terminationReasonCodes = <|
+	0 -> Missing["NotTerminated"],
+	1 -> $maxEvents,
+	2 -> $maxGenerationsLocal,
+	3 -> $maxFinalVertices,
+	4 -> $maxFinalVertexDegree,
+	5 -> $maxFinalExpressions,
+	6 -> $fixedPoint,
+	7 -> $Aborted
+|>;
+
+
 setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_] /;
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
-		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, resultAtoms,
+		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, terminationReason, resultAtoms,
 		inversePartialGlobalMap, inverseGlobalMap},
 	canonicalRules = toCanonicalRules[rules];
 	setAtoms = Hold /@ Union[Catenate[set]];
@@ -214,12 +235,13 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 				stepSpec /@ {
 						$maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalVertexDegree, $maxFinalExpressions} /.
 					{Infinity | (_ ? MissingQ) -> $maxInt}],
-			If[!returnOnAbortQ, Abort[]]],
+			If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]],
 		timeConstraint,
-		If[!returnOnAbortQ, Return[$Aborted]]];
+		If[!returnOnAbortQ, Return[$Aborted], terminationReason = $timeConstraint]];
 	cppOutput = decodeExpressions @ $cpp$setExpressions[setPtr];
 	maxCompleteGeneration =
 		Replace[$cpp$maxCompleteGeneration[setPtr], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]];
+	terminationReason = Replace[$terminationReasonCodes[$cpp$terminationReason[setPtr]], $Aborted -> terminationReason];
 	$cpp$setDelete[setPtr];
 	resultAtoms = Union[Catenate[cppOutput[$atomLists]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
@@ -230,6 +252,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 		<|$atomLists ->
 				ReleaseHold @ Map[inverseGlobalMap, cppOutput[$atomLists], {2}],
 			$rules -> rules,
-			$maxCompleteGeneration -> maxCompleteGeneration
+			$maxCompleteGeneration -> maxCompleteGeneration,
+			$terminationReason -> terminationReason
 		|>]]
 ]
