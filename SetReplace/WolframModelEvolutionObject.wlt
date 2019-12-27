@@ -175,6 +175,23 @@
         SameTest -> MatchQ
       ],
 
+      (* IncludeBoundaryEvents *)
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 2}}, {{1, 1}}, 1]},
+        testUnevaluated[
+          evo["EventsCount", "IncludeBoundaryEvents" -> $$$invalid$$$],
+          {WolframModelEvolutionObject::invalidFiniteOption}
+        ]
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 2}},
+          {{1, 1}},
+          1]["GenerationsCount", "IncludeBoundaryEvents" -> #],
+        1
+      ] & /@ {None, "Initial", "Final", All},
+
       (** Boxes **)
 
       VerificationTest[
@@ -261,6 +278,22 @@
           4]["EventsCount"],
         15
       ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["EventsCount", "IncludeBoundaryEvents" -> #],
+        #2
+      ] & @@@ {{"Initial", 16}, {"Final", 16}, {All, 17}},
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 2}},
+          {{1, 1}},
+          0]["EventsCount", "IncludeBoundaryEvents" -> #],
+        #2
+      ] & @@@ {{None, 0}, {"Initial", 1}, {"Final", 1}, {All, 2}},
 
       VerificationTest[
         WolframModel[
@@ -657,6 +690,25 @@
 
       VerificationTest[
         WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["EventGenerations", "IncludeBoundaryEvents" -> #],
+        #2
+      ] & @@@ {
+        {"Initial", {0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4}},
+        {"Final", {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4, 5}},
+        {All, {0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4, 5}}},
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 2}},
+          {{1, 1}},
+          0]["EventGenerations", "IncludeBoundaryEvents" -> #],
+        #2
+      ] & @@@ {{None, {}}, {"Initial", {0}}, {"Final", {1}}, {All, {0, 1}}},
+
+      VerificationTest[
+        WolframModel[
           {{1, 2}} -> {},
           {{1, 2}, {2, 3}},
           2]["EventGenerations"],
@@ -780,7 +832,45 @@
             Partition[Range[17], 2, 1],
             2][type, VertexLabels -> "Name"]], VertexLabels],
           {VertexLabels -> {"Name"}}
-        ]
+        ],
+
+        VerificationTest[
+          Through[{VertexList, Rule @@@ EdgeList[#] &}[WolframModel[
+            {{1, 2}, {2, 3}} -> {{1, 3}},
+            {{1, 2}, {2, 3}, {3, 4}, {4, 5}},
+            2][type, "IncludeBoundaryEvents" -> #1]]],
+          {#2, #3}
+        ] & @@@ {
+          {None, {1, 2, 3}, {1 -> 3, 2 -> 3}},
+          {"Initial", {0, 1, 2, 3}, {0 -> 1, 0 -> 1, 0 -> 2, 0 -> 2, 1 -> 3, 2 -> 3}},
+          {"Final", {1, 2, 3, Infinity}, {1 -> 3, 2 -> 3, 3 -> Infinity}},
+          {All, {0, 1, 2, 3, Infinity}, {0 -> 1, 0 -> 1, 0 -> 2, 0 -> 2, 1 -> 3, 2 -> 3, 3 -> Infinity}}},
+
+        VerificationTest[
+          Through[{VertexList, Rule @@@ EdgeList[#] &}[WolframModel[
+            {{1, 2}} -> {{1, 3}, {3, 2}},
+            {{1, 2}},
+            2][type, "IncludeBoundaryEvents" -> #1]]],
+          {#2, #3}
+        ] & @@@ {
+          {None, {1, 2, 3}, {1 -> 2, 1 -> 3}},
+          {"Initial", {0, 1, 2, 3}, {0 -> 1, 1 -> 2, 1 -> 3}},
+          {"Final", {1, 2, 3, Infinity}, {1 -> 2, 1 -> 3, 2 -> Infinity, 2 -> Infinity, 3 -> Infinity, 3 -> Infinity}},
+          {All,
+            {0, 1, 2, 3, Infinity},
+            {0 -> 1, 1 -> 2, 1 -> 3, 2 -> Infinity, 2 -> Infinity, 3 -> Infinity, 3 -> Infinity}}},
+
+        VerificationTest[
+          Through[{VertexList, Rule @@@ EdgeList[#] &}[WolframModel[
+            {{1, 2}} -> {{1, 2}},
+            {{1, 2}},
+            0][type, "IncludeBoundaryEvents" -> #1]]],
+          {#2, #3}
+        ] & @@@ {
+          {None, {}, {}},
+          {"Initial", {0}, {}},
+          {"Final", {Infinity}, {}},
+          {All, {0, Infinity}, {0 -> Infinity}}}
       }], {type, {"CausalGraph", "LayeredCausalGraph"}}],
 
       VerificationTest[
@@ -789,6 +879,14 @@
           pathGraph17,
           4]["LayeredCausalGraph"]], VertexCoordinates]][[All, 2]]],
         Floor[Log2[16 - Range[15]]]
+      ],
+
+      VerificationTest[
+        Round[Replace[VertexCoordinates, FilterRules[AbsoluteOptions[WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["LayeredCausalGraph", "IncludeBoundaryEvents" -> All]], VertexCoordinates]][[All, 2]]],
+        Join[{5}, Floor[Log2[16 - Range[15]]] + 1, {0}]
       ]
     }]
   |>
