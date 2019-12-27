@@ -174,7 +174,8 @@ deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := Module[{
 		$generations -> data[$generations][[expressionsToKeep]],
 		$atomLists -> data[$atomLists][[expressionsToKeep]],
 		$rules -> data[$rules],
-		$maxCompleteGeneration -> data[$maxCompleteGeneration]
+		$maxCompleteGeneration -> data[$maxCompleteGeneration],
+		$terminationReason -> data[$terminationReason]
 	|>]
 ]
 
