@@ -65,13 +65,14 @@ WolframModelEvolutionObject /:
 		MakeBoxes[
 			evo : WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			format_] := Module[
-	{generationsCount, maxCompleteGeneration, eventsCount, rules, initialSet},
+	{generationsCount, maxCompleteGeneration, eventsCount, terminationReason, rules, initialSet},
 	generationsCount = evo["GenerationsCount"];
 	maxCompleteGeneration = Replace[evo["MaxCompleteGeneration"], _ ? MissingQ -> "?"];
 	generationsDisplay = If[generationsCount === maxCompleteGeneration,
 		generationsCount,
 		Row[{maxCompleteGeneration, "\[Ellipsis]", generationsCount}]];
 	eventsCount = evo["EventsCount"];
+	terminationReason = evo["TerminationReason"];
 	rules = data[$rules];
 	initialSet = evo[0];
 	BoxForm`ArrangeSummaryBox[
@@ -82,7 +83,8 @@ WolframModelEvolutionObject /:
 		{{BoxForm`SummaryItem[{"Generations: ", generationsDisplay}]},
 		{BoxForm`SummaryItem[{"Events: ", eventsCount}]}},
 		(* Sometimes grid *)
-		{{BoxForm`SummaryItem[{"Rules: ", Short[rules]}]},
+		{{BoxForm`SummaryItem[{"Termination reason: ", terminationReason}]},
+		{BoxForm`SummaryItem[{"Rules: ", Short[rules]}]},
 		{BoxForm`SummaryItem[{"Initial set: ", Short[initialSet]}]}},
 		format,
 		"Interpretable" -> Automatic
@@ -121,6 +123,7 @@ $propertyArgumentCounts = Join[
 		"EventGenerations" -> {0, 0},
 		"CausalGraph" -> {0, Infinity},
 		"LayeredCausalGraph" -> {0, Infinity},
+		"TerminationReason" -> {0, 0},
 		"Properties" -> {0, 0}|>,
 	Association[# -> {0, 0} & /@ Keys[$accessorProperties]]];
 
@@ -627,6 +630,20 @@ propertyEvaluate[True, includeBoundaryEvents : includeBounaryEventsPattern][
 				(propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "GenerationsCount"] -
 						propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "EventGenerations"])}
 	]
+
+
+(* ::Subsubsection:: *)
+(*TerminationReason Implementation*)
+
+
+propertyEvaluate[
+		evolution : WolframModelEvolutionObject[data_ ? evolutionDataQ],
+		caller_,
+		"TerminationReason"] := Replace[data[[Key[$terminationReason]]], Join[Normal[$stepSpecKeys], {
+	$fixedPoint -> "FixedPoint",
+	$timeConstraint -> "TimeConstraint",
+	$Aborted -> "Aborted"
+}]]
 
 
 (* ::Subsection:: *)
