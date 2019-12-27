@@ -83,7 +83,7 @@ WolframModelEvolutionObject /:
 		{{BoxForm`SummaryItem[{"Generations: ", generationsDisplay}]},
 		{BoxForm`SummaryItem[{"Events: ", eventsCount}]}},
 		(* Sometimes grid *)
-		{{BoxForm`SummaryItem[{"Termination reason: ", terminationReason}]},
+		{If[MissingQ[terminationReason], Nothing, {BoxForm`SummaryItem[{"Termination reason: ", terminationReason}]}],
 		{BoxForm`SummaryItem[{"Rules: ", Short[rules]}]},
 		{BoxForm`SummaryItem[{"Initial set: ", Short[initialSet]}]}},
 		format,
@@ -283,7 +283,7 @@ propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		property_ ? (MemberQ[Keys[$accessorProperties], #] &)] :=
-	data[$accessorProperties[property]];
+	Lookup[data, $accessorProperties[property], Missing["NotAvailable"]];
 
 
 (* ::Subsection:: *)
@@ -642,7 +642,8 @@ propertyEvaluate[
 		"TerminationReason"] := Replace[data[[Key[$terminationReason]]], Join[Normal[$stepSpecKeys], {
 	$fixedPoint -> "FixedPoint",
 	$timeConstraint -> "TimeConstraint",
-	$Aborted -> "Aborted"
+	$Aborted -> "Aborted",
+	_ -> Missing["NotAvailable"]
 }]]
 
 
@@ -697,8 +698,14 @@ WolframModelEvolutionObject::corrupt =
 	"Use WolframModel for construction.";
 
 
-evolutionDataQ[data_Association] := Sort[Keys[data]] ===
-	Sort[{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules, $maxCompleteGeneration, $terminationReason}]
+evolutionDataQ[data_Association] :=
+	SubsetQ[
+		Keys[data],
+		{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules}] &&
+	SubsetQ[
+		{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules, $maxCompleteGeneration, $terminationReason},
+		Keys[data]
+	]
 
 
 evolutionDataQ[___] := False
