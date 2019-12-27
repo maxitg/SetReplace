@@ -192,7 +192,7 @@ $maxUnsignedInt = 2^32 - 1;
 
 
 $terminationReasonCodes = <|
-	0 -> Missing["NotTerminated"],
+	0 -> $notTerminated,
 	1 -> $maxEvents,
 	2 -> $maxGenerationsLocal,
 	3 -> $maxFinalVertices,
@@ -241,7 +241,9 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 	cppOutput = decodeExpressions @ $cpp$setExpressions[setPtr];
 	maxCompleteGeneration =
 		Replace[$cpp$maxCompleteGeneration[setPtr], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]];
-	terminationReason = Replace[$terminationReasonCodes[$cpp$terminationReason[setPtr]], $Aborted -> terminationReason];
+	terminationReason = Replace[$terminationReasonCodes[$cpp$terminationReason[setPtr]], {
+		$Aborted -> terminationReason,
+		$notTerminated -> $timeConstraint}];
 	$cpp$setDelete[setPtr];
 	resultAtoms = Union[Catenate[cppOutput[$atomLists]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];

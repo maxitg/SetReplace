@@ -643,6 +643,7 @@ propertyEvaluate[
 	$fixedPoint -> "FixedPoint",
 	$timeConstraint -> "TimeConstraint",
 	$Aborted -> "Aborted",
+	x_ ? MissingQ :> x,
 	_ -> Missing["NotAvailable"]
 }]]
 
