@@ -53,7 +53,8 @@ SyntaxInformation[WolframModel] =
 Options[WolframModel] := Join[{
 	"NodeNamingFunction" -> Automatic,
 	"EventOrderingFunction" -> "Sequential", (* Possible values are "Sequential" and "Random" *)
-	"IncludePartialGenerations" -> True},
+	"IncludePartialGenerations" -> True,
+	"IncludeBoundaryEvents" -> None},
 	Options[setSubstitutionSystem]];
 
 
@@ -180,8 +181,12 @@ WolframModel[
 					OptionValue["NodeNamingFunction"]],
 				$Failed],
 			$Failed];
-		propertyEvaluateWithOptions =
-			propertyEvaluate[OptionValue["IncludePartialGenerations"]][renamedNodesEvolution, WolframModel, #] &;
+		propertyEvaluateWithOptions = propertyEvaluate[
+			OptionValue["IncludePartialGenerations"],
+			OptionValue["IncludeBoundaryEvents"]][
+			renamedNodesEvolution,
+			WolframModel,
+			#] &;
 		result = Check[
 			If[renamedNodesEvolution =!= $Failed,
 				If[ListQ[property],

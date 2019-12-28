@@ -1401,6 +1401,18 @@
         WolframModel[{} -> {{1, 2}}, {}, <|"MaxEvents" -> 0|>]
       ],
 
+      (** IncludeBoundaryEvents **)
+
+      testUnevaluated[
+        WolframModel[{{1, 2}} -> {{1, 2}}, {{1, 1}}, 1, "EventsCount", "IncludeBoundaryEvents" -> $$$invalid$$$],
+        {WolframModel::invalidFiniteOption}
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 2}}, {{1, 1}}, 1, "EventsCount", "IncludeBoundaryEvents" -> All],
+        3
+      ],
+
       (** EventOrderingFunction **)
 
       VerificationTest[
