@@ -637,7 +637,7 @@ propertyEvaluate[True, includeBoundaryEvents : includeBounaryEventsPattern][
 (*TerminationReason Implementation*)
 
 
-propertyEvaluate[
+propertyEvaluate[True, includeBounaryEventsPattern][
 		evolution : WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"TerminationReason"] := Replace[data[[Key[$terminationReason]]], Join[Normal[$stepSpecKeys], {
