@@ -223,6 +223,22 @@ namespace SetReplace {
         
         return LIBRARY_NO_ERROR;
     }
+
+    int terminationReason(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+        if (argc != 1) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+
+        auto setPtr = (Set*)MArgument_getInteger(argv[0]);
+        try {
+            const Set::TerminationReason terminationReason = setPtr->terminationReason();
+            MArgument_setInteger(result, (int)terminationReason);
+        } catch (...) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+
+        return LIBRARY_NO_ERROR;
+    }
 }
 
 EXTERN_C mint WolframLibrary_getVersion() {
@@ -255,4 +271,8 @@ EXTERN_C int setExpressions(WolframLibraryData libData, mint argc, MArgument *ar
 
 EXTERN_C int maxCompleteGeneration(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
     return SetReplace::maxCompleteGeneration(libData, argc, argv, result);
+}
+
+EXTERN_C int terminationReason(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    return SetReplace::terminationReason(libData, argc, argv, result);
 }

@@ -16,7 +16,7 @@ namespace SetReplace {
     public:
         /** @brief Type of the error occurred during evaluation.
          */
-        enum Error {Aborted, DisconnectedInputs, NonPositiveAtoms};
+        enum class Error {Aborted, DisconnectedInputs, NonPositiveAtoms};
         
         /** @brief Specification of conditions upon which to stop evaluation.
          * @details Each of these is UpTo, i.e., the evolution is terminated when the first of these, fixed point, or an abort is reached.
@@ -34,6 +34,18 @@ namespace SetReplace {
             int maxFinalExpressions = 0;
         };
         
+        /** @brief Status of evaluation / termination reason if evaluation is finished.
+         */
+        enum class TerminationReason {
+            NotTerminated = 0,
+            MaxEvents = 1,
+            MaxGenerationsLocal = 2,
+            MaxFinalAtoms = 3,
+            MaxFinalAtomDegree = 4,
+            MaxFinalExpressions = 5,
+            FixedPoint = 6,
+            Aborted = 7};
+
         /** @brief Creates a new set with a given set of evolution rules, and initial condition.
          * @param rules substittion rules used for evolution. Note, these rules cannot be changed.
          * @param initialExpressions initial condition. It will be lazily indexed before the first replacement.
@@ -66,6 +78,10 @@ namespace SetReplace {
          */
         Generation maxCompleteGeneration(const std::function<bool()> shouldAbort);
         
+        /** @brief Yields termination reason for the previous evaluation, or TerminationReason::NotTerminated if no evaluation was done yet.
+         */
+        TerminationReason terminationReason() const;
+
     private:
         class Implementation;
         std::shared_ptr<Implementation> implementation_;

@@ -30,6 +30,7 @@ PackageScope["$generations"]
 PackageScope["$atomLists"]
 PackageScope["$rules"]
 PackageScope["$maxCompleteGeneration"]
+PackageScope["$terminationReason"]
 
 
 (* ::Section:: *)
@@ -64,13 +65,14 @@ WolframModelEvolutionObject /:
 		MakeBoxes[
 			evo : WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			format_] := Module[
-	{generationsCount, maxCompleteGeneration, eventsCount, rules, initialSet},
+	{generationsCount, maxCompleteGeneration, eventsCount, terminationReason, rules, initialSet},
 	generationsCount = evo["GenerationsCount"];
 	maxCompleteGeneration = Replace[evo["MaxCompleteGeneration"], _ ? MissingQ -> "?"];
 	generationsDisplay = If[generationsCount === maxCompleteGeneration,
 		generationsCount,
 		Row[{maxCompleteGeneration, "\[Ellipsis]", generationsCount}]];
 	eventsCount = evo["EventsCount"];
+	terminationReason = evo["TerminationReason"];
 	rules = data[$rules];
 	initialSet = evo[0];
 	BoxForm`ArrangeSummaryBox[
@@ -81,7 +83,8 @@ WolframModelEvolutionObject /:
 		{{BoxForm`SummaryItem[{"Generations: ", generationsDisplay}]},
 		{BoxForm`SummaryItem[{"Events: ", eventsCount}]}},
 		(* Sometimes grid *)
-		{{BoxForm`SummaryItem[{"Rules: ", Short[rules]}]},
+		{If[MissingQ[terminationReason], Nothing, {BoxForm`SummaryItem[{"Termination reason: ", terminationReason}]}],
+		{BoxForm`SummaryItem[{"Rules: ", Short[rules]}]},
 		{BoxForm`SummaryItem[{"Initial set: ", Short[initialSet]}]}},
 		format,
 		"Interpretable" -> Automatic
@@ -120,6 +123,7 @@ $propertyArgumentCounts = Join[
 		"EventGenerations" -> {0, 0},
 		"CausalGraph" -> {0, Infinity},
 		"LayeredCausalGraph" -> {0, Infinity},
+		"TerminationReason" -> {0, 0},
 		"Properties" -> {0, 0}|>,
 	Association[# -> {0, 0} & /@ Keys[$accessorProperties]]];
 
@@ -170,7 +174,8 @@ deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := Module[{
 		$generations -> data[$generations][[expressionsToKeep]],
 		$atomLists -> data[$atomLists][[expressionsToKeep]],
 		$rules -> data[$rules],
-		$maxCompleteGeneration -> data[$maxCompleteGeneration]
+		$maxCompleteGeneration -> data[$maxCompleteGeneration],
+		$terminationReason -> data[$terminationReason]
 	|>]
 ]
 
@@ -279,7 +284,7 @@ propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		property_ ? (MemberQ[Keys[$accessorProperties], #] &)] :=
-	data[$accessorProperties[property]];
+	Lookup[data, $accessorProperties[property], Missing["NotAvailable"]];
 
 
 (* ::Subsection:: *)
@@ -628,6 +633,22 @@ propertyEvaluate[True, includeBoundaryEvents : includeBounaryEventsPattern][
 	]
 
 
+(* ::Subsubsection:: *)
+(*TerminationReason Implementation*)
+
+
+propertyEvaluate[True, includeBounaryEventsPattern][
+		evolution : WolframModelEvolutionObject[data_ ? evolutionDataQ],
+		caller_,
+		"TerminationReason"] := Replace[data[[Key[$terminationReason]]], Join[Normal[$stepSpecKeys], {
+	$fixedPoint -> "FixedPoint",
+	$timeConstraint -> "TimeConstraint",
+	$Aborted -> "Aborted",
+	x_ ? MissingQ :> x,
+	_ -> Missing["NotAvailable"]
+}]]
+
+
 (* ::Subsection:: *)
 (*Public properties call*)
 
@@ -679,8 +700,14 @@ WolframModelEvolutionObject::corrupt =
 	"Use WolframModel for construction.";
 
 
-evolutionDataQ[data_Association] := Sort[Keys[data]] ===
-	Sort[{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules, $maxCompleteGeneration}]
+evolutionDataQ[data_Association] :=
+	SubsetQ[
+		Keys[data],
+		{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules}] &&
+	SubsetQ[
+		{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules, $maxCompleteGeneration, $terminationReason},
+		Keys[data]
+	]
 
 
 evolutionDataQ[___] := False

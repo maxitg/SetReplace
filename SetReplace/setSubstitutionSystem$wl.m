@@ -109,33 +109,41 @@ toNormalRules[rules_List] := Module[{
 
 (* ::Text:: *)
 (*This function just does the replacements, but it does not keep track of any metadata (generations and events).*)
+(*Returns {finalState, terminationReason}, and sows deleted expressions.*)
 
 
 setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstraint_] := Module[{
-		normalRules, previousResult},
+		normalRules, previousResult, eventsCount = 0},
 	normalRules = toNormalRules @ rules;
 	previousResult = set;
 	Catch[
 		TimeConstrained[
 			CheckAbort[
-				FixedPoint[
+				{FixedPoint[
 					AbortProtect[Module[{newResult, deletedExpressions},
-						{newResult, deletedExpressions} = Reap[
-							Catch[Replace[#, normalRules], $$reachedAtomDegreeLimit, Throw[previousResult, $$setReplaceResult] &]];
-						If[vertexCount[vertexIndex] > Lookup[stepSpec, $maxFinalVertices, Infinity] ||
-								Length[newResult] > Lookup[stepSpec, $maxFinalExpressions, Infinity],
-							Throw[previousResult, $$setReplaceResult]];
+						If[eventsCount++ == Lookup[stepSpec, $maxEvents, Infinity],
+							Throw[{previousResult, $maxEvents}, $$setReplaceResult];
+						];
+						{newResult, deletedExpressions} = Reap[Catch[
+							Replace[#, normalRules],
+							$$reachedAtomDegreeLimit,
+							Throw[{previousResult, $maxFinalVertexDegree}, $$setReplaceResult] &]];
+						If[vertexCount[vertexIndex] > Lookup[stepSpec, $maxFinalVertices, Infinity],
+							Throw[{previousResult, $maxFinalVertices}, $$setReplaceResult];
+						];
+						If[Length[newResult] > Lookup[stepSpec, $maxFinalExpressions, Infinity],
+							Throw[{previousResult, $maxFinalExpressions}, $$setReplaceResult];
+						];
 						Map[Sow, deletedExpressions, {2}];
 						previousResult = newResult]] &,
-					List @@ set,
-					Lookup[stepSpec, $maxEvents, Infinity]],
+					List @@ set], $fixedPoint},
 				If[returnOnAbortQ,
-					previousResult,
+					{previousResult, $Aborted},
 					Abort[]
 				]],
 			timeConstraint,
 			If[returnOnAbortQ,
-				previousResult,
+				{previousResult, $timeConstraint},
 				Return[$Aborted]
 			]],
 		$$setReplaceResult
@@ -322,7 +330,7 @@ setSubstitutionSystem$wl[
 			caller_, rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, $EventOrderingFunctionSequential] := Module[{
 		setWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, result,
 		nextExpressionID = 1, nextEventID = 1, expressionsCountsPerVertex, vertexIndex, nextExpression,
-		intermediateMaxCompleteGenerationObject},
+		intermediateEvolution},
 	nextExpression = nextExpressionID++ &;
 	(* {id, creator, destroyer, generation, atoms} *)
 	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
@@ -344,31 +352,38 @@ setSubstitutionSystem$wl[
 		Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint]],
 		$$nonListExpression,
 		(makeMessage[caller, "nonListExpressions", #];
-			Return[$Failed]) &];
+			Return[$Failed]) &]; (* {{finalState, terminationReason}, {deletedExpressions}} *)
 	If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
 	result = SortBy[
 		Join[
-			outputWithMetadata[[1]],
+			outputWithMetadata[[1, 1]],
 			If[outputWithMetadata[[2]] == {}, {}, outputWithMetadata[[2, 1]]]],
 		First];
-	intermediateMaxCompleteGenerationObject = WolframModelEvolutionObject[<|
+	intermediateEvolution = WolframModelEvolutionObject[<|
 		$creatorEvents -> result[[All, 2]],
 		$destroyerEvents -> result[[All, 3]],
 		$generations -> result[[All, 4]],
 		$atomLists -> result[[All, 5]],
 		$rules -> rules,
 		$maxCompleteGeneration -> CheckAbort[
-			maxCompleteGeneration[outputWithMetadata[[1]], renamedRules],
+			maxCompleteGeneration[outputWithMetadata[[1, 1]], renamedRules],
 			If[returnOnAbortQ,
 				Missing["Unknown", $Aborted],
 				Return[$Aborted]
-			]]|>];
+			]],
+		$terminationReason -> outputWithMetadata[[1, 2]]|>];
 	WolframModelEvolutionObject[
 		Join[
-			intermediateMaxCompleteGenerationObject[[1]],
+			intermediateEvolution[[1]],
 			<|$maxCompleteGeneration -> With[{
-					possibleInfinityResult = intermediateMaxCompleteGenerationObject[[1, Key[$maxCompleteGeneration]]]},
+					possibleInfinityResult = intermediateEvolution[[1, Key[$maxCompleteGeneration]]]},
 				If[MissingQ[possibleInfinityResult],
 					possibleInfinityResult,
-					Min[possibleInfinityResult, intermediateMaxCompleteGenerationObject["GenerationsCount"]]]]|>]]
+					Min[possibleInfinityResult, intermediateEvolution["GenerationsCount"]]]],
+			$terminationReason -> Replace[
+				intermediateEvolution[[1, Key[$terminationReason]]],
+				$fixedPoint ->
+					If[intermediateEvolution["GenerationsCount"] == Lookup[stepSpec, $maxGenerationsLocal, Infinity],
+						$maxGenerationsLocal,
+						$fixedPoint]]|>]]
 ]

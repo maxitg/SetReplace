@@ -34,4 +34,8 @@ EXTERN_C DLLEXPORT int setExpressions(WolframLibraryData libData, mint argc, MAr
  */
 EXTERN_C DLLEXPORT int maxCompleteGeneration(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result);
 
+/** @brief Returns a number corresponding to the termination reason.
+ */
+EXTERN_C DLLEXPORT int terminationReason(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result);
+
 #endif /* SetReplace_hpp */

@@ -307,32 +307,33 @@
 
       VerificationTest[
         WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 3|>] /@
-          {"GenerationsCount", "EventsCount"},
-        {3, 7}
+          {"GenerationsCount", "EventsCount", "TerminationReason"},
+        {3, 7, "MaxGenerations"}
       ],
 
       VerificationTest[
         WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxEvents" -> 6|>] /@
-          {"GenerationsCount", "EventsCount"},
-        {3, 6}
+          {"GenerationsCount", "EventsCount", "TerminationReason"},
+        {3, 6, "MaxEvents"}
       ],
 
       VerificationTest[
         WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 3, "MaxEvents" -> 6|>] /@
-          {"GenerationsCount", "EventsCount"},
-        {3, 6}
+          {"GenerationsCount", "EventsCount", "TerminationReason"},
+        {3, 6, "MaxGenerations" | "MaxEvents"},
+        SameTest -> MatchQ
       ],
 
       VerificationTest[
         WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 2, "MaxEvents" -> 6|>] /@
-          {"GenerationsCount", "EventsCount"},
-        {2, 3}
+          {"GenerationsCount", "EventsCount", "TerminationReason"},
+        {2, 3, "MaxGenerations"}
       ],
 
       VerificationTest[
         WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <||>] /@
-          {"GenerationsCount", "EventsCount"},
-        {2, 3}
+          {"GenerationsCount", "EventsCount", "TerminationReason"},
+        {2, 3, "FixedPoint"}
       ],
 
       testUnevaluated[
@@ -350,8 +351,8 @@
 
       VerificationTest[
         WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> \[Infinity], "MaxEvents" -> 12|>] /@
-          {"GenerationsCount", "EventsCount"},
-        {4, 12}
+          {"GenerationsCount", "EventsCount", "TerminationReason"},
+        {4, 12, "MaxEvents"}
       ],
 
       (*** MaxVertices ***)
@@ -368,8 +369,13 @@
         ],
 
         VerificationTest[
-          WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxVertices" -> #1|>, "FinalState", Method -> method],
-          #2
+          WolframModel[
+            $simpleGrowingRule,
+            $simpleGrowingInit,
+            <|"MaxVertices" -> #1|>,
+            {"FinalState", "TerminationReason"},
+            Method -> method],
+          {#2, "MaxVertices"}
         ] & @@@ {{1, {{1, 1}}}, {2, {{1, 2}, {2, 1}}}, {3, {{2, 1}, {1, 3}, {3, 2}}}},
 
         VerificationTest[
@@ -377,9 +383,9 @@
             $simpleGrowingRule,
             $simpleGrowingInit,
             <|"MaxVertices" -> Infinity, "MaxEvents" -> 100|>,
-            "EventsCount",
+            {"EventsCount", "TerminationReason"},
             Method -> method],
-          100
+          {100, "MaxEvents"}
         ],
 
         testUnevaluated[
@@ -389,8 +395,12 @@
 
         VerificationTest[
           WolframModel[
-            {{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 2}, {2, 3}}, <|"MaxVertices" -> 3|>, "FinalState", Method -> method],
-          {{1, 2}, {2, 3}}
+            {{1, 2}} -> {{1, 3}, {3, 2}},
+            {{1, 2}, {2, 3}},
+            <|"MaxVertices" -> 3|>,
+            {"FinalState", "TerminationReason"},
+            Method -> method],
+          {{{1, 2}, {2, 3}}, "MaxVertices"}
         ],
 
         VerificationTest[
@@ -398,9 +408,9 @@
             {{1, 2}} -> {{1, 2}, {2, 2}},
             {{1, 2}, {2, 3}},
             <|"MaxVertices" -> 3, "MaxEvents" -> 100|>,
-            "EventsCount",
+            {"EventsCount", "TerminationReason"},
             Method -> method],
-          100
+          {100, "MaxEvents"}
         ],
 
         VerificationTest[
@@ -417,9 +427,9 @@
           WolframModel[
             {{1, 2}} -> {{1, 3}}, {{1, 2}},
             <|"MaxVertices" -> 2, "MaxEvents" -> 100|>,
-            "EventsCount",
+            {"EventsCount", "TerminationReason"},
             Method -> method],
-          100
+          {100, "MaxEvents"}
         ],
 
         VerificationTest[
@@ -445,8 +455,9 @@
         ],
       
         VerificationTest[
-          WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxVertices" -> 12|>, "AtomsCountFinal"],
-          6
+          WolframModel[
+            $incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxVertices" -> 12|>, {"AtomsCountFinal", "TerminationReason"}],
+          {6, "MaxVertices"}
         ],
 
         testUnevaluated[
@@ -455,8 +466,8 @@
         ],
 
         VerificationTest[
-          WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <||>, "AtomsCountFinal"],
-          9
+          WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <||>, {"AtomsCountFinal", "TerminationReason"}],
+          {9, "FixedPoint"}
         ],
 
         testUnevaluated[
@@ -470,8 +481,8 @@
           <|"PatternRules" -> {{f[a_, x], f[b_, x]}} :> Module[{c}, {{f[a, x], f[c, x]}, {f[c, x], f[b, x]}}]|>,
           {{f[1, x], f[1, x]}},
           <|"MaxVertices" -> 4|>,
-          "ExpressionsCountFinal"],
-        4
+          {"ExpressionsCountFinal", "TerminationReason"}],
+        {4, "MaxVertices"}
       ],
 
       VerificationTest[
@@ -479,8 +490,8 @@
           <|"PatternRules" -> {{{a_, x}, {b_, x}}} :> Module[{c}, {{{a, x}, {c, x}}, {{c, x}, {b, x}}}]|>,
           {{{1, x}, {1, x}}},
           <|"MaxVertices" -> 4|>,
-          "ExpressionsCountFinal"],
-        4
+          {"ExpressionsCountFinal", "TerminationReason"}],
+        {4, "MaxVertices"}
       ],
 
       VerificationTest[
@@ -488,8 +499,8 @@
           <|"PatternRules" -> {{$1_, $2_}} :> Module[{$3}, {{$1, $3}, {$3, $2}}]|>,
           {{1, 1}},
           <|"MaxVertices" -> 30|>,
-          "AtomsCountFinal"],
-        30
+          {"AtomsCountFinal", "TerminationReason"}],
+        {30, "MaxVertices"}
       ],
 
       VerificationTest[
@@ -498,8 +509,8 @@
             {{{$1_, $11_}, {$2_, $22_}}} :> Module[{$3, $33}, {{{$1, $11}, {$3, $33}}, {{$3, $33}, {$2, $22}}}]|>,
           {{{1, 2}, {1, 2}}},
           <|"MaxVertices" -> 30|>,
-          "AtomsCountFinal"],
-        60
+          {"AtomsCountFinal", "TerminationReason"}],
+        {60, "MaxVertices"}
       ],
 
       (*** MaxEdges ***)
@@ -516,8 +527,13 @@
         ],
 
         VerificationTest[
-          WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxEdges" -> #1|>, "FinalState", Method -> method],
-          #2
+          WolframModel[
+            $simpleGrowingRule,
+            $simpleGrowingInit,
+            <|"MaxEdges" -> #1|>,
+            {"FinalState", "TerminationReason"},
+            Method -> method],
+          {#2, "MaxEdges"}
         ] & @@@ {{1, {{1, 1}}}, {2, {{1, 2}, {2, 1}}}, {3, {{2, 1}, {1, 3}, {3, 2}}}},
 
         VerificationTest[
@@ -525,9 +541,9 @@
             $simpleGrowingRule,
             $simpleGrowingInit,
             <|"MaxEdges" -> Infinity, "MaxEvents" -> 100|>,
-            "EventsCount",
+            {"EventsCount", "TerminationReason"},
             Method -> method],
-          100
+          {100, "MaxEvents"}
         ],
 
         testUnevaluated[
@@ -539,9 +555,9 @@
           WolframModel[
             {{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 2}, {2, 3}, {3, 4}},
             <|"MaxEdges" -> 3|>,
-            "FinalState",
+            {"FinalState", "TerminationReason"},
             Method -> method],
-          {{1, 2}, {2, 3}, {3, 4}}
+          {{{1, 2}, {2, 3}, {3, 4}}, "MaxEdges"}
         ],
 
         VerificationTest[
@@ -549,9 +565,9 @@
             {{1, 2}} -> {{3, 4}},
             {{1, 2}, {2, 3}},
             <|"MaxEdges" -> 3, "MaxEvents" -> 100|>,
-            "EventsCount",
+            {"EventsCount", "TerminationReason"},
             Method -> method],
-          100
+          {100, "MaxEvents"}
         ],
 
         VerificationTest[
@@ -577,19 +593,23 @@
       }], {method, DeleteCases[$SetReplaceMethods, Automatic]}],
 
       VerificationTest[
-        WolframModel[{1, 2} -> {1, 3, 3, 2}, {1, 2, 2, 3}, <|"MaxEdges" -> 6|>, "FinalState"],
-        {2, 3, 1, 4, 4, 2}
+        WolframModel[{1, 2} -> {1, 3, 3, 2}, {1, 2, 2, 3}, <|"MaxEdges" -> 6|>, {"FinalState", "TerminationReason"}],
+        {{2, 3, 1, 4, 4, 2}, "MaxEdges"}
       ],
 
       With[{$incrementingRule = <|"PatternRules" -> {{a_}} :> {a + 1, a + 2}|>}, {
         VerificationTest[
-          WolframModel[$incrementingRule, {{1}}, <|"MaxEdges" -> 2|>, "FinalState"],
-          {2, 3}
+          WolframModel[$incrementingRule, {{1}}, <|"MaxEdges" -> 2|>, {"FinalState", "TerminationReason"}],
+          {{2, 3}, "FixedPoint"}
         ],
 
         VerificationTest[
-          WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxEdges" -> 12|>, "ExpressionsCountFinal"],
-          12
+          WolframModel[
+            $incrementingRule,
+            {{{{{{{{{1}}}}}}}}},
+            <|"MaxEdges" -> 12|>,
+            {"ExpressionsCountFinal", "TerminationReason"}],
+          {12, "MaxEdges"}
         ]
       }],
 
@@ -598,7 +618,8 @@
       Table[With[{
           method = method,
           $simpleGrowingRule = {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
-          $simpleGrowingInit = {{1, 1}}}, {
+          $simpleGrowingInit = {{1, 1}},
+          maxVertexDegree = maxVertexDegree}, {
         testUnevaluated[
           WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxVertexDegree" -> x|>, Method -> method],
           {WolframModel::invalidSteps}
@@ -611,8 +632,12 @@
 
         VerificationTest[
           WolframModel[
-            $simpleGrowingRule, $simpleGrowingInit, <|"MaxVertexDegree" -> #1|>, "FinalState", Method -> method],
-          #2
+            $simpleGrowingRule,
+            $simpleGrowingInit,
+            <|"MaxVertexDegree" -> #1|>,
+            {"FinalState", "TerminationReason"},
+            Method -> method],
+          {#2, "MaxVertexDegree"}
         ] & @@@ {
           {1, {{1, 1}}},
           {2, {{1, 1}}},
@@ -624,9 +649,9 @@
             $simpleGrowingRule,
             $simpleGrowingInit,
             <|"MaxVertexDegree" -> Infinity, "MaxEvents" -> 100|>,
-            "EventsCount",
+            {"EventsCount", "TerminationReason"},
             Method -> method],
-          100
+          {100, "MaxEvents"}
         ],
 
         testUnevaluated[
@@ -639,9 +664,9 @@
           WolframModel[
             {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 2}, {1, 3}, {1, 4}},
             <|"MaxVertexDegree" -> 3|>,
-            "FinalState",
+            {"FinalState", "TerminationReason"},
             Method -> method],
-          {{1, 2}, {1, 3}, {1, 4}}
+          {{{1, 2}, {1, 3}, {1, 4}}, "MaxVertexDegree"}
         ],
 
         VerificationTest[
@@ -649,9 +674,9 @@
             {{1, 2}} -> {{1, 3}, {3, 2}},
             {{1, 1}},
             <|"MaxVertexDegree" -> #, "MaxEvents" -> 100|>,
-            "EventsCount",
+            {"EventsCount", "TerminationReason"},
             Method -> method] & /@ {1, 2},
-          {0, 100}
+          {{0, "MaxVertexDegree"}, {100, "MaxEvents"}}
         ],
 
         VerificationTest[
@@ -669,9 +694,9 @@
             {{1, 2}} -> {{1, 3}},
             {{1, 2}, {1, 3}},
             <|"MaxVertexDegree" -> 2, "MaxEvents" -> 100|>,
-            "EventsCount",
+            {"EventsCount", "TerminationReason"},
             Method -> method],
-          100
+          {100, "MaxEvents"}
         ],
 
         VerificationTest[
@@ -690,7 +715,7 @@
         {WolframModel::nonListExpressions}
       ] & /@ {3, Infinity, 0},
 
-      With[{$incrementingRule = <|"PatternRules" -> {{a_}} :> {a + 1, a + 2}|>}, {
+      With[{$incrementingRule = <|"PatternRules" -> {{a_}} :> {a + 1, a + 2}|>, maxVertexDegree = maxVertexDegree}, {
         testUnevaluated[
           WolframModel[$incrementingRule, {1}, <|"MaxVertexDegree" -> 4|>, "FinalState"],
           {WolframModel::nonListExpressions}
@@ -718,8 +743,8 @@
           <|"PatternRules" -> {{f[a_, x], f[b_, x]}} :> Module[{c}, {{f[a, x], f[b, x]}, {f[b, x], f[c, x]}}]|>,
           {{f[1, x], f[1, x]}},
           <|"MaxVertexDegree" -> 4|>,
-          "ExpressionsCountFinal"],
-        8
+          {"ExpressionsCountFinal", "TerminationReason"}],
+        {8, "MaxVertexDegree"}
       ],
 
       VerificationTest[
@@ -727,57 +752,58 @@
           <|"PatternRules" -> {{{a_, x}, {b_, x}}} :> Module[{c}, {{{a, x}, {b, x}}, {{b, x}, {c, x}}}]|>,
           {{{1, x}, {1, x}}},
           <|"MaxVertexDegree" -> 4|>,
-          "ExpressionsCountFinal"],
-        8
+          {"ExpressionsCountFinal", "TerminationReason"}],
+        {8, "MaxVertexDegree"}
       ],
 
       (*** Multiple stop conditions ***)
 
       Function[method, With[{
-          model = Sequence[{{1, 2}, {1, 3}} -> {{1, 3}, {1, 4}, {2, 4}, {3, 4}}, {{1, 1}, {1, 1}}]}, {
+          model = Sequence[{{1, 2}, {1, 3}} -> {{1, 3}, {1, 4}, {2, 4}, {3, 4}}, {{1, 1}, {1, 1}}],
+          maxVertexDegree = maxVertexDegree}, {
         VerificationTest[
           WolframModel[
             model,
             <|"MaxGenerations" -> 5, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 84, "MaxVertexDegree" -> 9|>,
-            "GenerationsCount",
+            {"GenerationsCount", "TerminationReason"},
             Method -> method],
-          5
+          {5, "MaxGenerations"}
         ],
 
         VerificationTest[
           WolframModel[
             model,
             <|"MaxGenerations" -> 6, "MaxEvents" -> 40, "MaxVertices" -> 42, "MaxEdges" -> 84, "MaxVertexDegree" -> 9|>,
-            "EventsCount",
+            {"EventsCount", "TerminationReason"},
             Method -> method],
-          40
+          {40, "MaxEvents"}
         ],
 
         VerificationTest[
           WolframModel[
             model,
             <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 41, "MaxEdges" -> 84, "MaxVertexDegree" -> 9|>,
-            "AtomsCountFinal",
+            {"AtomsCountFinal", "TerminationReason"},
             Method -> method],
-          41
+          {41, "MaxVertices"}
         ],
 
         VerificationTest[
           WolframModel[
             model,
             <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 83, "MaxVertexDegree" -> 9|>,
-            "ExpressionsCountFinal",
+            {"ExpressionsCountFinal", "TerminationReason"},
             Method -> method],
-          82
+          {82, "MaxEdges"}
         ],
 
         VerificationTest[
-          maxVertexDegree @ WolframModel[
+          {maxVertexDegree[#[[1]]], #[[2]]} & @ WolframModel[
             model,
             <|"MaxGenerations" -> 6, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 84, "MaxVertexDegree" -> 8|>,
-            "FinalState",
+            {"FinalState", "TerminationReason"},
             Method -> method],
-          8
+          {8, "MaxVertexDegree"}
         ]
       }]] /@ DeleteCases[$SetReplaceMethods, Automatic],
 
@@ -1257,11 +1283,17 @@
         (*** Check that aborted evaluation still produces correct evolutions. ***)
         Table[With[{method = method, time = time}, VerificationTest[
           And @@ Table[
-            With[{
-                output =
-                  WolframModel[timeConstraintRule, timeConstraintInit, 100, Method -> method, TimeConstraint -> time]},
-              WolframModel[timeConstraintRule, timeConstraintInit, <|"MaxEvents" -> output["EventsCount"]|>] ===
-                output],
+            Module[{timeConstrained, eventConstrained},
+              timeConstrained =
+                WolframModel[timeConstraintRule, timeConstraintInit, 100, Method -> method, TimeConstraint -> time];
+              eventConstrained =
+                WolframModel[timeConstraintRule, timeConstraintInit, <|"MaxEvents" -> timeConstrained["EventsCount"]|>];
+              timeConstrained["TerminationReason"] === "TimeConstraint" &&
+              eventConstrained["TerminationReason"] === "MaxEvents" &&
+              SameQ @@ (# /@ {
+                "CreatorEvents", "DestroyerEvents", "ExpressionGenerations", "AllExpressions", "Rules",
+                "MaxCompleteGeneration"} & /@ {timeConstrained, eventConstrained})
+            ],
             100]
         ]], {method, $SetReplaceMethods}, {time, {1.*^-100, 0.1}}],
 
