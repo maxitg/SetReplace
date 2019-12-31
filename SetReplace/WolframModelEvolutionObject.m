@@ -31,6 +31,7 @@ PackageScope["$atomLists"]
 PackageScope["$rules"]
 PackageScope["$maxCompleteGeneration"]
 PackageScope["$terminationReason"]
+PackageScope["$eventRuleIDs"]
 
 
 (* ::Section:: *)
@@ -709,7 +710,8 @@ evolutionDataQ[data_Association] :=
 		Keys[data],
 		{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules}] &&
 	SubsetQ[
-		{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules, $maxCompleteGeneration, $terminationReason},
+		{$creatorEvents, $destroyerEvents, $generations, $atomLists, $rules, $maxCompleteGeneration, $terminationReason,
+			$eventRuleIDs},
 		Keys[data]
 	]
 

@@ -239,6 +239,33 @@ namespace SetReplace {
 
         return LIBRARY_NO_ERROR;
     }
+
+    int eventRuleIDs(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+        if (argc != 1) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+        
+        auto setPtr = (Set*)MArgument_getInteger(argv[0]);
+        try {
+            const auto ruleIDs = setPtr->eventRuleIDs();
+            mint dimensions[1] = {static_cast<mint>(ruleIDs.size() - 1)};
+            MTensor output;
+            libData->MTensor_new(MType_Integer, 1, dimensions, &output);
+            
+            int writeIndex = 0;
+            mint position[1];
+            for (int event = 1; event < ruleIDs.size(); ++event) {
+                position[0] = ++writeIndex;
+                libData->MTensor_setInteger(output, position, ruleIDs[event] + 1);
+            }
+            
+            MArgument_setMTensor(result, output);
+        } catch (...) {
+            return LIBRARY_FUNCTION_ERROR;
+        }
+        
+        return LIBRARY_NO_ERROR;
+    }
 }
 
 EXTERN_C mint WolframLibrary_getVersion() {
@@ -275,4 +302,8 @@ EXTERN_C int maxCompleteGeneration(WolframLibraryData libData, mint argc, MArgum
 
 EXTERN_C int terminationReason(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
     return SetReplace::terminationReason(libData, argc, argv, result);
+}
+
+EXTERN_C int eventRuleIDs(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    return SetReplace::eventRuleIDs(libData, argc, argv, result);
 }

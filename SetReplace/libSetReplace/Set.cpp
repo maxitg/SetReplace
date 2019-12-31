@@ -18,10 +18,10 @@ namespace SetReplace {
         TerminationReason terminationReason_ = TerminationReason::NotTerminated;
         
         std::unordered_map<ExpressionID, SetExpression> expressions_;
+        std::vector<RuleID> eventRuleIDs_ = {-1};
         
         Atom nextAtom_ = 1;
         ExpressionID nextExpressionID_ = 0;
-        EventID nextEventID_ = 1;
         
         int destroyedExpressionsCount_ = 0;
         
@@ -52,7 +52,7 @@ namespace SetReplace {
         int replaceOnce(const std::function<bool()> shouldAbort) {
             terminationReason_ = TerminationReason::NotTerminated;
 
-            if (nextEventID_ > stepSpec_.maxEvents) {
+            if (eventRuleIDs_.size() > stepSpec_.maxEvents) {
                 terminationReason_ = TerminationReason::MaxEvents;
                 return 0;
             }
@@ -108,9 +108,10 @@ namespace SetReplace {
             }
             largestGeneration_ = std::max(largestGeneration_, outputGeneration);
             
-            const EventID eventID = nextEventID_++;
+            const EventID eventID = static_cast<int>(eventRuleIDs_.size());
             addExpressions(namedRuleOutputs, eventID, outputGeneration);
             assignDestroyerEvent(match.inputExpressions, eventID);
+            eventRuleIDs_.push_back(match.rule);
             
             return 1;
         }
@@ -151,6 +152,10 @@ namespace SetReplace {
         
         TerminationReason terminationReason() const {
             return terminationReason_;
+        }
+        
+        const std::vector<RuleID>& eventRuleIDs() const {
+            return eventRuleIDs_;
         }
 
     private:
@@ -357,5 +362,9 @@ namespace SetReplace {
 
     Set::TerminationReason Set::terminationReason() const {
         return implementation_->terminationReason();
+    }
+
+    const std::vector<RuleID>& Set::eventRuleIDs() const {
+        return implementation_->eventRuleIDs();
     }
 }

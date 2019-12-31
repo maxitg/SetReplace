@@ -80,6 +80,15 @@ $cpp$terminationReason = If[$libraryFile =!= $Failed,
 	$Failed];
 
 
+$cpp$eventRuleIDs = If[$libraryFile =!= $Failed,
+	LibraryFunctionLoad[
+		$libraryFile,
+		"eventRuleIDs",
+		{Integer}, (* set ptr *)
+		{Integer, 1}], (* ids *)
+	$Failed];
+
+
 (* ::Section:: *)
 (*Implementation*)
 
@@ -207,8 +216,8 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
-		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, terminationReason, resultAtoms,
-		inversePartialGlobalMap, inverseGlobalMap},
+		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, terminationReason, eventRuleIDs,
+		resultAtoms, inversePartialGlobalMap, inverseGlobalMap},
 	canonicalRules = toCanonicalRules[rules];
 	setAtoms = Hold /@ Union[Catenate[set]];
 	atomsInRules = ruleAtoms /@ canonicalRules;
@@ -244,6 +253,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 	terminationReason = Replace[$terminationReasonCodes[$cpp$terminationReason[setPtr]], {
 		$Aborted -> terminationReason,
 		$notTerminated -> $timeConstraint}];
+	eventRuleIDs = $cpp$eventRuleIDs[setPtr];
 	$cpp$setDelete[setPtr];
 	resultAtoms = Union[Catenate[cppOutput[$atomLists]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
@@ -255,6 +265,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 				ReleaseHold @ Map[inverseGlobalMap, cppOutput[$atomLists], {2}],
 			$rules -> rules,
 			$maxCompleteGeneration -> maxCompleteGeneration,
-			$terminationReason -> terminationReason
+			$terminationReason -> terminationReason,
+			$eventRuleIDs -> eventRuleIDs
 		|>]]
 ]
