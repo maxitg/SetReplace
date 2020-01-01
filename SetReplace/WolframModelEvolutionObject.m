@@ -125,6 +125,8 @@ $propertyArgumentCounts = Join[
 		"CausalGraph" -> {0, Infinity},
 		"LayeredCausalGraph" -> {0, Infinity},
 		"TerminationReason" -> {0, 0},
+		"AllEventsRuleIndices" -> {0, 0},
+		"AllEventsList" -> {0, 0},
 		"Properties" -> {0, 0}|>,
 	Association[# -> {0, 0} & /@ Keys[$accessorProperties]]];
 
@@ -601,17 +603,20 @@ propertyEvaluate[True, includeBounaryEventsPattern][
 (*CausalGraph Implementation*)
 
 
+eventsToDelete[includeBoundaryEvents : includeBounaryEventsPattern] :=
+	If[MatchQ[includeBoundaryEvents, All | #1], Nothing, #2] & @@@ {{"Initial", 0}, {"Final", Infinity}};
+
+
 propertyEvaluate[True, includeBoundaryEvents : includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"CausalGraph",
 		o : OptionsPattern[]] /;
 			(Complement[{o}, FilterRules[{o}, $causalGraphOptions]] == {}) := With[{
-		eventsToDelete = Alternatives @@ (
-			If[MatchQ[includeBoundaryEvents, All | #1], Nothing, #2] & @@@ {{"Initial", 0}, {"Final", Infinity}})},
+		$eventsToDelete = Alternatives @@ eventsToDelete[includeBoundaryEvents]},
 	Graph[
-		DeleteCases[Union[data[$creatorEvents], data[$destroyerEvents]], eventsToDelete],
-		Select[FreeQ[#, eventsToDelete] &] @ Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
+		DeleteCases[Union[data[$creatorEvents], data[$destroyerEvents]], $eventsToDelete],
+		Select[FreeQ[#, $eventsToDelete] &] @ Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
 		o]
 ]
 
@@ -652,6 +657,43 @@ propertyEvaluate[True, includeBounaryEventsPattern][
 	x_ ? MissingQ :> x,
 	_ -> Missing["NotAvailable"]
 }]]
+
+
+(* ::Subsubsection:: *)
+(*AllEventsRuleIndices*)
+
+
+insertBoundaryEvents[boundary_, events_] :=
+	If[MatchQ[boundary, "Initial" | All], Prepend[#, 0] &, Identity] @
+		If[MatchQ[boundary, "Final" | All], Append[#, Infinity] &, Identity] @
+		events
+
+
+propertyEvaluate[True, boundary : includeBounaryEventsPattern][
+		evolution : WolframModelEvolutionObject[data_ ? evolutionDataQ],
+		caller_,
+		"AllEventsRuleIndices"] := insertBoundaryEvents[boundary, Lookup[data, $eventRuleIDs, Missing["NotAvailable"]]]
+
+
+(* ::Subsubsection:: *)
+(*AllEventsList implementation*)
+
+
+propertyEvaluate[True, boundary : includeBounaryEventsPattern][
+		evolution : WolframModelEvolutionObject[data_ ? evolutionDataQ],
+		caller_,
+		"AllEventsList"] := With[{
+	ruleIndices = propertyEvaluate[True, boundary][evolution, caller, "AllEventsRuleIndices"],
+	createdExpressions = PositionIndex[evolution["CreatorEvents"]],
+	destroyedExpressions = PositionIndex[evolution["DestroyerEvents"]]},
+		If[MissingQ[ruleIndices],
+			ruleIndices,
+			MapThread[
+				{#, Lookup[destroyedExpressions, #2, {}] -> Lookup[createdExpressions, #2, {}]} &,
+				{ruleIndices,
+					insertBoundaryEvents[boundary, Range[propertyEvaluate[True, None][evolution, caller, "EventsCount"]]]}]
+		]
+]
 
 
 (* ::Subsection:: *)
