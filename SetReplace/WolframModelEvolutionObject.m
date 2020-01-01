@@ -160,17 +160,21 @@ propertyEvaluate[_, boundary : Except[includeBounaryEventsPattern]][evolution_, 
 
 
 deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := Module[{
-		maxCompleteGeneration, expressionsToDelete, lastGenerationExpressions, deleteEventsRules},
+		maxCompleteGeneration, expressionsToDelete, lastGenerationExpressions, expressionsToKeep, eventsToDelete,
+		eventsCount, eventsToKeep, eventRenameRules},
 	maxCompleteGeneration = data[$maxCompleteGeneration];
 	{expressionsToDelete, lastGenerationExpressions} =
 		Position[data[$generations], _ ? #][[All, 1]] & /@ {# > maxCompleteGeneration &, # == maxCompleteGeneration &};
 	expressionsToKeep = Complement[Range[Length[data[$generations]]], expressionsToDelete];
-	deleteEventsRules = Dispatch[Thread[
-		Union[data[$creatorEvents][[expressionsToDelete]], data[$destroyerEvents][[lastGenerationExpressions]]] ->
-			Infinity]];
+	eventsToDelete =
+		Union[data[$creatorEvents][[expressionsToDelete]], data[$destroyerEvents][[lastGenerationExpressions]]];
+	eventsCount = WolframModelEvolutionObject[data]["EventsCount"];
+	eventsToKeep = Complement[Range[eventsCount], eventsToDelete];
+	eventRenameRules =
+		Dispatch[Join[Thread[eventsToKeep -> Range[Length[eventsToKeep]]], Thread[eventsToDelete -> Infinity]]];
 	WolframModelEvolutionObject[<|
-		$creatorEvents -> data[$creatorEvents][[expressionsToKeep]],
-		$destroyerEvents -> data[$destroyerEvents][[expressionsToKeep]] /. deleteEventsRules,
+		$creatorEvents -> data[$creatorEvents][[expressionsToKeep]] /. eventRenameRules,
+		$destroyerEvents -> data[$destroyerEvents][[expressionsToKeep]] /. eventRenameRules,
 		$generations -> data[$generations][[expressionsToKeep]],
 		$atomLists -> data[$atomLists][[expressionsToKeep]],
 		$rules -> data[$rules],
