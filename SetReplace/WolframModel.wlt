@@ -1400,6 +1400,28 @@
         }] & @@@ models
       ], {method, DeleteCases[$SetReplaceMethods, Automatic]}],
 
+      VerificationTest[
+        SameQ @@ ((SeedRandom[2];
+          WolframModel[
+            {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
+            {{1, 1}},
+            <|"MaxEvents" -> #|>,
+            "EventOrderingFunction" -> "Random",
+            "IncludePartialGenerations" -> False]) & /@ {200, 300})
+      ],
+
+      VerificationTest[
+        SeedRandom[2];
+          Sort[VertexList[WolframModel[
+            {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
+            {{1, 1}},
+            <|"MaxEvents" -> 200|>,
+            "EventOrderingFunction" -> "Random",
+            "IncludePartialGenerations" -> False][
+            "CausalGraph"]]],
+        Range[13]
+      ],
+
       testUnevaluated[
         WolframModel[{{1, 2, 3}} -> {{1, 2, 3}}, {{1, 2, 3}}, 1, "IncludePartialGenerations" -> $$$invalid$$$],
         {WolframModel::invalidFiniteOption}
