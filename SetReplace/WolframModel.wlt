@@ -1526,7 +1526,64 @@
         WolframModel[
           {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> 1, Method -> "Symbolic"],
         {WolframModel::invalidFiniteOption}
-      ]
+      ],
+
+      (** AllEventsRuleIndices **)
+
+      Table[With[{method = method}, {
+        VerificationTest[
+          WolframModel[{{{1}} -> {{1}}}, {{1}}, 4, "AllEventsRuleIndices", Method -> method],
+          {1, 1, 1, 1}
+        ],
+
+        VerificationTest[
+          WolframModel[{{{1}} -> {{1, 2}}, {{1, 2}} -> {{1}}}, {{1}}, 4, "AllEventsRuleIndices", Method -> method],
+          {1, 2, 1, 2}
+        ],
+
+        VerificationTest[
+          WolframModel[{{{1, 2}} -> {{1}}, {{1}} -> {{1, 2}}}, {{1}}, 4, "AllEventsRuleIndices", Method -> method],
+          {2, 1, 2, 1}
+        ],
+
+        VerificationTest[
+          WolframModel[{{{1, 2}} -> {{1}}, {{1}} -> {{1, 2}}}, {{1}}, 0, "AllEventsRuleIndices", Method -> method],
+          {}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{{1, 2}} -> {{1}}, {{1}} -> {{1, 2}}},
+            {{1}},
+            4,
+            "AllEventsRuleIndices",
+            "IncludeBoundaryEvents" -> "Initial",
+            Method -> method],
+          {0, 2, 1, 2, 1}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{{1, 2}} -> {{1}}, {{1}} -> {{1, 2}}},
+            {{1}},
+            4,
+            "AllEventsRuleIndices",
+            "IncludeBoundaryEvents" -> "Final",
+            Method -> method],
+          {2, 1, 2, 1, Infinity}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{{1, 2}} -> {{1}}, {{1}} -> {{1, 2}}},
+            {{1}},
+            4,
+            "AllEventsRuleIndices",
+            "IncludeBoundaryEvents" -> All,
+            Method -> method],
+          {0, 2, 1, 2, 1, Infinity}
+        ]
+      }], {method, DeleteCases[$SetReplaceMethods, Automatic]}]
     }
   |>,
 
