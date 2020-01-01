@@ -120,21 +120,24 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
 		TimeConstrained[
 			CheckAbort[
 				{FixedPoint[
-					AbortProtect[Module[{newResult, deletedExpressions},
+					AbortProtect[Module[{newResult, deletedExpressions, ruleIndices},
 						If[eventsCount++ == Lookup[stepSpec, $maxEvents, Infinity],
 							Throw[{previousResult, $maxEvents}, $$setReplaceResult];
 						];
-						{newResult, deletedExpressions} = Reap[Catch[
-							Replace[#, normalRules],
-							$$reachedAtomDegreeLimit,
-							Throw[{previousResult, $maxFinalVertexDegree}, $$setReplaceResult] &]];
+						{newResult, {deletedExpressions, ruleIndices}} = Reap[
+							Catch[
+								Replace[#, normalRules],
+								$$reachedAtomDegreeLimit,
+								Throw[{previousResult, $maxFinalVertexDegree}, $$setReplaceResult] &],
+							{$$deletedExpressions, $$ruleIndex}];
 						If[vertexCount[vertexIndex] > Lookup[stepSpec, $maxFinalVertices, Infinity],
 							Throw[{previousResult, $maxFinalVertices}, $$setReplaceResult];
 						];
 						If[Length[newResult] > Lookup[stepSpec, $maxFinalExpressions, Infinity],
 							Throw[{previousResult, $maxFinalExpressions}, $$setReplaceResult];
 						];
-						Map[Sow, deletedExpressions, {2}];
+						Map[Sow[#, $$deletedExpressions] &, deletedExpressions, {2}];
+						Map[Sow[#, $$ruleIndex] &, ruleIndices, {2}];
 						previousResult = newResult]] &,
 					List @@ set], $fixedPoint},
 				If[returnOnAbortQ,
@@ -186,7 +189,8 @@ addMetadataManagement[
 							Given that these look just like normal expressions,
 							which just output Nothing at the end,
 							they pass just fine through all the transformation. *)
-						With[{expr = #[[5]]}, Hold[Sow[#]; deleteFromVertexIndex[vertexIndex, expr]; Nothing]] & @* ({
+						With[{expr = #[[5]]},
+								Hold[Sow[#, $$deletedExpressions]; deleteFromVertexIndex[vertexIndex, expr]; Nothing]] & @* ({
 							#[[1]], #[[2]], nextEvent, #[[3]], #[[4]]} &) /@
 								Transpose[{
 									inputIDs,
@@ -340,16 +344,20 @@ setSubstitutionSystem$wl[
 		$noIndex,
 		$vertexIndex[expressionsCountsPerVertex]];
 	initVertexIndex[vertexIndex, set];
-	rulesWithMetadata = addMetadataManagement[
+
+	rulesWithMetadata = MapIndexed[
+		addMetadataManagement[
 			#,
-			nextEventID++ &,
+			With[{ruleIndex = #2[[1]]}, (Sow[ruleIndex, $$ruleIndex]; nextEventID++) &],
 			nextExpression,
 			Lookup[stepSpec, $maxGenerationsLocal, Infinity],
 			Lookup[stepSpec, $maxFinalVertexDegree, Infinity],
-			vertexIndex] & /@
-		renamedRules;
+			vertexIndex] &,
+		renamedRules];
 	outputWithMetadata = Catch[
-		Reap[setReplace$wl[setWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint]],
+		Reap[
+			setReplace$wl[setWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint],
+			{$$deletedExpressions, $$ruleIndex}],
 		$$nonListExpression,
 		(makeMessage[caller, "nonListExpressions", #];
 			Return[$Failed]) &]; (* {{finalState, terminationReason}, {deletedExpressions}} *)
@@ -357,7 +365,7 @@ setSubstitutionSystem$wl[
 	result = SortBy[
 		Join[
 			outputWithMetadata[[1, 1]],
-			If[outputWithMetadata[[2]] == {}, {}, outputWithMetadata[[2, 1]]]],
+			If[outputWithMetadata[[2, 1]] == {}, {}, outputWithMetadata[[2, 1, 1]]]],
 		First];
 	intermediateEvolution = WolframModelEvolutionObject[<|
 		$creatorEvents -> result[[All, 2]],
@@ -371,7 +379,8 @@ setSubstitutionSystem$wl[
 				Missing["Unknown", $Aborted],
 				Return[$Aborted]
 			]],
-		$terminationReason -> outputWithMetadata[[1, 2]]|>];
+		$terminationReason -> outputWithMetadata[[1, 2]],
+		$eventRuleIDs -> If[outputWithMetadata[[2, 2]] == {}, {}, outputWithMetadata[[2, 2, 1]]]|>];
 	WolframModelEvolutionObject[
 		Join[
 			intermediateEvolution[[1]],
