@@ -38,4 +38,8 @@ EXTERN_C DLLEXPORT int maxCompleteGeneration(WolframLibraryData libData, mint ar
  */
 EXTERN_C DLLEXPORT int terminationReason(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result);
 
+/** @brief Returns the list of indices of rules used for each event.
+ */
+EXTERN_C DLLEXPORT int eventRuleIDs(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result);
+
 #endif /* SetReplace_hpp */

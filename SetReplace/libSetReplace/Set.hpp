@@ -81,6 +81,10 @@ namespace SetReplace {
         /** @brief Yields termination reason for the previous evaluation, or TerminationReason::NotTerminated if no evaluation was done yet.
          */
         TerminationReason terminationReason() const;
+        
+        /** @brief Yields rule IDs corresponding to each event.
+         */
+        const std::vector<RuleID>& eventRuleIDs() const;
 
     private:
         class Implementation;

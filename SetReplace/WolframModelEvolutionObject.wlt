@@ -887,6 +887,78 @@
           pathGraph17,
           4]["LayeredCausalGraph", "IncludeBoundaryEvents" -> All]], VertexCoordinates]][[All, 2]]],
         Join[{5}, Floor[Log2[16 - Range[15]]] + 1, {0}]
+      ],
+
+      (* AllEventsList *)
+
+      Table[With[{method = method}, {
+        VerificationTest[
+          WolframModel[{{{1}} -> {{1}}}, {{1}}, 4, Method -> method]["AllEventsList"],
+          {{1, {1} -> {2}}, {1, {2} -> {3}}, {1, {3} -> {4}}, {1, {4} -> {5}}}
+        ],
+
+        VerificationTest[
+          WolframModel[{{{1}} -> {{1, 2}}, {{1, 2}} -> {{1}}}, {{1}}, 4, Method -> method]["AllEventsList"],
+          {{1, {1} -> {2}}, {2, {2} -> {3}}, {1, {3} -> {4}}, {2, {4} -> {5}}}
+        ],
+
+        VerificationTest[
+          WolframModel[{{{1, 2}} -> {{1}}, {{1}} -> {{1, 2}}}, {{1}}, 4, Method -> method]["AllEventsList"],
+          {{2, {1} -> {2}}, {1, {2} -> {3}}, {2, {3} -> {4}}, {1, {4} -> {5}}}
+        ],
+
+        VerificationTest[
+          WolframModel[{{{1, 2}} -> {{1}, {2}}, {{1}} -> {{1, 2}}}, {{1}}, 4, Method -> method]["AllEventsList"],
+          {{2, {1} -> {2}}, {1, {2} -> {3, 4}}, {2, {3} -> {5}}, {2, {4} -> {6}}, {1, {5} -> {7, 8}}, {1, {6} -> {9, 10}}}
+        ],
+
+        VerificationTest[
+          WolframModel[{{{1, 2}} -> {}, {{1}} -> {{1, 2}}}, {{1}}, 4, Method -> method]["AllEventsList"],
+          {{2, {1} -> {2}}, {1, {2} -> {}}}
+        ],
+
+        VerificationTest[
+          WolframModel[{{{1, 2}} -> {{1}}, {{1}} -> {{1, 2}}}, {{1}}, 0, Method -> method]["AllEventsList"],
+          {}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{{1, 2}} -> {{1}}, {{1}} -> {{1, 2}}},
+            {{1}},
+            4,
+            Method -> method][
+            "AllEventsList",
+            "IncludeBoundaryEvents" -> "Initial"],
+          {{0, {} -> {1}}, {2, {1} -> {2}}, {1, {2} -> {3}}, {2, {3} -> {4}}, {1, {4} -> {5}}}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{{1, 2}} -> {{1}}, {{1}} -> {{1, 2}}},
+            {{1}},
+            4,
+            Method -> method][
+            "AllEventsList",
+            "IncludeBoundaryEvents" -> "Final"],
+          {{2, {1} -> {2}}, {1, {2} -> {3}}, {2, {3} -> {4}}, {1, {4} -> {5}}, {\[Infinity], {5} -> {}}}
+        ],
+
+        VerificationTest[
+          WolframModel[
+            {{{1, 2}} -> {{1}}, {{1}} -> {{1, 2}}},
+            {{1}},
+            4,
+            Method -> method][
+            "AllEventsList",
+            "IncludeBoundaryEvents" -> All],
+          {{0, {} -> {1}}, {2, {1} -> {2}}, {1, {2} -> {3}}, {2, {3} -> {4}}, {1, {4} -> {5}}, {\[Infinity], {5} -> {}}}
+        ]
+      }], {method, DeleteCases[$SetReplaceMethods, Automatic]}],
+
+      VerificationTest[
+        WolframModel[{{{1, 2}} -> {{}}, {{}} -> {{1, 2}}}, {{}}, 4]["AllEventsList"],
+        {{2, {1} -> {2}}, {1, {2} -> {3}}, {2, {3} -> {4}}, {1, {4} -> {5}}}
       ]
     }]
   |>
