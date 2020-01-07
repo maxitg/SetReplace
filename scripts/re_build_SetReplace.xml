@@ -1,0 +1,78 @@
+<project name='SetReplace' basedir='..'>
+  <property name='build_target' value='internal' />
+  <property name='component' value='${ant.project.name}' />
+  <property name='system_id' value='### Must be set by Jenkins ###' />
+
+  <property environment='env' />
+  <import file='${env.RE_ANTLIBRARY_HOME}/ant-lib.xml' />
+
+  <!--
+    Component (platform-independent)
+  -->
+  <target name='Component.SetReplace.execute' extensionOf='Component.execute'>
+    <copy todir='${files_directory}/${component}'>
+      <fileset dir='${component}' >
+        <include name='Kernel/**' />
+        <include name='*.m' />
+      </fileset>
+    </copy>
+  </target>
+
+  <!--
+    Native libraries
+  -->
+  <target name='NativeLibrary.SetReplace.init.custom' extensionOf='NativeLibrary.init.custom'>
+    <property name='library.makefiles.dir' value='${scratch_directory}${file.separator}Library.Makefiles' />
+  </target>
+
+  <target name='NativeLibrary.SetReplace.clean' extensionOf='NativeLibrary.clean'>
+    <delete dir='${library.makefiles.dir}' />
+    <mkdir dir='${library.makefiles.dir}' />
+  </target>
+
+  <target name='NativeLibrary.SetReplace.execute' extensionOf='NativeLibrary.execute'>
+    <mathematica
+      exe='${mathExe}'
+      fresh='true'
+      quit='true'
+      runfile='${basedir}${file.separator}scripts${file.separator}buildLibSetReplace.wls'
+      />
+  </target>
+
+  <target name='NativeLibrary.SetReplace.MacOSX-x86-64.postbuild' extensionOf='NativeLibrary.postbuild' if='is.osx'>
+    <sign dir='${files_directory}'>
+      <include name='**/*.dylib' />
+    </sign>
+  </target>
+
+  <target name='NativeLibrary.SetReplace.Windows-x86-64.postbuild' extensionOf='NativeLibrary.postbuild' if='is.windows'>
+    <sign dir='${files_directory}'>
+      <include name='**/*.dll' />
+      <include name='**/*.exe' />
+      <include name='**/*.lib' />
+    </sign>
+  </target>
+
+  <!--
+    Pack paclet
+  -->
+
+  <target name='PacletNew.SetReplace.init.custom' extensionOf='PacletNew.init.custom'>
+    <!--
+      Prevent Paclet.clean from deleting files_directory,
+      since CopyAndUnarchiveArtifact just put all the paclet
+      files in there....
+    -->
+    <property name='keep.files_directory' value='true' />
+  </target>
+  
+  <target name='PacletNew.SetReplace.execute' extensionOf='PacletNew.execute.custom'>
+    <mathematica
+      exe='${mathExe}'
+      fresh='true'
+      quit='true'
+      runfile='${basedir}${file.separator}scripts${file.separator}packPaclet.wls'
+      />
+  </target>
+
+</project>
