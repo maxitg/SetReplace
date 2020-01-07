@@ -17,12 +17,19 @@ $plotStyleAutomatic = <|
 	_ -> Hue[0.6, 0.2, 0.8], (* vertex style *)
 	_List -> Hue[0.6, 0.7, 0.5]|>; (* edge style *)
 
+$highlightStyleAutomatic = Hue[1.0, 1.0, 0.7];
+
 (* Automatic style pickes up, and possibly modifies the style it inherits from. *)
 Options[HypergraphPlot] = Join[{
 	"EdgePolygonStyle" -> Automatic, (* inherits from EdgeStyle, with specified small opacity *)
 	EdgeStyle -> Automatic, (* inherits from PlotStyle *)
 	GraphHighlight -> {},
-	GraphHighlightStyle -> Hue[1.0, 1.0, 0.7],
+	GraphHighlightStyle -> $highlightStyleAutomatic, (* similar to PlotStyle *)
+	"GraphHighlightEdgePolygonStyle" -> Automatic,
+	"GraphHighlightEdgeStyle" -> Automatic,
+	"GraphHighlightVertexSize" -> 0.06,
+	"GraphHighlightArrowheadLength" -> 0.15,
+	"GraphHighlightVertexStyle" -> Automatic,
 	"HyperedgeRendering" -> "Polygons",
 	PlotStyle -> $plotStyleAutomatic,
 	VertexCoordinateRules -> {},
@@ -48,11 +55,8 @@ General::invalidEdgeType =
 General::invalidCoordinates =
 	"Coordinates `1` should be a list of rules from vertices to pairs of numbers.";
 
-HypergraphPlot::invalidHighlight =
+General::invalidHighlight =
 	"GraphHighlight value `1` should be a list of vertices and edges.";
-
-General::invalidHighlightStyle =
-	"GraphHighlightStyle `1` should be a color.";
 
 General::invalidSize =
 	"`1` `2` should be a non-negative number.";
@@ -89,32 +93,61 @@ hypergraphPlot$parse[
 hypergraphPlot$parse[
 			edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
 				correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}] := Module[{
-		optionValue, plotStyles, edgeStyle, styles},
+		vertices, highlightCounts, vertexHighlightQ, edgeHighlightQ, optionValue, edgeStyle, styles, highlightStyles},
 	optionValue[opt_] := OptionValue[HypergraphPlot, {o}, opt];
 	vertices = vertexList[edges];
+
+	highlightCounts = Counts[highlight];
+
+	{vertexHighlightQ, edgeHighlightQ} = Map[
+		If[MissingQ[highlightCounts[#]], False, highlightCounts[#]-- > 0] &,
+		{vertices, edges},
+		{2}];
+
 	(* these are lists, one style for each vertex element *)
 	styles = <|
 		$vertexPoint -> parseStyles[
-			optionValue[VertexStyle],
 			vertices,
-			parseStyles[optionValue[PlotStyle], vertices, $plotStyleAutomatic, Identity],
-			Directive[#, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]] &],
+			$plotStyleAutomatic,
+			{
+				{optionValue[PlotStyle], True, Identity},
+				{optionValue[VertexStyle], True, Directive[#, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]] &},
+				{$highlightStyleAutomatic, vertexHighlightQ, Identity},
+				{optionValue[GraphHighlightStyle], vertexHighlightQ, Identity},
+				{optionValue["GraphHighlightVertexStyle"], vertexHighlightQ,
+						Directive[#, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]] &}
+			}
+		],
 		$edgeLine -> (edgeStyles = parseStyles[
-			optionValue[EdgeStyle],
 			edges,
-			parseStyles[optionValue[PlotStyle], edges, $plotStyleAutomatic, Identity],
-			Directive[#, Opacity[0.7]] &]),
+			$plotStyleAutomatic,
+			{
+				{optionValue[PlotStyle], True, Identity},
+				{optionValue[EdgeStyle], True, Directive[#, Opacity[0.7]] &},
+				{$highlightStyleAutomatic, edgeHighlightQ, Identity},
+				{optionValue[GraphHighlightStyle], edgeHighlightQ, Identity},
+				{optionValue["GraphHighlightEdgeStyle"], edgeHighlightQ, Directive[#, Opacity[1]] &}
+			}
+		]),
 		$edgePoint -> edgeStyles,
-		$edgePolygon -> parseStyles[optionValue["EdgePolygonStyle"], edges, edgeStyles, Directive[#, Opacity[0.09]] &]|>;
+		$edgePolygon -> parseStyles[
+			edges,
+			edgeStyles,
+			{
+				{optionValue["EdgePolygonStyle"], Not /@ edgeHighlightQ, Directive[#, Opacity[0.09]] &},
+				{optionValue["GraphHighlightEdgePolygonStyle"], edgeHighlightQ, Directive[#, Opacity[0.3]] &}
+			}
+		],
+		$vertexSize -> vertexHighlightQ /.
+			{False -> optionValue[VertexSize], True -> optionValue["GraphHighlightVertexSize"]},
+		$arrowheadLength -> edgeHighlightQ /.
+			{False -> optionValue["ArrowheadLength"], True -> optionValue["GraphHighlightArrowheadLength"]}|>;
+
 	hypergraphPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
 			(optionValue /@ {
-				GraphHighlight,
-				GraphHighlightStyle,
 				"HyperedgeRendering",
 				VertexCoordinateRules,
-				VertexLabels,
-				VertexSize,
-				"ArrowheadLength"})
+				VertexLabels})
 ]
 
 toListStyleSpec[Automatic, elements_] := toListStyleSpec[<||>, elements]
@@ -125,10 +158,20 @@ toListStyleSpec[spec_Association, elements_] := Replace[elements, Reverse[Join[{
 
 toListStyleSpec[spec_List, _] := spec
 
-parseStyles[newSpec_, elements_, oldSpec_, oldToNewTransform_] :=
+parseStyles[elements_, oldSpec_, new : {{newSpec_, applyQ_, oldToNewTransform_}...}] :=
+	Fold[parseStyles[#2, elements, #3, #1, #4] & @@ Prepend[#2, #] &, oldSpec, new]
+
+parseStyles[newSpec_, elements_, applyQ : (True | False), oldSpec_, oldToNewTransform_] :=
+	parseStyles[newSpec, elements, ConstantArray[applyQ, Length[elements]], oldSpec, oldToNewTransform]
+
+parseStyles[newSpec_, elements_, applyQ_List, oldSpec_, oldToNewTransform_] :=
 	MapThread[
-		If[#2 === Automatic, #1, Replace[#1, Automatic -> oldToNewTransform[#2]]] &,
-		toListStyleSpec[#, elements] & /@ {newSpec, oldSpec}]
+		If[applyQ[[#3]], If[#2 === Automatic, #1, Replace[#1, Automatic -> oldToNewTransform[#2]]], #2] &,
+		toListStyleSpec[#, elements] & /@ {newSpec, oldSpec, Range[Length[elements]]}]
+
+combineAssociationStyles[l___, s : Except[_Association], r___] := combineAssociationStyles[l, <|_ -> s|>, r]
+
+combineAssociationStyles[styles___Association] := Reverse[Join[styles]]
 
 hypergraphPlot$parse[___] := $Failed
 
@@ -139,13 +182,18 @@ correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	correctCoordinateRulesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinateRules]] &&
 	correctHighlightQ[edges, OptionValue[HypergraphPlot, opts, GraphHighlight]] &&
 	correctHighlightStyleQ[head, OptionValue[HypergraphPlot, opts, GraphHighlightStyle]] &&
-	correctSizeQ[head, "Vertex size", OptionValue[HypergraphPlot, opts, VertexSize]] &&
-	correctSizeQ[head, "Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"]] &&
-	correctPlotStyleQ[head, OptionValue[HypergraphPlot, opts, PlotStyle]] &&
-	correctStyleLengthQ[
-		head, "vertices", Length[vertexList[edges]], OptionValue[HypergraphPlot, opts, VertexStyle]] &&
+	And @@ (correctSizeQ[head, #1, OptionValue[HypergraphPlot, opts, #2]] & @@@ {
+		{"Vertex size", VertexSize},
+		{"Highlight vertex size", "GraphHighlightVertexSize"},
+		{"Arrowhead length", "ArrowheadLength"},
+		{"Highlight arrowhead length", "GraphHighlightArrowheadLength"}}) &&
+	And @@ (correctPlotStyleQ[head, OptionValue[HypergraphPlot, opts, #]] & /@ {PlotStyle, GraphHighlightStyle}) &&
 	And @@ (correctStyleLengthQ[
-		head, "edges", Length[edges], OptionValue[HypergraphPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
+		head, "vertices", Length[vertexList[edges]], OptionValue[HypergraphPlot, opts, #]] & /@
+			{VertexStyle, "GraphHighlightVertexStyle"}) &&
+	And @@ (correctStyleLengthQ[
+		head, "edges", Length[edges], OptionValue[HypergraphPlot, opts, #]] & /@
+			{EdgeStyle, "EdgePolygonStyle", "GraphHighlightEdgeStyle", "GraphHighlightEdgePolygonStyle"})
 
 correctCoordinateRulesQ[head_, coordinateRules_] :=
 	If[!MatchQ[coordinateRules,
@@ -156,10 +204,8 @@ correctCoordinateRulesQ[head_, coordinateRules_] :=
 		True
 	]
 
-correctHighlightQ[edges : Except[Automatic], highlight_] := Module[{
-		vertices, validQ},
-	vertices = vertexList[edges];
-	validQ = ListQ[highlight];
+correctHighlightQ[edges : Except[Automatic], highlight_] := With[{
+		validQ = ListQ[highlight]},
 	If[!validQ, Message[HypergraphPlot::invalidHighlight, highlight]];
 	validQ
 ]
@@ -196,17 +242,11 @@ hypergraphPlot[
 		edges_,
 		edgeType_,
 		styles_,
-		highlight_,
-		highlightColor_,
 		hyperedgeRendering_,
 		vertexCoordinates_,
 		vertexLabels_,
-		vertexSize_,
-		arrowheadLength_,
 		graphicsOptions_] := Catch[Show[
-	drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, arrowheadLength] @
-		hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @
-		edges,
+	drawEmbedding[styles, vertexLabels] @ hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @ edges,
 	graphicsOptions
 ]]
 
@@ -355,48 +395,30 @@ $arrowheadShape = Polygon[{
 	{-1.0039, -0.037561}, {-1., 0.}, {-1.0039, 0.0341466}, {-1.01512, 0.0780486}, {-1.03171, 0.127805},
 	{-1.05025, 0.178538}, {-1.08585, 0.264878}, {-1.10196, 0.301464}, {0., 0.}, {-1.10196, -0.289756}}];
 
-drawEmbedding[
-			styles_,
-			vertexLabels_,
-			highlight_,
-			highlightColor_,
-			vertexSize_,
-			arrowheadLength_][
-			embedding_] := Module[{
-		highlightCounts, embeddingShapes, vertexPoints, lines, polygons, edgePoints, labels,
+drawEmbedding[styles_, vertexLabels_][embedding_] := Module[{
+		vertexPoints, lines, polygons, edgePoints, labels,
 		singleVertexEdgeCounts, getSingleVertexEdgeRadius},
-	highlightCounts = Counts[highlight];
-	embeddingShapes = Map[
-		With[{highlightedQ = If[MissingQ[highlightCounts[#[[1]]]], False, highlightCounts[#[[1]]]-- > 0]},
-			#[[2]] /. (h : (Point | Line | Polygon))[pts_] :> highlighted[h[pts], highlightedQ]] &,
-		embedding,
-		{2}];
-	If[AnyTrue[highlightCounts, # > 0 &],
-		Message[HypergraphPlot::invalidHighlight, highlight];
-		Throw[$Failed]];
-
 	vertexPoints = MapIndexed[
-		With[{style = styles[$vertexPoint][[#2[[1]]]]},
-			# /. {
-				highlighted[Point[p_], h_] :> {
-					If[h, Directive[highlightColor, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]], style],
-					Disk[p, vertexSize]}}] &,
-		embeddingShapes[[1]]];
+		With[{style = styles[$vertexPoint][[#2[[1]]]], size = styles[$vertexSize][[#2[[1]]]]},
+			# /. {Point[p_] :> {style, Disk[p, size]}}] &,
+		embedding[[1]]];
 
 	singleVertexEdgeCounts = <||>;
 	getSingleVertexEdgeRadius[coords_] := (
-		singleVertexEdgeCounts[coords] = Lookup[singleVertexEdgeCounts, Key[coords], vertexSize] + vertexSize
+		singleVertexEdgeCounts[coords] =
+			Lookup[singleVertexEdgeCounts, Key[coords], styles[$vertexSize]] + styles[$vertexSize]
 	);
 
 	{lines, polygons, edgePoints} = Reap[MapIndexed[
 		With[{
 				lineStyle = styles[$edgeLine][[#2[[1]]]],
 				polygonStyle = styles[$edgePolygon][[#2[[1]]]],
-				pointStyle = styles[$edgePoint][[#2[[1]]]]},
+				pointStyle = styles[$edgePoint][[#2[[1]]]],
+				arrowheadLength = styles[$arrowheadLength][[#2[[1]]]]},
 			# /. {
-				highlighted[Line[pts_], h_] :> Sow[{
-					If[h, Directive[Opacity[1], highlightColor], lineStyle],
-					arrow[$arrowheadShape, arrowheadLength, vertexSize][pts]}, $edgeLine],
+				Line[pts_] :> Sow[{
+					lineStyle,
+					arrow[$arrowheadShape, arrowheadLength, styles[$vertexSize]][pts]}, $edgeLine],
 				highlighted[Polygon[pts_], h_] :> Sow[{
 					If[h, Directive[Opacity[0.3], highlightColor], polygonStyle],
 					Polygon[pts]}, $edgePolygon],
