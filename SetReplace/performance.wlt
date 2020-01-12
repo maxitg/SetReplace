@@ -77,12 +77,12 @@
         TimeConstraint -> 3
       ],
 
-      (** HypergraphPlot **)
+      (** WolframModelPlot **)
 
       Table[
         With[{edgeType = edgeType, hyperedgeRendering = hyperedgeRendering, $largeSet = $largeSet}, VerificationTest[
           With[{largeSet = ReleaseHold[$largeSet]},
-          Head[HypergraphPlot[largeSet, edgeType, "HyperedgeRendering" -> hyperedgeRendering]]],
+          Head[WolframModelPlot[largeSet, edgeType, "HyperedgeRendering" -> hyperedgeRendering]]],
           Graphics,
           TimeConstraint -> (5 $normalPlotTiming),
           MemoryConstraint -> (10 $normalPlotMemory)] /. HoldPattern[ReleaseHold[Hold[set_]]] -> set],

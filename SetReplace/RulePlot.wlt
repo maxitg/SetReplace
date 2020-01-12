@@ -263,7 +263,7 @@
 
       VerificationTest[
         First[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], Disk[_, r_] :> r, All]] > 
-          First[Cases[HypergraphPlot[{{1, 2, 3}}], Disk[_, r_] :> r, All]]
+          First[Cases[WolframModelPlot[{{1, 2, 3}}], Disk[_, r_] :> r, All]]
       ],
 
       (** Consistent vertex sizes **)
