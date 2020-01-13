@@ -92,15 +92,14 @@ correctOptionsQ[args_, {opts___}] :=
   supportedOptionQ[RulePlot, Frame, {True, False}, {opts}] &&
   correctEdgeTypeQ[OptionValue[RulePlot, {opts}, "EdgeType"]] &&
   correctSpacingsQ[{opts}] &&
-  correctHypergraphPlotOptionsQ[
-    RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[HypergraphPlot]]]
+  correctWolframModelPlotOptionsQ[
+    RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[WolframModelPlot]]]
 
-correctEdgeTypeQ[edgeType : Alternatives @@ $edgeTypes] := True
-
-correctEdgeTypeQ[edgeType_] := (
+correctEdgeTypeQ[edgeType_] := If[MatchQ[edgeType, Alternatives @@ $edgeTypes],
+  True,
   Message[RulePlot::invalidEdgeType, edgeType, $edgeTypes];
   False
-)
+]
 
 correctSpacingsQ[opts_] := Module[{spacings, correctQ},
   spacings = OptionValue[RulePlot, opts, Spacings];
@@ -174,7 +173,7 @@ singleRulePlot[
   vertexCoordinateRules = Join[
     ruleCoordinateRules[edgeType, hyperedgeRendering, externalVertexCoordinateRules, rule],
     externalVertexCoordinateRules];
-  ruleSidePlots = HypergraphPlot[
+  ruleSidePlots = WolframModelPlot[
       #,
       edgeType,
       GraphHighlight -> sharedRuleElements[rule],

@@ -1,24 +1,24 @@
 Package["SetReplace`"]
 
-PackageExport["HypergraphPlot"]
+PackageExport["WolframModelPlot"]
 
-PackageScope["correctHypergraphPlotOptionsQ"]
+PackageScope["correctWolframModelPlotOptionsQ"]
 PackageScope["$edgeTypes"]
 PackageScope["hypergraphEmbedding"]
 
 (* Documentation *)
 
-HypergraphPlot::usage = usageString[
-	"HypergraphPlot[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph."];
+WolframModelPlot::usage = usageString[
+	"WolframModelPlot[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph."];
 
-SyntaxInformation[HypergraphPlot] = {"ArgumentsPattern" -> {_, _., OptionsPattern[]}};
+SyntaxInformation[WolframModelPlot] = {"ArgumentsPattern" -> {_, _., OptionsPattern[]}};
 
 $plotStyleAutomatic = <|
 	_ -> Hue[0.6, 0.2, 0.8], (* vertex style *)
 	_List -> Hue[0.6, 0.7, 0.5]|>; (* edge style *)
 
 (* Automatic style pickes up, and possibly modifies the style it inherits from. *)
-Options[HypergraphPlot] = Join[{
+Options[WolframModelPlot] = Join[{
 	"EdgePolygonStyle" -> Automatic, (* inherits from EdgeStyle, with specified small opacity *)
 	EdgeStyle -> Automatic, (* inherits from PlotStyle *)
 	GraphHighlight -> {},
@@ -40,7 +40,7 @@ $hyperedgeRenderings = {"Subgraphs", "Polygons"};
 (* Messages *)
 
 General::invalidEdges =
-	"First argument of HypergraphPlot must be list of lists, where elements represent vertices.";
+	"First argument of WolframModelPlot must be list of lists, where elements represent vertices.";
 
 General::invalidEdgeType =
 	"Edge type `1` should be one of `2`.";
@@ -48,7 +48,7 @@ General::invalidEdgeType =
 General::invalidCoordinates =
 	"Coordinates `1` should be a list of rules from vertices to pairs of numbers.";
 
-HypergraphPlot::invalidHighlight =
+WolframModelPlot::invalidHighlight =
 	"GraphHighlight value `1` should be a list of vertices and edges.";
 
 General::invalidHighlightStyle =
@@ -65,32 +65,32 @@ General::invalidStyleLength =
 
 (* Evaluation *)
 
-func : HypergraphPlot[args___] := Module[{result = hypergraphPlot$parse[args]},
+func : WolframModelPlot[args___] := Module[{result = wolframModelPlot$parse[args]},
 	result /; result =!= $Failed
 ]
 
 (* Arguments parsing *)
 
-hypergraphPlot$parse[args___] /; !Developer`CheckArgumentCount[HypergraphPlot[args], 1, 2] := $Failed
+wolframModelPlot$parse[args___] /; !Developer`CheckArgumentCount[WolframModelPlot[args], 1, 2] := $Failed
 
-hypergraphPlot$parse[edges : Except[{___List}], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
-	Message[HypergraphPlot::invalidEdges];
+wolframModelPlot$parse[edges : Except[{___List}], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
+	Message[WolframModelPlot::invalidEdges];
 	$Failed
 )
 
-hypergraphPlot$parse[
+wolframModelPlot$parse[
 		edges : {___List},
 		edgeType : Except[Alternatives[Alternatives @@ $edgeTypes, OptionsPattern[]]],
 		o : OptionsPattern[]] := (
-	Message[HypergraphPlot::invalidEdgeType, edgeType, $edgeTypes];
+	Message[WolframModelPlot::invalidEdgeType, edgeType, $edgeTypes];
 	$Failed
 )
 
-hypergraphPlot$parse[
+wolframModelPlot$parse[
 			edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
-				correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}] := Module[{
+				correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] := Module[{
 		optionValue, plotStyles, edgeStyle, styles},
-	optionValue[opt_] := OptionValue[HypergraphPlot, {o}, opt];
+	optionValue[opt_] := OptionValue[WolframModelPlot, {o}, opt];
 	vertices = vertexList[edges];
 	(* these are lists, one style for each vertex element *)
 	styles = <|
@@ -106,7 +106,7 @@ hypergraphPlot$parse[
 			Directive[#, Opacity[0.7]] &]),
 		$edgePoint -> edgeStyles,
 		$edgePolygon -> parseStyles[optionValue["EdgePolygonStyle"], edges, edgeStyles, Directive[#, Opacity[0.09]] &]|>;
-	hypergraphPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
+	wolframModelPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
 			(optionValue /@ {
 				GraphHighlight,
 				GraphHighlightStyle,
@@ -130,22 +130,22 @@ parseStyles[newSpec_, elements_, oldSpec_, oldToNewTransform_] :=
 		If[#2 === Automatic, #1, Replace[#1, Automatic -> oldToNewTransform[#2]]] &,
 		toListStyleSpec[#, elements] & /@ {newSpec, oldSpec}]
 
-hypergraphPlot$parse[___] := $Failed
+wolframModelPlot$parse[___] := $Failed
 
-correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
+correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	knownOptionsQ[head, expr, opts] &&
 	(And @@ (supportedOptionQ[head, ##, opts] & @@@ {
 			{"HyperedgeRendering", $hyperedgeRenderings}})) &&
-	correctCoordinateRulesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinateRules]] &&
-	correctHighlightQ[edges, OptionValue[HypergraphPlot, opts, GraphHighlight]] &&
-	correctHighlightStyleQ[head, OptionValue[HypergraphPlot, opts, GraphHighlightStyle]] &&
-	correctSizeQ[head, "Vertex size", OptionValue[HypergraphPlot, opts, VertexSize]] &&
-	correctSizeQ[head, "Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"]] &&
-	correctPlotStyleQ[head, OptionValue[HypergraphPlot, opts, PlotStyle]] &&
+	correctCoordinateRulesQ[head, OptionValue[WolframModelPlot, opts, VertexCoordinateRules]] &&
+	correctHighlightQ[edges, OptionValue[WolframModelPlot, opts, GraphHighlight]] &&
+	correctHighlightStyleQ[head, OptionValue[WolframModelPlot, opts, GraphHighlightStyle]] &&
+	correctSizeQ[head, "Vertex size", OptionValue[WolframModelPlot, opts, VertexSize]] &&
+	correctSizeQ[head, "Arrowhead length", OptionValue[WolframModelPlot, opts, "ArrowheadLength"]] &&
+	correctPlotStyleQ[head, OptionValue[WolframModelPlot, opts, PlotStyle]] &&
 	correctStyleLengthQ[
-		head, "vertices", Length[vertexList[edges]], OptionValue[HypergraphPlot, opts, VertexStyle]] &&
+		head, "vertices", Length[vertexList[edges]], OptionValue[WolframModelPlot, opts, VertexStyle]] &&
 	And @@ (correctStyleLengthQ[
-		head, "edges", Length[edges], OptionValue[HypergraphPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
+		head, "edges", Length[edges], OptionValue[WolframModelPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
 
 correctCoordinateRulesQ[head_, coordinateRules_] :=
 	If[!MatchQ[coordinateRules,
@@ -160,7 +160,7 @@ correctHighlightQ[edges : Except[Automatic], highlight_] := Module[{
 		vertices, validQ},
 	vertices = vertexList[edges];
 	validQ = ListQ[highlight];
-	If[!validQ, Message[HypergraphPlot::invalidHighlight, highlight]];
+	If[!validQ, Message[WolframModelPlot::invalidHighlight, highlight]];
 	validQ
 ]
 
@@ -192,7 +192,7 @@ correctStyleLengthQ[__] := True
 
 (* Implementation *)
 
-hypergraphPlot[
+wolframModelPlot[
 		edges_,
 		edgeType_,
 		styles_,
@@ -372,7 +372,7 @@ drawEmbedding[
 		embedding,
 		{2}];
 	If[AnyTrue[highlightCounts, # > 0 &],
-		Message[HypergraphPlot::invalidHighlight, highlight];
+		Message[WolframModelPlot::invalidHighlight, highlight];
 		Throw[$Failed]];
 
 	vertexPoints = MapIndexed[
