@@ -6,13 +6,11 @@
       $simpleHypergraphs = {
         {{1, 3}, {2, 4}},
         {},
-        {{}},
         {{1}},
         {{1}, {1}},
         {{1}, {2}},
         {{1}, {1}, {2}},
-        {{1, 2}, {1}},
-        {{1, 2}, {1}, {}}
+        {{1, 2}, {1}}
       };
 
       diskCoordinates[graphics_] := Sort[Cases[graphics, Disk[i_, ___] :> i, All]];
@@ -100,6 +98,16 @@
 
       testUnevaluated[
         WolframModelPlot[{{1, 3}, 6, {2, 4}}],
+        {WolframModelPlot::invalidEdges}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot[{{}}],
+        {WolframModelPlot::invalidEdges}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot[{{1, 3}, {}}],
         {WolframModelPlot::invalidEdges}
       ],
 
