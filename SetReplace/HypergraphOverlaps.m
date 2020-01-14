@@ -9,18 +9,32 @@ HypergraphOverlaps::usage = usageString[
 
 SyntaxInformation[HypergraphOverlaps] = {"ArgumentsPattern" -> {_, _}};
 
+HypergraphOverlaps::hypergraphNotList = "Hypergraph `` should be a List.";
+
 HypergraphOverlaps::edgeNotList = "Hypergraph edge `` should be a List.";
 
 (* Implementation *)
 
-HypergraphOverlaps[e1_, e2_] := Module[{failedQ = False}, Catch[
-  With[{uniqueE1 = Map[$$1, e1, {2}], uniqueE2 = Map[$$2, e2, {2}]},
-    findUnion[uniqueE1, uniqueE2, ##] & @@@
-      Reap[findRemainingOverlaps[uniqueE1, uniqueE2, emptyEdgeMatch[], emptyVertexMatch[]]][[2, 1]]
-  ],
-  $Failed,
-  (failedQ = True) &] /; !failedQ
+HypergraphOverlaps[args___] := Module[{result = Catch[hypergraphOverlaps[args]]},
+  result /; result =!= $Failed
 ]
+
+hypergraphOverlaps[args___] /; !Developer`CheckArgumentCount[HypergraphOverlaps[args], 2, 2] := Throw[$Failed]
+
+hypergraphOverlaps[e1_List, e2_List] := With[{
+    uniqueE1 = Map[$$1, e1, {2}], uniqueE2 = Map[$$2, e2, {2}]},
+  findUnion[uniqueE1, uniqueE2, ##] & @@@
+    Reap[findRemainingOverlaps[uniqueE1, uniqueE2, emptyEdgeMatch[], emptyVertexMatch[]]][[2, 1]]
+]
+
+hypergraphOverlaps[e : Except[_List], _] := hypergraphNotListFail[e]
+
+hypergraphOverlaps[_, e : Except[_List]] := hypergraphNotListFail[e]
+
+hypergraphNotListFail[e_] := (
+  Message[HypergraphOverlaps::hypergraphNotList, e];
+  Throw[$Failed]
+)
 
 findRemainingOverlaps[e1_, e2_, edgeMatch_, vertexMatch_] :=
   Outer[(tryMatch[e1, e2, edgeMatch, vertexMatch, #1, #2]) &, ##] & @@
@@ -44,7 +58,7 @@ matchQ[_, edge : Except[_List]] := edgeNotListFail[edge]
 
 edgeNotListFail[edge_] := (
   Message[HypergraphOverlaps::edgeNotList, edge];
-  Throw[$Failed, $Failed]
+  Throw[$Failed]
 )
 
 edgesAlreadyUsedQ[edgeMatch_, nextIndex1_, nextIndex2_] :=
@@ -86,6 +100,3 @@ findUnion[e1_, e2_, edgeMatch_, vertexMatch_] := With[{
     Thread[uniqueE2Edges -> Range[Length[uniqueE2Edges]] + Length[uniqueE1Edges]],
     Thread[Values[edgeMatch] -> Range[Length[edgeMatch]] + Length[uniqueE1Edges] + Length[uniqueE2Edges]]]
 }]
-
-indexHypergraph[e_] := With[{vertices = Union[Catenate[e]]},
-  Replace[e, Thread[vertices -> Range[Length[vertices]]], {2}]]
