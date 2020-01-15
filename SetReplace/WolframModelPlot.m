@@ -74,7 +74,7 @@ func : WolframModelPlot[args___] := Module[{result = wolframModelPlot$parse[args
 wolframModelPlot$parse[args___] /; !Developer`CheckArgumentCount[WolframModelPlot[args], 1, 2] := $Failed
 
 (* allow composite vertices, but not list-vertices *)
-$hypergraphPattern = {{Except[_List] ..} ...};
+$hypergraphPattern = h_List /; AllTrue[h, ListQ[#] && Length[#] > 0 &] && AllTrue[h, Not @* ListQ, 2];
 
 wolframModelPlot$parse[edges : Except[$hypergraphPattern], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
 	Message[WolframModelPlot::invalidEdges];
