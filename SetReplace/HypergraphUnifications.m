@@ -1,38 +1,39 @@
 Package["SetReplace`"]
 
-PackageExport["HypergraphOverlaps"]
+PackageExport["HypergraphUnifications"]
 
 (* Documentation *)
 
-HypergraphOverlaps::usage = usageString[
-  "HypergraphOverlaps[`e1`, `e2`] yields a list of edge pairings between isomophic subgraphs of both `e1` and `e2`."];
+HypergraphUnifications::usage = usageString[
+  "HypergraphUnifications[`e1`, `e2`] yields a list of edge pairings ",
+  "between isomophic subgraphs of both `e1` and `e2`."];
 
-SyntaxInformation[HypergraphOverlaps] = {"ArgumentsPattern" -> {_, _}};
+SyntaxInformation[HypergraphUnifications] = {"ArgumentsPattern" -> {_, _}};
 
-HypergraphOverlaps::hypergraphNotList = "Hypergraph `` should be a List.";
+HypergraphUnifications::hypergraphNotList = "Hypergraph `` should be a List.";
 
-HypergraphOverlaps::edgeNotList = "Hypergraph edge `` should be a List.";
+HypergraphUnifications::edgeNotList = "Hypergraph edge `` should be a List.";
 
 (* Implementation *)
 
-HypergraphOverlaps[args___] := Module[{result = Catch[hypergraphOverlaps[args]]},
+HypergraphUnifications[args___] := Module[{result = Catch[hypergraphUnifications[args]]},
   result /; result =!= $Failed
 ]
 
-hypergraphOverlaps[args___] /; !Developer`CheckArgumentCount[HypergraphOverlaps[args], 2, 2] := Throw[$Failed]
+hypergraphUnifications[args___] /; !Developer`CheckArgumentCount[HypergraphUnifications[args], 2, 2] := Throw[$Failed]
 
-hypergraphOverlaps[e1_List, e2_List] := With[{
+hypergraphUnifications[e1_List, e2_List] := With[{
     uniqueE1 = Map[$$1, e1, {2}], uniqueE2 = Map[$$2, e2, {2}]},
   findUnion[uniqueE1, uniqueE2, ##] & @@@
     Reap[findRemainingOverlaps[uniqueE1, uniqueE2, emptyEdgeMatch[], emptyVertexMatch[]]][[2, 1]]
 ]
 
-hypergraphOverlaps[e : Except[_List], _] := hypergraphNotListFail[e]
+hypergraphUnifications[e : Except[_List], _] := hypergraphNotListFail[e]
 
-hypergraphOverlaps[_, e : Except[_List]] := hypergraphNotListFail[e]
+hypergraphUnifications[_, e : Except[_List]] := hypergraphNotListFail[e]
 
 hypergraphNotListFail[e_] := (
-  Message[HypergraphOverlaps::hypergraphNotList, e];
+  Message[HypergraphUnifications::hypergraphNotList, e];
   Throw[$Failed]
 )
 
@@ -57,7 +58,7 @@ matchQ[edge : Except[_List], _] := edgeNotListFail[edge]
 matchQ[_, edge : Except[_List]] := edgeNotListFail[edge]
 
 edgeNotListFail[edge_] := (
-  Message[HypergraphOverlaps::edgeNotList, edge];
+  Message[HypergraphUnifications::edgeNotList, edge];
   Throw[$Failed]
 )
 

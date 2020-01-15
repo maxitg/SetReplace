@@ -1,5 +1,5 @@
 <|
-  "HypergraphOverlaps" -> <|
+  "HypergraphUnifications" -> <|
     "init" -> (
       Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
@@ -11,92 +11,92 @@
     ),
     "tests" -> {
       testSymbolLeak[
-        HypergraphOverlaps[{{1, 2}, {2, 3}, {3, 4, 5}}, {{a, b}, {b, c}, {c, d, e}}]
+        HypergraphUnifications[{{1, 2}, {2, 3}, {3, 4, 5}}, {{a, b}, {b, c}, {c, d, e}}]
       ],
       
       testUnevaluated[
-        HypergraphOverlaps[],
-        {HypergraphOverlaps::argrx}
+        HypergraphUnifications[],
+        {HypergraphUnifications::argrx}
       ],
 
       testUnevaluated[
-        HypergraphOverlaps[1],
-        {HypergraphOverlaps::argr}
+        HypergraphUnifications[1],
+        {HypergraphUnifications::argr}
       ],
 
       testUnevaluated[
-        HypergraphOverlaps[1, 2, 3],
-        {HypergraphOverlaps::argrx}
+        HypergraphUnifications[1, 2, 3],
+        {HypergraphUnifications::argrx}
       ],
 
       testUnevaluated[
-        HypergraphOverlaps[{1}, 2],
-        {HypergraphOverlaps::hypergraphNotList}
+        HypergraphUnifications[{1}, 2],
+        {HypergraphUnifications::hypergraphNotList}
       ],
 
       testUnevaluated[
-        HypergraphOverlaps[1, {2}],
-        {HypergraphOverlaps::hypergraphNotList}
+        HypergraphUnifications[1, {2}],
+        {HypergraphUnifications::hypergraphNotList}
       ],
 
       testUnevaluated[
-        HypergraphOverlaps[{1}, {2}],
-        {HypergraphOverlaps::edgeNotList}
+        HypergraphUnifications[{1}, {2}],
+        {HypergraphUnifications::edgeNotList}
       ],
 
       testUnevaluated[
-        HypergraphOverlaps[{{1}}, {2}],
-        {HypergraphOverlaps::edgeNotList}
+        HypergraphUnifications[{{1}}, {2}],
+        {HypergraphUnifications::edgeNotList}
       ],
 
       testUnevaluated[
-        HypergraphOverlaps[{1}, {{2}}],
-        {HypergraphOverlaps::edgeNotList}
+        HypergraphUnifications[{1}, {{2}}],
+        {HypergraphUnifications::edgeNotList}
       ],
 
       VerificationTest[
-        HypergraphOverlaps[{{1}}, {{2}}],
+        HypergraphUnifications[{{1}}, {{2}}],
         {{{{1}}, <|1 -> 1|>, <|1 -> 1|>}}
       ],
 
       VerificationTest[
-        HypergraphOverlaps[{{1, 2}}, {{1, 2}}],
+        HypergraphUnifications[{{1, 2}}, {{1, 2}}],
         {{{{1, 2}}, <|1 -> 1|>, <|1 -> 1|>}}
       ],
 
       VerificationTest[
-        Sort @ HypergraphOverlaps[{{1, 2}, {3, 4}}, {{1, 2}}][[All, 2]],
+        Sort @ HypergraphUnifications[{{1, 2}, {3, 4}}, {{1, 2}}][[All, 2]],
         {<|1 -> 1, 2 -> 2|>, <|1 -> 2, 2 -> 1|>}
       ],
 
       VerificationTest[
-        Length[HypergraphOverlaps[{{1, 2}, {2, 3}, {3, 4}}, {{a, b}, {b, c}, {c, d}}]],
+        Length[HypergraphUnifications[{{1, 2}, {2, 3}, {3, 4}}, {{a, b}, {b, c}, {c, d}}]],
         33
       ],
 
       VerificationTest[
-        Length[HypergraphOverlaps[{{1, 1}, {1, 1}, {1, 1}}, {{1, 1}, {1, 1}, {1, 1}}]],
+        Length[HypergraphUnifications[{{1, 1}, {1, 1}, {1, 1}}, {{1, 1}, {1, 1}, {1, 1}}]],
         33
       ],
 
       VerificationTest[
-        Length[HypergraphOverlaps[{{1, 2}, {2, 3}, {3, 4, 5}}, {{1, 2}, {2, 3}, {3, 4, 5}}]],
+        Length[HypergraphUnifications[{{1, 2}, {2, 3}, {3, 4, 5}}, {{1, 2}, {2, 3}, {3, 4, 5}}]],
         13
       ],
 
       VerificationTest[
-        Length[HypergraphOverlaps[{{1, 2}, {2, 3, 4}}, {{1, 2}, {2, 3, 4}}]],
+        Length[HypergraphUnifications[{{1, 2}, {2, 3, 4}}, {{1, 2}, {2, 3, 4}}]],
         3
       ],
 
       VerificationTest[
-        Length[HypergraphOverlaps[{{1, 2}, {2, 3}, {3, 4}}, {{a, b}, {b, c}, {c, d}}]],
+        Length[HypergraphUnifications[{{1, 2}, {2, 3}, {3, 4}}, {{a, b}, {b, c}, {c, d}}]],
         33
       ],
 
       Function[{e1, e2},
         VerificationTest[
-          And @@ (correctOverlapQ[e1, e2, ##] & @@@ HypergraphOverlaps[e1, e2])
+          And @@ (correctOverlapQ[e1, e2, ##] & @@@ HypergraphUnifications[e1, e2])
         ]
       ] @@@ {
         ConstantArray[{{1, 2}}, 2],
