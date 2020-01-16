@@ -297,6 +297,18 @@
         ]
       } & /@ {VertexSize, "ArrowheadLength"},
 
+      (* HypergraphPlot can still be used *)
+
+      VerificationTest[
+        Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}]],
+        Graphics
+      ],
+
+      VerificationTest[
+        Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered"]],
+        Graphics
+      ],
+
       (* Implementation *)
 
       (** Simple examples **)
