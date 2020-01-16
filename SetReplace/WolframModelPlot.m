@@ -1,5 +1,6 @@
 Package["SetReplace`"]
 
+PackageExport["HypergraphPlot"]
 PackageExport["WolframModelPlot"]
 
 PackageScope["correctWolframModelPlotOptionsQ"]
@@ -36,6 +37,12 @@ $edgeTypes = {"Ordered", "Cyclic"};
 $defaultEdgeType = "Ordered";
 $graphLayout = "SpringElectricalEmbedding";
 $hyperedgeRenderings = {"Subgraphs", "Polygons"};
+
+(* for compatibility reasons, we don't care for messages and unevaluated code to preserve HypergraphPlot *)
+HypergraphPlot::usage = usageString["HypergraphPlot is deprecated. Use WolframModelPlot."];
+SyntaxInformation[HypergraphPlot] = SyntaxInformation[WolframModelPlot];
+Options[HypergraphPlot] = Options[WolframModelPlot];
+HypergraphPlot = WolframModelPlot;
 
 (* Messages *)
 
