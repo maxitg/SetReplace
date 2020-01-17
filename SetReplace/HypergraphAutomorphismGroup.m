@@ -9,14 +9,21 @@ HypergraphAutomorphismGroup::usage = usageString[
 
 SyntaxInformation[HypergraphAutomorphismGroup] = {"ArgumentsPattern" -> {_}};
 
+HypergraphAutomorphismGroup::invalidHypergraph =
+  "Hypergraph `` should be a list of lists of vertices, which are not themselves lists.";
+
 (* Implementation *)
+
+HypergraphAutomorphismGroup[args___] := Module[{result = Catch[hypergraphAutomorphismGroup[args]]},
+  result /; result =!= $Failed
+]
 
 (* Algorithm has 3 steps:
     1. First, convert the hypergraph into a normal Graph preserving structure (but adding new vertices).
     2. Then, compute the automorhpism group for that normal Graph.
     3. Finally, remove added auxiliary vertices from the spec of that group. *)
 
-HypergraphAutomorphismGroup[e : {{Except[_List]...}...}] := With[{
+hypergraphAutomorphismGroup[e : {{Except[_List]...}...}] := With[{
     binaryGraph = Graph[Catenate[toStructurePreservingBinaryEdges /@ e]]},
   removeAuxiliaryElements[GraphAutomorphismGroup[binaryGraph], binaryGraph, e]
 ]
@@ -43,3 +50,11 @@ removeAuxiliaryElements[group_, graph_, hypergraph_] := Module[{
   DeleteCases[group, Except[Alternatives @@ trueVertexIndices, _Integer], All] /.
     binaryGraphIndexToVertex /. vertexToHypergraphIndex /. Cycles[{}] -> Nothing
 ]
+
+hypergraphAutomorphismGroup[args___] /; !Developer`CheckArgumentCount[HypergraphAutomorphismGroup[args], 1, 1] :=
+  Throw[$Failed]
+
+hypergraphAutomorphismGroup[e : Except[{{Except[_List]...}...}]] := (
+  Message[HypergraphAutomorphismGroup::invalidHypergraph, e];
+  Throw[$Failed];
+)
