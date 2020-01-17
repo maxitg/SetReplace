@@ -11,6 +11,11 @@ SyntaxInformation[HypergraphAutomorphismGroup] = {"ArgumentsPattern" -> {_}};
 
 (* Implementation *)
 
+(* Algorithm has 3 steps:
+    1. First, convert the hypergraph into a normal Graph preserving structure (but adding new vertices).
+    2. Then, compute the automorhpism group for that normal Graph.
+    3. Finally, remove added auxiliary vertices from the spec of that group. *)
+
 HypergraphAutomorphismGroup[e : {{Except[_List]...}...}] := With[{
     binaryGraph = Graph[Catenate[toStructurePreservingBinaryEdges /@ e]]},
   removeAuxiliaryElements[GraphAutomorphismGroup[binaryGraph], binaryGraph, e]
@@ -22,6 +27,13 @@ toStructurePreservingBinaryEdges[hyperedge_] := Module[{
     EdgeList[PathGraph[edgeVertices, DirectedEdges -> True]],
     Thread[DirectedEdge[edgeVertices, hyperedge]]]
 ]
+
+(* Note, auxiliary vertices cannot mix with original vertices in the same cycle, since auxiliary vertices have
+    out-degrees of at least 1, whereas original vertices always have out-degree 0.
+    Hence, here we are taking a subgroup by identifying permutations of auxiliary vertices.
+    In the original group there are either auxiliary-only generators (which would be turned into empty Cycles[{}]
+    and deleted), generators affecting both (which will be trimmed), and generators of original vertices only
+    (which will be preserved).*)
 
 removeAuxiliaryElements[group_, graph_, hypergraph_] := Module[{
     trueVertexIndices, binaryGraphIndexToVertex, vertexToHypergraphIndex},
