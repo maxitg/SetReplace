@@ -80,13 +80,16 @@ func : WolframModelPlot[args___] := Module[{result = wolframModelPlot$parse[args
 
 wolframModelPlot$parse[args___] /; !Developer`CheckArgumentCount[WolframModelPlot[args], 1, 2] := $Failed
 
-wolframModelPlot$parse[edges : Except[{___List}], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
+(* allow composite vertices, but not list-vertices *)
+$hypergraphPattern = h_List /; AllTrue[h, ListQ[#] && Length[#] > 0 &] && AllTrue[h, Not @* ListQ, 2];
+
+wolframModelPlot$parse[edges : Except[$hypergraphPattern], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
 	Message[WolframModelPlot::invalidEdges];
 	$Failed
 )
 
 wolframModelPlot$parse[
-		edges : {___List},
+		edges : $hypergraphPattern,
 		edgeType : Except[Alternatives[Alternatives @@ $edgeTypes, OptionsPattern[]]],
 		o : OptionsPattern[]] := (
 	Message[WolframModelPlot::invalidEdgeType, edgeType, $edgeTypes];
@@ -94,7 +97,7 @@ wolframModelPlot$parse[
 )
 
 wolframModelPlot$parse[
-			edges : {___List}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
+			edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
 				correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] := Module[{
 		optionValue, plotStyles, edgeStyle, styles},
 	optionValue[opt_] := OptionValue[WolframModelPlot, {o}, opt];
