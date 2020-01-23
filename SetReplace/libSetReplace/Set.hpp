@@ -82,9 +82,9 @@ namespace SetReplace {
          */
         TerminationReason terminationReason() const;
         
-        /** @brief Yields rule IDs corresponding to each event.
+        /** @brief Yields rule indices corresponding to each event.
          */
-        const std::vector<RuleID>& eventRuleIDs() const;
+        const std::vector<RuleIndex>& eventRuleIndices() const;
 
     private:
         class Implementation;

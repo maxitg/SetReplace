@@ -80,10 +80,10 @@ $cpp$terminationReason = If[$libraryFile =!= $Failed,
 	$Failed];
 
 
-$cpp$eventRuleIDs = If[$libraryFile =!= $Failed,
+$cpp$eventRuleIndices = If[$libraryFile =!= $Failed,
 	LibraryFunctionLoad[
 		$libraryFile,
-		"eventRuleIDs",
+		"eventRuleIndices",
 		{Integer}, (* set ptr *)
 		{Integer, 1}], (* ids *)
 	$Failed];
@@ -216,7 +216,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
-		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, terminationReason, eventRuleIDs,
+		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, terminationReason, eventRuleIndices,
 		resultAtoms, inversePartialGlobalMap, inverseGlobalMap},
 	canonicalRules = toCanonicalRules[rules];
 	setAtoms = Hold /@ Union[Catenate[set]];
@@ -253,12 +253,12 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 	terminationReason = Replace[$terminationReasonCodes[$cpp$terminationReason[setPtr]], {
 		$Aborted -> terminationReason,
 		$notTerminated -> $timeConstraint}];
-	eventRuleIDs = $cpp$eventRuleIDs[setPtr];
+	eventRuleIndices = $cpp$eventRuleIndices[setPtr];
 	$cpp$setDelete[setPtr];
 	resultAtoms = Union[Catenate[cppOutput[$atomLists]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
 	inverseGlobalMap = Association @ Thread[resultAtoms
-		-> (Lookup[inversePartialGlobalMap, #, Unique["v", {Temporary}]] & /@ resultAtoms)];
+		-> (Lookup[inversePartialGlobalMap, #, #] & /@ resultAtoms)];
 	WolframModelEvolutionObject[Join[
 		cppOutput,
 		<|$atomLists ->
@@ -266,6 +266,6 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 			$rules -> rules,
 			$maxCompleteGeneration -> maxCompleteGeneration,
 			$terminationReason -> terminationReason,
-			$eventRuleIDs -> eventRuleIDs
+			$eventRuleIDs -> eventRuleIndices
 		|>]]
 ]

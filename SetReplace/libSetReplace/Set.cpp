@@ -16,12 +16,12 @@ namespace SetReplace {
         // Determines the limiting conditions for the evaluation.
         StepSpecification stepSpec_;
         TerminationReason terminationReason_ = TerminationReason::NotTerminated;
-        
-        std::unordered_map<ExpressionID, SetExpression> expressions_;
-        std::vector<RuleID> eventRuleIDs_ = {-1};
+                
+        std::unordered_map<ExpressionIndex, SetExpression> expressions_;
+        std::vector<RuleIndex> eventRuleIndices_ = {-1};
         
         Atom nextAtom_ = 1;
-        ExpressionID nextExpressionID_ = 0;
+        ExpressionIndex nextExpressionIndex_ = 0;
         
         int destroyedExpressionsCount_ = 0;
         
@@ -38,21 +38,25 @@ namespace SetReplace {
         
         Matcher matcher_;
         
-        std::vector<ExpressionID> unindexedExpressions_;
+        std::vector<ExpressionIndex> unindexedExpressions_;
         
     public:
         Implementation(const std::vector<Rule>& rules,
                        const std::vector<AtomsVector>& initialExpressions,
                        const Matcher::EvaluationType evaluationType,
                        const unsigned int randomSeed) :
-            Implementation(rules, initialExpressions, evaluationType, randomSeed, [this](const int expressionID) {
-                return expressions_.at(expressionID).atoms;
-            }) {}
+            Implementation(rules,
+                           initialExpressions,
+                           evaluationType,
+                           randomSeed,
+                           [this](const int expressionIndex) {
+                                return expressions_.at(expressionIndex).atoms;
+                           }) {}
         
         int replaceOnce(const std::function<bool()> shouldAbort) {
             terminationReason_ = TerminationReason::NotTerminated;
 
-            if (eventRuleIDs_.size() > stepSpec_.maxEvents) {
+            if (eventRuleIndices_.size() > stepSpec_.maxEvents) {
                 terminationReason_ = TerminationReason::MaxEvents;
                 return 0;
             }
@@ -74,8 +78,8 @@ namespace SetReplace {
             
             const auto& ruleInputs = rules_[match.rule].inputs;
             std::vector<AtomsVector> inputExpressions;
-            for (const auto& expressionID : match.inputExpressions) {
-                inputExpressions.push_back(expressions_.at(expressionID).atoms);
+            for (const auto& expressionIndex : match.inputExpressions) {
+                inputExpressions.push_back(expressions_.at(expressionIndex).atoms);
             }
             
             auto explicitRuleInputs = ruleInputs;
@@ -94,10 +98,15 @@ namespace SetReplace {
                 }
             }
             
+            std::vector<ExpressionID> inputExpressionIDs;
+            for (const auto expressionIndex : match.inputExpressions) {
+                inputExpressionIDs.push_back(expressions_[expressionIndex].id);
+            }
+            
             // At this point, we are committed to modifying the set.
             
             // Name newly created atoms as well, now all atoms in the output are explicitly named.
-            const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
+            const auto namedRuleOutputs = nameAnonymousRuleOutputs(inputExpressionIDs, explicitRuleOutputs, match.rule);
             
             matcher_.removeMatchesInvolvingExpressions(match.inputExpressions);
             atomsIndex_.removeExpressions(match.inputExpressions);
@@ -108,10 +117,10 @@ namespace SetReplace {
             }
             largestGeneration_ = std::max(largestGeneration_, outputGeneration);
             
-            const EventID eventID = static_cast<int>(eventRuleIDs_.size());
-            addExpressions(namedRuleOutputs, eventID, outputGeneration);
-            assignDestroyerEvent(match.inputExpressions, eventID);
-            eventRuleIDs_.push_back(match.rule);
+            const EventIndex eventIndex = static_cast<int>(eventRuleIndices_.size());
+            addExpressions(inputExpressionIDs, namedRuleOutputs, eventIndex, outputGeneration);
+            assignDestroyerEvent(match.inputExpressions, eventIndex);
+            eventRuleIndices_.push_back(match.rule);
             
             return 1;
         }
@@ -129,18 +138,18 @@ namespace SetReplace {
         }
         
         std::vector<SetExpression> expressions() const {
-            std::vector<std::pair<ExpressionID, SetExpression>> idsAndExpressions;
-            idsAndExpressions.reserve(expressions_.size());
-            for (const auto& idAndExpression : expressions_) {
-                idsAndExpressions.push_back(idAndExpression);
+            std::vector<std::pair<ExpressionIndex, SetExpression>> indicesAndExpressions;
+            indicesAndExpressions.reserve(expressions_.size());
+            for (const auto& indexAndExpression : expressions_) {
+                indicesAndExpressions.push_back(indexAndExpression);
             }
-            std::sort(idsAndExpressions.begin(), idsAndExpressions.end(), [](const auto& a, const auto& b) {
+            std::sort(indicesAndExpressions.begin(), indicesAndExpressions.end(), [](const auto& a, const auto& b) {
                 return a.first < b.first;
             });
             std::vector<SetExpression> result;
-            result.reserve(idsAndExpressions.size());
-            for (const auto& idAndExpression : idsAndExpressions) {
-                result.push_back(idAndExpression.second);
+            result.reserve(indicesAndExpressions.size());
+            for (const auto& indexAndExpression : indicesAndExpressions) {
+                result.push_back(indexAndExpression.second);
             }
             return result;
         }
@@ -154,8 +163,8 @@ namespace SetReplace {
             return terminationReason_;
         }
         
-        const std::vector<RuleID>& eventRuleIDs() const {
-            return eventRuleIDs_;
+        const std::vector<RuleIndex>& eventRuleIndices() const {
+            return eventRuleIndices_;
         }
 
     private:
@@ -163,7 +172,7 @@ namespace SetReplace {
                        const std::vector<AtomsVector>& initialExpressions,
                        const Matcher::EvaluationType evaluationType,
                        const unsigned int randomSeed,
-                       const std::function<AtomsVector(ExpressionID)>& getAtomsVector) :
+                       const std::function<AtomsVector(ExpressionIndex)>& getAtomsVector) :
         rules_(rules),
         atomsIndex_(getAtomsVector),
         matcher_(rules_, atomsIndex_, getAtomsVector, evaluationType, randomSeed) {
@@ -173,16 +182,16 @@ namespace SetReplace {
                     nextAtom_ = std::max(nextAtom_ - 1, atom) + 1;
                 }
             }
-            addExpressions(initialExpressions, initialConditionEvent, initialGeneration);
+            addExpressions({}, initialExpressions, initialConditionEvent, initialGeneration);
         }
         
         void updateStepSpec(const StepSpecification newStepSpec) {
             const auto previousMaxGeneration = stepSpec_.maxGenerationsLocal;
             stepSpec_ = newStepSpec;
             if (newStepSpec.maxGenerationsLocal > previousMaxGeneration) {
-                for (int expressionID = 0; expressionID < expressions_.size(); ++expressionID) {
-                    if (expressions_[expressionID].generation == previousMaxGeneration) {
-                        unindexedExpressions_.push_back(expressionID);
+                for (int expressionIndex = 0; expressionIndex < expressions_.size(); ++expressionIndex) {
+                    if (expressions_[expressionIndex].generation == previousMaxGeneration) {
+                        unindexedExpressions_.push_back(expressionIndex);
                     }
                 }
             }
@@ -195,8 +204,8 @@ namespace SetReplace {
             unindexedExpressions_.clear();
         }
         
-        TerminationReason willExceedAtomLimits(const std::vector<std::vector<int>> explicitRuleInputs,
-                                  const std::vector<std::vector<int>> explicitRuleOutputs) const {
+        TerminationReason willExceedAtomLimits(const std::vector<std::vector<Atom>> explicitRuleInputs,
+                                               const std::vector<std::vector<Atom>> explicitRuleOutputs) const {
             const int currentAtomsCount = static_cast<int>(atomDegrees_.size());
             
             std::unordered_map<Atom, int> atomDegreeDeltas;
@@ -246,9 +255,9 @@ namespace SetReplace {
             }
         }
         
-        TerminationReason willExceedExpressionsLimit(const std::vector<std::vector<int>> explicitRuleInputs,
-                                        const std::vector<std::vector<int>> explicitRuleOutputs) const {
-            const int currentExpressionsCount = nextExpressionID_ - destroyedExpressionsCount_;
+        TerminationReason willExceedExpressionsLimit(const std::vector<std::vector<Atom>> explicitRuleInputs,
+                                                     const std::vector<std::vector<Atom>> explicitRuleOutputs) const {
+            const int currentExpressionsCount = nextExpressionIndex_ - destroyedExpressionsCount_;
             const int newExpressionsCount = currentExpressionsCount
                                             - static_cast<int>(explicitRuleInputs.size())
                                             + static_cast<int>(explicitRuleOutputs.size());
@@ -259,13 +268,15 @@ namespace SetReplace {
             }
         }
         
-        std::vector<AtomsVector> nameAnonymousAtoms(const std::vector<AtomsVector>& atomVectors) {
+        std::vector<AtomsVector> nameAnonymousRuleOutputs(const std::vector<ExpressionID>& inputs,
+                                                          const std::vector<AtomsVector>& outputs,
+                                                          const RuleIndex ruleIndex) {
             std::unordered_map<Atom, Atom> names;
-            std::vector<AtomsVector> result = atomVectors;
+            std::vector<AtomsVector> result = outputs;
             for (auto& expression : result) {
                 for (auto& atom : expression) {
                     if (atom < 0 && names.count(atom) == 0) {
-                        names[atom] = nextAtom_++;
+                        names[atom] = newAtom(inputs, (int)names.size(), ruleIndex);
                     }
                     if (atom < 0) {
                         atom = names[atom];
@@ -276,50 +287,86 @@ namespace SetReplace {
             return result;
         }
         
-        std::vector<ExpressionID> addExpressions(const std::vector<AtomsVector>& expressions,
-                                                 const EventID creatorEvent,
-                                                 const int generation) {
-            const auto ids = assignExpressionIDs(expressions, creatorEvent, generation);
+        Atom newAtom(const std::vector<ExpressionID>& inputs, const int newAtomIndex, const RuleIndex ruleIndex) {
+            return newName(inputs, ElementType::Atom, newAtomIndex, ruleIndex);
+        }
+        
+        ExpressionID newExpressionID(const std::vector<ExpressionID>& inputs,
+                                     const int newExpressionIndex,
+                                     const RuleIndex ruleIndex) {
+            return newName(inputs, ElementType::Expression, newExpressionIndex, ruleIndex);
+        }
+        
+        enum class ElementType{Atom, Expression};
+        HashValue newName(const std::vector<ExpressionID>& inputs,
+                          const ElementType type,
+                          const int elementIndex,
+                          const RuleIndex ruleIndex) {
+            std::vector<HashValue> arrayToHash = {(HashValue)type, elementIndex, ruleIndex, inputs.size()};
+            for (const auto& input : inputs) {
+                arrayToHash.push_back(input);
+            }
+            return hash(arrayToHash);
+        }
+        
+        HashValue hash(const std::vector<HashValue>& values) {
+            std::hash<HashValue> hasher;
+            HashValue result = 0;
+            for (const auto& value : values)
+            {
+                result = result * 31 + hasher(value);
+            }
+            return result;
+        }
+        
+        std::vector<ExpressionIndex> addExpressions(const std::vector<ExpressionID>& ruleInputs,
+                                                    const std::vector<AtomsVector>& expressions,
+                                                    const EventIndex creatorEvent,
+                                                    const int generation) {
+            const auto indices = assignExpressionIndicesAndIDs(ruleInputs, expressions, creatorEvent, generation);
             
             // If generation is at least maxGeneration_, we will never use these expressions as inputs, so no need adding them to the index.
             if (generation < stepSpec_.maxGenerationsLocal) {
-                for (const auto id : ids) {
-                    unindexedExpressions_.push_back(id);
+                for (const auto index : indices) {
+                    unindexedExpressions_.push_back(index);
                 }
             }
             
             updateAtomDegrees(atomDegrees_, expressions, +1);
-            return ids;
+            return indices;
         }
         
-        std::vector<ExpressionID> assignExpressionIDs(const std::vector<AtomsVector>& expressions,
-                                                      const EventID creatorEvent,
-                                                      const int generation) {
-            std::vector<ExpressionID> ids;
-            for (const auto& expression : expressions) {
-                ids.push_back(nextExpressionID_);
-                expressions_.insert(std::make_pair(nextExpressionID_++,
-                                                   SetExpression{expression,creatorEvent, finalStateEvent, generation}));
+        std::vector<ExpressionIndex> assignExpressionIndicesAndIDs(const std::vector<ExpressionID>& ruleInputs,
+                                                                   const std::vector<AtomsVector>& expressions,
+                                                                   const EventIndex creatorEvent,
+                                                                   const int generation) {
+            std::vector<ExpressionIndex> indices;
+            for (int expressionIdx = 0; expressionIdx < expressions.size(); ++expressionIdx) {
+                indices.push_back(nextExpressionIndex_);
+                const ExpressionID id = newExpressionID(ruleInputs, expressionIdx, eventRuleIndices_[creatorEvent]);
+                const auto setExpression =
+                        SetExpression{id, expressions[expressionIdx], creatorEvent, finalStateEvent, generation};
+                expressions_.insert(std::make_pair(nextExpressionIndex_++, setExpression));
             }
-            return ids;
+            return indices;
         }
         
-        void assignDestroyerEvent(const std::vector<ExpressionID>& expressions, const EventID destroyerEvent) {
-            for (const auto id : expressions) {
-                if (expressions_.at(id).destroyerEvent == finalStateEvent) {
+        void assignDestroyerEvent(const std::vector<ExpressionIndex>& expressions, const EventIndex destroyerEvent) {
+            for (const auto index : expressions) {
+                if (expressions_.at(index).destroyerEvent == finalStateEvent) {
                     ++destroyedExpressionsCount_;
                 }
-                expressions_.at(id).destroyerEvent = destroyerEvent;
+                expressions_.at(index).destroyerEvent = destroyerEvent;
             }
             updateAtomDegrees(atomDegrees_, expressions, -1);
         }
         
         void updateAtomDegrees(std::unordered_map<Atom, int>& atomDegrees,
-                               const std::vector<ExpressionID>& deltaExpressionIDs,
+                               const std::vector<ExpressionIndex>& deltaExpressionIndices,
                                const int deltaCount) const {
             std::vector<AtomsVector> expressions;
-            for (const auto id : deltaExpressionIDs) {
-                expressions.push_back(expressions_.at(id).atoms);
+            for (const auto index : deltaExpressionIndices) {
+                expressions.push_back(expressions_.at(index).atoms);
             }
             updateAtomDegrees(atomDegrees, expressions, deltaCount);
         }
@@ -328,8 +375,8 @@ namespace SetReplace {
             Generation smallestSoFar = std::numeric_limits<Generation>::max();
             for (const auto& match : matches) {
                 Generation largestForTheMatch = 0;
-                for (const ExpressionID id : match.inputExpressions) {
-                    largestForTheMatch = std::max(largestForTheMatch, expressions_.at(id).generation);
+                for (const ExpressionIndex index : match.inputExpressions) {
+                    largestForTheMatch = std::max(largestForTheMatch, expressions_.at(index).generation);
                 }
                 smallestSoFar = std::min(smallestSoFar, largestForTheMatch);
             }
@@ -364,7 +411,7 @@ namespace SetReplace {
         return implementation_->terminationReason();
     }
 
-    const std::vector<RuleID>& Set::eventRuleIDs() const {
-        return implementation_->eventRuleIDs();
+    const std::vector<RuleIndex>& Set::eventRuleIndices() const {
+        return implementation_->eventRuleIndices();
     }
 }

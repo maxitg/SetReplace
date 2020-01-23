@@ -12,13 +12,13 @@ namespace SetReplace {
     /** @brief Match is a potential event that has not actualized yet.
      */
     struct Match {
-        /** @brief ID for the rule this match corresponds to.
+        /** @brief Index for the rule this match corresponds to.
          */
-        RuleID rule;
+        RuleIndex rule;
         
         /** @brief Expression matching the rule inputs.
          */
-        std::vector<ExpressionID> inputExpressions;
+        std::vector<ExpressionIndex> inputExpressions;
         
         /** @brief Matches that will be evaluated earlier are defined to be smaller.
          */
@@ -43,18 +43,19 @@ namespace SetReplace {
          */
         Matcher(const std::vector<Rule>& rules,
                 AtomsIndex& atomsIndex,
-                const std::function<AtomsVector(ExpressionID)> getAtomsVector,
+                const std::function<AtomsVector(ExpressionIndex)> getAtomsVector,
                 const EvaluationType evaluationType,
                 const unsigned int randomSeed = 0);
         
         /** @brief Finds and adds to the index all matches involving specified expressions.
          * @details Calls shouldAbort() frequently, and throws Error::Aborted if that returns true. Otherwise might take significant time to evaluate depending on the system.
          */
-        void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort);
+        void addMatchesInvolvingExpressions(const std::vector<ExpressionIndex>& expressionIndices,
+                                            const std::function<bool()> shouldAbort);
         
-        /** @brief Removes matches containing specified expression IDs from the index.
+        /** @brief Removes matches containing specified expression indices from the index.
          */
-        void removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs);
+        void removeMatchesInvolvingExpressions(const std::vector<ExpressionIndex>& expressionIndices);
         
         /** @brief Returns the number of matches currently available.
          */
@@ -74,7 +75,7 @@ namespace SetReplace {
                                                      const std::vector<AtomsVector> patternMatches,
                                                      std::vector<AtomsVector>& atomsToReplace);
         
-        /** @brief Returns the set of expression IDs matched in any match. */
+        /** @brief Returns the set of expression indices matched in any match. */
         const std::set<Match>& allMatches() const;
         
     private:

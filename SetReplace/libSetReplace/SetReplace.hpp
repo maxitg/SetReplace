@@ -40,6 +40,6 @@ EXTERN_C DLLEXPORT int terminationReason(WolframLibraryData libData, mint argc, 
 
 /** @brief Returns the list of indices of rules used for each event.
  */
-EXTERN_C DLLEXPORT int eventRuleIDs(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result);
+EXTERN_C DLLEXPORT int eventRuleIndices(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result);
 
 #endif /* SetReplace_hpp */

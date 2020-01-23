@@ -104,7 +104,7 @@ namespace SetReplace {
         
         int writeIndex = 0;
         mint position[1];
-        const auto appendToTensor = [libData, &writeIndex, &position, &output](const std::vector<int> numbers) {
+        const auto appendToTensor = [libData, &writeIndex, &position, &output](const std::vector<Atom> numbers) {
             for (const auto number : numbers) {
                 position[0] = ++writeIndex;
                 libData->MTensor_setInteger(output, position, number);
@@ -122,7 +122,7 @@ namespace SetReplace {
         }
         
         // Put fake event at the end so that the length of final expression can be determined on WL side.
-        constexpr EventID fakeEvent = -3;
+        constexpr EventIndex fakeEvent = -3;
         constexpr Generation fakeGeneration = -1;
         appendToTensor({fakeEvent, fakeEvent, fakeGeneration, atomsPointer});
         
@@ -240,23 +240,23 @@ namespace SetReplace {
         return LIBRARY_NO_ERROR;
     }
 
-    int eventRuleIDs(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    int eventRuleIndices(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
         if (argc != 1) {
             return LIBRARY_FUNCTION_ERROR;
         }
         
         auto setPtr = (Set*)MArgument_getInteger(argv[0]);
         try {
-            const auto ruleIDs = setPtr->eventRuleIDs();
-            mint dimensions[1] = {static_cast<mint>(ruleIDs.size() - 1)};
+            const auto ruleIndices = setPtr->eventRuleIndices();
+            mint dimensions[1] = {static_cast<mint>(ruleIndices.size() - 1)};
             MTensor output;
             libData->MTensor_new(MType_Integer, 1, dimensions, &output);
             
             int writeIndex = 0;
             mint position[1];
-            for (int event = 1; event < ruleIDs.size(); ++event) {
+            for (int event = 1; event < ruleIndices.size(); ++event) {
                 position[0] = ++writeIndex;
-                libData->MTensor_setInteger(output, position, ruleIDs[event] + 1);
+                libData->MTensor_setInteger(output, position, ruleIndices[event] + 1);
             }
             
             MArgument_setMTensor(result, output);
@@ -304,6 +304,6 @@ EXTERN_C int terminationReason(WolframLibraryData libData, mint argc, MArgument 
     return SetReplace::terminationReason(libData, argc, argv, result);
 }
 
-EXTERN_C int eventRuleIDs(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
-    return SetReplace::eventRuleIDs(libData, argc, argv, result);
+EXTERN_C int eventRuleIndices(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    return SetReplace::eventRuleIndices(libData, argc, argv, result);
 }

@@ -6,7 +6,7 @@
 
 namespace SetReplace {
     namespace {
-        int compareVectors(const std::vector<ExpressionID>& first, const std::vector<ExpressionID>& second) {
+        int compareVectors(const std::vector<ExpressionIndex>& first, const std::vector<ExpressionIndex>& second) {
             for (int i = 0; i < std::min(first.size(), second.size()); ++i) {
                 if (first[i] < second[i]) return -1;
                 else if (first[i] > second[i]) return +1;
@@ -17,11 +17,11 @@ namespace SetReplace {
             else return 0;
         }
         
-        int compareSortedIDs(const Match& first, const Match& second, bool reverseOrder = false) {
-            std::vector<ExpressionID> thisExpressions = first.inputExpressions;
+        int compareSortedIndices(const Match& first, const Match& second, bool reverseOrder = false) {
+            std::vector<ExpressionIndex> thisExpressions = first.inputExpressions;
             std::sort(thisExpressions.begin(), thisExpressions.end());
             
-            std::vector<ExpressionID> otherExpressions = second.inputExpressions;
+            std::vector<ExpressionIndex> otherExpressions = second.inputExpressions;
             std::sort(otherExpressions.begin(), otherExpressions.end());
             
             if (reverseOrder) {
@@ -31,18 +31,18 @@ namespace SetReplace {
             return compareVectors(thisExpressions, otherExpressions);
         }
         
-        int compareUnsortedIDs(const Match& first, const Match& second) {
+        int compareUnsortedIndices(const Match& first, const Match& second) {
             return compareVectors(first.inputExpressions, second.inputExpressions);
         }
     }
     
     bool Match::operator<(const Match& other) const {
-        // First, find which Match has oldest (lowest ID) expressions
-        int sortedComparison = compareSortedIDs(*this, other, true);
+        // First, find which Match has oldest (lowest index) expressions
+        int sortedComparison = compareSortedIndices(*this, other, true);
         if (sortedComparison != 0) return sortedComparison < 0;
 
         // Then, if sets of expressions are the same, use smaller permutation
-        int unsortedComparison = compareUnsortedIDs(*this, other);
+        int unsortedComparison = compareUnsortedIndices(*this, other);
         if (unsortedComparison != 0) return unsortedComparison < 0;
         
         // Finally, first rule goes first
@@ -53,7 +53,7 @@ namespace SetReplace {
     private:
         const std::vector<Rule>& rules_;
         AtomsIndex& atomsIndex_;
-        const std::function<AtomsVector(ExpressionID)> getAtomsVector_;
+        const std::function<AtomsVector(ExpressionIndex)> getAtomsVector_;
         
         std::set<Match> matches_; // sorted by priority, i.e., the first match is returned first.
         
@@ -62,8 +62,8 @@ namespace SetReplace {
                 return std::hash<int64_t>()((int64_t)&(*it));
             }
         };
-        // Matches organized by expression IDs, useful for deleting matches for deleted expressions.
-        std::unordered_map<ExpressionID, std::unordered_set<std::set<Match>::const_iterator, IteratorHash>> matchesIndex_;
+        // Matches organized by expression indices, useful for deleting matches for deleted expressions.
+        std::unordered_map<ExpressionIndex, std::unordered_set<std::set<Match>::const_iterator, IteratorHash>> matchesIndex_;
         
         std::vector<std::set<Match>::const_iterator> allMatchIterators_;
         std::unordered_map<std::set<Match>::const_iterator, int, IteratorHash> matchIteratorsToIndices_;
@@ -75,7 +75,7 @@ namespace SetReplace {
     public:
         Implementation(const std::vector<Rule>& rules,
                        AtomsIndex& atomsIndex,
-                       const std::function<AtomsVector(ExpressionID)> getAtomsVector,
+                       const std::function<AtomsVector(ExpressionIndex)> getAtomsVector,
                        const EvaluationType evaluationType,
                        const unsigned int randomSeed) :
             rules_(rules),
@@ -84,9 +84,10 @@ namespace SetReplace {
             evaluationType_(evaluationType),
             randomGenerator_(randomSeed) {}
         
-        void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort) {
+        void addMatchesInvolvingExpressions(const std::vector<ExpressionIndex>& expressionIndices,
+                                            const std::function<bool()> shouldAbort) {
             for (int i = 0; i < rules_.size(); ++i) {
-                addMatchesForRule(expressionIDs, i, shouldAbort);
+                addMatchesForRule(expressionIndices, i, shouldAbort);
             }
             
             chooseNextRandomMatch();
@@ -94,9 +95,9 @@ namespace SetReplace {
         
         // Note, deletion changes the ordering of allMatchIterators_, therefore
         // deletion should be done in deterministic order, otherwise, the random replacements will not be deterministic
-        void removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs) {
+        void removeMatchesInvolvingExpressions(const std::vector<ExpressionIndex>& expressionIndices) {
             std::set<Match> matchesToDelete; // do not use unordered_set, as it will make order undeterministic
-            for (const auto& expression : expressionIDs) {
+            for (const auto& expression : expressionIndices) {
                 const auto& matches = matchesIndex_[expression];
                 for (const auto& matchIterator : matches) {
                     matchesToDelete.insert(*matchIterator);
@@ -127,28 +128,34 @@ namespace SetReplace {
         }
         
     private:
-        void addMatchesForRule(const std::vector<ExpressionID>& expressionIDs, const RuleID& ruleID, const std::function<bool()> shouldAbort) {
-            for (int i = 0; i < rules_[ruleID].inputs.size(); ++i) {
-                Match emptyMatch{ruleID, std::vector<ExpressionID>(rules_[ruleID].inputs.size(), -1)};
-                completeMatchesStartingWithInput(emptyMatch, rules_[ruleID].inputs, i, expressionIDs, shouldAbort);
+        void addMatchesForRule(const std::vector<ExpressionIndex>& expressionIndices,
+                               const RuleIndex& ruleIndex,
+                               const std::function<bool()> shouldAbort) {
+            for (int i = 0; i < rules_[ruleIndex].inputs.size(); ++i) {
+                Match emptyMatch{ruleIndex, std::vector<ExpressionIndex>(rules_[ruleIndex].inputs.size(), -1)};
+                completeMatchesStartingWithInput(emptyMatch, rules_[ruleIndex].inputs, i, expressionIndices, shouldAbort);
             }
         }
         
         void completeMatchesStartingWithInput(const Match& incompleteMatch,
                                               const std::vector<AtomsVector>& partiallyMatchedInputs,
                                               const int nextInputIdx,
-                                              const std::vector<ExpressionID>& potentialExpressionIDs,
+                                              const std::vector<ExpressionIndex>& potentialExpressionIndices,
                                               const std::function<bool()> shouldAbort) {
-            for (const auto expressionID : potentialExpressionIDs) {
-                if (isExpressionUnused(incompleteMatch, expressionID)) {
-                    attemptMatchExpressionToInput(incompleteMatch, partiallyMatchedInputs, nextInputIdx, expressionID, shouldAbort);
+            for (const auto expressionIndex : potentialExpressionIndices) {
+                if (isExpressionUnused(incompleteMatch, expressionIndex)) {
+                    attemptMatchExpressionToInput(incompleteMatch,
+                                                  partiallyMatchedInputs,
+                                                  nextInputIdx,
+                                                  expressionIndex,
+                                                  shouldAbort);
                 }
             }
         }
         
-        static bool isExpressionUnused(const Match& match, const ExpressionID expressionID) {
+        static bool isExpressionUnused(const Match& match, const ExpressionIndex expressionIndex) {
             for (int i = 0; i < match.inputExpressions.size(); ++i) {
-                if (match.inputExpressions[i] == expressionID) return false;
+                if (match.inputExpressions[i] == expressionIndex) return false;
             }
             return true;
         }
@@ -156,7 +163,7 @@ namespace SetReplace {
         void attemptMatchExpressionToInput(const Match& incompleteMatch,
                                            const std::vector<AtomsVector>& partiallyMatchedInputs,
                                            const int nextInputIdx,
-                                           const ExpressionID potentialExpressionID,
+                                           const ExpressionIndex potentialExpressionIndex,
                                            const std::function<bool()> shouldAbort) {
             // If WL wants to abort, abort
             if (shouldAbort()) {
@@ -164,13 +171,13 @@ namespace SetReplace {
             }
             
             const auto& input = partiallyMatchedInputs[nextInputIdx];
-            const auto& expressionAtoms = getAtomsVector_(potentialExpressionID);
+            const auto& expressionAtoms = getAtomsVector_(potentialExpressionIndex);
             
             // edges (expressions) of different sizes, cannot match
             if (input.size() != expressionAtoms.size()) return;
             
             Match newMatch = incompleteMatch;
-            newMatch.inputExpressions[nextInputIdx] = potentialExpressionID;
+            newMatch.inputExpressions[nextInputIdx] = potentialExpressionIndex;
             
             auto newInputs = partiallyMatchedInputs;
             if (!Matcher::substituteMissingAtomsIfPossible({input}, {expressionAtoms}, newInputs)) return;
@@ -225,10 +232,10 @@ namespace SetReplace {
             return true;
         }
         
-        std::pair<int, std::vector<ExpressionID>> nextBestInputAndExpressionsToTry(const Match& incompleteMatch,
-                                                                                   const std::vector<AtomsVector>& partiallyMatchedInputs) const {
+        std::pair<int, std::vector<ExpressionIndex>> nextBestInputAndExpressionsToTry(const Match& incompleteMatch,
+                                                                                      const std::vector<AtomsVector>& partiallyMatchedInputs) const {
             int nextInputIdx = -1;
-            std::vector<ExpressionID> nextExpressionsToTry;
+            std::vector<ExpressionIndex> nextExpressionsToTry;
             
             // For each input, we will see how many expressions in the set contain atoms appearing in this input.
             // The fewer there are, the less branching we will have to do.
@@ -250,7 +257,7 @@ namespace SetReplace {
                 
                 // For each expression, we will count how many of the input atoms appear in it.
                 // We will then only use expressions that have all the required atoms.
-                std::unordered_map<ExpressionID, int> inputAtomsCountByExpression;
+                std::unordered_map<ExpressionIndex, int> inputAtomsCountByExpression;
                 for (const auto atom : appearingAtoms) {
                     for (const auto expression : atomsIndex_.expressionsContainingAtom(atom)) {
                         inputAtomsCountByExpression[expression]++;
@@ -258,7 +265,7 @@ namespace SetReplace {
                 }
                 
                 // Here we will collect all expressions that contain all the required atoms.
-                std::vector<ExpressionID> potentialExpressions;
+                std::vector<ExpressionIndex> potentialExpressions;
                 for (const auto& expressionAndCount : inputAtomsCountByExpression) {
                     if (expressionAndCount.second == appearingAtoms.size()) {
                         potentialExpressions.push_back(expressionAndCount.first);
@@ -299,18 +306,19 @@ namespace SetReplace {
     
     Matcher::Matcher(const std::vector<Rule>& rules,
                      AtomsIndex& atomsIndex,
-                     const std::function<AtomsVector(ExpressionID)> getAtomsVector,
+                     const std::function<AtomsVector(ExpressionIndex)> getAtomsVector,
                      const EvaluationType evaluationType,
                      const unsigned int randomSeed) {
         implementation_ = std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector, evaluationType, randomSeed);
     }
     
-    void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort) {
-        implementation_->addMatchesInvolvingExpressions(expressionIDs, shouldAbort);
+    void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionIndex>& expressionIndices,
+                                                 const std::function<bool()> shouldAbort) {
+        implementation_->addMatchesInvolvingExpressions(expressionIndices, shouldAbort);
     }
     
-    void Matcher::removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs) {
-        implementation_->removeMatchesInvolvingExpressions(expressionIDs);
+    void Matcher::removeMatchesInvolvingExpressions(const std::vector<ExpressionIndex>& expressionIndices) {
+        implementation_->removeMatchesInvolvingExpressions(expressionIndices);
     }
     
     int Matcher::matchCount() const {

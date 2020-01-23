@@ -16,17 +16,21 @@ namespace SetReplace {
     /** @brief Expression, as a part of the set, i.e., (hyper)edges in the graph.
      */
     struct SetExpression {
+        /** @brief Derived from the input expressions that produced this one as an output. Used to name subsequent atoms / vertices.
+         */
+        ExpressionID id;
+        
         /** @brief Ordered list of atoms the expression contains.
          */
         AtomsVector atoms;
         
         /** @brief Substitution event that has this expression as part of its output.
          */
-        EventID creatorEvent;
+        EventIndex creatorEvent;
         
         /** @brief Substitution event that has this expression as part of its input.
          */
-        EventID destroyerEvent = finalStateEvent;
+        EventIndex destroyerEvent = finalStateEvent;
         
         /** @brief Layer of the causal network this expression belongs to.
          */
@@ -40,19 +44,19 @@ namespace SetReplace {
         /** @brief Creates an empty index.
          * @param getAtomsVector datasource function that returns the list of atoms for a requested expression.
          */
-        AtomsIndex(const std::function<AtomsVector(ExpressionID)>& getAtomsVector);
+        AtomsIndex(const std::function<AtomsVector(ExpressionIndex)>& getAtomsVector);
         
-        /** @brief Removes expressions with specified IDs from the index.
+        /** @brief Removes expressions with specified indices from the index.
          */
-        void removeExpressions(const std::vector<ExpressionID>& expressionIDs);
+        void removeExpressions(const std::vector<ExpressionIndex>& expressionIndices);
         
-        /** @brief Adds expressions with specified IDs to the index.
+        /** @brief Adds expressions with specified indices to the index.
          */
-        void addExpressions(const std::vector<ExpressionID>& expressionIDs);
+        void addExpressions(const std::vector<ExpressionIndex>& expressionIndices);
         
         /** @brief Returns the list of expressions containing a specified atom.
          */
-        const std::unordered_set<ExpressionID> expressionsContainingAtom(const Atom atom) const;
+        const std::unordered_set<ExpressionIndex> expressionsContainingAtom(const Atom atom) const;
         
     private:
         class Implementation;
