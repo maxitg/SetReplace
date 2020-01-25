@@ -786,7 +786,7 @@ $masterOptions = {
 
 WolframModelEvolutionObject[
 		data_ ? evolutionDataQ][
-		property___ ? (Not[MatchQ[#, OptionsPattern[]]] &),
+		property__ ? (Not[MatchQ[#, OptionsPattern[]]] &),
 		opts : OptionsPattern[]] := Module[{prunedObject, result},
 	result = Check[
 		(propertyEvaluate @@
@@ -814,6 +814,10 @@ WolframModelEvolutionObject[
 
 WolframModelEvolutionObject[args___] := 0 /;
 	!Developer`CheckArgumentCount[WolframModelEvolutionObject[args], 1, 1] && False
+
+
+WolframModelEvolutionObject[data_][opts : OptionsPattern[]] := 0 /;
+  Message[WolframModelEvolutionObject::argm, Defer[WolframModelEvolutionObject[data][opts]], 0, 1]
 
 
 (* ::Subsection:: *)
