@@ -111,6 +111,7 @@ $propertyArgumentCounts = Join[
 		"EvolutionObject" -> {0, 0},
 		"FinalState" -> {0, 0},
 		"StatesList" -> {0, 0},
+    "StatesPlotsList" -> {0, Infinity},
 		"UpdatedStatesList" -> {0, 0},
 		"Generation" -> {1, 1},
 		"SetAfterEvent" -> {1, 1},
@@ -482,6 +483,35 @@ propertyEvaluate[True, includeBounaryEventsPattern][
 
 
 (* ::Subsection:: *)
+(*StatesPlotsList*)
+
+
+propertyEvaluate[True, includeBounaryEventsPattern][
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    "StatesPlotsList",
+    o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]] == {})] :=
+  WolframModelPlot[#, o] & /@ obj["StatesList"]
+
+
+propertyEvaluate[True, includeBounaryEventsPattern][
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    property : "StatesPlotsList",
+    o : OptionsPattern[]] := Message[
+      caller::optx,
+      Last[Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]]],
+      Defer[obj[property, o]]]
+
+
+propertyEvaluate[True, includeBounaryEventsPattern][
+    WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    property : "StatesPlotsList",
+    o___] := makeMessage[caller, "nonopt", property, Last[{o}]]
+
+
+(* ::Subsection:: *)
 (*AtomsCountFinal*)
 
 
@@ -578,10 +608,10 @@ $layeredCausalGraphOptions = Options[$causalGraphOptions];
 propertyEvaluate[True, includeBounaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
-		"CausalGraph" | "LayeredCausalGraph",
+		property : "CausalGraph" | "LayeredCausalGraph",
 		o___] := 0 /;
 	!MatchQ[{o}, OptionsPattern[]] &&
-	makeMessage[caller, "nonopt", Last[{o}]]
+	makeMessage[caller, "nonopt", property, Last[{o}]]
 
 
 propertyEvaluate[True, includeBounaryEventsPattern][

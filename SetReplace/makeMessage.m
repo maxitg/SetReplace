@@ -96,8 +96,8 @@ messageTemplate["generationNotInteger"] =
 
 
 messageTemplate["nonopt"] =
-	"Options expected (instead of `2`) " <>
-	"beyond position 1 for \"CausalGraph\" property. " <>
+	"Options expected (instead of `3`) " <>
+	"beyond position 1 for `2` property. " <>
 	"An option must be a rule or a list of rules.";
 
 
