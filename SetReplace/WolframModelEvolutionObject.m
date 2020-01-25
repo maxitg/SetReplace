@@ -161,7 +161,10 @@ $oldToNewPropertyNames = <|
 |>;
 
 
-$propertiesParameterless = Keys @ Select[#[[1]] == 0 &] @ $propertyArgumentCounts;
+$propertiesParameterless = Join[
+  Keys @ Select[#[[1]] == 0 &] @ $propertyArgumentCounts,
+  Select[First[$propertyArgumentCounts[$oldToNewPropertyNames[#]]] == 0 &] @ Keys[$oldToNewPropertyNames]
+];
 
 
 (* ::Subsection:: *)
