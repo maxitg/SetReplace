@@ -55,8 +55,8 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["GenerationsCount", 3],
-        WolframModelEvolutionObject[___]["GenerationsCount", 3],
+          4]["TotalGenerationsCount", 3],
+        WolframModelEvolutionObject[___]["TotalGenerationsCount", 3],
         {WolframModelEvolutionObject::pargx},
         SameTest -> MatchQ
       ],
@@ -65,8 +65,8 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["GenerationsCount", 3, 3],
-        WolframModelEvolutionObject[___]["GenerationsCount", 3, 3],
+          4]["TotalGenerationsCount", 3, 3],
+        WolframModelEvolutionObject[___]["TotalGenerationsCount", 3, 3],
         {WolframModelEvolutionObject::pargx},
         SameTest -> MatchQ
       ],
@@ -109,7 +109,7 @@
           pathGraph17,
           4]["SetAfterEvent", 16],
         WolframModelEvolutionObject[___]["SetAfterEvent", 16],
-        {WolframModelEvolutionObject::eventTooLarge},
+        {WolframModelEvolutionObject::stepTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -119,7 +119,7 @@
           pathGraph17,
           4]["SetAfterEvent", -17],
         WolframModelEvolutionObject[___]["SetAfterEvent", -17],
-        {WolframModelEvolutionObject::eventTooLarge},
+        {WolframModelEvolutionObject::stepTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -129,7 +129,7 @@
           pathGraph17,
           4]["SetAfterEvent", 1.2],
         WolframModelEvolutionObject[___]["SetAfterEvent", 1.2],
-        {WolframModelEvolutionObject::eventNotInteger},
+        {WolframModelEvolutionObject::stepNotInteger},
         SameTest -> MatchQ
       ],
 
@@ -139,7 +139,7 @@
           pathGraph17,
           4]["SetAfterEvent", "good"],
         WolframModelEvolutionObject[___]["SetAfterEvent", "good"],
-        {WolframModelEvolutionObject::eventNotInteger},
+        {WolframModelEvolutionObject::stepNotInteger},
         SameTest -> MatchQ
       ],
 
@@ -151,7 +151,7 @@
           pathGraph17,
           4]["Generation", 5],
         WolframModelEvolutionObject[___]["Generation", 5],
-        {WolframModelEvolutionObject::generationTooLarge},
+        {WolframModelEvolutionObject::stepTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -161,7 +161,7 @@
           pathGraph17,
           4]["Generation", -6],
         WolframModelEvolutionObject[___]["Generation", -6],
-        {WolframModelEvolutionObject::generationTooLarge},
+        {WolframModelEvolutionObject::stepTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -171,7 +171,7 @@
           pathGraph17,
           4]["Generation", 2.3],
         WolframModelEvolutionObject[___]["Generation", 2.3],
-        {WolframModelEvolutionObject::generationNotInteger},
+        {WolframModelEvolutionObject::stepNotInteger},
         SameTest -> MatchQ
       ],
 
@@ -188,7 +188,7 @@
         WolframModel[
           {{1, 2}} -> {{1, 2}},
           {{1, 1}},
-          1]["GenerationsCount", "IncludeBoundaryEvents" -> #],
+          1]["TotalGenerationsCount", "IncludeBoundaryEvents" -> #],
         1
       ] & /@ {None, "Initial", "Final", All},
 
@@ -251,13 +251,13 @@
         1 -> 2
       ],
 
-      (* GenerationsCount *)
+      (* TotalGenerationsCount *)
 
       VerificationTest[
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["GenerationsCount"],
+          4]["TotalGenerationsCount"],
         4
       ],
 
@@ -265,7 +265,7 @@
         WolframModel[
           {{1, 2}} -> {},
           {{1, 2}, {2, 3}},
-          2]["GenerationsCount"],
+          2]["TotalGenerationsCount"],
         1
       ],
 
@@ -769,7 +769,7 @@
   
           VerificationTest[
             GraphDistance[ReleaseHold[largeEvolution[type]], 1, ReleaseHold[largeEvolution["EventsCount"]]],
-            ReleaseHold[largeEvolution["GenerationsCount"]] - 1
+            ReleaseHold[largeEvolution["TotalGenerationsCount"]] - 1
           ]
         }] /. HoldPattern[ReleaseHold[Hold[expr_]]] :> expr,
   
