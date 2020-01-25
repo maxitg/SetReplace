@@ -44,7 +44,7 @@ WolframModelEvolutionObject::usage = usageString[
 	"\n",
 	"WolframModelEvolutionObject[`...`][`g`] yields the set at generation `g`.",
 	"\n",
-	"WolframModelEvolutionObject[`...`][\"SetAfterEvent\", `s`] yields the state ",
+	"WolframModelEvolutionObject[`...`][\"StateAfterEvent\", `s`] yields the state ",
 	"after `s` substitution events.",
 	"\n",
 	"WolframModelEvolutionObject[`...`][\"Properties\"] yields the list of all ",
@@ -115,7 +115,7 @@ $propertyArgumentCounts = Join[
 		"StatesPlotsList" -> {0, Infinity},
 		"AllEventsStatesList" -> {0, 0},
 		"Generation" -> {1, 1},
-		"SetAfterEvent" -> {1, 1},
+		"StateAfterEvent" -> {1, 1},
 		"Rules" -> {0, 0},
 		"TotalGenerationsCount" -> {0, 0},
 		"PartialGenerationsCount" -> {0, 0},
@@ -156,7 +156,8 @@ $oldToNewPropertyNames = <|
 	"AtomsCountFinal" -> "FinalDistinctElementsCount",
 	"AtomsCountTotal" -> "AllEventsDistinctElementsCount",
 	"ExpressionsCountFinal" -> "FinalEdgeCount",
-	"ExpressionsCountTotal" -> "AllEventsEdgesCount"
+	"ExpressionsCountTotal" -> "AllEventsEdgesCount",
+  "SetAfterEvent" -> "StateAfterEvent"
 |>;
 
 
@@ -423,7 +424,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 
 
 (* ::Subsection:: *)
-(*SetAfterEvent*)
+(*StateAfterEvent*)
 
 
 (* ::Subsubsection:: *)
@@ -451,7 +452,7 @@ toPositiveStep[total_, requested : Except[_Integer], caller_, name_] :=
 propertyEvaluate[True, includeBoundaryEventsPattern][
 			obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			caller_,
-			"SetAfterEvent",
+			"StateAfterEvent",
 			s_] := With[{
 		positiveEvent = toPositiveStep[propertyEvaluate[True, None][obj, caller, "AllEventsCount"], s, caller, "Event"]},
 	data[$atomLists][[Intersection[
@@ -467,7 +468,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 propertyEvaluate[True, includeBoundaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
-		"FinalState"] := WolframModelEvolutionObject[data]["SetAfterEvent", -1]
+		"FinalState"] := WolframModelEvolutionObject[data]["StateAfterEvent", -1]
 
 
 (* ::Subsection:: *)
@@ -490,7 +491,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
 		"AllEventsStatesList"] :=
-	WolframModelEvolutionObject[data]["SetAfterEvent", #] & /@
+	WolframModelEvolutionObject[data]["StateAfterEvent", #] & /@
 		Range[0, WolframModelEvolutionObject[data]["AllEventsCount"]]
 
 
@@ -573,7 +574,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 		"FinalDistinctElementsCount"] :=
 	Length[Union @ Cases[
 		propertyEvaluate[True, None][
-			WolframModelEvolutionObject[data], caller, "SetAfterEvent", -1],
+			WolframModelEvolutionObject[data], caller, "StateAfterEvent", -1],
 		_ ? AtomQ,
 		All]]
 
@@ -620,7 +621,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 		caller_,
 		"FinalEdgeCount"] :=
 	Length[propertyEvaluate[True, None][
-		WolframModelEvolutionObject[data], caller, "SetAfterEvent", -1]]
+		WolframModelEvolutionObject[data], caller, "StateAfterEvent", -1]]
 
 
 (* ::Subsection:: *)
