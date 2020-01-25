@@ -271,7 +271,7 @@
       (*** Generations and Events ***)
 
       VerificationTest[
-        WolframModel[1 -> 2, {1}, 2]["GenerationsCount"],
+        WolframModel[1 -> 2, {1}, 2]["TotalGenerationsCount"],
         2
       ],
 
@@ -301,38 +301,38 @@
       ],
 
       VerificationTest[
-        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, 3] /@ {"GenerationsCount", "EventsCount"},
+        WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, 3] /@ {"TotalGenerationsCount", "EventsCount"},
         {3, 7}
       ],
 
       VerificationTest[
         WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 3|>] /@
-          {"GenerationsCount", "EventsCount", "TerminationReason"},
+          {"TotalGenerationsCount", "EventsCount", "TerminationReason"},
         {3, 7, "MaxGenerations"}
       ],
 
       VerificationTest[
         WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxEvents" -> 6|>] /@
-          {"GenerationsCount", "EventsCount", "TerminationReason"},
+          {"TotalGenerationsCount", "EventsCount", "TerminationReason"},
         {3, 6, "MaxEvents"}
       ],
 
       VerificationTest[
         WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 3, "MaxEvents" -> 6|>] /@
-          {"GenerationsCount", "EventsCount", "TerminationReason"},
+          {"TotalGenerationsCount", "EventsCount", "TerminationReason"},
         {3, 6, "MaxGenerations" | "MaxEvents"},
         SameTest -> MatchQ
       ],
 
       VerificationTest[
         WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> 2, "MaxEvents" -> 6|>] /@
-          {"GenerationsCount", "EventsCount", "TerminationReason"},
+          {"TotalGenerationsCount", "EventsCount", "TerminationReason"},
         {2, 3, "MaxGenerations"}
       ],
 
       VerificationTest[
         WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <||>] /@
-          {"GenerationsCount", "EventsCount", "TerminationReason"},
+          {"TotalGenerationsCount", "EventsCount", "TerminationReason"},
         {2, 3, "FixedPoint"}
       ],
 
@@ -351,7 +351,7 @@
 
       VerificationTest[
         WolframModel[{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}, <|"MaxGenerations" -> \[Infinity], "MaxEvents" -> 12|>] /@
-          {"GenerationsCount", "EventsCount", "TerminationReason"},
+          {"TotalGenerationsCount", "EventsCount", "TerminationReason"},
         {4, 12, "MaxEvents"}
       ],
 
@@ -765,7 +765,7 @@
           WolframModel[
             model,
             <|"MaxGenerations" -> 5, "MaxEvents" -> 41, "MaxVertices" -> 42, "MaxEdges" -> 84, "MaxVertexDegree" -> 9|>,
-            {"GenerationsCount", "TerminationReason"},
+            {"TotalGenerationsCount", "TerminationReason"},
             Method -> method],
           {5, "MaxGenerations"}
         ],
@@ -946,7 +946,7 @@
       ],
 
       VerificationTest[
-        WolframModel[<|"PatternRules" -> {2 -> 5, 3 :> 6}|>, {1, 2, 3}, 2]["GenerationsCount"],
+        WolframModel[<|"PatternRules" -> {2 -> 5, 3 :> 6}|>, {1, 2, 3}, 2]["TotalGenerationsCount"],
         1
       ],
 
@@ -1053,7 +1053,7 @@
       ],
 
       VerificationTest[
-        WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 2}}, 10]["GenerationsCount"],
+        WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 2}}, 10]["TotalGenerationsCount"],
         10
       ],
 
@@ -1063,7 +1063,7 @@
       ],
 
       VerificationTest[
-        WolframModel[{{1}} -> {}, {{1}, {2}, {3}, {4}, {5}}, Infinity]["GenerationsCount"],
+        WolframModel[{{1}} -> {}, {{1}, {2}, {3}, {4}, {5}}, Infinity]["TotalGenerationsCount"],
         1
       ],
 
@@ -1078,7 +1078,7 @@
       ],
 
       VerificationTest[
-        WolframModel[{{1}} -> {{1}}, {{1}, {2}, {3}, {4}, {5}}, 0]["GenerationsCount"],
+        WolframModel[{{1}} -> {{1}}, {{1}, {2}, {3}, {4}, {5}}, 0]["TotalGenerationsCount"],
         0
       ],
 
@@ -1091,7 +1091,7 @@
         WolframModel[
           {{{1}} -> {}, {{1, 2}} -> {{1}}},
           {{1, 2}, {2}, {3}, {4}, {5}},
-          2]["GenerationsCount"],
+          2]["TotalGenerationsCount"],
         2
       ],
 
