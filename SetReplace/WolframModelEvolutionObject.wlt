@@ -45,6 +45,26 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
+          4][],
+        WolframModelEvolutionObject[___][],
+        {WolframModelEvolutionObject::argm},
+        SameTest -> MatchQ
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["$opt$" -> 3],
+        WolframModelEvolutionObject[___]["$opt$" -> 3],
+        {WolframModelEvolutionObject::argm},
+        SameTest -> MatchQ
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
           4]["$$$UnknownProperty$$$,,,"],
         WolframModelEvolutionObject[___]["$$$UnknownProperty$$$,,,"],
         {WolframModelEvolutionObject::unknownProperty},
@@ -269,15 +289,125 @@
         1
       ],
 
+      (* PartialGenerationsCount *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 30|>]["PartialGenerationsCount"],
+        1
+      ],
+
+      VerificationTest[
+        SeedRandom[123]; 
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 30|>,
+          "EventOrderingFunction" -> "Random"][
+          "PartialGenerationsCount"],
+        8
+      ],
+
+      (* CompleteGenerationsCount *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 30|>][#],
+        4
+      ] & /@ {"CompleteGenerationsCount", "MaxCompleteGeneration"},
+
+      VerificationTest[
+        SeedRandom[123]; 
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 30|>,
+          "EventOrderingFunction" -> "Random"][
+          "CompleteGenerationsCount"],
+        2
+      ],
+
+      (* GenerationsCount *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 30|>]["GenerationsCount"],
+        {4, 1}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {3, 2}},
+          {{1, 1}},
+          0]["GenerationsCount"],
+        {0, 0}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {3, 2}},
+          {{1, 1}, {1, 1}},
+          <|"MaxEvents" -> #|>]["GenerationsCount"] & /@ {1, 2},
+        {{0, 1}, {1, 0}}
+      ],
+
+      VerificationTest[
+        SeedRandom[123]; 
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 30|>,
+          "EventOrderingFunction" -> "Random"][
+          "GenerationsCount"],
+        {2, 8}
+      ],
+
+      (* GenerationComplete *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 30|>]["GenerationComplete"],
+        False
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {3, 2}},
+          {{1, 1}},
+          4]["GenerationComplete"],
+        True
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 30|>]["GenerationComplete", #] & /@ {-6, -5, -1, 0, 1, 4, 5, 10},
+        {True, True, False, True, True, True, False, False}
+      ],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
+        evo["GenerationComplete", #],
+        {WolframModelEvolutionObject::stepTooLarge}
+      ] & /@ {-10, -7}],
+
       (* EventsCount *)
 
       VerificationTest[
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["EventsCount"],
+          4][#],
         15
-      ],
+      ] & /@ {"EventsCount", "AllEventsCount"},
 
       VerificationTest[
         WolframModel[
@@ -303,6 +433,76 @@
         2
       ],
 
+      (* GenerationEventsCountList *)
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 4]["GenerationEventsCountList"],
+        {1, 3, 9, 27}
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 0]["GenerationEventsCountList"],
+        {}
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 4][
+          "GenerationEventsCountList", "IncludeBoundaryEvents" -> #] & /@ {None, "Initial", "Final", All},
+        {{1, 3, 9, 27}, {1, 1, 3, 9, 27}, {1, 3, 9, 27, 1}, {1, 1, 3, 9, 27, 1}}
+      ],
+
+      (* GenerationEventsList *)
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 2]["GenerationEventsList"],
+        {{{1, {1} -> {2, 3, 4}}}, {{1, {2} -> {5, 6, 7}}, {1, {3} -> {8, 9, 10}}, {1, {4} -> {11, 12, 13}}}}
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 0]["GenerationEventsList"],
+        {}
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 2][
+          "GenerationEventsList", "IncludeBoundaryEvents" -> All],
+        {
+          {{0, {} -> {1}}},
+          {{1, {1} -> {2, 3, 4}}},
+          {{1, {2} -> {5, 6, 7}}, {1, {3} -> {8, 9, 10}}, {1, {4} -> {11, 12, 13}}},
+          {{DirectedInfinity[1], {5, 6, 7, 8, 9, 10, 11, 12, 13} -> {}}}
+        }
+      ],
+
+      (* VertexCountList *)
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 4]["VertexCountList"],
+        {1, 2, 5, 14, 41}
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 0]["VertexCountList"],
+        {1}
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{f[1, x, y], f[1, x, y]}}, 4]["VertexCountList"],
+        {1, 2, 5, 14, 41}
+      ],
+
+      (* EdgeCountList *)
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 4]["EdgeCountList"],
+        {1, 3, 9, 27, 81}
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 0]["EdgeCountList"],
+        {1}
+      ],
+
       (* SetAfterEvent *)
 
       VerificationTest[
@@ -317,9 +517,9 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["SetAfterEvent", 1],
+          4][#, 1],
         Join[Partition[Range[3, 17], 2, 1], {{1, 3}}]
-      ],
+      ] & /@ {"SetAfterEvent", "StateAfterEvent"},
 
       VerificationTest[
         WolframModel[
@@ -404,6 +604,30 @@
         {}
       ],
 
+      (* FinalStatePlot *)
+
+      VerificationTest[
+        Head[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["FinalStatePlot"]],
+        Graphics
+      ],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
+        evo["FinalStatePlot", "$$$invalid$$$"],
+        {WolframModelEvolutionObject::nonopt}
+      ]],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
+        evo["FinalStatePlot", "$$$invalid$$$" -> 3],
+        {WolframModelEvolutionObject::optx}
+      ]],
+
+      VerificationTest[
+        AbsoluteOptions[
+          WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["FinalStatePlot", ImageSize -> 123.],
+          ImageSize],
+        {ImageSize -> 123.}
+      ],
+
       (* UpdatedStatesList *)
 
       VerificationTest[
@@ -429,9 +653,9 @@
         WolframModel[
           {{1, 2}} -> {},
           {{1, 2}, {2, 3}},
-          2]["UpdatedStatesList"],
+          2][#],
         {{{1, 2}, {2, 3}}, {{2, 3}}, {}}
-      ],
+      ] & /@ {"UpdatedStatesList", "AllEventsStatesList"},
 
       (* Generation *)
 
@@ -534,15 +758,38 @@
         {{{1, 2}, {2, 3}}, {}}
       ],
 
+      (* StatesPlotsList *)
+
+      VerificationTest[
+        Head /@ WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["StatesPlotsList"],
+        ConstantArray[Graphics, 4]
+      ],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
+        evo["StatesPlotsList", "$$$invalid$$$"],
+        {WolframModelEvolutionObject::nonopt}
+      ]],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
+        evo["StatesPlotsList", "$$$invalid$$$" -> 3],
+        {WolframModelEvolutionObject::optx}
+      ]],
+
+      VerificationTest[
+        AbsoluteOptions[#, ImageSize] & /@
+          WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["StatesPlotsList", ImageSize -> 123.],
+        ConstantArray[{ImageSize -> 123.}, 4]
+      ],
+
       (* AtomsCountFinal *)
 
       VerificationTest[
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["AtomsCountFinal"],
+          4][#],
         2
-      ],
+      ] & /@ {"AtomsCountFinal", "FinalDistinctElementsCount"},
 
       VerificationTest[
         WolframModel[
@@ -574,9 +821,9 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["AtomsCountTotal"],
+          4][#],
         17
-      ],
+      ] & /@ {"AtomsCountTotal", "AllEventsDistinctElementsCount"},
 
       VerificationTest[
         WolframModel[
@@ -608,9 +855,9 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["ExpressionsCountFinal"],
+          4][#],
         1
-      ],
+      ] & /@ {"ExpressionsCountFinal", "FinalEdgeCount"},
 
       VerificationTest[
         WolframModel[
@@ -626,9 +873,9 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["ExpressionsCountTotal"],
+          4][#],
         16 + 8 + 4 + 2 + 1
-      ],
+      ] & /@ {"ExpressionsCountTotal", "AllEventsEdgesCount"},
 
       VerificationTest[
         WolframModel[
@@ -644,9 +891,9 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["CreatorEvents"],
+          4][#],
         Join[Table[0, 16], Range[15]]
-      ],
+      ] & /@ {"CreatorEvents", "EdgeCreatorEventIndices"},
 
       (* DestroyerEvents *)
 
@@ -654,9 +901,9 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["DestroyerEvents"],
+          4][#],
         Append[Riffle @@ ConstantArray[Range[15], 2], Infinity]
-      ],
+      ] & /@ {"DestroyerEvents", "EdgeDestroyerEventIndices"},
 
       (* ExpressionGenerations *)
 
@@ -664,9 +911,9 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["ExpressionGenerations"],
+          4][#],
         Catenate[Table[Table[k, 2^(4 - k)], {k, 0, 4}]]
-      ],
+      ] & /@ {"ExpressionGenerations", "EdgeGenerationsList"},
 
       (* AllExpressions *)
 
@@ -674,9 +921,9 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["AllExpressions"],
+          4][#],
         Catenate[Table[Partition[Range[1, 17, 2^k], 2, 1], {k, 0, 4}]]
-      ],
+      ] & /@ {"AllExpressions", "AllEventsEdgesList"},
 
       (* EventGenerations *)
 
@@ -684,9 +931,9 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]["EventGenerations"],
+          4][#],
         {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4}
-      ],
+      ] & /@ {"EventGenerations", "EventGenerationsList", "AllEventsGenerationsList"},
 
       VerificationTest[
         WolframModel[
@@ -893,9 +1140,9 @@
 
       Table[With[{method = method}, {
         VerificationTest[
-          WolframModel[{{{1}} -> {{1}}}, {{1}}, 4, Method -> method]["AllEventsList"],
+          WolframModel[{{{1}} -> {{1}}}, {{1}}, 4, Method -> method][#],
           {{1, {1} -> {2}}, {1, {2} -> {3}}, {1, {3} -> {4}}, {1, {4} -> {5}}}
-        ],
+        ] & /@ {"AllEventsList", "EventsList"},
 
         VerificationTest[
           WolframModel[{{{1}} -> {{1, 2}}, {{1, 2}} -> {{1}}}, {{1}}, 4, Method -> method]["AllEventsList"],
@@ -959,6 +1206,21 @@
       VerificationTest[
         WolframModel[{{{1, 2}} -> {{}}, {{}} -> {{1, 2}}}, {{}}, 4]["AllEventsList"],
         {{2, {1} -> {2}}, {1, {2} -> {3}}, {2, {3} -> {4}}, {1, {4} -> {5}}}
+      ],
+
+      (* EventsStatesList *)
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 2]["EventsStatesList"],
+        {
+          {{1, 1}},
+          {1, {1} -> {2, 3}},
+          {{1, 2}, {2, 1}},
+          {1, {2} -> {4, 5}},
+          {{2, 1}, {1, 3}, {3, 2}},
+          {1, {3} -> {6, 7}},
+          {{1, 3}, {3, 2}, {2, 4}, {4, 1}}
+        }
       ]
     }]
   |>
