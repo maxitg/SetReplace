@@ -157,7 +157,7 @@ $oldToNewPropertyNames = <|
 	"AtomsCountTotal" -> "AllEventsDistinctElementsCount",
 	"ExpressionsCountFinal" -> "FinalEdgeCount",
 	"ExpressionsCountTotal" -> "AllEventsEdgesCount",
-  "SetAfterEvent" -> "StateAfterEvent"
+	"SetAfterEvent" -> "StateAfterEvent"
 |>;
 
 
