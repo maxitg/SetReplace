@@ -478,12 +478,20 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 (*FinalStatePlot*)
 
 
+General::nonHypergraphPlot = "`1` is only supported for states that are hypergraphs.";
+
+
 propertyEvaluate[True, includeBoundaryEventsPattern][
 		obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
 		caller_,
-		"FinalStatePlot",
+		property : "FinalStatePlot",
 		o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]] == {})] :=
-	WolframModelPlot[obj["FinalState"], o]
+	Quiet[
+		Check[
+			WolframModelPlot[obj["FinalState"], o],
+			Message[caller::nonHypergraphPlot, property],
+			WolframModelPlot::invalidEdges],
+		WolframModelPlot::invalidEdges]
 
 
 (* ::Subsection:: *)
@@ -562,9 +570,18 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 propertyEvaluate[True, includeBoundaryEventsPattern][
 		obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
 		caller_,
-		"StatesPlotsList",
+		property : "StatesPlotsList",
 		o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]] == {})] :=
-	WolframModelPlot[#, o] & /@ obj["StatesList"]
+	Catch @ Quiet[
+		Map[
+			Check[
+				Check[
+					WolframModelPlot[#, o],
+					Message[caller::nonHypergraphPlot, property],
+					WolframModelPlot::invalidEdges],
+				Throw[$Failed]] &,
+			obj["StatesList"]],
+		WolframModelPlot::invalidEdges]
 
 
 (* ::Subsection:: *)
