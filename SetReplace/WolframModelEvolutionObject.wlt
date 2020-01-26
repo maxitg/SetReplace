@@ -300,14 +300,12 @@
       ],
 
       VerificationTest[
-        SeedRandom[123]; 
         WolframModel[
           {{1, 2}} -> {{1, 3}, {3, 2}},
           {{1, 1}},
-          <|"MaxEvents" -> 30|>,
-          "EventOrderingFunction" -> "Random"][
+          <|"MaxEvents" -> 30|>][
           "PartialGenerationsCount"],
-        8
+        1
       ],
 
       (* CompleteGenerationsCount *)
@@ -321,14 +319,12 @@
       ] & /@ {"CompleteGenerationsCount", "MaxCompleteGeneration"},
 
       VerificationTest[
-        SeedRandom[123]; 
         WolframModel[
           {{1, 2}} -> {{1, 3}, {3, 2}},
           {{1, 1}},
-          <|"MaxEvents" -> 30|>,
-          "EventOrderingFunction" -> "Random"][
+          <|"MaxEvents" -> 30|>][
           "CompleteGenerationsCount"],
-        2
+        4
       ],
 
       (* GenerationsCount *)
@@ -358,14 +354,12 @@
       ],
 
       VerificationTest[
-        SeedRandom[123]; 
         WolframModel[
           {{1, 2}} -> {{1, 3}, {3, 2}},
           {{1, 1}},
-          <|"MaxEvents" -> 30|>,
-          "EventOrderingFunction" -> "Random"][
+          <|"MaxEvents" -> 30|>][
           "GenerationsCount"],
-        {2, 8}
+        {4, 1}
       ],
 
       (* GenerationComplete *)
@@ -628,6 +622,16 @@
         {ImageSize -> 123.}
       ],
 
+      testUnevaluated[
+        WolframModel[1 -> 2, {1}, 2, "FinalStatePlot"],
+        {WolframModel::nonHypergraphPlot}
+      ],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
+        evo["FinalStatePlot", VertexSize -> x],
+        {WolframModelPlot::invalidSize}
+      ]],
+
       (* UpdatedStatesList *)
 
       VerificationTest[
@@ -780,6 +784,16 @@
           WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["StatesPlotsList", ImageSize -> 123.],
         ConstantArray[{ImageSize -> 123.}, 4]
       ],
+
+      testUnevaluated[
+        WolframModel[1 -> 2, {1}, 2, "StatesPlotsList"],
+        {WolframModel::nonHypergraphPlot}
+      ],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
+        evo["StatesPlotsList", VertexSize -> x],
+        {WolframModelPlot::invalidSize}
+      ]],
 
       (* AtomsCountFinal *)
 
