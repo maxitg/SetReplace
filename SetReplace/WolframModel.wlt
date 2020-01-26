@@ -825,13 +825,13 @@
       ],
 
       VerificationTest[
-        WolframModel[1 -> 2, {1}, 2, #] & /@ $WolframModelProperties // Length,
+        WolframModel[{{1}} -> {{2}}, {{1}}, 2, #] & /@ $WolframModelProperties // Length,
         Length[$WolframModelProperties]
       ],
 
       VerificationTest[
-        WolframModel[1 -> 2, {1}, 2, $WolframModelProperties] // Length,
-        WolframModel[1 -> 2, {1}, 2, #] & /@ $WolframModelProperties // Length
+        WolframModel[{{1}} -> {{2}}, {{1}}, 2, $WolframModelProperties] // Length,
+        WolframModel[{{1}} -> {{2}}, {{1}}, 2, #] & /@ $WolframModelProperties // Length
       ],
 
       testUnevaluated[
