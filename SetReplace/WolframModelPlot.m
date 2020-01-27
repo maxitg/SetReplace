@@ -202,6 +202,8 @@ correctStyleLengthQ[__] := True
 
 (* Implementation *)
 
+$imageSizeDefault = {{360}, {420}};
+
 wolframModelPlot[
 		edges_,
 		edgeType_,
@@ -213,11 +215,11 @@ wolframModelPlot[
 		vertexLabels_,
 		vertexSize_,
 		arrowheadLength_,
-		graphicsOptions_] := Catch[Show[
-	drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, arrowheadLength] @
+		graphicsOptions_] := Catch[With[{
+	graphics = drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, arrowheadLength] @
 		hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @
-		edges,
-	graphicsOptions
+		edges},
+	Show[graphics, graphicsOptions, ImageSizeRaw -> $imageSizeDefault (Min[1, #[[2]] - #[[1]]] & /@ PlotRange[graphics])]
 ]]
 
 (** Embedding **)
