@@ -810,8 +810,8 @@
       (** Properties **)
 
       VerificationTest[
-        WolframModel[1 -> 2, {1}, 2, "CausalGraph"],
-        Graph[{1, 2}, {1 -> 2}]
+        EdgeList[WolframModel[1 -> 2, {1}, 2, "CausalGraph"]],
+        {DirectedEdge[1, 2]}
       ],
 
       testUnevaluated[
@@ -855,8 +855,8 @@
       ],
 
       VerificationTest[
-        WolframModel[1 -> 2, {1}, 2, {"CausalGraph", "CausalGraph"}],
-        ConstantArray[Graph[{1, 2}, {1 -> 2}], 2]
+        EdgeList /@ WolframModel[1 -> 2, {1}, 2, {"CausalGraph", "CausalGraph"}],
+        ConstantArray[{DirectedEdge[1, 2]}, 2]
       ],
 
       testUnevaluated[
@@ -897,8 +897,8 @@
       ],
 
       VerificationTest[
-        WolframModel[1 -> 2, {1}, "CausalGraph"],
-        Graph[{1}, {}]
+        Through[{VertexList, EdgeList}[WolframModel[1 -> 2, {1}, "CausalGraph"]]],
+        {{1}, {}}
       ],
 
       testUnevaluated[

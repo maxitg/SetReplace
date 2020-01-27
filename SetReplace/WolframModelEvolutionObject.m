@@ -699,6 +699,10 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 (*This produces a causal network for the system. This is a Graph with all events as vertices, and directed edges connecting them if the same event is a creator and a destroyer for the same expression (i.e., if two events are causally related).*)
 
 
+$causalGraphVertexStyle = Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]];
+$causalGraphEdgeStyle = Hue[0, 1, 0.56];
+
+
 (* ::Subsubsection:: *)
 (*CausalGraph Implementation*)
 
@@ -717,7 +721,9 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 	Graph[
 		DeleteCases[Union[data[$creatorEvents], data[$destroyerEvents]], $eventsToDelete],
 		Select[FreeQ[#, $eventsToDelete] &] @ Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
-		o]
+		o,
+		VertexStyle -> $causalGraphVertexStyle,
+		EdgeStyle -> $causalGraphEdgeStyle]
 ]
 
 
@@ -739,7 +745,9 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 			"LayeredDigraphEmbedding",
 			"VertexLayerPosition" ->
 				(propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "TotalGenerationsCount"] -
-						propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "AllEventsGenerationsList"])}
+						propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "AllEventsGenerationsList"])},
+		VertexStyle -> $causalGraphVertexStyle,
+		EdgeStyle -> $causalGraphEdgeStyle
 	]
 
 
