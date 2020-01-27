@@ -661,6 +661,35 @@
         {{{1, 2}, {2, 3}}, {{2, 3}}, {}}
       ] & /@ {"UpdatedStatesList", "AllEventsStatesList"},
 
+      (* AllEventsStatesEdgeIndicesList *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["AllEventsStatesEdgeIndicesList"],
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["StateEdgeIndicesAfterEvent", #] & /@ Range[0, 15]
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          0]["AllEventsStatesEdgeIndicesList"],
+        {Range[Length[pathGraph17]]}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {},
+          {{1, 2}, {2, 3}},
+          2]["AllEventsStatesEdgeIndicesList"],
+        {{1, 2}, {2}, {}}
+      ],
+
       (* Generation *)
 
       VerificationTest[
@@ -1226,14 +1255,40 @@
 
       VerificationTest[
         WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 2]["EventsStatesList"],
+        {{{1, {1} -> {2, 3}}, {2, 3}}, {{1, {2} -> {4, 5}}, {3, 4, 5}}, {{1, {3} -> {6, 7}}, {4, 5, 6, 7}}}
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 2][
+          "EventsStatesList", "IncludeBoundaryEvents" -> "Initial"],
         {
-          {{1, 1}},
-          {1, {1} -> {2, 3}},
-          {{1, 2}, {2, 1}},
-          {1, {2} -> {4, 5}},
-          {{2, 1}, {1, 3}, {3, 2}},
-          {1, {3} -> {6, 7}},
-          {{1, 3}, {3, 2}, {2, 4}, {4, 1}}
+          {{0, {} -> {1}}, {1}},
+          {{1, {1} -> {2, 3}}, {2, 3}},
+          {{1, {2} -> {4, 5}}, {3, 4, 5}},
+          {{1, {3} -> {6, 7}}, {4, 5, 6, 7}}
+        }
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 2][
+          "EventsStatesList", "IncludeBoundaryEvents" -> "Final"],
+        {
+          {{1, {1} -> {2, 3}}, {2, 3}},
+          {{1, {2} -> {4, 5}}, {3, 4, 5}},
+          {{1, {3} -> {6, 7}}, {4, 5, 6, 7}},
+          {{DirectedInfinity[1], {4, 5, 6, 7} -> {}}, {}}
+        }
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 2][
+          "EventsStatesList", "IncludeBoundaryEvents" -> All],
+        {
+          {{0, {} -> {1}}, {1}},
+          {{1, {1} -> {2, 3}}, {2, 3}},
+          {{1, {2} -> {4, 5}}, {3, 4, 5}},
+          {{1, {3} -> {6, 7}}, {4, 5, 6, 7}},
+          {{DirectedInfinity[1], {4, 5, 6, 7} -> {}}, {}}
         }
       ]
     }]
