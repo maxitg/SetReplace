@@ -178,7 +178,8 @@
 
       VerificationTest[
         SeedRandom[1655];
-          WolframModel[#1, #2, #6, {"GenerationsCount", "MaxCompleteGeneration"}, "EventOrderingFunction" -> "Random"],
+          WolframModel[
+            #1, #2, #6, {"TotalGenerationsCount", "MaxCompleteGeneration"}, "EventOrderingFunction" -> "Random"],
         {#6, #6}
       ] & @@@ $systemsToTest,
 

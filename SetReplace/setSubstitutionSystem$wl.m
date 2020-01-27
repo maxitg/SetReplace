@@ -388,11 +388,11 @@ setSubstitutionSystem$wl[
 					possibleInfinityResult = intermediateEvolution[[1, Key[$maxCompleteGeneration]]]},
 				If[MissingQ[possibleInfinityResult],
 					possibleInfinityResult,
-					Min[possibleInfinityResult, intermediateEvolution["GenerationsCount"]]]],
+					Min[possibleInfinityResult, intermediateEvolution["TotalGenerationsCount"]]]],
 			$terminationReason -> Replace[
 				intermediateEvolution[[1, Key[$terminationReason]]],
 				$fixedPoint ->
-					If[intermediateEvolution["GenerationsCount"] == Lookup[stepSpec, $maxGenerationsLocal, Infinity],
+					If[intermediateEvolution["TotalGenerationsCount"] == Lookup[stepSpec, $maxGenerationsLocal, Infinity],
 						$maxGenerationsLocal,
 						$fixedPoint]]|>]]
 ]
