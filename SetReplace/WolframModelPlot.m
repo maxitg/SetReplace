@@ -15,21 +15,24 @@ WolframModelPlot::usage = usageString[
 SyntaxInformation[WolframModelPlot] = {"ArgumentsPattern" -> {_, _., OptionsPattern[]}};
 
 $plotStyleAutomatic = <|
-	_ -> Hue[0.6, 0.2, 0.8], (* vertex style *)
-	_List -> Hue[0.6, 0.7, 0.5]|>; (* edge style *)
+	$vertexPoint -> Directive[Hue[0.63, 0.26, 0.89], EdgeForm[Directive[Hue[0.63, 0.7, 0.33], Opacity[0.95]]]],
+	$edgeLine -> Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]],
+	$edgePoint -> Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]],
+	$edgePolygon -> Directive[Hue[0.63, 0.66, 0.81], Opacity[0.1], EdgeForm[None]]
+|>;
 
 (* Automatic style pickes up, and possibly modifies the style it inherits from. *)
 Options[WolframModelPlot] = Join[{
 	"EdgePolygonStyle" -> Automatic, (* inherits from EdgeStyle, with specified small opacity *)
 	EdgeStyle -> Automatic, (* inherits from PlotStyle *)
 	GraphHighlight -> {},
-	GraphHighlightStyle -> Hue[1.0, 1.0, 0.7],
+	GraphHighlightStyle -> Red,
 	"HyperedgeRendering" -> "Polygons",
 	PlotStyle -> $plotStyleAutomatic,
 	VertexCoordinateRules -> {},
 	VertexLabels -> None,
 	VertexSize -> 0.06,
-	"ArrowheadLength" -> 0.15,
+	"ArrowheadLength" -> 0.1,
 	VertexStyle -> Automatic}, (* inherits from PlotStyle *)
 	Options[Graphics]];
 
@@ -104,18 +107,28 @@ wolframModelPlot$parse[
 	vertices = vertexList[edges];
 	(* these are lists, one style for each vertex element *)
 	styles = <|
-		$vertexPoint -> parseStyles[
-			optionValue[VertexStyle],
-			vertices,
-			parseStyles[optionValue[PlotStyle], vertices, $plotStyleAutomatic, Identity],
-			Directive[#, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]] &],
-		$edgeLine -> (edgeStyles = parseStyles[
-			optionValue[EdgeStyle],
-			edges,
-			parseStyles[optionValue[PlotStyle], edges, $plotStyleAutomatic, Identity],
-			Directive[#, Opacity[0.7]] &]),
-		$edgePoint -> edgeStyles,
-		$edgePolygon -> parseStyles[optionValue["EdgePolygonStyle"], edges, edgeStyles, Directive[#, Opacity[0.09]] &]|>;
+		$vertexPoint -> Replace[
+			parseStyles[
+				optionValue[VertexStyle],
+				vertices,
+				parseStyles[optionValue[PlotStyle], vertices, <||>, Identity],
+				Directive[#, EdgeForm[Directive[GrayLevel[0], Opacity[0.95]]]] &],
+			Automatic -> $plotStyleAutomatic[$vertexPoint],
+			{1}],
+		$edgeLine -> (Replace[
+			edgeStyles = parseStyles[
+				optionValue[EdgeStyle],
+				edges,
+				parseStyles[optionValue[PlotStyle], edges, <||>, Identity],
+				Directive[#, Opacity[0.7]] &],
+			Automatic -> $plotStyleAutomatic[$edgeLine],
+			{1}]),
+		$edgePoint -> Replace[edgeStyles, Automatic -> $plotStyleAutomatic[$edgePoint], {1}],
+		$edgePolygon -> Replace[
+			parseStyles[
+				optionValue["EdgePolygonStyle"], edges, edgeStyles, Directive[#, Opacity[0.1], EdgeForm[None]] &],
+			Automatic -> $plotStyleAutomatic[$edgePolygon],
+			{1}]|>;
 	wolframModelPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
 			(optionValue /@ {
 				GraphHighlight,

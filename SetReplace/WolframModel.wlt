@@ -22,7 +22,7 @@
 
       testSymbolLeak[
         WolframModel[
-          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 5, "FinalState", Method -> #1, "NodeNamingFunction" -> #2]
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 5, "FinalState", Method -> #1, "VertexNamingFunction" -> #2]
       ] & @@@ Tuples[{$SetReplaceMethods, {Automatic, All}}],
 
       (* Argument checks *)
@@ -810,8 +810,8 @@
       (** Properties **)
 
       VerificationTest[
-        WolframModel[1 -> 2, {1}, 2, "CausalGraph"],
-        Graph[{1, 2}, {1 -> 2}]
+        EdgeList[WolframModel[1 -> 2, {1}, 2, "CausalGraph"]],
+        {DirectedEdge[1, 2]}
       ],
 
       testUnevaluated[
@@ -855,8 +855,8 @@
       ],
 
       VerificationTest[
-        WolframModel[1 -> 2, {1}, 2, {"CausalGraph", "CausalGraph"}],
-        ConstantArray[Graph[{1, 2}, {1 -> 2}], 2]
+        EdgeList /@ WolframModel[1 -> 2, {1}, 2, {"CausalGraph", "CausalGraph"}],
+        ConstantArray[{DirectedEdge[1, 2]}, 2]
       ],
 
       testUnevaluated[
@@ -897,8 +897,8 @@
       ],
 
       VerificationTest[
-        WolframModel[1 -> 2, {1}, "CausalGraph"],
-        Graph[{1}, {}]
+        Through[{VertexList, EdgeList}[WolframModel[1 -> 2, {1}, "CausalGraph"]]],
+        {{1}, {}}
       ],
 
       testUnevaluated[
@@ -1158,7 +1158,7 @@
         {ConstantArray[{0, 0, 0}, 4]}
       ] & /@ $SetReplaceMethods,
 
-      (** NodeNamingFunction **)
+      (** VertexNamingFunction **)
 
       VerificationTest[
         WolframModel[
@@ -1171,7 +1171,7 @@
           {{0, 0}},
           2,
           "FinalState",
-          "NodeNamingFunction" -> Automatic]
+          "VertexNamingFunction" -> Automatic]
       ],
 
       VerificationTest[
@@ -1180,7 +1180,7 @@
           {{0, 0}},
           2,
           "FinalState",
-          "NodeNamingFunction" -> Automatic],
+          "VertexNamingFunction" -> Automatic],
         {{0, 2}, {2, 1}, {1, 3}, {3, 0}}
       ],
 
@@ -1190,7 +1190,7 @@
           {{2, 2}},
           2,
           "FinalState",
-          "NodeNamingFunction" -> Automatic],
+          "VertexNamingFunction" -> Automatic],
         {{2, 3}, {3, 1}, {1, 4}, {4, 2}}
       ],
 
@@ -1200,7 +1200,7 @@
           {{0, 0}},
           2,
           "FinalState",
-          "NodeNamingFunction" -> All],
+          "VertexNamingFunction" -> All],
         {{1, 3}, {3, 2}, {2, 4}, {4, 1}}
       ],
 
@@ -1210,7 +1210,7 @@
           {{0, 0}},
           2,
           "FinalState",
-          "NodeNamingFunction" -> None],
+          "VertexNamingFunction" -> None],
         {{0, x_Symbol}, {x_Symbol, y_Symbol}, {y_Symbol, z_Symbol}, {z_Symbol, 0}},
         SameTest -> MatchQ
       ],
@@ -1221,7 +1221,7 @@
           {{0, 0}},
           2,
           "FinalState",
-          "NodeNamingFunction" -> All],
+          "VertexNamingFunction" -> All],
         {{1, 3}, {3, 2}, {2, 4}, {4, 1}}
       ],
 
@@ -1231,7 +1231,7 @@
           {{0, 0}},
           2,
           "FinalState",
-          "NodeNamingFunction" -> #],
+          "VertexNamingFunction" -> #],
         {{0, x_Symbol}, {x_Symbol, y_Symbol}, {y_Symbol, z_Symbol}, {z_Symbol, 0}},
         SameTest -> MatchQ
       ] & /@ {Automatic, None},
@@ -1249,19 +1249,19 @@
       With[{namingTestModel = $namingTestModel}, {
         VerificationTest[
           # == Range[Length[#]] & @ Union @ Flatten[
-            WolframModel[##, "NodeNamingFunction" -> All] & @@
+            WolframModel[##, "VertexNamingFunction" -> All] & @@
               namingTestModel]
         ],
 
         VerificationTest[
           # == Range[0, Length[#] - 1] & @ Union @ Flatten[
-            WolframModel[##, "NodeNamingFunction" -> Automatic] & @@
+            WolframModel[##, "VertexNamingFunction" -> Automatic] & @@
               namingTestModel]
         ],
 
         VerificationTest[
           (#[[1]] /. Thread[Rule @@ Flatten /@ #]) == #[[2]] & @ (Table[
-            WolframModel[##, "NodeNamingFunction" -> namingFunction] & @@ namingTestModel,
+            WolframModel[##, "VertexNamingFunction" -> namingFunction] & @@ namingTestModel,
             {namingFunction, {All, None}}])
         ]
       }],
@@ -1273,7 +1273,7 @@
           {{s[1], s[2]}},
           1,
           "FinalState",
-          "NodeNamingFunction" -> All],
+          "VertexNamingFunction" -> All],
         {{1, 3}, {3, 2}}
       ],
 

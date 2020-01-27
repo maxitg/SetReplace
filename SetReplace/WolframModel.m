@@ -51,7 +51,7 @@ SyntaxInformation[WolframModel] =
 
 
 Options[WolframModel] := Join[{
-	"NodeNamingFunction" -> Automatic,
+	"VertexNamingFunction" -> Automatic,
 	"EventOrderingFunction" -> "Sequential", (* Possible values are "Sequential" and "Random" *)
 	"IncludePartialGenerations" -> True,
 	"IncludeBoundaryEvents" -> None},
@@ -101,7 +101,7 @@ fromStepsSpec[spec_Association] := With[{
 (*renameNodes*)
 
 
-$nodeNamingFunctions = {Automatic, None, All};
+$vertexNamingFunctions = {Automatic, None, All};
 
 
 renameNodes[evolution_, _, None] := evolution
@@ -110,9 +110,7 @@ renameNodes[evolution_, _, None] := evolution
 renameNodesExceptExisting[
 		evolution_, patternRulesQ_, existing_List] := Module[{
 			evolutionAtoms, existingAtoms, atomsToName, newNames},
-	{evolutionAtoms, existingAtoms} = DeleteDuplicates @ If[patternRulesQ,
-			Cases[#, _ ? AtomQ, All],
-			Catenate[If[AtomQ[#], {#}, #] & /@ #]] & /@
+	{evolutionAtoms, existingAtoms} = (DeleteDuplicates @ Catenate[If[AtomQ[#], {#}, #] & /@ #]) & /@
 		{evolution[[1]][$atomLists], existing};
 	atomsToName = DeleteCases[evolutionAtoms, Alternatives @@ existingAtoms];
 	newNames = Take[
@@ -137,12 +135,12 @@ renameNodes[evolution_, False, Automatic] :=
 	renameNodesExceptExisting[evolution, False, evolution[0]]
 
 
-WolframModel::unknownNodeNamingFunction =
-	"NodeNamingFunction `1` should be one of `2`.";
+WolframModel::unknownVertexNamingFunction =
+	"VertexNamingFunction `1` should be one of `2`.";
 
 
 renameNodes[evolution_, _, func_] := (
-	Message[WolframModel::unknownNodeNamingFunction, func, $nodeNamingFunctions];
+	Message[WolframModel::unknownVertexNamingFunction, func, $vertexNamingFunctions];
 	$Failed
 )
 
@@ -178,7 +176,7 @@ WolframModel[
 				renameNodes[
 					evolution,
 					AssociationQ[rulesSpec],
-					OptionValue["NodeNamingFunction"]],
+					OptionValue["VertexNamingFunction"]],
 				$Failed],
 			$Failed];
 		propertyEvaluateWithOptions = propertyEvaluate[
