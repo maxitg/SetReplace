@@ -31,6 +31,8 @@ $arrowheadsLength = 0.3;
 $graphPadding = Scaled[0.1];
 $ruleSidesSpacing = 0.2;
 
+$eventColor = Hue[0.11, 1, 0.97];
+
 (* Messages *)
 
 RulePlot::patternRules =
@@ -211,13 +213,13 @@ combinedRuleParts[sides_, plotRange_, spacings_] := Module[{maxRange, xRange, yR
   maxRange = Max[plotRange[[1, 2]] - plotRange[[1, 1]], plotRange[[2, 2]] - plotRange[[2, 1]], 1];
   {xRange, yRange} = Mean[#] + maxRange * {-0.5, 0.5} & /@ plotRange;
   xDisplacement = 1.5 (xRange[[2]] - xRange[[1]]);
-  frame = {Gray, Dotted, Line[{
+  frame = {$eventColor, Dotted, Line[{
     {xRange[[1]], yRange[[1]]},
     {xRange[[2]], yRange[[1]]},
     {xRange[[2]], yRange[[2]]},
     {xRange[[1]], yRange[[2]]},
     {xRange[[1]], yRange[[1]]}}]};
-  separator = arrow[$ruleArrowShape, 0.15, 0][{{0.15, 0.5}, {0.85, 0.5}}];
+  separator = {$eventColor, arrow[$ruleArrowShape, 0.15, 0][{{0.15, 0.5}, {0.85, 0.5}}]};
   graphicsRiffle[
     Append[#, frame] & /@ sides,
     ConstantArray[{xRange, yRange}, 2],
