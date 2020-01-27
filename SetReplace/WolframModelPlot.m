@@ -342,22 +342,21 @@ rescaleEmbedding[embedding_, center_, factor_] := Map[
 (*** SpringElectricalPolygons ***)
 
 hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinates_][edges_] := Module[{
-		embeddingWithNoRegions, vertexEmbedding, edgePoints, edgePolygons, edgeEmbedding},
+		embeddingWithNoRegions, vertexEmbedding, edgeEmbedding},
 	embeddingWithNoRegions =
 		hypergraphEmbedding["Cyclic", edgeType, "Subgraphs", vertexCoordinates][edges];
 	vertexEmbedding = embeddingWithNoRegions[[1]];
-	edgePoints =
-		Flatten[#, 2] & /@ (embeddingWithNoRegions[[2, All, 2]] /. {Line[pts_] :> {pts}, Point[pts_] :> {{pts}}});
-	edgePolygons = Map[
-		Polygon,
-		Map[
-			With[{region = ConvexHullMesh[Map[# + RandomReal[1.*^-10] &, #, {2}]]},
-				Table[MeshCoordinates[region][[polygon]], {polygon, MeshCells[region, 2][[All, 1]]}]
-			] &,
-			edgePoints],
-		{2}];
-	edgeEmbedding = MapThread[#1[[1]] -> Join[#1[[2]], #2] &, {embeddingWithNoRegions[[2]], edgePolygons}];
+	edgeEmbedding = addConvexPolygons[edgeType] @@@ embeddingWithNoRegions[[2]];
 	{vertexEmbedding, edgeEmbedding}
+]
+
+addConvexPolygons["Ordered"][edge : {_, _.}, subgraphsShapes_] := edge -> subgraphsShapes
+
+addConvexPolygons[edgeType_][edge_, subgraphsShapes_] := Module[{points, region, convexPolygons, polygon},
+	points = Flatten[#, 2] & @ (subgraphsShapes /. {Line[pts_] :> {pts}, Point[pts_] :> {{pts}}});
+	region = ConvexHullMesh[Map[# + RandomReal[1.*^-10] &, points, {2}]];
+	convexPolygons = Polygon /@ Table[MeshCoordinates[region][[polygon]], {polygon, MeshCells[region, 2][[All, 1]]}];
+	edge -> Join[subgraphsShapes, convexPolygons]
 ]
 
 (** Drawing **)
