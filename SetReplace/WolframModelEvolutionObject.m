@@ -567,6 +567,10 @@ $causalGraphOptions = Options[Graph];
 $layeredCausalGraphOptions = Options[$causalGraphOptions];
 
 
+$causalGraphVertexStyle = Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]];
+$causalGraphEdgeStyle = Hue[0, 1, 0.56];
+
+
 (* ::Subsubsection:: *)
 (*Argument checks*)
 
@@ -618,7 +622,9 @@ propertyEvaluate[True, includeBoundaryEvents : includeBounaryEventsPattern][
 	Graph[
 		DeleteCases[Union[data[$creatorEvents], data[$destroyerEvents]], $eventsToDelete],
 		Select[FreeQ[#, $eventsToDelete] &] @ Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
-		o]
+		o,
+		VertexStyle -> $causalGraphVertexStyle,
+		EdgeStyle -> $causalGraphEdgeStyle]
 ]
 
 
@@ -640,7 +646,9 @@ propertyEvaluate[True, includeBoundaryEvents : includeBounaryEventsPattern][
 			"LayeredDigraphEmbedding",
 			"VertexLayerPosition" ->
 				(propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "GenerationsCount"] -
-						propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "EventGenerations"])}
+						propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "EventGenerations"])},
+		VertexStyle -> $causalGraphVertexStyle,
+		EdgeStyle -> $causalGraphEdgeStyle
 	]
 
 
