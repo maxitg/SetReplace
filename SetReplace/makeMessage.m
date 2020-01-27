@@ -79,25 +79,17 @@ messageTemplate["pargx"] =
 	"`5``6``7``8` argument`9` `10` expected.";
 
 
-messageTemplate["eventTooLarge"] =
-	"Event `2` requested out of `3` total.";
+messageTemplate["stepTooLarge"] =
+	"`2` `3` requested out of `4` total.";
 
 
-messageTemplate["eventNotInteger"] =
-	"Event `2` must be an integer.";
-
-
-messageTemplate["generationTooLarge"] =
-	"Generation `2` requested out of `3` total.";
-
-
-messageTemplate["generationNotInteger"] =
-	"Generation `2` must be an integer.";
+messageTemplate["stepNotInteger"] =
+	"`2` `3` must be an integer.";
 
 
 messageTemplate["nonopt"] =
-	"Options expected (instead of `2`) " <>
-	"beyond position 1 for \"CausalGraph\" property. " <>
+	"Options expected (instead of `3`) " <>
+	"beyond position 1 for `2` property. " <>
 	"An option must be a rule or a list of rules.";
 
 
