@@ -55,7 +55,7 @@
               init,
               <|"MaxEvents" -> 1000|>,
               "FinalState",
-              "NodeNamingFunction" -> All]],
+              "VertexNamingFunction" -> All]],
             List,
             TimeConstraint -> 10,
             MemoryConstraint -> 10*^6
