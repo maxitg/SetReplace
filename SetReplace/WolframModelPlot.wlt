@@ -625,7 +625,14 @@
         {{1, 2, 3}, {1, 1}},
         {{1, 2, 3}, {3, 4, 5}, {5, 5}},
         {{1, 2, 3}, {3, 4, 5}, {5, 6, 1, 1}},
-        {{1, 2, 3, 4, 5, 5, 1}}}
+        {{1, 2, 3, 4, 5, 5, 1}}},
+
+      (* Automatic image size *)
+      VerificationTest[
+        Table[OrderedQ[(ImageSizeRaw /. AbsoluteOptions[WolframModelPlot[#], ImageSizeRaw])[[k, 1]] & /@
+          {{{1}}, {{1, 1}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 7}, {7, 8, 1}}}], {k, 2}],
+        {True, True}
+      ]
     }
   |>
 |>
