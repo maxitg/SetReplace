@@ -113,8 +113,10 @@ $propertyArgumentCounts = Join[
 		"FinalStatePlot" -> {0, Infinity},
 		"StatesList" -> {0, 0},
 		"StatesPlotsList" -> {0, Infinity},
+		"AllEventsStatesEdgeIndicesList" -> {0, 0},
 		"AllEventsStatesList" -> {0, 0},
 		"Generation" -> {1, 1},
+		"StateEdgeIndicesAfterEvent" -> {1, 1},
 		"StateAfterEvent" -> {1, 1},
 		"Rules" -> {0, 0},
 		"TotalGenerationsCount" -> {0, 0},
@@ -426,8 +428,8 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 	Lookup[data, $accessorProperties[property], Missing["NotAvailable"]];
 
 
-(* ::Subsection:: *)
-(*StateAfterEvent*)
+(* ::Subsecion:: *)
+(*StateEdgeIndicesAfterEvent*)
 
 
 (* ::Subsubsection:: *)
@@ -455,13 +457,24 @@ toPositiveStep[total_, requested : Except[_Integer], caller_, name_] :=
 propertyEvaluate[True, includeBoundaryEventsPattern][
 			obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			caller_,
-			"StateAfterEvent",
+			"StateEdgeIndicesAfterEvent",
 			s_] := With[{
 		positiveEvent = toPositiveStep[propertyEvaluate[True, None][obj, caller, "AllEventsCount"], s, caller, "Event"]},
-	data[$atomLists][[Intersection[
+	Intersection[
 		Position[data[$creatorEvents], _ ? (# <= positiveEvent &)][[All, 1]],
-		Position[data[$destroyerEvents], _ ? (# > positiveEvent &)][[All, 1]]]]]
+		Position[data[$destroyerEvents], _ ? (# > positiveEvent &)][[All, 1]]]
 ]
+
+
+(* ::Subsection:: *)
+(*StateAfterEvent*)
+
+
+propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
+			obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
+			caller_,
+			"StateAfterEvent",
+			s_] := data[$atomLists][[propertyEvaluate[True, boundary][obj, caller, "StateEdgeIndicesAfterEvent", s]]]
 
 
 (* ::Subsection:: *)
@@ -495,14 +508,18 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 
 
 (* ::Subsection:: *)
-(*AllEventsStatesList*)
+(*AllEventsStatesEdgeIndicesList & AllEventsStatesList*)
 
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
 		WolframModelEvolutionObject[data_ ? evolutionDataQ],
 		caller_,
-		"AllEventsStatesList"] :=
-	WolframModelEvolutionObject[data]["StateAfterEvent", #] & /@
+		property : "AllEventsStatesList" | "AllEventsStatesEdgeIndicesList"] :=
+	WolframModelEvolutionObject[data][
+			Replace[
+				property,
+				{"AllEventsStatesList" -> "StateAfterEvent", "AllEventsStatesEdgeIndicesList" -> "StateEdgeIndicesAfterEvent"}],
+			#] & /@
 		Range[0, WolframModelEvolutionObject[data]["AllEventsCount"]]
 
 
@@ -787,10 +804,11 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
 			obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
 			caller_,
 			"EventsStatesList"] := With[{
-		events = propertyEvaluate[True, boundary][obj, caller, "AllEventsList"]},
-	If[MatchQ[boundary, All | "Initial"],
-		Riffle[events, obj["AllEventsStatesList"]],
-		Riffle[obj["AllEventsStatesList"], events]]
+		events = propertyEvaluate[True, boundary][obj, caller, "AllEventsList"],
+		states = If[MatchQ[boundary, None | "Final"], Rest, # &] @
+			If[MatchQ[boundary, All | "Final"], Append[{}], # &] @
+			propertyEvaluate[True, boundary][obj, caller, "AllEventsStatesEdgeIndicesList"]},
+	Transpose[{events, states}]
 ]
 
 
