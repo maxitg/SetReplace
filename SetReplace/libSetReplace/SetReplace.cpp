@@ -62,6 +62,18 @@ namespace SetReplace {
         }
         return set;
     }
+
+    Matcher::OrderingSpec getOrderingSpec(WolframLibraryData libData, MTensor& orderingSpecTensor) {
+        mint tensorLength = libData->MTensor_getFlattenedLength(orderingSpecTensor);
+        mint* tensorData = libData->MTensor_getIntegerData(orderingSpecTensor);
+        Matcher::OrderingSpec result;
+        for (int i = 0; i < tensorLength; i += 2) {
+            result.push_back({
+                (Matcher::OrderingFunction)getData(tensorData, tensorLength, i),
+                (Matcher::OrderingDirection)getData(tensorData, tensorLength, i + 1)});
+        }
+        return result;
+    }
     
     Set::StepSpecification getStepSpec(WolframLibraryData libData, MTensor& stepsTensor) {
         mint tensorLength = libData->MTensor_getFlattenedLength(stepsTensor);
@@ -140,18 +152,18 @@ namespace SetReplace {
         
         std::vector<Rule> rules;
         std::vector<AtomsVector> initialExpressions;
-        Matcher::EvaluationType evaluationType;
+        Matcher::OrderingSpec orderingSpec;
         unsigned int randomSeed;
         try {
             rules = getRules(libData, MArgument_getMTensor(argv[0]));
             initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
-            evaluationType = MArgument_getInteger(argv[2]) == 0 ? Matcher::EvaluationType::Sequential : Matcher::EvaluationType::Random;
+            orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[2]));
             randomSeed = (unsigned int)MArgument_getInteger(argv[3]);
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }
         
-        auto setPtr = new Set(rules, initialExpressions, evaluationType, randomSeed);
+        auto setPtr = new Set(rules, initialExpressions, orderingSpec, randomSeed);
         MArgument_setInteger(result, (int64_t)setPtr);
         return LIBRARY_NO_ERROR;
     }

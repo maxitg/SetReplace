@@ -43,9 +43,9 @@ namespace SetReplace {
     public:
         Implementation(const std::vector<Rule>& rules,
                        const std::vector<AtomsVector>& initialExpressions,
-                       const Matcher::EvaluationType evaluationType,
+                       const Matcher::OrderingSpec orderingSpec,
                        const unsigned int randomSeed) :
-            Implementation(rules, initialExpressions, evaluationType, randomSeed, [this](const int expressionID) {
+            Implementation(rules, initialExpressions, orderingSpec, randomSeed, [this](const int expressionID) {
                 return expressions_.at(expressionID).atoms;
             }) {}
         
@@ -62,7 +62,7 @@ namespace SetReplace {
                 if (isAborted) terminationReason_ = TerminationReason::Aborted;
                 return isAborted;
             });
-            if (matcher_.matchCount() == 0) {
+            if (matcher_.empty()) {
                 if (largestGeneration_ == stepSpec_.maxGenerationsLocal) {
                     terminationReason_ = TerminationReason::MaxGenerationsLocal;
                 } else {
@@ -70,11 +70,11 @@ namespace SetReplace {
                 }
                 return 0;
             }
-            Match match = matcher_.nextMatch();
+            const MatchPtr match = matcher_.nextMatch();
             
-            const auto& ruleInputs = rules_[match.rule].inputs;
+            const auto& ruleInputs = rules_[match->rule].inputs;
             std::vector<AtomsVector> inputExpressions;
-            for (const auto& expressionID : match.inputExpressions) {
+            for (const auto& expressionID : match->inputExpressions) {
                 inputExpressions.push_back(expressions_.at(expressionID).atoms);
             }
             
@@ -82,7 +82,7 @@ namespace SetReplace {
             Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, explicitRuleInputs);
             
             // Identify output atoms that appear in the input, that still leaves newly created atoms as patterns.
-            auto explicitRuleOutputs = rules_[match.rule].outputs;
+            auto explicitRuleOutputs = rules_[match->rule].outputs;
             Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, explicitRuleOutputs);
             
             for (const auto function : {&Implementation::willExceedAtomLimits,
@@ -99,19 +99,19 @@ namespace SetReplace {
             // Name newly created atoms as well, now all atoms in the output are explicitly named.
             const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
             
-            matcher_.removeMatchesInvolvingExpressions(match.inputExpressions);
-            atomsIndex_.removeExpressions(match.inputExpressions);
+            matcher_.removeMatchesInvolvingExpressions(match->inputExpressions);
+            atomsIndex_.removeExpressions(match->inputExpressions);
             
             int outputGeneration = 0;
-            for (const auto& inputExpression : match.inputExpressions) {
+            for (const auto& inputExpression : match->inputExpressions) {
                 outputGeneration = std::max(outputGeneration, expressions_[inputExpression].generation + 1);
             }
             largestGeneration_ = std::max(largestGeneration_, outputGeneration);
             
             const EventID eventID = static_cast<int>(eventRuleIDs_.size());
             addExpressions(namedRuleOutputs, eventID, outputGeneration);
-            assignDestroyerEvent(match.inputExpressions, eventID);
-            eventRuleIDs_.push_back(match.rule);
+            assignDestroyerEvent(match->inputExpressions, eventID);
+            eventRuleIDs_.push_back(match->rule);
             
             return 1;
         }
@@ -161,12 +161,12 @@ namespace SetReplace {
     private:
         Implementation(const std::vector<Rule>& rules,
                        const std::vector<AtomsVector>& initialExpressions,
-                       const Matcher::EvaluationType evaluationType,
+                       const Matcher::OrderingSpec orderingSpec,
                        const unsigned int randomSeed,
                        const std::function<AtomsVector(ExpressionID)>& getAtomsVector) :
         rules_(rules),
         atomsIndex_(getAtomsVector),
-        matcher_(rules_, atomsIndex_, getAtomsVector, evaluationType, randomSeed) {
+        matcher_(rules_, atomsIndex_, getAtomsVector, orderingSpec, randomSeed) {
             for (const auto& expression : initialExpressions) {
                 for (const auto& atom : expression) {
                     if (atom <= 0) throw Error::NonPositiveAtoms;
@@ -324,11 +324,11 @@ namespace SetReplace {
             updateAtomDegrees(atomDegrees, expressions, deltaCount);
         }
         
-        Generation smallestGeneration(const std::set<Match>& matches) const {
+        Generation smallestGeneration(const std::vector<MatchPtr>& matches) const {
             Generation smallestSoFar = std::numeric_limits<Generation>::max();
             for (const auto& match : matches) {
                 Generation largestForTheMatch = 0;
-                for (const ExpressionID id : match.inputExpressions) {
+                for (const ExpressionID id : match->inputExpressions) {
                     largestForTheMatch = std::max(largestForTheMatch, expressions_.at(id).generation);
                 }
                 smallestSoFar = std::min(smallestSoFar, largestForTheMatch);
@@ -339,9 +339,9 @@ namespace SetReplace {
     
     Set::Set(const std::vector<Rule>& rules,
              const std::vector<AtomsVector>& initialExpressions,
-             const Matcher::EvaluationType evaluationType,
+             const Matcher::OrderingSpec orderingSpec,
              const unsigned int randomSeed) {
-        implementation_ = std::make_shared<Implementation>(rules, initialExpressions, evaluationType, randomSeed);
+        implementation_ = std::make_shared<Implementation>(rules, initialExpressions, orderingSpec, randomSeed);
     }
     
     int Set::replaceOnce(const std::function<bool()> shouldAbort) {
