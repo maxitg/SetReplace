@@ -124,6 +124,11 @@ namespace SetReplace {
         std::map<MatchPtr, Bucket, MatchComparator> matchQueue_;
         std::unordered_map<ExpressionID, std::unordered_set<MatchPtr, MatchHasher, MatchEquality>> expressionToMatches_;
         
+        // A frequent operation here is detection of duplicate matches. Hashing is much faster than searching for
+        // duplicates in a std::map, so we separately keep a flat hash table of all matches to speed that up.
+        // That's purely an optimization.
+        std::unordered_set<MatchPtr, MatchHasher, MatchEquality> allMatches_;
+        
         std::mt19937 randomGenerator_;
         MatchPtr nextMatch_;
         
@@ -255,10 +260,19 @@ namespace SetReplace {
         void insertMatch(const Match& newMatch) {
             // careful, don't create different pointers to the same match!
             const auto matchPtr = std::make_shared<Match>(newMatch);
-            if (!matchQueue_.count(matchPtr)) { // works because comparison is smart
-                matchQueue_[matchPtr] = {{}, {}};
+            
+            if (allMatches_.count(matchPtr)) {
+                return;
             }
-            auto& bucket = matchQueue_.at(matchPtr);
+            else {
+                allMatches_.insert(matchPtr);
+            }
+            
+            auto bucketIt = matchQueue_.find(matchPtr); // works because comparison is smart
+            if (bucketIt == matchQueue_.end()) {
+                bucketIt = matchQueue_.insert({matchPtr, {{}, {}}}).first;
+            }
+            auto& bucket = bucketIt->second;
             if (!bucket.first.count(matchPtr)) { // works because hashing is smart
                 bucket.second.push_back(matchPtr);
                 bucket.first[matchPtr] = static_cast<int>(bucket.second.size()) - 1;
@@ -271,6 +285,8 @@ namespace SetReplace {
         }
         
         void deleteMatch(const MatchPtr matchPtr) {
+            allMatches_.erase(matchPtr);
+            
             const auto& expressions = matchPtr->inputExpressions;
             for (const auto expression : expressions) {
                 expressionToMatches_[expression].erase(matchPtr);
