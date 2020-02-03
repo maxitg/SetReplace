@@ -37,18 +37,21 @@
       ],
 
       VerificationTest[
-        GeneralizedGridGraph[#],
-        Graph[{1}, {}]
+        Through[{VertexList, EdgeList} @ GeneralizedGridGraph[#]],
+        {{1}, {}},
+        SameTest -> MatchQ
       ] & /@ {{1}, {1 -> "Directed"}, {1 -> {"Directed"}}},
 
       VerificationTest[
-        GeneralizedGridGraph[{1 -> "Circular"}],
-        Graph[UndirectedEdge[1, 1]]
+        Through[{VertexList, EdgeList} @ GeneralizedGridGraph[{1 -> "Circular"}]],
+        {{1}, {UndirectedEdge[1, 1]}},
+        SameTest -> MatchQ
       ],
 
       VerificationTest[
-        GeneralizedGridGraph[#],
-        Graph[DirectedEdge[1, 1]]
+        Through[{VertexList, EdgeList} @ GeneralizedGridGraph[#]],
+        {{1}, {DirectedEdge[1, 1]}},
+        SameTest -> MatchQ
       ] & /@ {{1 -> {"Circular", "Directed"}}, {1 -> {"Directed", "Circular", "Circular"}}},
 
       VerificationTest[
@@ -92,7 +95,27 @@
         {{10 -> "Circular", 9 -> "Circular"}, 360},
         {{10 -> {"Circular", "Directed"}, 9 -> {"Circular", "Directed"}}, 90},
         {{10 -> {"Circular", "Directed"}, 9 -> {"Circular", "Directed"}, 3 -> {"Circular", "Directed"}}, 270}
-      }
+      },
+
+      VerificationTest[
+        Options[GeneralizedGridGraph[#1], GraphLayout],
+        {GraphLayout -> {"GridEmbedding", "Dimension" -> #2}}
+      ] & @@@ {{{4, 6}, {4, 6}}, {{4 -> "Directed", 6}, {4, 6}}, {{6, 4}, {6, 4}}},
+
+      VerificationTest[
+        Options[GeneralizedGridGraph[#], GraphLayout],
+        {GraphLayout -> "SpringElectricalEmbedding"}
+      ] & /@ {{3}, {3, 3, 3}, {3 -> "Circular", 5}},
+
+      VerificationTest[
+        With[{graph = GeneralizedGridGraph[#]},
+          AllTrue[
+            EdgeList[graph] /.
+              Thread[VertexList[graph] -> (VertexCoordinates /. AbsoluteOptions[graph, VertexCoordinates][[1]])] /.
+              (UndirectedEdge | DirectedEdge) -> EuclideanDistance,
+            0.999 < # < 1.001 &]
+        ]
+      ] & /@ {{4, 6}, {6, 4}, {3, 3}, {45, 76}, {6 -> "Directed", 8}, {5, 8 -> "Directed"}, {7 -> "Directed", 2 -> "Directed"}}
     }
   |>
 |>

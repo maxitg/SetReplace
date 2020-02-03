@@ -59,8 +59,13 @@ toExplicitDimSpec[originalSpec_, _ -> _List] := (
 )
 
 generalizedGridGraphExplicit[dimSpecs_] := IndexGraph[Graph[
-  Flatten[Outer[v, ##] & @@ Range /@ dimSpecs[[All, 1]]],
-  Catenate[singleDimensionEdges[dimSpecs, #] & /@ Range[Length[dimSpecs]]]]]
+  (* Reversal is needed to be consistent with "GridEmbedding" *)
+  Flatten[Outer[v @@ Reverse[{##}] &, ##] & @@ Reverse[Range /@ dimSpecs[[All, 1]]]],
+  Catenate[singleDimensionEdges[dimSpecs, #] & /@ Range[Length[dimSpecs]]]], GraphLayout -> graphLayout[dimSpecs]]
+
+graphLayout[{{n1_, $$linear, _}, {n2_, $$linear, _}}] := {"GridEmbedding", "Dimension" -> {n1, n2}}
+
+graphLayout[_] := "SpringElectricalEmbedding"
 
 singleDimensionEdges[dimSpecs_, k_] := Catenate[
   singleThreadEdges[dimSpecs[[k]], #] & /@
