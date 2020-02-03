@@ -1295,7 +1295,8 @@
                 "MaxCompleteGeneration"} & /@ {timeConstrained, eventConstrained})
             ],
             100]
-        ]], {method, $SetReplaceMethods}, {time, {1.*^-100, 0.1}}],
+        (* small time constrained case temporarily removed due to Wolfram bug #387470 *)
+        ]], {method, $SetReplaceMethods}, {time, {(*1.*^-100, *)0.1}}],
 
         (*** This does not work with TimeConstrained though, $Aborted is returned in that case. ***)
         VerificationTest[
