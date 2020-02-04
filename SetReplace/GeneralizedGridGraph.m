@@ -64,19 +64,20 @@ toExplicitDimSpec[originalSpec_, _ -> _List] := (
   Throw[$Failed];
 )
 
-generalizedGridGraphExplicit[dimSpecs_, opts___] := With[{
-    edges = singleDimensionEdges[dimSpecs, #] & /@ Range[Length[dimSpecs]]},
+generalizedGridGraphExplicit[dimSpecs_, opts___] := Module[{edges, directionalEdgeStyle},
+  edges = singleDimensionEdges[dimSpecs, #] & /@ Range[Length[dimSpecs]];
+  directionalEdgeStyle = EdgeStyle -> If[ListQ[#] && Length[#] == Length[dimSpecs] && AllTrue[#, Head[#] =!= Rule &],
+      Catenate @ MapThread[Function[{dirEdges, style}, # -> style & /@ dirEdges], {edges, #}],
+      Nothing] & @
+    OptionValue[GeneralizedGridGraph, {opts}, EdgeStyle];
   If[GraphQ[#], #, Throw[$Failed]] & @ Graph[
     IndexGraph @ Graph[
       (* Reversal is needed to be consistent with "GridEmbedding" *)
-      Flatten[Outer[v @@ Reverse[{##}] &, ##] & @@ Reverse[Range /@ dimSpecs[[All, 1]]]],
+      If[!ListQ[#], {}, #] & @ Flatten[Outer[v @@ Reverse[{##}] &, ##] & @@ Reverse[Range /@ dimSpecs[[All, 1]]]],
       Catenate[edges],
       GraphLayout -> graphLayout[dimSpecs],
-      EdgeStyle -> If[ListQ[#] && Length[#] == Length[dimSpecs],
-          Catenate @ MapThread[Function[{dirEdges, style}, # -> style & /@ dirEdges], {edges, #}],
-          #] & @
-        OptionValue[GeneralizedGridGraph, {opts}, EdgeStyle]],
-    opts]
+      directionalEdgeStyle],
+    If[directionalEdgeStyle[[2]] === Nothing, {opts}, FilterRules[{opts}, Except[EdgeStyle]]]]
 ]
 
 graphLayout[{{n1_, $$linear, _}, {n2_, $$linear, _}}] := {"GridEmbedding", "Dimension" -> {n1, n2}}
