@@ -1,12 +1,48 @@
 #include "Match.hpp"
 
 #include <algorithm>
+#include <map>
 #include <random>
 #include <unordered_map>
 
 namespace SetReplace {
-    namespace {
-        int compareVectors(const std::vector<ExpressionID>& first, const std::vector<ExpressionID>& second) {
+    class MatchComparator {
+    private:
+        const Matcher::OrderingSpec orderingSpec_;
+        
+    public:
+        MatchComparator(const Matcher::OrderingSpec& orderingSpec) : orderingSpec_(orderingSpec) {}
+        
+        bool operator()(const MatchPtr a, const MatchPtr b) const {
+            for (const auto& ordering : orderingSpec_) {
+                int comparison = compare(a, b, ordering.first);
+                if (comparison != 0) {
+                    if (ordering.second == Matcher::OrderingDirection::Reverse) comparison = -comparison;
+                    return comparison < 0;
+                }
+            }
+            return false;
+        }
+        
+        static int compare(const MatchPtr a, const MatchPtr b, const Matcher::OrderingFunction ordering) {
+            switch (ordering) {
+                case Matcher::OrderingFunction::SortedExpressionIDs:
+                    return compareSortedIDs(a, b, false);
+                    
+                case Matcher::OrderingFunction::ReverseSortedExpressionIDs:
+                    return compareSortedIDs(a, b, true);
+                    
+                case Matcher::OrderingFunction::ExpressionIDs:
+                    return compareUnsortedIDs(a, b);
+                    
+                case Matcher::OrderingFunction::RuleID:
+                    if (a->rule < b->rule) return -1;
+                    else if (a->rule > b->rule) return +1;
+                    else return 0;
+            }
+        }
+        
+        static int compareVectors(const std::vector<ExpressionID>& first, const std::vector<ExpressionID>& second) {
             for (int i = 0; i < std::min(first.size(), second.size()); ++i) {
                 if (first[i] < second[i]) return -1;
                 else if (first[i] > second[i]) return +1;
@@ -17,37 +53,56 @@ namespace SetReplace {
             else return 0;
         }
         
-        int compareSortedIDs(const Match& first, const Match& second, bool reverseOrder = false) {
-            std::vector<ExpressionID> thisExpressions = first.inputExpressions;
-            std::sort(thisExpressions.begin(), thisExpressions.end());
+        static int compareSortedIDs(const MatchPtr a, const MatchPtr b, const bool reverseOrder) {
+            std::vector<ExpressionID> aExpressions = a->inputExpressions;
+            std::sort(aExpressions.begin(), aExpressions.end());
             
-            std::vector<ExpressionID> otherExpressions = second.inputExpressions;
-            std::sort(otherExpressions.begin(), otherExpressions.end());
+            std::vector<ExpressionID> bExpressions = b->inputExpressions;
+            std::sort(bExpressions.begin(), bExpressions.end());
             
             if (reverseOrder) {
-                std::reverse(thisExpressions.begin(), thisExpressions.end());
-                std::reverse(otherExpressions.begin(), otherExpressions.end());
+                std::reverse(aExpressions.begin(), aExpressions.end());
+                std::reverse(bExpressions.begin(), bExpressions.end());
             }
-            return compareVectors(thisExpressions, otherExpressions);
+            return compareVectors(aExpressions, bExpressions);
         }
         
-        int compareUnsortedIDs(const Match& first, const Match& second) {
-            return compareVectors(first.inputExpressions, second.inputExpressions);
+        static int compareUnsortedIDs(const MatchPtr a, const MatchPtr& b) {
+            return compareVectors(a->inputExpressions, b->inputExpressions);
         }
-    }
-    
-    bool Match::operator<(const Match& other) const {
-        // First, find which Match has oldest (lowest ID) expressions
-        int sortedComparison = compareSortedIDs(*this, other, true);
-        if (sortedComparison != 0) return sortedComparison < 0;
+    };
 
-        // Then, if sets of expressions are the same, use smaller permutation
-        int unsortedComparison = compareUnsortedIDs(*this, other);
-        if (unsortedComparison != 0) return unsortedComparison < 0;
+    // Hashes the values of the matches, not the pointer itself.
+    class MatchHasher {
+    public:
+        size_t operator()(MatchPtr ptr) const {
+            std::size_t result = 0;
+            hash_combine(result, ptr->rule);
+            for (const auto expression : ptr->inputExpressions) {
+                hash_combine(result, expression);
+            }
+            return result;
+        }
         
-        // Finally, first rule goes first
-        return rule < other.rule;
-    }
+    private:
+        // https://stackoverflow.com/a/2595226
+        template <class T>
+        static void hash_combine(std::size_t& seed, const T& value) {
+            std::hash<T> hasher;
+            seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+    };
+
+    class MatchEquality {
+    public:
+        size_t operator()(MatchPtr a, MatchPtr b) const {
+            if (a->rule != b->rule || a->inputExpressions.size() != b->inputExpressions.size()) return false;
+            for (int i = 0; i < a->inputExpressions.size(); ++i) {
+                if (a->inputExpressions[i] != b->inputExpressions[i]) return false;
+            }
+            return true;
+        }
+    };
     
     class Matcher::Implementation {
     private:
@@ -55,75 +110,87 @@ namespace SetReplace {
         AtomsIndex& atomsIndex_;
         const std::function<AtomsVector(ExpressionID)> getAtomsVector_;
         
-        std::set<Match> matches_; // sorted by priority, i.e., the first match is returned first.
+        // Matches are arranged in buckets. Each bucket contains matches that are equivalent in terms of the ordering
+        // function, however, buckets themselves are ordered according to that function.
+        // To select next match, we select a random element from the first bucket.
+        // That in particular means the random ordering function will automatically be used if ordering
+        // specification is incomplete.
         
-        struct IteratorHash {
-            size_t operator()(std::set<Match>::const_iterator it) const {
-                return std::hash<int64_t>()((int64_t)&(*it));
-            }
-        };
-        // Matches organized by expression IDs, useful for deleting matches for deleted expressions.
-        std::unordered_map<ExpressionID, std::unordered_set<std::set<Match>::const_iterator, IteratorHash>> matchesIndex_;
+        // We use MatchPtr instead of Match to save memory, however, they are hashed and sorted according to their
+        // dereferenced values in the corresponding classes above.
         
-        std::vector<std::set<Match>::const_iterator> allMatchIterators_;
-        std::unordered_map<std::set<Match>::const_iterator, int, IteratorHash> matchIteratorsToIndices_;
+        // We cannot directly select a random element from an unordered_map, which is why we use a vector here.
+        using Bucket = std::pair<std::unordered_map<MatchPtr, int, MatchHasher, MatchEquality>, std::vector<MatchPtr>>;
+        std::map<MatchPtr, Bucket, MatchComparator> matchQueue_;
+        std::unordered_map<ExpressionID, std::unordered_set<MatchPtr, MatchHasher, MatchEquality>> expressionToMatches_;
         
-        EvaluationType evaluationType_;
+        // A frequent operation here is detection of duplicate matches. Hashing is much faster than searching for
+        // duplicates in a std::map, so we separately keep a flat hash table of all matches to speed that up.
+        // That's purely an optimization.
+        std::unordered_set<MatchPtr, MatchHasher, MatchEquality> allMatches_;
+        
         std::mt19937 randomGenerator_;
-        size_t nextRandomMatchIndex_ = -1;
+        MatchPtr nextMatch_;
         
     public:
         Implementation(const std::vector<Rule>& rules,
                        AtomsIndex& atomsIndex,
                        const std::function<AtomsVector(ExpressionID)> getAtomsVector,
-                       const EvaluationType evaluationType,
+                       const OrderingSpec orderingSpec,
                        const unsigned int randomSeed) :
             rules_(rules),
             atomsIndex_(atomsIndex),
             getAtomsVector_(getAtomsVector),
-            evaluationType_(evaluationType),
+            matchQueue_(orderingSpec),
             randomGenerator_(randomSeed) {}
         
         void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort) {
             for (int i = 0; i < rules_.size(); ++i) {
                 addMatchesForRule(expressionIDs, i, shouldAbort);
             }
-            
-            chooseNextRandomMatch();
+            chooseNextMatch();
         }
         
         // Note, deletion changes the ordering of allMatchIterators_, therefore
         // deletion should be done in deterministic order, otherwise, the random replacements will not be deterministic
         void removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs) {
-            std::set<Match> matchesToDelete; // do not use unordered_set, as it will make order undeterministic
+            // do not use unordered_set, as it make order undeterministic
+            // any ordering spec works here, as long as it's complete.
+            OrderingSpec fullOrderingSpec = {
+                {OrderingFunction::ExpressionIDs, OrderingDirection::Normal},
+                {OrderingFunction::RuleID, OrderingDirection::Normal}};
+            std::set<MatchPtr, MatchComparator> matchesToDelete(fullOrderingSpec);
+            
             for (const auto& expression : expressionIDs) {
-                const auto& matches = matchesIndex_[expression];
-                for (const auto& matchIterator : matches) {
-                    matchesToDelete.insert(*matchIterator);
+                const auto& matches = expressionToMatches_[expression];
+                for (const auto& matchPtr : matches) {
+                    matchesToDelete.insert(matchPtr);
                 }
             }
             
             for (const auto& match : matchesToDelete) {
-                deleteMatch(matches_.find(match));
+                deleteMatch(match);
             }
             
-            chooseNextRandomMatch();
+            chooseNextMatch();
         }
         
-        int matchCount() const {
-            return static_cast<int>(matches_.size());
+        bool empty() const {
+            return matchQueue_.empty();
         }
         
-        Match nextMatch() const {
-            if (evaluationType_ == EvaluationType::Random) {
-                return *allMatchIterators_[nextRandomMatchIndex_];
-            } else {
-                return *matches_.begin();
+        MatchPtr nextMatch() const {
+            return nextMatch_;
+        }
+        
+        const std::vector<MatchPtr> allMatches() const {
+            std::vector<MatchPtr> result;
+            for (const auto& exampleAndBucket : matchQueue_) {
+                for (const auto& matchPtr : exampleAndBucket.second.second) {
+                    result.push_back(matchPtr);
+                }
             }
-        }
-        
-        const std::set<Match>& allMatches() {
-            return matches_;
+            return result;
         }
         
     private:
@@ -191,31 +258,49 @@ namespace SetReplace {
         }
         
         void insertMatch(const Match& newMatch) {
-            if (matches_.count(newMatch)) return;
+            // careful, don't create different pointers to the same match!
+            const auto matchPtr = std::make_shared<Match>(newMatch);
             
-            const auto iterator = matches_.insert(newMatch).first;
-            for (const auto& expression : newMatch.inputExpressions) {
-                matchesIndex_[expression].insert(iterator);
+            if (allMatches_.count(matchPtr)) {
+                return;
             }
-            allMatchIterators_.push_back(iterator);
-            matchIteratorsToIndices_[iterator] = (int)allMatchIterators_.size() - 1;
-        }
-        
-        void deleteMatch(const std::set<Match>::const_iterator iterator) {
-            const int deletedIndex = matchIteratorsToIndices_[iterator];
-            matchIteratorsToIndices_.erase(iterator);
+            else {
+                allMatches_.insert(matchPtr);
+            }
             
-            std::swap(allMatchIterators_[deletedIndex], allMatchIterators_[allMatchIterators_.size() - 1]);
-            allMatchIterators_.pop_back();
-            matchIteratorsToIndices_[allMatchIterators_[deletedIndex]] = deletedIndex;
-            
-            for (const auto& expression : iterator->inputExpressions) {
-                matchesIndex_[expression].erase(iterator);
-                if (matchesIndex_[expression].empty()) {
-                    matchesIndex_.erase(expression);
+            auto bucketIt = matchQueue_.find(matchPtr); // works because comparison is smart
+            if (bucketIt == matchQueue_.end()) {
+                bucketIt = matchQueue_.insert({matchPtr, {{}, {}}}).first;
+            }
+            auto& bucket = bucketIt->second;
+            if (!bucket.first.count(matchPtr)) { // works because hashing is smart
+                bucket.second.push_back(matchPtr);
+                bucket.first[matchPtr] = static_cast<int>(bucket.second.size()) - 1;
+                
+                const auto& expressions = matchPtr->inputExpressions;
+                for (const auto expression : expressions) {
+                    expressionToMatches_[expression].insert(matchPtr);
                 }
             }
-            matches_.erase(iterator);
+        }
+        
+        void deleteMatch(const MatchPtr matchPtr) {
+            allMatches_.erase(matchPtr);
+            
+            const auto& expressions = matchPtr->inputExpressions;
+            for (const auto expression : expressions) {
+                expressionToMatches_[expression].erase(matchPtr);
+                if (expressionToMatches_[expression].empty()) expressionToMatches_.erase(expression);
+            }
+            
+            auto& bucket = matchQueue_[matchPtr];
+            const auto bucketIndex = bucket.first.at(matchPtr);
+            // O(1) order-non-preserving deletion from a vector
+            std::swap(bucket.second[bucketIndex], bucket.second[bucket.second.size() - 1]);
+            bucket.first[bucket.second[bucketIndex]] = bucketIndex;
+            bucket.first.erase(bucket.second[bucket.second.size() - 1]);
+            bucket.second.pop_back();
+            if (bucket.first.empty()) matchQueue_.erase(matchPtr);
         }
         
         static bool isMatchComplete(const Match& match) {
@@ -285,24 +370,20 @@ namespace SetReplace {
         }
 
         // This should be called every time matches are updated.
-        void chooseNextRandomMatch() {
-            if (evaluationType_ == EvaluationType::Random) {
-                if (allMatchIterators_.size() == 0) {
-                    nextRandomMatchIndex_ = -1;
-                } else {
-                    auto distribution = std::uniform_int_distribution<size_t>(0, allMatchIterators_.size() - 1);
-                    nextRandomMatchIndex_ = distribution(randomGenerator_);
-                }
-            }
+        void chooseNextMatch() {
+            if (empty()) return;
+            const auto& allPossibleMatches = matchQueue_.begin()->second.second;
+            auto distribution = std::uniform_int_distribution<size_t>(0, allPossibleMatches.size() - 1);
+            nextMatch_ = allPossibleMatches[distribution(randomGenerator_)];
         }
     };
     
     Matcher::Matcher(const std::vector<Rule>& rules,
                      AtomsIndex& atomsIndex,
                      const std::function<AtomsVector(ExpressionID)> getAtomsVector,
-                     const EvaluationType evaluationType,
+                     const OrderingSpec orderingSpec,
                      const unsigned int randomSeed) {
-        implementation_ = std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector, evaluationType, randomSeed);
+        implementation_ = std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector, orderingSpec, randomSeed);
     }
     
     void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort) {
@@ -313,11 +394,11 @@ namespace SetReplace {
         implementation_->removeMatchesInvolvingExpressions(expressionIDs);
     }
     
-    int Matcher::matchCount() const {
-        return implementation_->matchCount();
+    bool Matcher::empty() const {
+        return implementation_->empty();
     }
     
-    Match Matcher::nextMatch() const {
+    MatchPtr Matcher::nextMatch() const {
         return implementation_->nextMatch();
     }
     
@@ -357,7 +438,7 @@ namespace SetReplace {
         return true;
     }
 
-    const std::set<Match>& Matcher::allMatches() const {
+    const std::vector<MatchPtr> Matcher::allMatches() const {
         return implementation_->allMatches();
     }
 }
