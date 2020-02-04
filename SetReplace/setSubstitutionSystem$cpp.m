@@ -28,7 +28,7 @@ $cpp$setCreate = If[$libraryFile =!= $Failed,
 		"setCreate",
 		{{Integer, 1}, (* rules *)
 			{Integer, 1}, (* initial set *)
-			Integer, (* 0 -> sequential evaluation, 1 -> random evaluation *)
+			{Integer, 1}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
 			Integer}, (* random seed *)
 		Integer], (* set ptr *)
 	$Failed];
@@ -235,7 +235,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 	setPtr = $cpp$setCreate[
 		encodeNestedLists[List @@@ mappedRules],
 		encodeNestedLists[mappedSet],
-		Replace[eventOrderingFunction, {$EventOrderingFunctionSequential -> 0, $EventOrderingFunctionRandom -> 1}],
+		Replace[eventOrderingFunction, {$EventOrderingFunctionSequential -> {1, 0, 2, 0, 3, 0}, $EventOrderingFunctionRandom -> {}}],
 		If[eventOrderingFunction === $EventOrderingFunctionRandom, RandomInteger[{0, $maxUnsignedInt}], 0]];
 	TimeConstrained[
 		CheckAbort[

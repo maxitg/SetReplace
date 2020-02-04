@@ -19,11 +19,9 @@ namespace SetReplace {
         /** @brief Expression matching the rule inputs.
          */
         std::vector<ExpressionID> inputExpressions;
-        
-        /** @brief Matches that will be evaluated earlier are defined to be smaller.
-         */
-        bool operator<(const Match& other) const;
     };
+
+    using MatchPtr = std::shared_ptr<const Match>;
     
     /** @brief Matcher takes rules, atoms index, and a list of expressions, and returns all possible matches.
      * @details This contains the lowest-level code, and the main functionality of the library. Uses atomsIndex to discover expressions, thus if an expression is absent from the atomsIndex, it would not appear in any matches.
@@ -34,9 +32,21 @@ namespace SetReplace {
          */
         enum Error {Aborted, DisconnectedInputs, NoMatches};
         
-        /** @brief Determines whether nexxtMatch() will return the smallest Match or a random one.
+        /** @brief All possible functions available to sort matches. Random is the default that is always applied last.
          */
-        enum EvaluationType {Sequential, Random};
+        enum class OrderingFunction {
+            SortedExpressionIDs = 0,
+            ReverseSortedExpressionIDs = 1,
+            ExpressionIDs = 2,
+            RuleID = 3};
+        
+        /** @brief Whether to sort in normal or reverse order.
+         */
+        enum class OrderingDirection {Normal = 0, Reverse = 1};
+        
+        /** @brief Full specification for the sequence of ordering functions.
+         */
+        using OrderingSpec = std::vector<std::pair<OrderingFunction, OrderingDirection>>;
                 
         /** @brief Creates a new matcher object.
          * @details This is an O(1) operation, does not do any matching yet.
@@ -44,7 +54,7 @@ namespace SetReplace {
         Matcher(const std::vector<Rule>& rules,
                 AtomsIndex& atomsIndex,
                 const std::function<AtomsVector(ExpressionID)> getAtomsVector,
-                const EvaluationType evaluationType,
+                const OrderingSpec orderingSpec,
                 const unsigned int randomSeed = 0);
         
         /** @brief Finds and adds to the index all matches involving specified expressions.
@@ -56,14 +66,14 @@ namespace SetReplace {
          */
         void removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs);
         
-        /** @brief Returns the number of matches currently available.
+        /** @brief Yields true if there are no matches left.
          */
-        int matchCount() const;
+        bool empty() const;
         
         /** @brief Returns the match that should be substituted next.
          * @details Throws Error::NoMatches if there are no matches.
          */
-        Match nextMatch() const;
+        MatchPtr nextMatch() const;
         
         /** @brief Replaces patterns in atomsToReplace with explicit atoms.
          * @param inputPatterns patterns corresponding to patternMatches.
@@ -75,7 +85,7 @@ namespace SetReplace {
                                                      std::vector<AtomsVector>& atomsToReplace);
         
         /** @brief Returns the set of expression IDs matched in any match. */
-        const std::set<Match>& allMatches() const;
+        const std::vector<MatchPtr> allMatches() const;
         
     private:
         class Implementation;
