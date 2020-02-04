@@ -18,7 +18,10 @@ GeneralizedGridGraph::usage = usageString[
   "GeneralizedGridGraph[{`...`, \*SubscriptBox[`n`, `k`] -> {\"Circular\", \"Directed\"}, `...`}] makes the grid both ",
   "circular and directed."];
 
-SyntaxInformation[GeneralizedGridGraph] = {"ArgumentsPattern" -> {_}};
+Options[GeneralizedGridGraph] = Options[Graph];
+
+SyntaxInformation[GeneralizedGridGraph] =
+  {"ArgumentsPattern" -> {_, OptionsPattern[]}, "OptionNames" -> Options[GeneralizedGridGraph][[All, 1]]};
 
 GeneralizedGridGraph::dimsNotList = "Dimensions specification `` should be a list.";
 
@@ -32,9 +35,12 @@ GeneralizedGridGraph[args___] := Module[{result = Catch[generalizedGridGraph[arg
 
 generalizedGridGraph[args___] /; !Developer`CheckArgumentCount[GeneralizedGridGraph[args], 1, 1] := Throw[$Failed]
 
-generalizedGridGraph[dimSpecs_List] := generalizedGridGraphExplicit[toExplicitDimSpec /@ dimSpecs]
+generalizedGridGraph[args_, opts___] /;
+    !knownOptionsQ[GeneralizedGridGraph, Defer[GeneralizedGridGraph[args, opts]], {opts}] := Throw[$Failed]
 
-generalizedGridGraph[dimSpecs : Except[_List]] := (
+generalizedGridGraph[dimSpecs_List, opts___] := generalizedGridGraphExplicit[toExplicitDimSpec /@ dimSpecs, opts]
+
+generalizedGridGraph[dimSpecs : Except[_List], opts___] := (
   Message[GeneralizedGridGraph::dimsNotList, dimSpecs];
   Throw[$Failed];
 )
@@ -58,10 +64,20 @@ toExplicitDimSpec[originalSpec_, _ -> _List] := (
   Throw[$Failed];
 )
 
-generalizedGridGraphExplicit[dimSpecs_] := IndexGraph[Graph[
-  (* Reversal is needed to be consistent with "GridEmbedding" *)
-  Flatten[Outer[v @@ Reverse[{##}] &, ##] & @@ Reverse[Range /@ dimSpecs[[All, 1]]]],
-  Catenate[singleDimensionEdges[dimSpecs, #] & /@ Range[Length[dimSpecs]]]], GraphLayout -> graphLayout[dimSpecs]]
+generalizedGridGraphExplicit[dimSpecs_, opts___] := With[{
+    edges = singleDimensionEdges[dimSpecs, #] & /@ Range[Length[dimSpecs]]},
+  If[GraphQ[#], #, Throw[$Failed]] & @ Graph[
+    IndexGraph @ Graph[
+      (* Reversal is needed to be consistent with "GridEmbedding" *)
+      Flatten[Outer[v @@ Reverse[{##}] &, ##] & @@ Reverse[Range /@ dimSpecs[[All, 1]]]],
+      Catenate[edges],
+      GraphLayout -> graphLayout[dimSpecs],
+      EdgeStyle -> If[ListQ[#] && Length[#] == Length[dimSpecs],
+          Catenate @ MapThread[Function[{dirEdges, style}, # -> style & /@ dirEdges], {edges, #}],
+          #] & @
+        OptionValue[GeneralizedGridGraph, {opts}, EdgeStyle]],
+    opts]
+]
 
 graphLayout[{{n1_, $$linear, _}, {n2_, $$linear, _}}] := {"GridEmbedding", "Dimension" -> {n1, n2}}
 
