@@ -699,7 +699,10 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 (*This produces a causal network for the system. This is a Graph with all events as vertices, and directed edges connecting them if the same event is a creator and a destroyer for the same expression (i.e., if two events are causally related).*)
 
 
-$causalGraphVertexStyle = Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]];
+unicolorVertexStyle[color_] := Directive[color, EdgeForm[{color, Opacity[1]}]]
+$causalGraphVertexStyle = unicolorVertexStyle[Hue[0.11, 1, 0.97]];
+$causalGraphInitialVertexStyle = unicolorVertexStyle[RGBColor[{0.259, 0.576, 1}]];
+$causalGraphFinalVertexStyle = unicolorVertexStyle[Black];
 $causalGraphEdgeStyle = Hue[0, 1, 0.56];
 
 
@@ -722,7 +725,8 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 		DeleteCases[Union[data[$creatorEvents], data[$destroyerEvents]], $eventsToDelete],
 		Select[FreeQ[#, $eventsToDelete] &] @ Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
 		o,
-		VertexStyle -> $causalGraphVertexStyle,
+		VertexStyle -> Select[Head[#] =!= Rule || !MatchQ[#[[1]], $eventsToDelete] &] @ {
+			$causalGraphVertexStyle, 0 -> $causalGraphInitialVertexStyle, Infinity -> $causalGraphFinalVertexStyle},
 		EdgeStyle -> $causalGraphEdgeStyle]
 ]
 
