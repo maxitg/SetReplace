@@ -92,7 +92,7 @@ hypergraphRulesSpecQ[rulesSpec_] := (
 
 correctOptionsQ[args_, {opts___}] :=
   knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], {opts}, $allowedOptions] &&
-  supportedOptionQ[RulePlot, Frame, {True, False}, {opts}] &&
+  supportedOptionQ[RulePlot, Frame, {True, False, Automatic}, {opts}] &&
   correctEdgeTypeQ[OptionValue[RulePlot, {opts}, "EdgeType"]] &&
   correctSpacingsQ[{opts}] &&
   correctWolframModelPlotOptionsQ[
@@ -158,7 +158,15 @@ rulePlot[
     spacings_,
     graphicsOpts_] :=
   Graphics[
-      First[graphicsRiffle[#[[All, 1]], #[[All, 2]], {}, {{0, 1}, {0, 1}}, 0, 0.01, If[frameQ, frameStyle, None]]],
+      First[
+        graphicsRiffle[
+          #[[All, 1]],
+          #[[All, 2]],
+          {},
+          {{0, 1}, {0, 1}},
+          0,
+          0.01,
+          If[frameQ === True || (frameQ === Automatic && Length[rules] > 1), frameStyle, None]]],
       graphicsOpts] & @
     (singleRulePlot[edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, spacings] /@
         rules)
