@@ -702,7 +702,7 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 unicolorVertexStyle[color_] := Directive[color, EdgeForm[{color, Opacity[1]}]]
 $causalGraphVertexStyle = unicolorVertexStyle[Hue[0.11, 1, 0.97]];
 $causalGraphInitialVertexStyle = unicolorVertexStyle[RGBColor[{0.259, 0.576, 1}]];
-$causalGraphFinalVertexStyle = unicolorVertexStyle[Black];
+$causalGraphFinalVertexStyle = Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]];
 $causalGraphEdgeStyle = Hue[0, 1, 0.56];
 
 
