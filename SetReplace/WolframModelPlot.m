@@ -32,7 +32,7 @@ Options[WolframModelPlot] = Join[{
 	VertexCoordinateRules -> {},
 	VertexLabels -> None,
 	VertexSize -> 0.06,
-	"ArrowheadLength" -> 0.1,
+	"ArrowheadLength" -> 0.15,
 	VertexStyle -> Automatic, (* inherits from PlotStyle *)
 	"MaxImageSize" -> Automatic},
 	Options[Graphics]];
