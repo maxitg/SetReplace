@@ -1179,6 +1179,22 @@
         Join[{5}, Floor[Log2[16 - Range[15]]] + 1, {0}]
       ],
 
+      VerificationTest[
+        Cases[VertexStyle /. Options[
+          WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4, #, "IncludeBoundaryEvents" -> "Initial"],
+          VertexStyle][[1]], _Rule, {1}],
+        {0 -> _},
+        SameTest -> MatchQ
+      ] & /@ {"CausalGraph", "LayeredCausalGraph"},
+
+      VerificationTest[
+        Sort[Cases[VertexStyle /. Options[
+          WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4, "CausalGraph", "IncludeBoundaryEvents" -> #],
+          VertexStyle][[1]], _Rule, {1}]],
+        #2,
+        SameTest -> MatchQ
+      ] & @@@ {{None, {}}, {"Final", {Infinity -> _}}, {All, {0 -> _, Infinity -> _}}},
+
       (* AllEventsList *)
 
       Table[With[{method = method}, {
