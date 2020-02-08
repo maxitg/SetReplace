@@ -212,6 +212,16 @@ $terminationReasonCodes = <|
 |>;
 
 
+$orderingFunctionCodes = <|
+	$sortedExpressionIDs -> 0,
+	$reverseSortedExpressionIDs -> 1,
+	$expressionIDs -> 2,
+	$ruleIndex -> 3,
+	$forward -> 0,
+	$backward -> 1
+|>;
+
+
 setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_] /;
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
@@ -235,8 +245,8 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 	setPtr = $cpp$setCreate[
 		encodeNestedLists[List @@@ mappedRules],
 		encodeNestedLists[mappedSet],
-		Replace[eventOrderingFunction, {$EventOrderingFunctionSequential -> {1, 0, 2, 0, 3, 0}, $EventOrderingFunctionRandom -> {}}],
-		If[eventOrderingFunction === $EventOrderingFunctionRandom, RandomInteger[{0, $maxUnsignedInt}], 0]];
+		Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
+		RandomInteger[{0, $maxUnsignedInt}]];
 	TimeConstrained[
 		CheckAbort[
 			$cpp$setReplace[
