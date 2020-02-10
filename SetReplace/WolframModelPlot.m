@@ -33,7 +33,8 @@ Options[WolframModelPlot] = Join[{
 	VertexLabels -> None,
 	VertexSize -> 0.06,
 	"ArrowheadLength" -> 0.1,
-	VertexStyle -> Automatic}, (* inherits from PlotStyle *)
+	VertexStyle -> Automatic, (* inherits from PlotStyle *)
+	"MaxImageSize" -> Automatic},
 	Options[Graphics]];
 
 $edgeTypes = {"Ordered", "Cyclic"};
@@ -137,7 +138,8 @@ wolframModelPlot$parse[
 				VertexCoordinateRules,
 				VertexLabels,
 				VertexSize,
-				"ArrowheadLength"})
+				"ArrowheadLength",
+				"MaxImageSize"})
 ]
 
 toListStyleSpec[Automatic, elements_] := toListStyleSpec[<||>, elements]
@@ -228,12 +230,28 @@ wolframModelPlot[
 		vertexLabels_,
 		vertexSize_,
 		arrowheadLength_,
-		graphicsOptions_] := Catch[With[{
+		maxImageSize_,
+		graphicsOptions_] := Catch[Module[{graphics, imageSizeScaleFactor},
 	graphics = drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, arrowheadLength] @
 		hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @
-		edges},
-	Show[graphics, graphicsOptions, ImageSizeRaw -> $imageSizeDefault (Min[1, #[[2]] - #[[1]]] & /@ PlotRange[graphics])]
+		edges;
+	imageSizeScaleFactor = Min[1, 0.7 (#[[2]] - #[[1]])] & /@ PlotRange[graphics];
+	Show[
+		graphics,
+		graphicsOptions,
+		If[maxImageSize === Automatic,
+			ImageSizeRaw -> $imageSizeDefault imageSizeScaleFactor,
+			ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]]]
 ]]
+
+adjustImageSize[w_ ? NumericQ, {wScale_, hScale_}] := w wScale
+
+adjustImageSize[dims : {w_ ? NumericQ, h_ ? NumericQ}, scale_] := dims scale
+
+WolframModelPlot::invalidMaxImageSize =
+	"MaxImageSize `1` should either be a single number (width) or a list of two numbers (width and height)";
+
+adjustImageSize[dims_, _] := (Message[WolframModelPlot::invalidMaxImageSize, dims]; Throw[$Failed])
 
 (** Embedding **)
 (** hypergraphEmbedding produces an embedding of vertices and edges. The format is {vertices, edges},
