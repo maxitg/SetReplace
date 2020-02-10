@@ -632,6 +632,35 @@
         Table[OrderedQ[(ImageSizeRaw /. AbsoluteOptions[WolframModelPlot[#], ImageSizeRaw])[[k, 1]] & /@
           {{{1}}, {{1, 1}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 7}, {7, 8, 1}}}], {k, 2}],
         {True, True}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot[{{1, 2}, {2, 3}, {3, 1}}, "MaxImageSize" -> "$$$invalid$$$"],
+        {WolframModelPlot::invalidMaxImageSize}
+      ] & /@ {"$$$invalid$$$", {200, 200, 200}, UpTo[200], {{100, 200}, {100, 200}}, Full, Scaled[0.5]},
+
+      VerificationTest[
+        With[{
+            sizes = (ImageSize /. AbsoluteOptions[#, ImageSize][[1]] & /@
+              WolframModel[{{x, y}, {y, z}} -> {{w, y}, {y, z}, {z, w}, {x, w}}, {{0, 0}, {0, 0}}, 10][
+                "StatesPlotsList", "MaxImageSize" -> #]) & /@ {100, 200}},
+          AllTrue[sizes[[1]], # < 100.0001 &] &&
+          !AllTrue[sizes[[1]], # > 99.9999 &] &&
+          AllTrue[sizes[[2]] / sizes[[1]], 1.9999 < # < 2.0001 &]
+        ]
+      ],
+
+      VerificationTest[
+        With[{
+            sizes = (ImageSize /. AbsoluteOptions[#, ImageSize][[1]] & /@
+              WolframModel[{{x, y}, {y, z}} -> {{w, y}, {y, z}, {z, w}, {x, w}}, {{0, 0}, {0, 0}}, 10][
+                "StatesPlotsList", "MaxImageSize" -> #]) & /@ {{100, 30}, {200, 60}}},
+          AllTrue[sizes[[1, All, 1]], # < 100.0001 &] &&
+          AllTrue[sizes[[1, All, 2]], # < 30.0001 &] &&
+          !AllTrue[sizes[[1, All, 1]], # > 99.9999 &] &&
+          !AllTrue[sizes[[1, All, 2]], # > 29.9999 &] &&
+          And @@ ((AllTrue[sizes[[2, All, #]] / sizes[[1, All, #]], 1.9999 < # < 2.0001 &] &) /@ {1, 2})
+        ]
       ]
     }
   |>
