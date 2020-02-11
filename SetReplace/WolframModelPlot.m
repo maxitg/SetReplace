@@ -181,13 +181,10 @@ correctCoordinateRulesQ[head_, coordinateRules_] :=
 		True
 	]
 
-correctHighlightQ[edges : Except[Automatic], highlight_] := Module[{
-		vertices, validQ},
-	vertices = vertexList[edges];
-	validQ = ListQ[highlight];
-	If[!validQ, Message[WolframModelPlot::invalidHighlight, highlight]];
-	validQ
-]
+correctHighlightQ[edges : Except[Automatic], highlight_] := (
+	If[!ListQ[highlight], Message[WolframModelPlot::invalidHighlight, highlight]];
+	ListQ[highlight]
+)
 
 correctHighlightQ[Automatic, _] := True
 
@@ -413,9 +410,6 @@ drawEmbedding[
 			#[[2]] /. (h : (Point | Line | Polygon))[pts_] :> highlighted[h[pts], highlightedQ]] &,
 		embedding,
 		{2}];
-	If[AnyTrue[highlightCounts, # > 0 &],
-		Message[WolframModelPlot::invalidHighlight, highlight];
-		Throw[$Failed]];
 
 	vertexPoints = MapIndexed[
 		With[{style = styles[$vertexPoint][[#2[[1]]]]},
