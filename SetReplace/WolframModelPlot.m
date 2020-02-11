@@ -162,7 +162,7 @@ correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	(And @@ (supportedOptionQ[head, ##, opts] & @@@ {
 			{"HyperedgeRendering", $hyperedgeRenderings}})) &&
 	correctCoordinateRulesQ[head, OptionValue[WolframModelPlot, opts, VertexCoordinateRules]] &&
-	correctHighlightQ[edges, OptionValue[WolframModelPlot, opts, GraphHighlight]] &&
+	correctHighlightQ[OptionValue[WolframModelPlot, opts, GraphHighlight]] &&
 	correctHighlightStyleQ[head, OptionValue[WolframModelPlot, opts, GraphHighlightStyle]] &&
 	correctSizeQ[head, "Vertex size", OptionValue[WolframModelPlot, opts, VertexSize]] &&
 	correctSizeQ[head, "Arrowhead length", OptionValue[WolframModelPlot, opts, "ArrowheadLength"]] &&
@@ -181,12 +181,10 @@ correctCoordinateRulesQ[head_, coordinateRules_] :=
 		True
 	]
 
-correctHighlightQ[edges : Except[Automatic], highlight_] := (
+correctHighlightQ[highlight_] := (
 	If[!ListQ[highlight], Message[WolframModelPlot::invalidHighlight, highlight]];
 	ListQ[highlight]
 )
-
-correctHighlightQ[Automatic, _] := True
 
 correctHighlightStyleQ[head_, highlightStyle_] :=
 	If[ColorQ[highlightStyle], True, Message[head::invalidHighlightStyle, highlightStyle]; False]
