@@ -106,7 +106,7 @@ wolframModelPlot$parse[
 )
 
 wolframModelPlot$parse[
-	edges : {$hypergraphPattern...}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
+	edges : {$hypergraphPattern..}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
 		correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] :=
 	wolframModelPlot$parse[#, edgeType, o] & /@ edges
 
