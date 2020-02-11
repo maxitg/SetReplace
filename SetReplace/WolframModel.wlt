@@ -1584,7 +1584,41 @@
             Method -> method],
           {0, 2, 1, 2, 1, Infinity}
         ]
-      }], {method, DeleteCases[$SetReplaceMethods, Automatic]}]
+      }], {method, DeleteCases[$SetReplaceMethods, Automatic]}],
+
+      (** Automatic initial state **)
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, Automatic][0],
+        {{1, 1}}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{{1}, {1, 2}} -> {{1, 2}, {2}}, {{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 2, 3}} -> {{1, 2}, {2, 3, 4}}},
+          Automatic][0],
+        {{1}, {1, 1}, {1, 1, 1}}
+      ],
+
+      VerificationTest[
+        WolframModel[{{1}, {1, 2}} -> {{1}, {1, 3}, {3, 2}}, Automatic][0],
+        {{1}, {1, 1}}
+      ],
+
+      testUnevaluated[
+        WolframModel[<|"PatternRules" -> {{a_, b_}} :> {{a, b}, {b, a}}|>, Automatic],
+        {WolframModel::noPatternAutomatic}
+      ],
+
+      VerificationTest[
+        WolframModel[1 -> 2, Automatic][0],
+        {1}
+      ],
+
+      VerificationTest[
+        WolframModel[{1, {2}} -> {2, {3}}, Automatic][0],
+        {1, {1}}
+      ]
     }
   |>,
 
