@@ -1306,7 +1306,46 @@
           {{1, {3} -> {6, 7}}, {4, 5, 6, 7}},
           {{DirectedInfinity[1], {4, 5, 6, 7} -> {}}, {}}
         }
-      ]
+      ],
+
+      (* EventsStatesPlotsList *)
+
+      VerificationTest[
+        Head /@ WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["EventsStatesPlotsList"],
+        ConstantArray[Graphics, WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventsCount"] + 1]
+      ],
+
+      VerificationTest[
+        Head /@ WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3][
+          "EventsStatesPlotsList", "IncludeBoundaryEvents" -> All],
+        ConstantArray[Graphics, WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventsCount"] + 1]
+      ],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
+        evo["EventsStatesPlotsList", "$$$invalid$$$"],
+        {WolframModelEvolutionObject::nonopt}
+      ]],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
+        evo["EventsStatesPlotsList", "$$$invalid$$$" -> 3],
+        {WolframModelEvolutionObject::optx}
+      ]],
+
+      VerificationTest[
+        AbsoluteOptions[#, ImageSize] & /@
+          WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 1]["EventsStatesPlotsList", ImageSize -> 123.],
+        ConstantArray[{ImageSize -> 123.}, 2]
+      ],
+
+      testUnevaluated[
+        WolframModel[1 -> 2, {1}, 2, "EventsStatesPlotsList"],
+        {WolframModel::nonHypergraphPlot}
+      ],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
+        evo["EventsStatesPlotsList", VertexSize -> x],
+        {WolframModelPlot::invalidSize}
+      ]]
     }]
   |>
 |>
