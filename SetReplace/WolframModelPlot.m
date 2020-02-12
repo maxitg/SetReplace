@@ -25,7 +25,7 @@ $plotStyleAutomatic = <|
 Options[WolframModelPlot] = Join[{
 	"EdgePolygonStyle" -> Automatic, (* inherits from EdgeStyle, with specified small opacity *)
 	EdgeStyle -> Automatic, (* inherits from PlotStyle *)
-	GraphHighlight -> {},
+	GraphHighlight -> Automatic,
 	GraphHighlightStyle -> Red,
 	"HyperedgeRendering" -> "Polygons",
 	PlotStyle -> $plotStyleAutomatic,
@@ -41,6 +41,7 @@ $edgeTypes = {"Ordered", "Cyclic"};
 $defaultEdgeType = "Ordered";
 $graphLayout = "SpringElectricalEmbedding";
 $hyperedgeRenderings = {"Subgraphs", "Polygons"};
+$graphHighlights = {"Differences"};
 
 (* for compatibility reasons, we don't care for messages and unevaluated code to preserve HypergraphPlot *)
 HypergraphPlot::usage = usageString["HypergraphPlot is deprecated. Use WolframModelPlot."];
@@ -107,8 +108,18 @@ wolframModelPlot$parse[
 
 wolframModelPlot$parse[
 	edges : {$hypergraphPattern..}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
-		correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] :=
-	wolframModelPlot$parse[#, edgeType, o] & /@ edges
+			correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] := Module[{
+		newEdges, removedEdges, newOnlyEdges, removedOnlyEdges, newAndRemovedEdges, highlights},
+	If[OptionValue[WolframModelPlot, {o}, GraphHighlight] === "Differences",
+		newEdges = Join[{{}}, multisetComplement[#2, #1] & @@@ Partition[edges, 2, 1]];
+		removedEdges = Join[multisetComplement @@@ Partition[edges, 2, 1], {{}}];
+		newOnlyEdges = MapThread[multisetComplement, {newEdges, removedEdges}];
+		removedOnlyEdges = MapThread[multisetComplement, {removedEdges, newEdges}];
+		newAndRemovedEdges = MapThread[multisetIntersection, {removedEdges, newEdges}];
+		highlights = 
+	];
+	wolframModelPlot$parse[#, edgeType, GraphHighlight -> #2, o] & @@@ {edges, highlights}
+]
 
 wolframModelPlot$parse[
 			edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
@@ -191,9 +202,15 @@ correctCoordinateRulesQ[head_, coordinateRules_] :=
 		True
 	]
 
+correctHighlightQ[_List] := True
+
+correctHighlightQ[Automatic] := True
+
+correctHighlightQ[Alternatives @@ $graphHighlights] := True
+
 correctHighlightQ[highlight_] := (
-	If[!ListQ[highlight], Message[WolframModelPlot::invalidHighlight, highlight]];
-	ListQ[highlight]
+	Message[WolframModelPlot::invalidHighlight, highlight];
+	False
 )
 
 correctHighlightStyleQ[head_, highlightStyle_] :=
