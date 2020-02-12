@@ -1321,6 +1321,12 @@
         ConstantArray[Graphics, WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventsCount"] + 1]
       ],
 
+      VerificationTest[
+        Head /@ WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 0][
+          "EventsStatesPlotsList", "IncludeBoundaryEvents" -> #],
+        {Graphics}
+      ] & /@ {None, "Initial", "Final", All},
+
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
         evo["EventsStatesPlotsList", "$$$invalid$$$"],
         {WolframModelEvolutionObject::nonopt}
