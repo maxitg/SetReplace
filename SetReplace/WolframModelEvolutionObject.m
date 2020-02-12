@@ -113,6 +113,7 @@ $propertyArgumentCounts = Join[
 		"FinalStatePlot" -> {0, Infinity},
 		"StatesList" -> {0, 0},
 		"StatesPlotsList" -> {0, Infinity},
+		"EventsStatesPlotsList" -> {0, Infinity},
 		"AllEventsStatesEdgeIndicesList" -> {0, 0},
 		"AllEventsStatesList" -> {0, 0},
 		"Generation" -> {1, 1},
@@ -279,6 +280,7 @@ $propertyOptions = <|
 	"CausalGraph" -> Options[Graph],
 	"LayeredCausalGraph" -> Options[Graph],
 	"StatesPlotsList" -> Options[WolframModelPlot],
+	"EventsStatesPlotsList" -> Options[WolframModelPlot],
 	"FinalStatePlot" -> Options[WolframModelPlot]
 |>;
 
@@ -599,6 +601,56 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 				Throw[$Failed]] &,
 			obj["StatesList"]],
 		WolframModelPlot::invalidEdges]
+
+
+(* ::Subsection:: *)
+(*EventsStatesPlotsList*)
+
+
+$destroyedEdgeStyle = Directive[Hue[0.08, 0, 0.42], AbsoluteDashing[{1, 2}]];
+$createdEdgeStyle = Directive[Hue[0.02, 0.94, 0.83], Thick];
+$destroyedAndCreatedEdgeStyle = Directive[Hue[0.02, 0.94, 0.83], Thick, AbsoluteDashing[{1, 3}]];
+
+
+propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
+			obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+			caller_,
+			property : "EventsStatesPlotsList",
+			o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]] == {})] := Module[{
+		events, stateIndices, pictures, destroyedOnlyIndices, createdOnlyIndices, destroyedAndCreatedIndices, allEdges},
+	events = propertyEvaluate[True, boundary][obj, caller, "AllEventsList"][[All, 2]];
+	stateIndices = FoldList[
+		Join[DeleteCases[#, Alternatives @@ #2[[1]]], #2[[2]]] &,
+		If[MatchQ[boundary, "Initial" | All],
+			{},
+			Range[Length[propertyEvaluate[True, None][obj, caller, "Generation", 0]]]
+		],
+		events];
+	{destroyedOnlyIndices, createdOnlyIndices, destroyedAndCreatedIndices} = Transpose[MapThread[
+		{Complement[##], Complement[#2, #1], Intersection[##]} &,
+		{Append[events[[All, 1]], {}], Prepend[events[[All, 2]], {}]}]];
+	allEdges = propertyEvaluate[True, None][obj, caller, "AllEventsEdgesList"];
+	Catch @ Quiet[
+		MapThread[
+			Check[
+				Check[
+					WolframModelPlot[
+						allEdges[[#]],
+						o,
+						EdgeStyle -> ReplacePart[
+							Table[Automatic, Length[#]],
+							Join[
+								Thread[Position[#, Alternatives @@ #2][[All, 1]] -> $destroyedEdgeStyle],
+								Thread[Position[#, Alternatives @@ #3][[All, 1]] -> $createdEdgeStyle],
+								Thread[Position[#, Alternatives @@ #4][[All, 1]] -> $destroyedAndCreatedEdgeStyle]]]],
+					Message[caller::nonHypergraphPlot, property],
+					WolframModelPlot::invalidEdges],
+				Throw[$Failed]] &,
+			If[MatchQ[boundary, "Initial" | All], Rest /@ # &, # &] @
+				If[MatchQ[boundary, All | "Final"], Most /@ # &, # &] @
+				{stateIndices, destroyedOnlyIndices, createdOnlyIndices, destroyedAndCreatedIndices}],
+		WolframModelPlot::invalidEdges]
+]
 
 
 (* ::Subsection:: *)
