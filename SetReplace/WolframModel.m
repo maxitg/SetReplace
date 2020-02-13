@@ -52,7 +52,6 @@ SyntaxInformation[WolframModel] =
 
 Options[WolframModel] := Join[{
 	"VertexNamingFunction" -> Automatic,
-	"EventOrderingFunction" -> "Sequential", (* Possible values are "Sequential" and "Random" *)
 	"IncludePartialGenerations" -> True,
 	"IncludeBoundaryEvents" -> None},
 	Options[setSubstitutionSystem]];
@@ -80,7 +79,24 @@ fromRulesSpec[<|"PatternRules" -> rules_|>] := rules
 (*Init*)
 
 
-fromInitSpec[initSpec_] := initSpec
+fromInitSpec[rulesSpec_, initSpec_List] := initSpec
+
+
+fromInitSpec[rulesSpec_Rule, Automatic] := fromInitSpec[{rulesSpec}, Automatic]
+
+
+fromInitSpec[rulesSpec_List, Automatic] := Catenate[
+	If[#2 === 0, ConstantArray[1, #1], ConstantArray[1, {##}]] & @@@
+		Reverse /@ Sort[Normal[Merge[Counts /@ Map[Length, If[ListQ[#], #, {#}] & /@ rulesSpec[[All, 1]], {2}], Max]]]]
+
+
+WolframModel::noPatternAutomatic = "Automatic initial state is not supported for pattern rules ``";
+
+
+fromInitSpec[rulesSpec_Association, Automatic] := (
+	Message[WolframModel::noPatternAutomatic, rulesSpec];
+	Throw[$Failed];
+)
 
 
 (* ::Subsubsection:: *)
@@ -158,17 +174,19 @@ WolframModel[
 	Module[{
 			patternRules, initialSet, evolution, renamedNodesEvolution, result},
 		patternRules = fromRulesSpec[rulesSpec];
-		initialSet = fromInitSpec[initSpec];
-		evolution = Check[
-			setSubstitutionSystem[
-				patternRules,
-				initialSet,
-				fromStepsSpec[stepsSpec],
-				WolframModel,
-				property === "EvolutionObject",
-				Method -> OptionValue[Method],
-				TimeConstraint -> OptionValue[TimeConstraint],
-				"EventOrderingFunction" -> OptionValue["EventOrderingFunction"]],
+		initialSet = Catch[fromInitSpec[rulesSpec, initSpec]];
+		evolution = If[initialSet =!= $Failed,
+			Check[
+				setSubstitutionSystem[
+					patternRules,
+					initialSet,
+					fromStepsSpec[stepsSpec],
+					WolframModel,
+					property === "EvolutionObject",
+					Method -> OptionValue[Method],
+					TimeConstraint -> OptionValue[TimeConstraint],
+					"EventOrderingFunction" -> OptionValue["EventOrderingFunction"]],
+				$Failed],
 			$Failed];
 		If[evolution === $Aborted, Return[$Aborted]];
 		renamedNodesEvolution = If[evolution =!= $Failed,
@@ -288,6 +306,9 @@ wolframModelRulesSpecQ[_] := False
 
 
 wolframModelInitSpecQ[init_ ? ListQ] := True
+
+
+wolframModelInitSpecQ[Automatic] := True
 
 
 wolframModelInitSpecQ[_] := False

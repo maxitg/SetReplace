@@ -3,7 +3,7 @@ Needs["PacletManager`"];
 
 $internalBuildQ = AntProperty["build_target"] === "internal";
 
-If[PacletInformation["GitLink"] === {},
+If[PacletFind["GitLink", "Internal" -> All] === {},
   If[$internalBuildQ,
     PacletInstall["GitLink", "Site" -> "http://paclet-int.wolfram.com:8080/PacletServerInternal"],
     PacletInstall["https://www.wolframcloud.com/obj/maxp1/GitLink-2019.11.26.01.paclet"]];
