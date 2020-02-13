@@ -17,6 +17,15 @@
         {{1, 2, 3}} -> {{3, 4, 5}},
         {{1, 2, 3}} -> {{1, 2}, {2, 3}},
         {{1, 2, 3}} -> {{2, 3}, {3, 4}}};
+
+      aspectRatio[{{xMin_, xMax_}, {yMin_, yMax_}}] := (yMax - yMin) / (xMax -xMin);
+
+      checkAspectRatio[graphics_, answer_, tolerance_, count_] := VerificationTest[
+        count <= Length[
+          Select[Abs[# - answer] <= tolerance &][
+            aspectRatio[CoordinateBounds[#[[1]]]] & /@
+              Select[Length[#[[1]]] == 5 && Abs[Norm[#[[1, 1]] - #[[-1, 1]]]] < 0.001 &] @
+                Cases[graphics, _Line, All]]]];
     ),
     "tests" -> {
       (* Symbol Leak *)
@@ -277,7 +286,53 @@
       VerificationTest[
         Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], _ ? ColorQ, All] =!=
           Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{4, 5, 6}}]], _ ? ColorQ, All]
-      ]
+      ],
+
+      (** RulePartsAspectRatio **)
+
+      With[{
+          rule = {{1, 3}} -> {{1, 2}, {2, 3}, {3, 4}, {3, 5}},
+          coordinatesNormal = {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {2, 0}, 4 -> {3, -1}, 5 -> {3, 1}},
+          coordaintesSquare = {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {2, 0}, 4 -> {3, -1.5}, 5 -> {3, 1.5}},
+          coordinatesFlipped = {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {2, 0}, 4 -> {3, -3}, 5 -> {3, 3}},
+          coordinatesHorizontal = {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {2, 0}, 4 -> {3, 0}, 5 -> {4, 0}},
+          coordinatesVertical = {1 -> {0, 0}, 2 -> {0, 1}, 3 -> {0, 2}, 4 -> {0, 3}, 5 -> {0, 4}}}, {
+        testUnevaluated[
+          RulePlot[WolframModel[rule], "RulePartsAspectRatio" -> #],
+          {RulePlot::invalidAspectRatio}
+        ] & /@ {-1, 0, "xxx", xxx},
+
+        VerificationTest[
+          SameQ @@ (ImageSizeRaw /.
+              Options[
+                  RulePlot[WolframModel[rule], VertexCoordinateRules -> coordinatesNormal, "RulePartsAspectRatio" -> #],
+                  ImageSizeRaw] & /@
+                {0.01, 0.1})
+        ],
+
+        Function[coordinates, checkAspectRatio[
+            RulePlot[WolframModel[rule], VertexCoordinateRules -> coordinates, "RulePartsAspectRatio" -> #],
+            #,
+            0.001,
+            2] & /@
+          {0.01, 0.1, 0.5, 0.8, 1, 1.2, 2, 10, 100}] /@ {coordinatesNormal, coordaintesSquare, coordinatesFlipped},
+
+        checkAspectRatio[RulePlot[WolframModel[rule], VertexCoordinateRules -> #1], #2, #3, 2] & @@@ {
+          {coordinatesNormal, 2 / 3, 0.1},
+          {coordaintesSquare, 1, 0.1},
+          {coordinatesFlipped, 2, 0.1},
+          {coordinatesHorizontal, 0.2, 0.1},
+          {coordinatesVertical, 5, 1}},
+
+        (* outer frame *)
+        checkAspectRatio[
+            RulePlot[WolframModel[Table[rule, #]], Frame -> True, VertexCoordinateRules -> #2], #3, 0.1, 1] & @@@ {
+          {1, coordinatesNormal, 1 / 3},
+          {2, coordinatesNormal, 1 / 6},
+          {1, coordaintesSquare, 1 / 2},
+          {2, coordaintesSquare, 1 / 4},
+          {3, coordaintesSquare, 1 / 6}}
+      }]
     }
   |>
 |>
