@@ -28,7 +28,7 @@ Options[WolframModelPlot] = Join[{
 	GraphHighlight -> {},
 	GraphHighlightStyle -> Red,
 	"HyperedgeRendering" -> "Polygons",
-	PlotStyle -> $plotStyleAutomatic,
+	PlotStyle -> Automatic,
 	VertexCoordinateRules -> {},
 	VertexLabels -> None,
 	VertexSize -> 0.06,
