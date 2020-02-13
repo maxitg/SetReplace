@@ -211,34 +211,24 @@
         {WolframModelPlot::invalidHighlight}
       ],
 
-      testUnevaluated[
-        WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {6}],
-        {WolframModelPlot::invalidHighlight}
-      ],
-
-      testUnevaluated[
-        WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1, 1}],
-        {WolframModelPlot::invalidHighlight}
-      ],
-
-      testUnevaluated[
-        WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {{1, 2}}],
-        {WolframModelPlot::invalidHighlight}
-      ],
-
       VerificationTest[
         Head[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}}]],
         Graphics
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}, {1, 2, 3}}]],
+        Head[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {6}]],
         Graphics
       ],
 
-      testUnevaluated[
-        WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}],
-        {WolframModelPlot::invalidHighlight}
+      VerificationTest[
+        Head[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2}}]],
+        Graphics
+      ],
+
+      VerificationTest[
+        Head[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}, {1, 2, 3}}]],
+        Graphics
       ],
 
       VerificationTest[
@@ -543,6 +533,8 @@
       }],
 
       testColorPresence[{{1}, {1, 2}, {2, 3, 4}}, {PlotStyle -> <|_List -> color|>}, {color}],
+
+      testColorAbsense[{{1}, {1, 2}, {2, 3, 4}}, {GraphHighlight -> {5}, GraphHighlightStyle -> color}, {color}],
 
       VerificationTest[
         Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, VertexSize -> 0.3]],
