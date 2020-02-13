@@ -48,6 +48,9 @@ RulePlot::notHypergraphRule =
 RulePlot::invalidSpacings =
   "Spacings `1` should be either a single number, or a two-by-two list.";
 
+RulePlot::invalidAspectRatio =
+  "RulePartsAspectRatio `1` should be a positive number.";
+
 (* Evaluation *)
 
 WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`CheckArgumentCount[wm, 1, 1]], opts___] :=
@@ -98,6 +101,7 @@ correctOptionsQ[args_, {opts___}] :=
   supportedOptionQ[RulePlot, Frame, {True, False, Automatic}, {opts}] &&
   correctEdgeTypeQ[OptionValue[RulePlot, {opts}, "EdgeType"]] &&
   correctSpacingsQ[{opts}] &&
+  correctRulePartsAspectRatioQ[OptionValue[RulePlot, {opts}, "RulePartsAspectRatio"]] &&
   correctWolframModelPlotOptionsQ[
     RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[WolframModelPlot]]]
 
@@ -113,6 +117,14 @@ correctSpacingsQ[opts_] := Module[{spacings, correctQ},
   If[!correctQ, Message[RulePlot::invalidSpacings, spacings]];
   correctQ
 ]
+
+correctRulePartsAspectRatioQ[Automatic] := True
+
+correctRulePartsAspectRatioQ[aspectRatio_] :=
+  If[NumericQ[aspectRatio] && aspectRatio > 0,
+    True,
+    Message[RulePlot::invalidAspectRatio, aspectRatio];
+    False]
 
 (* Implementation *)
 
