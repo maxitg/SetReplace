@@ -190,7 +190,7 @@
       VerificationTest[
         Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> #]],
         Graphics
-      ] & /@ {False, True},
+      ] & /@ {False, True, Automatic},
 
       testUnevaluated[
         RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> "Invalid"],
