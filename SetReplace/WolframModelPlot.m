@@ -162,7 +162,7 @@ correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	(And @@ (supportedOptionQ[head, ##, opts] & @@@ {
 			{"HyperedgeRendering", $hyperedgeRenderings}})) &&
 	correctCoordinateRulesQ[head, OptionValue[WolframModelPlot, opts, VertexCoordinateRules]] &&
-	correctHighlightQ[edges, OptionValue[WolframModelPlot, opts, GraphHighlight]] &&
+	correctHighlightQ[OptionValue[WolframModelPlot, opts, GraphHighlight]] &&
 	correctHighlightStyleQ[head, OptionValue[WolframModelPlot, opts, GraphHighlightStyle]] &&
 	correctSizeQ[head, "Vertex size", OptionValue[WolframModelPlot, opts, VertexSize]] &&
 	correctSizeQ[head, "Arrowhead length", OptionValue[WolframModelPlot, opts, "ArrowheadLength"]] &&
@@ -181,15 +181,10 @@ correctCoordinateRulesQ[head_, coordinateRules_] :=
 		True
 	]
 
-correctHighlightQ[edges : Except[Automatic], highlight_] := Module[{
-		vertices, validQ},
-	vertices = vertexList[edges];
-	validQ = ListQ[highlight];
-	If[!validQ, Message[WolframModelPlot::invalidHighlight, highlight]];
-	validQ
-]
-
-correctHighlightQ[Automatic, _] := True
+correctHighlightQ[highlight_] := (
+	If[!ListQ[highlight], Message[WolframModelPlot::invalidHighlight, highlight]];
+	ListQ[highlight]
+)
 
 correctHighlightStyleQ[head_, highlightStyle_] :=
 	If[ColorQ[highlightStyle], True, Message[head::invalidHighlightStyle, highlightStyle]; False]
@@ -413,9 +408,6 @@ drawEmbedding[
 			#[[2]] /. (h : (Point | Line | Polygon))[pts_] :> highlighted[h[pts], highlightedQ]] &,
 		embedding,
 		{2}];
-	If[AnyTrue[highlightCounts, # > 0 &],
-		Message[WolframModelPlot::invalidHighlight, highlight];
-		Throw[$Failed]];
 
 	vertexPoints = MapIndexed[
 		With[{style = styles[$vertexPoint][[#2[[1]]]]},
