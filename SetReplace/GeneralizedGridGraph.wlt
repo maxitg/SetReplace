@@ -21,6 +21,17 @@
       ],
 
       testUnevaluated[
+        GeneralizedGridGraph[{2, 3}, "$$$invalid$$$" -> 123],
+        {GeneralizedGridGraph::optx}
+      ],
+
+      (* same behavior as GridGraph *)
+      testUnevaluated[
+        GeneralizedGridGraph[{2, 3}, VertexCoordinates -> "$$$invalid$$$"],
+        {}
+      ],
+
+      testUnevaluated[
         GeneralizedGridGraph[1],
         {GeneralizedGridGraph::dimsNotList}
       ],
@@ -33,8 +44,12 @@
         {1 -> {"Directed", "Circular"}, 2, 3 -> x}},
 
       VerificationTest[
-        EmptyGraphQ[GeneralizedGridGraph[{0}]]
-      ],
+        EmptyGraphQ[#]
+      ] & /@ {
+        GeneralizedGridGraph[{0}],
+        GeneralizedGridGraph[{}],
+        GeneralizedGridGraph[{}, EdgeStyle -> {}],
+        GeneralizedGridGraph[{}, EdgeStyle -> {Red}]},
 
       VerificationTest[
         Through[{VertexList, EdgeList} @ GeneralizedGridGraph[#]],
@@ -115,7 +130,74 @@
               (UndirectedEdge | DirectedEdge) -> EuclideanDistance,
             0.999 < # < 1.001 &]
         ]
-      ] & /@ {{4, 6}, {6, 4}, {3, 3}, {45, 76}, {6 -> "Directed", 8}, {5, 8 -> "Directed"}, {7 -> "Directed", 2 -> "Directed"}}
+      ] & /@ {
+        {4, 6}, {6, 4}, {3, 3}, {45, 76}, {6 -> "Directed", 8}, {5, 8 -> "Directed"},
+        {7 -> "Directed", 2 -> "Directed"}},
+
+      VerificationTest[
+        Options[GeneralizedGridGraph[{3, 4, 5}, EdgeStyle -> Red], EdgeStyle],
+        {EdgeStyle -> {Red}}
+      ],
+
+      With[{edgeStyle = {
+          UndirectedEdge[1, 2] -> Red,
+          UndirectedEdge[3, 4] -> Blue,
+          UndirectedEdge[1, 3] -> Orange,
+          UndirectedEdge[2, 4] -> Black}},
+        VerificationTest[
+          Sort[EdgeStyle /. Options[GeneralizedGridGraph[{2, 2}, EdgeStyle -> edgeStyle], EdgeStyle][[1]]],
+          Sort[edgeStyle]
+        ]
+      ],
+
+      VerificationTest[
+        Options[GeneralizedGridGraph[{2}, EdgeStyle -> {UndirectedEdge[1, 2] -> Red}], EdgeStyle],
+        {EdgeStyle -> {UndirectedEdge[1, 2] -> Red}}
+      ],
+
+      VerificationTest[
+        Options[GeneralizedGridGraph[{2}, EdgeStyle -> {Red}], EdgeStyle],
+        {EdgeStyle -> {UndirectedEdge[1, 2] -> Red}}
+      ],
+
+      VerificationTest[
+        Sort[EdgeStyle /. Options[GeneralizedGridGraph[{3, 1}, EdgeStyle -> {Red, Blue}], EdgeStyle][[1]]],
+        Sort[{UndirectedEdge[1, 2] -> Red, UndirectedEdge[2, 3] -> Red}]
+      ],
+
+      VerificationTest[
+        Sort[EdgeStyle /. Options[
+          GeneralizedGridGraph[{1, 3}, EdgeStyle -> {UndirectedEdge[1, 2] -> Red, UndirectedEdge[2, 3] -> Blue}],
+          EdgeStyle][[1]]],
+        Sort[{UndirectedEdge[1, 2] -> Red, UndirectedEdge[2, 3] -> Blue}]
+      ],
+
+      VerificationTest[
+        Counts[
+            (EdgeStyle /.
+                Options[GeneralizedGridGraph[{3, 4, 5}, EdgeStyle -> {Red, Blue, Black}], EdgeStyle])[[All, 2]]] /@
+          {Red, Blue, Black},
+        {40, 45, 48}
+      ],
+
+      VerificationTest[
+        Sort[EdgeStyle /. Options[GeneralizedGridGraph[{2, 2}, EdgeStyle -> {Red, Blue}], EdgeStyle][[1]]],
+        Sort[{
+          UndirectedEdge[2, 4] -> Blue,
+          UndirectedEdge[1, 2] -> Red,
+          UndirectedEdge[3, 4] -> Red,
+          UndirectedEdge[1, 3] -> Blue}]
+      ],
+
+      VerificationTest[
+        Counts[
+            (EdgeStyle /. Options[
+              GeneralizedGridGraph[
+                {4 -> "Circular", 3 -> {"Circular", "Directed"}, 5}, EdgeStyle -> {Red, Blue, Green}],
+              EdgeStyle])[[All, 2]]] /@
+          {Red, Blue, Green},
+        {60, 60, 48}
+      ]
     }
   |>
 |>
