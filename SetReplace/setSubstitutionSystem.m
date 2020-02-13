@@ -30,9 +30,12 @@ PackageScope["$maxFinalExpressions"]
 PackageScope["$fixedPoint"]
 PackageScope["$timeConstraint"]
 
-
-PackageScope["$EventOrderingFunctionSequential"]
-PackageScope["$EventOrderingFunctionRandom"]
+PackageScope["$sortedExpressionIDs"]
+PackageScope["$reverseSortedExpressionIDs"]
+PackageScope["$expressionIDs"]
+PackageScope["$ruleIndex"]
+PackageScope["$forward"]
+PackageScope["$backward"]
 
 
 (* ::Section:: *)
@@ -157,12 +160,46 @@ setSubstitutionSystem[
 (*EventOrderingFunction is valid*)
 
 
-$EventOrderingFunctions = {"Sequential" -> $EventOrderingFunctionSequential, "Random" -> $EventOrderingFunctionRandom};
+$eventOrderingFunctions = <|
+	"OldestEdge" -> {$sortedExpressionIDs, $forward},
+	"LeastOldEdge" -> {$sortedExpressionIDs, $backward},
+	"LeastRecentEdge" -> {$reverseSortedExpressionIDs, $forward},
+	"NewestEdge" -> {$reverseSortedExpressionIDs, $backward},
+	"RuleOrdering" -> {$expressionIDs, $forward},
+	"ReverseRuleOrdering" -> {$expressionIDs, $backward},
+	"RuleIndex" -> {$ruleIndex, $forward},
+	"ReverseRuleIndex" -> {$ruleIndex, $backward},
+	"Random" -> Nothing (* Random is done automatically in C++ if no more sorting is available *)
+|>;
 
 
-setSubstitutionSystem[
-		rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
-	supportedOptionQ[caller, "EventOrderingFunction", $EventOrderingFunctions[[All, 1]], {o}] && False
+(*This applies only to C++ due to #158, WL code uses similar order but does not apply "LeastRecentEdge" correctly.*)
+$eventOrderingFunctionDefault = $eventOrderingFunctions /@ {"LeastRecentEdge", "RuleOrdering", "RuleIndex"};
+
+
+parseEventOrderingFunction[caller_, Automatic] := $eventOrderingFunctionDefault
+
+
+parseEventOrderingFunction[caller_, s_String] := parseEventOrderingFunction[caller, {s}]
+
+
+parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+		!FreeQ[func, "Random"] :=
+	parseEventOrderingFunction[caller, func[[1 ;; FirstPosition[func, "Random"][[1]] - 1]]]
+
+
+parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+		FreeQ[func, "Random"] :=
+	$eventOrderingFunctions /@ func
+
+
+General::invalidEventOrdering = "EventOrderingFunction `1` should be one of `2`, or a list of them by priority.";
+
+
+parseEventOrderingFunction[caller_, func_] := (
+	Message[caller::invalidEventOrdering, func, Keys[$eventOrderingFunctions]];
+	$Failed
+)
 
 
 (* ::Section:: *)
@@ -209,11 +246,18 @@ simpleRuleQ[___] := False
 Options[setSubstitutionSystem] = {
 	Method -> Automatic,
 	TimeConstraint -> Infinity,
-	"EventOrderingFunction" -> "Sequential"};
+	"EventOrderingFunction" -> Automatic};
 
 
 (* ::Text:: *)
 (*Switching code between WL and C++ implementations*)
+
+
+General::symbOrdering = "Custom event ordering functions are not supported for symbolic method.";
+
+General::symbNotImplemented =
+	"Custom event ordering functions are only available for local rules, " <>
+	"and only for sets of lists (hypergraphs).";
 
 
 setSubstitutionSystem[
@@ -225,11 +269,14 @@ setSubstitutionSystem[
 			o : OptionsPattern[]] /; stepSpecQ[caller, set, stepSpec] := Module[{
 		method = OptionValue[Method],
 		timeConstraint = OptionValue[TimeConstraint],
-		eventOrderingFunction = Replace[OptionValue["EventOrderingFunction"], $EventOrderingFunctions],
+		eventOrderingFunction = parseEventOrderingFunction[caller, OptionValue["EventOrderingFunction"]],
 		canonicalRules,
 		failedQ = False},
+	If[eventOrderingFunction === $Failed, Return[$Failed]];
+	If[OptionValue["EventOrderingFunction"] =!= Automatic && method === "Symbolic",
+		Message[caller::symbOrdering];
+		Return[$Failed]];
 	If[(timeConstraint > 0) =!= True, Return[$Failed]];
-	If[!MatchQ[eventOrderingFunction, Alternatives @@ $EventOrderingFunctions[[All, 2]]], Return[$Failed]];
 	canonicalRules = toCanonicalRules[rules];
 	If[MatchQ[method, Automatic | $cppMethod]
 			&& MatchQ[set, {{___}...}]
@@ -244,5 +291,8 @@ setSubstitutionSystem[
 			makeMessage[caller, "lowLevelNotImplemented"]]];
 	If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
 		$Failed,
-		setSubstitutionSystem$wl[caller, rules, set, stepSpec, returnOnAbortQ, timeConstraint, eventOrderingFunction]]
+		If[OptionValue["EventOrderingFunction"] =!= Automatic,
+			Message[caller::symbNotImplemented];
+			Return[$Failed]];
+		setSubstitutionSystem$wl[caller, rules, set, stepSpec, returnOnAbortQ, timeConstraint]]
 ]

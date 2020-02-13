@@ -373,6 +373,112 @@
         ]
       }],
 
+      VerificationTest[
+        WolframModel[
+          {{b, c}, {a, b}} -> {},
+          {{1, 2}, {3, 4}, {4, 5}, {2, 3}, {a, b}, {b, c}, {5, 6}},
+          <|"MaxEvents" -> 1|>,
+          "FinalState",
+          "EventOrderingFunction" -> #1],
+        #2
+      ] & @@@ {
+        {"OldestEdge", {{3, 4}, {4, 5}, {a, b}, {b, c}, {5, 6}}},
+        {"LeastOldEdge", {{1, 2}, {3, 4}, {4, 5}, {2, 3}, {5, 6}}},
+        {"LeastRecentEdge", {{1, 2}, {2, 3}, {a, b}, {b, c}, {5, 6}}},
+        {"NewestEdge", {{1, 2}, {3, 4}, {2, 3}, {a, b}, {b, c}}},
+        {"RuleOrdering", {{1, 2}, {4, 5}, {a, b}, {b, c}, {5, 6}}},
+        {"ReverseRuleOrdering", {{1, 2}, {3, 4}, {2, 3}, {a, b}, {b, c}}}
+      },
+
+      Function[{ordering, result}, VerificationTest[
+          WolframModel[
+              <|"PatternRules" -> {{{1, 2}, {2, 3}} -> {{R1}}, {{4, 5}, {5, 6}} -> {{R2}}}|>,
+              #,
+              <|"MaxEvents" -> 1|>,
+              "FinalState",
+              "EventOrderingFunction" -> ordering][[-1, 1]] & /@
+            Permutations[{{1, 2}, {2, 3}, {4, 5}, {5, 6}}],
+          result
+      ]] @@@ {
+        {"OldestEdge",
+          {R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2}},
+        {"LeastOldEdge",
+          {R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1}},
+        {"LeastRecentEdge",
+          {R1, R1, R1, R2, R1, R2, R1, R1, R1, R2, R1, R2, R1, R2, R1, R2, R2, R2, R1, R2, R1, R2, R2, R2}},
+        {"NewestEdge",
+          {R2, R2, R2, R1, R2, R1, R2, R2, R2, R1, R2, R1, R2, R1, R2, R1, R1, R1, R2, R1, R2, R1, R1, R1}},
+        {"RuleOrdering",
+          {R1, R1, R1, R1, R1, R1, R1, R1, R2, R2, R1, R2, R2, R2, R2, R2, R2, R2, R1, R1, R1, R2, R2, R2}},
+        {"ReverseRuleOrdering",
+          {R2, R2, R2, R2, R2, R2, R2, R2, R1, R1, R2, R1, R1, R1, R1, R1, R1, R1, R2, R2, R2, R1, R1, R1}},
+        {"RuleIndex",
+          {R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1, R1}},
+        {"ReverseRuleIndex",
+          {R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2, R2}}
+      },
+
+      Function[{ordering, result}, VerificationTest[
+        WolframModel[
+            <|"PatternRules" -> {{1, 2, x_}, {1, 2, z_}} :> {{x, z}}|>,
+            #,
+            <|"MaxEvents" -> 1|>,
+            "FinalState",
+            "EventOrderingFunction" -> ordering][[-1]] & /@
+          Permutations[{{1, 2, x}, {1, 2, y}, {1, 2, z}}],
+        result
+      ]] @@@ {
+        {{"OldestEdge", "RuleOrdering"}, {{x, y}, {x, z}, {y, x}, {y, z}, {z, x}, {z, y}}},
+        {"RuleOrdering", {{x, y}, {x, z}, {y, x}, {y, z}, {z, x}, {z, y}}},
+        {{"OldestEdge", "ReverseRuleOrdering"}, {{y, x}, {z, x}, {x, y}, {z, y}, {x, z}, {y, z}}}
+      },
+
+      Function[{ordering, result}, VerificationTest[
+        WolframModel[
+            <|"PatternRules" -> {{{1, 2, x_}, {1, 3, z_}} :> {{1, x, z}}, {{1, 2, x_}, {1, 2, z_}} :> {{2, x, z}}}|>,
+            #,
+            <|"MaxEvents" -> 1|>,
+            "FinalState",
+            "EventOrderingFunction" -> ordering][[-1]] & /@
+          Permutations[{{1, 2, x}, {1, 2, y}, {1, 3, z}}],
+        result
+      ]] @@@ {
+        {{"OldestEdge", "RuleOrdering"}, {{2, x, y}, {1, x, z}, {2, y, x}, {1, y, z}, {1, x, z}, {1, y, z}}},
+        {{"RuleIndex", "RuleOrdering"}, {{1, x, z}, {1, x, z}, {1, y, z}, {1, y, z}, {1, x, z}, {1, y, z}}},
+        {{"ReverseRuleIndex", "ReverseRuleOrdering"},
+          {{2, y, x}, {2, y, x}, {2, x, y}, {2, x, y}, {2, y, x}, {2, x, y}}}
+      },
+
+      VerificationTest[
+        WolframModel[
+          {{{1, 2}, {2, 3}} -> {{1, 3}, {2, 4}, {4, 3}}, {{1, 1}, {2, 1}} -> {{1, 1}}},
+          {{2, 2}, {1, 4}, {4, 2}, {1, 2}, {3, 5}, {5, 2}},
+          <|"MaxEvents" -> 1|>,
+          "FinalState",
+          "EventOrderingFunction" -> #1],
+        #2
+      ] & @@@ {
+        {{"OldestEdge", "RuleOrdering"}, {{1, 4}, {1, 2}, {3, 5}, {5, 2}, {2, 2}}},
+        {{"OldestEdge", "ReverseRuleOrdering"}, {{1, 4}, {1, 2}, {3, 5}, {5, 2}, {4, 2}, {2, 6}, {6, 2}}},
+        {"LeastOldEdge", {{2, 2}, {1, 4}, {4, 2}, {1, 2}, {3, 2}, {5, 6}, {6, 2}}},
+        {{"LeastRecentEdge", "RuleOrdering"}, {{1, 4}, {1, 2}, {3, 5}, {5, 2}, {2, 2}}}
+      },
+
+      VerificationTest[
+        Length[
+          Counts[
+            Table[
+              SeedRandom[k];
+              WolframModel[
+                {{1, 2}, {1, 3}} -> {{2, 3}},
+                {{1, 2}, {1, 3}, {1, 4}, {1, 5}, {1, 6}},
+                <|"MaxEvents" -> 1|>,
+                "FinalState",
+                "EventOrderingFunction" -> "OldestEdge"][[-1]],
+              {k, 100}]]],
+        2
+      ],
+
       (** Potential variable collision between different rule inputs and outputs **)
       VerificationTest[
         WolframModel[
