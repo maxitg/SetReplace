@@ -29,10 +29,12 @@ Protect[RulePlot];
 $vertexSize = 0.1;
 $arrowheadsLength = 0.3;
 $graphPadding = Scaled[0.1];
-$ruleSidesSpacing = 0.2;
+$ruleSidesSpacing = 0.13;
 
-$arrowStyle = Directive[Thick, GrayLevel[0.5]];
-$rulePartsFrameStyle = GrayLevel[0.5]
+$arrowStyle = GrayLevel[0.65];
+$rulePartsFrameStyle = GrayLevel[0.7];
+
+$imageSizeScale = 128;
 
 (* Messages *)
 
@@ -156,20 +158,24 @@ rulePlot[
     frameQ_,
     frameStyle_,
     spacings_,
-    graphicsOpts_] :=
+    graphicsOpts_] := Module[{singlePlots, shapes, plotRange},
+  singlePlots =
+    singleRulePlot[edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, spacings] /@
+      rules;
+  {shapes, plotRange} = graphicsRiffle[
+    singlePlots[[All, 1]],
+    singlePlots[[All, 2]],
+    {},
+    {{0, 1}, {0, 1}},
+    0,
+    0.01,
+    If[frameQ === True || (frameQ === Automatic && Length[rules] > 1), frameStyle, None]];
   Graphics[
-      First[
-        graphicsRiffle[
-          #[[All, 1]],
-          #[[All, 2]],
-          {},
-          {{0, 1}, {0, 1}},
-          0,
-          0.01,
-          If[frameQ === True || (frameQ === Automatic && Length[rules] > 1), frameStyle, None]]],
-      graphicsOpts] & @
-    (singleRulePlot[edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, spacings] /@
-        rules)
+    shapes,
+    graphicsOpts,
+    PlotRange -> plotRange,
+    ImageSizeRaw -> $imageSizeScale (plotRange[[1, 2]] - plotRange[[1, 1]])]
+]
 
 (* returns {shapes, plotRange} *)
 singleRulePlot[
@@ -215,7 +221,12 @@ ruleCoordinateRules[edgeType_, hyperedgeRendering_, externalVertexCoordinateRule
 
 sharedRuleElements[in_ -> out_] := multisetIntersection @@ (Join[vertexList[#], #] & /@ {in, out})
 
-$ruleArrowShape = {Line[{{-1, 0.7}, {0, 0}, {-1, -0.7}}], Line[{{-1, 0}, {0, 0}}]};
+$arrow = FilledCurve[
+  {{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}}},
+  {{{-1., 0.1848}, {0.2991, 0.1848}, {-0.1531, 0.6363}, {0.109, 0.8982}, {1., 0.0034}, {0.109, -0.8982},
+    {-0.1531, -0.6363}, {0.2991, -0.1848}, {-1., -0.1848}, {-1., 0.1848}}}];
+$arrowLength = 0.22;
+$arrowPadding = 0.4;
 
 (* returns {shapes, plotRange} *)
 combinedRuleParts[sides_, plotRange_, spacings_] := Module[{maxRange, xRange, yRange, xDisplacement, frame, separator},
@@ -228,13 +239,13 @@ combinedRuleParts[sides_, plotRange_, spacings_] := Module[{maxRange, xRange, yR
     {xRange[[2]], yRange[[2]]},
     {xRange[[1]], yRange[[2]]},
     {xRange[[1]], yRange[[1]]}}]};
-  separator = {$arrowStyle, arrow[$ruleArrowShape, 0.15, 0][{{0.15, 0.5}, {0.85, 0.5}}]};
+  separator = {$arrowStyle, $arrow};
   graphicsRiffle[
     Append[#, frame] & /@ sides,
     ConstantArray[{xRange, yRange}, 2],
     separator,
-    {{0, 1}, {0, 1}},
-    0.5,
+    {{-1, 1}, {-1, 1}} (1 + $arrowPadding),
+    $arrowLength (1 + $arrowPadding),
     Replace[spacings, Automatic -> $ruleSidesSpacing],
     None]
 ]
@@ -243,7 +254,7 @@ aspectRatio[{{xMin_, xMax_}, {yMin_, yMax_}}] := (yMax - yMin) / (xMax - xMin)
 
 frame[{{xMin_, xMax_}, {yMin_, yMax_}}] := Line[{{xMin, yMin}, {xMax, yMin}, {xMax, yMax}, {xMin, yMax}, {xMin, yMin}}]
 
-$defaultGridColor = GrayLevel[0.8];
+$defaultGridColor = GrayLevel[0.85];
 
 (* returns {shapes, plotRange} *)
 graphicsRiffle[
