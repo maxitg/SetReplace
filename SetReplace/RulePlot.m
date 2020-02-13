@@ -8,7 +8,7 @@ $newOptions = {
   "HyperedgeRendering" -> "Polygons",
   VertexCoordinateRules -> {},
   VertexLabels -> None,
-  "RulePartsAspectRatio" -> 1
+  "RulePartsAspectRatio" -> Automatic
 };
 
 $allowedOptions = Join[
@@ -162,17 +162,17 @@ rulePlot[
     frameStyle_,
     spacings_,
     rulePartsAspectRatio_,
-    graphicsOpts_] := Module[{explicitSpacings, singlePlots, shapes, plotRange},
+    graphicsOpts_] := Module[{explicitSpacings, explicitAspectRatio, singlePlots, shapes, plotRange},
   explicitSpacings = toListSpacings[Replace[spacings, Automatic -> $ruleSidesSpacing]];
-  singlePlots =
-    singleRulePlot[
-        edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, explicitSpacings,
-        rulePartsAspectRatio] /@
-      rules;
+  hypergraphPlots =
+    rulePartsPlots[edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels] /@ rules;
+  explicitAspectRatio =
+    Replace[rulePartsAspectRatio, Automatic -> aspectRatioFromPlotRanges[hypergraphPlots[[All, 2]]]];
+  singlePlots = combinedRuleParts[#1[[All, 1]], #2, explicitSpacings, explicitAspectRatio] & @@@ hypergraphPlots;
   {shapes, plotRange} = graphicsRiffle[
     singlePlots[[All, 1]],
     singlePlots[[All, 2]],
-    Min[rulePartsAspectRatio, 1] + explicitSpacings[[2, 2]] + explicitSpacings[[2, 1]],
+    Min[explicitAspectRatio, 1] + explicitSpacings[[2, 2]] + explicitSpacings[[2, 1]],
     {},
     {{0, 1}, {0, 1}},
     0,
@@ -185,15 +185,28 @@ rulePlot[
     ImageSizeRaw -> $imageSizeScale (plotRange[[1, 2]] - plotRange[[1, 1]])]
 ]
 
-(* returns {shapes, plotRange} *)
-singleRulePlot[
+aspectRatio[{{xMin_, xMax_}, {yMin_, yMax_}}] := (yMax - yMin) / (xMax - xMin)
+
+$minAspectRatio = 0.2;
+$maxAspectRatio = 5.0;
+
+aspectRatioFromPlotRanges[plotRanges_] := Module[{
+    singleAspectRatios = aspectRatio /@ plotRanges, minMax},
+  minMax = MinMax[singleAspectRatios];
+  Switch[minMax,
+    _ ? (Max[#] < 1 &), Max[minMax, $minAspectRatio],
+    _ ? (Min[#] > 1 &), Min[minMax, $maxAspectRatio],
+    _, 1
+  ]
+]
+
+(* returns {{leftPlot, rightPlot}, plotRange} *)
+rulePartsPlots[
       edgeType_,
       graphHighlightStyle_,
       hyperedgeRendering_,
       externalVertexCoordinateRules_,
-      vertexLabels_,
-      spacings_,
-      rulePartsAspectRatio_][
+      vertexLabels_][
       rule_] := Module[{
     vertexCoordinateRules, ruleSidePlots, plotRange},
   vertexCoordinateRules = Join[
@@ -212,7 +225,7 @@ singleRulePlot[
     List @@ rule;
   plotRange =
     CoordinateBounds[Catenate[List @@ (Transpose[PlotRange[#]] & /@ ruleSidePlots)], $graphPadding];
-  combinedRuleParts[ruleSidePlots[[All, 1]], plotRange, spacings, rulePartsAspectRatio]
+  {ruleSidePlots, plotRange}
 ]
 
 connectedQ[edges_] := ConnectedGraphQ[Graph[UndirectedEdge @@@ Catenate[Partition[#, 2, 1] & /@ edges]]]
@@ -269,8 +282,6 @@ combinedRuleParts[sides_, plotRange_, spacings_, rulePartsAspectRatio_] := Modul
 toListSpacings[spacings_List] := spacings
 
 toListSpacings[spacings : Except[_List]] := ConstantArray[spacings, {2, 2}]
-
-aspectRatio[{{xMin_, xMax_}, {yMin_, yMax_}}] := (yMax - yMin) / (xMax - xMin)
 
 frame[{{xMin_, xMax_}, {yMin_, yMax_}}] := Line[{{xMin, yMin}, {xMax, yMin}, {xMax, yMax}, {xMin, yMax}, {xMin, yMin}}]
 
