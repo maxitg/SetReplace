@@ -52,7 +52,6 @@ SyntaxInformation[WolframModel] =
 
 Options[WolframModel] := Join[{
 	"VertexNamingFunction" -> Automatic,
-	"EventOrderingFunction" -> "Sequential", (* Possible values are "Sequential" and "Random" *)
 	"IncludePartialGenerations" -> True,
 	"IncludeBoundaryEvents" -> None},
 	Options[setSubstitutionSystem]];
