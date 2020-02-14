@@ -98,7 +98,7 @@ correctOptionsQ[args_, {opts___}] :=
   correctEdgeTypeQ[OptionValue[RulePlot, {opts}, "EdgeType"]] &&
   correctSpacingsQ[{opts}] &&
   correctWolframModelPlotOptionsQ[
-    RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[WolframModelPlot]]]
+    RulePlot, Defer[RulePlot[WolframModel[args], opts]], {{}}, FilterRules[{opts}, Options[WolframModelPlot]]]
 
 correctEdgeTypeQ[edgeType_] := If[MatchQ[edgeType, Alternatives @@ $edgeTypes],
   True,
@@ -217,7 +217,8 @@ layoutReferenceSide[in_, out_] := Module[{inConnectedQ, outConnectedQ},
 
 ruleCoordinateRules[edgeType_, hyperedgeRendering_, externalVertexCoordinateRules_, in_ -> out_] :=
   #[[1]] -> #[[2, 1, 1]] & /@
-    hypergraphEmbedding[edgeType, hyperedgeRendering, externalVertexCoordinateRules][layoutReferenceSide[in, out]][[1]]
+    hypergraphEmbedding[
+      edgeType, hyperedgeRendering, externalVertexCoordinateRules][{layoutReferenceSide[in, out]}][[1]]
 
 sharedRuleElements[in_ -> out_] := multisetIntersection @@ (Join[vertexList[#], #] & /@ {in, out})
 

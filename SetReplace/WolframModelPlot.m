@@ -106,40 +106,39 @@ wolframModelPlot$parse[
 )
 
 wolframModelPlot$parse[
-	edges : {$hypergraphPattern..}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
-		correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] :=
-	wolframModelPlot$parse[#, edgeType, o] & /@ edges
+		edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] :=
+	With[{result = wolframModelPlot$parse[{edges}, edgeType, o]}, If[result === $Failed, result, First[result]]]
 
 wolframModelPlot$parse[
-			edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
+			edges : {$hypergraphPattern..}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
 				correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] := Module[{
 		optionValue, plotStyles, edgeStyle, styles},
 	optionValue[opt_] := OptionValue[WolframModelPlot, {o}, opt];
-	vertices = vertexList[edges];
+	vertices = vertexList /@ edges;
 	(* these are lists, one style for each vertex element *)
-	styles = <|
+	styles = MapThread[<|
 		$vertexPoint -> Replace[
 			parseStyles[
 				optionValue[VertexStyle],
-				vertices,
-				parseStyles[optionValue[PlotStyle], vertices, <||>, Identity],
+				#1,
+				parseStyles[optionValue[PlotStyle], #1, <||>, Identity],
 				Directive[#, EdgeForm[Directive[GrayLevel[0], Opacity[0.95]]]] &],
 			Automatic -> $plotStyleAutomatic[$vertexPoint],
 			{1}],
 		$edgeLine -> (Replace[
 			edgeStyles = parseStyles[
 				optionValue[EdgeStyle],
-				edges,
-				parseStyles[optionValue[PlotStyle], edges, <||>, Identity],
+				#2,
+				parseStyles[optionValue[PlotStyle], #2, <||>, Identity],
 				Directive[#, Opacity[0.7]] &],
 			Automatic -> $plotStyleAutomatic[$edgeLine],
 			{1}]),
 		$edgePoint -> Replace[edgeStyles, Automatic -> $plotStyleAutomatic[$edgePoint], {1}],
 		$edgePolygon -> Replace[
 			parseStyles[
-				optionValue["EdgePolygonStyle"], edges, edgeStyles, Directive[#, Opacity[0.1], EdgeForm[None]] &],
+				optionValue["EdgePolygonStyle"], #2, edgeStyles, Directive[#, Opacity[0.1], EdgeForm[None]] &],
 			Automatic -> $plotStyleAutomatic[$edgePolygon],
-			{1}]|>;
+			{1}]|> &, {vertices, edges}];
 	wolframModelPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
 			(optionValue /@ {
 				GraphHighlight,
@@ -178,9 +177,17 @@ correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	correctSizeQ[head, "Arrowhead length", OptionValue[WolframModelPlot, opts, "ArrowheadLength"]] &&
 	correctPlotStyleQ[head, OptionValue[WolframModelPlot, opts, PlotStyle]] &&
 	correctStyleLengthQ[
-		head, "vertices", MatchQ[edges, {$hypergraphPattern...}], Length[vertexList[edges]], OptionValue[WolframModelPlot, opts, VertexStyle]] &&
+		head,
+		"vertices",
+		Length[edges] > 1,
+		Length[vertexList[First[edges]]],
+		OptionValue[WolframModelPlot, opts, VertexStyle]] &&
 	And @@ (correctStyleLengthQ[
-		head, "edges", MatchQ[edges, {$hypergraphPattern...}], Length[edges], OptionValue[WolframModelPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
+		head,
+		"edges",
+		Length[edges] > 1,
+		Length[First[edges]],
+		OptionValue[WolframModelPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
 
 correctCoordinateRulesQ[head_, coordinateRules_] :=
 	If[!MatchQ[coordinateRules,
@@ -243,17 +250,18 @@ wolframModelPlot[
 		vertexSize_,
 		arrowheadLength_,
 		maxImageSize_,
-		graphicsOptions_] := Catch[Module[{graphics, imageSizeScaleFactor},
-	graphics = drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, arrowheadLength] @
-		hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @
-		edges;
-	imageSizeScaleFactor = Min[1, 0.7 (#[[2]] - #[[1]])] & /@ PlotRange[graphics];
-	Show[
-		graphics,
+		graphicsOptions_] := Catch[Module[{embedding, graphics, imageSizeScaleFactor},
+	embedding = hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] /@ List /@ edges;
+	graphics = MapThread[
+		drawEmbedding[#2, vertexLabels, highlight, highlightColor, vertexSize, arrowheadLength][#1] &,
+		{embedding, styles}];
+	imageSizeScaleFactor = (Min[1, 0.7 (#[[2]] - #[[1]])] & /@ PlotRange[#]) & /@ graphics;
+	MapThread[Show[
+		#1,
 		graphicsOptions,
 		If[maxImageSize === Automatic,
-			ImageSizeRaw -> $imageSizeDefault imageSizeScaleFactor,
-			ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]]]
+			ImageSizeRaw -> $imageSizeDefault #2,
+			ImageSize -> adjustImageSize[maxImageSize, #2]]] &, {graphics, imageSizeScaleFactor}]
 ]]
 
 adjustImageSize[w_ ? NumericQ, {wScale_, hScale_}] := w wScale
@@ -280,7 +288,7 @@ hypergraphEmbedding[
 			edgeLayoutEdgeType_,
 			hyperedgeRendering : "Subgraphs",
 			coordinateRules_][
-			edges_] := Module[{
+			{edges_}] := Module[{
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
 	vertices = vertexList[edges];
 	{vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges} =
