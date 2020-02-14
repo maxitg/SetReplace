@@ -34,13 +34,15 @@ Options[WolframModelPlot] = Join[{
 	VertexSize -> 0.06,
 	"ArrowheadLength" -> 0.1,
 	VertexStyle -> Automatic, (* inherits from PlotStyle *)
-	"MaxImageSize" -> Automatic},
+	"MaxImageSize" -> Automatic,
+	"EmbeddingUnification" -> None},
 	Options[Graphics]];
 
 $edgeTypes = {"Ordered", "Cyclic"};
 $defaultEdgeType = "Ordered";
 $graphLayout = "SpringElectricalEmbedding";
 $hyperedgeRenderings = {"Subgraphs", "Polygons"};
+$embeddingUnifications = {None, "UnionGraph", "MasterGraph"}
 
 (* for compatibility reasons, we don't care for messages and unevaluated code to preserve HypergraphPlot *)
 HypergraphPlot::usage = usageString["HypergraphPlot is deprecated. Use WolframModelPlot."];
@@ -148,7 +150,8 @@ wolframModelPlot$parse[
 				VertexLabels,
 				VertexSize,
 				"ArrowheadLength",
-				"MaxImageSize"})
+				"MaxImageSize",
+				"EmbeddingUnification"})
 ]
 
 toListStyleSpec[Automatic, elements_] := toListStyleSpec[<||>, elements]
@@ -169,7 +172,7 @@ wolframModelPlot$parse[___] := $Failed
 correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	knownOptionsQ[head, expr, opts] &&
 	(And @@ (supportedOptionQ[head, ##, opts] & @@@ {
-			{"HyperedgeRendering", $hyperedgeRenderings}})) &&
+			{"HyperedgeRendering", $hyperedgeRenderings}, {"EmbeddingUnification", $embeddingUnifications}})) &&
 	correctCoordinateRulesQ[head, OptionValue[WolframModelPlot, opts, VertexCoordinateRules]] &&
 	correctHighlightQ[OptionValue[WolframModelPlot, opts, GraphHighlight]] &&
 	correctHighlightStyleQ[head, OptionValue[WolframModelPlot, opts, GraphHighlightStyle]] &&
@@ -250,11 +253,16 @@ wolframModelPlot[
 		vertexSize_,
 		arrowheadLength_,
 		maxImageSize_,
-		graphicsOptions_] := Catch[Module[{embedding, graphics, imageSizeScaleFactor},
-	embedding = hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] /@ List /@ edges;
+		embeddingUnification_,
+		graphicsOptions_] := Catch[Module[{embeddingFunction, embedding, graphics, imageSizeScaleFactor},
+	embeddingFunction = hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates];
+	embedding = If[embeddingUnification === "UnionGraph",
+		ConstantArray[embeddingFunction @ edges, Length[edges]],
+		embeddingFunction /@ List /@ edges];
 	graphics = MapThread[
-		drawEmbedding[#2, vertexLabels, highlight, highlightColor, vertexSize, arrowheadLength][#1] &,
-		{embedding, styles}];
+		drawEmbedding[#3, vertexLabels, highlight, highlightColor, vertexSize, arrowheadLength][
+			filterEmbedding[#2, #1]] &,
+		{edges, embedding, styles}];
 	imageSizeScaleFactor = (Min[1, 0.7 (#[[2]] - #[[1]])] & /@ PlotRange[#]) & /@ graphics;
 	MapThread[Show[
 		#1,
@@ -263,6 +271,11 @@ wolframModelPlot[
 			ImageSizeRaw -> $imageSizeDefault #2,
 			ImageSize -> adjustImageSize[maxImageSize, #2]]] &, {graphics, imageSizeScaleFactor}]
 ]]
+
+filterEmbedding[embedding_, edges_] := {
+	multisetFilterRules[embedding[[1]], vertexList[edges]],
+	multisetFilterRules[embedding[[2]], edges]
+}
 
 adjustImageSize[w_ ? NumericQ, {wScale_, hScale_}] := w wScale
 
@@ -288,13 +301,13 @@ hypergraphEmbedding[
 			edgeLayoutEdgeType_,
 			hyperedgeRendering : "Subgraphs",
 			coordinateRules_][
-			{edges_}] := Module[{
+			edges_] := Module[{
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
-	vertices = vertexList[edges];
+	vertices = vertexList[multisetUnion @@ edges];
 	{vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges} =
-		(toNormalEdges[#] /@ edges) & /@ {vertexLayoutEdgeType, edgeLayoutEdgeType};
+		(toNormalEdges[#] /@ (multisetUnion @@ edges)) & /@ {vertexLayoutEdgeType, edgeLayoutEdgeType};
 	normalToHypergraphEmbedding[
-		edges,
+		multisetUnion @@ edges,
 		edgeEmbeddingNormalEdges,
 		graphEmbedding[
 			vertices,
