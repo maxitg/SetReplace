@@ -7,7 +7,8 @@ $newOptions = {
   GraphHighlightStyle -> RGBColor[0.5, 0.5, 0.95],
   "HyperedgeRendering" -> "Polygons",
   VertexCoordinateRules -> {},
-  VertexLabels -> None
+  VertexLabels -> None,
+  "RulePartsAspectRatio" -> Automatic
 };
 
 $allowedOptions = Join[
@@ -47,6 +48,9 @@ RulePlot::notHypergraphRule =
 RulePlot::invalidSpacings =
   "Spacings `1` should be either a single number, or a two-by-two list.";
 
+RulePlot::invalidAspectRatio =
+  "RulePartsAspectRatio `1` should be a positive number.";
+
 (* Evaluation *)
 
 WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`CheckArgumentCount[wm, 1, 1]], opts___] :=
@@ -70,7 +74,7 @@ rulePlot$parse[{
         RulePlot,
         {opts},
         {"EdgeType", GraphHighlightStyle, "HyperedgeRendering", VertexCoordinateRules, VertexLabels, Frame, FrameStyle,
-          PlotLegends, Spacings}] /;
+          PlotLegends, Spacings, "RulePartsAspectRatio"}] /;
     correctOptionsQ[{rulesSpec, o}, {opts}]
 
 hypergraphRulesSpecQ[rulesSpec_List ? wolframModelRulesSpecQ] := Fold[# && hypergraphRulesSpecQ[#2] &, True, rulesSpec]
@@ -97,6 +101,7 @@ correctOptionsQ[args_, {opts___}] :=
   supportedOptionQ[RulePlot, Frame, {True, False, Automatic}, {opts}] &&
   correctEdgeTypeQ[OptionValue[RulePlot, {opts}, "EdgeType"]] &&
   correctSpacingsQ[{opts}] &&
+  correctRulePartsAspectRatioQ[OptionValue[RulePlot, {opts}, "RulePartsAspectRatio"]] &&
   correctWolframModelPlotOptionsQ[
     RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[WolframModelPlot]]]
 
@@ -113,6 +118,14 @@ correctSpacingsQ[opts_] := Module[{spacings, correctQ},
   correctQ
 ]
 
+correctRulePartsAspectRatioQ[Automatic] := True
+
+correctRulePartsAspectRatioQ[aspectRatio_] :=
+  If[NumericQ[aspectRatio] && aspectRatio > 0,
+    True,
+    Message[RulePlot::invalidAspectRatio, aspectRatio];
+    False]
+
 (* Implementation *)
 
 rulePlot[
@@ -126,11 +139,12 @@ rulePlot[
     frameStyle_,
     plotLegends_,
     spacings_,
+    rulePartsAspectRatio_,
     graphicsOpts_] :=
   If[PlotLegends === None, Identity, Legended[#, Replace[plotLegends, "Text" -> Placed[StandardForm[rules], Below]]] &][
     rulePlot[
       rules, edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
-        spacings, graphicsOpts]
+        spacings, rulePartsAspectRatio, graphicsOpts]
   ]
 
 rulePlot[
@@ -143,10 +157,11 @@ rulePlot[
     frameQ_,
     frameStyle_,
     spacings_,
+    rulePartsAspectRatio_,
     graphicsOpts_] :=
   rulePlot[
     {rule}, edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
-      spacings, graphicsOpts]
+      spacings, rulePartsAspectRatio, graphicsOpts]
 
 rulePlot[
     rules_List,
@@ -158,17 +173,22 @@ rulePlot[
     frameQ_,
     frameStyle_,
     spacings_,
-    graphicsOpts_] := Module[{singlePlots, shapes, plotRange},
-  singlePlots =
-    singleRulePlot[edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, spacings] /@
-      rules;
+    rulePartsAspectRatio_,
+    graphicsOpts_] := Module[{explicitSpacings, explicitAspectRatio, singlePlots, shapes, plotRange},
+  explicitSpacings = toListSpacings[Replace[spacings, Automatic -> $ruleSidesSpacing]];
+  hypergraphPlots =
+    rulePartsPlots[edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels] /@ rules;
+  explicitAspectRatio =
+    Replace[rulePartsAspectRatio, Automatic -> aspectRatioFromPlotRanges[hypergraphPlots[[All, 2]]]];
+  singlePlots = combinedRuleParts[#1[[All, 1]], #2, explicitSpacings, explicitAspectRatio] & @@@ hypergraphPlots;
   {shapes, plotRange} = graphicsRiffle[
     singlePlots[[All, 1]],
     singlePlots[[All, 2]],
+    Min[explicitAspectRatio, 1] + explicitSpacings[[2, 2]] + explicitSpacings[[2, 1]],
     {},
     {{0, 1}, {0, 1}},
     0,
-    0.01,
+    {{0.01, 0.01}, {0.01, 0.01}},
     If[frameQ === True || (frameQ === Automatic && Length[rules] > 1), frameStyle, None]];
   Graphics[
     shapes,
@@ -177,14 +197,28 @@ rulePlot[
     ImageSizeRaw -> $imageSizeScale (plotRange[[1, 2]] - plotRange[[1, 1]])]
 ]
 
-(* returns {shapes, plotRange} *)
-singleRulePlot[
+aspectRatio[{{xMin_, xMax_}, {yMin_, yMax_}}] := (yMax - yMin) / (xMax - xMin)
+
+$minAspectRatio = 0.2;
+$maxAspectRatio = 5.0;
+
+aspectRatioFromPlotRanges[plotRanges_] := Module[{
+    singleAspectRatios = aspectRatio /@ plotRanges, minMax},
+  minMax = MinMax[singleAspectRatios];
+  Switch[minMax,
+    _ ? (Max[#] < 1 &), Max[minMax, $minAspectRatio],
+    _ ? (Min[#] > 1 &), Min[minMax, $maxAspectRatio],
+    _, 1
+  ]
+]
+
+(* returns {{leftPlot, rightPlot}, plotRange} *)
+rulePartsPlots[
       edgeType_,
       graphHighlightStyle_,
       hyperedgeRendering_,
       externalVertexCoordinateRules_,
-      vertexLabels_,
-      spacings_][
+      vertexLabels_][
       rule_] := Module[{
     vertexCoordinateRules, ruleSidePlots, plotRange},
   vertexCoordinateRules = Join[
@@ -203,7 +237,7 @@ singleRulePlot[
     List @@ rule;
   plotRange =
     CoordinateBounds[Catenate[List @@ (Transpose[PlotRange[#]] & /@ ruleSidePlots)], $graphPadding];
-  combinedRuleParts[ruleSidePlots[[All, 1]], plotRange, spacings]
+  {ruleSidePlots, plotRange}
 ]
 
 connectedQ[edges_] := ConnectedGraphQ[Graph[UndirectedEdge @@@ Catenate[Partition[#, 2, 1] & /@ edges]]]
@@ -229,9 +263,15 @@ $arrowLength = 0.22;
 $arrowPadding = 0.4;
 
 (* returns {shapes, plotRange} *)
-combinedRuleParts[sides_, plotRange_, spacings_] := Module[{maxRange, xRange, yRange, xDisplacement, frame, separator},
-  maxRange = Max[plotRange[[1, 2]] - plotRange[[1, 1]], plotRange[[2, 2]] - plotRange[[2, 1]], 1];
-  {xRange, yRange} = Mean[#] + maxRange * {-0.5, 0.5} & /@ plotRange;
+combinedRuleParts[sides_, plotRange_, spacings_, rulePartsAspectRatio_] := Module[{
+    xScaleFactor, yScaleFactor, maxRange, xRange, yRange, xDisplacement, frame, separator},
+  xScaleFactor = Min[1, 1 / rulePartsAspectRatio];
+  yScaleFactor = Min[1, rulePartsAspectRatio];
+  maxRange = Max[
+    1 / xScaleFactor (plotRange[[1, 2]] - plotRange[[1, 1]]),
+    1 / yScaleFactor (plotRange[[2, 2]] - plotRange[[2, 1]]),
+    1];
+  {xRange, yRange} = MapThread[Mean[#] + maxRange * #2 * {-0.5, 0.5} &, {plotRange, {xScaleFactor, yScaleFactor}}];
   xDisplacement = 1.5 (xRange[[2]] - xRange[[1]]);
   frame = {$rulePartsFrameStyle, Line[{
     {xRange[[1]], yRange[[1]]},
@@ -243,14 +283,17 @@ combinedRuleParts[sides_, plotRange_, spacings_] := Module[{maxRange, xRange, yR
   graphicsRiffle[
     Append[#, frame] & /@ sides,
     ConstantArray[{xRange, yRange}, 2],
+    Min[rulePartsAspectRatio, 1],
     separator,
     {{-1, 1}, {-1, 1}} (1 + $arrowPadding),
     $arrowLength (1 + $arrowPadding),
-    Replace[spacings, Automatic -> $ruleSidesSpacing],
+    spacings,
     None]
 ]
 
-aspectRatio[{{xMin_, xMax_}, {yMin_, yMax_}}] := (yMax - yMin) / (xMax - xMin)
+toListSpacings[spacings_List] := spacings
+
+toListSpacings[spacings : Except[_List]] := ConstantArray[spacings, {2, 2}]
 
 frame[{{xMin_, xMax_}, {yMin_, yMax_}}] := Line[{{xMin, yMin}, {xMax, yMin}, {xMax, yMax}, {xMin, yMax}, {xMin, yMin}}]
 
@@ -260,42 +303,41 @@ $defaultGridColor = GrayLevel[0.85];
 graphicsRiffle[
       shapeLists_,
       plotRanges_,
+      height_,
       separator_,
       separatorPlotRange_,
       relativeSeparatorWidth_,
       spacings_,
       gridStyle_] := Module[{
-    scaledShapes, scaledSeparator, widthWithExtraSeparator, shapesWithExtraSeparator, totalWidth, explicitGridStyle,
-    explicitSpacings},
+    scaledShapes, scaledSeparator, widthWithExtraSeparator, shapesWithExtraSeparator, totalWidth, explicitGridStyle},
   scaledShapes = MapThread[
     Scale[
       Translate[#1, -#2[[All, 1]]],
-      1 / (#2[[2, 2]] - #2[[2, 1]]),
+      height / (#2[[2, 2]] - #2[[2, 1]]),
       {0, 0}] &,
     {shapeLists, plotRanges}];
   scaledSeparator = Scale[
-    Translate[separator, {0, 0.5} - {#[[1, 1]], (#[[2, 2]] + #[[2, 1]]) / 2} & @ separatorPlotRange],
+    Translate[separator, {0, 0.5 height} - {#[[1, 1]], (#[[2, 2]] + #[[2, 1]]) / 2} & @ separatorPlotRange],
     relativeSeparatorWidth / (separatorPlotRange[[1, 2]] - separatorPlotRange[[1, 1]]),
-    {0, 0.5}];
+    {0, 0.5 height}];
   explicitGridStyle = Replace[gridStyle, Automatic -> $defaultGridColor];
   {widthWithExtraSeparator, shapesWithExtraSeparator} = Reap[Fold[
-    With[{shapeWidth = 1 / aspectRatio[plotRanges[[#2]]]},
+    With[{shapeWidth = height / aspectRatio[plotRanges[[#2]]]},
       Sow[Translate[scaledShapes[[#2]], {#, 0}]];
       Sow[Translate[scaledSeparator, {# + shapeWidth, 0}]];
       If[gridStyle =!= None,
-        Sow[{explicitGridStyle, Line[{{#, 0}, {#, 1}}] & @ (# + shapeWidth + relativeSeparatorWidth / 2)}]];
+        Sow[{explicitGridStyle, Line[{{#, 0}, {#, height}}] & @ (# + shapeWidth + relativeSeparatorWidth / 2)}]];
       # + shapeWidth + relativeSeparatorWidth
     ] &,
     0,
     Range[Length[scaledShapes]]]];
   totalWidth = widthWithExtraSeparator - relativeSeparatorWidth;
-  explicitSpacings = If[!ListQ[spacings], ConstantArray[spacings, {2, 2}], spacings];
   {
     {
       Most[shapesWithExtraSeparator[[1]]],
-      If[gridStyle =!= None, {explicitGridStyle, frame[{{0, totalWidth}, {0, 1}}]}, Nothing]},
+      If[gridStyle =!= None, {explicitGridStyle, frame[{{0, totalWidth}, {0, height}}]}, Nothing]},
     {
-      {-explicitSpacings[[1, 1]], totalWidth + explicitSpacings[[1, 2]]},
-      {-explicitSpacings[[2, 1]], 1 + explicitSpacings[[2, 2]]}}
+      {-spacings[[1, 1]], totalWidth + spacings[[1, 2]]},
+      {-spacings[[2, 1]], height + spacings[[2, 2]]}}
   }
 ]

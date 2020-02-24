@@ -34,6 +34,16 @@ PackageScope["$terminationReason"]
 PackageScope["$eventRuleIDs"]
 
 
+$creatorEvents = "CreatorEvents";
+$destroyerEvents = "DestroyerEvents";
+$generations = "Generations";
+$atomLists = "AtomLists";
+$rules = "Rules";
+$maxCompleteGeneration = "MaxCompleteGeneration";
+$terminationReason = "TerminationReason";
+$eventRuleIDs = "EventRuleIDs";
+
+
 (* ::Section:: *)
 (*Documentation*)
 
