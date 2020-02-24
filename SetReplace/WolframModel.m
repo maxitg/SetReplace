@@ -424,5 +424,5 @@ WolframModel[
 (* ::Section:: *)
 (*Autocompletion*)
 
-With[{properties = $WolframModelProperties},
+With[{properties = $newParameterlessProperties},
 	FE`Evaluate[FEPrivate`AddSpecialArgCompletion["WolframModel" -> {0, 0, 0, properties}]]];
