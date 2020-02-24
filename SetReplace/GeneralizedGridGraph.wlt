@@ -32,6 +32,11 @@
       ],
 
       testUnevaluated[
+        GeneralizedGridGraph[{4, 5}, "VertexNamingFunction" -> "$$$invalid$$$"],
+        {GeneralizedGridGraph::invalidFiniteOption}
+      ],
+
+      testUnevaluated[
         GeneralizedGridGraph[1],
         {GeneralizedGridGraph::dimsNotList}
       ],
@@ -135,9 +140,9 @@
         {7 -> "Directed", 2 -> "Directed"}},
 
       VerificationTest[
-        Options[GeneralizedGridGraph[{3, 4, 5}, EdgeStyle -> Red], EdgeStyle],
+        Options[GeneralizedGridGraph[{3, 4, 5}, EdgeStyle -> Red, "VertexNamingFunction" -> #], EdgeStyle],
         {EdgeStyle -> {Red}}
-      ],
+      ] & /@ {Automatic, "Coordinates"},
 
       With[{edgeStyle = {
           UndirectedEdge[1, 2] -> Red,
@@ -175,10 +180,12 @@
       VerificationTest[
         Counts[
             (EdgeStyle /.
-                Options[GeneralizedGridGraph[{3, 4, 5}, EdgeStyle -> {Red, Blue, Black}], EdgeStyle])[[All, 2]]] /@
+              Options[
+                GeneralizedGridGraph[{3, 4, 5}, EdgeStyle -> {Red, Blue, Black}, "VertexNamingFunction" -> #],
+                EdgeStyle])[[All, 2]]] /@
           {Red, Blue, Black},
         {40, 45, 48}
-      ],
+      ] & /@ {Automatic, "Coordinates"},
 
       VerificationTest[
         Sort[EdgeStyle /. Options[GeneralizedGridGraph[{2, 2}, EdgeStyle -> {Red, Blue}], EdgeStyle][[1]]],
@@ -197,6 +204,26 @@
               EdgeStyle])[[All, 2]]] /@
           {Red, Blue, Green},
         {60, 60, 48}
+      ],
+
+      VerificationTest[
+        Sort[VertexList[GeneralizedGridGraph[{3, 4 -> "Directed", 5 -> "Circular"}]]],
+        Range[60]
+      ],
+
+      VerificationTest[
+        Sort[VertexList[GeneralizedGridGraph[{3}, "VertexNamingFunction" -> "Coordinates"]]],
+        {{1}, {2}, {3}}
+      ],
+
+      VerificationTest[
+        Sort[VertexList[GeneralizedGridGraph[{3, 4 -> "Directed"}, "VertexNamingFunction" -> "Coordinates"]]],
+        Tuples[{Range[3], Range[4]}]
+      ],
+
+      VerificationTest[
+        Sort[VertexList[GeneralizedGridGraph[{3, 4, 5 -> "Circular"}, "VertexNamingFunction" -> "Coordinates"]]],
+        Tuples[{Range[3], Range[4], Range[5]}]
       ]
     }
   |>

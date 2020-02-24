@@ -18,7 +18,9 @@ GeneralizedGridGraph::usage = usageString[
   "GeneralizedGridGraph[{`...`, \*SubscriptBox[`n`, `k`] -> {\"Circular\", \"Directed\"}, `...`}] makes the grid both ",
   "circular and directed."];
 
-Options[GeneralizedGridGraph] = Options[Graph];
+Options[GeneralizedGridGraph] = Join[Options[Graph], {"VertexNamingFunction" -> Automatic}];
+
+$vertexNamingFunctions = {Automatic (* IndexGraph *), "Coordinates"};
 
 SyntaxInformation[GeneralizedGridGraph] =
   {"ArgumentsPattern" -> {_, OptionsPattern[]}, "OptionNames" -> Options[GeneralizedGridGraph][[All, 1]]};
@@ -37,6 +39,9 @@ generalizedGridGraph[args___] /; !Developer`CheckArgumentCount[GeneralizedGridGr
 
 generalizedGridGraph[args_, opts___] /;
     !knownOptionsQ[GeneralizedGridGraph, Defer[GeneralizedGridGraph[args, opts]], {opts}] := Throw[$Failed]
+
+generalizedGridGraph[args_, opts___] /;
+    !supportedOptionQ[GeneralizedGridGraph, "VertexNamingFunction", $vertexNamingFunctions, {opts}] := Throw[$Failed]
 
 generalizedGridGraph[dimSpecs_List, opts___] := generalizedGridGraphExplicit[toExplicitDimSpec /@ dimSpecs, opts]
 
@@ -64,14 +69,16 @@ toExplicitDimSpec[originalSpec_, _ -> _List] := (
   Throw[$Failed];
 )
 
-generalizedGridGraphExplicit[dimSpecs_, opts___] := Module[{edges, directionalEdgeStyle},
+generalizedGridGraphExplicit[dimSpecs_, opts___] := Module[{
+    edgeStyle, vertexNamingFunction, edges, directionalEdgeStyle},
+  {edgeStyle, vertexNamingFunction} = OptionValue[GeneralizedGridGraph, {opts}, {EdgeStyle, "VertexNamingFunction"}];
   edges = singleDimensionEdges[dimSpecs, #] & /@ Range[Length[dimSpecs]];
-  directionalEdgeStyle = EdgeStyle -> If[ListQ[#] && Length[#] == Length[dimSpecs] && AllTrue[#, Head[#] =!= Rule &],
-      Catenate @ MapThread[Function[{dirEdges, style}, # -> style & /@ dirEdges], {edges, #}],
-      Nothing] & @
-    OptionValue[GeneralizedGridGraph, {opts}, EdgeStyle];
+  directionalEdgeStyle = EdgeStyle -> If[
+      ListQ[edgeStyle] && Length[edgeStyle] == Length[dimSpecs] && AllTrue[edgeStyle, Head[#] =!= Rule &],
+    Catenate @ MapThread[Function[{dirEdges, style}, # -> style & /@ dirEdges], {edges, edgeStyle}],
+    Nothing];
   If[GraphQ[#], #, Throw[$Failed]] & @ Graph[
-    IndexGraph @ Graph[
+    renameVertices[vertexNamingFunction] @ Graph[
       (* Reversal is needed to be consistent with "GridEmbedding" *)
       If[!ListQ[#], {}, #] & @ Flatten[Outer[v @@ Reverse[{##}] &, ##] & @@ Reverse[Range /@ dimSpecs[[All, 1]]]],
       Catenate[edges],
@@ -79,6 +86,10 @@ generalizedGridGraphExplicit[dimSpecs_, opts___] := Module[{edges, directionalEd
       directionalEdgeStyle],
     If[directionalEdgeStyle[[2]] === Nothing, {opts}, FilterRules[{opts}, Except[EdgeStyle]]]]
 ]
+
+renameVertices[Automatic][graph_] := IndexGraph[graph]
+
+renameVertices["Coordinates"][graph_] := VertexReplace[graph, v[coords___] :> {coords}]
 
 graphLayout[{{n1_, $$linear, _}, {n2_, $$linear, _}}] := {"GridEmbedding", "Dimension" -> {n1, n2}}
 
