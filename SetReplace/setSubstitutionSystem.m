@@ -38,6 +38,19 @@ PackageScope["$forward"]
 PackageScope["$backward"]
 
 
+(* ::Text:: *)
+(*Termination reason values*)
+
+
+$maxEvents = "MaxEvents";
+$maxGenerationsLocal = "MaxGenerationsLocal";
+$maxFinalVertices = "MaxFinalVertices";
+$maxFinalVertexDegree = "MaxFinalVertexDegree";
+$maxFinalExpressions = "MaxFinalExpressions";
+$fixedPoint = "FixedPoint";
+$timeConstraint = "TimeConstraint";
+
+
 (* ::Section:: *)
 (*Documentation*)
 
