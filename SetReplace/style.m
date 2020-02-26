@@ -102,16 +102,22 @@ $WolframPhysicsProjectPlotThemes::usage = usageString[
 $WolframPhysicsProjectPlotThemes = {$lightTheme};
 
 style[$lightTheme] = <|
+  (* Evolution object *)
   $evolutionObjectIcon -> $graphIcon,
+
+  (* Hypergraph diffs *)
   $destroyedEdgeStyle -> Directive[Hue[0.08, 0, 0.42], AbsoluteDashing[{1, 2}]],
   $createdEdgeStyle -> Directive[Hue[0.02, 0.94, 0.83], Thick],
   $destroyedAndCreatedEdgeStyle -> Directive[Hue[0.02, 0.94, 0.83], Thick, AbsoluteDashing[{1, 3}]],
+
+  (* Causal graph *)
   $causalGraphVertexStyle -> Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
   $causalGraphInitialVertexStyle ->
     Directive[RGBColor[{0.259, 0.576, 1}], EdgeForm[{RGBColor[{0.259, 0.576, 1}], Opacity[1]}]],
   $causalGraphFinalVertexStyle -> Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
   $causalGraphEdgeStyle -> Hue[0, 1, 0.56],
 
+  (* WolframModelPlot *)
   $vertexSize -> 0.06,
   $arrowheadLength -> 0.1,
   $edgeArrowheadShape -> Polygon[{
@@ -133,6 +139,7 @@ style[$lightTheme] = <|
   $hyperedgeRendering -> "Polygons",
   $wolframModelPlotImageSize -> {{360}, {420}},
 
+  (* RulePlot *)
   $sharedRuleElementsHighlight -> RGBColor[0.5, 0.5, 0.95],
   $ruleHyperedgeRendering -> "Polygons",
   $ruleVertexSize -> 0.1,
