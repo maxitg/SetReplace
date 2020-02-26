@@ -1,6 +1,9 @@
 Package["SetReplace`"]
 
+PackageExport["$WolframPhysicsProjectPlotThemes"]
+
 PackageScope["style"]
+PackageScope["$styleElements"]
 
 PackageScope["$lightTheme"]
 
@@ -46,9 +49,55 @@ PackageScope["$ruleArrowStyle"]
 PackageScope["$ruleGridColor"]
 PackageScope["$ruleImageSizePerPlotRange"]
 
+$evolutionObjectIcon = "EvolutionObjectIcon";
+$destroyedEdgeStyle = "DestroyedEdgeStyle";
+$createdEdgeStyle = "CreatedEdgeStyle";
+$destroyedAndCreatedEdgeStyle = "DestroyedAndCreatedEdgeStyle";
+$causalGraphVertexStyle = "CausalGraphVertexStyle";
+$causalGraphInitialVertexStyle = "CausalGraphInitialVertexStyle";
+$causalGraphFinalVertexStyle = "CausalGraphFinalVertexStyle";
+$causalGraphEdgeStyle = "CausalGraphEdgeStyle";
+
+$vertexSize = "VertexSize";
+$arrowheadLength = "ArrowheadLength";
+$edgeArrowheadShape = "EdgeArrowheadShape";
+$vertexStyle = "VertexStyle";
+$edgeLineStyle = "EdgeLineStyle";
+$edgePolygonStyle = "EdgePolygonStyle";
+$unaryEdgeStyle = "UnaryEdgeStyle";
+$vertexStyleFromPlotStyleDirective = "VertexStyleFromPlotStyleDirective";
+$edgeLineStyleFromPlotStyleDirective = "EdgeLineStyleFromPlotStyleDirective";
+$edgePolygonStyleFromEdgeStyleDirective = "EdgePolygonStyleFromEdgeStyleDirective";
+$highlightedVertexStyleDirective = "HighlightedVertexStyleDirective";
+$highlightedEdgeLineStyleDirective = "HighlightedEdgeLineStyleDirective";
+$highlightedUnaryEdgeStyleDirective = "HighlightedUnaryEdgeStyleDirective";
+$highlightedEdgePolygonStyleDirective = "HighlightedEdgePolygonStyleDirective";
+$highlightStyle = "HighlightStyle";
+$hyperedgeRendering = "HyperedgeRendering";
+$wolframModelPlotImageSize = "WolframModelPlotImageSize";
+
+$sharedRuleElementsHighlight = "SharedRuleElementHighlight";
+$ruleHyperedgeRendering = "RuleHyperedgeRendering";
+$ruleVertexSize = "RuleVertexSize";
+$ruleArrowheadLength = "RuleArrowheadLength";
+$rulePartsAspectRatio = "RulePartsAspectRatio";
+$rulePartsAspectRatioMin = "RulePartsAspectRatioMin";
+$rulePartsAspectRatioMax = "RulePartsAspectRatioMax";
+$ruleGraphPadding = "RuleGraphPadding";
+$ruleSidesSpacing = "RuleSidesSpacing";
+$rulePartsFrameStyle = "RulePartsFrameStyle";
+$ruleArrowShape = "RuleArrowShape";
+$ruleArrowLength = "RuleArrowLength";
+$ruleArrowPadding = "RuleArrowPadding";
+$ruleArrowStyle = "RuleArrowStyle";
+$ruleGridColor = "RuleGridColor";
+$ruleImageSizePerPlotRange = "RuleImageSizePerPlotRange";
+
 $lightTheme = "Light";
 
-$lightStyles = <|
+$WolframPhysicsProjectPlotThemes = {$lightTheme};
+
+style[$lightTheme] = <|
   $evolutionObjectIcon -> $graphIcon,
   $destroyedEdgeStyle -> Directive[Hue[0.08, 0, 0.42], AbsoluteDashing[{1, 2}]],
   $createdEdgeStyle -> Directive[Hue[0.02, 0.94, 0.83], Thick],
@@ -101,4 +150,4 @@ $lightStyles = <|
   $ruleImageSizePerPlotRange -> 128
 |>;
 
-style[$lightTheme] = $lightStyles;
+$styleElements = Keys[style[$lightTheme]];
