@@ -95,6 +95,10 @@ $ruleImageSizePerPlotRange = "RuleImageSizePerPlotRange";
 
 $lightTheme = "Light";
 
+$WolframPhysicsProjectPlotThemes::usage = usageString[
+  "$WolframPhysicsProjectPlotThemes gives the list of plot themes available for the Wolfram Physics Project."
+];
+
 $WolframPhysicsProjectPlotThemes = {$lightTheme};
 
 style[$lightTheme] = <|
