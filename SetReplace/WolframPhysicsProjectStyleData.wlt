@@ -7,18 +7,17 @@
     ),
     "tests" -> With[{
         themeExample = First @ $WolframPhysicsProjectPlotThemes,
-        elementExample = First @ Keys[WolframPhysicsProjectStyleData[]]}, {
+        groupExample = First @ Keys[WolframPhysicsProjectStyleData[]],
+        elementExample =
+          First @ Keys[WolframPhysicsProjectStyleData[First @ Keys[WolframPhysicsProjectStyleData[]]]],
+        secondGroupElementExample =
+          First @ Keys[WolframPhysicsProjectStyleData[Keys[WolframPhysicsProjectStyleData[]][[2]]]]}, {
       testSymbolLeak[
         WolframPhysicsProjectStyleData[]
       ],
 
       testSymbolLeak[
-        WolframPhysicsProjectStyleData[elementExample]
-      ],
-      
-      testUnevaluated[
-        WolframPhysicsProjectStyleData[themeExample, "VertexSize", 1],
-        {WolframPhysicsProjectStyleData::argb}
+        WolframPhysicsProjectStyleData[groupExample, elementExample]
       ],
 
       testUnevaluated[
@@ -27,8 +26,89 @@
       ],
 
       testUnevaluated[
+        WolframPhysicsProjectStyleData["$$invalid$$", "$$invalid$$"],
+        {WolframPhysicsProjectStyleData::invalidArg}
+      ],
+
+      testUnevaluated[
+        WolframPhysicsProjectStyleData["$$invalid$$", "$$invalid$$", "$$invalid$$"],
+        {WolframPhysicsProjectStyleData::invalidArg}
+      ],
+
+      testUnevaluated[
+        WolframPhysicsProjectStyleData["$$invalid$$", "$$invalid$$", "$$invalid$$", "$$invalid$$"],
+        {WolframPhysicsProjectStyleData::argb}
+      ],
+
+      VerificationTest[
+        AssociationQ @ WolframPhysicsProjectStyleData[themeExample]
+      ],
+
+      testUnevaluated[
         WolframPhysicsProjectStyleData[themeExample, "$$invalid$$"],
-        {WolframPhysicsProjectStyleData::invalidElement}
+        {WolframPhysicsProjectStyleData::invalidArg}
+      ],
+
+      testUnevaluated[
+        WolframPhysicsProjectStyleData[themeExample, "$$invalid$$", "$$invalid$$"],
+        {WolframPhysicsProjectStyleData::invalidArg}
+      ],
+
+      testUnevaluated[
+        WolframPhysicsProjectStyleData[themeExample, "$$invalid$$", "$$invalid$$", "$$invalid$$"],
+        {WolframPhysicsProjectStyleData::argb}
+      ],
+
+      VerificationTest[
+        AssociationQ @ WolframPhysicsProjectStyleData[groupExample]
+      ],
+
+      testUnevaluated[
+        WolframPhysicsProjectStyleData[groupExample, "$$invalid$$"],
+        {WolframPhysicsProjectStyleData::invalidArg}
+      ],
+
+      testUnevaluated[
+        WolframPhysicsProjectStyleData[groupExample, "$$invalid$$", "$$invalid$$"],
+        {WolframPhysicsProjectStyleData::invalidArg}
+      ],
+
+      testUnevaluated[
+        WolframPhysicsProjectStyleData[groupExample, "$$invalid$$", "$$invalid$$", "$$invalid$$"],
+        {WolframPhysicsProjectStyleData::argb}
+      ],
+
+      VerificationTest[
+        AssociationQ @ WolframPhysicsProjectStyleData[themeExample, groupExample]
+      ],
+
+      testUnevaluated[
+        WolframPhysicsProjectStyleData[themeExample, groupExample, "$$invalid$$"],
+        {WolframPhysicsProjectStyleData::invalidArg}
+      ],
+
+      testUnevaluated[
+        WolframPhysicsProjectStyleData[themeExample, groupExample, "$$invalid$$", "$$invalid$$"],
+        {WolframPhysicsProjectStyleData::argb}
+      ],
+
+      testUnevaluated[
+        WolframPhysicsProjectStyleData[
+          themeExample,
+          groupExample,
+          secondGroupElementExample],
+        {WolframPhysicsProjectStyleData::invalidArg}
+      ],
+
+      VerificationTest[
+        WolframPhysicsProjectStyleData[themeExample, groupExample, elementExample],
+        _,
+        SameTest -> MatchQ
+      ],
+
+      testUnevaluated[
+        WolframPhysicsProjectStyleData[themeExample, groupExample, elementExample, "$$invalid$$"],
+        {WolframPhysicsProjectStyleData::argb}
       ],
 
       VerificationTest[
@@ -36,28 +116,30 @@
       ],
 
       VerificationTest[
-        AssociationQ @ WolframPhysicsProjectStyleData[themeExample]
-      ],
-
-      VerificationTest[
-        Equal @@ Length /@ WolframPhysicsProjectStyleData /@ $WolframPhysicsProjectPlotThemes
+        Equal @@ Map[Keys, WolframPhysicsProjectStyleData /@ $WolframPhysicsProjectPlotThemes, {2}]
       ],
 
       VerificationTest[
         Head[WolframPhysicsProjectStyleData[
-            First @ $WolframPhysicsProjectPlotThemes, elementExample]] =!=
+            First @ $WolframPhysicsProjectPlotThemes, groupExample]] =!=
           WolframPhysicsProjectStyleData
       ],
 
       VerificationTest[
-        Head[WolframPhysicsProjectStyleData[elementExample]] =!=
+        Head[WolframPhysicsProjectStyleData[groupExample]] =!=
           WolframPhysicsProjectStyleData
       ],
 
       VerificationTest[
         MemberQ[
           WolframPhysicsProjectStyleData[],
-          WolframPhysicsProjectStyleData[elementExample]]
+          WolframPhysicsProjectStyleData[groupExample]]
+      ],
+
+      VerificationTest[
+        MemberQ[
+          WolframPhysicsProjectStyleData /@ $WolframPhysicsProjectPlotThemes,
+          WolframPhysicsProjectStyleData[]]
       ]
     }]
   |>,

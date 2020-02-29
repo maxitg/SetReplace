@@ -3,7 +3,7 @@ Package["SetReplace`"]
 PackageExport["$WolframPhysicsProjectPlotThemes"]
 
 PackageScope["style"]
-PackageScope["$styleElements"]
+PackageScope["$styleNames"]
 
 PackageScope["$lightTheme"]
 
@@ -49,49 +49,55 @@ PackageScope["$ruleArrowStyle"]
 PackageScope["$ruleGridColor"]
 PackageScope["$ruleImageSizePerPlotRange"]
 
-$evolutionObjectIcon = "EvolutionObjectIcon";
-$destroyedEdgeStyle = "DestroyedEdgeStyle";
-$createdEdgeStyle = "CreatedEdgeStyle";
-$destroyedAndCreatedEdgeStyle = "DestroyedAndCreatedEdgeStyle";
-$causalGraphVertexStyle = "CausalGraphVertexStyle";
-$causalGraphInitialVertexStyle = "CausalGraphInitialVertexStyle";
-$causalGraphFinalVertexStyle = "CausalGraphFinalVertexStyle";
-$causalGraphEdgeStyle = "CausalGraphEdgeStyle";
-
-$vertexSize = "VertexSize";
-$arrowheadLength = "ArrowheadLength";
-$edgeArrowheadShape = "EdgeArrowheadShape";
-$vertexStyle = "VertexStyle";
-$edgeLineStyle = "EdgeLineStyle";
-$edgePolygonStyle = "EdgePolygonStyle";
-$unaryEdgeStyle = "UnaryEdgeStyle";
-$vertexStyleFromPlotStyleDirective = "VertexStyleFromPlotStyleDirective";
-$edgeLineStyleFromPlotStyleDirective = "EdgeLineStyleFromPlotStyleDirective";
-$edgePolygonStyleFromEdgeStyleDirective = "EdgePolygonStyleFromEdgeStyleDirective";
-$highlightedVertexStyleDirective = "HighlightedVertexStyleDirective";
-$highlightedEdgeLineStyleDirective = "HighlightedEdgeLineStyleDirective";
-$highlightedUnaryEdgeStyleDirective = "HighlightedUnaryEdgeStyleDirective";
-$highlightedEdgePolygonStyleDirective = "HighlightedEdgePolygonStyleDirective";
-$highlightStyle = "HighlightStyle";
-$hyperedgeRendering = "HyperedgeRendering";
-$wolframModelPlotImageSize = "WolframModelPlotImageSize";
-
-$sharedRuleElementsHighlight = "SharedRuleElementHighlight";
-$ruleHyperedgeRendering = "RuleHyperedgeRendering";
-$ruleVertexSize = "RuleVertexSize";
-$ruleArrowheadLength = "RuleArrowheadLength";
-$rulePartsAspectRatio = "RulePartsAspectRatio";
-$rulePartsAspectRatioMin = "RulePartsAspectRatioMin";
-$rulePartsAspectRatioMax = "RulePartsAspectRatioMax";
-$ruleGraphPadding = "RuleGraphPadding";
-$ruleSidesSpacing = "RuleSidesSpacing";
-$rulePartsFrameStyle = "RulePartsFrameStyle";
-$ruleArrowShape = "RuleArrowShape";
-$ruleArrowLength = "RuleArrowLength";
-$ruleArrowPadding = "RuleArrowPadding";
-$ruleArrowStyle = "RuleArrowStyle";
-$ruleGridColor = "RuleGridColor";
-$ruleImageSizePerPlotRange = "RuleImageSizePerPlotRange";
+$styleNames = <|
+  "EvolutionObject" -> <|"Icon" -> $evolutionObjectIcon|>,
+  "SpatialGraph" -> <|
+    "DestroyedEdgeStyle" -> $destroyedEdgeStyle,
+    "CreatedEdgeStyle" -> $destroyedEdgeStyle,
+    "DestroyedAndCreatedEdgeStyle" -> $destroyedAndCreatedEdgeStyle,
+    "VertexSize" -> $vertexSize,
+    "ArrowheadLength" -> $arrowheadLength,
+    "EdgeArrowheadShape" -> $edgeArrowheadShape,
+    "VertexStyle" -> $vertexStyle,
+    "EdgeLineStyle" -> $edgeLineStyle,
+    "EdgePolygonStyle" -> $edgePolygonStyle,
+    "UnaryEdgeStyle" -> $unaryEdgeStyle,
+    "VertexStyleFromPlotStyleDirective" -> $vertexStyleFromPlotStyleDirective,
+    "EdgeLineStyleFromPlotStyleDirective" -> $edgeLineStyleFromPlotStyleDirective,
+    "EdgePolygonStyleFromEdgeStyleDirective" -> $edgePolygonStyleFromEdgeStyleDirective,
+    "HighlightedVertexStyleDirective" -> $highlightedVertexStyleDirective,
+    "HighlightedEdgeLineStyleDirective" -> $highlightedEdgeLineStyleDirective,
+    "HighlightedUnaryEdgeStyleDirective" -> $highlightedUnaryEdgeStyleDirective,
+    "HighlightedEdgePolygonStyleDirective" -> $highlightedEdgePolygonStyleDirective,
+    "HighlightStyle" -> $highlightStyle,
+    "HyperedgeRendering" -> $hyperedgeRendering,
+    "DefaultImageSize" -> $wolframModelPlotImageSize
+  |>,
+  "CausalGraph" -> <|
+    "VertexStyle" -> $causalGraphVertexStyle,
+    "InitialVertexStyle" -> $causalGraphInitialVertexStyle,
+    "FinalVertexStyle" -> $causalGraphFinalVertexStyle,
+    "EdgeStyle" -> $causalGraphEdgeStyle
+  |>,
+  "Rule" -> <|
+    "SharedElementHighlight" -> $sharedRuleElementsHighlight,
+    "HyperedgeRendering" -> $ruleHyperedgeRendering,
+    "VertexSize" -> $ruleVertexSize,
+    "ArrowheadLength" -> $ruleArrowheadLength,
+    "PartsAspectRatio" -> $rulePartsAspectRatio,
+    "PartsAspectRatioMin" -> $rulePartsAspectRatioMin,
+    "PartsAspectRatioMax" -> $rulePartsAspectRatioMax,
+    "GraphPadding" -> $ruleGraphPadding,
+    "SidesSpacing" -> $ruleSidesSpacing,
+    "PartsFrameStyle" -> $rulePartsFrameStyle,
+    "ArrowShape" -> $ruleArrowShape,
+    "ArrowLength" -> $ruleArrowLength,
+    "ArrowPadding" -> $ruleArrowPadding,
+    "ArrowStyle" -> $ruleArrowStyle,
+    "GridColor" -> $ruleGridColor,
+    "ImageSizePerPlotRange" -> $ruleImageSizePerPlotRange
+  |>
+|>;
 
 $lightTheme = "Light";
 
@@ -160,5 +166,3 @@ style[$lightTheme] = <|
   $ruleGridColor -> GrayLevel[0.85],
   $ruleImageSizePerPlotRange -> 128
 |>;
-
-$styleElements = Keys[style[$lightTheme]];
