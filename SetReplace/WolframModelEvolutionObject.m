@@ -90,7 +90,7 @@ WolframModelEvolutionObject /:
 	BoxForm`ArrangeSummaryBox[
 		WolframModelEvolutionObject,
 		evo,
-		$graphIcon,
+		style[$lightTheme][$evolutionObjectIcon],
 		(* Always grid *)
 		{{BoxForm`SummaryItem[{"Generations: ", generationsDisplay}]},
 		{BoxForm`SummaryItem[{"Events: ", eventsCount}]}},
@@ -621,11 +621,6 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 (*EventsStatesPlotsList*)
 
 
-$destroyedEdgeStyle = Directive[Hue[0.08, 0, 0.42], AbsoluteDashing[{1, 2}]];
-$createdEdgeStyle = Directive[Hue[0.02, 0.94, 0.83], Thick];
-$destroyedAndCreatedEdgeStyle = Directive[Hue[0.02, 0.94, 0.83], Thick, AbsoluteDashing[{1, 3}]];
-
-
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
 			obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
 			caller_,
@@ -654,9 +649,10 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
 						EdgeStyle -> ReplacePart[
 							Table[Automatic, Length[#]],
 							Join[
-								Thread[Position[#, Alternatives @@ #2][[All, 1]] -> $destroyedEdgeStyle],
-								Thread[Position[#, Alternatives @@ #3][[All, 1]] -> $createdEdgeStyle],
-								Thread[Position[#, Alternatives @@ #4][[All, 1]] -> $destroyedAndCreatedEdgeStyle]]]],
+								Thread[Position[#, Alternatives @@ #2][[All, 1]] -> style[$lightTheme][$destroyedEdgeStyle]],
+								Thread[Position[#, Alternatives @@ #3][[All, 1]] -> style[$lightTheme][$createdEdgeStyle]],
+								Thread[Position[#, Alternatives @@ #4][[All, 1]] ->
+									style[$lightTheme][$destroyedAndCreatedEdgeStyle]]]]],
 					Message[caller::nonHypergraphPlot, property],
 					WolframModelPlot::invalidEdges],
 				Throw[$Failed]] &,
@@ -765,13 +761,6 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 (*This produces a causal network for the system. This is a Graph with all events as vertices, and directed edges connecting them if the same event is a creator and a destroyer for the same expression (i.e., if two events are causally related).*)
 
 
-unicolorVertexStyle[color_] := Directive[color, EdgeForm[{color, Opacity[1]}]]
-$causalGraphVertexStyle = unicolorVertexStyle[Hue[0.11, 1, 0.97]];
-$causalGraphInitialVertexStyle = unicolorVertexStyle[RGBColor[{0.259, 0.576, 1}]];
-$causalGraphFinalVertexStyle = Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]];
-$causalGraphEdgeStyle = Hue[0, 1, 0.56];
-
-
 (* ::Subsubsection:: *)
 (*CausalGraph Implementation*)
 
@@ -792,8 +781,10 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 		Select[FreeQ[#, $eventsToDelete] &] @ Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
 		o,
 		VertexStyle -> Select[Head[#] =!= Rule || !MatchQ[#[[1]], $eventsToDelete] &] @ {
-			$causalGraphVertexStyle, 0 -> $causalGraphInitialVertexStyle, Infinity -> $causalGraphFinalVertexStyle},
-		EdgeStyle -> $causalGraphEdgeStyle]
+			style[$lightTheme][$causalGraphVertexStyle],
+			0 -> style[$lightTheme][$causalGraphInitialVertexStyle],
+			Infinity -> style[$lightTheme][$causalGraphFinalVertexStyle]},
+		EdgeStyle -> style[$lightTheme][$causalGraphEdgeStyle]]
 ]
 
 
@@ -815,9 +806,7 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 			"LayeredDigraphEmbedding",
 			"VertexLayerPosition" ->
 				(propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "TotalGenerationsCount"] -
-						propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "AllEventsGenerationsList"])},
-		VertexStyle -> $causalGraphVertexStyle,
-		EdgeStyle -> $causalGraphEdgeStyle
+						propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "AllEventsGenerationsList"])}
 	]
 
 
