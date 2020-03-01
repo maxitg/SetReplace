@@ -4,11 +4,11 @@ Package["SetReplace`"]
 
 $newOptions = {
   "EdgeType" -> "Ordered",
-  GraphHighlightStyle -> RGBColor[0.5, 0.5, 0.95],
-  "HyperedgeRendering" -> "Polygons",
+  GraphHighlightStyle -> style[$lightTheme][$sharedRuleElementsHighlight],
+  "HyperedgeRendering" -> style[$lightTheme][$ruleHyperedgeRendering],
   VertexCoordinateRules -> {},
   VertexLabels -> None,
-  "RulePartsAspectRatio" -> Automatic
+  "RulePartsAspectRatio" -> style[$lightTheme][$rulePartsAspectRatio]
 };
 
 $allowedOptions = Join[
@@ -24,18 +24,6 @@ SyntaxInformation[RulePlot] = Join[
   {"OptionNames" -> Join[("OptionNames" /. SyntaxInformation[RulePlot]), $newOptions[[All, 1]]]}
 ];
 Protect[RulePlot];
-
-(* Parameters *)
-
-$vertexSize = 0.1;
-$arrowheadsLength = 0.3;
-$graphPadding = Scaled[0.1];
-$ruleSidesSpacing = 0.13;
-
-$arrowStyle = GrayLevel[0.65];
-$rulePartsFrameStyle = GrayLevel[0.7];
-
-$imageSizeScale = 128;
 
 (* Messages *)
 
@@ -175,7 +163,7 @@ rulePlot[
     spacings_,
     rulePartsAspectRatio_,
     graphicsOpts_] := Module[{explicitSpacings, explicitAspectRatio, singlePlots, shapes, plotRange},
-  explicitSpacings = toListSpacings[Replace[spacings, Automatic -> $ruleSidesSpacing]];
+  explicitSpacings = toListSpacings[Replace[spacings, Automatic -> style[$lightTheme][$ruleSidesSpacing]]];
   hypergraphPlots =
     rulePartsPlots[edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels] /@ rules;
   explicitAspectRatio =
@@ -194,20 +182,17 @@ rulePlot[
     shapes,
     graphicsOpts,
     PlotRange -> plotRange,
-    ImageSizeRaw -> $imageSizeScale (plotRange[[1, 2]] - plotRange[[1, 1]])]
+    ImageSizeRaw -> style[$lightTheme][$ruleImageSizePerPlotRange] (plotRange[[1, 2]] - plotRange[[1, 1]])]
 ]
 
 aspectRatio[{{xMin_, xMax_}, {yMin_, yMax_}}] := (yMax - yMin) / (xMax - xMin)
-
-$minAspectRatio = 0.2;
-$maxAspectRatio = 5.0;
 
 aspectRatioFromPlotRanges[plotRanges_] := Module[{
     singleAspectRatios = aspectRatio /@ plotRanges, minMax},
   minMax = MinMax[singleAspectRatios];
   Switch[minMax,
-    _ ? (Max[#] < 1 &), Max[minMax, $minAspectRatio],
-    _ ? (Min[#] > 1 &), Min[minMax, $maxAspectRatio],
+    _ ? (Max[#] < 1 &), Max[minMax, style[$lightTheme][$rulePartsAspectRatioMin]],
+    _ ? (Min[#] > 1 &), Min[minMax, style[$lightTheme][$rulePartsAspectRatioMax]],
     _, 1
   ]
 ]
@@ -232,11 +217,12 @@ rulePartsPlots[
       "HyperedgeRendering" -> hyperedgeRendering,
       VertexCoordinateRules -> vertexCoordinateRules,
       VertexLabels -> vertexLabels,
-      VertexSize -> $vertexSize,
-      "ArrowheadLength" -> $arrowheadsLength] & /@
+      VertexSize -> style[$lightTheme][$ruleVertexSize],
+      "ArrowheadLength" -> style[$lightTheme][$ruleArrowheadLength]] & /@
     List @@ rule;
-  plotRange =
-    CoordinateBounds[Catenate[List @@ (Transpose[PlotRange[#]] & /@ ruleSidePlots)], $graphPadding];
+  plotRange = CoordinateBounds[
+    Catenate[List @@ (Transpose[PlotRange[#]] & /@ ruleSidePlots)],
+    style[$lightTheme][$ruleGraphPadding]];
   {ruleSidePlots, plotRange}
 ]
 
@@ -255,13 +241,6 @@ ruleCoordinateRules[edgeType_, hyperedgeRendering_, externalVertexCoordinateRule
 
 sharedRuleElements[in_ -> out_] := multisetIntersection @@ (Join[vertexList[#], #] & /@ {in, out})
 
-$arrow = FilledCurve[
-  {{{0, 2, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}, {0, 1, 0}}},
-  {{{-1., 0.1848}, {0.2991, 0.1848}, {-0.1531, 0.6363}, {0.109, 0.8982}, {1., 0.0034}, {0.109, -0.8982},
-    {-0.1531, -0.6363}, {0.2991, -0.1848}, {-1., -0.1848}, {-1., 0.1848}}}];
-$arrowLength = 0.22;
-$arrowPadding = 0.4;
-
 (* returns {shapes, plotRange} *)
 combinedRuleParts[sides_, plotRange_, spacings_, rulePartsAspectRatio_] := Module[{
     xScaleFactor, yScaleFactor, maxRange, xRange, yRange, xDisplacement, frame, separator},
@@ -273,20 +252,20 @@ combinedRuleParts[sides_, plotRange_, spacings_, rulePartsAspectRatio_] := Modul
     1];
   {xRange, yRange} = MapThread[Mean[#] + maxRange * #2 * {-0.5, 0.5} &, {plotRange, {xScaleFactor, yScaleFactor}}];
   xDisplacement = 1.5 (xRange[[2]] - xRange[[1]]);
-  frame = {$rulePartsFrameStyle, Line[{
+  frame = {style[$lightTheme][$rulePartsFrameStyle], Line[{
     {xRange[[1]], yRange[[1]]},
     {xRange[[2]], yRange[[1]]},
     {xRange[[2]], yRange[[2]]},
     {xRange[[1]], yRange[[2]]},
     {xRange[[1]], yRange[[1]]}}]};
-  separator = {$arrowStyle, $arrow};
+  separator = {style[$lightTheme][$ruleArrowStyle], style[$lightTheme][$ruleArrowShape]};
   graphicsRiffle[
     Append[#, frame] & /@ sides,
     ConstantArray[{xRange, yRange}, 2],
     Min[rulePartsAspectRatio, 1],
     separator,
-    {{-1, 1}, {-1, 1}} (1 + $arrowPadding),
-    $arrowLength (1 + $arrowPadding),
+    {{-1, 1}, {-1, 1}} (1 + style[$lightTheme][$ruleArrowPadding]),
+    style[$lightTheme][$ruleArrowLength] (1 + style[$lightTheme][$ruleArrowPadding]),
     spacings,
     None]
 ]
@@ -296,8 +275,6 @@ toListSpacings[spacings_List] := spacings
 toListSpacings[spacings : Except[_List]] := ConstantArray[spacings, {2, 2}]
 
 frame[{{xMin_, xMax_}, {yMin_, yMax_}}] := Line[{{xMin, yMin}, {xMax, yMin}, {xMax, yMax}, {xMin, yMax}, {xMin, yMin}}]
-
-$defaultGridColor = GrayLevel[0.85];
 
 (* returns {shapes, plotRange} *)
 graphicsRiffle[
@@ -320,7 +297,7 @@ graphicsRiffle[
     Translate[separator, {0, 0.5 height} - {#[[1, 1]], (#[[2, 2]] + #[[2, 1]]) / 2} & @ separatorPlotRange],
     relativeSeparatorWidth / (separatorPlotRange[[1, 2]] - separatorPlotRange[[1, 1]]),
     {0, 0.5 height}];
-  explicitGridStyle = Replace[gridStyle, Automatic -> $defaultGridColor];
+  explicitGridStyle = Replace[gridStyle, Automatic -> style[$lightTheme][$ruleGridColor]];
   {widthWithExtraSeparator, shapesWithExtraSeparator} = Reap[Fold[
     With[{shapeWidth = height / aspectRatio[plotRanges[[#2]]]},
       Sow[Translate[scaledShapes[[#2]], {#, 0}]];
