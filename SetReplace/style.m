@@ -49,7 +49,7 @@ PackageScope["$ruleArrowStyle"]
 PackageScope["$ruleGridColor"]
 PackageScope["$ruleImageSizePerPlotRange"]
 
-$styleNames = <|
+$styleNames = KeySort /@ KeySort @ <|
   "EvolutionObject" -> <|"Icon" -> $evolutionObjectIcon|>,
   "SpatialGraph" -> <|
     "DestroyedEdgeStyle" -> $destroyedEdgeStyle,
