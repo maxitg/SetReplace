@@ -10,7 +10,7 @@ WolframPhysicsProjectStyleData::usage = usageString[
   "WolframPhysicsProjectStyleData[`g`, `e`] gives a value for a particular style element `e` from group `g`.\n",
   "WolframPhysicsProjectStyleData[`theme`, `g`, `e`] gives a value for an element `e` from group `g` of `theme`."];
 
-SyntaxInformation[WolframPhysicsProjectStyleData] = {"ArgumentsPattern" -> {_. _.}};
+SyntaxInformation[WolframPhysicsProjectStyleData] = {"ArgumentsPattern" -> {_., _., _.}};
 
 $styleGroupNames = Keys[$styleNames];
 $styleElementNames = Catenate[Keys /@ Values @ $styleNames];
