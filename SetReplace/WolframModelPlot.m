@@ -15,10 +15,10 @@ WolframModelPlot::usage = usageString[
 SyntaxInformation[WolframModelPlot] = {"ArgumentsPattern" -> {_, _., OptionsPattern[]}};
 
 $plotStyleAutomatic = <|
-	$vertexPoint -> Directive[Hue[0.63, 0.26, 0.89], EdgeForm[Directive[Hue[0.63, 0.7, 0.33], Opacity[0.95]]]],
-	$edgeLine -> Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]],
-	$edgePoint -> Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]],
-	$edgePolygon -> Directive[Hue[0.63, 0.66, 0.81], Opacity[0.1], EdgeForm[None]]
+	$vertexPoint -> style[$lightTheme][$vertexStyle],
+	$edgeLine -> style[$lightTheme][$edgeLineStyle],
+	$edgePoint -> style[$lightTheme][$unaryEdgeStyle],
+	$edgePolygon -> style[$lightTheme][$edgePolygonStyle]
 |>;
 
 (* Automatic style pickes up, and possibly modifies the style it inherits from. *)
@@ -26,13 +26,13 @@ Options[WolframModelPlot] = Join[{
 	"EdgePolygonStyle" -> Automatic, (* inherits from EdgeStyle, with specified small opacity *)
 	EdgeStyle -> Automatic, (* inherits from PlotStyle *)
 	GraphHighlight -> {},
-	GraphHighlightStyle -> Red,
-	"HyperedgeRendering" -> "Polygons",
+	GraphHighlightStyle -> style[$lightTheme][$highlightStyle],
+	"HyperedgeRendering" -> style[$lightTheme][$hyperedgeRendering],
 	PlotStyle -> Automatic,
 	VertexCoordinateRules -> {},
 	VertexLabels -> None,
-	VertexSize -> 0.06,
-	"ArrowheadLength" -> 0.1,
+	VertexSize -> style[$lightTheme][$vertexSize],
+	"ArrowheadLength" -> style[$lightTheme][$arrowheadLength],
 	VertexStyle -> Automatic, (* inherits from PlotStyle *)
 	"MaxImageSize" -> Automatic},
 	Options[Graphics]];
@@ -123,7 +123,7 @@ wolframModelPlot$parse[
 				optionValue[VertexStyle],
 				vertices,
 				parseStyles[optionValue[PlotStyle], vertices, <||>, Identity],
-				Directive[#, EdgeForm[Directive[GrayLevel[0], Opacity[0.95]]]] &],
+				Directive[#, style[$lightTheme][$vertexStyleFromPlotStyleDirective]] &],
 			Automatic -> $plotStyleAutomatic[$vertexPoint],
 			{1}],
 		$edgeLine -> (Replace[
@@ -131,13 +131,16 @@ wolframModelPlot$parse[
 				optionValue[EdgeStyle],
 				edges,
 				parseStyles[optionValue[PlotStyle], edges, <||>, Identity],
-				Directive[#, Opacity[0.7]] &],
+				Directive[#, style[$lightTheme][$edgeLineStyleFromPlotStyleDirective]] &],
 			Automatic -> $plotStyleAutomatic[$edgeLine],
 			{1}]),
 		$edgePoint -> Replace[edgeStyles, Automatic -> $plotStyleAutomatic[$edgePoint], {1}],
 		$edgePolygon -> Replace[
 			parseStyles[
-				optionValue["EdgePolygonStyle"], edges, edgeStyles, Directive[#, Opacity[0.1], EdgeForm[None]] &],
+				optionValue["EdgePolygonStyle"],
+				edges,
+				edgeStyles,
+				Directive[#, style[$lightTheme][$edgePolygonStyleFromEdgeStyleDirective]] &],
 			Automatic -> $plotStyleAutomatic[$edgePolygon],
 			{1}]|>;
 	wolframModelPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
@@ -229,8 +232,6 @@ correctStyleLengthQ[__] := True
 
 (* Implementation *)
 
-$imageSizeDefault = {{360}, {420}};
-
 wolframModelPlot[
 		edges_,
 		edgeType_,
@@ -252,7 +253,7 @@ wolframModelPlot[
 		graphics,
 		graphicsOptions,
 		If[maxImageSize === Automatic,
-			ImageSizeRaw -> $imageSizeDefault imageSizeScaleFactor,
+			ImageSizeRaw -> style[$lightTheme][$wolframModelPlotImageSize] imageSizeScaleFactor,
 			ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]]]
 ]]
 
@@ -404,11 +405,6 @@ addConvexPolygons[edgeType_][edge_, subgraphsShapes_] := Module[{points, region,
 
 (** Drawing **)
 
-$arrowheadShape = Polygon[{
-	{-1.10196, -0.289756}, {-1.08585, -0.257073}, {-1.05025, -0.178048}, {-1.03171, -0.130243}, {-1.01512, -0.0824391},
-	{-1.0039, -0.037561}, {-1., 0.}, {-1.0039, 0.0341466}, {-1.01512, 0.0780486}, {-1.03171, 0.127805},
-	{-1.05025, 0.178538}, {-1.08585, 0.264878}, {-1.10196, 0.301464}, {0., 0.}, {-1.10196, -0.289756}}];
-
 drawEmbedding[
 			styles_,
 			vertexLabels_,
@@ -427,10 +423,10 @@ drawEmbedding[
 		{2}];
 
 	vertexPoints = MapIndexed[
-		With[{style = styles[$vertexPoint][[#2[[1]]]]},
+		With[{vertexStyle = styles[$vertexPoint][[#2[[1]]]]},
 			# /. {
 				highlighted[Point[p_], h_] :> {
-					If[h, Directive[highlightColor, EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]]], style],
+					If[h, Directive[highlightColor, style[$lightTheme][$highlightedVertexStyleDirective]], vertexStyle],
 					Disk[p, vertexSize]}}] &,
 		embeddingShapes[[1]]];
 
@@ -446,13 +442,13 @@ drawEmbedding[
 				pointStyle = styles[$edgePoint][[#2[[1]]]]},
 			# /. {
 				highlighted[Line[pts_], h_] :> Sow[{
-					If[h, Directive[Opacity[1], highlightColor], lineStyle],
-					arrow[$arrowheadShape, arrowheadLength, vertexSize][pts]}, $edgeLine],
+					If[h, Directive[style[$lightTheme][$highlightedEdgeLineStyleDirective], highlightColor], lineStyle],
+					arrow[style[$lightTheme][$edgeArrowheadShape], arrowheadLength, vertexSize][pts]}, $edgeLine],
 				highlighted[Polygon[pts_], h_] :> Sow[{
-					If[h, Directive[Opacity[0.3], highlightColor], polygonStyle],
+					If[h, Directive[style[$lightTheme][$highlightedEdgePolygonStyleDirective], highlightColor], polygonStyle],
 					Polygon[pts]}, $edgePolygon],
 				highlighted[Point[p_], h_] :> Sow[{
-					If[h, Directive[Opacity[1], highlightColor], pointStyle],
+					If[h, Directive[style[$lightTheme][$highlightedUnaryEdgeStyleDirective], highlightColor], pointStyle],
 					Circle[p, getSingleVertexEdgeRadius[p]]}, $edgePoint]}] &,
 		embeddingShapes[[2]]], {$edgeLine, $edgePolygon, $edgePoint}][[2, All]];
 
