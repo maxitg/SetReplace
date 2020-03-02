@@ -1,6 +1,9 @@
 Package["SetReplace`"]
 
+PackageExport["$WolframPhysicsProjectPlotThemes"]
+
 PackageScope["style"]
+PackageScope["$styleNames"]
 
 PackageScope["$lightTheme"]
 
@@ -46,19 +49,81 @@ PackageScope["$ruleArrowStyle"]
 PackageScope["$ruleGridColor"]
 PackageScope["$ruleImageSizePerPlotRange"]
 
+$styleNames = KeySort /@ KeySort @ <|
+  "EvolutionObject" -> <|"Icon" -> $evolutionObjectIcon|>,
+  "SpatialGraph" -> <|
+    "DestroyedEdgeStyle" -> $destroyedEdgeStyle,
+    "CreatedEdgeStyle" -> $destroyedEdgeStyle,
+    "DestroyedAndCreatedEdgeStyle" -> $destroyedAndCreatedEdgeStyle,
+    "VertexSize" -> $vertexSize,
+    "ArrowheadLength" -> $arrowheadLength,
+    "EdgeArrowheadShape" -> $edgeArrowheadShape,
+    "VertexStyle" -> $vertexStyle,
+    "EdgeLineStyle" -> $edgeLineStyle,
+    "EdgePolygonStyle" -> $edgePolygonStyle,
+    "UnaryEdgeStyle" -> $unaryEdgeStyle,
+    "VertexStyleFromPlotStyleDirective" -> $vertexStyleFromPlotStyleDirective,
+    "EdgeLineStyleFromPlotStyleDirective" -> $edgeLineStyleFromPlotStyleDirective,
+    "EdgePolygonStyleFromEdgeStyleDirective" -> $edgePolygonStyleFromEdgeStyleDirective,
+    "HighlightedVertexStyleDirective" -> $highlightedVertexStyleDirective,
+    "HighlightedEdgeLineStyleDirective" -> $highlightedEdgeLineStyleDirective,
+    "HighlightedUnaryEdgeStyleDirective" -> $highlightedUnaryEdgeStyleDirective,
+    "HighlightedEdgePolygonStyleDirective" -> $highlightedEdgePolygonStyleDirective,
+    "HighlightStyle" -> $highlightStyle,
+    "HyperedgeRendering" -> $hyperedgeRendering,
+    "DefaultImageSize" -> $wolframModelPlotImageSize
+  |>,
+  "CausalGraph" -> <|
+    "VertexStyle" -> $causalGraphVertexStyle,
+    "InitialVertexStyle" -> $causalGraphInitialVertexStyle,
+    "FinalVertexStyle" -> $causalGraphFinalVertexStyle,
+    "EdgeStyle" -> $causalGraphEdgeStyle
+  |>,
+  "Rule" -> <|
+    "SharedElementHighlight" -> $sharedRuleElementsHighlight,
+    "HyperedgeRendering" -> $ruleHyperedgeRendering,
+    "VertexSize" -> $ruleVertexSize,
+    "ArrowheadLength" -> $ruleArrowheadLength,
+    "PartsAspectRatio" -> $rulePartsAspectRatio,
+    "PartsAspectRatioMin" -> $rulePartsAspectRatioMin,
+    "PartsAspectRatioMax" -> $rulePartsAspectRatioMax,
+    "GraphPadding" -> $ruleGraphPadding,
+    "SidesSpacing" -> $ruleSidesSpacing,
+    "PartsFrameStyle" -> $rulePartsFrameStyle,
+    "ArrowShape" -> $ruleArrowShape,
+    "ArrowLength" -> $ruleArrowLength,
+    "ArrowPadding" -> $ruleArrowPadding,
+    "ArrowStyle" -> $ruleArrowStyle,
+    "GridColor" -> $ruleGridColor,
+    "ImageSizePerPlotRange" -> $ruleImageSizePerPlotRange
+  |>
+|>;
+
 $lightTheme = "Light";
 
-$lightStyles = <|
+$WolframPhysicsProjectPlotThemes::usage = usageString[
+  "$WolframPhysicsProjectPlotThemes gives the list of plot themes available for the Wolfram Physics Project."
+];
+
+$WolframPhysicsProjectPlotThemes = {$lightTheme};
+
+style[$lightTheme] = <|
+  (* Evolution object *)
   $evolutionObjectIcon -> $graphIcon,
+
+  (* Hypergraph diffs *)
   $destroyedEdgeStyle -> Directive[Hue[0.08, 0, 0.42], AbsoluteDashing[{1, 2}]],
   $createdEdgeStyle -> Directive[Hue[0.02, 0.94, 0.83], Thick],
   $destroyedAndCreatedEdgeStyle -> Directive[Hue[0.02, 0.94, 0.83], Thick, AbsoluteDashing[{1, 3}]],
+
+  (* Causal graph *)
   $causalGraphVertexStyle -> Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
   $causalGraphInitialVertexStyle ->
     Directive[RGBColor[{0.259, 0.576, 1}], EdgeForm[{RGBColor[{0.259, 0.576, 1}], Opacity[1]}]],
   $causalGraphFinalVertexStyle -> Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
   $causalGraphEdgeStyle -> Hue[0, 1, 0.56],
 
+  (* WolframModelPlot *)
   $vertexSize -> 0.06,
   $arrowheadLength -> 0.1,
   $edgeArrowheadShape -> Polygon[{
@@ -80,6 +145,7 @@ $lightStyles = <|
   $hyperedgeRendering -> "Polygons",
   $wolframModelPlotImageSize -> {{360}, {420}},
 
+  (* RulePlot *)
   $sharedRuleElementsHighlight -> RGBColor[0.5, 0.5, 0.95],
   $ruleHyperedgeRendering -> "Polygons",
   $ruleVertexSize -> 0.1,
@@ -100,5 +166,3 @@ $lightStyles = <|
   $ruleGridColor -> GrayLevel[0.85],
   $ruleImageSizePerPlotRange -> 128
 |>;
-
-style[$lightTheme] = $lightStyles;
