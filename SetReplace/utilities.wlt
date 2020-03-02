@@ -119,6 +119,10 @@
 
       VerificationTest[
         multisetUnion[],
+        {}
+      ],
+
+      VerificationTest[
         multisetUnion[{1, 2, 3}],
         {1, 2, 3}
       ],
