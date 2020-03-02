@@ -1,10 +1,13 @@
 <|
-  "ToPatternRules" -> <|
+  "utilities" -> <|
     "init" -> (
       Global`multisetComplement = SetReplace`PackageScope`multisetComplement;
       Global`multisetFilterRules = SetReplace`PackageScope`multisetFilterRules;
+      Global`multisetUnion = SetReplace`PackageScope`multisetUnion;
     ),
     "tests" -> {
+      (* multisetComplement *)
+
       VerificationTest[
         multisetComplement[{}, {}],
         {}
@@ -110,6 +113,44 @@
       VerificationTest[
         multisetFilterRules[{1 -> a, 2 -> b, 2 -> c, 2 -> d, {3, x} -> e, {3, x} -> f}, {2, 2, {3, x}, {3, x}}],
         {2 -> b, 2 -> c, {3, x} -> e, {3, x} -> f}
+      ],
+
+      (* multisetUnion *)
+
+      VerificationTest[
+        multisetUnion[],
+        multisetUnion[{1, 2, 3}],
+        {1, 2, 3}
+      ],
+
+      VerificationTest[
+        multisetUnion[{1, 2, 3, 3}],
+        {1, 2, 3, 3}
+      ],
+
+      VerificationTest[
+        multisetUnion[{1, 2, 3, 3}, {1, 3, 5}],
+        {1, 2, 3, 3, 5}
+      ],
+
+      VerificationTest[
+        multisetUnion[{1, 1, 2}, {1, 2, 2}],
+        {1, 1, 2, 2}
+      ],
+
+      VerificationTest[
+        multisetUnion[{1, 1, 2}, {1, 2, 2}, {1, 2, 3, 3}],
+        {1, 1, 2, 2, 3, 3}
+      ],
+
+      VerificationTest[
+        multisetUnion[{1, 1}, {}],
+        {1, 1}
+      ],
+
+      VerificationTest[
+        multisetUnion[{{1, 5}, {1, 4}, {1, 5}, 3, 5}, {{1, 5}, 2, 2, 3, 4}],
+        {{1, 5}, {1, 5}, {1, 4}, 3, 5, 2, 2, 4}
       ]
     }
   |>
