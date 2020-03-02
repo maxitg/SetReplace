@@ -18,6 +18,7 @@ PackageScope["propertyEvaluate"]
 
 
 PackageScope["$propertiesParameterless"]
+PackageScope["$newParameterlessProperties"]
 
 
 (* ::Text:: *)
@@ -178,6 +179,9 @@ $propertiesParameterless = Join[
   Keys @ Select[#[[1]] == 0 &] @ $propertyArgumentCounts,
   Select[First[$propertyArgumentCounts[$oldToNewPropertyNames[#]]] == 0 &] @ Keys[$oldToNewPropertyNames]
 ];
+
+
+$newParameterlessProperties = Intersection[$propertiesParameterless, Keys[$propertyArgumentCounts]];
 
 
 (* ::Subsection:: *)

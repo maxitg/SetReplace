@@ -419,3 +419,10 @@ WolframModel[
 		property : Except[OptionsPattern[]] ? (Not[wolframModelPropertyQ[#]] &),
 		o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] := 0 /;
 	Message[WolframModel::invalidProperty, property]
+
+
+(* ::Section:: *)
+(*Autocompletion*)
+
+With[{properties = $newParameterlessProperties},
+	FE`Evaluate[FEPrivate`AddSpecialArgCompletion["WolframModel" -> {0, 0, 0, properties}]]];
