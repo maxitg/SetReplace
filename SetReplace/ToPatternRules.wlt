@@ -123,6 +123,12 @@
           {{v[1], v[2]}, {v[2], v[3]}},
           ToPatternRules[{{v[1], v[2]}, {v[2], v[3]}} -> {{v[1], v[3]}}]],
         {{v[1], v[3]}}
+      ],
+
+      (** Renaming anonymous atoms does not affect names in the output #219 **)
+      VerificationTest[
+        ToPatternRules[{{1, 2}, {1, 3}} -> {{1, 2}, {1, 4}, {2, 4}, {3, 4}}],
+        ToPatternRules[{{x, y}, {x, z}} -> {{x, y}, {x, w}, {y, w}, {z, w}}]
       ]
     }
   |>
