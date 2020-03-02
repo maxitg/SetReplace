@@ -58,6 +58,12 @@ copyWLSourceToBuildDirectory[] /; !$internalBuildQ := With[{
   CopyFile[FileNameJoin[{$repoRoot, "SetReplace", #}], FileNameJoin[{$buildDirectory, #}]] & /@ files;
 ];
 
+fileStringReplace[file_, rules_] := Export[file, StringReplace[Import[file, "Text"], rules], "Text"]
+
+renameContext[newContext_] := fileStringReplace[#, "SetReplace`" -> newContext] & /@
+  (FileNameJoin[{$buildDirectory, #}] &) /@
+  Select[MatchQ[FileExtension[#], "m" | "wl"] &] @ Import[$buildDirectory]
+
 $baseVersionPacletMessage = "Will create paclet with the base version number.";
 updateVersion::noGitLink = "Could not find GitLink. " <> $baseVersionPacletMessage;
 
@@ -76,6 +82,7 @@ updateVersion[] /; Names["GitLink`*"] =!= {} := Module[{
     Return[]];
 
   Export[pacletInfoFilename, Paclet @@ Normal[Join[pacletInfo, <|Version -> versionString|>]]];
+  versionString
 ];
 
 updateVersion[] /; Names["GitLink`*"] === {} := Message[updateVersion::noGitLink];
