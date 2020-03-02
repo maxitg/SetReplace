@@ -101,8 +101,14 @@
         {WolframModelPlot::invalidEdges}
       ],
 
-      testUnevaluated[
+      VerificationTest[
         WolframModelPlot[{{}}],
+        {_Graphics},
+        SameTest -> MatchQ
+      ],
+
+      testUnevaluated[
+        WolframModelPlot[{{{}}}],
         {WolframModelPlot::invalidEdges}
       ],
 
@@ -653,7 +659,19 @@
           !AllTrue[sizes[[1, All, 2]], # > 29.9999 &] &&
           And @@ ((AllTrue[sizes[[2, All, #]] / sizes[[1, All, #]], 1.9999 < # < 2.0001 &] &) /@ {1, 2})
         ]
-      ]
+      ],
+
+      (* Multiple hypergraphs *)
+      VerificationTest[
+        Head /@ WolframModelPlot[{{{1, 2, 3}, {3, 4, 5}}, {{3, 4, 5}, {5, 6, 7}}, {{5, 6, 7}, {7, 8, 5}}}, ##],
+        {Graphics, Graphics, Graphics}
+      ] & @@@ {
+        {},
+        {GraphHighlight -> {3, {3, 4, 5}}},
+        {VertexSize -> 0.1, "ArrowheadLength" -> 0.2},
+        {EdgeStyle -> Red},
+        {VertexCoordinateRules -> {3 -> {0, 0}, 4 -> {1, 0}}}
+      }
     }
   |>
 |>

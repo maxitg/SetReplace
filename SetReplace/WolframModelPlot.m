@@ -51,7 +51,8 @@ HypergraphPlot = WolframModelPlot;
 (* Messages *)
 
 General::invalidEdges =
-	"First argument of WolframModelPlot must be list of lists, where elements represent vertices.";
+	"First argument of WolframModelPlot must be a hypergraph, i.e., a list of lists, " <>
+	"where elements represent vertices, or a list of such hypergraphs.";
 
 General::invalidEdgeType =
 	"Edge type `1` should be one of `2`.";
@@ -74,6 +75,9 @@ General::invalidPlotStyle =
 General::invalidStyleLength =
 	"The list of styles `1` should have the same length as the number of `2` `3`.";
 
+General::multigraphElementwiseStyle =
+	"The elementwise style specification `1` is not supported for lists of hypergraphs.";
+
 (* Evaluation *)
 
 func : WolframModelPlot[args___] := Module[{result = wolframModelPlot$parse[args]},
@@ -85,20 +89,26 @@ func : WolframModelPlot[args___] := Module[{result = wolframModelPlot$parse[args
 wolframModelPlot$parse[args___] /; !Developer`CheckArgumentCount[WolframModelPlot[args], 1, 2] := $Failed
 
 (* allow composite vertices, but not list-vertices *)
-$hypergraphPattern = h_List /; AllTrue[h, ListQ[#] && Length[#] > 0 &] && AllTrue[h, Not @* ListQ, 2];
+$hypergraphPattern = _List ? (Function[h, AllTrue[h, ListQ[#] && Length[#] > 0 &] && AllTrue[h, Not @* ListQ, 2]]);
+$multiHypergraphPattern = $hypergraphPattern | {$hypergraphPattern...};
 
-wolframModelPlot$parse[edges : Except[$hypergraphPattern], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
+wolframModelPlot$parse[edges : Except[$multiHypergraphPattern], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
 	Message[WolframModelPlot::invalidEdges];
 	$Failed
 )
 
 wolframModelPlot$parse[
-		edges : $hypergraphPattern,
+		edges : $multiHypergraphPattern,
 		edgeType : Except[Alternatives[Alternatives @@ $edgeTypes, OptionsPattern[]]],
 		o : OptionsPattern[]] := (
 	Message[WolframModelPlot::invalidEdgeType, edgeType, $edgeTypes];
 	$Failed
 )
+
+wolframModelPlot$parse[
+	edges : {$hypergraphPattern..}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
+		correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] :=
+	wolframModelPlot$parse[#, edgeType, o] & /@ edges
 
 wolframModelPlot$parse[
 			edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
@@ -171,9 +181,9 @@ correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	correctSizeQ[head, "Arrowhead length", OptionValue[WolframModelPlot, opts, "ArrowheadLength"]] &&
 	correctPlotStyleQ[head, OptionValue[WolframModelPlot, opts, PlotStyle]] &&
 	correctStyleLengthQ[
-		head, "vertices", Length[vertexList[edges]], OptionValue[WolframModelPlot, opts, VertexStyle]] &&
+		head, "vertices", MatchQ[edges, {$hypergraphPattern...}], Length[vertexList[edges]], OptionValue[WolframModelPlot, opts, VertexStyle]] &&
 	And @@ (correctStyleLengthQ[
-		head, "edges", Length[edges], OptionValue[WolframModelPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
+		head, "edges", MatchQ[edges, {$hypergraphPattern...}], Length[edges], OptionValue[WolframModelPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
 
 correctCoordinateRulesQ[head_, coordinateRules_] :=
 	If[!MatchQ[coordinateRules,
@@ -206,8 +216,15 @@ correctPlotStyleQ[head_, style_List] := (
 
 correctPlotStyleQ[__] := True
 
-correctStyleLengthQ[head_, name_, correctLength_, styles_List] /; Length[styles] =!= correctLength := (
+(* Single hypergraph *)
+correctStyleLengthQ[head_, name_, False, correctLength_, styles_List] /; Length[styles] =!= correctLength := (
 	Message[head::invalidStyleLength, styles, name, correctLength];
+	False
+)
+
+(* Multiple hypergraphs *)
+correctStyleLengthQ[head_, name_, True, correctLength_, styles_List] := (
+	Message[head::multigraphElementwiseStyle, styles];
 	False
 )
 
