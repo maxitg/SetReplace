@@ -84,7 +84,7 @@ toPatternRules[rule : _Rule, caller_] := Module[
 		 newLeft, leftVertices, rightVertices, rightOnlyVertices},
 	{leftSymbols, rightSymbols} =
 		Union[Cases[#, _ ? AtomQ, {0, 1}], Cases[#, _, {2}]] & /@ List @@ rule;
-	symbols = Union[leftSymbols, rightSymbols];
+	symbols = DeleteDuplicates @ Join[leftSymbols, rightSymbols];
 	newVertexNames =
 		ToHeldExpression /@ StringTemplate["v``"] /@ Range @ Length @ symbols;
 	vertexPatterns = Pattern[#, Blank[]] & /@ newVertexNames;
