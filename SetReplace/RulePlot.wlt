@@ -211,7 +211,7 @@
       VerificationTest[
         MemberQ[
           Cases[
-            RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], FrameStyle -> RGBColor[0.33, 0.66, 0.77]][[1]],
+            RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], FrameStyle -> RGBColor[0.33, 0.66, 0.77], Frame -> True][[1]],
             _ ? ColorQ,
             All],
           RGBColor[0.33, 0.66, 0.77]]
