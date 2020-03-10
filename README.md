@@ -266,6 +266,13 @@ Out[] = {{8, 1, 3}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}, {2, 13, 11}, {13, 7,
   6}, {7, 2, 9}, {7, 14, 6}, {14, 11, 4}, {11, 7, 8}}
 ```
 
+A particular generation can be extracted simply by number (including, i.e., -1 for the final state):
+![WolframModelBasicEvolution10[3]](READMEImages/WolframModelBasicEvolution10Generation3.png)
+```
+Out[] = {{6, 7, 2}, {8, 1, 3}, {4, 11, 7}, {11, 6, 9}, {6, 4, 8}, {5, 12,
+  1}, {12, 8, 10}, {8, 5, 4}}
+```
+
 If a property does not take any arguments, it can be specified directly in `WolframModel` as a shorthand:
 ```
 In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
@@ -299,7 +306,23 @@ In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {1, 2, 5, 3,
 Out[] = {{1, 2, 5, 3, 6}, {5, 3, 6, 3}, {6, 3, 8}, {8, 9}, {17}}
 ```
 
-### Initial Condition Specification
+### Automatic Initial State
+
+An initial state consistint of an appropriate number of (hyper) self-loops can be automatically produced for anonymous (non-pattern) rules (here we evolve the system for 0 steps and ask the evolution object for the 0-th generation aka the initial state).
+```
+In[] := WolframModel[{{1, 2}, {1, 2}} -> {{3, 2}, {3, 2}, {2, 1}, {1, 3}},
+  Automatic, 0][0]
+Out[] = {{1, 1}, {1, 1}}
+```
+
+That even works for multiple rules in which case the loops are chosen in such a way that any of the rules can match
+```
+In[] := WolframModel[{{{1, 2}, {1, 2}} -> {{3, 2}, {3, 2}, {2, 1, 3}, {2,
+      3}}, {{2, 1, 3}, {2, 3}} -> {{2, 1}, {1, 3}}}, Automatic, 0][0]
+Out[] = {{1, 1}, {1, 1}, {1, 1, 1}}
+```
+
+Note that because different patterns can be matched to the same symbol, this initial state is guaranteed to match the rules at least once (no guarantees after that).
 
 ### Step Limiters
 
