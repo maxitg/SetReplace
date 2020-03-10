@@ -1005,6 +1005,17 @@
         {1, 1}
       ],
 
+      (* #258 *)
+      VerificationTest[
+        WolframModel[
+          <|"PatternRules" -> {{{1, 2}} -> {{1, 4}}, {{1, 4}} -> {{1, 5}}, {{1, 3}} -> {{1, 6}}, {{1, 5}, {1, 6}} -> {}}|>,
+          {{1, 2}, {1, 3}},
+          Infinity,
+          "AllEventsGenerationsList",
+          "EventOrderingFunction" -> {"RuleIndex"}],
+        {1, 2, 1, 3}
+      ],
+
       (* CausalGraph *)
 
       Table[With[{type = type}, {

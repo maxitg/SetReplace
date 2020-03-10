@@ -747,9 +747,9 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 		Values @
 		KeySort @
 		KeyDrop[
-			Join[
-				Association[Thread[data[$creatorEvents] -> data[$generations]]],
-				Association[Thread[data[$destroyerEvents] -> data[$generations] + 1]]],
+			Merge[Max] @ Join[
+				Association /@ Thread[data[$creatorEvents] -> data[$generations]],
+				Association /@ Thread[data[$destroyerEvents] -> data[$generations] + 1]],
 			{0, Infinity}]
 
 
