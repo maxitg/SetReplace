@@ -157,6 +157,45 @@ Out[] = {{1, 2, 5, 3, 6}, {5, 3, 6, 3}, {6, 3, 8}, {8, 9}, {17}}
 
 All of these functions have `Method`, `TimeConstraint` and `"EventOrderingFunction"` options. `TimeConstraint` is self-evident, the other two work the same way as they do in `WolframModel` and will be described further in the `WolframModel` part of this README.
 
+## ToPatternRules
+
+`ToPatternRules` is a convenience function used to quickly enter rules such as the one mentioned previously
+```
+{{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
+ Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]
+```
+
+This is the type of rule we study the most, and it satisfies the following set of conditions:
+* Both input and output subsets consist of (ordered) lists of atoms (aka vertices).
+* The input (left-hand side) only contains patterns, it never refers to explicit vertex names.
+* The name of the vertex is only used to identify it, it does not contain any additional information. As such, there are no conditions specified on the left-hand side of the rule (neither on the entire subset, nor on individual vertices), except for the implicit condition of some vertices appearing multiple times in different lists.
+* The output may contain new vertices (i.e., the ones that don't appear on the left-hand side), in which case they are created with a `Module`.
+
+`ToPatternRules` provides a simpler way to specify such rules by automatically assuming that the level-2 expressions on the left-hand side are patterns, and that vertices used on the right which don't appear on the left are new and should be created with a `Module`. For example, the rule above can simply be written as
+```
+In[] := ToPatternRules[{{v1, v2, v3}, {v2, v4, v5}} -> {{v5, v6, v1}, {v6, v4,
+     v2}, {v4, v5, v3}}]
+Out[] = {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
+ Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]
+```
+or even simpler as
+```
+In[] := ToPatternRules[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
+     3}}]
+Out[] = {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
+ Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]
+```
+
+This last form of the rule is the one that we use most often, and is also the one that is accepted by `WolframModel` by default (more on that in `WolframModel` section).
+
+`ToPatternRules` is listable in a trivial way:
+```
+In[] := ToPatternRules[{{{1, 2}} -> {{1, 2}, {2, 3}}, {{1, 2}} -> {{1, 3}, {3,
+      2}}}]
+Out[] = {{{v1_, v2_}} :> Module[{v3}, {{v1, v2}, {v2, v3}}], {{v1_, v2_}} :>
+  Module[{v3}, {{v1, v3}, {v3, v2}}]}
+```
+
 ## Fundamental Physics
 
 A hypothesis is that space-time at the fundamental Planck scale might be represented as a network that can be produced by a system similar to the one this package implements.
