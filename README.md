@@ -190,16 +190,6 @@ On the other hand, Wolfram Language implementation `Method -> "WolframLanguage"`
 
 There are unit tests, but if you spend time studying a particular rule in detail, it is a good idea to evaluate it with both C++ and Wolfram Language implementations and check the results are the same. If results are different, create an issue, and assign `bug` and `P0` tags to it.
 
-## Other Functions
-
-There are other functions available, such as `SetReplaceAll`, `SetReplaceFixedPoint` and `SetReplaceList`. Only Wolfram Language implementations are available for these at the time. They all have usage strings, so just run
-```
-In[.] := ?SetReplace`*
-```
-![List of symbols](READMEImages/symbolList.png)
-
-to see the full list and explore.
-
 ## Rules with Complex Behaviors
 
 One example of an interesting system (credit to Stephen Wolfram) is
