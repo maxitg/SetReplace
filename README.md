@@ -98,6 +98,65 @@ Here `ClangCompiler` can be replaced with one of `"Compiler" /. CCompilers[Full]
 
 A less frequently updated version is available through the Wolfram's public paclet server and can be installed by running `PacletInstall["SetReplace"]`.
 
+# Symbols and Functions
+
+## SetReplace, SetReplaceList, SetReplaceAll, SetReplaceFixedPoint, SetReplaceFixedPointList
+
+`SetReplace` (and related `SetReplaceList`, `SetReplaceAll`, `SetReplaceFixedPoint` and `SetReplaceFixedPointList`) are the functions the package is named after. They are quite simple, don't have a lot of options, and simply perform replacement operations either one-at-a-time (as in the case of `SetReplace`), to all non-overlapping subsets (`SetReplaceAll`), or until no more matches can be made (`SetReplaceFixedPoint`). A suffix `*List` implies the function will return a set after each replacement instead of just the final result.
+
+These functions are good for their simplicity, but we don't use them much anymore as a more advanced `WolframModel` incorporates all of these features plus other utilities helpful for the exploration of our models.
+
+As was mentioned previously, `SetReplace` performs a single iteration if called with two arguments:
+```
+In[] := SetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> {a + b}]
+Out[] = {5, 3, 6, 3}
+```
+
+It can be supplied a third argument specifying the number of replacements (the same can be achieved using `Nest`):
+```
+In[] := SetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> {a + b}, 2]
+Out[] = {6, 3, 8}
+```
+
+If the number of replacements is set to `Infinity` calling `SetReplace` is equivalent to `SetReplaceFixedPoint`:
+```
+In[] := SetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> {a + b}, \[Infinity]]
+Out[] = {17}
+```
+
+It is possible to use multiple rules as well (here the subsets `{1, 5}` and then `{2, 6}` are replaced):
+```
+In[] := SetReplace[{1, 2, 5, 3,
+  6}, {{a_?EvenQ, b_?EvenQ} :> {a + b}, {a_?OddQ,
+    b_?OddQ} :> {a + b}}, 2]
+Out[] = {3, 6, 8}
+```
+
+`SetReplaceList` can be used to see the set after each replacement (here a list is omitted on the right-hand side of the rule, which can be done if the subset only contains a single element):
+```
+In[] := SetReplaceList[{1, 2, 5, 3, 6}, {a_, b_} :> a + b, \[Infinity]]
+Out[] = {{1, 2, 5, 3, 6}, {5, 3, 6, 3}, {6, 3, 8}, {8, 9}, {17}}
+```
+
+`SetReplaceAll` replaces all non-overlapping subsets:
+```
+In[] := SetReplaceAll[{1, 2, 5, 3, 6}, {a_, b_} :> a + b]
+Out[] = {6, 3, 8}
+```
+
+`SetReplaceFixedPoint` and `SetReplaceFixedPointList` perform replacements for as long as possible as previously mentioned:
+```
+In[] := SetReplaceFixedPoint[{1, 2, 5, 3, 6}, {a_, b_} :> a + b]
+Out[] = {17}
+```
+```
+In[] := SetReplaceFixedPointList[{1, 2, 5, 3, 6}, {a_, b_} :> a + b]
+Out[] = {{1, 2, 5, 3, 6}, {5, 3, 6, 3}, {6, 3, 8}, {8, 9}, {17}}
+
+```
+
+All of these functions have `Method`, `TimeConstraint` and `"EventOrderingFunction"` options. `TimeConstraint` is self-evident, the other two work the same way as they do in `WolframModel` and will be described further in the `WolframModel` part of this README.
+
 ## Fundamental Physics
 
 A hypothesis is that space-time at the fundamental Planck scale might be represented as a network that can be produced by a system similar to the one this package implements.
