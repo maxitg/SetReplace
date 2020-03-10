@@ -518,9 +518,53 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
 
 Here the dotted gray edges are the ones about to be deleted, whereas the red ones have just been created.
 
+#### EdgeCreatorEventIndices (aka CreatorEvents), EdgeDestroyerEventIndices (aka DestroyerEvents)
+
+#### EdgeGenerationsList (aka ExpressionGenerations), AllEventsGenerationsList (aka EventGenerations or EventGenerationsList)
+
+#### AllEventsEdgesList (aka AllExpressions)
+
+#### Rules
+
+#### GenerationsCount, TotalGenerationsCount, PartialGenerationsCount, CompleteGenerationsCount (aka MaxCompleteGeneration), GenerationComplete
+
+#### TerminationReason
+
+#### AllEventsRuleIndices
+
+#### AllEventsStatesEdgeIndicesList, StateEdgeIndicesAfterEvent
+
+#### AllEventsCount (aka EventsCount), GenerationEventsCountList
+
+#### VertexCountList, EdgeCountList
+
+#### FinalDistinctElementsCount (aka AtomsCountFinal), FinalEdgeCount (aka ExpressionsCountFinal)
+
+#### AllEventsDistinctElementsCount (aka AtomsCountTotal), AllEventsEdgesCount (aka ExpressionsCountTotal)
+
+#### AllEventsList (aka EventsList), GenerationEventsList
+
+#### EventsStatesList
+
+#### CausalGraph, LayeredCausalGraph
+
 ### Options
 
-## Fundamental Physics
+## WolframModelPlot (aka HypergraphPlot)
+
+## RulePlot of WolframModel
+
+## Utility Functions
+
+### GeneralizedGridGraph
+
+### HypergraphAutomorphismGroup
+
+### HypergraphUnifications
+
+### WolframPhysicsProjectStyleData
+
+# Physics Applications
 
 A hypothesis is that space-time at the fundamental Planck scale might be represented as a network that can be produced by a system similar to the one this package implements.
 
