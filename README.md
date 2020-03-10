@@ -59,7 +59,7 @@ In[] := HypergraphPlot[
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 10],
  VertexLabels -> Automatic]
 ```
-![{{7,2,v1960},{7,v1965,6},{v1965,v1962,4},{v1962,7,v1959},{3,v1966,v1963},{v1966,1,v1959},{1,3,v1961},{1,v1967,v1959},{v1967,v1963,5},{v1963,1,4},{6,v1968,2},{v1968,7,v1964},{7,6,v1962}}](READMEImages/basicRuleTenSteps.png)
+![{{7, 2, v1960}, {7, v1965, 6}, {v1965, v1962, 4}, {v1962, 7, v1959}, {3, v1966, v1963}, {v1966, 1, v1959}, {1, 3, v1961}, {1, v1967, v1959}, {v1967, v1963, 5}, {v1963, 1, 4}, {6, v1968, 2}, {v1968, 7, v1964}, {7, 6, v1962}}](READMEImages/basicRuleTenSteps.png)
 
 And after 100 steps, it gets even more complicated
 ```
@@ -100,7 +100,7 @@ A less frequently updated version is available through the Wolfram's public pacl
 
 # Symbols and Functions
 
-## SetReplace, SetReplaceList, SetReplaceAll, SetReplaceFixedPoint, SetReplaceFixedPointList
+## SetReplace, SetReplaceList, SetReplaceAll, SetReplaceFixedPoint and SetReplaceFixedPointList
 
 `SetReplace` (and related `SetReplaceList`, `SetReplaceAll`, `SetReplaceFixedPoint` and `SetReplaceFixedPointList`) are the functions the package is named after. They are quite simple, don't have a lot of options, and simply perform replacement operations either one-at-a-time (as in the case of `SetReplace`), to all non-overlapping subsets (`SetReplaceAll`), or until no more matches can be made (`SetReplaceFixedPoint`). A suffix `*List` implies the function will return a set after each replacement instead of just the final result.
 
@@ -195,6 +195,93 @@ In[] := ToPatternRules[{{{1, 2}} -> {{1, 2}, {2, 3}}, {{1, 2}} -> {{1, 3}, {3,
 Out[] = {{{v1_, v2_}} :> Module[{v3}, {{v1, v2}, {v2, v3}}], {{v1_, v2_}} :>
   Module[{v3}, {{v1, v3}, {v3, v2}}]}
 ```
+
+## WolframModel and WolframModelEvolutionObject
+
+`WolframModel` is the main function of the package, and provides tools for the generation and analysis of set substitution systems. It can compute many different properties of the evolution, and has many different options, which are described in the corresponding subsections.
+
+The most basic way to call it however is this:
+```
+In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
+    3}}, {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 10]
+```
+![WolframModelBasicEvolution10](READMEImages/WolframModelBasicEvolution10.png)
+
+Note this call is different from using the `SetReplace` function in a variety of ways:
+* The order of arguments is switched, the rule goes first.
+* The rule is specified in the "anonymous" form (i.e., `ToPatternRules` is done implicitly).
+* The number of steps here is defined the same way as in `SetReplaceAll`, which is also known as the number of generations. Here each edge can have at most 10 generations of predecessors.
+* The output is not a final state, but instead an object which contains the entire evolution (similar to `SetReplaceList`) but with additional information about which rules are being used at each replacement. From the information field on that object one can see that the evolution was done for 10 generations (i.e., a fixed point has not been reached early), and 109 replacements (aka events) were made in total. More properties can be computed from an evolution object, more on that later.
+
+To see the information an evolution object contains, let's make one with a smaller number of generations:
+```
+In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
+    3}}, {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 3]
+```
+![WolframModelBasicEvolution3](READMEImages/WolframModelBasicEvolution3.png)
+
+One can easily see its internal structure in the `InputForm`:
+![WolframModelBasicEvolution3 // InputForm](READMEImages/WolframModelBasicEvolution3InputForm.png)
+```
+Out[] = WolframModelEvolutionObject[<|"CreatorEvents" -> {0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4,
+   4, 4, 5, 5, 5}, "DestroyerEvents" -> {1, 1, 2, 3, 2, 3, 4, 4, Infinity, 5, 5,
+    Infinity, Infinity, Infinity, Infinity, Infinity, Infinity, Infinity},
+  "Generations" -> {0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3},
+  "AtomLists" -> {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}, {5, 8, 1}, {8, 4, 2}, {4, 5, 3},
+    {7, 9, 8}, {9, 6, 4}, {6, 7, 2}, {1, 10, 4}, {10, 8, 5}, {8, 1, 3}, {4, 11, 7},
+    {11, 6, 9}, {6, 4, 8}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}},
+  "Rules" -> {{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5, 3}},
+  "MaxCompleteGeneration" -> 3, "TerminationReason" -> "MaxGenerationsLocal",
+  "EventRuleIDs" -> {1, 1, 1, 1, 1}|>]
+```
+
+The most important part of that association is `"AtomLists"` which includes all set elements (aka expressions or edges) ever created throughout history. Note, this does not correspond to any particular step, rather all steps are combined. They are not just catenated states as well, as if a particular expression was never used as an input for any replacement in a particular step, it would not be duplicated in that list. To see how that works, compare it to `"StatesList"` and observe that a catenated `"StatesList"` would contain more expressions than `"AtomLists"` does.
+![WolframModelBasicEvolution3["StatesList"]](READMEImages/WolframModelBasicEvolution3StatesList.png)
+```
+Out[] = {{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, {{4, 6, 7}, {5, 8, 1}, {8, 4,
+   2}, {4, 5, 3}}, {{7, 9, 8}, {9, 6, 4}, {6, 7, 2}, {1, 10, 4}, {10,
+   8, 5}, {8, 1, 3}}, {{6, 7, 2}, {8, 1, 3}, {4, 11, 7}, {11, 6,
+   9}, {6, 4, 8}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}}}
+```
+
+Each edge in `"AtomLists"` has properties which are storied in other lists of the evolution object:
+* `"CreatorEvents"` shows which event (aka replacement) (referenced by its index) has this edge as one of its outputs.
+* `"DestroyerEvents"` shows which event has this edge as an input. Note that even though multiple matches could be possible that involve a particular edge, in the current implementation only one of these matches will be used (see `"EventOrderingFunction"` option on how to control which match to use).
+* `"Generations"` shows how many layers of predecessors a given edge has.
+* `"Rules"` is an exact copy of the `WolframModel` input.
+* `"MaxCompleteGenerations"` shows the smallest generation such that the final state does not contain any matches composed solely of expressions from this generation. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](#step-limiters) is used.
+* `"TerminationReason"` shows the reason evaluation was stopped. See the [`"TerminationReason"`](#terminationreason) property for more details.
+* Finally, `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case as only one rule is used in this example.
+
+A specific property can be requested from an evolution object in a similar way as a property for an `Entity`. The list of available properties can be found [below](#properties).
+![WolframModelBasicEvolution10["EventsCount"]](READMEImages/WolframModelBasicEvolution10EventsCount.png)
+```
+Out[] = 109
+```
+
+Some properties take additional arguments, which can be supplied after the property name:
+![WolframModelBasicEvolution10["StateAfterEvent", 7]](READMEImages/WolframModelBasicEvolution10StateAfterEvent7.png)
+```
+Out[] = {{8, 1, 3}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}, {2, 13, 11}, {13, 7,
+  6}, {7, 2, 9}, {7, 14, 6}, {14, 11, 4}, {11, 7, 8}}
+```
+
+If a property does not take any arguments, it can be specified directly in `WolframModel` as a shorthand:
+```
+In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
+    3}}, {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 10, "EdgeCountList"]
+Out[] = {3, 4, 6, 8, 12, 18, 24, 36, 54, 76, 112}
+```
+
+### Rule Specification
+
+### Initial Condition Specification
+
+### Step Limiters
+
+### Properties
+
+### Options
 
 ## Fundamental Physics
 
