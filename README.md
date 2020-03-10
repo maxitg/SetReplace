@@ -477,6 +477,34 @@ In[] := WolframModelPlot@
 
 This is equivalent to taking a corresponding part in the `"AllEventsStatesList"`, but is much faster to compute than the entire list.
 
+#### FinalStatePlot, StatesPlotsList
+
+Instead of explicitly calling `WolframModelPlot`, one can use short-hand properties `"FinalStatePlot"` and `"StatesPlotsList"`:
+```
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
+    10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
+    9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1,
+   1}}, 6, "FinalStatePlot"]
+```
+![WolframModelPropertiesFinalState](READMEImages/WolframModelPropertiesFinalState.png)
+
+```
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
+    10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
+    9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1,
+   1}}, 6, "StatesPlotsList"]
+```
+![WolframModelPropertiesStatesList](READMEImages/WolframModelPropertiesStatesList.png)
+
+These properties take the same options as `WolframModelPlot`:
+```
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
+     10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
+     9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}},
+  3]["FinalStatePlot", VertexLabels -> Automatic]
+```
+![WolframModelPropertiesFinalStatePlotVertexLabels](READMEImages/WolframModelPropertiesFinalStatePlotVertexLabels.png)
+
 ### Options
 
 ## Fundamental Physics
