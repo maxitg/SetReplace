@@ -11,9 +11,9 @@
   -->
   <target name='Component.SetReplace.execute' extensionOf='Component.execute'>
     <copy todir='${files_directory}/${component}'>
-      <fileset dir='${component}' >
+      <fileset dir='.' >
         <include name='Kernel/**' />
-        <include name='*.m' />
+        <include name='PacletInfo.m' />
       </fileset>
     </copy>
   </target>

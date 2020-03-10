@@ -20,7 +20,7 @@ tryEnvironment[var_, default_] := If[# === $Failed, default, #] & @ Environment[
 buildLibSetReplace::fail = "Compilation failed. Paclet will be created without low level implementation.";
 
 buildLibSetReplace[] := With[{
-    libSetReplaceSource = FileNameJoin[{$repoRoot, "SetReplace", "libSetReplace"}],
+    libSetReplaceSource = FileNameJoin[{$repoRoot, "libSetReplace"}],
     systemID = If[$internalBuildQ, AntProperty["system_id"], $SystemID]},
   If[$internalBuildQ, Off[CreateLibrary::wddirty]];
   If[!StringQ[CreateLibrary[
@@ -49,13 +49,9 @@ deleteBuildDirectory[] /; !$internalBuildQ :=
   If[FileExistsQ[$buildDirectory], DeleteDirectory[$buildDirectory, DeleteContents -> True]];
 
 copyWLSourceToBuildDirectory[] /; !$internalBuildQ := With[{
-    files = Select[StringMatchQ[#, __ ~~ (".wl" | ".m")] &] @ Import[FileNameJoin[{$repoRoot, "SetReplace"}]]},
-  If[!FileExistsQ[$buildDirectory], CreateDirectory[$buildDirectory]];
-  CreateDirectory /@
-    Function[FileNameJoin[Join[{$buildDirectory}, #]]] /@
-    Most /@
-    Select[Length[#] > 1 &][FileNameSplit /@ files];
-  CopyFile[FileNameJoin[{$repoRoot, "SetReplace", #}], FileNameJoin[{$buildDirectory, #}]] & /@ files;
+    files = Append[Import[FileNameJoin[{$repoRoot, "Kernel"}]], FileNameJoin[{"..", "PacletInfo.m"}]]},
+  If[!FileExistsQ[#], CreateDirectory[#]] & /@ {$buildDirectory, FileNameJoin[{$buildDirectory, "Kernel"}]};
+  CopyFile[FileNameJoin[{$repoRoot, "Kernel", #}], FileNameJoin[{$buildDirectory, "Kernel", #}]] & /@ files;
 ];
 
 fileStringReplace[file_, rules_] := Export[file, StringReplace[Import[file, "Text"], rules], "Text"]

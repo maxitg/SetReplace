@@ -15,8 +15,8 @@ Check[
 	(* Get test files *)
 	
 	$testFiles = If[Length @ $ScriptCommandLine >= 2,
-		FileNameJoin[{".", "SetReplace", # <> ".wlt"}] & /@ $ScriptCommandLine[[2 ;; ]],
-		FileNames[FileNameJoin[{".", "SetReplace", "*.wlt"}]]
+		FileNameJoin[{".", "Tests", # <> ".wlt"}] & /@ $ScriptCommandLine[[2 ;; ]],
+		FileNames[FileNameJoin[{".", "Tests", "*.wlt"}]]
 	];
 	
 	If[!FileExistsQ[#],

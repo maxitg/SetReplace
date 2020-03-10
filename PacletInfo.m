@@ -9,7 +9,7 @@ Paclet[
 	URL -> "https://github.com/maxitg/SetReplace",
 	SystemID -> {"MacOSX-x86-64", "Linux-x86-64", "Windows-x86-64"},
 	Extensions -> {
-		{"Application", Context -> "SetReplace`"},
+		{"Kernel", Context -> "SetReplace`"},
 		{"LibraryLink"}
 	}
 ]
