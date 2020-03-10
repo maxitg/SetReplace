@@ -326,6 +326,38 @@ Note that because different patterns can be matched to the same symbol, this ini
 
 ### Step Limiters
 
+The standard numeric argument to `WolframModel` specifies the number of generations.
+```
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 8}, {9,
+     3, 10}, {11, 4, 12}, {13, 6, 14}, {7, 13}, {13, 7}, {8, 10}, {10,
+     8}, {9, 11}, {11, 9}, {12, 14}, {14, 12}}, {{1, 2, 3}, {4, 5,
+   6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6,
+   3}}, 6, "FinalStatePlot"]
+```
+![WolframModelFixedGenerationsFinalStatePlot](READMEImages/WolframModelFixedGenerationsFinalStatePlot.png)
+
+Alternatively, an `Association` can be used to specify multiple limiting conditions
+```
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 8}, {9,
+     3, 10}, {11, 4, 12}, {13, 6, 14}, {7, 13}, {13, 7}, {8, 10}, {10,
+     8}, {9, 11}, {11, 9}, {12, 14}, {14, 12}}, {{1, 2, 3}, {4, 5,
+   6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6, 3}}, <|
+  "MaxVertices" -> 300, "MaxEvents" -> 200|>, "FinalStatePlot"]
+```
+![WolframModelMaxVerticesFinalStatePlot](READMEImages/WolframModelMaxVerticesFinalStatePlot.png)
+
+Note that the final state in this case is "less symmetric" because its last generation is incomplete (more on that [later](#hypergraphautomorphismgroup)). Such incomplete generations can be automatically trimmed by setting [`"IncludePartialGenerations" -> False`](#includepartialgenerations).
+
+One can also see the presence of an incomplete generation by looking at the evolution object (note `5...6` which means 5 generations are complete, and 1 is not). Expanding the object's information, one can also see that in this particular case the evolution was terminated because `"MaxVertices"` (not `"MaxEvents"`) condition was reached:
+```
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 8}, {9,
+     3, 10}, {11, 4, 12}, {13, 6, 14}, {7, 13}, {13, 7}, {8, 10}, {10,
+     8}, {9, 11}, {11, 9}, {12, 14}, {14, 12}}, {{1, 2, 3}, {4, 5,
+   6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6, 3}}, <|
+  "MaxVertices" -> 300, "MaxEvents" -> 200|>]
+```
+![WolframModelMaxVerticesEvolution](READMEImages/WolframModelMaxVerticesEvolution.png)
+
 ### Properties
 
 ### Options
