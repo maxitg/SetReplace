@@ -9,9 +9,7 @@
         themeExample = First @ $WolframPhysicsProjectPlotThemes,
         groupExample = First @ Keys[WolframPhysicsProjectStyleData[]],
         elementExample =
-          First @ Keys[WolframPhysicsProjectStyleData[First @ Keys[WolframPhysicsProjectStyleData[]]]],
-        secondGroupElementExample =
-          First @ Keys[WolframPhysicsProjectStyleData[Keys[WolframPhysicsProjectStyleData[]][[2]]]]}, {
+          First @ Keys[WolframPhysicsProjectStyleData[First @ Keys[WolframPhysicsProjectStyleData[]]]]}, {
       testSymbolLeak[
         WolframPhysicsProjectStyleData[]
       ],
@@ -92,13 +90,17 @@
         {WolframPhysicsProjectStyleData::argb}
       ],
 
-      testUnevaluated[
-        WolframPhysicsProjectStyleData[
-          themeExample,
-          groupExample,
-          secondGroupElementExample],
-        {WolframPhysicsProjectStyleData::invalidArg}
-      ],
+      With[{
+          anotherGroupElementExample = First[Complement[
+            Union[Catenate[Keys[WolframPhysicsProjectStyleData[#]] & /@ Keys[WolframPhysicsProjectStyleData[]]]],
+            Keys[WolframPhysicsProjectStyleData[themeExample, groupExample]]]]},
+        testUnevaluated[
+          WolframPhysicsProjectStyleData[
+            themeExample,
+            groupExample,
+            anotherGroupElementExample],
+          {WolframPhysicsProjectStyleData::invalidArg}
+        ]],
 
       VerificationTest[
         WolframPhysicsProjectStyleData[themeExample, groupExample, elementExample],
