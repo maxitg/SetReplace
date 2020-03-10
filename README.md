@@ -275,6 +275,30 @@ Out[] = {3, 4, 6, 8, 12, 18, 24, 36, 54, 76, 112}
 
 ### Rule Specification
 
+#### Multiple Rules
+
+Multiple rules can simply be specified as a list of rules.
+```
+In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}}, {{1,
+     2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}, {{1, 1, 1}}, 4]
+```
+![WolframModelMultipleRulesObject](READMEImages/WolframModelMultipleRulesObject.png)
+
+To see which rules were used for each replacement:
+![WolframModelMultipleRulesObject["AllEventsRuleIndices"]](READMEImages/WolframModelMultipleRulesObjectAllEventsRuleIndices.png)
+```
+Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
+```
+
+#### Pattern Rules
+
+Pattern rules (i.e., the kind of rules used in the `SetReplace` function) can be specified as well. As an example, previously described call to `SetReplaceList` can be reproduced as
+```
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {1, 2, 5, 3,
+  6}, \[Infinity], "AllEventsStatesList"]
+Out[] = {{1, 2, 5, 3, 6}, {5, 3, 6, 3}, {6, 3, 8}, {8, 9}, {17}}
+```
+
 ### Initial Condition Specification
 
 ### Step Limiters
