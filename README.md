@@ -505,6 +505,19 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
 ```
 ![WolframModelPropertiesFinalStatePlotVertexLabels](READMEImages/WolframModelPropertiesFinalStatePlotVertexLabels.png)
 
+#### EventsStatesPlotsList
+
+The plotting function corresponding to `"AllEventsStatesList"` is more interesting than the other ones. It plots not only the corresponding states, but also the events that produced each of them:
+```
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
+    10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
+    9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1,
+   1}}, 3, "EventsStatesPlotsList"]
+```
+![WolframModelPropertiesEventsStatesPlotsList](READMEImages/WolframModelPropertiesEventsStatesPlotsList.png)
+
+Here the dotted gray edges are the ones about to be deleted, whereas the red ones have just been created.
+
 ### Options
 
 ## Fundamental Physics
