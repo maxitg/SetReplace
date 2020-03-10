@@ -96,6 +96,11 @@ $styleNames = KeySort /@ KeySort @ <|
     "ArrowStyle" -> $ruleArrowStyle,
     "GridColor" -> $ruleGridColor,
     "ImageSizePerPlotRange" -> $ruleImageSizePerPlotRange
+  |>,
+
+  (* For future use *)
+  "BranchialGraph" -> <|
+    "EdgeStyle" -> $branchialEdgeStyle
   |>
 |>;
 
@@ -164,5 +169,8 @@ style[$lightTheme] = <|
   $ruleArrowPadding -> 0.4,
   $ruleArrowStyle -> GrayLevel[0.65],
   $ruleGridColor -> GrayLevel[0.85],
-  $ruleImageSizePerPlotRange -> 128
+  $ruleImageSizePerPlotRange -> 128,
+
+  (* Branchial graph *)
+  $branchialEdgeStyle -> Hue[0.89, 0.97, 0.71]
 |>;
