@@ -259,6 +259,26 @@ A specific property can be requested from an evolution object in a similar way a
 Out[] = 109
 ```
 
+List of all available properties can be obtained with a `"Properties"` property:
+![WolframModelBasicEvolution10["Properties"]](READMEImages/WolframModelBasicEvolution10Properties.png)
+```
+Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList", \
+"StatesPlotsList", "EventsStatesPlotsList", \
+"AllEventsStatesEdgeIndicesList", "AllEventsStatesList", \
+"Generation", "StateEdgeIndicesAfterEvent", "StateAfterEvent", \
+"Rules", "TotalGenerationsCount", "PartialGenerationsCount", \
+"GenerationsCount", "GenerationComplete", "AllEventsCount", \
+"GenerationEventsCountList", "GenerationEventsList", \
+"FinalDistinctElementsCount", "AllEventsDistinctElementsCount", \
+"VertexCountList", "EdgeCountList", "FinalEdgeCount", \
+"AllEventsEdgesCount", "AllEventsGenerationsList", "CausalGraph", \
+"LayeredCausalGraph", "TerminationReason", "AllEventsRuleIndices", \
+"AllEventsList", "EventsStatesList", "Properties", \
+"EdgeCreatorEventIndices", "EdgeDestroyerEventIndices", \
+"EdgeGenerationsList", "AllEventsEdgesList", \
+"CompleteGenerationsCount"}
+```
+
 Some properties take additional arguments, which can be supplied after the property name:
 ![WolframModelBasicEvolution10["StateAfterEvent", 7]](READMEImages/WolframModelBasicEvolution10StateAfterEvent7.png)
 ```
@@ -278,6 +298,38 @@ If a property does not take any arguments, it can be specified directly in `Wolf
 In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
     3}}, {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 10, "EdgeCountList"]
 Out[] = {3, 4, 6, 8, 12, 18, 24, 36, 54, 76, 112}
+```
+
+All properties available to use directly in `WolframModel` can be looked up in `$WolframModelProperties` (there are more properties here compared to the list above because some properties are available under multiple names, and only the canonical name is listed above).
+```
+In[] := $WolframModelProperties
+Out[] = {"AllEventsCount", "AllEventsDistinctElementsCount", \
+"AllEventsEdgesCount", "AllEventsEdgesList", \
+"AllEventsGenerationsList", "AllEventsList", "AllEventsRuleIndices", \
+"AllEventsStatesEdgeIndicesList", "AllEventsStatesList", \
+"AllExpressions", "AtomsCountFinal", "AtomsCountTotal", \
+"CausalGraph", "CompleteGenerationsCount", "CreatorEvents", \
+"DestroyerEvents", "EdgeCountList", "EdgeCreatorEventIndices", \
+"EdgeDestroyerEventIndices", "EdgeGenerationsList", \
+"EventGenerations", "EventGenerationsList", "EventsCount", \
+"EventsList", "EventsStatesList", "EventsStatesPlotsList", \
+"EvolutionObject", "ExpressionGenerations", "ExpressionsCountFinal", \
+"ExpressionsCountTotal", "FinalDistinctElementsCount", \
+"FinalEdgeCount", "FinalState", "FinalStatePlot", \
+"GenerationComplete", "GenerationEventsCountList", \
+"GenerationEventsList", "GenerationsCount", "LayeredCausalGraph", \
+"MaxCompleteGeneration", "PartialGenerationsCount", "StatesList", \
+"StatesPlotsList", "TerminationReason", "TotalGenerationsCount", \
+"UpdatedStatesList", "VertexCountList"}
+```
+
+Multiple properties can also be specified in a list (only in `WolframModel`, not in `WolframModelEvolutionObject`):
+```
+In[] = WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
+    3}}, {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 10, {"EdgeCountList",
+  "VertexCountList"}]
+Out[] = {{3, 4, 6, 8, 12, 18, 24, 36, 54, 76, 112}, {7, 8, 10, 12, 16, 22, 28,
+   40, 58, 80, 116}}
 ```
 
 ### Rule Specification
@@ -359,6 +411,71 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 8}, {9,
 ![WolframModelMaxVerticesEvolution](READMEImages/WolframModelMaxVerticesEvolution.png)
 
 ### Properties
+
+#### FinalState (aka -1), StatesList, Generation, AllEventsStatesList, StateAfterEvent (aka SetAfterEvent)
+
+These are the properties used to extract states at a particular moment in the evolution. They always return lists, but in the examples below we plot them for clarity.
+
+`FinalState` yields the state obtained after all replacements of the evolution have been made:
+```
+In[] := WolframModelPlot@
+ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
+     10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
+     9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6,
+  "FinalState"]
+```
+![WolframModelPropertiesFinalState](READMEImages/WolframModelPropertiesFinalState.png)
+
+`"StateList"` yields the list of states at each generation:
+```
+In[] := WolframModelPlot /@
+ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
+     10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
+     9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6,
+  "StatesList"]
+```
+![WolframModelPropertiesStatesList](READMEImages/WolframModelPropertiesStatesList.png)
+
+This is identical to using the `"Generation"` property mapped over all generations:
+```
+In[] := WolframModelPlot /@ (WolframModel[{{1, 2, 3}, {4, 5, 6}, {1,
+         4}} -> {{2, 7, 8}, {3, 9, 10}, {5, 11, 12}, {6, 13, 14}, {8,
+         12}, {11, 10}, {13, 7}, {14, 9}}, {{1, 1, 1}, {1, 1, 1}, {1,
+        1}, {1, 1}, {1, 1}}, 6]["Generation", #] &) /@ Range[0, 6]
+```
+![WolframModelPropertiesStatesList](READMEImages/WolframModelPropertiesStatesList.png)
+
+In fact `"Generation"` property can be omitted and the index of the generation can be used directly:
+```
+In[] := WolframModelPlot /@
+ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
+      10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
+      9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6] /@
+  Range[0, 6]
+```
+![WolframModelPropertiesStatesList](READMEImages/WolframModelPropertiesStatesList.png)
+
+`"StatesList"` shows a compressed version of the evolution. To see how state changes with each applied replacement, use `"AllEventsStatesList"`:
+```
+In[] := WolframModelPlot /@
+ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
+     10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
+     9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 3,
+  "AllEventsStatesList"]
+```
+![WolframModelPropertiesAllEventsStatesList](READMEImages/WolframModelPropertiesAllEventsStatesList.png)
+
+Finally, to see a state after a specific event, use `"StateAfterEvent"`:
+```
+In[] := WolframModelPlot@
+ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
+      10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
+      9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6][
+  "StateAfterEvent", 42]
+```
+![WolframModelPropertiesStateAfterEvent](READMEImages/WolframModelPropertiesStateAfterEvent.png)
+
+This is equivalent to taking a corresponding part in the `"AllEventsStatesList"`, but is much faster to compute than the entire list.
 
 ### Options
 
