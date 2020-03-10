@@ -1,67 +1,76 @@
-# SetReplace
+# Set Substitution System
 
-## Set | Network Substitution Systems
+## Basic Example
 
-**SetReplace** is a Wolfram Language package that implements a substitution system such that in each step an unordered subset matching a given pattern is deleted from a multiset and replaced with different subset. If each element of the set consists of pairs of elements, this set can be thought of as a directed graph, and the system becomes a ***network substitution*** (aka *graph rewrite*) ***system***.
-
-An example of such a system would be removing vertices from a path graph
+**SetReplace** is a [Wolfram Language](https://www.wolfram.com/language/) package to manipulate set substitution systems. To understand what a set substitution system does consider an unordered set of elements:
 ```
-In[.] := SetReplace[{{0, 1}, {1, 2}, {2, 3}}, {{a_, b_}, {b_, c_}} :> {{a, c}}, 2]
+{1, 2, 5, 3, 6}
 ```
+We can set up an operation on this set which would take any of the two elements and replace them with their sum:
 ```
-Out[.] = {{0, 3}}
+{a_, b_} :> {a + b}
 ```
-
-Here, `{{0, 1}, {1, 2}, {2, 3}}` is the initial condition, `{{a_, b_}, {b_, c_}} :> {{a, c}}` is the rule that matches pairs of edges sharing a vertex and replaces them with a single edge, and `2` the number of steps, i.e., the number of times the rule is applied.
-
-One can also imagine an inverse of the rule above
+In **SetReplace**, this can be expressed as (the new element is put at the end)
 ```
-In[.] := SetReplace[{{0, 1}}, {{a_, b_}} :>
-  Module[{new}, {{a, new}, {new, b}}], 2]
+In[] := SetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> {a + b}]
+Out[] = {5, 3, 6, 3}
 ```
+Note that this is similar to `SubsetReplace` function of Wolfram Language (which did not exist prior to version 12.1, and which by default replaces all non-overlapping subsets at once)
 ```
-Out[.] = {{v11, 1}, {0, v12}, {v12, v11}}
+In[] := SubsetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> Sequence[a + b]]
+Out[] = {3, 8, 6}
 ```
 
-We use `Module` here to assign unique names to the newly created vertices. As using `Module` is somewhat cumbersome, a simplified syntax is available, where integers are automatically converted into patterns, and `Module` is added if necessary
-```
-In[.] := SetReplace[{{0, 1}},
- Echo @ FromAnonymousRules[{{0, 1}} -> {{0, 2}, {2, 1}}], 2]
-```
-```
->> {{v1_, v2_}} :> Module[{v3}\, {{v1, v3}, {v3, v2}}]
-Out[.] = {{v13, 1}, {0, v14}, {v14, v13}}
-```
+## Relations between Set Elements
 
-A more complex example is taking three edges starting at the same vertex and replacing them with a triangle
-```
-In[.] := pointToTriangle = {{0, 1}, {0, 2}, {0, 3}} -> {{4, 5}, {5, 4}, {4,
-     6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}};
-In[.] := Graph /@ Apply[DirectedEdge, pointToTriangle, {2}]
-```
-![Point to triangle rule](READMEImages/pointToTriangleRule.png)
+A more interesting case (and the only case we have studied with any reasonable detail) is the case of set elements that are related to each other. Specifically, the elements can be expressed as ordered lists of atoms (or vertices), and the set essentially becomes an ordered hypergraph.
 
+As a simple example consider a set
 ```
-In[.] := Graph[DirectedEdge @@@
-  SetReplace[{{0, 1}, {0, 2}, {0, 3}},
-   FromAnonymousRules[pointToTriangle], 13]]
+{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}
 ```
-![Point to triangle result after 13 steps](READMEImages/pointToTriangleOutput.png)
+which we can render as a collection of ordered hyperedges:
+```
+In[] := HypergraphPlot[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+ VertexLabels -> Automatic]
+```
+![{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}](READMEImages/basicHypergraph.png)
 
-Edges can contain more than two vertices, in which case this becomes a directed hypergraph rewrite system
+We can then have a rule which would pick a subset of expressions related in a particular way (much like a join query) and replace them with something else. Note the [`Module`](https://reference.wolfram.com/language/ref/Module.html) on the right-hand side creates a new variable (vertex) which causes the hypergraph to grow.
 ```
-In[.] := hyperedgeToTriangle = {{1, 2, 3}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5, 3}};
-In[.] := HypergraphPlot[#, VertexLabels -> "Name"] & /@ hyperedgeToTriangle
+{{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
+ Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]
 ```
-![Hyperedge to triangle rule](READMEImages/hyperedgeToTriangleRule.png)
+After a single replacement we get this (note the new vertex)
+```
+In[] := HypergraphPlot[
+ SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6,
+    7}}, {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
+   Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]],
+ VertexLabels -> Automatic]
+```
+![{{4, 6, 7}, {5, v1938, 1}, {v1938, 4, 2}, {4, 5, 3}}](READMEImages/basicRuleOneStep.png)
 
+After 10 steps, we get a more complicated structure
 ```
-In[.] := HypergraphPlot[
- SetReplace[{{1, 2, 3}}, FromAnonymousRules[hyperedgeToTriangle], 13]]
+In[] := HypergraphPlot[
+ SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6,
+    7}}, {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
+   Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 10],
+ VertexLabels -> Automatic]
 ```
-![Hyperedge to triangle result after 13 steps](READMEImages/hyperedgeToTriangleOutput.png)
+![{{7,2,v1960},{7,v1965,6},{v1965,v1962,4},{v1962,7,v1959},{3,v1966,v1963},{v1966,1,v1959},{1,3,v1961},{1,v1967,v1959},{v1967,v1963,5},{v1963,1,4},{6,v1968,2},{v1968,7,v1964},{7,6,v1962}}](READMEImages/basicRuleTenSteps.png)
 
-Here `HypergraphPlot` is used, which displays each directed hyperedge with a sequence of two-vertex edges, and colors each such sequence in a different color.
+And after 100 steps, it gets even more complicated
+```
+In[] := HypergraphPlot[
+ SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6,
+    7}}, {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
+   Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 100]]
+```
+![basicRuleHundredSteps](READMEImages/basicRuleHundredSteps.png)
+
+Exploring the models of this more complicated variety is what this package is mostly designed for.
 
 ## Fundamental Physics
 
