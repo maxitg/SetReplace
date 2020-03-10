@@ -72,6 +72,32 @@ In[] := HypergraphPlot[
 
 Exploring the models of this more complicated variety is what this package is mostly designed for.
 
+# Getting Started
+
+## Prerequisites
+
+To start using `SetReplace` you only need two things.
+
+* [Wolfram Language 12.1+](https://www.wolfram.com/language/) including [WolframScript](https://www.wolfram.com/wolframscript/). A free (although not open-source) version is available as [Wolfram Engine](https://www.wolfram.com/engine/).
+* A C++ compiler to build the low-level part of the package. Instructions on how to setup a compiler to use in WolframScript in various platforms are [available](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
+
+## Build Instructions
+
+To build,
+1. `cd` to the root directory of the repository.
+2. Run `./build.wls` to create the paclet file.
+If you see an error message about c++17, make sure the C++ compiler you are using is up-to-date. If your default system compiler does not support c++17, you can choose a different one with environmental variables. The following, for instance, typically works on a Mac:
+```
+COMPILER=CCompilerDriver\`ClangCompiler\`ClangCompiler COMPILER_INSTALLATION=/usr/bin ./build.wls
+```
+Here `ClangCompiler` can be replaced with one of `"Compiler" /. CCompilers[Full]` (run ``<< CCompilerDriver` `` to use `CCompilers`), and `COMPILER_INSTALLATION` is a directory in which the compiler binary can be found.
+
+3. Run `./install.wls` to install the paclet into your Wolfram system.
+4. Evaluate `PacletDataRebuild[]` in all running Wolfram kernels.
+5. Evaluate ``<< SetReplace` `` every time prior to using package functions.
+
+A less frequently updated version is available through the Wolfram's public paclet server and can be installed by running `PacletInstall["SetReplace"]`.
+
 ## Fundamental Physics
 
 A hypothesis is that space-time at the fundamental Planck scale might be represented as a network that can be produced by a system similar to the one this package implements.
@@ -146,25 +172,3 @@ In[.] := PlanarGraphQ[neat2]
 ```
 Out[.] = True
 ```
-
-## Prerequisites
-
-* Linux, macOS, or Windows.
-* [Wolfram Language 12.0+](https://www.wolfram.com/language/).
-* [WolframScript](https://www.wolfram.com/wolframscript/).
-* [C++ compiler](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
-
-## Build Instructions
-
-To build,
-1. `cd` to the root directory of the repository.
-2. Run `./build.wls` to create the paclet file.
-If you see an error message about c++17, make sure the C++ compiler you are using is up-to-date. If your default system compiler does not support c++17, you can choose a different one with environmental variables. The following, for instance, typically works on a Mac:
-```
-COMPILER=CCompilerDriver\`ClangCompiler\`ClangCompiler COMPILER_INSTALLATION=/usr/bin ./build.wls
-```
-Here `ClangCompiler` can be replaced with one of `"Compiler" /. CCompilers[Full]`, and `COMPILER_INSTALLATION` is a directory in which the compiler binary can be found.
-
-3. Run `./install.wls` to install the paclet into your Wolfram system.
-4. Restart any running Wolfram kernels.
-5. Evaluate ``<< SetReplace` `` every time prior to using package functions.
