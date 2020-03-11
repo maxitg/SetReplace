@@ -520,6 +520,24 @@ Here the dotted gray edges are the ones about to be deleted, whereas the red one
 
 #### AllEventsEdgesList (aka AllExpressions)
 
+`"AllEventsEdgesList"` returns the list of edges throughout history. This is distinct from a catenated `"StateList"`, as the edge will not appear twice if it moved from one generation to the next without being involved in an event.
+
+Compare for instance the output of `"StatesList"` for a system where only one replacement is made per generation
+```
+In[] := WolframModel[<|"PatternRules" -> {x_?OddQ, y_} :> x + y|>, {1, 2, 4,
+  6}, \[Infinity], "StatesList"]
+Out[] = {{1, 2, 4, 6}, {4, 6, 3}, {6, 7}, {13}}
+```
+with the output of `"AllEventsEdgesList"`:
+```
+In[] := WolframModel[<|"PatternRules" -> {x_?OddQ, y_} :> x + y|>, {1, 2, 4,
+  6}, \[Infinity], "AllEventsEdgesList"]
+Out[] = {1, 2, 4, 6, 3, 7, 13}
+```
+Note how 4 and 6 only appear once in the list.
+
+Edge indices from `"AllEventsEdgesList"` are used in various other properties such as [`"AllEventsList"`](#alleventslist--aka-eventslist---generationeventslist) and [`"EventsStatesList"`](#eventsstateslist).
+
 #### AllEventsStatesEdgeIndicesList, StateEdgeIndicesAfterEvent
 
 #### AllEventsList (aka EventsList), GenerationEventsList
