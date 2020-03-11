@@ -249,7 +249,7 @@ Each edge in `"AtomLists"` has properties which are storied in other lists of th
 * `"DestroyerEvents"` shows which event has this edge as an input. Note that even though multiple matches could be possible that involve a particular edge, in the current implementation only one of these matches will be used (see `"EventOrderingFunction"` option on how to control which match to use).
 * `"Generations"` shows how many layers of predecessors a given edge has.
 * `"Rules"` is an exact copy of the `WolframModel` input.
-* `"MaxCompleteGenerations"` shows the smallest generation such that the final state does not contain any matches composed solely of expressions from this generation. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](#step-limiters) is used.
+* `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions of this or earlier generations. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](#step-limiters) is used.
 * `"TerminationReason"` shows the reason evaluation was stopped. See the [`"TerminationReason"`](#terminationreason) property for more details.
 * Finally, `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case as only one rule is used in this example.
 
@@ -822,6 +822,31 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {5, 9,
 ![WolframModelAbortedEvolutionObject](READMEImages/WolframModelAbortedEvolutionObject.png)
 
 #### GenerationsCount, TotalGenerationsCount, PartialGenerationsCount, CompleteGenerationsCount (aka MaxCompleteGeneration), GenerationComplete
+
+`"TotalGenerationsCount"` returns the largest generation of any edge during the evolution:
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
+  "MaxEvents" -> 42|>, "TotalGenerationsCount"]
+Out[] = 5
+```
+
+`"PartialGenerationsCount"` return the number of generations that are "completely done". That is, no more matches can be made involving this or earlier generations. If the default [evaluation order](#eventorderingfunction) is used, this can only be 0 (if we are in the middle of a step) or 1 (if we just finished the step). However, it gets much more interesting if a different event order is used. For a random evolution, for instance, one can get:
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
+  "MaxEvents" -> 42|>, "EventOrderingFunction" -> "Random"]
+```
+![WolframModelPartialGenerationsCountRandomObject](READMEImages/WolframModelPartialGenerationsCountRandomObject.png)
+
+Note, in this case, only 2 generations are complete, and 7 are partial. That happens because the states grow with each generation, so it becomes more likely for a random choice to pick an edge from a later generation, thus earlier ones are left unevolved.
+
+`"CompleteGenerationsCount"` is simply a difference of `"TotalGenerationsCount"` and `"PartialGenerationsCount"`, and `"GenerationsCount"` is equivalent to `{"CompleteGenerationsCount", "PartialGenerationsCount"}`.
+
+`"GenerationComplete"` takes a generation number as an argument, and gives `True` or `False` depending on whether that particular generation is complete.
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
+   "MaxEvents" -> 42|>]["GenerationComplete", 5]
+Out[] = False
+```
 
 #### AllEventsCount (aka EventsCount), GenerationEventsCountList
 
