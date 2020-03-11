@@ -410,6 +410,15 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 8}, {9,
 ```
 ![WolframModelMaxVerticesEvolution](READMEImages/WolframModelMaxVerticesEvolution.png)
 
+All possible keys in that association are:
+* `"MaxEvents"`: limit the number of individual replacements (in the `SetReplace` function meaning).
+* `"MaxGenerations"`: limit the number of generations (steps in `SetReplaceAll` meaning), same as specifying steps directly as a number in `WolframModel`.
+* `"MaxVertices"`: limit the number of vertices in the *final* state only (the total count throughout history might be larger). This will stop evolution if the next event if applied will put the state over the limit. Note once such an event is encountered it will stop evolving immediately even if other matches exist that would not put the vertex count over the limit.
+* `"MaxVertexDegree"`: limit the number of final state edges any particular vertex is involved in. Works in a similar way to `"MaxVertices"`.
+* `"MaxEdges"`: limit the number of edges (expressions) in the final state. Similar to `"MaxVertices"`.
+
+Any combination of these will be used, in which case the earliest triggered will stop the evolution.
+
 ### Properties
 
 #### FinalState (aka -1), StatesList, Generation, AllEventsStatesList, StateAfterEvent (aka SetAfterEvent)
