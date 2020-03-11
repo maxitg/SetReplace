@@ -616,11 +616,89 @@ Out[] = {{{1, {1} -> {2, 3, 4, 5}}, {2, 3, 4,
    10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}}}
 ```
 
-#### AllEventsRuleIndices
+#### EdgeCreatorEventIndices (aka CreatorEvents), EdgeDestroyerEventIndices (aka DestroyerEvents)
 
 #### CausalGraph, LayeredCausalGraph
 
-#### EdgeCreatorEventIndices (aka CreatorEvents), EdgeDestroyerEventIndices (aka DestroyerEvents)
+An event A causes an event B if there exists an edge that was created by A and destroyed by B. If we then consider all relationships between events, we can create a causal graph. In a causal graph vertices correspond to events, and causal graph edges correspond to the set edges (aka expressions).
+
+For example if we consider our simple arithmetic model `{a_, b_} :> a + b` starting from `{3, 8, 8, 8, 2, 10, 0, 9, 7}` we get a causal graph which quite clearly describes what's going on (each event here is labeled with explicit values for a and b):
+```
+In[] := With[{evolution =
+   WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8,
+     2, 10, 0, 9, 7}, \[Infinity]]},
+ With[{causalGraph = evolution["CausalGraph"]},
+  Graph[causalGraph,
+   VertexLabels ->
+    Thread[VertexList[causalGraph] ->
+      Map[evolution["AllEventsEdgesList"][[#]] &,
+       Last /@ evolution["AllEventsList"], {2}]]]]]
+```
+![WolframModelPropertiesArithmeticCausalGraph](READMEImages/WolframModelPropertiesArithmeticCausalGraph.png)
+
+Here is an example for a hypergraph model (which is considerably harder to understand):
+```
+In[] := WolframModel[{{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{3, 7, 8}, {9, 2,
+     10}, {11, 12, 5}, {13, 14, 6}, {7, 12}, {11, 9}, {13, 10}, {14,
+     8}}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1,
+   1}}, 20, "CausalGraph"]
+```
+![WolframModelPropertiesHypergraphModelCausalGraph](READMEImages/WolframModelPropertiesHypergraphModelCausalGraph.png)
+
+`"LayeredCausalGraph"` generations the same graph but layers events generation-by-generation. For example, for our arithmetic causal graph, note how it's arranged differently from an example above:
+```
+In[] := With[{evolution =
+   WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8,
+     2, 10, 0, 9, 7}, \[Infinity]]},
+ With[{causalGraph = evolution["LayeredCausalGraph"]},
+  Graph[causalGraph,
+   VertexLabels ->
+    Thread[VertexList[causalGraph] ->
+      Map[evolution["AllEventsEdgesList"][[#]] &,
+       Last /@ evolution["AllEventsList"], {2}]]]]]
+```
+![WolframModelPropertiesArithmeticLayeredCausalGraph](READMEImages/WolframModelPropertiesArithmeticayeredCausalGraph.png)
+
+Furthermore, if we include the initial condition as a "fake" event (see [`"IncludeBoundaryEvents"`](#includeboundaryevents) option for more information), note how slices through the causal graph correspond to states from the `"StatesList"`:
+```
+In[] := With[{evolution =
+   WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8,
+     2, 10, 0, 9, 7}, \[Infinity]]},
+ With[{causalGraph =
+    evolution["LayeredCausalGraph",
+     "IncludeBoundaryEvents" -> "Initial"]},
+  Graph[causalGraph,
+   VertexLabels ->
+    Thread[VertexList[causalGraph] ->
+      Map[evolution["AllEventsEdgesList",
+          "IncludeBoundaryEvents" -> "Initial"][[#]] &,
+       Last /@ evolution["AllEventsList",
+         "IncludeBoundaryEvents" -> "Initial"], {2}]],
+   Epilog -> {Red, Dotted,
+     Table[Line[{{-10, k}, {10, k}}], {k, 0.5, 4.5}]}]]]
+```
+![WolframModelPropertiesArithmeticLayeredCausalGraphFoliated](READMEImages/WolframModelPropertiesArithmeticLayeredCausalGraphFoliated.png)
+
+```
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8, 2,
+  10, 0, 9, 7}, \[Infinity], "StatesList"]
+Out[] = {{3, 8, 8, 8, 2, 10, 0, 9, 7}, {7, 11, 16, 12, 9}, {9, 18, 28}, {28,
+  27}, {55}}
+```
+
+`"CausalGraph"` property accepts the same options as `Graph` as was demonstrated above with `VertexLabels`.
+
+#### AllEventsRuleIndices
+
+`"AllEventsRuleIndices"` returns which rule was used for each event (the same can be obtained by mapping `First` over `"AllEventsList"`):
+```
+In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}}, {{1,
+     2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}, {{1, 1,
+   1}}, 4, "AllEventsRuleIndices"]
+Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
+```
+
+TODO: Add causal graph coloring.
 
 #### EdgeGenerationsList (aka ExpressionGenerations), AllEventsGenerationsList (aka EventGenerations or EventGenerationsList)
 
