@@ -518,21 +518,25 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
 
 Here the dotted gray edges are the ones about to be deleted, whereas the red ones have just been created.
 
+#### AllEventsEdgesList (aka AllExpressions)
+
+#### AllEventsStatesEdgeIndicesList, StateEdgeIndicesAfterEvent
+
+#### AllEventsList (aka EventsList), GenerationEventsList
+
+#### EventsStatesList
+
+#### AllEventsRuleIndices
+
+#### CausalGraph, LayeredCausalGraph
+
 #### EdgeCreatorEventIndices (aka CreatorEvents), EdgeDestroyerEventIndices (aka DestroyerEvents)
 
 #### EdgeGenerationsList (aka ExpressionGenerations), AllEventsGenerationsList (aka EventGenerations or EventGenerationsList)
 
-#### AllEventsEdgesList (aka AllExpressions)
-
-#### Rules
-
-#### GenerationsCount, TotalGenerationsCount, PartialGenerationsCount, CompleteGenerationsCount (aka MaxCompleteGeneration), GenerationComplete
-
 #### TerminationReason
 
-#### AllEventsRuleIndices
-
-#### AllEventsStatesEdgeIndicesList, StateEdgeIndicesAfterEvent
+#### GenerationsCount, TotalGenerationsCount, PartialGenerationsCount, CompleteGenerationsCount (aka MaxCompleteGeneration), GenerationComplete
 
 #### AllEventsCount (aka EventsCount), GenerationEventsCountList
 
@@ -542,11 +546,7 @@ Here the dotted gray edges are the ones about to be deleted, whereas the red one
 
 #### AllEventsDistinctElementsCount (aka AtomsCountTotal), AllEventsEdgesCount (aka ExpressionsCountTotal)
 
-#### AllEventsList (aka EventsList), GenerationEventsList
-
-#### EventsStatesList
-
-#### CausalGraph, LayeredCausalGraph
+#### Rules
 
 ### Options
 
