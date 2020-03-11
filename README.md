@@ -618,6 +618,43 @@ Out[] = {{{1, {1} -> {2, 3, 4, 5}}, {2, 3, 4,
 
 #### EdgeCreatorEventIndices (aka CreatorEvents), EdgeDestroyerEventIndices (aka DestroyerEvents)
 
+And event *destroys* the edges in its input, and *creates* the edges in its output. Creator and destroyer events for each edge can be obtained with `EdgeCreatorEventIndices` and `EdgeDestroyerEventIndices` properties.
+
+As an example, for a simple rule that splits each edge in two, one can see that edges are created in pairs:
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1,
+   1}}, 4, "EdgeCreatorEventIndices"]
+Out[] = {0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, \
+11, 12, 12, 13, 13, 14, 14, 15, 15}
+```
+and destroyed one-by-one:
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1,
+   1}}, 4, "EdgeDestroyerEventIndices"]
+Out[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, \[Infinity], \
+\[Infinity], \[Infinity], \[Infinity], \[Infinity], \[Infinity], \
+\[Infinity], \[Infinity], \[Infinity], \[Infinity], \[Infinity], \
+\[Infinity], \[Infinity], \[Infinity], \[Infinity], \[Infinity]}
+```
+
+Here 0 refers to the initial state, and `\[Infinity]` means an expression was never destroyed by any event (and thus appears in the final state). Thus a simple way to obtain a `"FinalState"` is to pick all expressions which destroyer event is `\[Infinity]`:
+```
+In[] := With[{evolution =
+   WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4]},
+ evolution["AllEventsEdgesList"][[
+  First /@ Position[
+    evolution["EdgeDestroyerEventIndices"], \[Infinity]]]]]
+Out[] = {{1, 9}, {9, 5}, {5, 10}, {10, 3}, {3, 11}, {11, 6}, {6, 12}, {12,
+  2}, {2, 13}, {13, 7}, {7, 14}, {14, 4}, {4, 15}, {15, 8}, {8,
+  16}, {16, 1}}
+```
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][-1]
+Out[] = {{1, 9}, {9, 5}, {5, 10}, {10, 3}, {3, 11}, {11, 6}, {6, 12}, {12,
+  2}, {2, 13}, {13, 7}, {7, 14}, {14, 4}, {4, 15}, {15, 8}, {8,
+  16}, {16, 1}}
+```
+
 #### CausalGraph, LayeredCausalGraph
 
 An event A causes an event B if there exists an edge that was created by A and destroyed by B. If we then consider all relationships between events, we can create a causal graph. In a causal graph vertices correspond to events, and causal graph edges correspond to the set edges (aka expressions).
