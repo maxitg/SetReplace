@@ -877,6 +877,36 @@ Out[] = {2, 4, 8, 16, 28, 54, 98, 184, 342, 648, 1244}
 
 #### FinalDistinctElementsCount (aka AtomsCountFinal), FinalEdgeCount (aka ExpressionsCountFinal)
 
+These properties are similar to corresponding `*List` ones, except we don't have `"FinalVertexCount"` and instead have `"FinalDistinctElementsCount"` (we should have `"FinalVertexCount"` and `"FinalDistinctElementsCountList"`, but they are not currently implemented).
+
+The difference is that `"VertexCountList"` counts expressions of level 2 in the states whereas `"FinalDistinctElementsCount"` counts all expressions matching `_ ? AtomQ`. The difference becomes apparent for edges which contain non-trivially nested lists.
+
+For example, consider a rule that performs a non-trivial nesting:
+```
+In[] := WolframModel[<|
+  "PatternRules" -> {{a_}} :> {{a + 1}, {a - 1}, {{a + 2,
+       a - 2}}}|>, {{1}}, 7, "VertexCountList"]
+Out[] = {1, 3, 6, 10, 15, 21, 28, 36}
+```
+
+```
+In[] := WolframModel[<|
+    "PatternRules" -> {{a_}} :> {{a + 1}, {a - 1}, {{a + 2,
+         a - 2}}}|>, {{1}}, #, "FinalDistinctElementsCount"] & /@
+ Range[0, 7]
+Out[] = {1, 4, 9, 13, 17, 21, 25, 29}
+```
+
+To understand why this is happening, consider the state after one step:
+```
+In[] := WolframModel[<|
+  "PatternRules" -> {{a_}} :> {{a + 1}, {a - 1}, {{a + 2,
+       a - 2}}}|>, {{1}}, 1, "FinalState"]
+Out[] = {{2}, {0}, {{3, -1}}}
+```
+
+This state has 3 vertices (distinct level-2 expressions): `2`, `0` and `{3, -1}`, but 4 atoms: `2`, `0`, `3` and `-1`. This distinction does not usually come up in our models since vertices are atoms are usually the same thing, but it is important in exotic cases like this.
+
 #### AllEventsDistinctElementsCount (aka AtomsCountTotal), AllEventsEdgesCount (aka ExpressionsCountTotal)
 
 #### Rules
