@@ -579,6 +579,29 @@ Out[] = {18, 19, 29, 34, 35, 36, 37, 39, 40, 42, 43, 44, 45, 49, 50, 51, 52, \
 
 #### AllEventsList (aka EventsList), GenerationEventsList
 
+Both of these properties return all replacement events throughout the evolution. The only difference is how the events are arranged. `"AllEventsList"` returns the flat list of all events, whereas `"GenerationEventsList"` splits them into sublists for each generation.
+```
+In[] := WolframModel[{{1, 2}} -> {{3, 4}, {3, 1}, {4, 1}, {2, 4}}, {{1,
+   1}}, 2, "AllEventsList"]
+Out[] = {{1, {1} -> {2, 3, 4, 5}}, {1, {2} -> {6, 7, 8, 9}}, {1, {3} -> {10,
+    11, 12, 13}}, {1, {4} -> {14, 15, 16, 17}}, {1, {5} -> {18, 19,
+    20, 21}}}
+```
+
+```
+In[] := WolframModel[{{1, 2}} -> {{3, 4}, {3, 1}, {4, 1}, {2, 4}}, {{1,
+   1}}, 2, "GenerationEventsList"]
+Out[] = {{{1, {1} -> {2, 3, 4, 5}}}, {{1, {2} -> {6, 7, 8,
+     9}}, {1, {3} -> {10, 11, 12, 13}}, {1, {4} -> {14, 15, 16,
+     17}}, {1, {5} -> {18, 19, 20, 21}}}}
+```
+
+The format for the events is
+```
+{ruleIndex, {indexEdgeIndices} -> {outputEdgeIndices}}
+```
+where the edge indices refer to expressions from [`"AllEventsEdgesList"`](#alleventsedgeslist--aka-allexpressions-).
+
 #### EventsStatesList
 
 #### AllEventsRuleIndices
