@@ -990,6 +990,36 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{6, 6, 3}, {2, 6, 2}, {6, 4,
 
 #### IncludeBoundaryEvents
 
+`"IncludeBoundaryEvents"` allows one to include "fake" initial and final events in properties such as `"CausalGraph"`. It does not affect the evolution itself, and has no effect on the evolution object. It has 4 settings: `None`, `"Initial"`, `"Final"` and `All`.
+
+We have already [demonstrated](#causalgraph-layeredcausalgraph) it previously for our arithmetic model. Here is an example with the final "event" included as well (event labels are kept for reference):
+```
+In[] := With[{evolution =
+   WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8,
+     2, 10, 0, 9, 7}, \[Infinity]]},
+ With[{causalGraph =
+    evolution["LayeredCausalGraph", "IncludeBoundaryEvents" -> All]},
+  Graph[causalGraph,
+   VertexLabels ->
+    Thread[VertexList[causalGraph] ->
+      Map[evolution["AllEventsEdgesList",
+          "IncludeBoundaryEvents" -> All][[#]] &,
+       Last /@ evolution["AllEventsList",
+         "IncludeBoundaryEvents" -> All], {2}]]]]]
+```
+![WolframModelIncludeBoundaryEventsCausalGraph](READMEImages/WolframModelIncludeBoundaryEventsCausalGraph.png)
+
+Properties like `"AllEventsList"` are affected as well:
+```
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8, 2,
+  10, 0, 9, 7}, \[Infinity], "AllEventsList",
+ "IncludeBoundaryEvents" -> "Final"]
+Out[] = {{1, {1, 2} -> {10}}, {1, {3, 4} -> {11}}, {1, {5,
+    6} -> {12}}, {1, {7, 8} -> {13}}, {1, {9, 10} -> {14}}, {1, {11,
+    12} -> {15}}, {1, {13, 14} -> {16}}, {1, {15,
+    16} -> {17}}, {\[Infinity], {17} -> {}}}
+```
+
 #### Method
 
 #### TimeConstraint
