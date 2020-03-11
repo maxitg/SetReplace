@@ -965,6 +965,29 @@ Out[] = {{{v1, v1}}, {{v1, 1}, {v1, 1}, {1, v1}}, {{v1, 2}, {v1, 2}, {2,
 
 #### IncludePartialGenerations
 
+In case partial generations were generated, they can be automatically dropped by setting `"IncludePartialGenerations" -> False`. Compare for instance
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
+  "MaxEvents" -> 42|>]
+```
+![WolframModelEvolutionObjectWithPartialGenerations](READMEImages/WolframModelEvolutionObjectWithPartialGenerations.png)
+with
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
+  "MaxEvents" -> 42|>, "IncludePartialGenerations" -> False]
+```
+![WolframModelEvolutionObjectWithPartialGenerationsDropped](READMEImages/WolframModelEvolutionObjectWithPartialGenerationsDropped.png)
+
+One neat use of this is producing a uniformly random evolution for a complete number of generations:
+```
+In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{6, 6, 3}, {2, 6, 2}, {6, 4,
+    2}, {5, 3, 6}}, {{1, 1, 1}, {1, 1, 1}}, <|
+  "MaxEvents" -> 10000|>, "FinalStatePlot",
+ "EventOrderingFunction" -> "Random",
+ "IncludePartialGenerations" -> False]
+```
+![WolframModelCompleteUniformRandomEvolutionPlot](READMEImages/WolframModelCompleteUniformRandomEvolutionPlot.png)
+
 #### IncludeBoundaryEvents
 
 #### Method
