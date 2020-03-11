@@ -850,6 +850,15 @@ Out[] = False
 
 #### AllEventsCount (aka EventsCount), GenerationEventsCountList
 
+`"AllEventsCount"` just returns the overall number of events throughout the evolution (the `Length` of `"AllEventsList"`).
+
+`"GenerationEventsCountList"` gives the number of events per each generation (`Length` mapped over `"GenerationEventsList"`):
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1,
+   1}}, 5, "GenerationEventsCountList"]
+Out[] = {1, 3, 9, 27, 81}
+```
+
 #### VertexCountList, EdgeCountList
 
 #### FinalDistinctElementsCount (aka AtomsCountFinal), FinalEdgeCount (aka ExpressionsCountFinal)
