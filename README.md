@@ -760,6 +760,41 @@ In[] := With[{evolution =
 
 #### EdgeGenerationsList (aka ExpressionGenerations), AllEventsGenerationsList (aka EventGenerations or EventGenerationsList)
 
+`"EdgeGenerationsList"` yields the list generation numbers (numbers of predecessor layers) for each edge in `"AllEventsEdgesList"`. `"AllEventsGenerationsList"` gives the same for events. The generation of an event is the same as the generation of edges it produces as output.
+
+Here edges of different generations are colored differently:
+```
+In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {3, 2}, {3, 4}, {3,
+    5}}, {{1, 1}, {1, 1}, {1, 1}}, 5, "EdgeGenerationsList"]
+Out[] = {0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, \
+5, 5, 5, 5}
+```
+```
+In[] := With[{evolution =
+   WolframModel[{{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {3, 2}, {3,
+       4}, {3, 5}}, {{1, 1}, {1, 1}, {1, 1}}, 5]},
+ MapThread[
+  WolframModelPlot[#, EdgeStyle -> #2] &, {evolution["StatesList"],
+   Replace[evolution[
+        "EdgeGenerationsList"][[#]] & /@ (evolution[
+         "StateEdgeIndicesAfterEvent", #] &) /@
+      Prepend[0]@Accumulate@evolution["GenerationEventsCountList"],
+    g_ :> ColorData["Rainbow"][g/5], {2}]}]]
+```
+![WolframModelPropertiesEdgeGenerationsListColoring](READMEImages/WolframModelPropertiesEdgeGenerationsListColoring.png)
+
+Event generations correspond to layers in `"LayeredCausalGraph"`:
+```
+In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {3, 2}, {3, 4}, {3,
+    5}}, {{1, 1}, {1, 1}, {1, 1}}, 5, "AllEventsGenerationsList"]
+Out[] = {1, 2, 3, 4, 5, 5}
+```
+```
+In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {3, 2}, {3, 4}, {3,
+    5}}, {{1, 1}, {1, 1}, {1, 1}}, 5, "LayeredCausalGraph"]
+```
+![WolframModelPropertiesAllEventsGenerationsListCausalGraph](READMEImages/WolframModelPropertiesAllEventsGenerationsListCausalGraph.png)
+
 #### TerminationReason
 
 #### GenerationsCount, TotalGenerationsCount, PartialGenerationsCount, CompleteGenerationsCount (aka MaxCompleteGeneration), GenerationComplete
