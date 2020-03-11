@@ -861,6 +861,20 @@ Out[] = {1, 3, 9, 27, 81}
 
 #### VertexCountList, EdgeCountList
 
+`"VertexCountList"` and `"EdgeCountList"` return counts of vertices and edges respectively in each state of `"StatesList"`. They are useful to see how quickly a particular system grows.
+
+```
+In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{6, 6, 3}, {2, 6, 2}, {6, 4,
+    2}, {5, 3, 6}}, {{1, 1, 1}, {1, 1, 1}}, 10, "VertexCountList"]
+Out[] = {1, 2, 4, 8, 14, 27, 49, 92, 171, 324, 622}
+```
+
+```
+In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{6, 6, 3}, {2, 6, 2}, {6, 4,
+    2}, {5, 3, 6}}, {{1, 1, 1}, {1, 1, 1}}, 10, "EdgeCountList"]
+Out[] = {2, 4, 8, 16, 28, 54, 98, 184, 342, 648, 1244}
+```
+
 #### FinalDistinctElementsCount (aka AtomsCountFinal), FinalEdgeCount (aka ExpressionsCountFinal)
 
 #### AllEventsDistinctElementsCount (aka AtomsCountTotal), AllEventsEdgesCount (aka ExpressionsCountTotal)
