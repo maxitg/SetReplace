@@ -550,6 +550,18 @@ Here the dotted gray edges are the ones about to be deleted, whereas the red one
 
 ### Options
 
+#### VertexNamingFunction
+
+#### IncludePartialGenerations
+
+#### IncludeBoundaryEvents
+
+#### Method
+
+#### TimeConstraint
+
+#### EventOrderingFunction
+
 ## WolframModelPlot (aka HypergraphPlot)
 
 ## RulePlot of WolframModel
