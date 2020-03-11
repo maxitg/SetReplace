@@ -735,7 +735,19 @@ In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}}, {{1,
 Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
 ```
 
-TODO: Add causal graph coloring.
+A neat example of using `"AllEventsRuleIndices"` is coloring events in a causal graph differently depending on which rule they correspond to. With this visualization one can see, for instance, that the outputs of the second rule in the example above are never used in any further inputs:
+```
+In[] := With[{evolution =
+   WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2,
+        3}}, {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}, {{1, 1, 1}}, 6]},
+  With[{causalGraph = evolution["LayeredCausalGraph"]},
+  Graph[causalGraph,
+   VertexStyle ->
+    Thread[VertexList[causalGraph] ->
+      Replace[evolution["AllEventsRuleIndices"], {1 -> Black,
+        2 -> White}, {1}]], VertexSize -> Medium]]]
+```
+![WolframModelPropertiesCausalGraphColoring](READMEImages/WolframModelPropertiesCausalGraphColoring.png)
 
 #### EdgeGenerationsList (aka ExpressionGenerations), AllEventsGenerationsList (aka EventGenerations or EventGenerationsList)
 
