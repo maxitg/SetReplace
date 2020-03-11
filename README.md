@@ -797,6 +797,30 @@ In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {3, 2}, {3, 4}, {3,
 
 #### TerminationReason
 
+`"TerminationReason"` shows why the evaluation of the model was stopped. This is particularly useful if multiple [stopping conditions](#step-limiters) are specified.
+
+All possible values are:
+* `"MaxEvents"`, `"MaxGenerations"`, `"MaxVertices"`, `"MaxVertexDegree"` and `"MaxEdges"` correspond directly to step limiters.
+* `"FixedPoint"` means there were no more matches possible to rule inputs.
+* `"TimeConstraint"` could occur if a [`"TimeConstraint"`](#timeconstraint) option was used.
+* `"Aborted"` would occur if the evaluation was manually interrupted (i.e., with ⌘. on a Mac). In that case a partially computed evolution object will still be returned.
+
+As an example, in our arithmetic model from before a `"FixedPoint"` is reached (which is why we can use `Infinity` as the number of steps):
+```
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8, 2,
+   10, 0, 9, 7}, \[Infinity]]["TerminationReason"]
+Out[] = "FixedPoint"
+```
+
+And if we manually abort the evolution, we could get something like this:
+```
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {5, 9,
+    10}, {6, 11, 12}, {13, 3, 14}, {8, 13}, {9, 7}, {10, 12}, {14,
+    11}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 100]
+⌘.
+```
+![WolframModelAbortedEvolutionObject](READMEImages/WolframModelAbortedEvolutionObject.png)
+
 #### GenerationsCount, TotalGenerationsCount, PartialGenerationsCount, CompleteGenerationsCount (aka MaxCompleteGeneration), GenerationComplete
 
 #### AllEventsCount (aka EventsCount), GenerationEventsCountList
