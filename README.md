@@ -1114,11 +1114,11 @@ In[] := WolframModel[{{x, y}, {y, z}} -> {}, {{1, 2}, {a, b}, {b, c}, {2,
 Out[] = {{{1, {1, 4} -> {}}}, {{1, {2, 3} -> {}}}}
 ```
 
-Note that in this example `"OldestEdge"` has select edges the first and the last edge, whereas `"LeastRecentEdge"` in an attempt to avoid the most "recent" last edge has select the second and the third ones. In this case, similarly to `"OldestEdge"`, a fixed set of edges will be chosen, but potentially in different orders.
+    Note that in this example `"OldestEdge"` has select edges the first and the last edge, whereas `"LeastRecentEdge"` in an attempt to avoid the most "recent" last edge has select the second and the third ones. In this case, similarly to `"OldestEdge"`, a fixed set of edges will be chosen, but potentially in different orders.
 
 * `"LeastOldEdge"`: similar to `"LeastRecentEdge"`, but avoids old edges instead of avoiding new ones.
 
-Note that counterintuitively `"OldestEdge"` sorting is not equivalent to the reverse of `"NewestEdge"` sorting, it is actually equivalent to the reverse of `"LeastOldEdge"`. Similarly, `"NewestEdge"` is the reverse of `"LeastRecentEdge"`.
+    Note that counterintuitively `"OldestEdge"` sorting is not equivalent to the reverse of `"NewestEdge"` sorting, it is actually equivalent to the reverse of `"LeastOldEdge"`. Similarly, `"NewestEdge"` is the reverse of `"LeastRecentEdge"`.
 
 * `"RuleOrdering"`: similarly to `"OldestEdge"` greedely chooses edges from the beginning of the list, however unlike `"OldestEdge"` which would pick the oldest edge with *any* available matches, it chooses edges in the order the left-hand side of (any) rule is written. The difference is best demonstrated in an example:
 ```
@@ -1128,7 +1128,7 @@ In[] := WolframModel[{{x, y}, {y, z}} -> {}, {{b, c}, {1, 2}, {a, b}, {2,
 Out[] = {{{1, {1, 3} -> {}}}, {{1, {2, 4} -> {}}}}
 ```
 
-Note how `"RuleOrdering"` has selected the second edge first because it matches to the first rule input while the first edge does not.
+    Note how `"RuleOrdering"` has selected the second edge first because it matches to the first rule input while the first edge does not.
 
 In this case a specific ordered sequence of edges will be matched (including its permutation). However, multiple matches might still be possible if multiple rules exist which match that sequence.
 
