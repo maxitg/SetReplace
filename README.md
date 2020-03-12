@@ -419,6 +419,8 @@ All possible keys in that association are:
 
 Any combination of these will be used, in which case the earliest triggered will stop the evolution.
 
+Note also that `"MaxGenerations"` works differently from the other limiters, as the matching algorithm would not even attempt to match edges with generations over the limit. This means that unlike, i.e., `"MaxVertices"` which would terminate the evolution immediately once the limit-violating event is attempted, `"MaxGenerations"`-limited evolution will keep "filling in" events for as long as possible until no further matches within allowed generations can be made.
+
 ### Properties
 
 #### FinalState (aka -1), StatesList, Generation, AllEventsStatesList, StateAfterEvent (aka SetAfterEvent)
@@ -1059,6 +1061,98 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1,
 ![WolframModelTimeConstrainedEvolutionObject](READMEImages/WolframModelTimeConstrainedEvolutionObject.png)
 
 #### EventOrderingFunction
+
+In many `WolframModel` systems multiple matches are possible at any given step. As an example, two possible replacements are possible in the system below from the initial condition:
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 2}, {2, 2}}, <|
+  "MaxEvents" -> 1|>, "EventsStatesPlotsList"]
+```
+![WolframModelNonoverlappingEventOrderingOldest](READMEImages/WolframModelNonoverlappingEventOrderingOldest.png)
+
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 2}, {2, 2}}, <|
+  "MaxEvents" -> 1|>, "EventsStatesPlotsList",
+ "EventOrderingFunction" -> "NewestEdge"]
+```
+![WolframModelNonoverlappingEventOrderingNewest](READMEImages/WolframModelNonoverlappingEventOrderingNewest.png)
+
+In this particular, the so-called non-overlapping system, the order of replacements does not matter, as regardless of order the same final state (upto the renaming of vertices) will be produced for the same fixed number of generations. This will always be the case if there is only a single edge on the left-hand side of the rule:
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 2}, {2, 2}},
+   3, "FinalStatePlot", "EventOrderingFunction" -> #] & /@ {Automatic,
+   "Random"}
+```
+![WolframModelNonoverlappingRandom](READMEImages/WolframModelNonoverlappingRandom.png)
+
+For some systems, however, the order of replacements does matter, and non-equivalent final states would be produced for different orders even if a fixed number of generations is requested:
+```
+In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3,
+    4}}, {{1, 2}, {2, 3}, {3, 4}, {4, 1}}, 5, "FinalStatePlot"]
+```
+![WolframModelOverlappingLeastRecent](READMEImages/WolframModelOverlappingLeastRecent.png)
+
+```
+In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3,
+    4}}, {{1, 2}, {2, 3}, {3, 4}, {4, 1}}, 5, "FinalStatePlot",
+ "EventOrderingFunction" -> "RuleOrdering"]
+```
+![WolframModelOverlappingRuleOrdering](READMEImages/WolframModelOverlappingRuleOrdering.png)
+
+In case like that it is important to be able to specify the desired evolution order, which is what `"EventOrderingFunction"` option is for. `"EventOrderingFunction"` is specified as a list of sorting criteria such as the default `{"LeastRecentEdge", "RuleOrdering", "RuleIndex"}`. Note that most individual sorting criteria are insufficient to distinguish between all available matches. If multiple matches remain after exchausting all sorting criteria, one will be chosen uniformly at random (which is why `{}` works as a shorthand for `"Random"`).
+
+Possible sorting criteria are:
+* `"OldestEdge"`: greedely select the edge in the set closest to the beginning of the list (which would typically correspond to the oldest edge). Note, within a single-event output, the edges are assumed oldest-to-newest left-to-right as written on the right-hand side of the rule. After this criteria, a fixed ***set*** of edges will be chosen, but different orderings of that set might be possible (which could allow for multiple non-equivalent matches).
+
+* `"NewestEdge"`: similar to `"OldestEdge"` except edges are chosen from the end of the list rather than from the beginning.
+
+* `"LeastRecentEdge"`: this is similar to `"OldestEdge"`, but instead of greedely choosing the oldest edges, it instead avoids choosing new ones. The difference is best demonstrated in an example:
+```
+In[] := WolframModel[{{x, y}, {y, z}} -> {}, {{1, 2}, {a, b}, {b, c}, {2,
+     3}}, <|"MaxEvents" -> 1|>, "AllEventsList",
+   "EventOrderingFunction" -> #] & /@ {"OldestEdge",
+  "LeastRecentEdge"}
+Out[] = {{{1, {1, 4} -> {}}}, {{1, {2, 3} -> {}}}}
+```
+
+Note that in this example `"OldestEdge"` has select edges the first and the last edge, whereas `"LeastRecentEdge"` in an attempt to avoid the most "recent" last edge has select the second and the third ones. In this case, similarly to `"OldestEdge"`, a fixed set of edges will be chosen, but potentially in different orders.
+
+* `"LeastOldEdge"`: similar to `"LeastRecentEdge"`, but avoids old edges instead of avoiding new ones.
+
+Note that counterintuitively `"OldestEdge"` sorting is not equivalent to the reverse of `"NewestEdge"` sorting, it is actually equivalent to the reverse of `"LeastOldEdge"`. Similarly, `"NewestEdge"` is the reverse of `"LeastRecentEdge"`.
+
+* `"RuleOrdering"`: similarly to `"OldestEdge"` greedely chooses edges from the beginning of the list, however unlike `"OldestEdge"` which would pick the oldest edge with *any* available matches, it chooses edges in the order the left-hand side of (any) rule is written. The difference is best demonstrated in an example:
+```
+In[] := WolframModel[{{x, y}, {y, z}} -> {}, {{b, c}, {1, 2}, {a, b}, {2,
+     3}}, <|"MaxEvents" -> 1|>, "AllEventsList",
+   "EventOrderingFunction" -> #] & /@ {"OldestEdge", "RuleOrdering"}
+Out[] = {{{1, {1, 3} -> {}}}, {{1, {2, 4} -> {}}}}
+```
+
+Note how `"RuleOrdering"` has selected the second edge first because it matches to the first rule input while the first edge does not.
+
+In this case a specific ordered sequence of edges will be matched (including its permutation). However, multiple matches might still be possible if multiple rules exist which match that sequence.
+
+* `"ReverseRuleOrdering"`: as the name suggests, this is just the reverse of `"RuleOrdering"`.
+
+* `"RuleIndex"`: this simply means it will attempt to match the first rule first, and only if no matches to the first rule are possible, it will go to the second rule, etc.
+
+* `"ReverseRuleIndex"`: similar to `"RuleIndex"`, but reversed as the name suggests.
+
+* `"Random"`: this will select a single match uniformly at random. This is possible to do efficiently because the C++ implementation of `WolframModel` (the only one that supported `"EventOrderingFunction"`) keeps track of all possible matches at any point during the evolution. This is guaranteed to select a single match, so the remainder of the sorting criteria list is ignored. It can also be omitted because the random event will always be chosen if provided sorting criteria are insufficient. The seeding can be controlled with `SeedRandom`, however, the result will depend on your platform (Mac/Linux/Windows) and the specific build (version) of `SetReplace`.
+
+As a neat example, here is the output of all individual sorting criteria (default sorting criteria are appended to disambiguate):
+```
+In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
+         7}, {7, 6}, {6, 5}, {5, 2}, {6, 3}, {7, 4}, {2, 7}, {4,
+        5}}, {{1, 2}, {1, 3}, {1, 4}, {1, 5}} -> {{2, 3}, {3,
+        4}}}, {{1, 1}, {1, 1}, {1, 1}}, <|"MaxEvents" -> 30|>,
+    "EventOrderingFunction" -> {#, "LeastRecentEdge", "RuleOrdering",
+      "RuleIndex"}]["FinalStatePlot",
+   PlotLabel -> #] & /@ {"OldestEdge", "LeastOldEdge",
+  "LeastRecentEdge", "NewestEdge", "RuleOrdering",
+  "ReverseRuleOrdering", "RuleIndex", "ReverseRuleIndex", "Random"}
+```
+![WolframModelAllEventOrderingFunctions](READMEImages/WolframModelAllEventOrderingFunctions.png)
 
 ## WolframModelPlot (aka HypergraphPlot)
 
