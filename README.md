@@ -1156,6 +1156,24 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
 
 ## WolframModelPlot (aka HypergraphPlot)
 
+### Edge Type
+
+### GraphHighlight and GraphHighlightStyle
+
+### HyperedgeRendering
+
+### VertexCoordinateRules
+
+### VertexLabels
+
+### VertexSize and ArrowheadLength
+
+### MaxImageSize
+
+### Style Options
+
+### Graphics Options
+
 ## RulePlot of WolframModel
 
 ## Utility Functions
