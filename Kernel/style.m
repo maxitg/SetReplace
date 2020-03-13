@@ -112,7 +112,7 @@ $styleNames = KeySort /@ KeySort @ <|
   "EvolutionCausalGraph" -> <|
     "StateVertexStyle" -> $statesGraphVertexStyle,
     "EvolutionEdgeStyle" -> $evolutionCausalGraphEvolutionEdgeStyle,
-    "EdgeVertexStyle" -> $causalGraphVertexStyle,
+    "EventVertexStyle" -> $causalGraphVertexStyle,
     "CausalEdgeStyle" -> $evolutionCausalGraphCausalEdgeStyle
   |>,
   "BranchialGraph" -> <|
