@@ -1426,20 +1426,20 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
 ```
 In[] := GeneralizedGridGraph[{5 -> "Directed", 5 -> "Circular"}]
 ```
-![Plot of circular directed grid](READMEImages/GeneralizedGridGraphBasic.png)
+<img src="READMEImages/GeneralizedGridGraphBasic.png" width="478">
 
 Possible specifiers are `"Directed"` and `"Circular"`, and they can be combined:
 ```
 In[] := GeneralizedGridGraph[{3 -> {"Directed", "Circular"}, 6}]
 ```
-![Plot of directed circular grid in the same direction](READMEImages/GeneralizedGridGraphCombinedDirectedCircular.png)
+<img src="READMEImages/GeneralizedGridGraphCombinedDirectedCircular.png" width="478">
 
 Same options as `GridGraph` are supported. In addition `"VertexNamingFunction" -> "Coordinates"` names vertices according to their position in a grid:
 ```
 In[] := GeneralizedGridGraph[{4, 5, 2},
  "VertexNamingFunction" -> "Coordinates", VertexLabels -> Automatic]
 ```
-![Plot of 3D grid graph with position-named vertices](READMEImages/GeneralizedGridGraphVertexNamingFunction.png)
+<img src="READMEImages/GeneralizedGridGraphVertexNamingFunction.png" width="478">
 
 Finally, it's possible to use different `EdgeStyle` in different directions by specifying it as a list:
 ```
@@ -1447,7 +1447,7 @@ In[] := GeneralizedGridGraph[{4 -> "Directed", 5, 2},
  "VertexNamingFunction" -> "Coordinates",
  EdgeStyle -> Darker /@ {Red, Green, Blue}]
 ```
-![Plot of 3D grid with multiple edge styles](READMEImages/GeneralizedGridGraphEdgeStyle.png)
+<img src="READMEImages/GeneralizedGridGraphEdgeStyle.png" width="478">
 
 ### HypergraphAutomorphismGroup
 
@@ -1465,7 +1465,7 @@ In[] := GroupOrder[
     WolframModelPlot]@{{1, 2, 3}, {3, 4, 5}, {5, 6, 1}, {1, 7, 3}, {3,
       8, 5}, {5, 9, 1}}]]
 ```
-![Plot {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}, {1, 7, 3}, {3, 8, 5}, {5, 9, 1}}](READMEImages/HypergraphAutomorphismGroupNeatExample.png)
+<img src="READMEImages/HypergraphAutomorphismGroupNeatExample.png" width="451">
 ```
 Out[] = 24
 ```
@@ -1499,7 +1499,7 @@ In[] := WolframModelPlot[#,
       Thread[Values[#2] -> Red], Thread[Values[#3] -> Blue]]]] & @@@
  HypergraphUnifications[{{1, 2}, {2, 3}}, {{1, 2}, {2, 3}}]
 ```
-![Plot of unifications of {{1, 2}, {2, 3}} with itself](READMEImages/HypergraphUnificationsBasic.png)
+<img src="READMEImages/HypergraphUnificationsBasic.png" width="745">
 
 A more complicated example with edges of multiple arities is
 ```
@@ -1511,7 +1511,7 @@ In[] := WolframModelPlot[#,
  HypergraphUnifications[{{1, 2, 3}, {4, 5, 6}, {1, 4}}, {{1, 2, 3}, {4, 5,
      6}, {1, 4}}]
 ```
-![Plot of unifications of {{1, 2, 3}, {4, 5, 6}, {1, 4}} with itself](READMEImages/HypergraphUnificationsMultipleArities.png)
+<img src="READMEImages/HypergraphUnificationsMultipleArities.png" width="746">
 
 ### WolframPhysicsProjectStyleData
 
