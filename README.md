@@ -2,8 +2,6 @@
 
 # Set Substitution Systems
 
-[Basic Example](#basic-example) | [Relations between Set Elements](#relations-between-set-elements)
-
 ## Basic Example
 
 **SetReplace** is a [Wolfram Language](https://www.wolfram.com/language/) package to manipulate set substitution systems. To understand what a set substitution system does consider an unordered set of elements:
