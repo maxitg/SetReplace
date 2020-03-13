@@ -1470,6 +1470,47 @@ Out[] = 24
 
 ### HypergraphUnifications
 
+When considering how many matches could potentially exist to a given set of rule inputs, it is often useful to see all possible ways hypergraphs can overlap. `HypergraphUnifications` constructs all possible hypergraphs containing both subgraphs matching the specified arguments. The argument-hypergraphs must overlap by at least a single edge. The vertices are identified to the least extent possible, but some identification are made if necessary.
+
+The output format is a list of triples `{unified hypergraph, first argument edge matches, second argument edge matches}`, where the last two elements are associations mapping the edge indices in the input hypergraphs to the edge indices in the unified hypergraph.
+
+As an example, consider a simple case of two adjacent binary edges:
+```
+In[] := HypergraphUnifications[{{1, 2}, {2, 3}}, {{1, 2}, {2, 3}}]
+Out[] = {{{{3, 1}, {3, 4}, {2, 3}}, <|1 -> 3, 2 -> 1|>, <|1 -> 3,
+   2 -> 2|>}, {{{2, 3}, {3, 1}}, <|1 -> 1, 2 -> 2|>, <|1 -> 1,
+   2 -> 2|>}, {{{4, 1}, {2, 3}, {3, 4}}, <|1 -> 3, 2 -> 1|>, <|1 -> 2,
+    2 -> 3|>}, {{{1, 2}, {2, 1}}, <|1 -> 1, 2 -> 2|>, <|1 -> 2,
+   2 -> 1|>}, {{{1, 2}, {3, 4}, {2, 3}}, <|1 -> 1, 2 -> 3|>, <|1 -> 3,
+    2 -> 2|>}, {{{1, 3}, {2, 3}, {3, 4}}, <|1 -> 1,
+   2 -> 3|>, <|1 -> 2, 2 -> 3|>}}
+```
+
+In the first output here `{{{3, 1}, {3, 4}, {2, 3}}, <|1 -> 3, 2 -> 1|>, <|1 -> 3, 2 -> 2|>}`, the graphs are overlapped by a shared edge `{2, 3}`, and two inputs are matched respectively to `{{2, 3}, {3, 1}}` and `{{2, 3}, {3, 4}}`.
+
+All matches can be visualized by coloring shared edges purple, edges mapped to only the first argument or only the second argument red and blue respecively:
+```
+In[] := WolframModelPlot[#,
+   EdgeStyle ->
+    ReplacePart[Table[Automatic, Length[#]],
+     Join[Thread[Intersection[Values[#2], Values[#3]] -> Purple],
+      Thread[Values[#2] -> Red], Thread[Values[#3] -> Blue]]]] & @@@
+ HypergraphUnifications[{{1, 2}, {2, 3}}, {{1, 2}, {2, 3}}]
+```
+![Plot of unifications of {{1, 2}, {2, 3}} with itself](READMEImages/HypergraphUnificationsBasic.png)
+
+A more complicated example with edges of multiple arities is
+```
+In[] := WolframModelPlot[#,
+   EdgeStyle ->
+    ReplacePart[Table[Automatic, Length[#]],
+     Join[Thread[Intersection[Values[#2], Values[#3]] -> Purple],
+      Thread[Values[#2] -> Red], Thread[Values[#3] -> Blue]]]] & @@@
+ HypergraphUnifications[{{1, 2, 3}, {4, 5, 6}, {1, 4}}, {{1, 2, 3}, {4, 5,
+     6}, {1, 4}}]
+```
+![Plot of unifications of {{1, 2, 3}, {4, 5, 6}, {1, 4}} with itself](READMEImages/HypergraphUnificationsMultipleArities.png)
+
 ### WolframPhysicsProjectStyleData
 
 # Physics Applications
