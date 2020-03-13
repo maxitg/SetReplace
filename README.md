@@ -34,7 +34,7 @@ which we can render as a collection of ordered hyperedges:
 In[] := HypergraphPlot[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
-![{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}](READMEImages/basicHypergraph.png)
+<img src="READMEImages/basicHypergraph.png" width="797">
 
 We can then have a rule which would pick a subset of expressions related in a particular way (much like a join query) and replace them with something else. Note the [`Module`](https://reference.wolfram.com/language/ref/Module.html) on the right-hand side creates a new variable (vertex) which causes the hypergraph to grow.
 ```
@@ -49,7 +49,7 @@ In[] := HypergraphPlot[
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]],
  VertexLabels -> Automatic]
 ```
-![{{4, 6, 7}, {5, v1938, 1}, {v1938, 4, 2}, {4, 5, 3}}](READMEImages/basicRuleOneStep.png)
+<img src="READMEImages/basicRuleOneStep.png" width="797">
 
 After 10 steps, we get a more complicated structure
 ```
@@ -59,7 +59,7 @@ In[] := HypergraphPlot[
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 10],
  VertexLabels -> Automatic]
 ```
-![{{7, 2, v1960}, {7, v1965, 6}, {v1965, v1962, 4}, {v1962, 7, v1959}, {3, v1966, v1963}, {v1966, 1, v1959}, {1, 3, v1961}, {1, v1967, v1959}, {v1967, v1963, 5}, {v1963, 1, 4}, {6, v1968, 2}, {v1968, 7, v1964}, {7, 6, v1962}}](READMEImages/basicRuleTenSteps.png)
+<img src="READMEImages/basicRuleTenSteps.png" width="797">
 
 And after 100 steps, it gets even more complicated
 ```
@@ -68,7 +68,7 @@ In[] := HypergraphPlot[
     7}}, {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 100]]
 ```
-![basicRuleHundredSteps](READMEImages/basicRuleHundredSteps.png)
+<img src="READMEImages/basicRuleHundredSteps.png" width="797">
 
 Exploring the models of this more complicated variety is what this package is mostly designed for.
 
@@ -205,7 +205,7 @@ The most basic way to call it however is this:
 In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
     3}}, {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 10]
 ```
-![WolframModelBasicEvolution10](READMEImages/WolframModelBasicEvolution10.png)
+<img src="READMEImages/WolframModelBasicEvolution10.png" width="821">
 
 Note this call is different from using the `SetReplace` function in a variety of ways:
 * The order of arguments is switched, the rule goes first.
@@ -218,10 +218,10 @@ To see the information an evolution object contains, let's make one with a small
 In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
     3}}, {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 3]
 ```
-![WolframModelBasicEvolution3](READMEImages/WolframModelBasicEvolution3.png)
+<img src="READMEImages/WolframModelBasicEvolution3.png" width="811">
 
 One can easily see its internal structure in the `InputForm`:
-![WolframModelBasicEvolution3 // InputForm](READMEImages/WolframModelBasicEvolution3InputForm.png)
+<img src="READMEImages/WolframModelBasicEvolution3InputForm.png" width="990">
 ```
 Out[] = WolframModelEvolutionObject[<|"CreatorEvents" -> {0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4,
    4, 4, 5, 5, 5}, "DestroyerEvents" -> {1, 1, 2, 3, 2, 3, 4, 4, Infinity, 5, 5,
@@ -236,7 +236,7 @@ Out[] = WolframModelEvolutionObject[<|"CreatorEvents" -> {0, 0, 0, 1, 1, 1, 2, 2
 ```
 
 The most important part of that association is `"AtomLists"` which includes all set elements (aka expressions or edges) ever created throughout history. Note, this does not correspond to any particular step, rather all steps are combined. They are not just catenated states as well, as if a particular expression was never used as an input for any replacement in a particular step, it would not be duplicated in that list. To see how that works, compare it to `"StatesList"` and observe that a catenated `"StatesList"` would contain more expressions than `"AtomLists"` does.
-![WolframModelBasicEvolution3["StatesList"]](READMEImages/WolframModelBasicEvolution3StatesList.png)
+<img src="READMEImages/WolframModelBasicEvolution3StatesList.png" width="1022">
 ```
 Out[] = {{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, {{4, 6, 7}, {5, 8, 1}, {8, 4,
    2}, {4, 5, 3}}, {{7, 9, 8}, {9, 6, 4}, {6, 7, 2}, {1, 10, 4}, {10,
