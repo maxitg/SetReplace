@@ -1200,6 +1200,28 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}, "Cyclic"]
 
 ### GraphHighlight and GraphHighlightStyle
 
+Vertices and edges can be highlighted with `GraphHighlight` option:
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
+   9}, {9}}, GraphHighlight -> {{1, 2, 3}, 4, {9}}]
+```
+![Highlighted {1, 2, 3}, 4, and {9}](READMEImages/WolframModelPlotHighlight.png)
+
+For a hypergraph with multiedges, only the specified number of edges will be highlighted:
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {1, 2, 3}, {3, 4}, {3, 4}, {3,
+   4}, {4}, {4}}, GraphHighlight -> {{1, 2, 3}, {3, 4}, {3, 4}, {4}}]
+```
+![Highlighted {1, 2, 3}, double {3, 4} and {4}](READMEImages/WolframModelPlotMultiedgeHighlight.png)
+
+The color of the highlight can be specified with `GraphHighlightStyle` (only colors, not other style specifiers are supported at the moment):
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
+   9}, {9}}, GraphHighlight -> {{1, 2, 3}, 4, {9}},
+ GraphHighlightStyle -> Darker@Green]
+```
+![Highlighted {1, 2, 3}, 4 and {9} in green](READMEImages/WolframModelPlotHighlightGreen.png)
+
 ### HyperedgeRendering
 
 ### VertexCoordinateRules
