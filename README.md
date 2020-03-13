@@ -1188,6 +1188,13 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6,
 ```
 ![{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6, 6}}](READMEImages/WolframModelPlotMultiedges.png)
 
+`WolframModelPlot` is listable, multiple hypergraphs can be plotted at the same time:
+```
+In[] := WolframModelPlot[{{{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3,
+     4, 5}, {5, 6, 7}}}]
+```
+![{{{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 7}}}](READMEImages/WolframModelPlotMultiple.png)
+
 Many properties of `WolframModel` such as `"FinalStatePlot"` and `"EventStatesPlotsList"` use `WolframModelPlot` to produce output and accept the same set of options, which are explained below.
 
 ### Edge Type
@@ -1295,6 +1302,18 @@ In[] := WolframModelPlot[{{1, 2, 2}, {2, 3, 3}, {3, 1, 1}},
 ![{{1, 2, 2}, {2, 3, 3}, {3, 1, 1}} as unordered hypergraph](READMEImages/WolframModelPlotUnordered.png)
 
 ### MaxImageSize
+
+`"MaxImageSize"` allows one to specify the image size while allowing for automatic reduction in size for very small hypergraphs. To demonstrate that, consider the difference:
+```
+In[] := WolframModelPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}},
+ "MaxImageSize" -> 100]
+```
+![{{{1}}, {{1, 1}}, {{1, 2, 3}}} with "MaxImageSize"](READMEImages/WolframModelPlotMaxImageSize.png)
+
+```
+In[] := WolframModelPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}}, ImageSize -> 100]
+```
+![{{{1}}, {{1, 1}}, {{1, 2, 3}}} with ImageSize](READMEImages/WolframModelPlotImageSize.png)
 
 ### Style Options
 
