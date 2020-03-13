@@ -254,13 +254,13 @@ Each edge in `"AtomLists"` has properties which are storied in other lists of th
 * Finally, `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case as only one rule is used in this example.
 
 A specific property can be requested from an evolution object in a similar way as a property for an `Entity`. The list of available properties can be found [below](#properties).
-![WolframModelBasicEvolution10["EventsCount"]](READMEImages/WolframModelBasicEvolution10EventsCount.png)
+<img src="READMEImages/WolframModelBasicEvolution10EventsCount.png" width="629">
 ```
 Out[] = 109
 ```
 
 List of all available properties can be obtained with a `"Properties"` property:
-![WolframModelBasicEvolution10["Properties"]](READMEImages/WolframModelBasicEvolution10Properties.png)
+<img src="READMEImages/WolframModelBasicEvolution10Properties.png" width="619">
 ```
 Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList", \
 "StatesPlotsList", "EventsStatesPlotsList", \
@@ -280,14 +280,14 @@ Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList", \
 ```
 
 Some properties take additional arguments, which can be supplied after the property name:
-![WolframModelBasicEvolution10["StateAfterEvent", 7]](READMEImages/WolframModelBasicEvolution10StateAfterEvent7.png)
+<img src="READMEImages/WolframModelBasicEvolution10StateAfterEvent7.png" width="691">
 ```
 Out[] = {{8, 1, 3}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}, {2, 13, 11}, {13, 7,
   6}, {7, 2, 9}, {7, 14, 6}, {14, 11, 4}, {11, 7, 8}}
 ```
 
 A particular generation can be extracted simply by number (including, i.e., -1 for the final state):
-![WolframModelBasicEvolution10[3]](READMEImages/WolframModelBasicEvolution10Generation3.png)
+<img src="READMEImages/WolframModelBasicEvolution10Generation3.png" width="516">
 ```
 Out[] = {{6, 7, 2}, {8, 1, 3}, {4, 11, 7}, {11, 6, 9}, {6, 4, 8}, {5, 12,
   1}, {12, 8, 10}, {8, 5, 4}}
@@ -341,10 +341,10 @@ Multiple rules can simply be specified as a list of rules.
 In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}}, {{1,
      2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}, {{1, 1, 1}}, 4]
 ```
-![WolframModelMultipleRulesObject](READMEImages/WolframModelMultipleRulesObject.png)
+<img src="READMEImages/WolframModelMultipleRulesObject.png" width="488">
 
 To see which rules were used for each replacement:
-![WolframModelMultipleRulesObject["AllEventsRuleIndices"]](READMEImages/WolframModelMultipleRulesObjectAllEventsRuleIndices.png)
+<img src="READMEImages/WolframModelMultipleRulesObjectAllEventsRuleIndices.png" width="708">
 ```
 Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
 ```
@@ -386,7 +386,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 8}, {9,
    6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6,
    3}}, 6, "FinalStatePlot"]
 ```
-![WolframModelFixedGenerationsFinalStatePlot](READMEImages/WolframModelFixedGenerationsFinalStatePlot.png)
+<img src="READMEImages/WolframModelFixedGenerationsFinalStatePlot.png" width="478">
 
 Alternatively, an `Association` can be used to specify multiple limiting conditions
 ```
@@ -396,7 +396,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 8}, {9,
    6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6, 3}}, <|
   "MaxVertices" -> 300, "MaxEvents" -> 200|>, "FinalStatePlot"]
 ```
-![WolframModelMaxVerticesFinalStatePlot](READMEImages/WolframModelMaxVerticesFinalStatePlot.png)
+<img src="READMEImages/WolframModelMaxVerticesFinalStatePlot.png" width="478">
 
 Note that the final state in this case is "less symmetric" because its last generation is incomplete (more on that [later](#hypergraphautomorphismgroup)). Such incomplete generations can be automatically trimmed by setting [`"IncludePartialGenerations" -> False`](#includepartialgenerations).
 
@@ -408,7 +408,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 8}, {9,
    6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6, 3}}, <|
   "MaxVertices" -> 300, "MaxEvents" -> 200|>]
 ```
-![WolframModelMaxVerticesEvolution](READMEImages/WolframModelMaxVerticesEvolution.png)
+<img src="READMEImages/WolframModelMaxVerticesFinalStatePlot.png" width="507">
 
 All possible keys in that association are:
 * `"MaxEvents"`: limit the number of individual replacements (in the `SetReplace` function meaning).
