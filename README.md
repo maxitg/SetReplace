@@ -102,6 +102,8 @@ A less frequently updated version is available through the Wolfram's public pacl
 
 # Symbols and Functions
 
+[SetReplace\*](#setreplace) | [ToPatternRules](#topatternrules) | [WolframModel and WolframModelEvolutionObject](#wolframmodel-and-wolframmodelevolutionobject) | [WolframModelPlot](#wolframmodelplot) | [RulePlot of WolframModel](#ruleplot-of-wolframmodel) | [Utility Functions](#utility-functions)
+
 ## SetReplace*
 
 **`SetReplace`** (and related **`SetReplaceList`**, **`SetReplaceAll`**, **`SetReplaceFixedPoint`** and **`SetReplaceFixedPointList`**) are the functions the package is named after. They are quite simple, don't have many options, and simply perform replacement operations either one-at-a-time (as in the case of `SetReplace`), to all non-overlapping subsets (`SetReplaceAll`), or until no more matches can be made (`SetReplaceFixedPoint`). A suffix `*List` implies the function returns a list of sets after each replacement instead of just the final result.
