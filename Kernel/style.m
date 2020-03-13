@@ -1,5 +1,3 @@
-(* ::Package:: *)
-
 Package["SetReplace`"]
 
 PackageExport["$WolframPhysicsProjectPlotThemes"]
@@ -112,10 +110,13 @@ $styleNames = KeySort /@ KeySort @ <|
     "EdgeStyle" -> $statesGraphEdgeStyle
   |>,
   "EvolutionCausalGraph" -> <|
+    "EvolutionVertexStyle" -> $statesGraphVertexStyle,
     "EvolutionEdgeStyle" -> $evolutionCausalGraphEvolutionEdgeStyle,
+    "CausalVertexStyle" -> $causalGraphVertexStyle,
     "CausalEdgeStyle" -> $evolutionCausalGraphCausalEdgeStyle
   |>,
   "BranchialGraph" -> <|
+    "VertexStyle" -> $statesGraphVertexStyle,
     "EdgeStyle" -> $branchialGraphEdgeStyle
   |>
 |>;
@@ -191,11 +192,11 @@ style[$lightTheme] = <|
   
   (* States graph *)
   $statesGraphVertexStyle -> Directive[Opacity[0.7], Hue[0.62, 0.45, 0.87]],
-  $statesGraphEdgeStyle -> Directive[{Hue[0.75, 0, 0.35], Dashing[None]}],
+  $statesGraphEdgeStyle -> Directive[{Hue[0.75, 0, 0.35]}],
 
   (* Evolution causal graph *)
-  $evolutionCausalGraphEvolutionEdgeStyle -> Directive[{Hue[0.75, 0, 0.24], Dashing[None]}],
-  $evolutionCausalGraphCausalEdgeStyle -> Directive[{Hue[0.07, 0.78, 1], Dashing[None]}],
+  $evolutionCausalGraphEvolutionEdgeStyle -> Directive[{Hue[0.75, 0, 0.24]}],
+  $evolutionCausalGraphCausalEdgeStyle -> Directive[{Hue[0.07, 0.78, 1]}],
 
   (* Branchial graph *)
   $branchialGraphEdgeStyle -> Hue[0.89, 0.97, 0.71]
