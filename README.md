@@ -186,7 +186,7 @@ Out[] = {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
  Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]
 ```
 
-This last form of the rule is the one that we use most often and is also the one that is accepted by [`WolframModel`](#wolframmodelp-and-wolframmodelevolutionobject) by default (more on that in [`WolframModel` section]((#wolframmodelp-and-wolframmodelevolutionobject))).
+This last form of the rule is the one that we use most often and is also the one that is accepted by [`WolframModel`](#wolframmodel-and-wolframmodelevolutionobject) by default (more on that in [`WolframModel` section]((#wolframmodel-and-wolframmodelevolutionobject))).
 
 `ToPatternRules` is listable in a trivial way:
 ```
