@@ -211,7 +211,7 @@ Note that this call is different from using the `SetReplace` function in a varie
 * The order of arguments is switched, the rule goes first.
 * The rule is specified in the "anonymous" form (i.e., `ToPatternRules` is done implicitly).
 * The number of steps here is the number of generations, which is equivalent to steps of `SetReplaceAll`. Here each edge can have at most 10 generations of predecessors.
-* The output is not a final state, but an object containing the entire evolution (similar to `SetReplaceList`) but with additional information about which rules are used at each replacement. From the information field on that object one can see that the evolution was done for 10 generations (i.e., a fixed point has not been reached early), and 109 replacements (aka events) were made in total. More properties can be computed from an evolution object, more on that later.
+* The output is not a final state, but an object containing the entire evolution (similar to `SetReplaceList`) but with additional information about which rules are used at each replacement. From the information field on that object, one can see that the evolution was done for 10 generations (i.e., a fixed point has not been reached early), and 109 replacements (aka events) were made in total. More properties can be computed from an evolution object, more on that later.
 
 To see the information an evolution object contains, let's make one with a smaller number of generations:
 ```
@@ -1140,7 +1140,7 @@ Possible sorting criteria are:
 
 * `"ReverseRuleIndex"`: similar to `"RuleIndex"`, but reversed as the name suggests.
 
-* `"Random"`: this will select a single match uniformly at random. It is possible to do that efficiently because the C++ implementation of `WolframModel` (the only one that supports `"EventOrderingFunction"`) keeps track of all possible matches at any point during the evolution. `"Random"` is guaranteed to select a single match, so the remainder of the sorting criteria list is ignored. It can also be omitted because the random event is always chosen if provided sorting criteria are insufficient. The seeding can be controlled with `SeedRandom`. However, the result does depend on your platform (Mac/Linux/Windows) and the specific build (version) of `SetReplace`.
+* `"Random"`: this selects a single match uniformly at random. It is possible to do that efficiently because the C++ implementation of `WolframModel` (the only one that supports `"EventOrderingFunction"`) keeps track of all possible matches at any point during the evolution. `"Random"` is guaranteed to select a single match, so the remainder of the sorting criteria list is ignored. It can also be omitted because the random event is always chosen if provided sorting criteria are insufficient. The seeding can be controlled with `SeedRandom`. However, the result does depend on your platform (Mac/Linux/Windows) and the specific build (version) of `SetReplace`.
 
 As a neat example, here is the output of all individual sorting criteria (default sorting criteria are appended to disambiguate):
 ```
@@ -1352,6 +1352,24 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
   Directive[Lighter[Green, 0.9], EdgeForm[Dotted]]]
 ```
 <img src="READMEImages/WolframModelPlotEdgePolygonStyle.png" width="478">
+
+It is possible to specify styles separately for each edge and vertex. Vertex styles are specified in the same order as `Union @* Catenate` evaluated on the list of edges.
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
+   9}, {9}}, EdgeStyle -> ColorData[97] /@ Range[6],
+ VertexStyle -> ColorData[98] /@ Range[9]]
+```
+<img src="READMEImages/WolframModelPlotSeparateElementStyles.png" width="478">
+
+Alternatively, one can specify different styles for different patterns of elements. In this case, styles are specified as `Association`s with patterns for keys. This can be used to, for example, differently color edges of different arities:
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
+   9}, {9}},
+ EdgeStyle -> <|{_} -> Darker@Blue, {_, _} ->
+    Darker@Yellow, {_, _, _} -> Darker@Green, {_, _, _, _} ->
+    Darker@Red|>]
+```
+<img src="READMEImages/WolframModelPlotPatternStyles.png" width="478">
 
 ### Graphics Options
 
