@@ -1420,7 +1420,7 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {2, 2}, {2,
 ```
 <img src="READMEImages/RulePlotManualCoordinates.png" width="429">
 
-Some of the [`WolframModelPlot`](#wolframmodelplot) options are supported, specifically [`GraphHighlightStyle`](#graphhighlight-and-graphhighlightstyle), [`"HyperedgeRendering"`](#hyperedgerendering), [`VertexCoordinateRules`](#vertexcoordinaterules) and [`VertexLabels`](#vertexlabels). `"EdgeType"` is supported as an option instead of the second argument like in [`WolframModelPlot`](#wolframmodelplot).
+Some of the [`WolframModelPlot`](#wolframmodelplot) options are supported, specifically [`GraphHighlightStyle`](#graphhighlight-and-graphhighlightstyle), [`"HyperedgeRendering"`](#hyperedgerendering), [`VertexCoordinateRules`](#vertexcoordinaterules) and [`VertexLabels`](#vertexlabels). `"EdgeType"` is supported as an option instead of [the second argument](#edge-type) like in [`WolframModelPlot`](#wolframmodelplot).
 
 There are also two additional `RulePlot`-specific style options. `Spacings` controls the amount of empty space between the rule parts and the frame (or the space where the frame would be if it's not shown):
 ```
