@@ -1420,6 +1420,33 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
 
 ### GeneralizedGridGraph
 
+`GeneralizedGridGraph` is similar to `GridGraph`, but it allows for additional specifiers in each direction of the grid:
+```
+In[] := GeneralizedGridGraph[{5 -> "Directed", 5 -> "Circular"}]
+```
+![Plot of circular directed grid](READMEImages/GeneralizedGridGraphBasic.png)
+
+Possible specifiers are `"Directed"` and `"Circular"`, and they can be combined:
+```
+In[] := GeneralizedGridGraph[{3 -> {"Directed", "Circular"}, 6}]
+```
+![Plot of directed circular grid in the same direction](READMEImages/GeneralizedGridGraphCombinedDirectedCircular.png)
+
+Same options as `GridGraph` are supported. In addition `"VertexNamingFunction" -> "Coordinates"` names vertices according to their position in a grid:
+```
+In[] := GeneralizedGridGraph[{4, 5, 2},
+ "VertexNamingFunction" -> "Coordinates", VertexLabels -> Automatic]
+```
+![Plot of 3D grid graph with position-named vertices](READMEImages/GeneralizedGridGraphVertexNamingFunction.png)
+
+Finally, it's possible to use different `EdgeStyle` in different directions by specifying it as a list:
+```
+In[] := GeneralizedGridGraph[{4 -> "Directed", 5, 2},
+ "VertexNamingFunction" -> "Coordinates",
+ EdgeStyle -> Darker /@ {Red, Green, Blue}]
+```
+![Plot of 3D grid with multiple edge styles](READMEImages/GeneralizedGridGraphEdgeStyle.png)
+
 ### HypergraphAutomorphismGroup
 
 ### HypergraphUnifications
