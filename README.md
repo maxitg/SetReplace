@@ -408,7 +408,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 8}, {9,
    6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6, 3}}, <|
   "MaxVertices" -> 300, "MaxEvents" -> 200|>]
 ```
-<img src="READMEImages/WolframModelMaxVerticesFinalStatePlot.png" width="507">
+<img src="READMEImages/WolframModelMaxVerticesEvolution.png" width="507">
 
 All possible keys in that association are:
 * `"MaxEvents"`: limit the number of individual replacements (in the `SetReplace` function meaning).
