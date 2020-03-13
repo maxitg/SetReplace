@@ -110,9 +110,9 @@ $styleNames = KeySort /@ KeySort @ <|
     "EdgeStyle" -> $statesGraphEdgeStyle
   |>,
   "EvolutionCausalGraph" -> <|
-    "EvolutionVertexStyle" -> $statesGraphVertexStyle,
+    "StateVertexStyle" -> $statesGraphVertexStyle,
     "EvolutionEdgeStyle" -> $evolutionCausalGraphEvolutionEdgeStyle,
-    "CausalVertexStyle" -> $causalGraphVertexStyle,
+    "EdgeVertexStyle" -> $causalGraphVertexStyle,
     "CausalEdgeStyle" -> $evolutionCausalGraphCausalEdgeStyle
   |>,
   "BranchialGraph" -> <|
@@ -192,11 +192,11 @@ style[$lightTheme] = <|
   
   (* States graph *)
   $statesGraphVertexStyle -> Directive[Opacity[0.7], Hue[0.62, 0.45, 0.87]],
-  $statesGraphEdgeStyle -> Directive[{Hue[0.75, 0, 0.35]}],
+  $statesGraphEdgeStyle -> Hue[0.75, 0, 0.35],
 
   (* Evolution causal graph *)
-  $evolutionCausalGraphEvolutionEdgeStyle -> Directive[{Hue[0.75, 0, 0.24]}],
-  $evolutionCausalGraphCausalEdgeStyle -> Directive[{Hue[0.07, 0.78, 1]}],
+  $evolutionCausalGraphEvolutionEdgeStyle -> Hue[0.75, 0, 0.24],
+  $evolutionCausalGraphCausalEdgeStyle -> Hue[0.07, 0.78, 1],
 
   (* Branchial graph *)
   $branchialGraphEdgeStyle -> Hue[0.89, 0.97, 0.71]
