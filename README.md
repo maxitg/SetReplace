@@ -1156,7 +1156,47 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
 
 ## WolframModelPlot (aka HypergraphPlot)
 
+`WolframModelPlot` is a function used to visualize `WolframModel` states. It treats lists of vertices as ordered hypergraphs, and displays each hyperedge as a polygon with arrows showing the ordering:
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}]
+```
+![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}](READMEImages/WolframModelPlotBasic.png)
+
+Edges of any arity can be mixed, the binary edges are displayed as non-filled arrows, and the unary edges are shown as circles around the vertices:
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4}, {4, 3}, {4, 5,
+   6}, {1}, {6}, {6}}]
+```
+![{{1, 2, 3}, {3, 4}, {4, 3}, {4, 5, 6}, {1}, {6}, {6}}](READMEImages/WolframModelPlotBinaryAndUnary.png)
+
+Self-loops are shown as convex polygons around the appropriate number of circular arrows:
+```
+In[] := WolframModelPlot[{{1, 1, 1}, {1, 2, 3}, {3, 4, 4}}]
+```
+![{{1, 1, 1}, {1, 2, 3}, {3, 4, 4}}](READMEImages/WolframModelPlotSelfLoops.png)
+
+Note the difference between a hypermultiedge and two binary edges pointing in opposite directions:
+```
+In[] := WolframModelPlot[{{1, 2, 1}, {2, 3}, {3, 2}}]
+```
+![{{1, 2, 1}, {2, 3}, {3, 2}}](READMEImages/WolframModelPlotNonSubsequentSelfLoop.png)
+
+And multiedges are shown in darker color (because of overlayed polygons), or as separate polygons depending on the layout (and are admittedly sometimes hard to understand):
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6,
+   6}}]
+```
+![{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6, 6}}](READMEImages/WolframModelPlotMultiedges.png)
+
+Many properties of `WolframModel` such as `"FinalStatePlot"` and `"EventStatesPlotsList"` use `WolframModelPlot` to produce output and accept the same set of options, which are explained below.
+
 ### Edge Type
+
+By default, `WolframModelPlot` assumes the hypergraph is an ordered hypergraph. It is also possible to treat edges as cyclic edges instead (i.e., assume `RotateLeft` and `RotateRigth` don't change the edge), in which case `"Cyclic"` should be used as the second argument to `WolframModelPlot`:
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}, "Cyclic"]
+```
+![Cyclic {{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}](READMEImages/WolframModelPlotCyclic.png)
 
 ### GraphHighlight and GraphHighlightStyle
 
