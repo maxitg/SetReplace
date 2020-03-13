@@ -1353,6 +1353,15 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 
 ### Graphics Options
 
+All `Graphics` options are supported as well, such as `Background`, `PlotRange`, `Axes`, etc.:
+```
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 2}, {2,
+    3}, {3, 1}}, 7]["FinalStatePlot", Background -> Black,
+ PlotStyle -> White, GridLines -> Automatic,
+ PlotRange -> {{30, 50}, {20, 40}}, Axes -> True]
+```
+![Zoomed in FinalStatePlot](READMEImages/WolframModelPlotZoomedInWithGrid.png)
+
 ## RulePlot of WolframModel
 
 ## Utility Functions
