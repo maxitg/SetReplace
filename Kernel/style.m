@@ -198,5 +198,5 @@ style[$lightTheme] = <|
   $evolutionCausalGraphCausalEdgeStyle -> Directive[{Hue[0.07, 0.78, 1], Dashing[None]}],
 
   (* Branchial graph *)
-  $branchialGraphEdgeStyle -> EdgeStyle -> Hue[0.89, 0.97, 0.71]
+  $branchialGraphEdgeStyle -> Hue[0.89, 0.97, 0.71]
 |>;
