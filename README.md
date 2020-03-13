@@ -120,7 +120,7 @@ Out[] = {6, 3, 8}
 
 If the number of replacements is set to [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html) calling `SetReplace` is equivalent to `SetReplaceFixedPoint`:
 ```
-In[] := SetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> {a + b}, \[Infinity]]
+In[] := SetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> {a + b}, Infinity]
 Out[] = {17}
 ```
 
@@ -134,7 +134,7 @@ Out[] = {3, 6, 8}
 
 `SetReplaceList` can be used to see the set after each replacement (here a list is omitted on the right-hand side of the rule, which can be done if the subset only contains a single element):
 ```
-In[] := SetReplaceList[{1, 2, 5, 3, 6}, {a_, b_} :> a + b, \[Infinity]]
+In[] := SetReplaceList[{1, 2, 5, 3, 6}, {a_, b_} :> a + b, Infinity]
 Out[] = {{1, 2, 5, 3, 6}, {5, 3, 6, 3}, {6, 3, 8}, {8, 9}, {17}}
 ```
 
@@ -354,7 +354,7 @@ Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
 Pattern rules (i.e., the kind of rules used in the [`SetReplace`](#setreplace) function) can be specified as well. As an example, previously described call to [`SetReplaceList`](#setreplace) can be reproduced as
 ```
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {1, 2, 5, 3,
-  6}, \[Infinity], "AllEventsStatesList"]
+  6}, Infinity, "AllEventsStatesList"]
 Out[] = {{1, 2, 5, 3, 6}, {5, 3, 6, 3}, {6, 3, 8}, {8, 9}, {17}}
 ```
 
@@ -536,13 +536,13 @@ Here the dotted gray edges are the ones about to be deleted, whereas the red one
 Compare for instance the output of [`"StatesList"`](#states) for a system where only one replacement is made per generation
 ```
 In[] := WolframModel[<|"PatternRules" -> {x_?OddQ, y_} :> x + y|>, {1, 2, 4,
-  6}, \[Infinity], "StatesList"]
+  6}, Infinity, "StatesList"]
 Out[] = {{1, 2, 4, 6}, {4, 6, 3}, {6, 7}, {13}}
 ```
 with the output of `"AllEventsEdgesList"`:
 ```
 In[] := WolframModel[<|"PatternRules" -> {x_?OddQ, y_} :> x + y|>, {1, 2, 4,
-  6}, \[Infinity], "AllEventsEdgesList"]
+  6}, Infinity, "AllEventsEdgesList"]
 Out[] = {1, 2, 4, 6, 3, 7, 13}
 ```
 Note how 4 and 6 only appear once in the list.
@@ -648,13 +648,13 @@ Out[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, \[Infinity], \
 \[Infinity], \[Infinity], \[Infinity], \[Infinity], \[Infinity]}
 ```
 
-Here 0 refers to the initial state, and `\[Infinity]` means an expression was never destroyed by any event (and thus appears in the final state). Thus a simple way to obtain a [`"FinalState"`](#states) is to pick all expressions which destroyer event is `\[Infinity]`:
+Here 0 refers to the initial state, and `\[Infinity]` means an expression was never destroyed by any event (and thus appears in the final state). Thus a simple way to obtain a [`"FinalState"`](#states) is to pick all expressions which destroyer event is [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html):
 ```
 In[] := With[{evolution =
    WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4]},
  evolution["AllEventsEdgesList"][[
   First /@ Position[
-    evolution["EdgeDestroyerEventIndices"], \[Infinity]]]]]
+    evolution["EdgeDestroyerEventIndices"], Infinity]]]]
 Out[] = {{1, 9}, {9, 5}, {5, 10}, {10, 3}, {3, 11}, {11, 6}, {6, 12}, {12,
   2}, {2, 13}, {13, 7}, {7, 14}, {14, 4}, {4, 15}, {15, 8}, {8,
   16}, {16, 1}}
@@ -674,7 +674,7 @@ For example, if we consider our simple arithmetic model `{a_, b_} :> a + b` star
 ```
 In[] := With[{evolution =
    WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8,
-     2, 10, 0, 9, 7}, \[Infinity]]},
+     2, 10, 0, 9, 7}, Infinity]},
  With[{causalGraph = evolution["CausalGraph"]},
   Graph[causalGraph,
    VertexLabels ->
@@ -697,7 +697,7 @@ In[] := WolframModel[{{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{3, 7, 8}, {9, 2,
 ```
 In[] := With[{evolution =
    WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8,
-     2, 10, 0, 9, 7}, \[Infinity]]},
+     2, 10, 0, 9, 7}, Infinity]},
  With[{causalGraph = evolution["LayeredCausalGraph"]},
   Graph[causalGraph,
    VertexLabels ->
@@ -711,7 +711,7 @@ Furthermore, if we include the initial condition as a "fake" event (see [`"Inclu
 ```
 In[] := With[{evolution =
    WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8,
-     2, 10, 0, 9, 7}, \[Infinity]]},
+     2, 10, 0, 9, 7}, Infinity]},
  With[{causalGraph =
     evolution["LayeredCausalGraph",
      "IncludeBoundaryEvents" -> "Initial"]},
@@ -729,7 +729,7 @@ In[] := With[{evolution =
 
 ```
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8, 2,
-  10, 0, 9, 7}, \[Infinity], "StatesList"]
+  10, 0, 9, 7}, Infinity, "StatesList"]
 Out[] = {{3, 8, 8, 8, 2, 10, 0, 9, 7}, {7, 11, 16, 12, 9}, {9, 18, 28}, {28,
   27}, {55}}
 ```
@@ -810,7 +810,7 @@ All possible values are:
 As an example, in our arithmetic model from before a `"FixedPoint"` is reached (which is why we can use [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html) as the number of steps):
 ```
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8, 2,
-   10, 0, 9, 7}, \[Infinity]]["TerminationReason"]
+   10, 0, 9, 7}, Infinity]["TerminationReason"]
 Out[] = "FixedPoint"
 ```
 
@@ -998,7 +998,7 @@ We have already [demonstrated](#causal-graphs) it previously for our arithmetic 
 ```
 In[] := With[{evolution =
    WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8,
-     2, 10, 0, 9, 7}, \[Infinity]]},
+     2, 10, 0, 9, 7}, Infinity]},
  With[{causalGraph =
     evolution["LayeredCausalGraph", "IncludeBoundaryEvents" -> All]},
   Graph[causalGraph,
@@ -1014,7 +1014,7 @@ In[] := With[{evolution =
 Properties like [`"AllEventsList"`](#events) are affected as well:
 ```
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8, 2,
-  10, 0, 9, 7}, \[Infinity], "AllEventsList",
+  10, 0, 9, 7}, Infinity, "AllEventsList",
  "IncludeBoundaryEvents" -> "Final"]
 Out[] = {{1, {1, 2} -> {10}}, {1, {3, 4} -> {11}}, {1, {5,
     6} -> {12}}, {1, {7, 8} -> {13}}, {1, {9, 10} -> {14}}, {1, {11,
@@ -1058,7 +1058,7 @@ On the other hand, Wolfram Language implementation should be used if:
 **`TimeConstraint`** option allows one to stop the evolution early. If an evolution object is requested, it will return a partial result, otherwise, it will just give [`$Aborted`](https://reference.wolfram.com/language/ref/$Aborted.html).
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1,
-   1}}, \[Infinity], TimeConstraint -> 1]
+   1}}, Infinity, TimeConstraint -> 1]
 ```
 <img src="READMEImages/WolframModelTimeConstrainedEvolutionObject.png" width="565">
 
