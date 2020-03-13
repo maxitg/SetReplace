@@ -629,7 +629,7 @@ Out[] = {{{1, {1} -> {2, 3, 4, 5}}, {2, 3, 4,
 
 #### Creator and Destroyer Events
 
-And event *destroys* the edges in its input, and *creates* the edges in its output. Creator and destroyer events for each edge can be obtained with **`EdgeCreatorEventIndices`** (aka `"CreatorEvents"`) and **`EdgeDestroyerEventIndices`** (aka `"DestroyerEvents"`) properties.
+And event *destroys* the edges in its input, and *creates* the edges in its output. Creator and destroyer events for each edge can be obtained with **`"EdgeCreatorEventIndices"`** (aka `"CreatorEvents"`) and **`"EdgeDestroyerEventIndices"`** (aka `"DestroyerEvents"`) properties.
 
 As an example, for a simple rule that splits each edge in two, one can see that edges are created in pairs:
 ```
@@ -1024,7 +1024,7 @@ Out[] = {{1, {1, 2} -> {10}}, {1, {3, 4} -> {11}}, {1, {5,
 
 #### Method
 
-There are two implementations (**`Method`**s) available: one written in Wolfram Language (`Method -> "Symbolic"`), one in C++ (`Method -> "LowLevel"`).
+There are two implementations (**`Method`** s) available: one written in Wolfram Language (`Method -> "Symbolic"`), one in C++ (`Method -> "LowLevel"`).
 
 The Wolfram Language implementation permutes the left-hand sides of the rules in all possible ways and uses [`Replace`](https://reference.wolfram.com/language/ref/Replace.html) a specified number of times to perform evolution. This implementation works well for small graphs and small rule inputs, but it slows down with the number of edges in the graph and has exponential complexity in rule size.
 
