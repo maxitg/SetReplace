@@ -1258,6 +1258,13 @@ In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
 
 ### VertexLabels
 
+`"VertexLabels" -> Automatic` will draw the labels for vertices, similar to `GraphPlot`:
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
+ VertexLabels -> Automatic]
+```
+![{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}} with labeled vertices](READMEImages/WolframModelPlotVertexLabels.png)
+
 ### VertexSize and ArrowheadLength
 
 ### MaxImageSize
