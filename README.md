@@ -202,6 +202,8 @@ Out[] = {{{v1_, v2_}} :> Module[{v3}, {{v1, v2}, {v2, v3}}], {{v1_, v2_}} :>
 
 ## WolframModel and WolframModelEvolutionObject
 
+[Rule Specification](#rule-specification) | [Automatic Initial State](#automatic-initial-state) | [Step Limiters](#step-limiters) | [Properties](#properties) | [Options](#options)
+
 **`WolframModel`** is the primary function of the package, and provides tools for the generation and analysis of set substitution systems. It can compute many different properties of the evolution and has many different options, which we describe in the corresponding subsections.
 
 The most basic way to call it however is this:
@@ -426,6 +428,8 @@ Any combination of these can be used, in which case the earliest triggered stops
 Note also that `"MaxGenerations"` works differently from the other limiters, as the matching algorithm would not even attempt to match edges with generations over the limit. Therefore unlike, i.e., `"MaxVertices"`, which would terminate the evolution immediately once the limit-violating event is attempted, `"MaxGenerations"`-limited evolution keeps "filling in" events for as long as possible until no further matches within allowed generations can be made.
 
 ### Properties
+
+[States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout History](#all-edges-throughout-history) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules)
 
 #### States
 
@@ -939,6 +943,8 @@ This is useful for display in the information box of the evolution object, and i
 
 ### Options
 
+["VertexNamingFunction"](#vertexnamingfunction) | ["IncludePartialGenerations"](#includepartialgenerations) | ["IncludeBoundaryEvents"](#includeboundaryevents) | [Method](#method) | [TimeConstraint](#timeconstraint) | ["EventOrderingFunction"](#eventorderingfunction)
+
 #### "VertexNamingFunction"
 
 **`"VertexNamingFunction"`** controls the names chosen for vertices, particularly the newly created ones. It can take three values: [`None`](https://reference.wolfram.com/language/ref/None.html), [`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html), and [`All`](https://reference.wolfram.com/language/ref/All.html).
@@ -1161,6 +1167,8 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
 <img src="READMEImages/WolframModelAllEventOrderingFunctions.png" width="746">
 
 ## WolframModelPlot
+
+[Edge Type](#edge-type) | [GraphHighlight and GraphHighlightStyle](#graphhighlight-and-graphhighlightstyle) | ["HyperedgeRendering"](#hyperedge-rendering) | [VertexCoordinateRules](#vertexcoordinaterules) | [VertexLabels](#vertexlabels) | [VertexSize and "ArrowheadLength"](#vertexsize-and-arrowheadlength) | ["MaxImageSize"](#maximagesize) | [Style Options](#style-options) | [Graphics Options](#graphics-options)
 
 **`WolframModelPlot`** (aka `HypergraphPlot`) is a function used to visualize [`WolframModel`](#wolframmodel-and-wolframmodelevolutionobject) states. It treats lists of vertices as ordered hypergraphs, and displays each hyperedge as a polygon with arrows showing the ordering:
 ```
@@ -1441,6 +1449,8 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
 <img src="READMEImages/RulePlotSquare.png" width="429">
 
 ## Utility Functions
+
+[GeneralizedGridGraph](#generalizedgridgraph) | [HypergraphAutomorphismGroup](#hypergraphautomorphismgroup) | [HypergraphUnifications](#hypergraphunifications) | [WolframPhysicsProjectStyleData](#wolframphysicsprojectstyledata)
 
 ### GeneralizedGridGraph
 
