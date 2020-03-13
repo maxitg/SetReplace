@@ -1234,6 +1234,28 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 
 ### VertexCoordinateRules
 
+It is possible to manually specify some or all coordinates for the vertices.
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
+ VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {0, 1}},
+ Axes -> True]
+```
+![{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}} with manual coordinates](READMEImages/WolframModelPlotCoordinates.png)
+
+Unfortunately though due to limitations of `GraphEmbedding`, specifying coordinates of two or more vertices breaks the scaling of distances between vertices. As a result, vertices and arrowheads might appear too small or too large, and will need to be manually adjusted. This might also affect [`RulePlot`](#ruleplot-of-wolframmodel) in some cases.
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
+ VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}}]
+```
+![{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}} crammed up](READMEImages/WolframModelPlotCoordinatesMessedUpScale.png)
+
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
+ VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}},
+ VertexSize -> 0.03, "ArrowheadLength" -> 0.06]
+```
+![{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}} reduced vertex/arrowhead size](READMEImages/WolframModelPlotCoordinatesFixedScale.png)
+
 ### VertexLabels
 
 ### VertexSize and ArrowheadLength
