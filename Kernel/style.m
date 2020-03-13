@@ -48,6 +48,11 @@ PackageScope["$ruleArrowPadding"]
 PackageScope["$ruleArrowStyle"]
 PackageScope["$ruleGridColor"]
 PackageScope["$ruleImageSizePerPlotRange"]
+PackageScope["$statesGraphVertexStyle"]
+PackageScope["$statesGraphEdgeStyle"]
+PackageScope["$evolutionCausalGraphEvolutionEdgeStyle"]
+PackageScope["$evolutionCausalGraphCausalEdgeStyle"]
+PackageScope["$branchialGraphEdgeStyle"]
 
 $styleNames = KeySort /@ KeySort @ <|
   "EvolutionObject" -> <|"Icon" -> $evolutionObjectIcon|>,
@@ -98,9 +103,21 @@ $styleNames = KeySort /@ KeySort @ <|
     "ImageSizePerPlotRange" -> $ruleImageSizePerPlotRange
   |>,
 
-  (* For future use *)
+  (* MultiwaySystem styles *)
+  
+  "StatesGraph" -> <|
+    "VertexStyle" -> $statesGraphVertexStyle,
+    "EdgeStyle" -> $statesGraphEdgeStyle
+  |>,
+  "EvolutionCausalGraph" -> <|
+    "StateVertexStyle" -> $statesGraphVertexStyle,
+    "EvolutionEdgeStyle" -> $evolutionCausalGraphEvolutionEdgeStyle,
+    "EventVertexStyle" -> $causalGraphVertexStyle,
+    "CausalEdgeStyle" -> $evolutionCausalGraphCausalEdgeStyle
+  |>,
   "BranchialGraph" -> <|
-    "EdgeStyle" -> $branchialEdgeStyle
+    "VertexStyle" -> $statesGraphVertexStyle,
+    "EdgeStyle" -> $branchialGraphEdgeStyle
   |>
 |>;
 
@@ -170,7 +187,17 @@ style[$lightTheme] = <|
   $ruleArrowStyle -> GrayLevel[0.65],
   $ruleGridColor -> GrayLevel[0.85],
   $ruleImageSizePerPlotRange -> 128,
+  
+  (* MultiwaySystem styles *)
+  
+  (* States graph *)
+  $statesGraphVertexStyle -> Directive[Opacity[0.7], Hue[0.62, 0.45, 0.87]],
+  $statesGraphEdgeStyle -> Hue[0.75, 0, 0.35],
+
+  (* Evolution causal graph *)
+  $evolutionCausalGraphEvolutionEdgeStyle -> Hue[0.75, 0, 0.24],
+  $evolutionCausalGraphCausalEdgeStyle -> Hue[0.07, 0.78, 1],
 
   (* Branchial graph *)
-  $branchialEdgeStyle -> Hue[0.89, 0.97, 0.71]
+  $branchialGraphEdgeStyle -> Hue[0.89, 0.97, 0.71]
 |>;
