@@ -23,7 +23,7 @@ Out[] = {3, 8, 6}
 
 ## Relations between Set Elements
 
-A more interesting case (and the only case we have studied with any reasonable detail) is the case of set elements that are related to each other. Specifically, the elements can be expressed as ordered lists of atoms (or vertices), and the set essentially becomes an ordered hypergraph.
+A more interesting case (and the only case we have studied with any reasonable detail) is the case of set elements that are related to each other. Specifically, we can consider ordered lists of atoms (or vertices) as elements, in which case the set becomes an ordered hypergraph.
 
 As a simple example consider a set
 ```
@@ -70,16 +70,16 @@ In[] := HypergraphPlot[
 ```
 <img src="READMEImages/basicRuleHundredSteps.png" width="478">
 
-Exploring the models of this more complicated variety is what this package is mostly designed for.
+Exploring the models of this more complicated variety is the primary purpose of this package.
 
 # Getting Started
 
 ## Prerequisites
 
-To start using `SetReplace` you only need two things.
+To start using `SetReplace`, you only need two things.
 
 * [Wolfram Language 12.1+](https://www.wolfram.com/language/) including [WolframScript](https://www.wolfram.com/wolframscript/). A free (although not open-source) version is available as [Wolfram Engine](https://www.wolfram.com/engine/).
-* A C++ compiler to build the low-level part of the package. Instructions on how to setup a compiler to use in WolframScript in various platforms are [available](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
+* A C++ compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in WolframScript in various platforms are [available](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
 
 ## Build Instructions
 
@@ -102,9 +102,9 @@ A less frequently updated version is available through the Wolfram's public pacl
 
 ## SetReplace, SetReplaceList, SetReplaceAll, SetReplaceFixedPoint and SetReplaceFixedPointList
 
-`SetReplace` (and related `SetReplaceList`, `SetReplaceAll`, `SetReplaceFixedPoint` and `SetReplaceFixedPointList`) are the functions the package is named after. They are quite simple, don't have a lot of options, and simply perform replacement operations either one-at-a-time (as in the case of `SetReplace`), to all non-overlapping subsets (`SetReplaceAll`), or until no more matches can be made (`SetReplaceFixedPoint`). A suffix `*List` implies the function will return a set after each replacement instead of just the final result.
+`SetReplace` (and related `SetReplaceList`, `SetReplaceAll`, `SetReplaceFixedPoint` and `SetReplaceFixedPointList`) are the functions the package is named after. They are quite simple, don't have many options, and simply perform replacement operations either one-at-a-time (as in the case of `SetReplace`), to all non-overlapping subsets (`SetReplaceAll`), or until no more matches can be made (`SetReplaceFixedPoint`). A suffix `*List` implies the function returns a list of sets after each replacement instead of just the final result.
 
-These functions are good for their simplicity, but we don't use them much anymore as a more advanced `WolframModel` incorporates all of these features plus other utilities helpful for the exploration of our models.
+These functions are useful for their simplicity, but we don't use them much anymore as a more advanced `WolframModel` incorporates all of these features plus other utilities helpful for the exploration of our models.
 
 As was mentioned previously, `SetReplace` performs a single iteration if called with two arguments:
 ```
@@ -155,7 +155,7 @@ Out[] = {{1, 2, 5, 3, 6}, {5, 3, 6, 3}, {6, 3, 8}, {8, 9}, {17}}
 
 ```
 
-All of these functions have `Method`, `TimeConstraint` and `"EventOrderingFunction"` options. `TimeConstraint` is self-evident, the other two work the same way as they do in `WolframModel` and will be described further in the `WolframModel` part of this README.
+All of these functions have `Method`, `TimeConstraint` and `"EventOrderingFunction"` options. `TimeConstraint` is self-evident. The other two work the same way as they do in `WolframModel`, and we describe them further in the `WolframModel` part of this README.
 
 ## ToPatternRules
 
@@ -168,8 +168,8 @@ All of these functions have `Method`, `TimeConstraint` and `"EventOrderingFuncti
 This is the type of rule we study the most, and it satisfies the following set of conditions:
 * Both input and output subsets consist of (ordered) lists of atoms (aka vertices).
 * The input (left-hand side) only contains patterns, it never refers to explicit vertex names.
-* The name of the vertex is only used to identify it, it does not contain any additional information. As such, there are no conditions specified on the left-hand side of the rule (neither on the entire subset, nor on individual vertices), except for the implicit condition of some vertices appearing multiple times in different lists.
-* The output may contain new vertices (i.e., the ones that don't appear on the left-hand side), in which case they are created with a `Module`.
+* The name of the vertex is only used to identify it, it does not contain any additional information. In particular, there are no conditions on the left-hand side of the rule (neither on the entire subset nor on individual vertices), except for the implicit condition of some vertices appearing multiple times in different lists.
+* The output may contain new vertices (i.e., the ones that don't appear on the left-hand side), in which case `Module` is inserted to create them.
 
 `ToPatternRules` provides a simpler way to specify such rules by automatically assuming that the level-2 expressions on the left-hand side are patterns, and that vertices used on the right which don't appear on the left are new and should be created with a `Module`. For example, the rule above can simply be written as
 ```
@@ -186,7 +186,7 @@ Out[] = {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
  Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]
 ```
 
-This last form of the rule is the one that we use most often, and is also the one that is accepted by `WolframModel` by default (more on that in `WolframModel` section).
+This last form of the rule is the one that we use most often and is also the one that is accepted by `WolframModel` by default (more on that in `WolframModel` section).
 
 `ToPatternRules` is listable in a trivial way:
 ```
@@ -198,7 +198,7 @@ Out[] = {{{v1_, v2_}} :> Module[{v3}, {{v1, v2}, {v2, v3}}], {{v1_, v2_}} :>
 
 ## WolframModel and WolframModelEvolutionObject
 
-`WolframModel` is the main function of the package, and provides tools for the generation and analysis of set substitution systems. It can compute many different properties of the evolution, and has many different options, which are described in the corresponding subsections.
+`WolframModel` is the primary function of the package, and provides tools for the generation and analysis of set substitution systems. It can compute many different properties of the evolution and has many different options, which we describe in the corresponding subsections.
 
 The most basic way to call it however is this:
 ```
@@ -207,11 +207,11 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
 ```
 <img src="READMEImages/WolframModelBasicEvolution10.png" width="493">
 
-Note this call is different from using the `SetReplace` function in a variety of ways:
+Note that this call is different from using the `SetReplace` function in a variety of ways:
 * The order of arguments is switched, the rule goes first.
 * The rule is specified in the "anonymous" form (i.e., `ToPatternRules` is done implicitly).
-* The number of steps here is defined the same way as in `SetReplaceAll`, which is also known as the number of generations. Here each edge can have at most 10 generations of predecessors.
-* The output is not a final state, but instead an object which contains the entire evolution (similar to `SetReplaceList`) but with additional information about which rules are being used at each replacement. From the information field on that object one can see that the evolution was done for 10 generations (i.e., a fixed point has not been reached early), and 109 replacements (aka events) were made in total. More properties can be computed from an evolution object, more on that later.
+* The number of steps here is the number of generations, which is equivalent to steps of `SetReplaceAll`. Here each edge can have at most 10 generations of predecessors.
+* The output is not a final state, but an object containing the entire evolution (similar to `SetReplaceList`) but with additional information about which rules are used at each replacement. From the information field on that object one can see that the evolution was done for 10 generations (i.e., a fixed point has not been reached early), and 109 replacements (aka events) were made in total. More properties can be computed from an evolution object, more on that later.
 
 To see the information an evolution object contains, let's make one with a smaller number of generations:
 ```
@@ -244,9 +244,9 @@ Out[] = {{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, {{4, 6, 7}, {5, 8, 1}, {8, 4,
    9}, {6, 4, 8}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}}}
 ```
 
-Each edge in `"AtomLists"` has properties which are storied in other lists of the evolution object:
+Each edge in `"AtomLists"` has properties which are stored in other lists of the evolution object:
 * `"CreatorEvents"` shows which event (aka replacement) (referenced by its index) has this edge as one of its outputs.
-* `"DestroyerEvents"` shows which event has this edge as an input. Note that even though multiple matches could be possible that involve a particular edge, in the current implementation only one of these matches will be used (see `"EventOrderingFunction"` option on how to control which match to use).
+* `"DestroyerEvents"` shows which event has this edge as an input. Note that even though multiple matches could be possible that involve a particular edge, in the current implementation, only one of these matches is used (see `"EventOrderingFunction"` option on how to control which match to use).
 * `"Generations"` shows how many layers of predecessors a given edge has.
 * `"Rules"` is an exact copy of the `WolframModel` input.
 * `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions of this or earlier generations. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](#step-limiters) is used.
@@ -398,7 +398,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 8}, {9,
 ```
 <img src="READMEImages/WolframModelMaxVerticesFinalStatePlot.png" width="478">
 
-Note that the final state in this case is "less symmetric" because its last generation is incomplete (more on that [later](#hypergraphautomorphismgroup)). Such incomplete generations can be automatically trimmed by setting [`"IncludePartialGenerations" -> False`](#includepartialgenerations).
+Note that the final state here is "less symmetric" because its last generation is incomplete (more on that [later](#hypergraphautomorphismgroup)). Such incomplete generations can be automatically trimmed by setting [`"IncludePartialGenerations" -> False`](#includepartialgenerations).
 
 One can also see the presence of an incomplete generation by looking at the evolution object (note `5...6` which means 5 generations are complete, and 1 is not). Expanding the object's information, one can also see that in this particular case the evolution was terminated because `"MaxVertices"` (not `"MaxEvents"`) condition was reached:
 ```
@@ -413,19 +413,19 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 8}, {9,
 All possible keys in that association are:
 * `"MaxEvents"`: limit the number of individual replacements (in the `SetReplace` function meaning).
 * `"MaxGenerations"`: limit the number of generations (steps in `SetReplaceAll` meaning), same as specifying steps directly as a number in `WolframModel`.
-* `"MaxVertices"`: limit the number of vertices in the *final* state only (the total count throughout history might be larger). This will stop evolution if the next event if applied will put the state over the limit. Note once such an event is encountered it will stop evolving immediately even if other matches exist that would not put the vertex count over the limit.
-* `"MaxVertexDegree"`: limit the number of final state edges any particular vertex is involved in. Works in a similar way to `"MaxVertices"`.
+* `"MaxVertices"`: limit the number of vertices in the *final* state only (the total count throughout history might be larger). This limit stops evolution if the next event, if applied, would put the state over the limit. Note once such an event is encountered, the evolution stops immediately even if other matches exist that would not put the vertex count over the limit.
+* `"MaxVertexDegree"`: limit the number of final state edges in which any particular vertex is involved. Works in a similar way to `"MaxVertices"`.
 * `"MaxEdges"`: limit the number of edges (expressions) in the final state. Similar to `"MaxVertices"`.
 
-Any combination of these will be used, in which case the earliest triggered will stop the evolution.
+Any combination of these can be used, in which case the earliest triggered stops the evolution.
 
-Note also that `"MaxGenerations"` works differently from the other limiters, as the matching algorithm would not even attempt to match edges with generations over the limit. This means that unlike, i.e., `"MaxVertices"` which would terminate the evolution immediately once the limit-violating event is attempted, `"MaxGenerations"`-limited evolution will keep "filling in" events for as long as possible until no further matches within allowed generations can be made.
+Note also that `"MaxGenerations"` works differently from the other limiters, as the matching algorithm would not even attempt to match edges with generations over the limit. Therefore unlike, i.e., `"MaxVertices"`, which would terminate the evolution immediately once the limit-violating event is attempted, `"MaxGenerations"`-limited evolution keeps "filling in" events for as long as possible until no further matches within allowed generations can be made.
 
 ### Properties
 
 #### FinalState (aka -1), StatesList, Generation, AllEventsStatesList, StateAfterEvent (aka SetAfterEvent)
 
-These are the properties used to extract states at a particular moment in the evolution. They always return lists, but in the examples below we plot them for clarity.
+These are the properties used to extract states at a particular moment in the evolution. They always return lists, but in the examples below, we plot them for clarity.
 
 `FinalState` yields the state obtained after all replacements of the evolution have been made:
 ```
@@ -486,7 +486,7 @@ In[] := WolframModelPlot@
 ```
 <img src="READMEImages/WolframModelPropertiesStateAfterEvent.png" width="478">
 
-This is equivalent to taking a corresponding part in the `"AllEventsStatesList"`, but is much faster to compute than the entire list.
+`"StateAfterEvent"` is equivalent to taking a corresponding part in `"AllEventsStatesList"`, but it is much faster to compute than the entire list.
 
 #### FinalStatePlot, StatesPlotsList
 
@@ -531,7 +531,7 @@ Here the dotted gray edges are the ones about to be deleted, whereas the red one
 
 #### AllEventsEdgesList (aka AllExpressions)
 
-`"AllEventsEdgesList"` returns the list of edges throughout history. This is distinct from a catenated `"StateList"`, as the edge will not appear twice if it moved from one generation to the next without being involved in an event.
+`"AllEventsEdgesList"` returns the list of edges throughout history. This is distinct from a catenated `"StateList"`, as the edge does not appear twice if it moved from one generation to the next without being involved in an event.
 
 Compare for instance the output of `"StatesList"` for a system where only one replacement is made per generation
 ```
@@ -562,7 +562,7 @@ Out[] = {{1, 2, 3, 4, 5}, {4, 5, 6, 7, 8, 9, 10, 11, 12, 13}, {5, 8, 9, 10,
   15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29}}
 ```
 
-One can easily go back to states
+One can easily go back to states:
 ```
 In[] := WolframModelPlot /@
  With[{evolution =
@@ -574,7 +574,7 @@ In[] := WolframModelPlot /@
 ```
 <img src="READMEImages/WolframModelPropertiesAllEventsStatesList.png" width="746">
 
-however this representation is useful if one needs to distinguish between identical edges.
+However, this representation is useful if one needs to distinguish between identical edges.
 
 Similarly, `"StateEdgeIndicesAfterEvent"` is a index analog of `"StateAfterEvent"`:
 ```
@@ -668,9 +668,9 @@ Out[] = {{1, 9}, {9, 5}, {5, 10}, {10, 3}, {3, 11}, {11, 6}, {6, 12}, {12,
 
 #### CausalGraph, LayeredCausalGraph
 
-An event A causes an event B if there exists an edge that was created by A and destroyed by B. If we then consider all relationships between events, we can create a causal graph. In a causal graph vertices correspond to events, and causal graph edges correspond to the set edges (aka expressions).
+An event A causes an event B if there exists an edge that was created by A and destroyed by B. If we then consider all relationships between events, we can create a causal graph. In a causal graph, vertices correspond to events, and causal graph edges correspond to the set edges (aka expressions).
 
-For example if we consider our simple arithmetic model `{a_, b_} :> a + b` starting from `{3, 8, 8, 8, 2, 10, 0, 9, 7}` we get a causal graph which quite clearly describes what's going on (each event here is labeled with explicit values for a and b):
+For example, if we consider our simple arithmetic model `{a_, b_} :> a + b` starting from `{3, 8, 8, 8, 2, 10, 0, 9, 7}` we get a causal graph which quite clearly describes what's going on (we label each event here with explicit values for a and b):
 ```
 In[] := With[{evolution =
    WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8,
@@ -746,7 +746,7 @@ In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}}, {{1,
 Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
 ```
 
-A neat example of using `"AllEventsRuleIndices"` is coloring events in a causal graph differently depending on which rule they correspond to. With this visualization one can see, for instance, that the outputs of the second rule in the example above are never used in any further inputs:
+A neat example of using `"AllEventsRuleIndices"` is coloring events in a causal graph differently depending on the corresponding rule. With this visualization, one can see, for instance, that the outputs of the second rule in the example above are never used in any further inputs:
 ```
 In[] := With[{evolution =
    WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2,
@@ -799,13 +799,13 @@ In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {3, 2}, {3, 4}, {3,
 
 #### TerminationReason
 
-`"TerminationReason"` shows why the evaluation of the model was stopped. This is particularly useful if multiple [stopping conditions](#step-limiters) are specified.
+`"TerminationReason"` shows why the evaluation of the model was stopped. It's particularly useful if multiple [stopping conditions](#step-limiters) are specified.
 
 All possible values are:
 * `"MaxEvents"`, `"MaxGenerations"`, `"MaxVertices"`, `"MaxVertexDegree"` and `"MaxEdges"` correspond directly to step limiters.
 * `"FixedPoint"` means there were no more matches possible to rule inputs.
 * `"TimeConstraint"` could occur if a [`"TimeConstraint"`](#timeconstraint) option was used.
-* `"Aborted"` would occur if the evaluation was manually interrupted (i.e., with ⌘. on a Mac). In that case a partially computed evolution object will still be returned.
+* `"Aborted"` would occur if the evaluation was manually interrupted (i.e., with ⌘. on a Mac). In that case, a partially computed evolution object is returned.
 
 As an example, in our arithmetic model from before a `"FixedPoint"` is reached (which is why we can use `Infinity` as the number of steps):
 ```
@@ -839,7 +839,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
 ```
 <img src="READMEImages/WolframModelPartialGenerationsCountRandomObject.png" width="507">
 
-Note, in this case, only 2 generations are complete, and 7 are partial. That happens because the states grow with each generation, so it becomes more likely for a random choice to pick an edge from a later generation, thus earlier ones are left unevolved.
+Note, in this case, only 2 generations are complete, and 7 are partial. That happens because the states grow with each generation, so it becomes more likely for a random choice to pick an edge from a later generation. Thus earlier ones are left unevolved.
 
 `"CompleteGenerationsCount"` is simply a difference of `"TotalGenerationsCount"` and `"PartialGenerationsCount"`, and `"GenerationsCount"` is equivalent to `{"CompleteGenerationsCount", "PartialGenerationsCount"}`.
 
@@ -881,7 +881,7 @@ Out[] = {2, 4, 8, 16, 28, 54, 98, 184, 342, 648, 1244}
 
 These properties are similar to corresponding `*List` ones, except we don't have `"FinalVertexCount"` and instead have `"FinalDistinctElementsCount"` (we should have `"FinalVertexCount"` and `"FinalDistinctElementsCountList"`, but they are not currently implemented).
 
-The difference is that `"VertexCountList"` counts expressions of level 2 in the states whereas `"FinalDistinctElementsCount"` counts all expressions matching `_ ? AtomQ`. The difference becomes apparent for edges which contain non-trivially nested lists.
+The difference is that `"VertexCountList"` counts expressions of level 2 in the states whereas `"FinalDistinctElementsCount"` counts all expressions matching `_ ? AtomQ`. The difference becomes apparent for edges that contain non-trivially nested lists.
 
 For example, consider a rule that performs a non-trivial nesting:
 ```
@@ -907,7 +907,7 @@ In[] := WolframModel[<|
 Out[] = {{2}, {0}, {{3, -1}}}
 ```
 
-This state has 3 vertices (distinct level-2 expressions): `2`, `0` and `{3, -1}`, but 4 atoms: `2`, `0`, `3` and `-1`. This distinction does not usually come up in our models since vertices are atoms are usually the same thing, but it is important in exotic cases like this.
+This state has 3 vertices (distinct level-2 expressions): `2`, `0`, and `{3, -1}`, but 4 atoms: `2`, `0`, `3`, and `-1`. This distinction does not usually come up in our models since vertices are atoms are usually the same thing, but it is significant in exotic cases like this.
 
 #### AllEventsDistinctElementsCount (aka AtomsCountTotal), AllEventsEdgesCount (aka ExpressionsCountTotal)
 
@@ -923,7 +923,7 @@ Out[] = {622, 2486}
 
 #### Rules
 
-`"Rules"` just stores the rules in exactly the same way they were entered as an input to `WolframModel`.
+`"Rules"` just stores the rules in the same way they were entered as an input to `WolframModel`.
 ```
 In[] := WolframModel[<|
    "PatternRules" -> {{a_}} :> {{a + 1}, {a - 1}, {{a + 2,
@@ -931,13 +931,13 @@ In[] := WolframModel[<|
 Out[] = <|"PatternRules" -> {{a_}} :> {{a + 1}, {a - 1}, {{a + 2, a - 2}}}|>
 ```
 
-This is useful for display in the information box of the evolution object, and if one needs to reproduce an evolution object the input for which is no longer available.
+This is useful for display in the information box of the evolution object, and if one needs to reproduce an evolution object, the input for which is no longer available.
 
 ### Options
 
 #### VertexNamingFunction
 
-`"VertexNamingFunction"` controls the names chosen for vertices, particularly the newly created ones. It can take three values: `None`, `Automatic` and `All`.
+`"VertexNamingFunction"` controls the names chosen for vertices, particularly the newly created ones. It can take three values: `None`, `Automatic`, and `All`.
 
 `None` does not do anything, the vertices in the initial condition are left as-is, and the newly created vertices use symbol names as, i.e., `Module[{v}, v]` would generate.
 ```
@@ -992,7 +992,7 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{6, 6, 3}, {2, 6, 2}, {6, 4,
 
 #### IncludeBoundaryEvents
 
-`"IncludeBoundaryEvents"` allows one to include "fake" initial and final events in properties such as `"CausalGraph"`. It does not affect the evolution itself, and has no effect on the evolution object. It has 4 settings: `None`, `"Initial"`, `"Final"` and `All`.
+`"IncludeBoundaryEvents"` allows one to include "fake" initial and final events in properties such as `"CausalGraph"`. It does not affect the evolution itself and does not affect the evolution object. It has 4 settings: `None`, `"Initial"`, `"Final"` and `All`.
 
 We have already [demonstrated](#causalgraph-layeredcausalgraph) it previously for our arithmetic model. Here is an example with the final "event" included as well (event labels are kept for reference):
 ```
@@ -1026,11 +1026,11 @@ Out[] = {{1, {1, 2} -> {10}}, {1, {3, 4} -> {11}}, {1, {5,
 
 There are two implementations available: one written in Wolfram Language (`Method -> "Symbolic"`), one in C++ (`Method -> "LowLevel"`).
 
-The Wolfram Language implementation permutes the left-hand sides of the rules in all possible ways and uses `Replace` a specified number of times to perform evolution. This works well for small graphs and small rule inputs, but it slows down with the number of edges in the graph and has exponential complexity in rule size.
+The Wolfram Language implementation permutes the left-hand sides of the rules in all possible ways and uses `Replace` a specified number of times to perform evolution. This implementation works well for small graphs and small rule inputs, but it slows down with the number of edges in the graph and has exponential complexity in rule size.
 
-The C++ implementation, on the other hand, keeps an index of all possible rule matches and updates it after every replacement. The reindexing algorithm looks only at the local region of the graph close to the rewrite site, thus time complexity does not depend on the graph size as long as vertex degrees are small. The downside is that it has exponential complexity (both in time and memory) in the vertex degrees. Currently, it also does not work for non-local rules (i.e., rule inputs that do not form a connected hypergraph) and rules that are not hypergraph rules (i.e., pattern rules that have non-trivial nesting or conditions).
+The C++ implementation, on the other hand, keeps an index of all possible rule matches and updates it after every replacement. The reindexing algorithm looks only at the local region of the graph close to the rewrite site. Thus time complexity does not depend on the graph size as long as vertex degrees are small. The downside is that it has exponential complexity (both in time and memory) in the vertex degrees. Currently, it also does not work for non-local rules (i.e., rule inputs that do not form a connected hypergraph) and rules that are not hypergraph rules (i.e., pattern rules that have non-trivial nesting or conditions).
 
-C++ implementation is used by default for supported systems, and is particularly useful if:
+The C++ implementation is used by default for supported systems and is particularly useful if:
 * Vertex degrees are expected to be small.
 * Evolution needs to be done for a large number of steps `> 100`, it is possible to produce states with up to `10^6` edges or more.
 
@@ -1100,10 +1100,10 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3,
 ```
 <img src="READMEImages/WolframModelOverlappingRuleOrdering.png" width="478">
 
-In case like that it is important to be able to specify the desired evolution order, which is what `"EventOrderingFunction"` option is for. `"EventOrderingFunction"` is specified as a list of sorting criteria such as the default `{"LeastRecentEdge", "RuleOrdering", "RuleIndex"}`. Note that most individual sorting criteria are insufficient to distinguish between all available matches. If multiple matches remain after exchausting all sorting criteria, one will be chosen uniformly at random (which is why `{}` works as a shorthand for `"Random"`).
+In a case like that, it is important to be able to specify the desired evolution order, which is the purpose of the `"EventOrderingFunction"` option. `"EventOrderingFunction"` is specified as a list of sorting criteria such as the default `{"LeastRecentEdge", "RuleOrdering", "RuleIndex"}`. Note that most individual sorting criteria are insufficient to distinguish between all available matches. If multiple matches remain after exhausting all sorting criteria, one is chosen uniformly at random (which is why `{}` works as a shorthand for `"Random"`).
 
 Possible sorting criteria are:
-* `"OldestEdge"`: greedely select the edge in the set closest to the beginning of the list (which would typically correspond to the oldest edge). Note, within a single-event output, the edges are assumed oldest-to-newest left-to-right as written on the right-hand side of the rule. After this criteria, a fixed ***set*** of edges will be chosen, but different orderings of that set might be possible (which could allow for multiple non-equivalent matches).
+* `"OldestEdge"`: greedily select the edge in the set closest to the beginning of the list (which would typically correspond to the oldest edge). Note, the edges within a single-event output are assumed oldest-to-newest left-to-right as written on the right-hand side of the rule. After this criterion, a fixed ***set*** of edges is guaranteed to be chosen, but different orderings of that set might be possible (which could allow for multiple non-equivalent matches).
 
 * `"NewestEdge"`: similar to `"OldestEdge"` except edges are chosen from the end of the list rather than from the beginning.
 
@@ -1116,11 +1116,11 @@ Possible sorting criteria are:
     Out[] = {{{1, {1, 4} -> {}}}, {{1, {2, 3} -> {}}}}
     ```
 
-    Note that in this example `"OldestEdge"` has select edges the first and the last edge, whereas `"LeastRecentEdge"` in an attempt to avoid the most "recent" last edge has select the second and the third ones. In this case, similarly to `"OldestEdge"`, a fixed set of edges will be chosen, but potentially in different orders.
+    Note that in this example `"OldestEdge"` has select edges the first and the last edge, whereas `"LeastRecentEdge"` in an attempt to avoid the most "recent" last edge has select the second and the third ones. In this case, similarly to `"OldestEdge"`, a fixed set of edges is guaranteed to be chosen, but potentially in different orders.
 
 * `"LeastOldEdge"`: similar to `"LeastRecentEdge"`, but avoids old edges instead of avoiding new ones.
 
-    Note that counterintuitively `"OldestEdge"` sorting is not equivalent to the reverse of `"NewestEdge"` sorting, it is actually equivalent to the reverse of `"LeastOldEdge"`. Similarly, `"NewestEdge"` is the reverse of `"LeastRecentEdge"`.
+    Note that counterintuitively `"OldestEdge"` sorting is not equivalent to the reverse of `"NewestEdge"` sorting, it is equivalent to the reverse of `"LeastOldEdge"`. Similarly, `"NewestEdge"` is the reverse of `"LeastRecentEdge"`.
 
 * `"RuleOrdering"`: similarly to `"OldestEdge"` greedely chooses edges from the beginning of the list, however unlike `"OldestEdge"` which would pick the oldest edge with *any* available matches, it chooses edges in the order the left-hand side of (any) rule is written. The difference is best demonstrated in an example:
     ```
@@ -1130,17 +1130,17 @@ Possible sorting criteria are:
     Out[] = {{{1, {1, 3} -> {}}}, {{1, {2, 4} -> {}}}}
     ```
 
-    Note how `"RuleOrdering"` has selected the second edge first because it matches to the first rule input while the first edge does not.
+    Note how `"RuleOrdering"` has selected the second edge first because it matches the first rule input while the first edge does not.
 
-    In this case a specific ordered sequence of edges will be matched (including its permutation). However, multiple matches might still be possible if multiple rules exist which match that sequence.
+    In this case, a specific ordered sequence of edges is guaranteed to be matched (including its permutation). However, multiple matches might still be possible if multiple rules exist which match that sequence.
 
 * `"ReverseRuleOrdering"`: as the name suggests, this is just the reverse of `"RuleOrdering"`.
 
-* `"RuleIndex"`: this simply means it will attempt to match the first rule first, and only if no matches to the first rule are possible, it will go to the second rule, etc.
+* `"RuleIndex"`: this simply means it attempts to match the first rule first, and only if no matches to the first rule are possible, it goes to the second rule, and so on.
 
 * `"ReverseRuleIndex"`: similar to `"RuleIndex"`, but reversed as the name suggests.
 
-* `"Random"`: this will select a single match uniformly at random. This is possible to do efficiently because the C++ implementation of `WolframModel` (the only one that supported `"EventOrderingFunction"`) keeps track of all possible matches at any point during the evolution. This is guaranteed to select a single match, so the remainder of the sorting criteria list is ignored. It can also be omitted because the random event will always be chosen if provided sorting criteria are insufficient. The seeding can be controlled with `SeedRandom`, however, the result will depend on your platform (Mac/Linux/Windows) and the specific build (version) of `SetReplace`.
+* `"Random"`: this will select a single match uniformly at random. It is possible to do that efficiently because the C++ implementation of `WolframModel` (the only one that supports `"EventOrderingFunction"`) keeps track of all possible matches at any point during the evolution. `"Random"` is guaranteed to select a single match, so the remainder of the sorting criteria list is ignored. It can also be omitted because the random event is always chosen if provided sorting criteria are insufficient. The seeding can be controlled with `SeedRandom`. However, the result does depend on your platform (Mac/Linux/Windows) and the specific build (version) of `SetReplace`.
 
 As a neat example, here is the output of all individual sorting criteria (default sorting criteria are appended to disambiguate):
 ```
@@ -1197,7 +1197,7 @@ In[] := WolframModelPlot[{{{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3,
 ```
 <img src="READMEImages/WolframModelPlotMultiple.png" width="698">
 
-Many properties of `WolframModel` such as `"FinalStatePlot"` and `"EventStatesPlotsList"` use `WolframModelPlot` to produce output and accept the same set of options, which are explained below.
+Many `WolframModel` properties, such as `"FinalStatePlot"` and `"EventStatesPlotsList"`, use `WolframModelPlot` to produce output. They accept the same set of options, as explained below.
 
 ### Edge Type
 
@@ -1283,7 +1283,7 @@ In[] := WolframModelPlot[{{1, 2, 3, 4}, {1, 5, 6}, {2, 7, 8}, {4, 6, 9}},
 ```
 <img src="READMEImages/WolframModelPlotElementSizes.png" width="478">
 
-Note that unlike `GraphPlot`, both vertices and arrowheads have fixed size relative to the layout (in fact, the arrowheads are drawn manually as polygons). This means they will scale proportionally when the image is resized, and will not overlay/disappear for very small / very large graphs or image sizes.
+Note that unlike `GraphPlot`, both vertices and arrowheads have fixed size relative to the layout (in fact, the arrowheads are drawn manually as polygons). This fixed-size implies that they scale proportionally when the image is resized, and do not overlay/disappear for tiny/huge graphs or image sizes.
 
 These options can also be used to get rid of vertices and arrowheads altogether:
 ```
@@ -1473,7 +1473,7 @@ Out[] = 24
 
 ### HypergraphUnifications
 
-When considering how many matches could potentially exist to a given set of rule inputs, it is often useful to see all possible ways hypergraphs can overlap. `HypergraphUnifications` constructs all possible hypergraphs containing both subgraphs matching the specified arguments. The argument-hypergraphs must overlap by at least a single edge. The vertices are identified to the least extent possible, but some identification are made if necessary.
+When considering how many matches could potentially exist to a given set of rule inputs, it is often useful to see all possible ways hypergraphs can overlap. `HypergraphUnifications` constructs all possible hypergraphs that contain both subgraphs matching the specified arguments. The argument-hypergraphs must overlap by at least a single edge. `HypergraphUnifications` identifies vertices to the least extent possible, but it makes some identifications if necessary.
 
 The output format is a list of triples `{unified hypergraph, first argument edge matches, second argument edge matches}`, where the last two elements are associations mapping the edge indices in the input hypergraphs to the edge indices in the unified hypergraph.
 
@@ -1538,12 +1538,12 @@ Out[] = <|"EdgeStyle" -> Hue[0, 1, 0.56],
    EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]]|>
 ```
 
-This function is useful if one needs to produce "fake" example plots using styles consistent with Wolfram Physics Project.
+This function is useful if one needs to produce "fake" example plots using styles consistent with the Wolfram Physics Project.
 
 # Physics
 
-A hypothesis is that spacetime at small scales might be represented as a network and is generated by a system similar to the one this package implements.
+A hypothesis is that spacetime at small scales is a network, and the fundamental law of physics is a system similar to the one this package implements.
 
-This idea (for a slightly less general system) was first introduced in Stephen Wolfram's [A New Kind Of Science](https://www.wolframscience.com/nks/chap-9--fundamental-physics/).
+A slightly different version of this system was first introduced in Stephen Wolfram's [A New Kind Of Science](https://www.wolframscience.com/nks/chap-9--fundamental-physics/).
 
-Stay tuned for our upcoming **Technical Introduction** where many more details about physics will appear.
+Stay tuned for the upcoming **Technical Introduction**, where we will present many more details about our physics results.
