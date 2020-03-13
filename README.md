@@ -1317,6 +1317,40 @@ In[] := WolframModelPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}}, ImageSize -> 100]
 
 ### Style Options
 
+There are four styling options: `PlotStyle`, `VertexStyle`, `EdgeStyle` and `"EdgePolygonStyle"`.
+
+`PlotStyle` controls the overall style for everything, `VertexStyle` and `EdgeStyle` inherit from it:
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
+   9}, {9}}, PlotStyle -> Directive[Blue, Dotted]]
+```
+![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4, 9}, {9}} with blue dotted PlotStyle](READMEImages/WolframModelPlotPlotStyle.png)
+
+`VertexStyle` works similarly to `GraphPlot`:
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
+   9}, {9}}, PlotStyle -> Directive[Blue, Dotted], VertexStyle -> Red]
+```
+![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4, 9}, {9}} with red vertices](READMEImages/WolframModelPlotVertexStyle.png)
+
+`EdgeStyle` controls edge lines, and `"EdgePolygonStyle"` inherits from it (automatically adding transparency):
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
+   9}, {9}}, PlotStyle -> Directive[Blue, Dotted], VertexStyle -> Red,
+  EdgeStyle -> Darker@Green]
+```
+![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4, 9}, {9}} with green edges](READMEImages/WolframModelPlotEdgeStyle.png)
+
+Finally, `"EdgePolygonStyle"` controls the hyperedge polygons:
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
+   9}, {9}}, PlotStyle -> Directive[Blue, Dotted], VertexStyle -> Red,
+  EdgeStyle -> Darker@Green,
+ "EdgePolygonStyle" ->
+  Directive[Lighter[Green, 0.9], EdgeForm[Dotted]]]
+```
+![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4, 9}, {9}} with dotted polygons](READMEImages/WolframModelPlotEdgePolygonStyle.png)
+
 ### Graphics Options
 
 ## RulePlot of WolframModel
