@@ -435,7 +435,7 @@ In[] := WolframModelPlot@
      9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6,
   "FinalState"]
 ```
-<img src="READMEImages/WolframModelMaxVerticesEvolution.png" width="478">
+<img src="READMEImages/WolframModelPropertiesFinalState.png" width="478">
 
 `"StateList"` yields the list of states at each generation:
 ```
