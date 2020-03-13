@@ -102,7 +102,7 @@ A less frequently updated version is available through the Wolfram's public pacl
 
 ## SetReplace*
 
-`SetReplace` (and related `SetReplaceList`, `SetReplaceAll`, `SetReplaceFixedPoint` and `SetReplaceFixedPointList`) are the functions the package is named after. They are quite simple, don't have many options, and simply perform replacement operations either one-at-a-time (as in the case of `SetReplace`), to all non-overlapping subsets (`SetReplaceAll`), or until no more matches can be made (`SetReplaceFixedPoint`). A suffix `*List` implies the function returns a list of sets after each replacement instead of just the final result.
+**`SetReplace`** (and related **`SetReplaceList`**, **`SetReplaceAll`**, **`SetReplaceFixedPoint`** and **`SetReplaceFixedPointList`**) are the functions the package is named after. They are quite simple, don't have many options, and simply perform replacement operations either one-at-a-time (as in the case of `SetReplace`), to all non-overlapping subsets (`SetReplaceAll`), or until no more matches can be made (`SetReplaceFixedPoint`). A suffix `*List` implies the function returns a list of sets after each replacement instead of just the final result.
 
 These functions are useful for their simplicity, but we don't use them much anymore as a more advanced [`WolframModel`](#wolframmodel-and-wolframmodelevolutionobject) incorporates all of these features plus other utilities helpful for the exploration of our models.
 
@@ -159,7 +159,7 @@ All of these functions have [`Method`](#method), [`TimeConstraint`](#timeconstra
 
 ## ToPatternRules
 
-`ToPatternRules` is a convenience function used to quickly enter rules such as the one mentioned previously
+**`ToPatternRules`** is a convenience function used to quickly enter rules such as the one mentioned previously
 ```
 {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
  Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]
@@ -198,7 +198,7 @@ Out[] = {{{v1_, v2_}} :> Module[{v3}, {{v1, v2}, {v2, v3}}], {{v1_, v2_}} :>
 
 ## WolframModel and WolframModelEvolutionObject
 
-`WolframModel` is the primary function of the package, and provides tools for the generation and analysis of set substitution systems. It can compute many different properties of the evolution and has many different options, which we describe in the corresponding subsections.
+**`WolframModel`** is the primary function of the package, and provides tools for the generation and analysis of set substitution systems. It can compute many different properties of the evolution and has many different options, which we describe in the corresponding subsections.
 
 The most basic way to call it however is this:
 ```
@@ -211,7 +211,7 @@ Note that this call is different from using the [`SetReplace`](#setreplace) func
 * The order of arguments is switched, the rule goes first.
 * The rule is specified in the "anonymous" form (i.e., [`ToPatternRules`](#topatternrules) is done implicitly).
 * The number of steps here is the number of generations, which is equivalent to steps of [`SetReplaceAll`](#setreplace). Here each edge can have at most 10 generations of predecessors.
-* The output is not a final state, but an object containing the entire evolution (similar to [`SetReplaceList`](#setreplace) but with additional information about which rules are used at each replacement. From the information field on that object, one can see that the evolution was done for 10 generations (i.e., a fixed point has not been reached early), and 109 replacements (aka events) were made in total. More properties can be computed from an evolution object, more on that later.
+* The output is not a final state, but a **`WolframModelEvolutionObject`** containing the entire evolution (similar to [`SetReplaceList`](#setreplace) but with additional information about which rules are used at each replacement. From the information field on that object, one can see that the evolution was done for 10 generations (i.e., a fixed point has not been reached early), and 109 replacements (aka events) were made in total. More properties can be computed from an evolution object, more on that later.
 
 To see the information an evolution object contains, let's make one with a smaller number of generations:
 ```
@@ -427,7 +427,7 @@ Note also that `"MaxGenerations"` works differently from the other limiters, as 
 
 These are the properties used to extract states at a particular moment in the evolution. They always return lists, but in the examples below, we plot them for clarity.
 
-`FinalState` yields the state obtained after all replacements of the evolution have been made:
+**`"FinalState"`** (aka -1) yields the state obtained after all replacements of the evolution have been made:
 ```
 In[] := WolframModelPlot@
  WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
@@ -437,7 +437,7 @@ In[] := WolframModelPlot@
 ```
 <img src="READMEImages/WolframModelPropertiesFinalState.png" width="478">
 
-`"StateList"` yields the list of states at each generation:
+**`"StateList"`** yields the list of states at each generation:
 ```
 In[] := WolframModelPlot /@
  WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
@@ -447,7 +447,7 @@ In[] := WolframModelPlot /@
 ```
 <img src="READMEImages/WolframModelPropertiesStatesList.png" width="746">
 
-This is identical to using the `"Generation"` property mapped over all generations:
+This is identical to using the **`"Generation"`** property mapped over all generations:
 ```
 In[] := WolframModelPlot /@ (WolframModel[{{1, 2, 3}, {4, 5, 6}, {1,
          4}} -> {{2, 7, 8}, {3, 9, 10}, {5, 11, 12}, {6, 13, 14}, {8,
@@ -466,7 +466,7 @@ In[] := WolframModelPlot /@
 ```
 <img src="READMEImages/WolframModelPropertiesStatesList.png" width="746">
 
-`"StatesList"` shows a compressed version of the evolution. To see how state changes with each applied replacement, use `"AllEventsStatesList"`:
+`"StatesList"` shows a compressed version of the evolution. To see how state changes with each applied replacement, use **`"AllEventsStatesList"`**:
 ```
 In[] := WolframModelPlot /@
  WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
@@ -476,7 +476,7 @@ In[] := WolframModelPlot /@
 ```
 <img src="READMEImages/WolframModelPropertiesAllEventsStatesList.png" width="746">
 
-Finally, to see a state after a specific event, use `"StateAfterEvent"`:
+Finally, to see a state after a specific event, use **`"StateAfterEvent"`** (aka `"SetAfterEvent"`):
 ```
 In[] := WolframModelPlot@
  WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
@@ -490,7 +490,7 @@ In[] := WolframModelPlot@
 
 #### Plots of States
 
-Instead of explicitly calling [`WolframModelPlot`](#wolframmodelplot), one can use short-hand properties `"FinalStatePlot"` and `"StatesPlotsList"`:
+Instead of explicitly calling [`WolframModelPlot`](#wolframmodelplot), one can use short-hand properties **`"FinalStatePlot"`** and **`"StatesPlotsList"`**:
 ```
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
     10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
@@ -518,7 +518,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
 
 #### Plots of Events
 
-The plotting function corresponding to [`"AllEventsStatesList"`](#states) is more interesting than the other ones. It plots not only the corresponding states, but also the events that produced each of them:
+The plotting function corresponding to [`"AllEventsStatesList"`](#states) is more interesting than the other ones. **`"EventsStatesPlotsList"`** plots not only the corresponding states, but also the events that produced each of them:
 ```
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
     10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
@@ -531,7 +531,7 @@ Here the dotted gray edges are the ones about to be deleted, whereas the red one
 
 #### All Edges throughout History
 
-`"AllEventsEdgesList"` (aka `"AllExpressions"`) returns the list of edges throughout history. This is distinct from a catenated [`"StateList"`](#states), as the edge does not appear twice if it moved from one generation to the next without being involved in an event.
+**`"AllEventsEdgesList"`** (aka `"AllExpressions"`) returns the list of edges throughout history. This is distinct from a catenated [`"StateList"`](#states), as the edge does not appear twice if it moved from one generation to the next without being involved in an event.
 
 Compare for instance the output of [`"StatesList"`](#states) for a system where only one replacement is made per generation
 ```
@@ -551,7 +551,7 @@ Edge indices from `"AllEventsEdgesList"` are used in various other properties su
 
 #### States as Edge Indices
 
-`"AllEventsStatesEdgeIndicesList"` is similar to [`"AllEventsStatesList"`](#states), except instead of actual edges the list it returns contains the indices of edges from [`"AllEventsEdgesList"`](#all-edges-throughout-history).
+**`"AllEventsStatesEdgeIndicesList"`** is similar to [`"AllEventsStatesList"`](#states), except instead of actual edges the list it returns contains the indices of edges from [`"AllEventsEdgesList"`](#all-edges-throughout-history).
 ```
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
     10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
@@ -576,7 +576,7 @@ In[] := WolframModelPlot /@
 
 However, this representation is useful if one needs to distinguish between identical edges.
 
-Similarly, `"StateEdgeIndicesAfterEvent"` is a index analog of [`"StateAfterEvent"`](#states):
+Similarly, **`"StateEdgeIndicesAfterEvent"`** is a index analog of [`"StateAfterEvent"`](#states):
 ```
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
      10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11, 10}, {13, 7}, {14,
@@ -590,7 +590,7 @@ Out[] = {18, 19, 29, 34, 35, 36, 37, 39, 40, 42, 43, 44, 45, 49, 50, 51, 52, \
 
 #### Events
 
-Both of these properties return all replacement events throughout the evolution. The only difference is how the events are arranged. `"AllEventsList"` returns the flat list of all events, whereas `"GenerationEventsList"` splits them into sublists for each generation.
+Both of these properties return all replacement events throughout the evolution. The only difference is how the events are arranged. **`"AllEventsList"`** (aka `"EventsList"`) returns the flat list of all events, whereas **`"GenerationEventsList"`** splits them into sublists for each generation.
 ```
 In[] := WolframModel[{{1, 2}} -> {{3, 4}, {3, 1}, {4, 1}, {2, 4}}, {{1,
    1}}, 2, "AllEventsList"]
@@ -615,7 +615,7 @@ where the edge indices refer to expressions from [`"AllEventsEdgesList"`](#all-e
 
 #### Events and States
 
-`"EventsStatesList"` just produces a list of `{event, state}` pairs, where state is the complete state right after this event is applied. Events are the same as generated by [`"AllEventsList"`](#events), and the states are represented as edge indices as in [`"AllEventsStatesEdgeIndicesList"`](#states-as-edge-indices).
+**`"EventsStatesList"`** just produces a list of `{event, state}` pairs, where state is the complete state right after this event is applied. Events are the same as generated by [`"AllEventsList"`](#events), and the states are represented as edge indices as in [`"AllEventsStatesEdgeIndicesList"`](#states-as-edge-indices).
 ```
 In[] := WolframModel[{{1, 2}} -> {{3, 4}, {3, 1}, {4, 1}, {2, 4}}, {{1,
    1}}, 2, "EventsStatesList"]
@@ -629,7 +629,7 @@ Out[] = {{{1, {1} -> {2, 3, 4, 5}}, {2, 3, 4,
 
 #### Creator and Destroyer Events
 
-And event *destroys* the edges in its input, and *creates* the edges in its output. Creator and destroyer events for each edge can be obtained with `EdgeCreatorEventIndices` and `EdgeDestroyerEventIndices` properties.
+And event *destroys* the edges in its input, and *creates* the edges in its output. Creator and destroyer events for each edge can be obtained with **`EdgeCreatorEventIndices`** (aka `"CreatorEvents"`) and **`EdgeDestroyerEventIndices`** (aka `"DestroyerEvents"`) properties.
 
 As an example, for a simple rule that splits each edge in two, one can see that edges are created in pairs:
 ```
@@ -668,7 +668,7 @@ Out[] = {{1, 9}, {9, 5}, {5, 10}, {10, 3}, {3, 11}, {11, 6}, {6, 12}, {12,
 
 #### Causal Graphs
 
-An event A causes an event B if there exists an edge that was created by A and destroyed by B. If we then consider all relationships between events, we can create a causal graph. In a causal graph, vertices correspond to events, and causal graph edges correspond to the set edges (aka expressions).
+An event A causes an event B if there exists an edge that was created by A and destroyed by B. If we then consider all relationships between events, we can create a causal graph. In a **`"CausalGraph"`**, vertices correspond to events, and causal graph edges correspond to the set edges (aka expressions).
 
 For example, if we consider our simple arithmetic model `{a_, b_} :> a + b` starting from `{3, 8, 8, 8, 2, 10, 0, 9, 7}` we get a causal graph which quite clearly describes what's going on (we label each event here with explicit values for a and b):
 ```
@@ -693,7 +693,7 @@ In[] := WolframModel[{{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{3, 7, 8}, {9, 2,
 ```
 <img src="READMEImages/WolframModelPropertiesHypergraphModelCausalGraph.png" width="478">
 
-`"LayeredCausalGraph"` generations the same graph but layers events generation-by-generation. For example, for our arithmetic causal graph, note how it's arranged differently from an example above:
+**`"LayeredCausalGraph"`** generates the same graph but layers events generation-by-generation. For example, for our arithmetic causal graph, note how it's arranged differently from an example above:
 ```
 In[] := With[{evolution =
    WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8,
@@ -738,7 +738,7 @@ Out[] = {{3, 8, 8, 8, 2, 10, 0, 9, 7}, {7, 11, 16, 12, 9}, {9, 18, 28}, {28,
 
 #### Rule Indices for Events
 
-`"AllEventsRuleIndices"` returns which rule was used for each event (the same can be obtained by mapping [`First`](https://reference.wolfram.com/language/ref/First.html) over [`"AllEventsList"`](#events)):
+**`"AllEventsRuleIndices"`** returns which rule was used for each event (the same can be obtained by mapping [`First`](https://reference.wolfram.com/language/ref/First.html) over [`"AllEventsList"`](#events)):
 ```
 In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}}, {{1,
      2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}, {{1, 1,
@@ -762,7 +762,7 @@ In[] := With[{evolution =
 
 #### Edge and Event Generations
 
-`"EdgeGenerationsList"` yields the list generation numbers (numbers of predecessor layers) for each edge in [`"AllEventsEdgesList"`](#all-edges-throughout-history). `"AllEventsGenerationsList"` gives the same for events. The generation of an event is the same as the generation of edges it produces as output.
+**`"EdgeGenerationsList"`** (aka `"ExpressionGenerations"`) yields the list generation numbers (numbers of predecessor layers) for each edge in [`"AllEventsEdgesList"`](#all-edges-throughout-history). **`"AllEventsGenerationsList"`** (aka `"EventGenerations"`) gives the same for events. The generation of an event is the same as the generation of edges it produces as output.
 
 Here edges of different generations are colored differently:
 ```
@@ -799,7 +799,7 @@ In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {3, 2}, {3, 4}, {3,
 
 #### Termination Reason
 
-`"TerminationReason"` shows why the evaluation of the model was stopped. It's particularly useful if multiple [stopping conditions](#step-limiters) are specified.
+**`"TerminationReason"`** shows why the evaluation of the model was stopped. It's particularly useful if multiple [stopping conditions](#step-limiters) are specified.
 
 All possible values are:
 * `"MaxEvents"`, `"MaxGenerations"`, `"MaxVertices"`, `"MaxVertexDegree"` and `"MaxEdges"` correspond directly to step limiters.
@@ -825,14 +825,14 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {5, 9,
 
 #### Generation Counts
 
-`"TotalGenerationsCount"` returns the largest generation of any edge during the evolution:
+**`"TotalGenerationsCount"`** returns the largest generation of any edge during the evolution:
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
   "MaxEvents" -> 42|>, "TotalGenerationsCount"]
 Out[] = 5
 ```
 
-`"PartialGenerationsCount"` return the number of generations that are "completely done". That is, no more matches can be made involving this or earlier generations. If the default [evaluation order](#eventorderingfunction) is used, this can only be 0 (if we are in the middle of a step) or 1 (if we just finished the step). However, it gets much more interesting if a different event order is used. For a random evolution, for instance, one can get:
+**`"PartialGenerationsCount"`** return the number of generations that are "completely done". That is, no more matches can be made involving this or earlier generations. If the default [evaluation order](#eventorderingfunction) is used, this can only be 0 (if we are in the middle of a step) or 1 (if we just finished the step). However, it gets much more interesting if a different event order is used. For a random evolution, for instance, one can get:
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
   "MaxEvents" -> 42|>, "EventOrderingFunction" -> "Random"]
@@ -841,9 +841,9 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
 
 Note, in this case, only 2 generations are complete, and 7 are partial. That happens because the states grow with each generation, so it becomes more likely for a random choice to pick an edge from a later generation. Thus earlier ones are left unevolved.
 
-`"CompleteGenerationsCount"` is simply a difference of `"TotalGenerationsCount"` and `"PartialGenerationsCount"`, and `"GenerationsCount"` is equivalent to `{"CompleteGenerationsCount", "PartialGenerationsCount"}`.
+**`"CompleteGenerationsCount"`** is simply a difference of `"TotalGenerationsCount"` and `"PartialGenerationsCount"`, and **`"GenerationsCount"`** is equivalent to `{"CompleteGenerationsCount", "PartialGenerationsCount"}`.
 
-`"GenerationComplete"` takes a generation number as an argument, and gives [`True`](https://reference.wolfram.com/language/ref/True.html) or [`False`](https://reference.wolfram.com/language/ref/False.html) depending on whether that particular generation is complete.
+**`"GenerationComplete"`** takes a generation number as an argument, and gives [`True`](https://reference.wolfram.com/language/ref/True.html) or [`False`](https://reference.wolfram.com/language/ref/False.html) depending on whether that particular generation is complete.
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
    "MaxEvents" -> 42|>]["GenerationComplete", 5]
@@ -852,9 +852,9 @@ Out[] = False
 
 #### Event Counts
 
-`"AllEventsCount"` just returns the overall number of events throughout the evolution (the [`Length`](https://reference.wolfram.com/language/ref/Length.html) of [`"AllEventsList"`](#events)).
+**`"AllEventsCount"`** (aka `"EventsCount"`) just returns the overall number of events throughout the evolution (the [`Length`](https://reference.wolfram.com/language/ref/Length.html) of [`"AllEventsList"`](#events)).
 
-`"GenerationEventsCountList"` gives the number of events per each generation ([`Length`](https://reference.wolfram.com/language/ref/Length.html) mapped over [`"GenerationEventsList"`](#events)):
+**`"GenerationEventsCountList"`** gives the number of events per each generation ([`Length`](https://reference.wolfram.com/language/ref/Length.html) mapped over [`"GenerationEventsList"`](#events)):
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1,
    1}}, 5, "GenerationEventsCountList"]
@@ -863,7 +863,7 @@ Out[] = {1, 3, 9, 27, 81}
 
 #### Element Count Lists
 
-`"VertexCountList"` and `"EdgeCountList"` return counts of vertices and edges respectively in each state of [`"StatesList"`](#states). They are useful to see how quickly a particular system grows.
+**`"VertexCountList"`** and **`"EdgeCountList"`** return counts of vertices and edges respectively in each state of [`"StatesList"`](#states). They are useful to see how quickly a particular system grows.
 
 ```
 In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{6, 6, 3}, {2, 6, 2}, {6, 4,
@@ -879,7 +879,7 @@ Out[] = {2, 4, 8, 16, 28, 54, 98, 184, 342, 648, 1244}
 
 #### Final Element Counts
 
-These properties are similar to corresponding [`*List`](#element-count-lists) ones, except we don't have `"FinalVertexCount"` and instead have `"FinalDistinctElementsCount"` (we should have `"FinalVertexCount"` and `"FinalDistinctElementsCountList"`, but they are not currently implemented).
+These properties are similar to corresponding [`*List`](#element-count-lists) ones, except we don't have `"FinalVertexCount"` and instead have **`"FinalDistinctElementsCount"`** and **`"FinalEdgeCount"`** (we should have `"FinalVertexCount"` and `"FinalDistinctElementsCountList"`, but they are not currently implemented).
 
 The difference is that [`"VertexCountList"`](#element-count-lists) counts expressions of level 2 in the states whereas `"FinalDistinctElementsCount"` counts all expressions matching `_ ? AtomQ`. The difference becomes apparent for edges that contain non-trivially nested lists.
 
@@ -911,7 +911,7 @@ This state has 3 vertices (distinct level-2 expressions): `2`, `0`, and `{3, -1}
 
 #### Total Element Counts
 
-These properties are similar to [`"FinalDistinctElementsCount"`](#final-element-counts) and [`"FinalEdgeCount"`](#final-element-counts), except they count atoms and edges throughout the entire evolution instead of just in the final step.
+**`"AllEventsDistinctElementsCount"`** (aka `"AtomsCountTotal"`) and **`"AllEventsEdgesCount"`** (aka `"ExpressionsCountTotal"`) are similar to [`"FinalDistinctElementsCount"`](#final-element-counts) and [`"FinalEdgeCount"`](#final-element-counts), except they count atoms and edges throughout the entire evolution instead of just in the final step.
 
 For instance,
 ```
@@ -923,7 +923,7 @@ Out[] = {622, 2486}
 
 #### Rules
 
-`"Rules"` just stores the rules in the same way they were entered as an input to `WolframModel`.
+**`"Rules"`** just stores the rules in the same way they were entered as an input to `WolframModel`.
 ```
 In[] := WolframModel[<|
    "PatternRules" -> {{a_}} :> {{a + 1}, {a - 1}, {{a + 2,
@@ -937,7 +937,7 @@ This is useful for display in the information box of the evolution object, and i
 
 #### "VertexNamingFunction"
 
-`"VertexNamingFunction"` controls the names chosen for vertices, particularly the newly created ones. It can take three values: [`None`](https://reference.wolfram.com/language/ref/None.html), [`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html), and [`All`](https://reference.wolfram.com/language/ref/All.html).
+**`"VertexNamingFunction"`** controls the names chosen for vertices, particularly the newly created ones. It can take three values: [`None`](https://reference.wolfram.com/language/ref/None.html), [`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html), and [`All`](https://reference.wolfram.com/language/ref/All.html).
 
 [`None`](https://reference.wolfram.com/language/ref/None.html) does not do anything, the vertices in the initial condition are left as-is, and the newly created vertices use symbol names as, i.e., `Module[{v}, v]` would generate.
 ```
@@ -967,7 +967,7 @@ Out[] = {{{v1, v1}}, {{v1, 1}, {v1, 1}, {1, v1}}, {{v1, 2}, {v1, 2}, {2,
 
 #### "IncludePartialGenerations"
 
-In case partial generations were generated, they can be automatically dropped by setting `"IncludePartialGenerations" -> False`. Compare for instance
+In case partial generations were generated, they can be automatically dropped by setting **`"IncludePartialGenerations"`** to [`False`](https://reference.wolfram.com/language/ref/False.html). Compare for instance
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
   "MaxEvents" -> 42|>]
@@ -992,7 +992,7 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{6, 6, 3}, {2, 6, 2}, {6, 4,
 
 #### "IncludeBoundaryEvents"
 
-`"IncludeBoundaryEvents"` allows one to include "fake" initial and final events in properties such as [`"CausalGraph"`](#causal-graphs). It does not affect the evolution itself and does not affect the evolution object. It has 4 settings: [`None`](https://reference.wolfram.com/language/ref/None.html), `"Initial"`, `"Final"` and [`All`](https://reference.wolfram.com/language/ref/All.html).
+**`"IncludeBoundaryEvents"`** allows one to include "fake" initial and final events in properties such as [`"CausalGraph"`](#causal-graphs). It does not affect the evolution itself and does not affect the evolution object. It has 4 settings: [`None`](https://reference.wolfram.com/language/ref/None.html), `"Initial"`, `"Final"` and [`All`](https://reference.wolfram.com/language/ref/All.html).
 
 We have already [demonstrated](#causalgraph-layeredcausalgraph) it previously for our arithmetic model. Here is an example with the final "event" included as well (event labels are kept for reference):
 ```
@@ -1024,7 +1024,7 @@ Out[] = {{1, {1, 2} -> {10}}, {1, {3, 4} -> {11}}, {1, {5,
 
 #### Method
 
-There are two implementations available: one written in Wolfram Language (`Method -> "Symbolic"`), one in C++ (`Method -> "LowLevel"`).
+There are two implementations (**`Method`**s) available: one written in Wolfram Language (`Method -> "Symbolic"`), one in C++ (`Method -> "LowLevel"`).
 
 The Wolfram Language implementation permutes the left-hand sides of the rules in all possible ways and uses [`Replace`](https://reference.wolfram.com/language/ref/Replace.html) a specified number of times to perform evolution. This implementation works well for small graphs and small rule inputs, but it slows down with the number of edges in the graph and has exponential complexity in rule size.
 
@@ -1055,7 +1055,7 @@ On the other hand, Wolfram Language implementation should be used if:
 
 #### TimeConstraint
 
-`TimeConstraint` option allows one to stop the evolution early. If an evolution object is requested, it will return a partial result, otherwise, it will just give [`$Aborted`](https://reference.wolfram.com/language/ref/$Aborted.html).
+**`TimeConstraint`** option allows one to stop the evolution early. If an evolution object is requested, it will return a partial result, otherwise, it will just give [`$Aborted`](https://reference.wolfram.com/language/ref/$Aborted.html).
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1,
    1}}, \[Infinity], TimeConstraint -> 1]
@@ -1100,7 +1100,7 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3,
 ```
 <img src="READMEImages/WolframModelOverlappingRuleOrdering.png" width="478">
 
-In a case like that, it is important to be able to specify the desired evolution order, which is the purpose of the `"EventOrderingFunction"` option. `"EventOrderingFunction"` is specified as a list of sorting criteria such as the default `{"LeastRecentEdge", "RuleOrdering", "RuleIndex"}`. Note that most individual sorting criteria are insufficient to distinguish between all available matches. If multiple matches remain after exhausting all sorting criteria, one is chosen uniformly at random (which is why `{}` works as a shorthand for `"Random"`).
+In a case like that, it is important to be able to specify the desired evolution order, which is the purpose of the **`"EventOrderingFunction"`** option. `"EventOrderingFunction"` is specified as a list of sorting criteria such as the default `{"LeastRecentEdge", "RuleOrdering", "RuleIndex"}`. Note that most individual sorting criteria are insufficient to distinguish between all available matches. If multiple matches remain after exhausting all sorting criteria, one is chosen uniformly at random (which is why `{}` works as a shorthand for `"Random"`).
 
 Possible sorting criteria are:
 * `"OldestEdge"`: greedily select the edge in the set closest to the beginning of the list (which would typically correspond to the oldest edge). Note, the edges within a single-event output are assumed oldest-to-newest left-to-right as written on the right-hand side of the rule. After this criterion, a fixed ***set*** of edges is guaranteed to be chosen, but different orderings of that set might be possible (which could allow for multiple non-equivalent matches).
@@ -1158,7 +1158,7 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
 
 ## WolframModelPlot
 
-`WolframModelPlot` (aka `HypergraphPlot`) is a function used to visualize [`WolframModel`](#wolframmodel-and-wolframmodelevolutionobject) states. It treats lists of vertices as ordered hypergraphs, and displays each hyperedge as a polygon with arrows showing the ordering:
+**`WolframModelPlot`** (aka `HypergraphPlot`) is a function used to visualize [`WolframModel`](#wolframmodel-and-wolframmodelevolutionobject) states. It treats lists of vertices as ordered hypergraphs, and displays each hyperedge as a polygon with arrows showing the ordering:
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}]
 ```
@@ -1209,7 +1209,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}, "Cyclic"]
 
 ### GraphHighlight and GraphHighlightStyle
 
-Vertices and edges can be highlighted with `GraphHighlight` option:
+Vertices and edges can be highlighted with **`GraphHighlight`** option:
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, GraphHighlight -> {{1, 2, 3}, 4, {9}}]
@@ -1223,7 +1223,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {1, 2, 3}, {3, 4}, {3, 4}, {3,
 ```
 <img src="READMEImages/WolframModelPlotMultiedgeHighlight.png" width="478">
 
-The color of the highlight can be specified with `GraphHighlightStyle` (only colors, not other style specifiers are supported at the moment):
+The color of the highlight can be specified with **`GraphHighlightStyle`** (only colors, not other style specifiers are supported at the moment):
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, GraphHighlight -> {{1, 2, 3}, 4, {9}},
@@ -1233,7 +1233,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 
 ### "HyperedgeRendering"
 
-By default, `WolframModelPlot` represents each hyperedge as a polygon. It is possible instead of drop the polygons (and the vertex layout adjustments that come with them), and simply split each hyperedge into a collection of binary edges. This looses information (`{{1, 2}, {2, 3}}` and `{{1, 2, 3}}` would look the same), but might be helpful if one does not care to see the separation between hyperedges.
+By default, `WolframModelPlot` represents each hyperedge as a polygon. It is possible instead of drop the polygons (and the vertex layout adjustments that come with them), and simply split each hyperedge into a collection of binary edges by setting **`"HyperedgeRendering"`** to `"Subgraphs"`. This looses information (`{{1, 2}, {2, 3}}` and `{{1, 2, 3}}` would look the same), but might be helpful if one does not care to see the separation between hyperedges.
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, "HyperedgeRendering" -> "Subgraphs",
@@ -1276,7 +1276,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
 
 ### VertexSize and "ArrowheadLength"
 
-The size of vertices (in the units of internal graphics coordinates), and the length of arrowheads can be adjusted:
+The size of vertices (in the units of internal graphics coordinates), and the length of arrowheads can be adjusted with **`VertexSize`** and **`"ArrowheadLength"`** respectively:
 ```
 In[] := WolframModelPlot[{{1, 2, 3, 4}, {1, 5, 6}, {2, 7, 8}, {4, 6, 9}},
  VertexSize -> 0.1, "ArrowheadLength" -> 0.3]
@@ -1305,7 +1305,7 @@ In[] := WolframModelPlot[{{1, 2, 2}, {2, 3, 3}, {3, 1, 1}},
 
 ### "MaxImageSize"
 
-`"MaxImageSize"` allows one to specify the image size while allowing for automatic reduction in size for very small hypergraphs. To demonstrate that, consider the difference:
+**`"MaxImageSize"`** allows one to specify the image size while allowing for automatic reduction in size for very small hypergraphs. To demonstrate that, consider the difference:
 ```
 In[] := WolframModelPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}},
  "MaxImageSize" -> 100]
@@ -1319,7 +1319,7 @@ In[] := WolframModelPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}}, ImageSize -> 100]
 
 ### Style Options
 
-There are four styling options: `PlotStyle`, `VertexStyle`, `EdgeStyle` and `"EdgePolygonStyle"`.
+There are four styling options: **`PlotStyle`**, **`VertexStyle`**, **`EdgeStyle`** and **`"EdgePolygonStyle"`**.
 
 `PlotStyle` controls the overall style for everything, `VertexStyle` and `EdgeStyle` inherit from it:
 ```
@@ -1384,7 +1384,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 2}, {2,
 
 ## RulePlot of WolframModel
 
-`RulePlot` can be used to get a visual representation of hypergraph substitution rules based on [`WolframModelPlot`](#wolframmodelplot).
+**`RulePlot`** can be used to get a visual representation of hypergraph substitution rules based on [`WolframModelPlot`](#wolframmodelplot).
 ```
 In[] := RulePlot[WolframModel[{{1, 2}, {1, 2}} -> {{3, 2}, {3, 2}, {2, 1}, {1,
       3}}]]
@@ -1440,7 +1440,7 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
 
 ### GeneralizedGridGraph
 
-`GeneralizedGridGraph` is similar to [`GridGraph`](https://reference.wolfram.com/language/ref/GridGraph.html), but it allows for additional specifiers in each direction of the grid:
+**`GeneralizedGridGraph`** is similar to [`GridGraph`](https://reference.wolfram.com/language/ref/GridGraph.html), but it allows for additional specifiers in each direction of the grid:
 ```
 In[] := GeneralizedGridGraph[{5 -> "Directed", 5 -> "Circular"}]
 ```
@@ -1469,7 +1469,7 @@ In[] := GeneralizedGridGraph[{4 -> "Directed", 5, 2},
 
 ### HypergraphAutomorphismGroup
 
-`HypergraphAutomorphismGroup` does the same as [`GraphAutomorphismGroup`](https://reference.wolfram.com/language/ref/GraphAutomorphismGroup.html), but for ordered hypergraphs:
+**`HypergraphAutomorphismGroup`** does the same as [`GraphAutomorphismGroup`](https://reference.wolfram.com/language/ref/GraphAutomorphismGroup.html), but for ordered hypergraphs:
 ```
 In[] := HypergraphAutomorphismGroup[{{1, 2, 3}, {1, 2, 4}}]
 Out[] = PermutationGroup[{Cycles[{{3, 4}}]}]
@@ -1491,7 +1491,7 @@ Out[] = 24
 
 ### HypergraphUnifications
 
-When considering how many matches could potentially exist to a given set of rule inputs, it is often useful to see all possible ways hypergraphs can overlap. `HypergraphUnifications` constructs all possible hypergraphs that contain both subgraphs matching the specified arguments. The argument-hypergraphs must overlap by at least a single edge. `HypergraphUnifications` identifies vertices to the least extent possible, but it makes some identifications if necessary.
+When considering how many matches could potentially exist to a given set of rule inputs, it is often useful to see all possible ways hypergraphs can overlap. **`HypergraphUnifications`** constructs all possible hypergraphs that contain both subgraphs matching the specified arguments. The argument-hypergraphs must overlap by at least a single edge. `HypergraphUnifications` identifies vertices to the least extent possible, but it makes some identifications if necessary.
 
 The output format is a list of triples `{unified hypergraph, first argument edge matches, second argument edge matches}`, where the last two elements are associations mapping the edge indices in the input hypergraphs to the edge indices in the unified hypergraph.
 
@@ -1534,7 +1534,7 @@ In[] := WolframModelPlot[#,
 
 ### WolframPhysicsProjectStyleData
 
-`WolframPhysicsProjectStyleData` allows one to lookup styles used in various **SetReplace** functions and properties such as [`WolframModelPlot`](#wolframmodelplot) and [`"CausalGraph"`](#causal-graphs).
+**`WolframPhysicsProjectStyleData`** allows one to lookup styles used in various **SetReplace** functions and properties such as [`WolframModelPlot`](#wolframmodelplot) and [`"CausalGraph"`](#causal-graphs).
 
 For example, here is the default style used to draw polygons in [`WolframModelPlot`](#wolframmodelplot):
 ```
