@@ -1,3 +1,5 @@
+[Set Substitution Systems](#set-substitution-systems) | [Getting Started](#getting-started) | [Symbols and Functions](#symbols-and-functions) | [Physics](#physics)
+
 # Set Substitution Systems
 
 ## Basic Example
