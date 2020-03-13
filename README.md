@@ -1267,6 +1267,33 @@ In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
 
 ### VertexSize and ArrowheadLength
 
+The size of vertices (in the units of internal graphics coordinates), and the length of arrowheads can be adjusted:
+```
+In[] := WolframModelPlot[{{1, 2, 3, 4}, {1, 5, 6}, {2, 7, 8}, {4, 6, 9}},
+ VertexSize -> 0.1, "ArrowheadLength" -> 0.3]
+```
+![{{1, 2, 3, 4}, {1, 5, 6}, {2, 7, 8}, {4, 6, 9}} with large elements](READMEImages/WolframModelPlotElementSizes.png)
+
+Note that unlike `GraphPlot`, both vertices and arrowheads have fixed size relative to the layout (in fact, the arrowheads are drawn manually as polygons). This means they will scale proportionally when the image is resized, and will not overlay/disappear for very small / very large graphs or image sizes.
+
+These options can also be used to get rid of vertices and arrowheads altogether:
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7}, {7, 8, 9}, {9, 10,
+   1}}, "Cyclic", "ArrowheadLength" -> 0, VertexSize -> 0,
+ VertexStyle -> Transparent]
+```
+![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7}, {7, 8, 9}, {9, 10, 1}} with no arrows and vertices](READMEImages/WolframModelPlotNoArrowsAndVertices.png)
+
+As a neat example, this can be used to draw unordered hypergraphs:
+```
+In[] := WolframModelPlot[{{1, 2, 2}, {2, 3, 3}, {3, 1, 1}},
+ "ArrowheadLength" -> 0, EdgeStyle -> <|{_, _, _ ..} -> Transparent|>,
+  "EdgePolygonStyle" -> <|{_, _, _ ..} ->
+    Directive[Hue[0.63, 0.66, 0.81], Opacity[0.1],
+     EdgeForm[Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]]]]|>]
+```
+![{{1, 2, 2}, {2, 3, 3}, {3, 1, 1}} as unordered hypergraph](READMEImages/WolframModelPlotUnordered.png)
+
 ### MaxImageSize
 
 ### Style Options
