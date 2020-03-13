@@ -1466,6 +1466,7 @@ In[] := GroupOrder[
       8, 5}, {5, 9, 1}}]]
 ```
 <img src="READMEImages/HypergraphAutomorphismGroupNeatExample.png" width="451">
+
 ```
 Out[] = 24
 ```
