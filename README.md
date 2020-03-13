@@ -1162,40 +1162,40 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}]
 ```
-![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}](READMEImages/WolframModelPlotBasic.png)
+<img src="READMEImages/WolframModelPlotBasic.png" width="478">
 
 Edges of any arity can be mixed, the binary edges are displayed as non-filled arrows, and the unary edges are shown as circles around the vertices:
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4}, {4, 3}, {4, 5,
    6}, {1}, {6}, {6}}]
 ```
-![{{1, 2, 3}, {3, 4}, {4, 3}, {4, 5, 6}, {1}, {6}, {6}}](READMEImages/WolframModelPlotBinaryAndUnary.png)
+<img src="READMEImages/WolframModelPlotBinaryAndUnary.png" width="478">
 
 Self-loops are shown as convex polygons around the appropriate number of circular arrows:
 ```
 In[] := WolframModelPlot[{{1, 1, 1}, {1, 2, 3}, {3, 4, 4}}]
 ```
-![{{1, 1, 1}, {1, 2, 3}, {3, 4, 4}}](READMEImages/WolframModelPlotSelfLoops.png)
+<img src="READMEImages/WolframModelPlotSelfLoops.png" width="478">
 
 Note the difference between a hypermultiedge and two binary edges pointing in opposite directions:
 ```
 In[] := WolframModelPlot[{{1, 2, 1}, {2, 3}, {3, 2}}]
 ```
-![{{1, 2, 1}, {2, 3}, {3, 2}}](READMEImages/WolframModelPlotNonSubsequentSelfLoop.png)
+<img src="READMEImages/WolframModelPlotNonSubsequentSelfLoop.png" width="460">
 
 And multiedges are shown in darker color (because of overlayed polygons), or as separate polygons depending on the layout (and are admittedly sometimes hard to understand):
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6,
    6}}]
 ```
-![{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6, 6}}](READMEImages/WolframModelPlotMultiedges.png)
+<img src="READMEImages/WolframModelPlotMultiedges.png" width="478">
 
 `WolframModelPlot` is listable, multiple hypergraphs can be plotted at the same time:
 ```
 In[] := WolframModelPlot[{{{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3,
      4, 5}, {5, 6, 7}}}]
 ```
-![{{{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 7}}}](READMEImages/WolframModelPlotMultiple.png)
+<img src="READMEImages/WolframModelPlotMultiple.png" width="698">
 
 Many properties of `WolframModel` such as `"FinalStatePlot"` and `"EventStatesPlotsList"` use `WolframModelPlot` to produce output and accept the same set of options, which are explained below.
 
@@ -1205,7 +1205,7 @@ By default, `WolframModelPlot` assumes the hypergraph is an ordered hypergraph. 
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}, "Cyclic"]
 ```
-![Cyclic {{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}](READMEImages/WolframModelPlotCyclic.png)
+<img src="READMEImages/WolframModelPlotCyclic.png" width="478">
 
 ### GraphHighlight and GraphHighlightStyle
 
@@ -1214,14 +1214,14 @@ Vertices and edges can be highlighted with `GraphHighlight` option:
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, GraphHighlight -> {{1, 2, 3}, 4, {9}}]
 ```
-![Highlighted {1, 2, 3}, 4, and {9}](READMEImages/WolframModelPlotHighlight.png)
+<img src="READMEImages/WolframModelPlotHighlight.png" width="478">
 
 For a hypergraph with multiedges, only the specified number of edges will be highlighted:
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {1, 2, 3}, {3, 4}, {3, 4}, {3,
    4}, {4}, {4}}, GraphHighlight -> {{1, 2, 3}, {3, 4}, {3, 4}, {4}}]
 ```
-![Highlighted {1, 2, 3}, double {3, 4} and {4}](READMEImages/WolframModelPlotMultiedgeHighlight.png)
+<img src="READMEImages/WolframModelPlotMultiedgeHighlight.png" width="478">
 
 The color of the highlight can be specified with `GraphHighlightStyle` (only colors, not other style specifiers are supported at the moment):
 ```
@@ -1229,7 +1229,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, GraphHighlight -> {{1, 2, 3}, 4, {9}},
  GraphHighlightStyle -> Darker@Green]
 ```
-![Highlighted {1, 2, 3}, 4 and {9} in green](READMEImages/WolframModelPlotHighlightGreen.png)
+<img src="READMEImages/WolframModelPlotHighlightGreen.png" width="478">
 
 ### HyperedgeRendering
 
@@ -1239,7 +1239,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, "HyperedgeRendering" -> "Subgraphs",
  VertexLabels -> Automatic]
 ```
-![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4, 9}, {9}} with subgraphs rendering](READMEImages/WolframModelPlotSubgraphs.png)
+<img src="READMEImages/WolframModelPlotSubgraphs.png" width="478">
 
 ### VertexCoordinateRules
 
@@ -1249,21 +1249,21 @@ In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
  VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {0, 1}},
  Axes -> True]
 ```
-![{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}} with manual coordinates](READMEImages/WolframModelPlotCoordinates.png)
+<img src="READMEImages/WolframModelPlotCoordinates.png" width="478">
 
 Unfortunately though due to limitations of `GraphEmbedding`, specifying coordinates of two or more vertices breaks the scaling of distances between vertices. As a result, vertices and arrowheads might appear too small or too large, and will need to be manually adjusted. This might also affect [`RulePlot`](#ruleplot-of-wolframmodel) in some cases.
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
  VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}}]
 ```
-![{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}} crammed up](READMEImages/WolframModelPlotCoordinatesMessedUpScale.png)
+<img src="READMEImages/WolframModelPlotCoordinatesMessedUpScale.png" width="466">
 
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
  VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}},
  VertexSize -> 0.03, "ArrowheadLength" -> 0.06]
 ```
-![{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}} reduced vertex/arrowhead size](READMEImages/WolframModelPlotCoordinatesFixedScale.png)
+<img src="READMEImages/WolframModelPlotCoordinatesFixedScale.png" width="448">
 
 ### VertexLabels
 
@@ -1272,7 +1272,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
 In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
  VertexLabels -> Automatic]
 ```
-![{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}} with labeled vertices](READMEImages/WolframModelPlotVertexLabels.png)
+<img src="READMEImages/WolframModelPlotVertexLabels.png" width="478">
 
 ### VertexSize and ArrowheadLength
 
@@ -1281,7 +1281,7 @@ The size of vertices (in the units of internal graphics coordinates), and the le
 In[] := WolframModelPlot[{{1, 2, 3, 4}, {1, 5, 6}, {2, 7, 8}, {4, 6, 9}},
  VertexSize -> 0.1, "ArrowheadLength" -> 0.3]
 ```
-![{{1, 2, 3, 4}, {1, 5, 6}, {2, 7, 8}, {4, 6, 9}} with large elements](READMEImages/WolframModelPlotElementSizes.png)
+<img src="READMEImages/WolframModelPlotElementSizes.png" width="478">
 
 Note that unlike `GraphPlot`, both vertices and arrowheads have fixed size relative to the layout (in fact, the arrowheads are drawn manually as polygons). This means they will scale proportionally when the image is resized, and will not overlay/disappear for very small / very large graphs or image sizes.
 
@@ -1291,7 +1291,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7}, {7, 8, 9}, {9, 10,
    1}}, "Cyclic", "ArrowheadLength" -> 0, VertexSize -> 0,
  VertexStyle -> Transparent]
 ```
-![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7}, {7, 8, 9}, {9, 10, 1}} with no arrows and vertices](READMEImages/WolframModelPlotNoArrowsAndVertices.png)
+<img src="READMEImages/WolframModelPlotNoArrowsAndVertices.png" width="478">
 
 As a neat example, this can be used to draw unordered hypergraphs:
 ```
@@ -1301,7 +1301,7 @@ In[] := WolframModelPlot[{{1, 2, 2}, {2, 3, 3}, {3, 1, 1}},
     Directive[Hue[0.63, 0.66, 0.81], Opacity[0.1],
      EdgeForm[Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]]]]|>]
 ```
-![{{1, 2, 2}, {2, 3, 3}, {3, 1, 1}} as unordered hypergraph](READMEImages/WolframModelPlotUnordered.png)
+<img src="READMEImages/WolframModelPlotUnordered.png" width="478">
 
 ### MaxImageSize
 
@@ -1310,12 +1310,12 @@ In[] := WolframModelPlot[{{1, 2, 2}, {2, 3, 3}, {3, 1, 1}},
 In[] := WolframModelPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}},
  "MaxImageSize" -> 100]
 ```
-![{{{1}}, {{1, 1}}, {{1, 2, 3}}} with "MaxImageSize"](READMEImages/WolframModelPlotMaxImageSize.png)
+<img src="READMEImages/WolframModelPlotMaxImageSize.png" width="254">
 
 ```
 In[] := WolframModelPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}}, ImageSize -> 100]
 ```
-![{{{1}}, {{1, 1}}, {{1, 2, 3}}} with ImageSize](READMEImages/WolframModelPlotImageSize.png)
+<img src="READMEImages/WolframModelPlotImageSize.png" width="457">
 
 ### Style Options
 
@@ -1326,14 +1326,14 @@ There are four styling options: `PlotStyle`, `VertexStyle`, `EdgeStyle` and `"Ed
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, PlotStyle -> Directive[Blue, Dotted]]
 ```
-![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4, 9}, {9}} with blue dotted PlotStyle](READMEImages/WolframModelPlotPlotStyle.png)
+<img src="READMEImages/WolframModelPlotPlotStyle.png" width="478">
 
 `VertexStyle` works similarly to `GraphPlot`:
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, PlotStyle -> Directive[Blue, Dotted], VertexStyle -> Red]
 ```
-![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4, 9}, {9}} with red vertices](READMEImages/WolframModelPlotVertexStyle.png)
+<img src="READMEImages/WolframModelPlotVertexStyle.png" width="478">
 
 `EdgeStyle` controls edge lines, and `"EdgePolygonStyle"` inherits from it (automatically adding transparency):
 ```
@@ -1341,7 +1341,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, PlotStyle -> Directive[Blue, Dotted], VertexStyle -> Red,
   EdgeStyle -> Darker@Green]
 ```
-![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4, 9}, {9}} with green edges](READMEImages/WolframModelPlotEdgeStyle.png)
+<img src="READMEImages/WolframModelPlotEdgeStyle.png" width="478">
 
 Finally, `"EdgePolygonStyle"` controls the hyperedge polygons:
 ```
@@ -1351,7 +1351,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
  "EdgePolygonStyle" ->
   Directive[Lighter[Green, 0.9], EdgeForm[Dotted]]]
 ```
-![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4, 9}, {9}} with dotted polygons](READMEImages/WolframModelPlotEdgePolygonStyle.png)
+<img src="READMEImages/WolframModelPlotEdgePolygonStyle.png" width="478">
 
 ### Graphics Options
 
@@ -1362,7 +1362,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 2}, {2,
  PlotStyle -> White, GridLines -> Automatic,
  PlotRange -> {{30, 50}, {20, 40}}, Axes -> True]
 ```
-![Zoomed in FinalStatePlot](READMEImages/WolframModelPlotZoomedInWithGrid.png)
+<img src="READMEImages/WolframModelPlotZoomedInWithGrid.png" width="478">
 
 ## RulePlot of WolframModel
 
@@ -1371,27 +1371,27 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 2}, {2,
 In[] := RulePlot[WolframModel[{{1, 2}, {1, 2}} -> {{3, 2}, {3, 2}, {2, 1}, {1,
       3}}]]
 ```
-![Plot of {{1, 2}, {1, 2}} -> {{3, 2}, {3, 2}, {2, 1}, {1, 3}}](READMEImages/RulePlotBasic.png)
+<img src="READMEImages/RulePlotBasic.png" width="429">
 
 The shared elements between rules sides (vertices `1` and `2` in the example above) are put at the same positions in the `RulePlot` and highlighted in a darker shade of blue. Shared edges are highlighted as well:
 ```
 In[] := RulePlot[WolframModel[{{1, 2, 3}} -> {{1, 2, 3}, {3, 4, 5}}]]
 ```
-![Plot of {{1, 2, 3}} -> {{1, 2, 3}, {3, 4, 5}}](READMEImages/RulePlotSharedEdges.png)
+<img src="READMEImages/RulePlotSharedEdges.png" width="429">
 
 Multiple rules can be plotted:
 ```
 In[] := RulePlot[WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2,
       3}}, {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}]]
 ```
-![Plot of {{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}}, {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}](READMEImages/RulePlotMultiple.png)
+<img src="READMEImages/RulePlotMultiple.png" width="808">
 
 Sometimes an incorrectly scaled layout might be produced due to the same issue discussed above in [`"VertexCoordinateRules"`](#vertexcoordinaterules):
 ```
 In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {2, 2}, {2,
       5}, {3, 2}}]]
 ```
-![Plot of {{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {2, 2}, {2, 5}, {3, 2}}](READMEImages/RulePlotIncorrectlyScaled.png)
+<img src="READMEImages/RulePlotIncorrectlyScaled.png" width="429">
 
 `VertexCoordinateRules` can be used in that case to specify the layout manually:
 ```
@@ -1400,7 +1400,7 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {2, 2}, {2,
  VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {0, 1},
    4 -> {-1, 0}, 5 -> {2, 1}}]
 ```
-![Plot of {{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {2, 2}, {2, 5}, {3, 2}} with manual vertex coordinates](READMEImages/RulePlotManualCoordinates.png)
+<img src="READMEImages/RulePlotManualCoordinates.png" width="429">
 
 Some of the `WolframModelPlot` options are supported, specifically `GraphHighlightStyle`, `"HyperedgeRendering"`, `VertexCoordinateRules` and `VertexLabels`. `"EdgeType"` is supported as an option instead of the second argument like in `WolframModelPlot`.
 
@@ -1409,14 +1409,14 @@ There are also two additional `RulePlot`-specific style options. `Spacings` cont
 In[] := RulePlot[WolframModel[{{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1,
       2}, {1, 2}} -> {{1, 3}, {3, 2}}}], Spacings -> 0.03]
 ```
-![Plot of {{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 2}, {1, 2}} -> {{1, 3}, {3, 2}}} with small spacings](READMEImages/RulePlotSmallSpacings.png)
+<img src="READMEImages/RulePlotSmallSpacings.png" width="747">
 
 `"RulePartsAspectRatio"` is used to control the aspect ratio of rule sides. As an example, it can be used to force rule parts to be square:
 ```
 In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
  "RulePartsAspectRatio" -> 1]
 ```
-![Plot of {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}} with square sides](READMEImages/RulePlotSquare.png)
+<img src="READMEImages/RulePlotSquare.png" width="429">
 
 ## Utility Functions
 
