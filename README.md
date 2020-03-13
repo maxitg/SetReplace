@@ -1158,7 +1158,7 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
 
 ## WolframModelPlot
 
-`WolframModelPlot` (aka `HypergraphPlot`) is a function used to visualize [`WolframModel`](#wolframmmodel-and-wolframmodelevolutionobject) states. It treats lists of vertices as ordered hypergraphs, and displays each hyperedge as a polygon with arrows showing the ordering:
+`WolframModelPlot` (aka `HypergraphPlot`) is a function used to visualize [`WolframModel`](#wolframmodel-and-wolframmodelevolutionobject) states. It treats lists of vertices as ordered hypergraphs, and displays each hyperedge as a polygon with arrows showing the ordering:
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}]
 ```
@@ -1197,7 +1197,7 @@ In[] := WolframModelPlot[{{{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3,
 ```
 <img src="READMEImages/WolframModelPlotMultiple.png" width="698">
 
-Many [`WolframModel`](#wolframmmodel-and-wolframmodelevolutionobject) properties, such as [`"FinalStatePlot"`](#plots-of-states) and [`"EventStatesPlotsList"`](#plots-of-events), use `WolframModelPlot` to produce output. They accept the same set of options, as explained below.
+Many [`WolframModel`](#wolframmodel-and-wolframmodelevolutionobject) properties, such as [`"FinalStatePlot"`](#plots-of-states) and [`"EventStatesPlotsList"`](#plots-of-events), use `WolframModelPlot` to produce output. They accept the same set of options, as explained below.
 
 ### Edge Type
 
