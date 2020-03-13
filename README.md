@@ -1513,6 +1513,30 @@ In[] := WolframModelPlot[#,
 
 ### WolframPhysicsProjectStyleData
 
+`WolframPhysicsProjectStyleData` allows one to lookup styles used in various `SetReplace` functions and properties such as `WolframModelPlot` and `"CausalGraph"`.
+
+For example, here is the default style used to draw polygons in `WolframModelPlot`:
+```
+In[] := WolframPhysicsProjectStyleData["SpatialGraph", "EdgePolygonStyle"]
+Out[] = Directive[Hue[0.63, 0.66, 0.81], Opacity[0.1], EdgeForm[None]]
+```
+
+The full specification is `WolframPhysicsProjectStyleData[theme, plot type, style element]`, however either the last, or the last two elements can be ommited to obtain a full `Association` of styles. The `theme` argument can be omitted to get the result for the default plot theme (only `"Light"` theme is supported at the moment). Here are all styles used in `"CausalGraph"` for example:
+```
+In[] := WolframPhysicsProjectStyleData["CausalGraph"]
+Out[] = <|"EdgeStyle" -> Hue[0, 1, 0.56],
+ "FinalVertexStyle" ->
+  Directive[GrayLevel[1], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
+  "InitialVertexStyle" ->
+  Directive[RGBColor[{0.259, 0.576, 1}],
+   EdgeForm[{RGBColor[{0.259, 0.576, 1}], Opacity[1]}]],
+ "VertexStyle" ->
+  Directive[Hue[0.11, 1, 0.97],
+   EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]]|>
+```
+
+This function is useful if one needs to produce "fake" example plots using styles consistent with Wolfram Physics Project.
+
 # Physics Applications
 
 A hypothesis is that space-time at the fundamental Planck scale might be represented as a network that can be produced by a system similar to the one this package implements.
