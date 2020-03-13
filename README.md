@@ -1224,6 +1224,14 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 
 ### HyperedgeRendering
 
+By default, `WolframModelPlot` represents each hyperedge as a polygon. It is possible instead of drop the polygons (and the vertex layout adjustments that come with them), and simply split each hyperedge into a collection of binary edges. This looses information (`{{1, 2}, {2, 3}}` and `{{1, 2, 3}}` would look the same), but might be helpful if one does not care to see the separation between hyperedges.
+```
+In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
+   9}, {9}}, "HyperedgeRendering" -> "Subgraphs",
+ VertexLabels -> Automatic]
+```
+![{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4, 9}, {9}} with subgraphs rendering](READMEImages/WolframModelPlotSubgraphs.png)
+
 ### VertexCoordinateRules
 
 ### VertexLabels
