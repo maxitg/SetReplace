@@ -1201,7 +1201,7 @@ Many [`WolframModel`](#wolframmodel-and-wolframmodelevolutionobject) properties,
 
 ### Edge Type
 
-By default, `WolframModelPlot` assumes the hypergraph is an ordered hypergraph. It is also possible to treat edges as cyclic edges instead (i.e., assume [`RotateLeft`](https://reference.wolfram.com/language/ref/RotateLeft.html) and [`RotateRigth`](https://reference.wolfram.com/language/ref/RotateRight.html) don't change the edge), in which case `"Cyclic"` should be used as the second argument to `WolframModelPlot`:
+By default, `WolframModelPlot` assumes the hypergraph is an ordered hypergraph. It is also possible to treat edges as cyclic edges instead (i.e., assume [`RotateLeft`](https://reference.wolfram.com/language/ref/RotateLeft.html) and [`RotateRight`](https://reference.wolfram.com/language/ref/RotateRight.html) don't change the edge), in which case `"Cyclic"` should be used as the second argument to `WolframModelPlot`:
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}, "Cyclic"]
 ```
