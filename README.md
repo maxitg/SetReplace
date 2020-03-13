@@ -435,7 +435,7 @@ In[] := WolframModelPlot@
      9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6,
   "FinalState"]
 ```
-![WolframModelPropertiesFinalState](READMEImages/WolframModelPropertiesFinalState.png)
+<img src="READMEImages/WolframModelMaxVerticesEvolution.png" width="478">
 
 `"StateList"` yields the list of states at each generation:
 ```
@@ -445,7 +445,7 @@ In[] := WolframModelPlot /@
      9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6,
   "StatesList"]
 ```
-![WolframModelPropertiesStatesList](READMEImages/WolframModelPropertiesStatesList.png)
+<img src="READMEImages/WolframModelPropertiesStatesList.png" width="746">
 
 This is identical to using the `"Generation"` property mapped over all generations:
 ```
@@ -454,7 +454,7 @@ In[] := WolframModelPlot /@ (WolframModel[{{1, 2, 3}, {4, 5, 6}, {1,
          12}, {11, 10}, {13, 7}, {14, 9}}, {{1, 1, 1}, {1, 1, 1}, {1,
         1}, {1, 1}, {1, 1}}, 6]["Generation", #] &) /@ Range[0, 6]
 ```
-![WolframModelPropertiesStatesList](READMEImages/WolframModelPropertiesStatesList.png)
+<img src="READMEImages/WolframModelPropertiesStatesList.png" width="746">
 
 In fact `"Generation"` property can be omitted and the index of the generation can be used directly:
 ```
@@ -464,7 +464,7 @@ In[] := WolframModelPlot /@
       9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6] /@
   Range[0, 6]
 ```
-![WolframModelPropertiesStatesList](READMEImages/WolframModelPropertiesStatesList.png)
+<img src="READMEImages/WolframModelPropertiesStatesList.png" width="746">
 
 `"StatesList"` shows a compressed version of the evolution. To see how state changes with each applied replacement, use `"AllEventsStatesList"`:
 ```
@@ -474,7 +474,7 @@ In[] := WolframModelPlot /@
      9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 3,
   "AllEventsStatesList"]
 ```
-![WolframModelPropertiesAllEventsStatesList](READMEImages/WolframModelPropertiesAllEventsStatesList.png)
+<img src="READMEImages/WolframModelPropertiesAllEventsStatesList.png" width="746">
 
 Finally, to see a state after a specific event, use `"StateAfterEvent"`:
 ```
@@ -484,7 +484,7 @@ In[] := WolframModelPlot@
       9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6][
   "StateAfterEvent", 42]
 ```
-![WolframModelPropertiesStateAfterEvent](READMEImages/WolframModelPropertiesStateAfterEvent.png)
+<img src="READMEImages/WolframModelPropertiesStateAfterEvent.png" width="478">
 
 This is equivalent to taking a corresponding part in the `"AllEventsStatesList"`, but is much faster to compute than the entire list.
 
@@ -497,7 +497,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
     9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1,
    1}}, 6, "FinalStatePlot"]
 ```
-![WolframModelPropertiesFinalState](READMEImages/WolframModelPropertiesFinalState.png)
+<img src="READMEImages/WolframModelPropertiesFinalState.png" width="478">
 
 ```
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
@@ -505,7 +505,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
     9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1,
    1}}, 6, "StatesPlotsList"]
 ```
-![WolframModelPropertiesStatesList](READMEImages/WolframModelPropertiesStatesList.png)
+<img src="READMEImages/WolframModelPropertiesStatesList.png" width="746">
 
 These properties take the same options as `WolframModelPlot`:
 ```
@@ -514,7 +514,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
      9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}},
   3]["FinalStatePlot", VertexLabels -> Automatic]
 ```
-![WolframModelPropertiesFinalStatePlotVertexLabels](READMEImages/WolframModelPropertiesFinalStatePlotVertexLabels.png)
+<img src="READMEImages/WolframModelPropertiesFinalStatePlotVertexLabels.png" width="478">
 
 #### EventsStatesPlotsList
 
@@ -525,7 +525,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {3, 9,
     9}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1,
    1}}, 3, "EventsStatesPlotsList"]
 ```
-![WolframModelPropertiesEventsStatesPlotsList](READMEImages/WolframModelPropertiesEventsStatesPlotsList.png)
+<img src="READMEImages/WolframModelPropertiesEventsStatesPlotsList.png" width="746">
 
 Here the dotted gray edges are the ones about to be deleted, whereas the red ones have just been created.
 
@@ -572,7 +572,7 @@ In[] := WolframModelPlot /@
      3]}, evolution["AllEventsEdgesList"][[#]] & /@
    evolution["AllEventsStatesEdgeIndicesList"]]
 ```
-![WolframModelPropertiesAllEventsStatesList](READMEImages/WolframModelPropertiesAllEventsStatesList.png)
+<img src="READMEImages/WolframModelPropertiesAllEventsStatesList.png" width="746">
 
 however this representation is useful if one needs to distinguish between identical edges.
 
@@ -682,7 +682,7 @@ In[] := With[{evolution =
       Map[evolution["AllEventsEdgesList"][[#]] &,
        Last /@ evolution["AllEventsList"], {2}]]]]]
 ```
-![WolframModelPropertiesArithmeticCausalGraph](READMEImages/WolframModelPropertiesArithmeticCausalGraph.png)
+<img src="READMEImages/WolframModelPropertiesArithmeticCausalGraph.png" width="478">
 
 Here is an example for a hypergraph model (which is considerably harder to understand):
 ```
@@ -691,7 +691,7 @@ In[] := WolframModel[{{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{3, 7, 8}, {9, 2,
      8}}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1,
    1}}, 20, "CausalGraph"]
 ```
-![WolframModelPropertiesHypergraphModelCausalGraph](READMEImages/WolframModelPropertiesHypergraphModelCausalGraph.png)
+<img src="READMEImages/WolframModelPropertiesHypergraphModelCausalGraph.png" width="478">
 
 `"LayeredCausalGraph"` generations the same graph but layers events generation-by-generation. For example, for our arithmetic causal graph, note how it's arranged differently from an example above:
 ```
@@ -705,7 +705,7 @@ In[] := With[{evolution =
       Map[evolution["AllEventsEdgesList"][[#]] &,
        Last /@ evolution["AllEventsList"], {2}]]]]]
 ```
-![WolframModelPropertiesArithmeticLayeredCausalGraph](READMEImages/WolframModelPropertiesArithmeticayeredCausalGraph.png)
+<img src="READMEImages/WolframModelPropertiesArithmeticLayeredCausalGraph.png" width="478">
 
 Furthermore, if we include the initial condition as a "fake" event (see [`"IncludeBoundaryEvents"`](#includeboundaryevents) option for more information), note how slices through the causal graph correspond to states from the `"StatesList"`:
 ```
@@ -725,7 +725,7 @@ In[] := With[{evolution =
    Epilog -> {Red, Dotted,
      Table[Line[{{-10, k}, {10, k}}], {k, 0.5, 4.5}]}]]]
 ```
-![WolframModelPropertiesArithmeticLayeredCausalGraphFoliated](READMEImages/WolframModelPropertiesArithmeticLayeredCausalGraphFoliated.png)
+<img src="READMEImages/WolframModelPropertiesArithmeticLayeredCausalGraphFoliated.png" width="478">
 
 ```
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>, {3, 8, 8, 8, 2,
@@ -758,7 +758,7 @@ In[] := With[{evolution =
       Replace[evolution["AllEventsRuleIndices"], {1 -> Black,
         2 -> White}, {1}]], VertexSize -> Medium]]]
 ```
-![WolframModelPropertiesCausalGraphColoring](READMEImages/WolframModelPropertiesCausalGraphColoring.png)
+<img src="READMEImages/WolframModelPropertiesCausalGraphColoring.png" width="478">
 
 #### EdgeGenerationsList (aka ExpressionGenerations), AllEventsGenerationsList (aka EventGenerations or EventGenerationsList)
 
@@ -783,7 +783,7 @@ In[] := With[{evolution =
       Prepend[0]@Accumulate@evolution["GenerationEventsCountList"],
     g_ :> ColorData["Rainbow"][g/5], {2}]}]]
 ```
-![WolframModelPropertiesEdgeGenerationsListColoring](READMEImages/WolframModelPropertiesEdgeGenerationsListColoring.png)
+<img src="READMEImages/WolframModelPropertiesEdgeGenerationsListColoring.png" width="746">
 
 Event generations correspond to layers in `"LayeredCausalGraph"`:
 ```
@@ -795,7 +795,7 @@ Out[] = {1, 2, 3, 4, 5, 5}
 In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} -> {{2, 2}, {3, 2}, {3, 4}, {3,
     5}}, {{1, 1}, {1, 1}, {1, 1}}, 5, "LayeredCausalGraph"]
 ```
-![WolframModelPropertiesAllEventsGenerationsListCausalGraph](READMEImages/WolframModelPropertiesAllEventsGenerationsListCausalGraph.png)
+<img src="READMEImages/WolframModelPropertiesAllEventsGenerationsListCausalGraph.png" width="218">
 
 #### TerminationReason
 
@@ -821,7 +821,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} -> {{2, 7, 8}, {5, 9,
     11}}, {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 100]
 ⌘.
 ```
-![WolframModelAbortedEvolutionObject](READMEImages/WolframModelAbortedEvolutionObject.png)
+<img src="READMEImages/WolframModelAbortedEvolutionObject.png" width="565">
 
 #### GenerationsCount, TotalGenerationsCount, PartialGenerationsCount, CompleteGenerationsCount (aka MaxCompleteGeneration), GenerationComplete
 
@@ -837,7 +837,7 @@ Out[] = 5
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
   "MaxEvents" -> 42|>, "EventOrderingFunction" -> "Random"]
 ```
-![WolframModelPartialGenerationsCountRandomObject](READMEImages/WolframModelPartialGenerationsCountRandomObject.png)
+<img src="READMEImages/WolframModelPartialGenerationsCountRandomObject.png" width="507">
 
 Note, in this case, only 2 generations are complete, and 7 are partial. That happens because the states grow with each generation, so it becomes more likely for a random choice to pick an edge from a later generation, thus earlier ones are left unevolved.
 
@@ -972,13 +972,13 @@ In case partial generations were generated, they can be automatically dropped by
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
   "MaxEvents" -> 42|>]
 ```
-![WolframModelEvolutionObjectWithPartialGenerations](READMEImages/WolframModelEvolutionObjectWithPartialGenerations.png)
+<img src="READMEImages/WolframModelEvolutionObjectWithPartialGenerations.png" width="508">
 with
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, <|
   "MaxEvents" -> 42|>, "IncludePartialGenerations" -> False]
 ```
-![WolframModelEvolutionObjectWithPartialGenerationsDropped](READMEImages/WolframModelEvolutionObjectWithPartialGenerationsDropped.png)
+<img src="READMEImages/WolframModelEvolutionObjectWithPartialGenerationsDropped.png" width="488">
 
 One neat use of this is producing a uniformly random evolution for a complete number of generations:
 ```
@@ -988,7 +988,7 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{6, 6, 3}, {2, 6, 2}, {6, 4,
  "EventOrderingFunction" -> "Random",
  "IncludePartialGenerations" -> False]
 ```
-![WolframModelCompleteUniformRandomEvolutionPlot](READMEImages/WolframModelCompleteUniformRandomEvolutionPlot.png)
+<img src="READMEImages/WolframModelCompleteUniformRandomEvolutionPlot.png" width="478">
 
 #### IncludeBoundaryEvents
 
@@ -1009,7 +1009,7 @@ In[] := With[{evolution =
        Last /@ evolution["AllEventsList",
          "IncludeBoundaryEvents" -> All], {2}]]]]]
 ```
-![WolframModelIncludeBoundaryEventsCausalGraph](READMEImages/WolframModelIncludeBoundaryEventsCausalGraph.png)
+<img src="READMEImages/WolframModelIncludeBoundaryEventsCausalGraph.png" width="478">
 
 Properties like `"AllEventsList"` are affected as well:
 ```
@@ -1036,16 +1036,18 @@ C++ implementation is used by default for supported systems, and is particularly
 
 It should not be used, however, if vertex degrees can grow large. For example
 ```
-In[] := WolframModel[{{{0}} -> {{0}, {0}, {0}}, {{0}, {0}, {0}} -> {{0}}}, \
-{{0}}, <|"MaxEvents" -> 30|>, Method -> "LowLevel"]
+In[] := AbsoluteTiming[
+ WolframModel[{{{0}} -> {{0}, {0}, {0}}, {{0}, {0}, {0}} -> {{0}}}, \
+{{0}}, <|"MaxEvents" -> 30|>, Method -> "LowLevel"]]
 ```
-![WolframModelSlowLowLevelObject](READMEImages/WolframModelSlowLowLevelObject.png)
+<img src="READMEImages/WolframModelSlowLowLevelObject.png" width="609">
 takes almost 10 seconds in C++ implementation, and less than 1/10th of a second in the Wolfram Language implementation:
 ```
-In[] := WolframModel[{{{0}} -> {{0}, {0}, {0}}, {{0}, {0}, {0}} -> {{0}}}, \
-{{0}}, <|"MaxEvents" -> 30|>, Method -> "Symbolic"]
+In[] := AbsoluteTiming[
+ WolframModel[{{{0}} -> {{0}, {0}, {0}}, {{0}, {0}, {0}} -> {{0}}}, \
+{{0}}, <|"MaxEvents" -> 30|>, Method -> "Symbolic"]]
 ```
-![WolframModelFastSymbolicObject](READMEImages/WolframModelFastSymbolicObject.png)
+<img src="READMEImages/WolframModelFastSymbolicObject.png" width="617">
 
 On the other hand, Wolfram Language implementation should be used if:
 * A large number of small rules with unknown behavior needs to be simulated for a small number of steps.
@@ -1058,7 +1060,7 @@ On the other hand, Wolfram Language implementation should be used if:
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1,
    1}}, \[Infinity], TimeConstraint -> 1]
 ```
-![WolframModelTimeConstrainedEvolutionObject](READMEImages/WolframModelTimeConstrainedEvolutionObject.png)
+<img src="READMEImages/WolframModelTimeConstrainedEvolutionObject.png" width="565">
 
 #### EventOrderingFunction
 
@@ -1067,14 +1069,14 @@ In many `WolframModel` systems multiple matches are possible at any given step. 
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 2}, {2, 2}}, <|
   "MaxEvents" -> 1|>, "EventsStatesPlotsList"]
 ```
-![WolframModelNonoverlappingEventOrderingOldest](READMEImages/WolframModelNonoverlappingEventOrderingOldest.png)
+<img src="READMEImages/WolframModelNonoverlappingEventOrderingOldest.png" width="513">
 
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 2}, {2, 2}}, <|
   "MaxEvents" -> 1|>, "EventsStatesPlotsList",
  "EventOrderingFunction" -> "NewestEdge"]
 ```
-![WolframModelNonoverlappingEventOrderingNewest](READMEImages/WolframModelNonoverlappingEventOrderingNewest.png)
+<img src="READMEImages/WolframModelNonoverlappingEventOrderingNewest.png" width="513">
 
 In this particular, the so-called non-overlapping system, the order of replacements does not matter, as regardless of order the same final state (upto the renaming of vertices) will be produced for the same fixed number of generations. This will always be the case if there is only a single edge on the left-hand side of the rule:
 ```
@@ -1082,21 +1084,21 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 2}, {2, 2}},
    3, "FinalStatePlot", "EventOrderingFunction" -> #] & /@ {Automatic,
    "Random"}
 ```
-![WolframModelNonoverlappingRandom](READMEImages/WolframModelNonoverlappingRandom.png)
+<img src="READMEImages/WolframModelNonoverlappingRandom.png" width="513">
 
 For some systems, however, the order of replacements does matter, and non-equivalent final states would be produced for different orders even if a fixed number of generations is requested:
 ```
 In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3,
     4}}, {{1, 2}, {2, 3}, {3, 4}, {4, 1}}, 5, "FinalStatePlot"]
 ```
-![WolframModelOverlappingLeastRecent](READMEImages/WolframModelOverlappingLeastRecent.png)
+<img src="READMEImages/WolframModelOverlappingLeastRecent.png" width="478">
 
 ```
 In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3,
     4}}, {{1, 2}, {2, 3}, {3, 4}, {4, 1}}, 5, "FinalStatePlot",
  "EventOrderingFunction" -> "RuleOrdering"]
 ```
-![WolframModelOverlappingRuleOrdering](READMEImages/WolframModelOverlappingRuleOrdering.png)
+<img src="READMEImages/WolframModelOverlappingRuleOrdering.png" width="478">
 
 In case like that it is important to be able to specify the desired evolution order, which is what `"EventOrderingFunction"` option is for. `"EventOrderingFunction"` is specified as a list of sorting criteria such as the default `{"LeastRecentEdge", "RuleOrdering", "RuleIndex"}`. Note that most individual sorting criteria are insufficient to distinguish between all available matches. If multiple matches remain after exchausting all sorting criteria, one will be chosen uniformly at random (which is why `{}` works as a shorthand for `"Random"`).
 
@@ -1152,7 +1154,7 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
   "LeastRecentEdge", "NewestEdge", "RuleOrdering",
   "ReverseRuleOrdering", "RuleIndex", "ReverseRuleIndex", "Random"}
 ```
-![WolframModelAllEventOrderingFunctions](READMEImages/WolframModelAllEventOrderingFunctions.png)
+<img src="READMEImages/WolframModelAllEventOrderingFunctions.png" width="746">
 
 ## WolframModelPlot (aka HypergraphPlot)
 
