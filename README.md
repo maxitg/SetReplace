@@ -32,7 +32,7 @@ Out[] = {3, 8, 6}
 
 ## Relations between Set Elements
 
-A more interesting case (and the only one we have studied in any reasonable detail) is one where the set elements are related to each other. Specifically, we can consider a set of ordered lists of atomic vertices, in other words an ordered hypergraph.
+A more interesting case (and the only one we have studied in any reasonable detail) is one where the set elements are related to each other. Specifically, we can consider a set of ordered lists of atomic vertices; in other words, an ordered hypergraph.
 
 As an example consider a set:
 
@@ -114,7 +114,7 @@ To build:
 
 3. Run `./install.wls` to install the paclet into your Wolfram system.
 4. Evaluate `PacletDataRebuild[]` in all running Wolfram kernels.
-5. Evaluate ``<< SetReplace` `` every time prior to using the package.
+5. Evaluate ``<< SetReplace` `` every time before using the package.
 
 A less frequently updated version is available through the Wolfram public paclet server and can be installed with `PacletInstall["SetReplace"]`.
 
@@ -201,7 +201,7 @@ This is the type of rule we study the most, and it satisfies the following set o
 * The name of the vertex is only used to identify it, it does not contain any additional information. In particular, there are no conditions on the left-hand side of the rule (neither on the entire subset nor on individual vertices or edges), except for the implicit condition of the same vertices appearing in multiple edges.
 * The output may contain new vertices (the ones that don't appear on the left-hand side), in which case [`Module`](https://reference.wolfram.com/language/ref/Module.html) is used to create them.
 
-`ToPatternRules` provides a simpler way to specify such rules by automatically assuming that all level-2 expressions on the left-hand side are patterns, and vertices used on the right that don't appear on the left are new and should be created with a [`Module`](https://reference.wolfram.com/language/ref/Module.html). For example, the rule above can simply be written as
+`ToPatternRules` provides a more straightforward way to specify such rules by automatically assuming that all level-2 expressions on the left-hand side are patterns, and vertices used on the right that don't appear on the left are new and should be created with a [`Module`](https://reference.wolfram.com/language/ref/Module.html). For example, the rule above can simply be written as
 
 ```
 In[] := ToPatternRules[{{v1, v2, v3}, {v2, v4, v5}} ->
@@ -234,7 +234,7 @@ Out[] = {{{v1_, v2_}} :> Module[{v3}, {{v1, v2}, {v2, v3}}],
 
 [Rule Specification](#rule-specification) | [Automatic Initial State](#automatic-initial-state) | [Step Limiters](#step-limiters) | [Properties](#properties) | [Options](#options)
 
-**`WolframModel`** is the primary function of the package, it provides tools for the generation and analysis of set substitution systems. It can compute many different properties of the evolution and has many different options, which we describe in the corresponding subsections.
+**`WolframModel`** is the primary function of the package. It provides tools for the generation and analysis of set substitution systems. It can compute many different properties of the evolution and has many different options, which we describe in the corresponding subsections.
 
 The most basic way to call it is
 
@@ -306,7 +306,7 @@ Each edge in `"AtomLists"` has properties which are stored in other lists of the
 * `"Rules"` is an exact copy of the `WolframModel` argument.
 * `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions of this or earlier generations. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](#step-limiters) is used.
 * `"TerminationReason"` shows the reason evaluation was stopped. See the [`"TerminationReason"`](#termination-reason) property for more details.
-* Finally, `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case as this example only has one rule. See [Rule Indices for Events](#rule-indices-for-events) for a more interesting case.
+* Finally, `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example only has one rule. See [Rule Indices for Events](#rule-indices-for-events) for a more interesting case.
 
 A specific property can be requested from an evolution object in a similar way as a property for an [`Entity`](https://reference.wolfram.com/language/ref/Entity.html):
 
@@ -776,7 +776,7 @@ Here 0 refers to the initial state, and [`Infinity`](https://reference.wolfram.c
 
 #### Causal Graphs
 
-An event **A** *causes* an event **B** if there exists a set element that was created by **A** and destroyed by **B**. If we then consider all such relationships between events, we create a **`"CausalGraph"`**. In a causal graph, vertices correspond to events, and edges correspond to the set elements (aka spatial edges).
+An event **A** *causes* an event **B** if there exists a set element created by **A** and destroyed by **B**. If we then consider all such relationships between events, we create a **`"CausalGraph"`**. In a causal graph, vertices correspond to events, and edges correspond to the set elements (aka spatial edges).
 
 For example, if we consider our simple arithmetic model `{a_, b_} :> a + b` starting from `{3, 8, 8, 8, 2, 10, 0, 9, 7}` we get a causal graph which quite clearly describes what's going on (we label each event here with explicit values for a and b):
 
@@ -850,7 +850,7 @@ Out[] = {{3, 8, 8, 8, 2, 10, 0, 9, 7}, {7, 11, 16, 12, 9}, {9, 18, 28}, {28,
   27}, {55}}
 ```
 
-`"CausalGraph"` property accepts the same options as [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html).
+`"CausalGraph"` property accepts the same options as [`Graph`](https://reference.wolfram.com/language/ref/Graph.html), as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html).
 
 #### Rule Indices for Events
 
@@ -1050,7 +1050,7 @@ In[] := WolframModel[<|
 Out[] = {{2}, {0}, {{3, -1}}}
 ```
 
-This state has 3 vertices (distinct level-2 expressions): `2`, `0`, and `{3, -1}`, but 4 atoms: `2`, `0`, `3`, and `-1`. This distinction does not usually come up in our models since vertices and atoms are usually the same thing, but it is significant in exotic cases like this.
+This state has 3 vertices (distinct level-2 expressions): `2`, `0`, and `{3, -1}`, but 4 atoms: `2`, `0`, `3`, and `-1`. This distinction does not usually come up in our models since vertices and atoms are usually the same things, but it is significant in exotic cases like this.
 
 #### Total Element Counts
 
@@ -1107,7 +1107,7 @@ Out[] = {{{1, 1}}, {{1, 2}, {1, 2}, {2, 1}}, {{1, 3}, {1, 3}, {3, 2}, {1,
    4}, {1, 4}, {4, 2}, {2, 5}, {2, 5}, {5, 1}}}
 ```
 
-[`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html) only renames newly created vertices with non-previouslly-used integers, and leaves the initial condition as-is. It does nothing in the case of [pattern rules](#pattern-rules).
+[`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html) only renames newly created vertices with non-previously-used integers, and leaves the initial condition as-is. It does nothing in the case of [pattern rules](#pattern-rules).
 
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
@@ -1299,7 +1299,7 @@ Possible sorting criteria are:
     Out[] = {{{1, {1, 4} -> {}}}, {{1, {2, 3} -> {}}}}
     ```
 
-    Note that in this example `"OldestEdge"` has selected the first and the last edge, whereas `"LeastRecentEdge"`, in an attempt to avoid the most "recent" last edge, has select the second and the third ones. In this case, similarly to `"OldestEdge"`, a fixed set of edges is guaranteed to be chosen, but potentially in multiple orders.
+    Note that in this example, `"OldestEdge"` has selected the first and the last edge, whereas `"LeastRecentEdge"`, in an attempt to avoid the most "recent" last edge, has select the second and the third ones. In this case, similarly to `"OldestEdge"`, a fixed set of edges is guaranteed to be chosen, but potentially in multiple orders.
 
 * `"LeastOldEdge"`: similar to `"LeastRecentEdge"`, but avoids old edges instead of new ones.
 
@@ -1467,7 +1467,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
 
 <img src="READMEImages/WolframModelPlotCoordinates.png" width="478">
 
-Unfortunately due to limitations of [`GraphEmbedding`](https://reference.wolfram.com/language/ref/GraphEmbedding.html), specifying coordinates of two or more vertices breaks the scaling of distances. As a result, vertices and arrowheads might appear too small or too large, and will need to be manually adjusted. This might also affect [`RulePlot`](#ruleplot-of-wolframmodel) in some cases.
+Unfortunately, due to limitations of [`GraphEmbedding`](https://reference.wolfram.com/language/ref/GraphEmbedding.html), specifying coordinates of two or more vertices breaks the scaling of distances. As a result, vertices and arrowheads might appear too small or too large and need to be manually adjusted. This might also affect [`RulePlot`](#ruleplot-of-wolframmodel) in some cases.
 
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
@@ -1821,7 +1821,7 @@ In[] := WolframPhysicsProjectStyleData["SpatialGraph", "EdgePolygonStyle"]
 
 <img src="READMEImages/SpatialGraphEdgePolygonStyle.png" width="437">
 
-The full specification is `WolframPhysicsProjectStyleData[theme, plot type, style element]`, however either the last, or the last two elements can be ommited to obtain a full [`Association`](https://reference.wolfram.com/language/ref/Association.html) of styles. The `theme` argument can be omitted to get the result for the default plot theme (only `"Light"` theme is supported at the moment). Here are all styles used in [`"CausalGraph"`](#causal-graphs) for example:
+The full specification is `WolframPhysicsProjectStyleData[theme, plot type, style element]`, however either the last or the last two elements can be omitted to obtain a full [`Association`](https://reference.wolfram.com/language/ref/Association.html) of styles. The `theme` argument can be omitted to get the result for the default plot theme (only `"Light"` theme is supported at the moment). Here are all styles used in [`"CausalGraph"`](#causal-graphs) for example:
 
 ```
 In[] := WolframPhysicsProjectStyleData["CausalGraph"]
