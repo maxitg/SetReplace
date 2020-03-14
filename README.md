@@ -47,7 +47,7 @@ In[] := HypergraphPlot[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
-<img src="READMEImages/basicHypergraph.png" width="478">
+<img src="READMEImages/BasicHypergraphPlot.png" width="478">
 
 We can then have a rule which would pick a subset of these hyperedges related through common vertices (much like a join query) and replace them with something else:
 
@@ -65,7 +65,7 @@ In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
-<img src="READMEImages/basicRuleOneStep.png" width="478">
+<img src="READMEImages/EvolutionResult1Step.png" width="478">
 
 After 10 steps, we get a more complicated structure:
 
@@ -76,7 +76,7 @@ In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
-<img src="READMEImages/basicRuleTenSteps.png" width="478">
+<img src="READMEImages/EvolutionResult10Steps.png" width="478">
 
 And after 100 steps, it gets even more elaborate:
 
@@ -86,7 +86,7 @@ In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 100]]
 ```
 
-<img src="READMEImages/basicRuleHundredSteps.png" width="478">
+<img src="READMEImages/EvolutionResult100Steps.png" width="478">
 
 Exploring the hypergraph models of this variety is the primary purpose of this package.
 
@@ -244,7 +244,7 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
  {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 10]
 ```
 
-<img src="READMEImages/WolframModelBasicEvolution10.png" width="493">
+<img src="READMEImages/EvolutionObject10Steps.png" width="493">
 
 Note that this call is different from the [`SetReplace`](#setreplace) function in a variety of ways:
 
@@ -261,11 +261,11 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
  {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 3]
 ```
 
-<img src="READMEImages/WolframModelBasicEvolution3.png" width="487">
+<img src="READMEImages/EvolutionObject3Steps.png" width="487">
 
 One can easily see its internal structure in its [`InputForm`](https://reference.wolfram.com/language/ref/InputForm.html):
 
-<img src="READMEImages/WolframModelBasicEvolution3InputForm.png" width="594">
+<img src="READMEImages/InputFormOfEvolutionObject.png" width="594">
 
 ```
 Out[] = WolframModelEvolutionObject[<|
@@ -289,7 +289,7 @@ Out[] = WolframModelEvolutionObject[<|
 
 The most important part of this [`Association`](https://reference.wolfram.com/language/ref/Association.html) is `"AtomLists"` which includes all set elements (aka expressions or edges) ever created throughout history. Note, this does not correspond to any particular step, rather all steps are combined. They are not just catenated states either, as if a particular edge was never used as an input for any replacement in a particular generation, it would not be duplicated in that list. As an example, compare it to [`"StatesList"`](#states) and observe that a catenated [`"StatesList"`](#states) would contain more elements than `"AtomLists"`:
 
-<img src="READMEImages/WolframModelBasicEvolution3StatesList.png" width="613">
+<img src="READMEImages/StatesListOfEvolutionObject.png" width="613">
 
 ```
 Out[] = {{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, {{4, 6, 7}, {5, 8, 1}, {8, 4,
@@ -310,7 +310,7 @@ Each edge in `"AtomLists"` has properties which are stored in other lists of the
 
 A specific property can be requested from an evolution object in a similar way as a property for an [`Entity`](https://reference.wolfram.com/language/ref/Entity.html):
 
-<img src="READMEImages/WolframModelBasicEvolution10EventsCount.png" width="629">
+<img src="READMEImages/EventsCountOfEvolutionObject.png" width="629">
 
 ```
 Out[] = 109
@@ -318,7 +318,7 @@ Out[] = 109
 
 List of [all available properties](#properties) can be obtained with the `"Properties"` property:
 
-<img src="READMEImages/WolframModelBasicEvolution10Properties.png" width="619">
+<img src="READMEImages/PropertiesOfEvolutionObject.png" width="619">
 
 ```
 Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList",
@@ -340,7 +340,7 @@ Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList",
 
 Some properties take additional arguments, which can be supplied after the property name:
 
-<img src="READMEImages/WolframModelBasicEvolution10StateAfterEvent7.png" width="691">
+<img src="READMEImages/StateAfterEventOfEvolutionObject.png" width="691">
 
 ```
 Out[] = {{8, 1, 3}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}, {2, 13, 11}, {13, 7,
@@ -349,7 +349,7 @@ Out[] = {{8, 1, 3}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}, {2, 13, 11}, {13, 7,
 
 A particular generation can be extracted simply by its number (including, i.e., -1 for the final state):
 
-<img src="READMEImages/WolframModelBasicEvolution10Generation3.png" width="516">
+<img src="READMEImages/GenerationOfEvolutionObject.png" width="516">
 
 ```
 Out[] = {{6, 7, 2}, {8, 1, 3}, {4, 11, 7}, {11, 6, 9}, {6, 4, 8}, {5, 12,
@@ -411,11 +411,11 @@ In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}},
   {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}, {{1, 1, 1}}, 4]
 ```
 
-<img src="READMEImages/WolframModelMultipleRulesObject.png" width="488">
+<img src="READMEImages/EvolutionObjectFromMultipleRules.png" width="488">
 
 To see which rules were used for each replacement:
 
-<img src="READMEImages/WolframModelMultipleRulesObjectAllEventsRuleIndices.png" width="708">
+<img src="READMEImages/AllEventsRuleIndicesOfEvolutionObject.png" width="708">
 
 ```
 Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
@@ -464,7 +464,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
    3}}, 6, "FinalStatePlot"]
 ```
 
-<img src="READMEImages/WolframModelFixedGenerationsFinalStatePlot.png" width="478">
+<img src="READMEImages/MaxGenerationsFinalStatePlot.png" width="478">
 
 Alternatively, an [`Association`](https://reference.wolfram.com/language/ref/Association.html) can be used to specify a more elaborate limiting condition:
 
@@ -477,7 +477,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
  <|"MaxVertices" -> 300, "MaxEvents" -> 200|>, "FinalStatePlot"]
 ```
 
-<img src="READMEImages/WolframModelMaxVerticesFinalStatePlot.png" width="478">
+<img src="READMEImages/MaxVerticesFinalStatePlot.png" width="478">
 
 Note that the final state here is "less symmetric" because its last generation is incomplete (more on that [later](#hypergraphautomorphismgroup)). Such incomplete generations can be automatically trimmed by setting [`"IncludePartialGenerations" -> False`](#includepartialgenerations).
 
@@ -492,7 +492,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
  <|"MaxVertices" -> 300, "MaxEvents" -> 200|>]
 ```
 
-<img src="READMEImages/WolframModelMaxVerticesEvolution.png" width="753">
+<img src="READMEImages/MaxVerticesEvolutionObject.png" width="753">
 
 All possible keys in that association are:
 
@@ -523,7 +523,7 @@ In[] := WolframModelPlot @ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "FinalState"]
 ```
 
-<img src="READMEImages/WolframModelPropertiesFinalState.png" width="478">
+<img src="READMEImages/FinalStatePlot.png" width="478">
 
 **`"StatesList"`** yields the list of states at each generation:
 
@@ -534,7 +534,7 @@ In[] := WolframModelPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "StatesList"]
 ```
 
-<img src="READMEImages/WolframModelPropertiesStatesList.png" width="746">
+<img src="READMEImages/StatesListPlot.png" width="746">
 
 This is identical to using the **`"Generation"`** property mapped over all generations:
 
@@ -546,7 +546,7 @@ In[] := WolframModelPlot /@ (WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
      "Generation", #] &) /@ Range[0, 6]
 ```
 
-<img src="READMEImages/WolframModelPropertiesStatesList.png" width="746">
+<img src="READMEImages/StatesListPlot.png" width="746">
 
 In fact `"Generation"` property can be omitted and the index of the generation can be used directly:
 
@@ -557,7 +557,7 @@ In[] := WolframModelPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
    {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6] /@ Range[0, 6]
 ```
 
-<img src="READMEImages/WolframModelPropertiesStatesList.png" width="746">
+<img src="READMEImages/StatesListPlot.png" width="746">
 
 `"StatesList"` shows a compressed version of the evolution. To see how state changes with each applied replacement, use **`"AllEventsStatesList"`**:
 
@@ -569,7 +569,7 @@ In[] := WolframModelPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   "AllEventsStatesList"]
 ```
 
-<img src="READMEImages/WolframModelPropertiesAllEventsStatesList.png" width="746">
+<img src="READMEImages/AllEventsStatesListPlot.png" width="746">
 
 Finally, to see a state after a specific event, use **`"StateAfterEvent"`** (aka `"SetAfterEvent"`):
 
@@ -581,7 +581,7 @@ In[] := WolframModelPlot @ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   "StateAfterEvent", 42]
 ```
 
-<img src="READMEImages/WolframModelPropertiesStateAfterEvent.png" width="478">
+<img src="READMEImages/StateAfterEventPlot.png" width="478">
 
 `"StateAfterEvent"` is equivalent to taking a corresponding part in `"AllEventsStatesList"`, but it is much faster to compute than the entire list.
 
@@ -596,7 +596,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "FinalStatePlot"]
 ```
 
-<img src="READMEImages/WolframModelPropertiesFinalState.png" width="478">
+<img src="READMEImages/FinalStatePlot.png" width="478">
 
 ```
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
@@ -605,7 +605,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "StatesPlotsList"]
 ```
 
-<img src="READMEImages/WolframModelPropertiesStatesList.png" width="746">
+<img src="READMEImages/StatesListPlot.png" width="746">
 
 These properties take the same options as [`WolframModelPlot`](#wolframmodelplot):
 
@@ -617,7 +617,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   VertexLabels -> Automatic]
 ```
 
-<img src="READMEImages/WolframModelPropertiesFinalStatePlotVertexLabels.png" width="478">
+<img src="READMEImages/FinalStatePlotWithVertexLabels.png" width="478">
 
 #### Plots of Events
 
@@ -631,7 +631,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  3, "EventsStatesPlotsList"]
 ```
 
-<img src="READMEImages/WolframModelPropertiesEventsStatesPlotsList.png" width="746">
+<img src="READMEImages/EventsStatesPlotsList.png" width="746">
 
 Here the dotted gray edges are the ones about to be deleted, whereas the red ones have just been created.
 
@@ -686,7 +686,7 @@ In[] := WolframModelPlot /@ With[{
    evolution["AllEventsStatesEdgeIndicesList"]]
 ```
 
-<img src="READMEImages/WolframModelPropertiesAllEventsStatesList.png" width="746">
+<img src="READMEImages/AllEventsStatesListPlot.png" width="746">
 
 However, this representation is useful if one needs to distinguish between identical edges.
 
@@ -792,7 +792,7 @@ In[] := With[{
        Last /@ evolution["AllEventsList"], {2}]]]]]
 ```
 
-<img src="READMEImages/WolframModelPropertiesArithmeticCausalGraph.png" width="478">
+<img src="READMEImages/ArithmeticModelCausalGraph.png" width="478">
 
 Here is an example for a hypergraph model (admittedly considerably harder to understand). Multiedges correspond to situations where multiple set elements were both created and destroyed by the same pair of events:
 
@@ -803,7 +803,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 20, "CausalGraph"]
 ```
 
-<img src="READMEImages/WolframModelPropertiesHypergraphModelCausalGraph.png" width="478">
+<img src="READMEImages/HypergraphModelCausalGraph.png" width="478">
 
 **`"LayeredCausalGraph"`** generates the same graph but layers events generation-by-generation. For example, in our arithmetic causal graph, note how it's arranged differently from an example above:
 
@@ -819,7 +819,7 @@ In[] := With[{
        Last /@ evolution["AllEventsList"], {2}]]]]]
 ```
 
-<img src="READMEImages/WolframModelPropertiesArithmeticLayeredCausalGraph.png" width="478">
+<img src="READMEImages/ArithmeticModelLayeredCausalGraph.png" width="478">
 
 Furthermore, if we include the initial condition as a "fake" event (see [`"IncludeBoundaryEvents"`](#includeboundaryevents) option for more information), note how slices through the causal graph correspond to states returned by [`"StatesList"`](#states):
 
@@ -841,7 +841,7 @@ In[] := With[{
      Table[Line[{{-10, k}, {10, k}}], {k, 0.5, 4.5}]}]]]
 ```
 
-<img src="READMEImages/WolframModelPropertiesArithmeticLayeredCausalGraphFoliated.png" width="478">
+<img src="READMEImages/FoliatedCausalGraph.png" width="478">
 
 ```
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
@@ -878,7 +878,7 @@ In[] := With[{
         2 -> White}, {1}]], VertexSize -> Medium]]]
 ```
 
-<img src="READMEImages/WolframModelPropertiesCausalGraphColoring.png" width="478">
+<img src="READMEImages/ColoredCausalGraph.png" width="478">
 
 #### Edge and Event Generations
 
@@ -908,7 +908,7 @@ In[] := With[{
     g_ :> ColorData["Rainbow"][g/5], {2}]}]]
 ```
 
-<img src="READMEImages/WolframModelPropertiesEdgeGenerationsListColoring.png" width="746">
+<img src="READMEImages/GenerationColoredStatePlots.png" width="746">
 
 Event generations correspond to layers in [`"LayeredCausalGraph"`](#causal-graphs):
 
@@ -925,7 +925,7 @@ In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
  {{1, 1}, {1, 1}, {1, 1}}, 5, "LayeredCausalGraph"]
 ```
 
-<img src="READMEImages/WolframModelPropertiesAllEventsGenerationsListCausalGraph.png" width="218">
+<img src="READMEImages/HypergraphModelLayeredCausalGraph.png" width="218">
 
 #### Termination Reason
 
@@ -956,7 +956,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 ⌘.
 ```
 
-<img src="READMEImages/WolframModelAbortedEvolutionObject.png" width="760">
+<img src="READMEImages/AbortedEvolutionObject.png" width="760">
 
 #### Generation Counts
 
@@ -975,7 +975,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}},
  <|"MaxEvents" -> 42|>, "EventOrderingFunction" -> "Random"]
 ```
 
-<img src="READMEImages/WolframModelPartialGenerationsCountRandomObject.png" width="507">
+<img src="READMEImages/RandomEvolutionObject.png" width="507">
 
 Note, in this case, only one generation is complete, and 7 are partial. That happens because the states grow with each generation, so it becomes more likely for a random choice to pick an edge from a later generation. Thus earlier ones are left unevolved.
 
@@ -1125,7 +1125,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
  {{1, 1}}, <|"MaxEvents" -> 42|>]
 ```
 
-<img src="READMEImages/WolframModelEvolutionObjectWithPartialGenerations.png" width="508">
+<img src="READMEImages/EvolutionObjectWithPartialGenerations.png" width="508">
 
 with
 
@@ -1135,7 +1135,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
  "IncludePartialGenerations" -> False]
 ```
 
-<img src="READMEImages/WolframModelEvolutionObjectWithPartialGenerationsDropped.png" width="488">
+<img src="READMEImages/EvolutionObjectWithDroppedGenerations.png" width="488">
 
 One neat use of this is producing a uniformly random evolution for a complete number of generations:
 
@@ -1147,7 +1147,7 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
  "IncludePartialGenerations" -> False]
 ```
 
-<img src="READMEImages/WolframModelCompleteUniformRandomEvolutionPlot.png" width="478">
+<img src="READMEImages/RandomEvolutionPlotWithDroppedGenerations.png" width="478">
 
 #### "IncludeBoundaryEvents"
 
@@ -1170,7 +1170,7 @@ In[] := With[{
          "IncludeBoundaryEvents" -> All], {2}]]]]]
 ```
 
-<img src="READMEImages/WolframModelIncludeBoundaryEventsCausalGraph.png" width="478">
+<img src="READMEImages/CausalGraphWithFinalEvent.png" width="478">
 
 Properties like [`"AllEventsList"`](#events) are affected as well:
 
@@ -1206,7 +1206,7 @@ In[] := AbsoluteTiming[
   {{0}}, <|"MaxEvents" -> 30|>, Method -> "LowLevel"]]
 ```
 
-<img src="READMEImages/WolframModelSlowLowLevelObject.png" width="609">
+<img src="READMEImages/SlowLowLevelTiming.png" width="609">
 
 takes almost 10 seconds in C++ implementation, and less than 1/10th of a second in the Wolfram Language implementation:
 
@@ -1216,7 +1216,7 @@ In[] := AbsoluteTiming[
   {{0}}, <|"MaxEvents" -> 30|>, Method -> "Symbolic"]]
 ```
 
-<img src="READMEImages/WolframModelFastSymbolicObject.png" width="617">
+<img src="READMEImages/FastSymbolicTiming.png" width="617">
 
 Wolfram Language implementation should be used if:
 
@@ -1232,7 +1232,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
  {{1, 1}}, Infinity, TimeConstraint -> 1]
 ```
 
-<img src="READMEImages/WolframModelTimeConstrainedEvolutionObject.png" width="565">
+<img src="READMEImages/TimeConstrainedEvolutionObject.png" width="565">
 
 #### "EventOrderingFunction"
 
@@ -1243,7 +1243,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
  {{1, 2}, {2, 2}}, <|"MaxEvents" -> 1|>, "EventsStatesPlotsList"]
 ```
 
-<img src="READMEImages/WolframModelNonoverlappingEventOrderingOldest.png" width="513">
+<img src="READMEImages/NonoverlappingEvolutionWithAutomaticOrdering.png" width="513">
 
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
@@ -1251,7 +1251,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
  "EventOrderingFunction" -> "NewestEdge"]
 ```
 
-<img src="READMEImages/WolframModelNonoverlappingEventOrderingNewest.png" width="513">
+<img src="READMEImages/NonoverlappingEvolutionWithNewestEdgeOrdering.png" width="513">
 
 In this particular, so-called non-overlapping, system the order of replacements does not matter, as regardless of order the same final state (upto renaming of vertices) is produced for the same fixed number of generations. This will always be the case if there is only a single edge on the left-hand side of the rule:
 
@@ -1261,7 +1261,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
    "EventOrderingFunction" -> #] & /@ {Automatic, "Random"}
 ```
 
-<img src="READMEImages/WolframModelNonoverlappingRandom.png" width="513">
+<img src="READMEImages/NonoverlappingRandomEvolutionComparison.png" width="513">
 
 For some systems, however, the order of replacements does matter, and non-equivalent final states would be produced for different orders even if a fixed number of generations is requested:
 
@@ -1270,7 +1270,7 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3, 4}},
  {{1, 2}, {2, 3}, {3, 4}, {4, 1}}, 5, "FinalStatePlot"]
 ```
 
-<img src="READMEImages/WolframModelOverlappingLeastRecent.png" width="478">
+<img src="READMEImages/OverlappingEvolutionAutomaticOrdering.png" width="478">
 
 ```
 In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3, 4}},
@@ -1278,7 +1278,7 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3, 4}},
  "EventOrderingFunction" -> "RuleOrdering"]
 ```
 
-<img src="READMEImages/WolframModelOverlappingRuleOrdering.png" width="478">
+<img src="READMEImages/OverlappingEvolutionRuleOrderingOrdering.png" width="478">
 
 In a case like that, it is important to be able to specify the desired evolution order, which is the purpose of the **`"EventOrderingFunction"`** option. `"EventOrderingFunction"` is specified as a list of sorting criteria such as the default `{"LeastRecentEdge", "RuleOrdering", "RuleIndex"}`. Note that most individual sorting criteria are insufficient to distinguish between all available matches. If multiple matches remain after exhausting all sorting criteria, one is chosen uniformly at random (which is why `{}` works as a shorthand for `"Random"`).
 
@@ -1343,7 +1343,7 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
   "ReverseRuleOrdering", "RuleIndex", "ReverseRuleIndex", "Random"}
 ```
 
-<img src="READMEImages/WolframModelAllEventOrderingFunctions.png" width="746">
+<img src="READMEImages/AllEventOrderingFunctionPlots.png" width="746">
 
 ## WolframModelPlot
 
@@ -1355,7 +1355,7 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}]
 ```
 
-<img src="READMEImages/WolframModelPlotBasic.png" width="478">
+<img src="READMEImages/WolframModelPlot.png" width="478">
 
 Edges of any arity can be mixed, the binary edges are displayed as non-filled arrows, and the unary edges are shown as circles around the vertices:
 
@@ -1364,7 +1364,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4}, {4, 3}, {4, 5,
    6}, {1}, {6}, {6}}]
 ```
 
-<img src="READMEImages/WolframModelPlotBinaryAndUnary.png" width="478">
+<img src="READMEImages/BinaryAndUnaryEdgesPlot.png" width="478">
 
 Self-loops are shown as convex polygons around the appropriate number of circular arrows:
 
@@ -1372,7 +1372,7 @@ Self-loops are shown as convex polygons around the appropriate number of circula
 In[] := WolframModelPlot[{{1, 1, 1}, {1, 2, 3}, {3, 4, 4}}]
 ```
 
-<img src="READMEImages/WolframModelPlotSelfLoops.png" width="478">
+<img src="READMEImages/SelfLoopsPlot.png" width="478">
 
 Note the difference between a hyper-self-loop and two binary edges pointing in opposite directions:
 
@@ -1380,7 +1380,7 @@ Note the difference between a hyper-self-loop and two binary edges pointing in o
 In[] := WolframModelPlot[{{1, 2, 1}, {2, 3}, {3, 2}}]
 ```
 
-<img src="READMEImages/WolframModelPlotNonSubsequentSelfLoop.png" width="460">
+<img src="READMEImages/HyperSelfLoopDoubleBinaryEdgesComparison.png" width="460">
 
 Multiedges are shown in a darker color (because of overlayed partially transparent polygons), or as separate polygons depending on the layout (and are admittedly sometimes hard to understand):
 
@@ -1389,7 +1389,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6,
    6}}]
 ```
 
-<img src="READMEImages/WolframModelPlotMultiedges.png" width="478">
+<img src="READMEImages/MultiedgesPlot.png" width="478">
 
 `WolframModelPlot` is listable, multiple hypergraphs can be plotted at the same time:
 
@@ -1399,7 +1399,7 @@ In[] := WolframModelPlot[{{{1, 2, 3}},
   {{1, 2, 3}, {3, 4, 5}, {5, 6, 7}}}]
 ```
 
-<img src="READMEImages/WolframModelPlotMultiple.png" width="698">
+<img src="READMEImages/MultiplePlots.png" width="698">
 
 Many [`WolframModel`](#wolframmodel-and-wolframmodelevolutionobject) properties, such as [`"FinalStatePlot"`](#plots-of-states) and [`"EventStatesPlotsList"`](#plots-of-events), use `WolframModelPlot` to produce output. They accept the same set of options, as enumerated below.
 
@@ -1411,7 +1411,7 @@ By default, `WolframModelPlot` assumes the hypergraph edges are ordered. It is a
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}, "Cyclic"]
 ```
 
-<img src="READMEImages/WolframModelPlotCyclic.png" width="478">
+<img src="READMEImages/CyclicPlot.png" width="478">
 
 ### GraphHighlight and GraphHighlightStyle
 
@@ -1422,7 +1422,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, GraphHighlight -> {{1, 2, 3}, 4, {9}}]
 ```
 
-<img src="READMEImages/WolframModelPlotHighlight.png" width="478">
+<img src="READMEImages/PlotWithHighlight.png" width="478">
 
 For a hypergraph with multiedges, only the specified number of edges will be highlighted:
 
@@ -1431,7 +1431,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {1, 2, 3}, {3, 4}, {3, 4}, {3,
    4}, {4}, {4}}, GraphHighlight -> {{1, 2, 3}, {3, 4}, {3, 4}, {4}}]
 ```
 
-<img src="READMEImages/WolframModelPlotMultiedgeHighlight.png" width="478">
+<img src="READMEImages/PlotWithMultiedgeHighlight.png" width="478">
 
 The color of the highlight can be specified with **`GraphHighlightStyle`** (only colors, other style specifiers are not supported at the moment):
 
@@ -1441,7 +1441,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
  GraphHighlightStyle -> Darker @ Green]
 ```
 
-<img src="READMEImages/WolframModelPlotHighlightGreen.png" width="478">
+<img src="READMEImages/PlotWithGreenHighlight.png" width="478">
 
 ### "HyperedgeRendering"
 
@@ -1453,7 +1453,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
  VertexLabels -> Automatic]
 ```
 
-<img src="READMEImages/WolframModelPlotSubgraphs.png" width="478">
+<img src="READMEImages/SubgraphsHyperedgeRendering.png" width="478">
 
 ### VertexCoordinateRules
 
@@ -1465,7 +1465,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
  Axes -> True]
 ```
 
-<img src="READMEImages/WolframModelPlotCoordinates.png" width="478">
+<img src="READMEImages/PlotWithCustomCoordinates.png" width="478">
 
 Unfortunately, due to limitations of [`GraphEmbedding`](https://reference.wolfram.com/language/ref/GraphEmbedding.html), specifying coordinates of two or more vertices breaks the scaling of distances. As a result, vertices and arrowheads might appear too small or too large and need to be manually adjusted. This might also affect [`RulePlot`](#ruleplot-of-wolframmodel) in some cases.
 
@@ -1474,7 +1474,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
  VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}}]
 ```
 
-<img src="READMEImages/WolframModelPlotCoordinatesMessedUpScale.png" width="466">
+<img src="READMEImages/IncorrectlyScaledPlot.png" width="466">
 
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
@@ -1482,7 +1482,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
  VertexSize -> 0.03, "ArrowheadLength" -> 0.06]
 ```
 
-<img src="READMEImages/WolframModelPlotCoordinatesFixedScale.png" width="448">
+<img src="READMEImages/PlotWithCompensatedScale.png" width="448">
 
 ### VertexLabels
 
@@ -1493,7 +1493,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
  VertexLabels -> Automatic]
 ```
 
-<img src="READMEImages/WolframModelPlotVertexLabels.png" width="478">
+<img src="READMEImages/PlotWithVertexLabels.png" width="478">
 
 ### VertexSize and "ArrowheadLength"
 
@@ -1504,7 +1504,7 @@ In[] := WolframModelPlot[{{1, 2, 3, 4}, {1, 5, 6}, {2, 7, 8}, {4, 6, 9}},
  VertexSize -> 0.1, "ArrowheadLength" -> 0.3]
 ```
 
-<img src="READMEImages/WolframModelPlotElementSizes.png" width="478">
+<img src="READMEImages/PlotWithCustomElementSizes.png" width="478">
 
 Note that unlike [`GraphPlot`](https://reference.wolfram.com/language/ref/GraphPlot.html), both vertices and arrowheads have a fixed size relative to the layout (in fact, the arrowheads are drawn manually as polygons). This fixed size implies that they scale proportionally when the image is resized, and do not overlay/disappear for tiny/huge graphs or image sizes.
 
@@ -1516,7 +1516,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7}, {7, 8, 9}, {9, 10,
  VertexStyle -> Transparent]
 ```
 
-<img src="READMEImages/WolframModelPlotNoArrowsAndVertices.png" width="478">
+<img src="READMEImages/PlotWithNoArrowsAndVertices.png" width="478">
 
 As a neat example, one can even draw unordered hypergraphs:
 
@@ -1528,7 +1528,7 @@ In[] := WolframModelPlot[{{1, 2, 2}, {2, 3, 3}, {3, 1, 1}},
      EdgeForm[Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]]]]|>]
 ```
 
-<img src="READMEImages/WolframModelPlotUnordered.png" width="478">
+<img src="READMEImages/UnorderedPlot.png" width="478">
 
 ### "MaxImageSize"
 
@@ -1539,13 +1539,13 @@ In[] := WolframModelPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}},
  "MaxImageSize" -> 100]
 ```
 
-<img src="READMEImages/WolframModelPlotMaxImageSize.png" width="254">
+<img src="READMEImages/PlotWithMaxImageSize.png" width="254">
 
 ```
 In[] := WolframModelPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}}, ImageSize -> 100]
 ```
 
-<img src="READMEImages/WolframModelPlotImageSize.png" width="457">
+<img src="READMEImages/PlotWithImageSize.png" width="457">
 
 ### Style Options
 
@@ -1558,7 +1558,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, PlotStyle -> Directive[Blue, Dotted]]
 ```
 
-<img src="READMEImages/WolframModelPlotPlotStyle.png" width="478">
+<img src="READMEImages/PlotWithCustomPlotStyle.png" width="478">
 
 `VertexStyle` works similar to [`GraphPlot`](https://reference.wolfram.com/language/ref/GraphPlot.html):
 
@@ -1567,7 +1567,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, PlotStyle -> Directive[Blue, Dotted], VertexStyle -> Red]
 ```
 
-<img src="READMEImages/WolframModelPlotVertexStyle.png" width="478">
+<img src="READMEImages/PlotWithCustomVertexStyle.png" width="478">
 
 `EdgeStyle` controls edge lines, and `"EdgePolygonStyle"` inherits from it (automatically adding transparency):
 
@@ -1577,7 +1577,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
   EdgeStyle -> Darker @ Green]
 ```
 
-<img src="READMEImages/WolframModelPlotEdgeStyle.png" width="478">
+<img src="READMEImages/PlotWithCustomEdgeStyle.png" width="478">
 
 Finally, `"EdgePolygonStyle"` controls the hyperedge polygons:
 
@@ -1589,7 +1589,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
   Directive[Lighter[Green, 0.9], EdgeForm[Dotted]]]
 ```
 
-<img src="READMEImages/WolframModelPlotEdgePolygonStyle.png" width="478">
+<img src="READMEImages/PlotWithCustomEdgePolygonStyle.png" width="478">
 
 It is possible to specify styles separately for each edge and vertex. Vertex styles are specified in the same order as `Union @* Catenate` evaluated on the list of edges:
 
@@ -1599,7 +1599,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
  VertexStyle -> ColorData[98] /@ Range[9]]
 ```
 
-<img src="READMEImages/WolframModelPlotSeparateElementStyles.png" width="478">
+<img src="READMEImages/PlotWithElementwiseStyles.png" width="478">
 
 Alternatively, one can specify different styles for different patterns of elements. In this case, styles are specified as [`Association`](https://reference.wolfram.com/language/ref/Association.html)s with patterns for keys. This can be used to, for example, differently color edges of different arities:
 
@@ -1612,7 +1612,7 @@ In[] := WolframModelPlot[WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
  EdgeStyle -> <|{_, _} -> Darker @ Green, {_, _, _} -> Darker @ Red|>]
 ```
 
-<img src="READMEImages/WolframModelPlotPatternStyles.png" width="478">
+<img src="READMEImages/PlotWithAritywiseStyles.png" width="478">
 
 ### Graphics Options
 
@@ -1625,7 +1625,7 @@ In[] := WolframModelPlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
  PlotRange -> {{30, 50}, {20, 40}}, Axes -> True]
 ```
 
-<img src="READMEImages/WolframModelPlotZoomedInWithGrid.png" width="478">
+<img src="READMEImages/PlotOfHypergraphFragment.png" width="478">
 
 ## RulePlot of WolframModel
 
@@ -1636,7 +1636,7 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 2}} ->
    {{3, 2}, {3, 2}, {2, 1}, {1, 3}}]]
 ```
 
-<img src="READMEImages/RulePlotBasic.png" width="429">
+<img src="READMEImages/RulePlot.png" width="429">
 
 The shared elements between rule sides (vertices `1` and `2` in the example above) are put at the same positions in the `RulePlot` and highlighted in a darker shade of blue. Shared edges are highlighted as well:
 
@@ -1644,7 +1644,7 @@ The shared elements between rule sides (vertices `1` and `2` in the example abov
 In[] := RulePlot[WolframModel[{{1, 2, 3}} -> {{1, 2, 3}, {3, 4, 5}}]]
 ```
 
-<img src="READMEImages/RulePlotSharedEdges.png" width="429">
+<img src="READMEImages/RulePlotWithSharedEdges.png" width="429">
 
 Multiple rules can be plotted:
 
@@ -1654,7 +1654,7 @@ In[] := RulePlot[WolframModel[{{{1, 1, 2}} ->
    {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}]]
 ```
 
-<img src="READMEImages/RulePlotMultiple.png" width="808">
+<img src="READMEImages/MultipleRulesPlot.png" width="808">
 
 Sometimes an incorrectly scaled layout might be produced due to the issue discussed above in [`VertexCoordinateRules`](#vertexcoordinaterules):
 
@@ -1663,7 +1663,7 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
    {{2, 2}, {2, 2}, {2, 5}, {3, 2}}]]
 ```
 
-<img src="READMEImages/RulePlotIncorrectlyScaled.png" width="429">
+<img src="READMEImages/IncorrectlyScaledRulePlot.png" width="429">
 
 `VertexCoordinateRules` can be used in that case to specify the layout manually:
 
@@ -1674,7 +1674,7 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
    4 -> {-1, 0}, 5 -> {2, 1}}]
 ```
 
-<img src="READMEImages/RulePlotManualCoordinates.png" width="429">
+<img src="READMEImages/RulePlotWithCustomCoordinates.png" width="429">
 
 Some of the [`WolframModelPlot`](#wolframmodelplot) options are supported, specifically [`GraphHighlightStyle`](#graphhighlight-and-graphhighlightstyle), [`"HyperedgeRendering"`](#hyperedgerendering), [`VertexCoordinateRules`](#vertexcoordinaterules) and [`VertexLabels`](#vertexlabels). `"EdgeType"` is supported as an option instead of [the second argument](#edge-type) like in [`WolframModelPlot`](#wolframmodelplot).
 
@@ -1685,7 +1685,7 @@ In[] := RulePlot[WolframModel[{{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
    {{1, 2}, {1, 2}} -> {{1, 3}, {3, 2}}}], Spacings -> 0.03]
 ```
 
-<img src="READMEImages/RulePlotSmallSpacings.png" width="747">
+<img src="READMEImages/RulePlotWithSmallSpacings.png" width="747">
 
 **`"RulePartsAspectRatio"`** is used to control the aspect ratio of rule sides. As an example, it can be used to force rule parts to be square:
 
@@ -1694,7 +1694,7 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
  "RulePartsAspectRatio" -> 1]
 ```
 
-<img src="READMEImages/RulePlotSquare.png" width="429">
+<img src="READMEImages/SquareRulePlot.png" width="429">
 
 ## Utility Functions
 
@@ -1708,7 +1708,7 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
 In[] := GeneralizedGridGraph[{5 -> "Directed", 5 -> "Circular"}]
 ```
 
-<img src="READMEImages/GeneralizedGridGraphBasic.png" width="478">
+<img src="READMEImages/GridGraph.png" width="478">
 
 Possible specifiers are `"Directed"` and `"Circular"`, and they can be combined:
 
@@ -1716,7 +1716,7 @@ Possible specifiers are `"Directed"` and `"Circular"`, and they can be combined:
 In[] := GeneralizedGridGraph[{3 -> {"Directed", "Circular"}, 6}]
 ```
 
-<img src="READMEImages/GeneralizedGridGraphCombinedDirectedCircular.png" width="478">
+<img src="READMEImages/DirectedCircularGridGraph.png" width="478">
 
 Same options as [`GridGraph`](https://reference.wolfram.com/language/ref/GridGraph.html) are supported. In addition `"VertexNamingFunction" -> "Coordinates"` names vertices according to their position in a grid:
 
@@ -1725,7 +1725,7 @@ In[] := GeneralizedGridGraph[{4, 5, 2},
  "VertexNamingFunction" -> "Coordinates", VertexLabels -> Automatic]
 ```
 
-<img src="READMEImages/GeneralizedGridGraphVertexNamingFunction.png" width="478">
+<img src="READMEImages/GridGraphWithCoordinateNamedVertices.png" width="478">
 
 Finally, it's possible to use different `EdgeStyle` in different directions by specifying it as a list:
 
@@ -1735,7 +1735,7 @@ In[] := GeneralizedGridGraph[{4 -> "Directed", 5, 2},
  EdgeStyle -> Darker /@ {Red, Green, Blue}]
 ```
 
-<img src="READMEImages/GeneralizedGridGraphEdgeStyle.png" width="478">
+<img src="READMEImages/GridGraphWithDifferentEdgeStyles.png" width="478">
 
 ### HypergraphAutomorphismGroup
 
@@ -1756,7 +1756,7 @@ In[] := GroupOrder[
       8, 5}, {5, 9, 1}}]]
 ```
 
-<img src="READMEImages/HypergraphAutomorphismGroupNeatExample.png" width="451">
+<img src="READMEImages/SymmetricHypergraphPlot.png" width="451">
 
 ```
 Out[] = 24
@@ -1793,7 +1793,7 @@ In[] := WolframModelPlot[#,
  HypergraphUnifications[{{1, 2}, {2, 3}}, {{1, 2}, {2, 3}}]
 ```
 
-<img src="READMEImages/HypergraphUnificationsBasic.png" width="745">
+<img src="READMEImages/HypergraphUnificationsPlot.png" width="745">
 
 A more complicated example with edges of various arities is
 
@@ -1807,7 +1807,7 @@ In[] := WolframModelPlot[#,
      6}, {1, 4}}]
 ```
 
-<img src="READMEImages/HypergraphUnificationsMultipleArities.png" width="746">
+<img src="READMEImages/HypergraphUnificationsPlotWithMultipleArities.png" width="746">
 
 ### WolframPhysicsProjectStyleData
 
