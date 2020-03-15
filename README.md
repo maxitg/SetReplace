@@ -56,7 +56,7 @@ We can then have a rule which would pick a subset of these hyperedges related th
  Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]
 ```
 
-Note the [`Module`](https://reference.wolfram.com/language/ref/Module.html) on the right-hand side creates a new variable (vertex) which causes the hypergraph to grow. After a single replacement we get this (the new vertex is `v11`):
+Note the [`Module`](https://reference.wolfram.com/language/ref/Module.html) on the right-hand side creates a new variable (vertex) which causes the hypergraph to grow. After a single replacement we get this (the new vertex is `v11`, due to optimizations it's not always a [`Module`](https://reference.wolfram.com/language/ref/Module.html) that creates vertices, so the naming may be different):
 
 ```
 In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
@@ -198,7 +198,7 @@ This is the type of rule we study the most, and it satisfies the following set o
 
 * Both input and output subsets consist of ordered lists of atomic vertices.
 * The input (left-hand side) only contains patterns, it never refers to explicit vertex names.
-* The name of the vertex is only used to identify it, it does not contain any additional information. In particular, there are no conditions on the left-hand side of the rule (neither on the entire subset nor on individual vertices or edges), except for the implicit condition of the same vertices appearing in multiple edges.
+* The name of the vertex is only used to identify it, it does not contain any additional information. In particular, there are no conditions on the left-hand side of the rule (neither on the entire subset nor on individual vertices or edges), except for the implicit condition of the same vertices appearing multiple times.
 * The output may contain new vertices (the ones that don't appear on the left-hand side), in which case [`Module`](https://reference.wolfram.com/language/ref/Module.html) is used to create them.
 
 `ToPatternRules` provides a more straightforward way to specify such rules by automatically assuming that all level-2 expressions on the left-hand side are patterns, and vertices used on the right that don't appear on the left are new and should be created with a [`Module`](https://reference.wolfram.com/language/ref/Module.html). For example, the rule above can simply be written as
@@ -433,7 +433,7 @@ Out[] = {{1, 2, 5, 3, 6}, {5, 3, 6, 3}, {6, 3, 8}, {8, 9}, {17}}
 
 ### Automatic Initial State
 
-An initial state consistent of an appropriate number of (hyper) self-loops can be automatically produced for anonymous (non-pattern) rules. Here we evolve the system for 0 steps and ask the evolution object for the 0-th generation aka the initial state:
+An initial state consisting of an appropriate number of (hyper) self-loops can be automatically produced for anonymous (non-pattern) rules. Here we evolve the system for 0 steps and ask the evolution object for the 0-th generation aka the initial state:
 
 ```
 In[] := WolframModel[{{1, 2}, {1, 2}} -> {{3, 2}, {3, 2}, {2, 1}, {1, 3}},
@@ -607,7 +607,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 
 <img src="READMEImages/StatesListPlot.png" width="746">
 
-These properties take the same options as [`WolframModelPlot`](#wolframmodelplot):
+These properties take the same options as [`WolframModelPlot`](#wolframmodelplot) (but one has to specify them in a call to the evolution object, not `WolframModel`):
 
 ```
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
@@ -933,7 +933,7 @@ In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
 
 All possible values are:
 
-* `"MaxEvents"`, `"MaxGenerations"`, `"MaxVertices"`, `"MaxVertexDegree"` and `"MaxEdges"` correspond directly to step limiters.
+* `"MaxEvents"`, `"MaxGenerations"`, `"MaxVertices"`, `"MaxVertexDegree"` and `"MaxEdges"` correspond directly to [step limiters](#step-limiters).
 * `"FixedPoint"` means there were no more matches possible to rule inputs.
 * `"TimeConstraint"` could occur if a [`"TimeConstraint"`](#timeconstraint) option is used.
 * `"Aborted"` would occur if the evaluation was manually interrupted (i.e., by pressing ⌘. on a Mac). In that case, a partially computed evolution object is returned.
@@ -1023,7 +1023,7 @@ Out[] = {2, 4, 8, 16, 28, 54, 98, 184, 342, 648, 1244}
 
 These properties are similar to corresponding [`*List`](#element-count-lists) ones, except we don't have `"FinalVertexCount"` and instead have **`"FinalDistinctElementsCount"`** (aka `"AtomsCountFinal"`) and **`"FinalEdgeCount"`** (aka `"ExpressionsCountFinal"`) (we should have `"FinalVertexCount"` and `"FinalDistinctElementsCountList"`, but they are not currently implemented).
 
-The difference is that [`"VertexCountList"`](#element-count-lists) counts expressions of level 2 in the states whereas `"FinalDistinctElementsCount"` counts all expressions matching `_ ? AtomQ`. The difference becomes apparent for edges that contain non-trivially nested lists.
+The difference is that [`"VertexCountList"`](#element-count-lists) counts expressions on level 2 in the states whereas `"FinalDistinctElementsCount"` counts all expressions matching `_ ? AtomQ` (on any level). The difference becomes apparent for edges that contain non-trivially nested lists.
 
 For example, consider a rule that performs non-trivial nesting:
 
@@ -1299,7 +1299,7 @@ Possible sorting criteria are:
     Out[] = {{{1, {1, 4} -> {}}}, {{1, {2, 3} -> {}}}}
     ```
 
-    Note that in this example, `"OldestEdge"` has selected the first and the last edge, whereas `"LeastRecentEdge"`, in an attempt to avoid the most "recent" last edge, has select the second and the third ones. In this case, similarly to `"OldestEdge"`, a fixed set of edges is guaranteed to be chosen, but potentially in multiple orders.
+    Note that in this example `"OldestEdge"` has selected the first and the last edge, whereas `"LeastRecentEdge"`, in an attempt to avoid the most "recent" last edge, has select the second and the third ones. In this case, similarly to `"OldestEdge"`, a fixed set of edges is guaranteed to be chosen, but potentially in multiple orders.
 
 * `"LeastOldEdge"`: similar to `"LeastRecentEdge"`, but avoids old edges instead of new ones.
 
