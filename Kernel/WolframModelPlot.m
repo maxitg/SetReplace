@@ -32,7 +32,7 @@ Options[WolframModelPlot] = Join[{
 	VertexCoordinateRules -> {},
 	VertexLabels -> None,
 	VertexSize -> style[$lightTheme][$vertexSize],
-	"ArrowheadLength" -> style[$lightTheme][$arrowheadLength],
+	"ArrowheadLength" -> Automatic,
 	VertexStyle -> Automatic, (* inherits from PlotStyle *)
 	"MaxImageSize" -> Automatic},
 	Options[Graphics]];
@@ -177,8 +177,8 @@ correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	correctCoordinateRulesQ[head, OptionValue[WolframModelPlot, opts, VertexCoordinateRules]] &&
 	correctHighlightQ[OptionValue[WolframModelPlot, opts, GraphHighlight]] &&
 	correctHighlightStyleQ[head, OptionValue[WolframModelPlot, opts, GraphHighlightStyle]] &&
-	correctSizeQ[head, "Vertex size", OptionValue[WolframModelPlot, opts, VertexSize]] &&
-	correctSizeQ[head, "Arrowhead length", OptionValue[WolframModelPlot, opts, "ArrowheadLength"]] &&
+	correctSizeQ[head, "Vertex size", OptionValue[WolframModelPlot, opts, VertexSize], {}] &&
+	correctSizeQ[head, "Arrowhead length", OptionValue[WolframModelPlot, opts, "ArrowheadLength"], {Automatic}] &&
 	correctPlotStyleQ[head, OptionValue[WolframModelPlot, opts, PlotStyle]] &&
 	correctStyleLengthQ[
 		head, "vertices", MatchQ[edges, {$hypergraphPattern...}], Length[vertexList[edges]], OptionValue[WolframModelPlot, opts, VertexStyle]] &&
@@ -202,9 +202,12 @@ correctHighlightQ[highlight_] := (
 correctHighlightStyleQ[head_, highlightStyle_] :=
 	If[ColorQ[highlightStyle], True, Message[head::invalidHighlightStyle, highlightStyle]; False]
 
-correctSizeQ[head_, capitalizedName_, size_ ? (# >= 0 &)] := True
+correctSizeQ[head_, capitalizedName_, size_ ? (# >= 0 &), _] := True
 
-correctSizeQ[head_, capitalizedName_, size_] := (
+correctSizeQ[head_, capitalizedName_, size_, allowedSpecialValues_] /;
+		MatchQ[size, Alternatives @@ allowedSpecialValues] := True
+
+correctSizeQ[head_, capitalizedName_, size_, _] := (
 	Message[head::invalidSize, capitalizedName, size];
 	False
 )
@@ -244,10 +247,12 @@ wolframModelPlot[
 		vertexSize_,
 		arrowheadLength_,
 		maxImageSize_,
-		graphicsOptions_] := Catch[Module[{graphics, imageSizeScaleFactor},
-	graphics = drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, arrowheadLength] @
-		hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @
-		edges;
+		graphicsOptions_] := Catch[Module[{embedding, graphics, imageSizeScaleFactor},
+	embedding = hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @ edges;
+	numericArrowheadLength = Replace[
+		arrowheadLength, Automatic -> style[$lightTheme][$arrowheadLengthFunction][vertexEmbeddingRange[embedding[[1]]]]];
+	graphics =
+		drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, numericArrowheadLength] @ embedding;
 	imageSizeScaleFactor = Min[1, 0.7 (#[[2]] - #[[1]])] & /@ PlotRange[graphics];
 	Show[
 		graphics,
@@ -256,6 +261,10 @@ wolframModelPlot[
 			ImageSizeRaw -> style[$lightTheme][$wolframModelPlotImageSize] imageSizeScaleFactor,
 			ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]]]
 ]]
+
+vertexEmbeddingRange[{}] := 0
+
+vertexEmbeddingRange[vertexEmbedding_] := Max[#2 - #1 & @@@ MinMax /@ Transpose[vertexEmbedding[[All, 2, 1, 1]]]]
 
 adjustImageSize[w_ ? NumericQ, {wScale_, hScale_}] := w wScale
 
