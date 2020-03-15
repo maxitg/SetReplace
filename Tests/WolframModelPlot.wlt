@@ -25,7 +25,7 @@
 
       {$minArrowheadSize, $maxArrowheadSize} =
         WolframPhysicsProjectStyleData["SpatialGraph", "ArrowheadLengthFunction"][
-          <|"PlotRange" -> #|>] & /@ {0, 1.*^100}
+          <|"PlotRange" -> #|>] & /@ {0, 1.*^100};
 
       $selfLoopLength = FirstCase[
         WolframModelPlot[{{1, 1}}, "HyperedgeRendering" -> "Subgraphs"],
