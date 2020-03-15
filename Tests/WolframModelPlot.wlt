@@ -293,6 +293,11 @@
         ]
       } & /@ {VertexSize, "ArrowheadLength"},
 
+      VerificationTest[
+        Head[WolframModelPlot[#, "ArrowheadLength" -> Automatic]],
+        Graphics
+      ] & /@ {{{1, 2, 3}, {3, 4, 5}}, {{1, 1}}, {{1}}, {}},
+
       (* HypergraphPlot can still be used *)
 
       VerificationTest[
