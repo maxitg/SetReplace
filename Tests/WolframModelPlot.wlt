@@ -23,6 +23,10 @@
         {{1, 2, 3}, {3, 4, 5}, {1, 2, 3, 4}}
       };
 
+      {$minArrowheadSize, $maxArrowheadSize} =
+        WolframPhysicsProjectStyleData["SpatialGraph", "ArrowheadLengthFunction"][
+          <|"PlotRange" -> #|>] & /@ {0, 1.*^100}
+
       $selfLoopLength = FirstCase[
         WolframModelPlot[{{1, 1}}, "HyperedgeRendering" -> "Subgraphs"],
         Line[pts_] :> RegionMeasure[Line[pts]],
@@ -603,32 +607,36 @@
             {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
       ],
 
-      VerificationTest[
-        Equal @@ (
-          Mean[Cases[
-              WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs"],
-              Line[pts_] :> EuclideanDistance @@ pts,
-              All]] & /@
-            {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3, 4, 5, 1}}})
-      ],
+      With[{$minArrowheadSize = $minArrowheadSize, $maxArrowheadSize = $maxArrowheadSize},
+        VerificationTest[
+          Length[DeleteDuplicates[
+            Mean[Cases[
+                WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs"],
+                Line[pts_] :> EuclideanDistance @@ pts,
+                All]] & /@
+              {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3, 4, 5, 1}}},
+            #2 - #1 <= $maxArrowheadSize - $minArrowheadSize &]] == 1
+        ]],
 
-      VerificationTest[
-        Abs[
-              First[
-                Nearest[
-                  Cases[
-                    WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs"],
-                    Line[pts_] :> RegionMeasure[Line[pts]],
-                    All],
-                  $selfLoopLength]] -
-            $selfLoopLength] <
-          1.*^-10
-      ] & /@ {
-        {{1, 1}},
-        {{1, 2, 3}, {1, 1}},
-        {{1, 2, 3}, {3, 4, 5}, {5, 5}},
-        {{1, 2, 3}, {3, 4, 5}, {5, 6, 1, 1}},
-        {{1, 2, 3, 4, 5, 5, 1}}},
+      With[{
+          $minArrowheadSize = $minArrowheadSize, $maxArrowheadSize = $maxArrowheadSize, $selfLoopLength = $selfLoopLength},
+        VerificationTest[
+          Abs[
+                First[
+                  Nearest[
+                    Cases[
+                      WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs"],
+                      Line[pts_] :> RegionMeasure[Line[pts]],
+                      All],
+                    $selfLoopLength]] -
+              $selfLoopLength] <
+            $maxArrowheadSize - $minArrowheadSize
+        ] & /@ {
+          {{1, 1}},
+          {{1, 2, 3}, {1, 1}},
+          {{1, 2, 3}, {3, 4, 5}, {5, 5}},
+          {{1, 2, 3}, {3, 4, 5}, {5, 6, 1, 1}},
+          {{1, 2, 3, 4, 5, 5, 1}}}],
 
       (* Automatic image size *)
       VerificationTest[
