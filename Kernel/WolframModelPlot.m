@@ -250,7 +250,8 @@ wolframModelPlot[
 		graphicsOptions_] := Catch[Module[{embedding, graphics, imageSizeScaleFactor},
 	embedding = hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @ edges;
 	numericArrowheadLength = Replace[
-		arrowheadLength, Automatic -> style[$lightTheme][$arrowheadLengthFunction][vertexEmbeddingRange[embedding[[1]]]]];
+		arrowheadLength,
+		Automatic -> style[$lightTheme][$arrowheadLengthFunction][<|"PlotRange" -> vertexEmbeddingRange[embedding[[1]]]|>]];
 	graphics =
 		drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, numericArrowheadLength] @ embedding;
 	imageSizeScaleFactor = Min[1, 0.7 (#[[2]] - #[[1]])] & /@ PlotRange[graphics];

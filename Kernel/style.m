@@ -147,7 +147,7 @@ style[$lightTheme] = <|
 
   (* WolframModelPlot *)
   $vertexSize -> 0.06,
-  $arrowheadLengthFunction -> Function[plotRange, Max[0.1, Min[0.185, 0.066 + 0.017 plotRange]]],
+  $arrowheadLengthFunction -> (Max[0.1, Min[0.185, 0.066 + 0.017 #PlotRange]] &),
   $edgeArrowheadShape -> Polygon[{
     {-1.10196, -0.289756}, {-1.08585, -0.257073}, {-1.05025, -0.178048}, {-1.03171, -0.130243}, {-1.01512, -0.0824391},
     {-1.0039, -0.037561}, {-1., 0.}, {-1.0039, 0.0341466}, {-1.01512, 0.0780486}, {-1.03171, 0.127805},
