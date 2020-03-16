@@ -96,7 +96,7 @@ Exploring the hypergraph models of this variety is the primary purpose of this p
 
 You only need two things to use **SetReplace**:
 
-* [Wolfram Language 12.1+](https://www.wolfram.com/language/) including [WolframScript](https://www.wolfram.com/wolframscript/). A no-cost version is available as [Wolfram Engine](https://www.wolfram.com/engine/).
+* [Wolfram Language 12.1+](https://www.wolfram.com/language/) including [WolframScript](https://www.wolfram.com/wolframscript/). A free version is available as [Wolfram Engine](https://www.wolfram.com/engine/).
 * A C++ compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in WolframScript are [here](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
 
 ## Build Instructions
@@ -126,7 +126,7 @@ A less frequently updated version is available through the Wolfram public paclet
 
 **`SetReplace`** (and related **`SetReplaceList`**, **`SetReplaceAll`**, **`SetReplaceFixedPoint`** and **`SetReplaceFixedPointList`**) are the functions the package is named after. They are quite simple, and perform replacement operations either one-at-a-time (as in the case of `SetReplace`), to all non-overlapping subsets (`SetReplaceAll`), or until no more matches can be made (`SetReplaceFixedPoint`). A suffix `*List` implies the function returns a list of sets after each step instead of just the final result.
 
-These functions are useful for their simplicity, but they lack in functionality compared to the more advanced [`WolframModel`](#wolframmodel-and-wolframmodelevolutionobject), which incorporates all of these plus many more features.
+These functions are good for their simplicity and can be primarily used to obtain replacement results. [`WolframModel`](#wolframmodel-and-wolframmodelevolutionobject) is an advanced version of these functions and incorporates all of their features plus more sophisticated analysis capabilities.
 
 As was mentioned previously, `SetReplace` performs a single iteration if called with two arguments:
 
@@ -157,7 +157,7 @@ In[] := SetReplace[{1, 2, 5, 3, 6},
 Out[] = {3, 5, 8}
 ```
 
-`SetReplaceList` can be used to see the set after each replacement (here a list is omitted on the right-hand side of the rule, which can be done if the subset only contains a single element):
+`SetReplaceList` can be used to see the set after each replacement (here a list is omitted on the right-hand side of the rule, which can be done if the subset only contains a single element). Similar to `SetReplace`, if the number of steps is [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html), it's equivalent to `SetReplaceFixedPointList`:
 
 ```
 In[] := SetReplaceList[{1, 2, 5, 3, 6}, {a_, b_} :> a + b, Infinity]
