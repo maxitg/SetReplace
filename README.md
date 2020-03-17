@@ -263,7 +263,7 @@ Note that this call is different from the [`SetReplace`](#setreplace) function i
 * The order of arguments is switched, the rule goes first.
 * The rule is specified in the "anonymous" form ([`ToPatternRules`](#topatternrules) is done implicitly).
 * The number of steps here is the number of generations, which is equivalent to steps of [`SetReplaceAll`](#setreplace). Here each edge can have at most 10 generations of predecessors.
-* The output is not a final state, but a **`WolframModelEvolutionObject`** containing the entire evolution (similar to [`SetReplaceList`](#setreplace) but with additional information about the relationships between edges and the events that produced them. From the information field on that object, one can see that the evolution was done for 10 generations (i.e., the evolution did not terminate early), and 109 replacements (aka events) were made in total. More properties can be computed from an evolution object, more on that later.
+* The output is not a final state, but a **`WolframModelEvolutionObject`** containing the entire evolution (similar to [`SetReplaceList`](#setreplace) but with additional information about the relationships between edges and the events that produced them. From the information field on that object, one can see that the evolution was done for 10 generations (i.e., the evolution did not terminate early), and 109 replacements (aka events) were made in total. More [properties](#properties) can be computed from an evolution object.
 
 To see the information an evolution object contains, let's make one with a smaller number of generations:
 
