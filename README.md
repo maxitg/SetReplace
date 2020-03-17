@@ -131,6 +131,12 @@ These functions are good for their simplicity and can be primarily used to obtai
 As was mentioned previously, `SetReplace` performs a single iteration if called with two arguments:
 
 ```
+In[] := SetReplace[set, rule]
+```
+
+For example,
+
+```
 In[] := SetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> {a + b}]
 Out[] = {5, 3, 6, 3}
 ```
@@ -237,6 +243,12 @@ Out[] = {{{v1_, v2_}} :> Module[{v3}, {{v1, v2}, {v2, v3}}],
 **`WolframModel`** is the primary function of the package. It provides tools for the generation and analysis of set substitution systems. It can compute many different properties of the evolution and has many different options, which we describe in the corresponding subsections.
 
 The most basic way to call it is
+
+```
+In[] := WolframModel[rule, initial set, step count]
+```
+
+For example,
 
 ```
 In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
