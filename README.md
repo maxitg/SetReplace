@@ -299,16 +299,24 @@ Out[] = WolframModelEvolutionObject[<|
   "EventRuleIDs" -> {1, 1, 1, 1, 1}|>]
 ```
 
-The most important part of this [`Association`](https://reference.wolfram.com/language/ref/Association.html) is `"AtomLists"` which includes all set elements (aka expressions or edges) ever created throughout evolution. Note, this does not correspond to any particular step, rather all steps are combined. They are not just catenated states either, as if a particular edge was never used as an input for any replacement in a particular generation, it would not be duplicated in that list. As an example, compare it to [`"StatesList"`](#states) and observe that a catenated [`"StatesList"`](#states) would contain more elements than `"AtomLists"`:
+The most important part of this [`Association`](https://reference.wolfram.com/language/ref/Association.html) is `"AtomLists"` which includes all set elements (aka expressions or edges) ever created throughout evolution.
+
+In this particular example, it begins with `{1, 2, 3}`, `{2, 4, 5}` and `{4, 6, 7}`, which is the initial set. It is then followed by `{5, 8, 1}`, `{8, 4, 2}` and `{4, 5, 3}` which are the edges created in the first replacement event (the new vertex `8` here is named with the first unused integer, see [`"VertexNamingFunction"`](#vertexnamingfunction) for details about naming). These edges are followed by four more triples of edges corresponding to the outputs of remaining events.
+
+`"AtomLists"` contains edges from all steps and is by itself insufficient to determine to which step a particular edge belongs. For example, `{5, 8, 1}` only appears in the result after a single step and `{7, 9, 8}` after two steps. Here we use [`"StatesList"`](#states) property to demonstrate that:
 
 <img src="READMEImages/StatesListOfEvolutionObject.png" width="613">
 
 ```
-Out[] = {{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, {{4, 6, 7}, {5, 8, 1}, {8, 4,
-   2}, {4, 5, 3}}, {{7, 9, 8}, {9, 6, 4}, {6, 7, 2}, {1, 10, 4}, {10,
-   8, 5}, {8, 1, 3}}, {{6, 7, 2}, {8, 1, 3}, {4, 11, 7}, {11, 6,
-   9}, {6, 4, 8}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}}}
+Out[] = {{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+ {{4, 6, 7}, {5, 8, 1}, {8, 4, 2}, {4, 5, 3}},
+ {{7, 9, 8}, {9, 6, 4}, {6, 7, 2}, {1, 10, 4}, {10, 8, 5}, {8, 1,
+   3}},
+ {{6, 7, 2}, {8, 1, 3}, {4, 11, 7}, {11, 6, 9}, {6, 4, 8}, {5, 12,
+   1}, {12, 8, 10}, {8, 5, 4}}}
 ```
+
+Note that a set element is not duplicated in `"AtomLists"` if it exists in multiple steps. For example, `{6, 7, 2}` appears in the set after both two and three steps, but it only appears in `"AtomLists"` once because it was never used as an input during the 3rd step.
 
 Each edge in `"AtomLists"` has properties which are stored in other lists of the evolution object:
 
