@@ -299,7 +299,7 @@ Out[] = WolframModelEvolutionObject[<|
   "EventRuleIDs" -> {1, 1, 1, 1, 1}|>]
 ```
 
-The most important part of this [`Association`](https://reference.wolfram.com/language/ref/Association.html) is `"AtomLists"` which includes all set elements (aka expressions or edges) ever created throughout history. Note, this does not correspond to any particular step, rather all steps are combined. They are not just catenated states either, as if a particular edge was never used as an input for any replacement in a particular generation, it would not be duplicated in that list. As an example, compare it to [`"StatesList"`](#states) and observe that a catenated [`"StatesList"`](#states) would contain more elements than `"AtomLists"`:
+The most important part of this [`Association`](https://reference.wolfram.com/language/ref/Association.html) is `"AtomLists"` which includes all set elements (aka expressions or edges) ever created throughout evolution. Note, this does not correspond to any particular step, rather all steps are combined. They are not just catenated states either, as if a particular edge was never used as an input for any replacement in a particular generation, it would not be duplicated in that list. As an example, compare it to [`"StatesList"`](#states) and observe that a catenated [`"StatesList"`](#states) would contain more elements than `"AtomLists"`:
 
 <img src="READMEImages/StatesListOfEvolutionObject.png" width="613">
 
@@ -510,7 +510,7 @@ All possible keys in that association are:
 
 * `"MaxEvents"`: limit the number of individual replacements (in the [`SetReplace`](#setreplace) function meaning).
 * `"MaxGenerations"`: limit the number of generations (steps in [`SetReplaceAll`](#setreplace) meaning), same as specifying steps directly as a number in `WolframModel`.
-* `"MaxVertices"`: limit the number of vertices in the *final* state only (the total count throughout history might be larger). This limit stops evolution if the next event, if applied, would put the state over the limit. Note once such an event is encountered, the evolution stops immediately even if other matches exist that would not put the vertex count over the limit.
+* `"MaxVertices"`: limit the number of vertices in the *final* state only (the total count throughout evolution might be larger). This limit stops evolution if the next event, if applied, would put the state over the limit. Note once such an event is encountered, the evolution stops immediately even if other matches exist that would not put the vertex count over the limit.
 * `"MaxVertexDegree"`: limit the number of final state edges in which any particular vertex is involved. Works in a similar way to `"MaxVertices"`.
 * `"MaxEdges"`: limit the number of edges (set elements) in the final state. Works similarly to `"MaxVertices"`.
 
@@ -520,7 +520,7 @@ Note also that `"MaxGenerations"` works differently from the other limiters, as 
 
 ### Properties
 
-[States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout History](#all-edges-throughout-history) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules)
+[States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout Evolution](#all-edges-throughout-evolution) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules)
 
 #### States
 
@@ -647,9 +647,9 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 
 Here the dotted gray edges are the ones about to be deleted, whereas the red ones have just been created.
 
-#### All Edges throughout History
+#### All Edges throughout Evolution
 
-**`"AllEventsEdgesList"`** (aka `"AllExpressions"`) returns the list of edges throughout history. This is distinct from a catenated [`"StateList"`](#states), as the edge does not appear twice if it moved from one generation to the next without being involved in an event.
+**`"AllEventsEdgesList"`** (aka `"AllExpressions"`) returns the list of edges throughout evolution. This is distinct from a catenated [`"StateList"`](#states), as the edge does not appear twice if it moved from one generation to the next without being involved in an event.
 
 Compare for instance the output of [`"StatesList"`](#states) for a system where only one replacement is made per generation:
 
@@ -673,7 +673,7 @@ Edge indices from `"AllEventsEdgesList"` are used in various other properties su
 
 #### States as Edge Indices
 
-**`"AllEventsStatesEdgeIndicesList"`** is similar to [`"AllEventsStatesList"`](#states), except instead of actual edges the list it returns contains the indices of edges from [`"AllEventsEdgesList"`](#all-edges-throughout-history):
+**`"AllEventsStatesEdgeIndicesList"`** is similar to [`"AllEventsStatesList"`](#states), except instead of actual edges the list it returns contains the indices of edges from [`"AllEventsEdgesList"`](#all-edges-throughout-evolution):
 
 ```
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
@@ -742,7 +742,7 @@ The format for the events is
 {ruleIndex, {inputEdgeIndices} -> {outputEdgeIndices}}
 ```
 
-where the edge indices refer to expressions from [`"AllEventsEdgesList"`](#all-edges-throughout-history).
+where the edge indices refer to expressions from [`"AllEventsEdgesList"`](#all-edges-throughout-evolution).
 
 #### Events and States
 
@@ -894,7 +894,7 @@ In[] := With[{
 
 #### Edge and Event Generations
 
-**`"EdgeGenerationsList"`** (aka `"ExpressionGenerations"`) yields the list of generation numbers (numbers of predecessor layers) for each edge in [`"AllEventsEdgesList"`](#all-edges-throughout-history):
+**`"EdgeGenerationsList"`** (aka `"ExpressionGenerations"`) yields the list of generation numbers (numbers of predecessor layers) for each edge in [`"AllEventsEdgesList"`](#all-edges-throughout-evolution):
 
 ```
 In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
