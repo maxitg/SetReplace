@@ -260,5 +260,5 @@ style[$lightTheme] = <|
     RGBColor[0.268833, 0.246555, 0.506783], RGBColor[0.4, 0.27, 0.59], RGBColor[0.640833, 0.661311, 0.886885]},
 
   (* Generic graph *)
-  $genericGraphEdgeStyle -> Directive[Hue[0.62, 0.4, 0.45], Opacity[0.7], AbsoluteThickness[1.5]]
+  $genericGraphEdgeStyle -> Directive[Hue[0.62, 0.3, 0.45], Opacity[0.7], AbsoluteThickness[1.5]]
 |>;
