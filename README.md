@@ -328,7 +328,7 @@ Each edge in `"AtomLists"` has properties which are stored in other lists of the
 * `"TerminationReason"` shows the reason evaluation was stopped. See the [`"TerminationReason"`](#termination-reason) property for more details.
 * Finally, `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example only has one rule. See [Rule Indices for Events](#rule-indices-for-events) for a more interesting case.
 
-A specific property can be requested from an evolution object in a similar way as a property for an [`Entity`](https://reference.wolfram.com/language/ref/Entity.html):
+A specific property can be requested from an evolution object by supplying it as an argument to the object itself:
 
 <img src="READMEImages/EventsCountOfEvolutionObject.png" width="629">
 
