@@ -336,7 +336,7 @@ A specific property can be requested from an evolution object by supplying it as
 Out[] = 109
 ```
 
-List of [all available properties](#properties) can be obtained with the `"Properties"` property:
+[Properties section](#properties) describes and gives examples for each available property. The full list of them can also be obtained with the `"Properties"` property:
 
 <img src="READMEImages/PropertiesOfEvolutionObject.png" width="619">
 
