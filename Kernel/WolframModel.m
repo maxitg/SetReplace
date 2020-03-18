@@ -326,6 +326,12 @@ wolframModelStepsSpecQ[stepsSpec_Association] /;
 	AllTrue[fromStepsSpec[stepsSpec], stepCountQ] := True
 
 
+wolframModelStepsSpecQ[Automatic] := True
+
+
+wolframModelStepsSpecQ[{Automatic, _ ? (# >= 0 &)}] := True
+
+
 wolframModelStepsSpecQ[_] := False
 
 
@@ -391,7 +397,7 @@ expr : WolframModel[
 
 
 WolframModel::invalidSteps =
-	"The steps specification `1` should be an Integer, Infinity, " <>
+	"The steps specification `1` should be an Integer, Infinity, Automatic, " <>
 	"or an association with one or more keys from `2`.";
 
 
