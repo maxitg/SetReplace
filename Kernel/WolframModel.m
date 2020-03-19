@@ -103,14 +103,28 @@ fromInitSpec[rulesSpec_Association, Automatic] := (
 (*Steps*)
 
 
-fromStepsSpec[generations : (_Integer | Infinity)] :=
-	fromStepsSpec[<|$stepSpecKeys[$maxGenerationsLocal] -> generations|>]
+fromStepsSpec[init_, generations : (_Integer | Infinity)] :=
+	fromStepsSpec[init, <|$stepSpecKeys[$maxGenerationsLocal] -> generations|>]
 
 
-fromStepsSpec[spec_Association] := With[{
+fromStepsSpec[_, spec_Association] := With[{
 		stepSpecInverse = Association[Reverse /@ Normal[$stepSpecKeys]]},
-	KeyMap[# /. stepSpecInverse &, spec]
+	{KeyMap[# /. stepSpecInverse &, spec], Inherited (* termination reason *)}
 ]
+
+
+fromStepsSpec[init_, Automatic] := fromStepsSpec[init, {Automatic, 1}]
+
+
+$automaticMaxEvents = 5000;
+$automaticMaxFinalExpressions = 200;
+$automaticStepsTimeConstraint = 5.0;
+
+fromStepsSpec[init_, {Automatic, factor_}] := {
+	<|$maxEvents -> Round[factor $automaticMaxEvents],
+		$maxFinalExpressions -> Max[Round[factor $automaticMaxFinalExpressions], Length[init]]|>,
+	Automatic (* termination reason *)
+}
 
 
 (* ::Subsection:: *)
@@ -160,6 +174,16 @@ renameNodes[evolution_, _, func_] := (
 	$Failed
 )
 
+(* ::Subsection:: *)
+(*overrideTerminationReason*)
+
+
+overrideTerminationReason[Inherited][evolution_] := evolution
+
+
+overrideTerminationReason[newReason_][evolution_] :=
+	WolframModelEvolutionObject[Join[First[evolution], <|$terminationReason -> newReason|>]]
+
 
 (* ::Subsection:: *)
 (*Normal form*)
@@ -172,15 +196,16 @@ WolframModel[
 			property : _ ? wolframModelPropertyQ : "EvolutionObject",
 			o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] :=
 	Module[{
-			patternRules, initialSet, evolution, renamedNodesEvolution, result},
+			patternRules, initialSet, steps, terminationReasonOverride, evolution, modifiedEvolution, result},
 		patternRules = fromRulesSpec[rulesSpec];
 		initialSet = Catch[fromInitSpec[rulesSpec, initSpec]];
+		{steps, terminationReasonOverride} = fromStepsSpec[initialSet, stepsSpec];
 		evolution = If[initialSet =!= $Failed,
 			Check[
 				setSubstitutionSystem[
 					patternRules,
 					initialSet,
-					fromStepsSpec[stepsSpec],
+					steps,
 					WolframModel,
 					property === "EvolutionObject",
 					Method -> OptionValue[Method],
@@ -189,9 +214,9 @@ WolframModel[
 				$Failed],
 			$Failed];
 		If[evolution === $Aborted, Return[$Aborted]];
-		renamedNodesEvolution = If[evolution =!= $Failed,
+		modifiedEvolution = If[evolution =!= $Failed,
 			Check[
-				renameNodes[
+				overrideTerminationReason[terminationReasonOverride] @ renameNodes[
 					evolution,
 					AssociationQ[rulesSpec],
 					OptionValue["VertexNamingFunction"]],
@@ -200,11 +225,11 @@ WolframModel[
 		propertyEvaluateWithOptions = propertyEvaluate[
 			OptionValue["IncludePartialGenerations"],
 			OptionValue["IncludeBoundaryEvents"]][
-			renamedNodesEvolution,
+			modifiedEvolution,
 			WolframModel,
 			#] &;
 		result = Check[
-			If[renamedNodesEvolution =!= $Failed,
+			If[modifiedEvolution =!= $Failed,
 				If[ListQ[property],
 						Catch[
 							Check[propertyEvaluateWithOptions[#], Throw[$Failed, $propertyMessages]] & /@ property,
