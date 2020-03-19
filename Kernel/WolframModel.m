@@ -103,27 +103,28 @@ fromInitSpec[rulesSpec_Association, Automatic] := (
 (*Steps*)
 
 
-fromStepsSpec[init_, generations : (_Integer | Infinity)] :=
-	fromStepsSpec[init, <|$stepSpecKeys[$maxGenerationsLocal] -> generations|>]
+fromStepsSpec[init_, generations : (_Integer | Infinity), timeConstraint_] :=
+	fromStepsSpec[init, <|$stepSpecKeys[$maxGenerationsLocal] -> generations|>, timeConstraint]
 
 
-fromStepsSpec[_, spec_Association] := With[{
+fromStepsSpec[_, spec_Association, _] := With[{
 		stepSpecInverse = Association[Reverse /@ Normal[$stepSpecKeys]]},
-	{KeyMap[# /. stepSpecInverse &, spec], Inherited (* termination reason *)}
+	{KeyMap[# /. stepSpecInverse &, spec], Inherited (* termination reason *), {} (* options override *)}
 ]
 
 
-fromStepsSpec[init_, Automatic] := fromStepsSpec[init, {Automatic, 1}]
+fromStepsSpec[init_, Automatic, timeConstraint_] := fromStepsSpec[init, {Automatic, 1}, timeConstraint]
 
 
 $automaticMaxEvents = 5000;
 $automaticMaxFinalExpressions = 200;
 $automaticStepsTimeConstraint = 5.0;
 
-fromStepsSpec[init_, {Automatic, factor_}] := {
+fromStepsSpec[init_, {Automatic, factor_}, timeConstraint_] := {
 	<|$maxEvents -> Round[factor $automaticMaxEvents],
 		$maxFinalExpressions -> Max[Round[factor $automaticMaxFinalExpressions], Length[init]]|>,
-	Automatic (* termination reason *)
+	Automatic, (* termination reason *)
+	{TimeConstraint -> Min[timeConstraint, $automaticStepsTimeConstraint], "IncludePartialGenerations" -> False}
 }
 
 
@@ -196,10 +197,13 @@ WolframModel[
 			property : _ ? wolframModelPropertyQ : "EvolutionObject",
 			o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] :=
 	Module[{
-			patternRules, initialSet, steps, terminationReasonOverride, evolution, modifiedEvolution, result},
+			patternRules, initialSet, steps, terminationReasonOverride, overridenOptionValue, evolution, modifiedEvolution,
+			result},
 		patternRules = fromRulesSpec[rulesSpec];
 		initialSet = Catch[fromInitSpec[rulesSpec, initSpec]];
-		{steps, terminationReasonOverride} = fromStepsSpec[initialSet, stepsSpec];
+		{steps, terminationReasonOverride, optionsOverride} =
+			fromStepsSpec[initialSet, stepsSpec, OptionValue[TimeConstraint]];
+		overridenOptionValue[option_] := OptionValue[WolframModel, Join[optionsOverride, {o}], option];
 		evolution = If[initialSet =!= $Failed,
 			Check[
 				setSubstitutionSystem[
@@ -208,9 +212,9 @@ WolframModel[
 					steps,
 					WolframModel,
 					property === "EvolutionObject",
-					Method -> OptionValue[Method],
-					TimeConstraint -> OptionValue[TimeConstraint],
-					"EventOrderingFunction" -> OptionValue["EventOrderingFunction"]],
+					Method -> overridenOptionValue[Method],
+					TimeConstraint -> overridenOptionValue[TimeConstraint],
+					"EventOrderingFunction" -> overridenOptionValue["EventOrderingFunction"]],
 				$Failed],
 			$Failed];
 		If[evolution === $Aborted, Return[$Aborted]];
@@ -219,12 +223,12 @@ WolframModel[
 				overrideTerminationReason[terminationReasonOverride] @ renameNodes[
 					evolution,
 					AssociationQ[rulesSpec],
-					OptionValue["VertexNamingFunction"]],
+					overridenOptionValue["VertexNamingFunction"]],
 				$Failed],
 			$Failed];
 		propertyEvaluateWithOptions = propertyEvaluate[
-			OptionValue["IncludePartialGenerations"],
-			OptionValue["IncludeBoundaryEvents"]][
+			overridenOptionValue["IncludePartialGenerations"],
+			overridenOptionValue["IncludeBoundaryEvents"]][
 			modifiedEvolution,
 			WolframModel,
 			#] &;
