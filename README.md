@@ -988,7 +988,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}},
 Out[] = 5
 ```
 
-**`"CompleteGenerationsCount"`** yields the number of generations that are "completely done". That is, no more matches can be made involving this or earlier generations. If the default [evaluation order](#eventorderingfunction) is used, this can only be either the same as `"TotalGenerationsCount"` (if we just finished the step) or one less (if we are in the middle of a step). However, it gets much more interesting if a different event order is used. For a random evolution, for instance, one can get
+**`"CompleteGenerationsCount"`** yields the number of generations that are "completely done". That is, no more matches can be made involving this or earlier generations. If the default [evaluation order](#eventorderingfunction) is used, this can only be either the same as `"TotalGenerationsCount"` (if we just finished a step) or one less (if we are in the middle of a step). However, it gets much more interesting if a different event order is used. For a random evolution, for instance, one can get
 
 ```
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}},
