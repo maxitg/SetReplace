@@ -18,8 +18,8 @@ Check[
 Check[
   copyWLSourceToBuildDirectory[];
   $version = updateVersion[];
-  renameContext[Automatic, $version];
-  packPaclet[];
+  $context = renameContext[Automatic, $version];
+  packPaclet[$context];
   deleteBuildDirectory[];,
 
   Exit[1];

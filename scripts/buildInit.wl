@@ -64,6 +64,7 @@ renameContext[Automatic, version_] := Module[{context},
     Print["Building with context ", context];
     renameContext[context];
   ];
+  context
 ]
 
 renameContext[newContext_] := fileStringReplace[#, "SetReplace`" -> newContext] & /@
@@ -93,13 +94,19 @@ updateVersion[] /; Names["GitLink`*"] =!= {} := Module[{
 
 updateVersion[] /; Names["GitLink`*"] === {} := Message[updateVersion::noGitLink];
 
-packPaclet[] := (
+addModifiedContextFlag[fileName_] := FileNameJoin[Append[
+  Most[FileNameSplit[fileName]],
+  StringJoin[StringRiffle[Most[StringSplit[Last[FileNameSplit[fileName]], "."]], "."], "-C.paclet"]]]
+
+packPaclet[context_] := Module[{pacletFileName},
   If[$internalBuildQ,
     Print["$Version: ", $Version];
     Print["$InstallationDirectory: ", $InstallationDirectory];
     Unset[$MessagePrePrint];
   ];
-  PackPaclet[$buildDirectory, If[$internalBuildQ, AntProperty["output_directory"], $repoRoot]];
+  pacletFileName =
+    CreatePacletArchive[$buildDirectory, If[$internalBuildQ, AntProperty["output_directory"], $repoRoot]];
+  If[context =!= "SetReplace`", RenameFile[pacletFileName, addModifiedContextFlag[pacletFileName]]];
   If[$internalBuildQ,
     SetDirectory[AntProperty["output_directory"]];
     If[TrueQ[FileExistsQ[FileNames["SetReplace*.paclet"][[1]]]],
@@ -107,4 +114,4 @@ packPaclet[] := (
       AntFail["Paclet not produced"]
     ];
   ];
-)
+]

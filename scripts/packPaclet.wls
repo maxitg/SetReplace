@@ -5,8 +5,8 @@ Check[
 
   copyWLSourceToBuildDirectory[];
   $version = updateVersion[];
-  renameContext[Automatic, $version];
-  packPaclet[];,
+  $context = renameContext[Automatic, $version];
+  packPaclet[$context];,
 
   If[$internalBuild, AntFail, Print]["Paclet packing failed."];
   Exit[1];
