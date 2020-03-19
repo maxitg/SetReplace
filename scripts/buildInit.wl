@@ -56,13 +56,9 @@ copyWLSourceToBuildDirectory[] /; !$internalBuildQ := With[{
 
 fileStringReplace[file_, rules_] := Export[file, StringReplace[Import[file, "Text"], rules], "Text"]
 
-$contextAntVariable = "${env.CONTEXT}";
-
 renameContext[Automatic, version_] := Module[{context},
   context = Replace[
-    If[$internalBuildQ,
-      Replace[AntProperty[$contextAntVariable], $contextAntVariable -> "SetReplace"],
-      tryEnvironment["CONTEXT", "SetReplace"]],
+    If[$internalBuildQ, AntProperty["context"], tryEnvironment["CONTEXT", "SetReplace"]],
     "Version" -> "SetReplace$" <> StringReplace[version, "." -> "$"]] <> "`";
   If[context =!= "SetReplace`",
     Print["Building with context ", context];

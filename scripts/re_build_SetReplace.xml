@@ -4,6 +4,9 @@
   <property name='system_id' value='### Must be set by Jenkins ###' />
 
   <property environment='env' />
+  <condition property="context" value="${env.CONTEXT}" else="SetReplace">
+    <isset property="env.CONTEXT" />
+  </condition>
   <import file='${env.RE_ANTLIBRARY_HOME}/ant-lib.xml' />
 
   <!--
