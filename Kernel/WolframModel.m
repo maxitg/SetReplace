@@ -197,13 +197,13 @@ WolframModel[
 			property : _ ? wolframModelPropertyQ : "EvolutionObject",
 			o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] :=
 	Module[{
-			patternRules, initialSet, steps, terminationReasonOverride, overridenOptionValue, evolution, modifiedEvolution,
-			result},
+			patternRules, initialSet, steps, terminationReasonOverride, optionsOverride, overridenOptionValue, evolution,
+			modifiedEvolution, propertyEvaluateWithOptions, result},
 		patternRules = fromRulesSpec[rulesSpec];
 		initialSet = Catch[fromInitSpec[rulesSpec, initSpec]];
 		{steps, terminationReasonOverride, optionsOverride} =
 			fromStepsSpec[initialSet, stepsSpec, OptionValue[TimeConstraint]];
-		overridenOptionValue[option_] := OptionValue[WolframModel, Join[optionsOverride, {o}], option];
+		overridenOptionValue = OptionValue[WolframModel, Join[optionsOverride, {o}], #] &;
 		evolution = If[initialSet =!= $Failed,
 			Check[
 				setSubstitutionSystem[
@@ -352,7 +352,7 @@ wolframModelStepsSpecQ[stepsSpec_ ? stepCountQ] := True
 
 wolframModelStepsSpecQ[stepsSpec_Association] /;
 	SubsetQ[Values[$stepSpecKeys], Keys[stepsSpec]] &&
-	AllTrue[fromStepsSpec[stepsSpec], stepCountQ] := True
+	AllTrue[First[fromStepsSpec[{}, stepsSpec, Infinity]], stepCountQ] := True
 
 
 wolframModelStepsSpecQ[Automatic] := True
