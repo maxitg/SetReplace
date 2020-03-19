@@ -18,12 +18,7 @@ Check[
 Check[
   copyWLSourceToBuildDirectory[];
   $version = updateVersion[];
-  $context = Replace[
-    tryEnvironment["CONTEXT", "SetReplace"], "Version" -> "SetReplace$" <> StringReplace[$version, "." -> "$"]] <> "`";
-  If[$context =!= "SetReplace`",
-    Print["Building with context ", $context];
-    renameContext[$context];
-  ];
+  renameContext[Automatic, $version];
   packPaclet[];
   deleteBuildDirectory[];,
 

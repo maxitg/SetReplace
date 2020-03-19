@@ -4,7 +4,8 @@ Check[
   Get[FileNameJoin[{DirectoryName[$InputFileName], "buildInit.wl"}]];
 
   copyWLSourceToBuildDirectory[];
-  updateVersion[];
+  $version = updateVersion[];
+  renameContext[Automatic, $version];
   packPaclet[];,
 
   If[$internalBuild, AntFail, Print]["Paclet packing failed."];
