@@ -2,9 +2,9 @@
   <property name='build_target' value='internal' />
   <property name='component' value='${ant.project.name}' />
   <property name='system_id' value='### Must be set by Jenkins ###' />
-  <property name='context' value='${env.CONTEXT}' />
 
   <property environment='env' />
+  <property name='context' value='${env.CONTEXT}' />
   <import file='${env.RE_ANTLIBRARY_HOME}/ant-lib.xml' />
 
   <!--
