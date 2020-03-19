@@ -58,7 +58,8 @@ fileStringReplace[file_, rules_] := Export[file, StringReplace[Import[file, "Tex
 
 renameContext[Automatic, version_] := Module[{context},
   context = Replace[
-    tryEnvironment["CONTEXT", "SetReplace"], "Version" -> "SetReplace$" <> StringReplace[$version, "." -> "$"]] <> "`";
+    If[$internalBuildQ, Replace[AntProperty["context"], Null -> "SetReplace"], tryEnvironment["CONTEXT", "SetReplace"]],
+    "Version" -> "SetReplace$" <> StringReplace[$version, "." -> "$"]] <> "`";
   If[context =!= "SetReplace`",
     Print["Building with context ", context];
     renameContext[context];
