@@ -104,8 +104,7 @@ packPaclet[context_] := Module[{pacletFileName},
     Print["$InstallationDirectory: ", $InstallationDirectory];
     Unset[$MessagePrePrint];
   ];
-  pacletFileName =
-    CreatePacletArchive[$buildDirectory, If[$internalBuildQ, AntProperty["output_directory"], $repoRoot]];
+  pacletFileName = PackPaclet[$buildDirectory, If[$internalBuildQ, AntProperty["output_directory"], $repoRoot]];
   If[context =!= "SetReplace`", RenameFile[pacletFileName, addModifiedContextFlag[pacletFileName]]];
   If[$internalBuildQ,
     SetDirectory[AntProperty["output_directory"]];
