@@ -48,11 +48,22 @@ PackageScope["$ruleArrowPadding"]
 PackageScope["$ruleArrowStyle"]
 PackageScope["$ruleGridColor"]
 PackageScope["$ruleImageSizePerPlotRange"]
+PackageScope["$spatialGraph3DVertexStyle"]
+PackageScope["$spatialGraph3DEdgeStyle"]
 PackageScope["$statesGraphVertexStyle"]
 PackageScope["$statesGraphEdgeStyle"]
+PackageScope["$statesGraph3DEdgeStyle"]
 PackageScope["$evolutionCausalGraphEvolutionEdgeStyle"]
 PackageScope["$evolutionCausalGraphCausalEdgeStyle"]
 PackageScope["$branchialGraphEdgeStyle"]
+PackageScope["$rulialGraphVertexStyle"]
+PackageScope["$rulialGraphEdgeStyle"]
+PackageScope["$rulialGraphVertexIconFontColor"]
+PackageScope["$rulialGraphVertexIconBackground"]
+PackageScope["$rulialGraphVertexIconFrameStyle"]
+PackageScope["$rulialGraphVertexIconFrameMargins"]
+PackageScope["$genericLinePlotStyles"]
+PackageScope["$genericGraphEdgeStyle"]
 
 $styleNames = KeySort /@ KeySort @ <|
   "EvolutionObject" -> <|"Icon" -> $evolutionObjectIcon|>,
@@ -103,11 +114,22 @@ $styleNames = KeySort /@ KeySort @ <|
     "ImageSizePerPlotRange" -> $ruleImageSizePerPlotRange
   |>,
 
+  (* For future use *)
+
+  "SpatialGraph3D" -> <|
+    "VertexStyle" -> $spatialGraph3DVertexStyle,
+    "EdgeLineStyle" -> $spatialGraph3DEdgeStyle
+  |>,
+
   (* MultiwaySystem styles *)
   
   "StatesGraph" -> <|
     "VertexStyle" -> $statesGraphVertexStyle,
     "EdgeStyle" -> $statesGraphEdgeStyle
+  |>,
+  "StatesGraph3D" -> <|
+    "VertexStyle" -> $statesGraphVertexStyle, (* same as 2D *)
+    "EdgeStyle" -> $statesGraph3DEdgeStyle
   |>,
   "EvolutionCausalGraph" -> <|
     "StateVertexStyle" -> $statesGraphVertexStyle,
@@ -118,6 +140,23 @@ $styleNames = KeySort /@ KeySort @ <|
   "BranchialGraph" -> <|
     "VertexStyle" -> $statesGraphVertexStyle,
     "EdgeStyle" -> $branchialGraphEdgeStyle
+  |>,
+  "RulialGraph" -> <|
+    "VertexStyle" -> $rulialGraphVertexStyle,
+    "EdgeStyle" -> $rulialGraphEdgeStyle,
+    "VertexIconFontColor" -> $rulialGraphVertexIconFontColor,
+    "VertexIconBackground" -> $rulialGraphVertexIconBackground,
+    "VertexIconFrameStyle" -> $rulialGraphVertexIconFrameStyle,
+    "VertexIconFrameMargins" -> $rulialGraphVertexIconFrameMargins
+  |>,
+
+  (* Generic plots *)
+
+  "GenericLinePlot" -> <|
+    "PlotStyles" -> $genericLinePlotStyles
+  |>,
+  "GenericGraph" -> <|
+    "EdgeStyle" -> $genericGraphEdgeStyle
   |>
 |>;
 
@@ -187,17 +226,39 @@ style[$lightTheme] = <|
   $ruleArrowStyle -> GrayLevel[0.65],
   $ruleGridColor -> GrayLevel[0.85],
   $ruleImageSizePerPlotRange -> 128,
-  
-  (* MultiwaySystem styles *)
-  
+
+  (* Spatial graph 3D *)
+  $spatialGraph3DVertexStyle -> Directive[Hue[0.65, 0.64, 0.68], Specularity[Hue[0.71, 0.6, 0.64], 10]],
+  $spatialGraph3DEdgeStyle -> Hue[0.61, 0.3, 0.85],
+
   (* States graph *)
   $statesGraphVertexStyle -> Directive[Opacity[0.7], Hue[0.62, 0.45, 0.87]],
   $statesGraphEdgeStyle -> Hue[0.75, 0, 0.35],
+
+  (* States graph 3D *)
+  $statesGraph3DEdgeStyle -> Directive[Hue[0.62, 0.05, 0.55], Opacity[0.6]],
 
   (* Evolution causal graph *)
   $evolutionCausalGraphEvolutionEdgeStyle -> Hue[0.75, 0, 0.24],
   $evolutionCausalGraphCausalEdgeStyle -> Hue[0.07, 0.78, 1],
 
   (* Branchial graph *)
-  $branchialGraphEdgeStyle -> Hue[0.89, 0.97, 0.71]
+  $branchialGraphEdgeStyle -> Hue[0.89, 0.97, 0.71],
+
+  (* Rulial graph *)
+  $rulialGraphVertexStyle -> Directive[Hue[0.54, 0.41, 0.89], EdgeForm[Directive[Hue[0.63, 0.7, 0.33], Opacity[0.95]]]],
+  $rulialGraphEdgeStyle -> Hue[0.29, 0.97, 0.71],
+  $rulialGraphVertexIconFontColor -> Hue[0.62, 1, 0.48],
+  $rulialGraphVertexIconBackground -> Directive[Opacity[0.4], Hue[0.54, 0.41, 0.89]],
+  $rulialGraphVertexIconFrameStyle -> Directive[Opacity[0.5], Hue[0.62, 0.52, 0.82]],
+  $rulialGraphVertexIconFrameMargins -> {{2, 2}, {0, 0}},
+
+  (* Generic line plot *)
+  $genericLinePlotStyles -> {
+    Hue[0.64, 0.5, 0.7], Hue[0.5, 0.7, 0.6], Hue[0.2, 0.66, 0.66], Hue[0.7, 0.4, 0.8], Hue[0.15, 0.67, 0.75],
+    Hue[0.5, 0.6, 0.7], RGBColor[0.54, 0.59, 0.67], RGBColor[0.15, 0.28, 0.56], RGBColor[0.3, 0.59, 0.77],
+    RGBColor[0.268833, 0.246555, 0.506783], RGBColor[0.4, 0.27, 0.59], RGBColor[0.640833, 0.661311, 0.886885]},
+
+  (* Generic graph *)
+  $genericGraphEdgeStyle -> Directive[Hue[0.62, 0.3, 0.45], Opacity[0.7], AbsoluteThickness[1.5]]
 |>;
