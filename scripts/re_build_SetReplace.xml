@@ -69,6 +69,7 @@
     <property name='keep.files_directory' value='true' />
   </target>
   
+  <property name='PacletNew.execute.has-custom' value='true' />
   <target name='PacletNew.SetReplace.execute' extensionOf='PacletNew.execute.custom'>
     <mathematica
       exe='${mathExe}'
