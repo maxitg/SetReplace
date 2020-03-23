@@ -463,8 +463,8 @@ drawEmbedding[
 		embeddingShapes[[2]]], {$edgeLine, $edgePolygon, $edgePoint}][[2, All]];
 
 	(* would only work if coordinates consist of a single point *)
-	labels = If[VertexLabels === None,
-		Nothing,
+	labels = If[vertexLabels === None,
+		Graphics[{}],
 		GraphPlot[
 			Graph[embedding[[1, All, 1]], {}],
 			VertexCoordinates -> embedding[[1, All, 2, 1, 1]],
