@@ -454,9 +454,11 @@ addConvexPolygons[edgeType_][edge_, subgraphsShapes_] := Module[{points, region,
 
 (** Drawing **)
 
-applyStyle[style : Except[_List], shapes_] := {style, shapes}
+applyStyle[style : Except[_List], shapes_] := With[{trimmedShapes = DeleteCases[shapes, {}]},
+	If[trimmedShapes === {}, Nothing, {style, trimmedShapes}]
+]
 
-applyStyle[style_List, shapes_] := Transpose[{style, shapes}]
+applyStyle[style_List, shapes_] := Replace[DeleteCases[Transpose[{style, shapes}], {_, {}}], {} -> Nothing]
 
 drawEmbedding[
 			styles_,
