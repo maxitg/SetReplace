@@ -821,7 +821,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 	$fixedPoint -> "FixedPoint",
 	$timeConstraint -> "TimeConstraint",
 	$Aborted -> "Aborted",
-	x_ ? MissingQ :> x,
+	x : (_ ? MissingQ | Automatic) :> x,
 	_ -> Missing["NotAvailable"]
 }]]
 
