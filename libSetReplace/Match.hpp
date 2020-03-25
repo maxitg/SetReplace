@@ -30,7 +30,7 @@ namespace SetReplace {
     public:
         /** @brief Type of the error occurred during evaluation.
          */
-        enum Error {Aborted, DisconnectedInputs, NoMatches};
+        enum Error {Aborted, DisconnectedInputs, NoMatches, InvalidOrderingFunction, InvalidOrderingDirection};
         
         /** @brief All possible functions available to sort matches. Random is the default that is always applied last.
          */
