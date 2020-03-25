@@ -24,6 +24,7 @@ Check[
     Print["Building with context ", $context];
     renameContext[$context];
   ];
+  updateBuildData[];
   packPaclet[];
   deleteBuildDirectory[];,
 
