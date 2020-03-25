@@ -110,43 +110,77 @@ wolframModelPlot$parse[
 		correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] :=
 	wolframModelPlot$parse[#, edgeType, o] & /@ edges
 
+parseHighlight[_, _, {}, _] := ConstantArray[Automatic, 3]
+
+parseHighlight[vertices_, edges_, highlightList_, highlightStyle_] := Module[{
+		highlightCounts, vertexHighlightFlags, edgeHighlightFlags},
+	highlightCounts = Counts[highlightList];
+	{vertexHighlightFlags, edgeHighlightFlags} = Map[
+		With[{highlightedQ = If[MissingQ[highlightCounts[#]], False, highlightCounts[#]-- > 0]},
+			Replace[highlightedQ, False -> Automatic]] &,
+		{vertices, edges},
+		{2}];
+	{Replace[
+			vertexHighlightFlags,
+			True -> Directive[highlightStyle, style[$lightTheme][$highlightedVertexStyleDirective]], {1}],
+		Replace[
+			edgeHighlightFlags,
+			True -> Directive[highlightStyle, style[$lightTheme][$highlightedEdgeLineStyleDirective]], {1}],
+		Replace[
+			edgeHighlightFlags,
+			True -> Directive[highlightStyle, style[$lightTheme][$highlightedEdgePolygonStyleDirective]], {1}]}
+]
+
 wolframModelPlot$parse[
 			edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
 				correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] := Module[{
-		optionValue, plotStyles, edgeStyle, styles},
+		optionValue, vertices, highlightedVertexStyles, highlightedEdgeLineStyles, highlightedEdgePointStyles,
+		highlightedEdgePolygonStyles, styles},
 	optionValue[opt_] := OptionValue[WolframModelPlot, {o}, opt];
 	vertices = vertexList[edges];
-	(* these are lists, one style for each vertex element *)
+	(* these are either single styles or lists, one style for each element *)
+	{highlightedVertexStyles, highlightedEdgeLineStyles, highlightedEdgePolygonStyles} =
+		parseHighlight[vertices, edges, optionValue[GraphHighlight], optionValue[GraphHighlightStyle]];
 	styles = <|
 		$vertexPoint -> Replace[
 			parseStyles[
-				optionValue[VertexStyle],
+				highlightedVertexStyles,
 				vertices,
-				parseStyles[optionValue[PlotStyle], vertices, <||>, Identity],
-				Directive[#, style[$lightTheme][$vertexStyleFromPlotStyleDirective]] &],
+				parseStyles[
+					optionValue[VertexStyle],
+					vertices,
+					parseStyles[optionValue[PlotStyle], vertices, Automatic, Identity],
+					Directive[#, style[$lightTheme][$vertexStyleFromPlotStyleDirective]] &],
+				Identity],
 			Automatic -> $plotStyleAutomatic[$vertexPoint],
-			{1}],
-		$edgeLine -> (Replace[
+			{0, 1}],
+		$edgeLine -> Replace[
 			edgeStyles = parseStyles[
-				optionValue[EdgeStyle],
+				highlightedEdgeLineStyles,
 				edges,
-				parseStyles[optionValue[PlotStyle], edges, <||>, Identity],
-				Directive[#, style[$lightTheme][$edgeLineStyleFromPlotStyleDirective]] &],
+				parseStyles[
+					optionValue[EdgeStyle],
+					edges,
+					parseStyles[optionValue[PlotStyle], edges, Automatic, Identity],
+					Directive[#, style[$lightTheme][$edgeLineStyleFromPlotStyleDirective]] &],
+				Identity],
 			Automatic -> $plotStyleAutomatic[$edgeLine],
-			{1}]),
-		$edgePoint -> Replace[edgeStyles, Automatic -> $plotStyleAutomatic[$edgePoint], {1}],
+			{0, 1}],
+		$edgePoint -> Replace[edgeStyles, Automatic -> $plotStyleAutomatic[$edgePoint], {0, 1}],
 		$edgePolygon -> Replace[
 			parseStyles[
-				optionValue["EdgePolygonStyle"],
+				highlightedEdgePolygonStyles,
 				edges,
-				edgeStyles,
-				Directive[#, style[$lightTheme][$edgePolygonStyleFromEdgeStyleDirective]] &],
+				parseStyles[
+					optionValue["EdgePolygonStyle"],
+					edges,
+					edgeStyles,
+					Directive[#, style[$lightTheme][$edgePolygonStyleFromEdgeStyleDirective]] &],
+				Identity],
 			Automatic -> $plotStyleAutomatic[$edgePolygon],
-			{1}]|>;
+			{0, 1}]|>;
 	wolframModelPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
 			(optionValue /@ {
-				GraphHighlight,
-				GraphHighlightStyle,
 				"HyperedgeRendering",
 				VertexCoordinateRules,
 				VertexLabels,
@@ -163,10 +197,17 @@ toListStyleSpec[spec_Association, elements_] := Replace[elements, Reverse[Join[{
 
 toListStyleSpec[spec_List, _] := spec
 
-parseStyles[newSpec_, elements_, oldSpec_, oldToNewTransform_] :=
+parseStyles[newSpec : Except[_List | _Association], elements_, Automatic, oldToNewTransform_] := newSpec
+
+parseStyles[newSpec_, elements_, oldSpec_, oldToNewTransform_] /;
+		AllTrue[{oldSpec, newSpec}, MatchQ[#, _List | _Association | Automatic] &] :=
 	MapThread[
 		If[#2 === Automatic, #1, Replace[#1, Automatic -> oldToNewTransform[#2]]] &,
 		toListStyleSpec[#, elements] & /@ {newSpec, oldSpec}]
+
+parseStyles[newSpec_, elements_, oldSpec_, oldToNewTransform_] /;
+		AllTrue[{oldSpec, newSpec}, MatchQ[#, Except[_List | _Association]] &] :=
+	First[parseStyles[{newSpec}, {}, {oldSpec}, oldToNewTransform]]
 
 wolframModelPlot$parse[___] := $Failed
 
@@ -239,8 +280,6 @@ wolframModelPlot[
 		edges_,
 		edgeType_,
 		styles_,
-		highlight_,
-		highlightColor_,
 		hyperedgeRendering_,
 		vertexCoordinates_,
 		vertexLabels_,
@@ -253,7 +292,7 @@ wolframModelPlot[
 		arrowheadLength,
 		Automatic -> style[$lightTheme][$arrowheadLengthFunction][<|"PlotRange" -> vertexEmbeddingRange[embedding[[1]]]|>]];
 	graphics =
-		drawEmbedding[styles, vertexLabels, highlight, highlightColor, vertexSize, numericArrowheadLength] @ embedding;
+		drawEmbedding[styles, vertexLabels, vertexSize, numericArrowheadLength] @ embedding;
 	imageSizeScaleFactor = Min[1, 0.7 (#[[2]] - #[[1]])] & /@ PlotRange[graphics];
 	Show[
 		graphics,
@@ -415,61 +454,39 @@ addConvexPolygons[edgeType_][edge_, subgraphsShapes_] := Module[{points, region,
 
 (** Drawing **)
 
+applyStyle[style : Except[_List], shapes_] := With[{trimmedShapes = DeleteCases[shapes, {}]},
+	If[trimmedShapes === {}, Nothing, {style, trimmedShapes}]
+]
+
+applyStyle[style_List, shapes_] := Replace[DeleteCases[Transpose[{style, shapes}], {_, {}}], {} -> Nothing]
+
 drawEmbedding[
 			styles_,
 			vertexLabels_,
-			highlight_,
-			highlightColor_,
 			vertexSize_,
 			arrowheadLength_][
-			embedding_] := Module[{
-		highlightCounts, embeddingShapes, vertexPoints, lines, polygons, edgePoints, labels,
-		singleVertexEdgeCounts, getSingleVertexEdgeRadius},
-	highlightCounts = Counts[highlight];
-	embeddingShapes = Map[
-		With[{highlightedQ = If[MissingQ[highlightCounts[#[[1]]]], False, highlightCounts[#[[1]]]-- > 0]},
-			#[[2]] /. (h : (Point | Line | Polygon))[pts_] :> highlighted[h[pts], highlightedQ]] &,
-		embedding,
-		{2}];
-
-	vertexPoints = MapIndexed[
-		With[{vertexStyle = styles[$vertexPoint][[#2[[1]]]]},
-			# /. {
-				highlighted[Point[p_], h_] :> {
-					If[h, Directive[highlightColor, style[$lightTheme][$highlightedVertexStyleDirective]], vertexStyle],
-					Disk[p, vertexSize]}}] &,
-		embeddingShapes[[1]]];
-
+			embedding_] := Module[{singleVertexEdgeCounts, getSingleVertexEdgeRadius},
 	singleVertexEdgeCounts = <||>;
 	getSingleVertexEdgeRadius[coords_] := (
 		singleVertexEdgeCounts[coords] = Lookup[singleVertexEdgeCounts, Key[coords], vertexSize] + vertexSize
 	);
-
-	{lines, polygons, edgePoints} = Reap[MapIndexed[
-		With[{
-				lineStyle = styles[$edgeLine][[#2[[1]]]],
-				polygonStyle = styles[$edgePolygon][[#2[[1]]]],
-				pointStyle = styles[$edgePoint][[#2[[1]]]]},
-			# /. {
-				highlighted[Line[pts_], h_] :> Sow[{
-					If[h, Directive[style[$lightTheme][$highlightedEdgeLineStyleDirective], highlightColor], lineStyle],
-					arrow[style[$lightTheme][$edgeArrowheadShape], arrowheadLength, vertexSize][pts]}, $edgeLine],
-				highlighted[Polygon[pts_], h_] :> Sow[{
-					If[h, Directive[style[$lightTheme][$highlightedEdgePolygonStyleDirective], highlightColor], polygonStyle],
-					Polygon[pts]}, $edgePolygon],
-				highlighted[Point[p_], h_] :> Sow[{
-					If[h, Directive[style[$lightTheme][$highlightedUnaryEdgeStyleDirective], highlightColor], pointStyle],
-					Circle[p, getSingleVertexEdgeRadius[p]]}, $edgePoint]}] &,
-		embeddingShapes[[2]]], {$edgeLine, $edgePolygon, $edgePoint}][[2, All]];
-
-	(* would only work if coordinates consist of a single point *)
-	labels = If[VertexLabels === None,
-		Nothing,
-		GraphPlot[
-			Graph[embedding[[1, All, 1]], {}],
-			VertexCoordinates -> embedding[[1, All, 2, 1, 1]],
-			VertexLabels -> vertexLabels,
-			VertexShapeFunction -> None,
-			EdgeShapeFunction -> None]];
-	Show[Graphics[{polygons, lines, vertexPoints, edgePoints}], labels]
+	Show[
+		Graphics[{
+			applyStyle[styles[$edgePolygon], Cases[#, _Polygon, All] & /@ embedding[[2, All, 2]]],
+			applyStyle[styles[$edgeLine],
+				Cases[
+						#, Line[pts_] :> arrow[style[$lightTheme][$edgeArrowheadShape], arrowheadLength, vertexSize][pts], All] & /@
+					embedding[[2, All, 2]]],
+			applyStyle[styles[$vertexPoint], Cases[#, Point[pts_] :> Disk[pts, vertexSize], All] & /@ embedding[[1, All, 2]]],
+			applyStyle[styles[$edgePoint],
+					Cases[#, Point[pts_] :> Circle[pts, getSingleVertexEdgeRadius[pts]], All] & /@ embedding[[2, All, 2]]]}],
+		If[vertexLabels === None,
+			Graphics[{}],
+			GraphPlot[
+				Graph[embedding[[1, All, 1]], {}],
+				VertexCoordinates -> embedding[[1, All, 2, 1, 1]],
+				VertexLabels -> vertexLabels,
+				VertexShapeFunction -> None,
+				EdgeShapeFunction -> None]]
+	]
 ]

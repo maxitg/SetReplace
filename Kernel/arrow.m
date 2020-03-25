@@ -7,14 +7,21 @@ arrow[shape_, arrowheadLength_, vertexSize_][pts_] := Module[{ptsStartToArrowEnd
   ptsStartToLineEnd = lineTake[ptsStartToArrowEnd, 0 ;; - arrowheadLength];
   {
     Line[ptsStartToLineEnd],
-    If[Length[ptsStartToArrowEnd] > 1,
-      arrowhead[
+    If[Length[ptsStartToArrowEnd] > 1 && arrowheadLength > 0,
+      If[MatchQ[shape, Polygon[{{_ ? NumericQ, _ ? NumericQ}...}]], polygonArrowhead, arrowhead][
         shape,
         Last[ptsStartToArrowEnd],
         Normalize[ptsStartToArrowEnd[[-1]] - ptsStartToLineEnd[[-1]]],
         arrowheadLength],
       Nothing]
   }
+]
+
+polygonArrowhead[shape_, endPt_, {0 | 0., 0 | 0.}, length_] := {}
+
+polygonArrowhead[shape_, endPt_, direction_, length_] := With[{
+    rotationMatrix = RotationMatrix[{{1, 0}, direction}]},
+  Polygon[Transpose[rotationMatrix.Transpose[length shape[[1]]] + endPt]]
 ]
 
 arrowhead[shape_, endPt_, {0 | 0., 0 | 0.}, length_] := {}

@@ -344,18 +344,18 @@
 
       VerificationTest[
         Length[Union[Cases[
-          WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs"],
+          WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs", "ArrowheadLength" -> 0],
           Polygon[___],
           All]]],
-        1
+        0
       ] & /@ $layoutTestHypergraphs,
 
       VerificationTest[
         Length[Union[Cases[
-          WolframModelPlot[#, "HyperedgeRendering" -> "Polygons"],
+          WolframModelPlot[#, "HyperedgeRendering" -> "Polygons", "ArrowheadLength" -> 0],
           Polygon[___],
           All]]],
-        1 + Length[#]
+        0 + Length[#]
       ] & /@ $layoutTestHypergraphs,
 
       (* VertexLabels *)
@@ -599,12 +599,6 @@
         SameQ @@ (
           Union[Cases[WolframModelPlot[#], Disk[_, r_] :> r, All]] & /@
             {{{1}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
-      ],
-
-      VerificationTest[
-        SameQ @@ (
-          Union[Cases[WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs"], p : Polygon[___] :> Area[p], All]] & /@
-            {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
       ],
 
       With[{$minArrowheadSize = $minArrowheadSize, $maxArrowheadSize = $maxArrowheadSize},
