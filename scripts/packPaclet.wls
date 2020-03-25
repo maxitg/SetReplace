@@ -5,6 +5,7 @@ Check[
 
   copyWLSourceToBuildDirectory[];
   updateVersion[];
+  updateBuildData[];
   packPaclet[];,
 
   If[$internalBuild, AntFail, Print]["Paclet packing failed."];

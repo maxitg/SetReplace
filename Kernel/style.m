@@ -16,7 +16,7 @@ PackageScope["$causalGraphInitialVertexStyle"]
 PackageScope["$causalGraphFinalVertexStyle"]
 PackageScope["$causalGraphEdgeStyle"]
 PackageScope["$vertexSize"]
-PackageScope["$arrowheadLength"]
+PackageScope["$arrowheadLengthFunction"]
 PackageScope["$edgeArrowheadShape"]
 PackageScope["$vertexStyle"]
 PackageScope["$edgeLineStyle"]
@@ -27,7 +27,6 @@ PackageScope["$edgeLineStyleFromPlotStyleDirective"]
 PackageScope["$edgePolygonStyleFromEdgeStyleDirective"]
 PackageScope["$highlightedVertexStyleDirective"]
 PackageScope["$highlightedEdgeLineStyleDirective"]
-PackageScope["$highlightedUnaryEdgeStyleDirective"]
 PackageScope["$highlightedEdgePolygonStyleDirective"]
 PackageScope["$highlightStyle"]
 PackageScope["$hyperedgeRendering"]
@@ -72,7 +71,7 @@ $styleNames = KeySort /@ KeySort @ <|
     "CreatedEdgeStyle" -> $destroyedEdgeStyle,
     "DestroyedAndCreatedEdgeStyle" -> $destroyedAndCreatedEdgeStyle,
     "VertexSize" -> $vertexSize,
-    "ArrowheadLength" -> $arrowheadLength,
+    "ArrowheadLengthFunction" -> $arrowheadLengthFunction,
     "EdgeArrowheadShape" -> $edgeArrowheadShape,
     "VertexStyle" -> $vertexStyle,
     "EdgeLineStyle" -> $edgeLineStyle,
@@ -83,7 +82,6 @@ $styleNames = KeySort /@ KeySort @ <|
     "EdgePolygonStyleFromEdgeStyleDirective" -> $edgePolygonStyleFromEdgeStyleDirective,
     "HighlightedVertexStyleDirective" -> $highlightedVertexStyleDirective,
     "HighlightedEdgeLineStyleDirective" -> $highlightedEdgeLineStyleDirective,
-    "HighlightedUnaryEdgeStyleDirective" -> $highlightedUnaryEdgeStyleDirective,
     "HighlightedEdgePolygonStyleDirective" -> $highlightedEdgePolygonStyleDirective,
     "HighlightStyle" -> $highlightStyle,
     "HyperedgeRendering" -> $hyperedgeRendering,
@@ -186,7 +184,7 @@ style[$lightTheme] = <|
 
   (* WolframModelPlot *)
   $vertexSize -> 0.06,
-  $arrowheadLength -> 0.1,
+  $arrowheadLengthFunction -> (Max[0.1, Min[0.185, 0.066 + 0.017 #PlotRange]] &),
   $edgeArrowheadShape -> Polygon[{
     {-1.10196, -0.289756}, {-1.08585, -0.257073}, {-1.05025, -0.178048}, {-1.03171, -0.130243}, {-1.01512, -0.0824391},
     {-1.0039, -0.037561}, {-1., 0.}, {-1.0039, 0.0341466}, {-1.01512, 0.0780486}, {-1.03171, 0.127805},
@@ -200,7 +198,6 @@ style[$lightTheme] = <|
   $edgePolygonStyleFromEdgeStyleDirective -> Directive[Opacity[0.1], EdgeForm[None]],
   $highlightedVertexStyleDirective -> EdgeForm[Directive[GrayLevel[0], Opacity[0.7]]],
   $highlightedEdgeLineStyleDirective -> Opacity[1],
-  $highlightedUnaryEdgeStyleDirective -> Opacity[1],
   $highlightedEdgePolygonStyleDirective -> Opacity[0.3],
   $highlightStyle -> Red,
   $hyperedgeRendering -> "Polygons",
