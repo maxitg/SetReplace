@@ -334,7 +334,7 @@ hypergraphEmbedding[
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
 	vertices = vertexList[edges];
 	{vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges} =
-		(toNormalEdges[#] /@ edges) & /@ {vertexLayoutEdgeType, edgeLayoutEdgeType};
+		toNormalEdges[edges, #] & /@ {vertexLayoutEdgeType, edgeLayoutEdgeType};
 	normalToHypergraphEmbedding[
 		edges,
 		edgeEmbeddingNormalEdges,
@@ -346,13 +346,11 @@ hypergraphEmbedding[
 			coordinateRules]]
 ]
 
-toNormalEdges["Ordered"][hyperedge_] :=
-	DirectedEdge @@@ Partition[hyperedge, 2, 1]
+toNormalEdges[edges_, partitionArgs___] := DirectedEdge @@@ Partition[#, partitionArgs] & /@ edges
 
-toNormalEdges["Cyclic"][hyperedge : Except[{}]] :=
-	DirectedEdge @@@ Append[Partition[hyperedge, 2, 1], hyperedge[[{-1, 1}]]]
+toNormalEdges[edges_, "Ordered"] := toNormalEdges[edges, 2, 1]
 
-toNormalEdges["Cyclic"][{}] := {}
+toNormalEdges[edges_, "Cyclic"] := toNormalEdges[edges, 2, 1, 1]
 
 graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
 		relevantCoordinateRules, vertexCoordinateRules, unscaledEmbedding},
