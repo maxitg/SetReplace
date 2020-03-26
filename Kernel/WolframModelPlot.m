@@ -359,11 +359,16 @@ graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, c
 	relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
 	vertexCoordinateRules = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
 		relevantCoordinateRules,
-		graphEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules][[1]]
+		vertexEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules]
 	];
 	unscaledEmbedding = graphEmbedding[vertices, edgeEmbeddingEdges, layout, vertexCoordinateRules];
 	rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules]
 ]
+
+vertexEmbedding[vertices_, edges_, layout_, {}] := Thread[vertices -> GraphEmbedding[Graph[vertices, edges], layout]]
+
+vertexEmbedding[vertices_, edges_, layout_, coordinateRules_] :=
+	graphEmbedding[vertices, edges, layout, coordinateRules][[1]]
 
 graphEmbedding[vertices_, edges_, layout_, coordinateRules_] := Replace[
 	Reap[
