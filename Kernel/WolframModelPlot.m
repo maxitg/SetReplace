@@ -357,11 +357,12 @@ toNormalEdges["Cyclic"][{}] := {}
 graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
 		relevantCoordinateRules, vertexCoordinateRules, unscaledEmbedding},
 	relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
-	vertexCoordinateRules = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
-		relevantCoordinateRules,
-		vertexEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules]
+	unscaledEmbedding = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
+		graphEmbedding[vertices, edgeEmbeddingEdges, layout, relevantCoordinateRules],
+		With[{ve = vertexEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules]},
+			{ve, edgeEmbedding[vertices, edgeEmbeddingEdges, layout, ve]}
+		]
 	];
-	unscaledEmbedding = graphEmbedding[vertices, edgeEmbeddingEdges, layout, vertexCoordinateRules];
 	rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules]
 ]
 
@@ -369,6 +370,15 @@ vertexEmbedding[vertices_, edges_, layout_, {}] := Thread[vertices -> GraphEmbed
 
 vertexEmbedding[vertices_, edges_, layout_, coordinateRules_] :=
 	graphEmbedding[vertices, edges, layout, coordinateRules][[1]]
+
+edgeEmbedding[vertices_, edges_, "SpringElectricalEmbedding", vertexCoordinates_] /;
+		SimpleGraphQ[Graph[UndirectedEdge @@@ edges]] := Module[{coordinates},
+	coordinates = Association[vertexCoordinates];
+	Thread[edges -> List @@@ Map[coordinates, edges, {2}]]
+]
+
+edgeEmbedding[vertices_, edges_, layout_, vertexCoordinates_] :=
+	graphEmbedding[vertices, edges, layout, vertexCoordinates][[2]]
 
 graphEmbedding[vertices_, edges_, layout_, coordinateRules_] := Replace[
 	Reap[
