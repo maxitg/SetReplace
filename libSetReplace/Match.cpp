@@ -17,7 +17,15 @@ namespace SetReplace {
             for (const auto& ordering : orderingSpec_) {
                 int comparison = compare(a, b, ordering.first);
                 if (comparison != 0) {
-                    if (ordering.second == Matcher::OrderingDirection::Reverse) comparison = -comparison;
+                    switch (ordering.second) {
+                        case Matcher::OrderingDirection::Normal:
+                            break;
+                        case Matcher::OrderingDirection::Reverse:
+                            comparison = -comparison;
+                            break;
+                        default:
+                            throw Matcher::Error::InvalidOrderingDirection;
+                    }
                     return comparison < 0;
                 }
             }
@@ -39,11 +47,14 @@ namespace SetReplace {
                     if (a->rule < b->rule) return -1;
                     else if (a->rule > b->rule) return +1;
                     else return 0;
+                    
+                default:
+                    throw Matcher::Error::InvalidOrderingFunction;
             }
         }
         
         static int compareVectors(const std::vector<ExpressionID>& first, const std::vector<ExpressionID>& second) {
-            for (int i = 0; i < std::min(first.size(), second.size()); ++i) {
+            for (size_t i = 0; i < std::min(first.size(), second.size()); ++i) {
                 if (first[i] < second[i]) return -1;
                 else if (first[i] > second[i]) return +1;
             }
@@ -97,7 +108,7 @@ namespace SetReplace {
     public:
         size_t operator()(MatchPtr a, MatchPtr b) const {
             if (a->rule != b->rule || a->inputExpressions.size() != b->inputExpressions.size()) return false;
-            for (int i = 0; i < a->inputExpressions.size(); ++i) {
+            for (size_t i = 0; i < a->inputExpressions.size(); ++i) {
                 if (a->inputExpressions[i] != b->inputExpressions[i]) return false;
             }
             return true;
@@ -120,7 +131,7 @@ namespace SetReplace {
         // dereferenced values in the corresponding classes above.
         
         // We cannot directly select a random element from an unordered_map, which is why we use a vector here.
-        using Bucket = std::pair<std::unordered_map<MatchPtr, int, MatchHasher, MatchEquality>, std::vector<MatchPtr>>;
+        using Bucket = std::pair<std::unordered_map<MatchPtr, size_t, MatchHasher, MatchEquality>, std::vector<MatchPtr>>;
         std::map<MatchPtr, Bucket, MatchComparator> matchQueue_;
         std::unordered_map<ExpressionID, std::unordered_set<MatchPtr, MatchHasher, MatchEquality>> expressionToMatches_;
         
@@ -145,8 +156,8 @@ namespace SetReplace {
             randomGenerator_(randomSeed) {}
         
         void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort) {
-            for (int i = 0; i < rules_.size(); ++i) {
-                addMatchesForRule(expressionIDs, i, shouldAbort);
+            for (size_t i = 0; i < rules_.size(); ++i) {
+                addMatchesForRule(expressionIDs, static_cast<RuleID>(i), shouldAbort);
             }
             chooseNextMatch();
         }
@@ -195,7 +206,7 @@ namespace SetReplace {
         
     private:
         void addMatchesForRule(const std::vector<ExpressionID>& expressionIDs, const RuleID& ruleID, const std::function<bool()> shouldAbort) {
-            for (int i = 0; i < rules_[ruleID].inputs.size(); ++i) {
+            for (size_t i = 0; i < rules_[ruleID].inputs.size(); ++i) {
                 Match emptyMatch{ruleID, std::vector<ExpressionID>(rules_[ruleID].inputs.size(), -1)};
                 completeMatchesStartingWithInput(emptyMatch, rules_[ruleID].inputs, i, expressionIDs, shouldAbort);
             }
@@ -203,7 +214,7 @@ namespace SetReplace {
         
         void completeMatchesStartingWithInput(const Match& incompleteMatch,
                                               const std::vector<AtomsVector>& partiallyMatchedInputs,
-                                              const int nextInputIdx,
+                                              const size_t nextInputIdx,
                                               const std::vector<ExpressionID>& potentialExpressionIDs,
                                               const std::function<bool()> shouldAbort) {
             for (const auto expressionID : potentialExpressionIDs) {
@@ -214,7 +225,7 @@ namespace SetReplace {
         }
         
         static bool isExpressionUnused(const Match& match, const ExpressionID expressionID) {
-            for (int i = 0; i < match.inputExpressions.size(); ++i) {
+            for (size_t i = 0; i < match.inputExpressions.size(); ++i) {
                 if (match.inputExpressions[i] == expressionID) return false;
             }
             return true;
@@ -222,7 +233,7 @@ namespace SetReplace {
         
         void attemptMatchExpressionToInput(const Match& incompleteMatch,
                                            const std::vector<AtomsVector>& partiallyMatchedInputs,
-                                           const int nextInputIdx,
+                                           const size_t nextInputIdx,
                                            const ExpressionID potentialExpressionID,
                                            const std::function<bool()> shouldAbort) {
             // If WL wants to abort, abort
@@ -275,7 +286,7 @@ namespace SetReplace {
             auto& bucket = bucketIt->second;
             if (!bucket.first.count(matchPtr)) { // works because hashing is smart
                 bucket.second.push_back(matchPtr);
-                bucket.first[matchPtr] = static_cast<int>(bucket.second.size()) - 1;
+                bucket.first[matchPtr] = bucket.second.size() - 1;
                 
                 const auto& expressions = matchPtr->inputExpressions;
                 for (const auto expression : expressions) {
@@ -304,20 +315,20 @@ namespace SetReplace {
         }
         
         static bool isMatchComplete(const Match& match) {
-            for (int i = 0; i < match.inputExpressions.size(); ++i) {
+            for (size_t i = 0; i < match.inputExpressions.size(); ++i) {
                 if (match.inputExpressions[i] < 0) return false;
             }
             return true;
         }
         
-        std::pair<int, std::vector<ExpressionID>> nextBestInputAndExpressionsToTry(const Match& incompleteMatch,
-                                                                                   const std::vector<AtomsVector>& partiallyMatchedInputs) const {
-            int nextInputIdx = -1;
+        std::pair<size_t, std::vector<ExpressionID>> nextBestInputAndExpressionsToTry(const Match& incompleteMatch,
+                                                                                      const std::vector<AtomsVector>& partiallyMatchedInputs) const {
+            size_t nextInputIdx = -1;
             std::vector<ExpressionID> nextExpressionsToTry;
             
             // For each input, we will see how many expressions in the set contain atoms appearing in this input.
             // The fewer there are, the less branching we will have to do.
-            for (int i = 0; i < partiallyMatchedInputs.size(); ++i) {
+            for (size_t i = 0; i < partiallyMatchedInputs.size(); ++i) {
                 if (incompleteMatch.inputExpressions[i] != -1) continue;
                 
                 std::unordered_set<Atom> appearingAtoms;
@@ -335,7 +346,7 @@ namespace SetReplace {
                 
                 // For each expression, we will count how many of the input atoms appear in it.
                 // We will then only use expressions that have all the required atoms.
-                std::unordered_map<ExpressionID, int> inputAtomsCountByExpression;
+                std::unordered_map<ExpressionID, int64_t> inputAtomsCountByExpression;
                 for (const auto atom : appearingAtoms) {
                     for (const auto expression : atomsIndex_.expressionsContainingAtom(atom)) {
                         inputAtomsCountByExpression[expression]++;
@@ -408,11 +419,11 @@ namespace SetReplace {
         if (inputPatterns.size() != patternMatches.size()) return false;
         
         std::unordered_map<Atom, Atom> match;
-        for (int i = 0; i < inputPatterns.size(); ++i) {
+        for (size_t i = 0; i < inputPatterns.size(); ++i) {
             const auto& pattern = inputPatterns[i];
             const auto& patternMatch = patternMatches[i];
             if (pattern.size() != patternMatch.size()) return false;;
-            for (int j = 0; j < pattern.size(); ++j) {
+            for (size_t j = 0; j < pattern.size(); ++j) {
                 Atom inputAtom;
                 if (match.count(pattern[j])) {
                     inputAtom = match.at(pattern[j]);
@@ -428,8 +439,8 @@ namespace SetReplace {
             }
         }
         
-        for (int i = 0; i < atomsToReplace.size(); ++i) {
-            for (int j = 0; j < atomsToReplace[i].size(); ++j) {
+        for (size_t i = 0; i < atomsToReplace.size(); ++i) {
+            for (size_t j = 0; j < atomsToReplace[i].size(); ++j) {
                 if (match.count(atomsToReplace[i][j])) {
                     atomsToReplace[i][j] = match[atomsToReplace[i][j]];
                 }

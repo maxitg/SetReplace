@@ -108,7 +108,29 @@
         {{{1, 2}, {2, 1}}, {{a, b}, {b, c}, {c, d, e}}},
         {{{1, 2}}, {{a, b}, {b, c}, {c, d, e}}},
         ConstantArray[{{1, 1}, {1, 1}, {1, 1}}, 2]
-      }
+      },
+
+      (* #220 *)
+
+      VerificationTest[
+        HypergraphUnifications[{}, {}],
+        {}
+      ],
+
+      VerificationTest[
+        HypergraphUnifications[{{1}}, {}],
+        {}
+      ],
+
+      VerificationTest[
+        HypergraphUnifications[{}, {{1}}],
+        {}
+      ],
+
+      VerificationTest[
+        HypergraphUnifications[{{1, 2}}, {{1, 2, 3}}],
+        {}
+      ]
     }
   |>
 |>
