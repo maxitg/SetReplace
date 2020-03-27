@@ -807,6 +807,64 @@
         ]
       }]] /@ DeleteCases[$SetReplaceMethods, Automatic],
 
+      (*** Automatic steps ***)
+
+      VerificationTest[
+        2 WolframModel[{{1, 2}} -> {{2, 3}}, {{1, 1}}, Automatic, "AllEventsCount"],
+        WolframModel[{{1, 2}} -> {{2, 3}}, {{1, 1}}, {Automatic, 2}, "AllEventsCount"]
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, Automatic, "AllEventsCount"] > 0
+      ],
+
+      (* fractional factors should work *)
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, {Automatic, 1 / Pi}, "AllEventsCount"] <
+          WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, Automatic, "AllEventsCount"]
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, {Automatic, 1. - 1.*^-20}, "AllEventsCount"],
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, Automatic, "AllEventsCount"]
+      ],
+
+      (* there should be no message if input has more edges than the step constraint *)
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, {Automatic, 0}, "AllEventsCount"],
+        0
+      ],
+
+      (* TerminationReason should not leak internal information *)
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, Automatic, "TerminationReason"],
+        Automatic
+      ],
+
+      (* Evaluation should never take too long *)
+      VerificationTest[
+        Head[TimeConstrained[WolframModel[
+          {{0, 0}, {0, 0}, {0, 0}} -> {{0, 0}, {0, 0}, {0, 0}, {0, 0}}, {{1, 1}, {1, 1}, {1, 1}}, Automatic], 60]],
+        WolframModelEvolutionObject
+      ],
+
+      (* We don't want partial generations *)
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, Automatic, "PartialGenerationsCount"],
+        0
+      ],
+
+      (* even if specifically asked for *)
+      VerificationTest[
+        WolframModel[
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
+          {{1, 1}},
+          Automatic,
+          "PartialGenerationsCount",
+          "IncludePartialGenerations" -> True],
+        0
+      ],
+
       (** Properties **)
 
       VerificationTest[

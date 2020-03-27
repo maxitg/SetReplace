@@ -82,6 +82,25 @@ updateVersion[] /; Names["GitLink`*"] =!= {} := Module[{
 
 updateVersion[] /; Names["GitLink`*"] === {} := Message[updateVersion::noGitLink];
 
+gitSHA[] /; Names["GitLink`*"] =!= {} := Module[{gitRepo, sha, cleanQ},
+  gitRepo = GitOpen[$repoRoot];
+  sha = GitSHA[gitRepo, gitRepo["HEAD"]];
+  cleanQ = AllTrue[# === {} &]@GitStatus[gitRepo];
+  If[cleanQ, sha, sha <> "*"]
+]
+
+gitSHA::noGitLink = "Could not find GitLink. $SetReplaceGitSHA will not be available.";
+
+gitSHA[] /; Names["GitLink`*"] === {} := (
+  Message[gitSHA::noGitLink];
+  Missing["NotAvailable"]
+)
+
+updateBuildData[] := With[{
+    buildDataFile = File[FileNameJoin[{$buildDirectory, "Kernel", "buildData.m"}]]},
+  FileTemplateApply[buildDataFile, buildDataFile];
+]
+
 packPaclet[] := (
   If[$internalBuildQ,
     Print["$Version: ", $Version];

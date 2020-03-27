@@ -25,7 +25,9 @@ hypergraphUnifications[args___] /; !Developer`CheckArgumentCount[HypergraphUnifi
 hypergraphUnifications[e1_List, e2_List] := With[{
     uniqueE1 = Map[$$1, e1, {2}], uniqueE2 = Map[$$2, e2, {2}]},
   findUnion[uniqueE1, uniqueE2, ##] & @@@
-    Reap[findRemainingOverlaps[uniqueE1, uniqueE2, emptyEdgeMatch[], emptyVertexMatch[]]][[2, 1]]
+    Replace[
+      Reap[findRemainingOverlaps[uniqueE1, uniqueE2, emptyEdgeMatch[], emptyVertexMatch[]]][[2]],
+      {overlaps_} -> overlaps]
 ]
 
 hypergraphUnifications[e : Except[_List], _] := hypergraphNotListFail[e]
