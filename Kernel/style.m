@@ -252,9 +252,9 @@ style[$lightTheme] = <|
 
   (* Generic line plot *)
   $genericLinePlotStyles -> {
-    Hue[0.64, 0.5, 0.7], Hue[0.5, 0.7, 0.6], Hue[0.2, 0.66, 0.66], Hue[0.7, 0.4, 0.8], Hue[0.15, 0.67, 0.75],
-    Hue[0.5, 0.6, 0.7], RGBColor[0.54, 0.59, 0.67], RGBColor[0.15, 0.28, 0.56], RGBColor[0.3, 0.59, 0.77],
-    RGBColor[0.268833, 0.246555, 0.506783], RGBColor[0.4, 0.27, 0.59], RGBColor[0.640833, 0.661311, 0.886885]},
+    Hue[0.985, 0.845, 0.638], Hue[0.050, 0.949, 0.955], Hue[0.089, 0.750, 0.873], Hue[0.060, 1.000, 0.800],
+    Hue[0.120, 1.000, 0.900], Hue[0.080, 1.000, 1.000], Hue[0.987, 0.673, 0.733], Hue[0.040, 0.680, 0.940],
+    Hue[0.995, 0.989, 0.824], Hue[0.991, 0.400, 0.900]},
 
   (* Generic graph *)
   $genericGraphEdgeStyle -> Directive[Hue[0.62, 0.3, 0.45], Opacity[0.7], AbsoluteThickness[1.5]]
