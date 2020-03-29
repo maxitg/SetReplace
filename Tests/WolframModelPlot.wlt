@@ -678,7 +678,17 @@
         {VertexSize -> 0.1, "ArrowheadLength" -> 0.2},
         {EdgeStyle -> Red},
         {VertexCoordinateRules -> {3 -> {0, 0}, 4 -> {1, 0}}}
-      }
+      },
+
+      (* GraphHighlight and style interaction *)
+
+      With[{color1 = RGBColor[0.46, 0.51, 0.87], color2 = RGBColor[0.13, 0.64, 0.27]},
+        testColorPresence[
+          {{1, 2}},
+          {GraphHighlight -> {2}, GraphHighlightStyle -> color1, VertexStyle -> color2},
+          {color1, color2}
+        ]
+      ]
     }
   |>
 |>
