@@ -4,8 +4,6 @@
       Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
-      Global`checkGraphics[args___] := SetReplace`PackageScope`checkGraphics[args];
-      Global`graphicsQ[args___] := SetReplace`PackageScope`graphicsQ[args];
 
       $largeEvolution = Hold[WolframModel[
         {{0, 1}, {0, 2}, {0, 3}} ->
@@ -600,40 +598,6 @@
         {}
       ],
 
-      (* FinalStatePlot *)
-
-      VerificationTest[
-        graphicsQ[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["FinalStatePlot"]]
-      ],
-
-      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
-        evo["FinalStatePlot", "$$$invalid$$$"],
-        {WolframModelEvolutionObject::nonopt}
-      ]],
-
-      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
-        evo["FinalStatePlot", "$$$invalid$$$" -> 3],
-        {WolframModelEvolutionObject::optx}
-      ]],
-
-      VerificationTest[
-        AbsoluteOptions[
-          checkGraphics @ WolframModel[
-            {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["FinalStatePlot", ImageSize -> 123.],
-          ImageSize],
-        {ImageSize -> 123.}
-      ],
-
-      testUnevaluated[
-        WolframModel[1 -> 2, {1}, 2, "FinalStatePlot"],
-        {WolframModel::nonHypergraphPlot}
-      ],
-
-      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
-        evo["FinalStatePlot", VertexSize -> x],
-        {WolframModelPlot::invalidSize}
-      ]],
-
       (* UpdatedStatesList *)
 
       VerificationTest[
@@ -792,40 +756,6 @@
           2]["StatesList"],
         {{{1, 2}, {2, 3}}, {}}
       ],
-
-      (* StatesPlotsList *)
-
-      VerificationTest[
-        graphicsQ /@ WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["StatesPlotsList"],
-        ConstantArray[True, 4]
-      ],
-
-      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
-        evo["StatesPlotsList", "$$$invalid$$$"],
-        {WolframModelEvolutionObject::nonopt}
-      ]],
-
-      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
-        evo["StatesPlotsList", "$$$invalid$$$" -> 3],
-        {WolframModelEvolutionObject::optx}
-      ]],
-
-      VerificationTest[
-        AbsoluteOptions[#, ImageSize] & /@
-          checkGraphics[WolframModel[
-            {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["StatesPlotsList", ImageSize -> 123.]],
-        ConstantArray[{ImageSize -> 123.}, 4]
-      ],
-
-      testUnevaluated[
-        WolframModel[1 -> 2, {1}, 2, "StatesPlotsList"],
-        {WolframModel::nonHypergraphPlot}
-      ],
-
-      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
-        evo["StatesPlotsList", VertexSize -> x],
-        {WolframModelPlot::invalidSize}
-      ]],
 
       (* AtomsCountFinal *)
 
@@ -1320,7 +1250,85 @@
           {{1, {3} -> {6, 7}}, {4, 5, 6, 7}},
           {{DirectedInfinity[1], {4, 5, 6, 7} -> {}}, {}}
         }
+      ]
+    }]
+  |>,
+
+  "WolframModelEvolutionObjectGraphics" -> <|
+    "init" -> (
+      Attributes[Global`testUnevaluated] = {HoldAll};
+      Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+      Global`checkGraphics[args___] := SetReplace`PackageScope`checkGraphics[args];
+      Global`graphicsQ[args___] := SetReplace`PackageScope`graphicsQ[args];
+    ),
+    "tests" -> {
+      (* FinalStatePlot *)
+
+      VerificationTest[
+        graphicsQ[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["FinalStatePlot"]]
       ],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
+        evo["FinalStatePlot", "$$$invalid$$$"],
+        {WolframModelEvolutionObject::nonopt}
+      ]],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
+        evo["FinalStatePlot", "$$$invalid$$$" -> 3],
+        {WolframModelEvolutionObject::optx}
+      ]],
+
+      VerificationTest[
+        AbsoluteOptions[
+          checkGraphics @ WolframModel[
+            {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["FinalStatePlot", ImageSize -> 123.],
+          ImageSize],
+        {ImageSize -> 123.}
+      ],
+
+      testUnevaluated[
+        WolframModel[1 -> 2, {1}, 2, "FinalStatePlot"],
+        {WolframModel::nonHypergraphPlot}
+      ],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
+        evo["FinalStatePlot", VertexSize -> x],
+        {WolframModelPlot::invalidSize}
+      ]],
+
+      (* StatesPlotsList *)
+
+      VerificationTest[
+        graphicsQ /@ WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["StatesPlotsList"],
+        ConstantArray[True, 4]
+      ],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
+        evo["StatesPlotsList", "$$$invalid$$$"],
+        {WolframModelEvolutionObject::nonopt}
+      ]],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
+        evo["StatesPlotsList", "$$$invalid$$$" -> 3],
+        {WolframModelEvolutionObject::optx}
+      ]],
+
+      VerificationTest[
+        AbsoluteOptions[#, ImageSize] & /@
+          checkGraphics[WolframModel[
+            {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["StatesPlotsList", ImageSize -> 123.]],
+        ConstantArray[{ImageSize -> 123.}, 4]
+      ],
+
+      testUnevaluated[
+        WolframModel[1 -> 2, {1}, 2, "StatesPlotsList"],
+        {WolframModel::nonHypergraphPlot}
+      ],
+
+      With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
+        evo["StatesPlotsList", VertexSize -> x],
+        {WolframModelPlot::invalidSize}
+      ]],
 
       (* EventsStatesPlotsList *)
 
@@ -1367,7 +1375,7 @@
         evo["EventsStatesPlotsList", VertexSize -> x],
         {WolframModelPlot::invalidSize}
       ]]
-    }],
+    },
     "options" -> {
       "Parallel" -> False
     }
