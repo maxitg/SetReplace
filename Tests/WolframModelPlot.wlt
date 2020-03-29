@@ -688,6 +688,32 @@
           {GraphHighlight -> {2}, GraphHighlightStyle -> color1, VertexStyle -> color2},
           {color1, color2}
         ]
+      ],
+
+      (* Style inheritance *)
+      SeedRandom[288];
+      With[{
+          colors = Table[RandomColor[5]], edgeColor = RandomColor[], extraColor = RandomColor[],
+          set = {{1, 2, 3}, {3, 4, 5}}},
+        {testColorPresence[set, #, #2, Replace[#4, All -> Sequence[]]],
+            testColorAbsense[set, #, #3, Replace[#4, All -> Sequence[]]]} & @@@ {
+          {{PlotStyle -> colors[[1]], EdgeStyle -> edgeColor, VertexStyle -> colors[[2]]},          {colors[[2]]},    {colors[[1]]}, All},
+          {{PlotStyle -> colors[[1]], EdgeStyle -> edgeColor, VertexStyle -> Automatic},            {colors[[1]]},    {},            All},
+          {{PlotStyle -> colors[[1]], EdgeStyle -> edgeColor, VertexStyle -> <|3 -> colors[[2]]|>}, colors[[1 ;; 2]], {},            All},
+          {{PlotStyle -> extraColor,  EdgeStyle -> edgeColor, VertexStyle -> colors},               colors,           {extraColor},  All},
+          {{PlotStyle -> Automatic,                           VertexStyle -> colors[[1]]},          {colors[[1]]},    {},            All},
+          {{PlotStyle -> Automatic,                           VertexStyle -> Automatic},            {},               {},            All},
+          {{PlotStyle -> Automatic,                           VertexStyle -> <|3 -> colors[[1]]|>}, {colors[[1]]},    {},            All},
+          {{PlotStyle -> Automatic,                           VertexStyle -> colors},               colors,           {},            All},
+          {{PlotStyle -> <|3 -> colors[[1]]|>,                VertexStyle -> colors[[2]]},          {colors[[2]]},    {colors[[1]]}, All},
+          {{PlotStyle -> <|3 -> colors[[1]]|>,                VertexStyle -> Automatic},            {colors[[1]]},    {},            All},
+          {{PlotStyle -> <|3 -> colors[[1]]|>,                VertexStyle -> <|4 -> colors[[2]]|>}, colors[[1 ;; 2]], {},            All},
+          {{PlotStyle -> <|3 -> extraColor|>,                 VertexStyle -> colors},               colors,           {extraColor},  All},
+          {{EdgeStyle -> colors[[1 ;; 2]],   "EdgePolygonStyle" -> colors[[3]]},                    colors[[1 ;; 3]], {},            {"Polygons"}},
+          {{EdgeStyle -> colors[[1 ;; 2]],   "EdgePolygonStyle" -> Automatic},                      colors[[1 ;; 2]], {},            {"Polygons"}},
+          {{EdgeStyle -> colors[[1 ;; 2]],   "EdgePolygonStyle" -> <|{1, 2, 3} -> colors[[3]]|>},   colors[[1 ;; 3]], {},            {"Polygons"}},
+          {{EdgeStyle -> colors[[1 ;; 2]],   "EdgePolygonStyle" -> colors[[3 ;; 4]]},               colors[[1 ;; 4]], {},            {"Polygons"}}
+        }
       ]
     }
   |>
