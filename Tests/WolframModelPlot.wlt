@@ -63,6 +63,9 @@
 
       testColorPresence[args___] := testColor[True, args];
     ),
+    "options" -> {
+      "Parallel" -> False
+    },
     "tests" -> {
       (* Symbol Leak *)
 
@@ -665,9 +668,6 @@
         {EdgeStyle -> Red},
         {VertexCoordinateRules -> {3 -> {0, 0}, 4 -> {1, 0}}}
       }
-    },
-    "options" -> {
-      "Parallel" -> False
     }
   |>
 |>
