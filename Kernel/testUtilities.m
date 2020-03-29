@@ -41,12 +41,11 @@ frontEndErrors[expr_] := UsingFrontEnd @ Module[{notebook, result},
   result
 ]
 
-checkGraphics::frontEndErrors := "Front End errors `2` generated for graphics `1`.";
+checkGraphics::frontEndErrors := "``";
 
-checkGraphics[graphics_] := With[{
-    errors = frontEndErrors[graphics]},
-  If[errors =!= {}, Message[checkGraphics::frontEndErrors, graphics, errors]];
+checkGraphics[graphics_] := (
+  Message[checkGraphics::frontEndErrors, #] & /@ Flatten[frontEndErrors[graphics]];
   graphics
-]
+)
 
 graphicsQ[graphics_] := Head[graphics] === Graphics && frontEndErrors[graphics] === {}
