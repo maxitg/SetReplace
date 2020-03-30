@@ -266,6 +266,50 @@
         {{1, {2, 3}}, {1, 2}}
       },
 
+      (** Style options **)
+
+      SeedRandom[911];
+      With[{color = RandomColor[]}]
+      VerificationTest[
+        !FreeQ[checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], ##], color]
+      ] & /@ {
+        {PlotStyle -> color},
+        {PlotStyle -> <|1 -> color|>},
+        {VertexStyle -> color},
+        {VertexStyle -> <|1 -> color|>},
+        {EdgeStyle -> color},
+        {EdgeStyle -> <|{1, 2, 3} -> color|>},
+        {"EdgePolygonStyle" -> color},
+        {"EdgePolygonStyle" -> <|{1, 2, 3} -> color|>}
+      },
+
+      testUnevaluated[
+        RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], PlotStyle -> {1}],
+        RulePlot::invalidPlotStyle
+      ],
+
+      testUnevaluated[
+        RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], # -> {1}],
+        RulePlot::elementwiseStyle
+      ] & /@ {VertexStyle, EdgeStyle, "EdgePolygonStyle"},
+
+      VerificationTest[
+        FirstCase[
+          checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexSize -> 0.213],
+          Disk[_, r_] :> r,
+          0, (* default *)
+          All],
+        0.213
+      ],
+
+      VerificationTest[
+        4 == #2 / #1 & @@ (FirstCase[
+          checkGraphics @ RulePlot[WolframModel[{{1, 2}} -> {{2, 3}}], "ArrowheadLength" -> #],
+          p_Polygon :> Area[p],
+          0,
+          All] & /@ {0.1, 0.2})
+      ],
+
       (* Scaling consistency *)
 
       (** Vertex amplification **)
