@@ -269,19 +269,20 @@
       (** Style options **)
 
       SeedRandom[911];
-      With[{color = RandomColor[]}]
-      VerificationTest[
-        !FreeQ[checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], ##], color]
-      ] & /@ {
-        {PlotStyle -> color},
-        {PlotStyle -> <|1 -> color|>},
-        {VertexStyle -> color},
-        {VertexStyle -> <|1 -> color|>},
-        {EdgeStyle -> color},
-        {EdgeStyle -> <|{1, 2, 3} -> color|>},
-        {"EdgePolygonStyle" -> color},
-        {"EdgePolygonStyle" -> <|{1, 2, 3} -> color|>}
-      },
+      With[{color = RandomColor[]},
+        VerificationTest[
+          !FreeQ[checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], #], color]
+        ] & /@ {
+          PlotStyle -> color,
+          PlotStyle -> <|1 -> color|>,
+          VertexStyle -> color,
+          VertexStyle -> <|1 -> color|>,
+          EdgeStyle -> color,
+          EdgeStyle -> <|{1, 2, 3} -> color|>,
+          "EdgePolygonStyle" -> color,
+          "EdgePolygonStyle" -> <|{1, 2, 3} -> color|>
+        }
+      ],
 
       testUnevaluated[
         RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], PlotStyle -> {1}],
