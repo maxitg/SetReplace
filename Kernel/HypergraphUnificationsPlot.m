@@ -25,7 +25,7 @@ $color2 = Blue;
 
 HypergraphUnificationsPlot::emptyEdge = "Empty edges are not supported.";
 
-hypergraphUnificationsPlot[e1_List, e2_List, opts : OptionsPattern[]] := Module[{
+hypergraphUnificationsPlot[e1_, e2_, opts : OptionsPattern[]] := Module[{
     unifications, automaticVertexLabelsList, vertexLabels, edgeStyle},
   If[Length[Cases[Join[e1, e2], {}]] > 0,
     Message[HypergraphUnificationsPlot::emptyEdge];
