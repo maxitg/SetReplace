@@ -1374,7 +1374,7 @@
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
         evo["EventsStatesPlotsList", VertexSize -> x],
         {WolframModelPlot::invalidSize}
-      ],
+      ]],
 
       VerificationTest[
         graphicsQ /@ WolframModel[{{1, 2}} -> {}, {{1, 2}}, Infinity, "EventsStatesPlotsList"],
@@ -1384,7 +1384,7 @@
       VerificationTest[
         graphicsQ /@ WolframModel[{} -> {{1, 2}}, {}, <|"MaxEvents" -> 1|>, "EventsStatesPlotsList"],
         {True, True}
-      ]]
+      ]
     },
     "options" -> {
       "Parallel" -> False
