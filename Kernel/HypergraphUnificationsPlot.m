@@ -26,23 +26,25 @@ $color2 = Blue;
 HypergraphUnificationsPlot::emptyEdge = "Empty edges are not supported.";
 
 hypergraphUnificationsPlot[e1_List, e2_List, opts : OptionsPattern[]] := Module[{
-    unifications, automaticVertexLabelsList},
+    unifications, automaticVertexLabelsList, vertexLabels, edgeStyle},
   If[Length[Cases[Join[e1, e2], {}]] > 0,
     Message[HypergraphUnificationsPlot::emptyEdge];
     Throw[$Failed];
   ];
   unifications = Check[HypergraphUnifications[e1, e2], Throw[$Failed]];
   automaticVertexLabelsList = unificationVertexLabels[e1, e2] @@@ unifications;
+  {vertexLabels, edgeStyle} =
+    Check[OptionValue[HypergraphUnificationsPlot, {opts}, #], Throw[$Failed]] & /@ {VertexLabels, EdgeStyle};
   MapThread[
     Check[WolframModelPlot[
       #1,
-      VertexLabels -> Replace[OptionValue[HypergraphUnificationsPlot, {opts}, VertexLabels], Automatic -> #4],
-      EdgeStyle -> ReplacePart[
+      VertexLabels -> Replace[vertexLabels, Automatic -> #4],
+      EdgeStyle -> Replace[edgeStyle, Automatic -> ReplacePart[
         Table[Automatic, Length[#]],
         Join[
           Thread[Intersection[Values[#2], Values[#3]] -> Blend[{$color1, $color2}]],
-          Thread[Values[#2] -> $color1], Thread[Values[#3] -> $color2]]],
-      opts], Throw[$Failed]] &,
+          Thread[Values[#2] -> $color1], Thread[Values[#3] -> $color2]]]],
+        opts], Throw[$Failed]] &,
     {unifications[[All, 1]], unifications[[All, 2]], unifications[[All, 3]], automaticVertexLabelsList}]
 ]
 
