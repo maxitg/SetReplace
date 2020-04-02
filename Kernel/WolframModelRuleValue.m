@@ -13,7 +13,7 @@ SyntaxInformation[WolframModelRuleValue] = {"ArgumentsPattern" -> {_, _.}};
 
 $WolframModelRuleProperties = Sort @ {
   "ConnectedInput", "ConnectedOutput", "ConnectedInputOutputUnion", "MaximumArity", "NodeCounts", "NodesDroppedAdded",
-  "Signature", "SignatureTraditionalForm", "TransformationCount"};
+  "Signature", "TraditionalSignature", "TransformationCount"};
 
 With[{properties = $WolframModelRuleProperties},
   FE`Evaluate[FEPrivate`AddSpecialArgCompletion["WolframModelRuleValue" -> {0, properties}]]];
@@ -72,7 +72,7 @@ wolframModelRuleValue[input_ -> output_, "ConnectedInputOutputUnion"] :=
 
 wolframModelRuleValue[
     rules : {Rule[_, _]...},
-    property : "NodeCounts" | "NodesDroppedAdded" | "Signature" | "SignatureTraditionalForm"] :=
+    property : "NodeCounts" | "NodesDroppedAdded" | "Signature" | "TraditionalSignature"] :=
   wolframModelRuleValue[#, property] & /@ rules
 
 (* Arity *)
@@ -100,7 +100,7 @@ wolframModelRuleValue[rule : Rule[_, _], "Signature"] := hypergraphSignature /@ 
 
 hypergraphSignature[edges_] := SortBy[Reverse /@ Tally[Length /@ edges], Last]
 
-wolframModelRuleValue[rule : Rule[_, _], "SignatureTraditionalForm"] :=
+wolframModelRuleValue[rule : Rule[_, _], "TraditionalSignature"] :=
   Switch[Length[#], 0, "\[EmptySet]", 1, First[#], _, Row[#]] & /@
     Apply[Subscript, wolframModelRuleValue[rule, "Signature"], {2}]
 

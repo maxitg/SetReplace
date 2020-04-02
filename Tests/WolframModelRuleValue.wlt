@@ -138,7 +138,7 @@
       },
 
       VerificationTest[
-        WolframModelRuleValue[#1, "SignatureTraditionalForm"],
+        WolframModelRuleValue[#1, "TraditionalSignature"],
         #2
       ] & @@@ {
         {1 -> 2, Subscript[1, 1] -> Subscript[1, 1]},
