@@ -46,31 +46,26 @@ wolframModelRuleValue[rule_, property : Except[_List | _String]] := (
 
 (* Connectedness *)
 
+wolframModelRuleValue[rules_List, property : "ConnectedInput" | "ConnectedOutput" | "ConnectedInputOutputUnion"] :=
+  And @@ (wolframModelRuleValue[#, property] &) /@ rules
+
 wolframModelRuleValue[rule_Rule, "ConnectedInput"] := connectedHypergraphQ[First[rule]]
 
 wolframModelRuleValue[rule_Rule, "ConnectedOutput"] := connectedHypergraphQ[Last[rule]]
 
 wolframModelRuleValue[rule_Rule, "ConnectedInputOutputUnion"] := connectedHypergraphQ[Flatten[List @@ rule, 1]]
 
-wolframModelRuleValue[rules_List, property : "ConnectedInput" | "ConnectedOutput" | "ConnectedInputOutputUnion"] :=
-  And @@ (wolframModelRuleValue[#, property] &) /@ rules
-
 (* Arity *)
-
-wolframModelRuleValue[rule_Rule, "MaximumArity"] := Max[maximumHypergraphArity /@ List @@ rule]
 
 wolframModelRuleValue[rules_List, "MaximumArity"] := Max[wolframModelRuleValue[#, "MaximumArity"] & /@ rules]
 
-maximumHypergraphArity[edge : Except[_List]] := 1
+wolframModelRuleValue[rule_Rule, "MaximumArity"] :=
+  Max[maximumHypergraphArity /@ toCanonicalHypergraphForm /@ List @@ rule]
 
-maximumHypergraphArity[edges_List] := Max[edgeArity /@ edges]
-
-edgeArity[edge : Except[_List]] := 1
-
-edgeArity[edge_List] := Length[edge]
+maximumHypergraphArity[edges_List] := Max[Length /@ edges]
 
 (* Node Counts *)
 
-wolframModelRuleValue[rule_Rule, "RuleNodeCounts"] := Length @* vertexList /@ List @@ rule
+wolframModelRuleValue[rule_Rule, "RuleNodeCounts"] := Length @* vertexList /@ rule
 
 wolframModelRuleValue[rules_List, "RuleNodeCounts"] := wolframModelRuleValue[#, "RuleNodeCounts"] & /@ rules
