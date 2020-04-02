@@ -11,8 +11,9 @@ WolframModelRuleValue::usage = usageString[
 
 SyntaxInformation[WolframModelRuleValue] = {"ArgumentsPattern" -> {_, _.}};
 
-$WolframModelRuleProperties =
-  {"ConnectedInput", "ConnectedOutput", "ConnectedInputOutputUnion", "MaximumArity", "RuleNodeCounts"};
+$WolframModelRuleProperties = {
+  "ConnectedInput", "ConnectedOutput", "ConnectedInputOutputUnion", "MaximumArity", "RuleNodeCounts",
+  "RuleNodesDroppedAdded"};
 
 With[{properties = $WolframModelRuleProperties},
   FE`Evaluate[FEPrivate`AddSpecialArgCompletion["WolframModelRuleValue" -> {0, properties}]]];
@@ -66,6 +67,14 @@ maximumHypergraphArity[edges_List] := Max[Length /@ edges]
 
 (* Node Counts *)
 
+wolframModelRuleValue[rules_List, "RuleNodeCounts"] := wolframModelRuleValue[#, "RuleNodeCounts"] & /@ rules
+
 wolframModelRuleValue[rule_Rule, "RuleNodeCounts"] := Length @* vertexList /@ rule
 
-wolframModelRuleValue[rules_List, "RuleNodeCounts"] := wolframModelRuleValue[#, "RuleNodeCounts"] & /@ rules
+(* Nodes dropped and added *)
+
+wolframModelRuleValue[rules_List, "RuleNodesDroppedAdded"] :=
+  wolframModelRuleValue[#, "RuleNodesDroppedAdded"] & /@ rules
+
+wolframModelRuleValue[rule_Rule, "RuleNodesDroppedAdded"] :=
+  Length /@ ({Complement[#1, #2], Complement[#2, #1]} &) @@ vertexList /@ List @@ rule
