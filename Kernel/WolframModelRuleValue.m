@@ -9,6 +9,9 @@ WolframModelRuleValue::usage = usageString[
   "WolframModelRuleValue[`r`, `p`] yields a value for property `p` of Wolfram model rule `r`.",
   "WolframModelRuleValue[`r`] yields values of all available properties."];
 
+$WolframModelRuleProperties::usage = usageString[
+  "$WolframModelRuleProperties gives the list of all available rule properties."];
+
 SyntaxInformation[WolframModelRuleValue] = {"ArgumentsPattern" -> {_, _.}};
 
 $WolframModelRuleProperties = Sort @ {
