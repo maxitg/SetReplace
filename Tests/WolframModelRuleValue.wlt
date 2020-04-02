@@ -42,12 +42,12 @@
 
       testUnevaluated[
         WolframModelRuleValue[Rule[1, 2, 3]],
-        {Rule::argr, WolframModelRuleValue::invalidRule}
+        {Rule::argrx, WolframModelRuleValue::invalidRule}
       ],
 
       testUnevaluated[
         WolframModelRuleValue[{Rule[1, 2], Rule[1, 2, 3]}, "NodesDroppedAdded"],
-        {Rule::argr, WolframModelRuleValue::invalidRule}
+        {Rule::argrx, WolframModelRuleValue::invalidRule}
       ],
 
       VerificationTest[
@@ -159,7 +159,7 @@
         {{1 -> 2, 3 -> 4}, 2},
         {{}, 0}
       }
-    }]
+    }
   |>,
 
   "$WolframModelRuleProperties" -> <|
