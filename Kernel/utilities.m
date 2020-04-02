@@ -7,6 +7,7 @@ PackageScope["multisetUnion"]
 PackageScope["multisetComplement"]
 PackageScope["multisetFilterRules"]
 PackageScope["indexHypergraph"]
+PackageScope["connectedHypergraphQ"]
 
 vertexList[edges_] := Sort[Union[Catenate[edges]]]
 
@@ -24,3 +25,11 @@ multisetFilterRules[rules_, filter_] := Catenate @ MapThread[
     Values @ KeySort @ Counts[filter]}]
 
 indexHypergraph[e_] := With[{vertices = vertexList[e]}, Replace[e, Thread[vertices -> Range[Length[vertices]]], {2}]]
+
+connectedHypergraphQ[edge : Except[_List]] := connectedHypergraphQ[{edge}]
+
+connectedHypergraphQ[edges_List] := ConnectedGraphQ[Graph[Catenate[toNormalEdges /@ edges]]]
+
+toNormalEdges[vertex : Except[_List]] := toNormalEdges[{vertex}]
+
+toNormalEdges[edge_List] := UndirectedEdge @@@ Partition[edge, 2, 1, 1]
