@@ -11,9 +11,9 @@ WolframModelRuleValue::usage = usageString[
 
 SyntaxInformation[WolframModelRuleValue] = {"ArgumentsPattern" -> {_, _.}};
 
-$WolframModelRuleProperties = {
-  "ConnectedInput", "ConnectedOutput", "ConnectedInputOutputUnion", "MaximumArity", "RuleNodeCounts",
-  "RuleNodesDroppedAdded", "RuleSignature", "RuleSignatureTraditionalForm", "TransformationCount"};
+$WolframModelRuleProperties = Sort @ {
+  "ConnectedInput", "ConnectedOutput", "ConnectedInputOutputUnion", "MaximumArity", "NodeCounts", "NodesDroppedAdded",
+  "Signature", "SignatureTraditionalForm", "TransformationCount"};
 
 With[{properties = $WolframModelRuleProperties},
   FE`Evaluate[FEPrivate`AddSpecialArgCompletion["WolframModelRuleValue" -> {0, properties}]]];
@@ -72,34 +72,37 @@ wolframModelRuleValue[input_ -> output_, "ConnectedInputOutputUnion"] :=
 
 wolframModelRuleValue[
     rules : {Rule[_, _]...},
-    property :
-      "MaximumArity" | "RuleNodeCounts" | "RuleNodesDroppedAdded" | "RuleSignature" | "RuleSignatureTraditionalForm"] :=
+    property : "NodeCounts" | "NodesDroppedAdded" | "Signature" | "SignatureTraditionalForm"] :=
   wolframModelRuleValue[#, property] & /@ rules
 
 (* Arity *)
 
-wolframModelRuleValue[input_ -> output_, "MaximumArity"] :=
-  Max[maximumHypergraphArity /@ toCanonicalHypergraphForm /@ {input, output}]
+wolframModelRuleValue[rules : {Rule[_, _]...}, "MaximumArity"] :=
+  Max[wolframModelRuleValue[#, "MaximumArity"] & /@ rules, 0]
 
-maximumHypergraphArity[edges_List] := Max[Length /@ edges]
+wolframModelRuleValue[input_ -> output_, "MaximumArity"] :=
+  Max[maximumHypergraphArity /@ toCanonicalHypergraphForm /@ {input, output}, 0]
+
+maximumHypergraphArity[edges_List] := Max[Length /@ edges, 0]
 
 (* Node Counts *)
 
-wolframModelRuleValue[rule : Rule[_, _], "RuleNodeCounts"] := Length @* vertexList /@ rule
+wolframModelRuleValue[rule : Rule[_, _], "NodeCounts"] := Length @* vertexList /@ rule
 
 (* Nodes dropped and added *)
 
-wolframModelRuleValue[input_ -> output_, "RuleNodesDroppedAdded"] :=
+wolframModelRuleValue[input_ -> output_, "NodesDroppedAdded"] :=
   Length /@ ({Complement[#1, #2], Complement[#2, #1]} &) @@ vertexList /@ {input, output}
 
 (* Rule signature *)
 
-wolframModelRuleValue[rule : Rule[_, _], "RuleSignature"] := hypergraphSignature /@ toCanonicalHypergraphForm /@ rule
+wolframModelRuleValue[rule : Rule[_, _], "Signature"] := hypergraphSignature /@ toCanonicalHypergraphForm /@ rule
 
-hypergraphSignature[edges_] := Reverse /@ Tally[Length /@ edges]
+hypergraphSignature[edges_] := SortBy[Reverse /@ Tally[Length /@ edges], Last]
 
-wolframModelRuleValue[rule : Rule[_, _], "RuleSignatureTraditionalForm"] :=
-  Row /@ Apply[Subscript, wolframModelRuleValue[rule, "RuleSignature"], {2}]
+wolframModelRuleValue[rule : Rule[_, _], "SignatureTraditionalForm"] :=
+  Switch[Length[#], 0, "\[EmptySet]", 1, First[#], _, Row[#]] & /@
+    Apply[Subscript, wolframModelRuleValue[rule, "Signature"], {2}]
 
 (* Rule count *)
 
