@@ -13,7 +13,7 @@ SyntaxInformation[WolframModelRuleValue] = {"ArgumentsPattern" -> {_, _.}};
 
 $WolframModelRuleProperties = {
   "ConnectedInput", "ConnectedOutput", "ConnectedInputOutputUnion", "MaximumArity", "RuleNodeCounts",
-  "RuleNodesDroppedAdded"};
+  "RuleNodesDroppedAdded", "RuleSignature", "RuleSignatureTraditionalForm", "TransformationCount"};
 
 With[{properties = $WolframModelRuleProperties},
   FE`Evaluate[FEPrivate`AddSpecialArgCompletion["WolframModelRuleValue" -> {0, properties}]]];
@@ -26,55 +26,83 @@ WolframModelRuleValue[args___] := Module[{result = Catch[wolframModelRuleValue[a
 
 wolframModelRuleValue[args___] /; !Developer`CheckArgumentCount[WolframModelRuleValue[args], 1, 2] := Throw[$Failed]
 
-wolframModelRuleValue[rule_, properties_List] := Check[wolframModelRuleValue[rule, #], Throw[$Failed]] & /@ properties
+$rulePattern = Rule[_, _] | {Rule[_, _]...}
 
-wolframModelRuleValue[rule_] :=
+wolframModelRuleValue[rule : $rulePattern, properties_List] :=
+  Check[wolframModelRuleValue[rule, #], Throw[$Failed]] & /@ properties
+
+wolframModelRuleValue[rule : $rulePattern] :=
   Association @ Thread[$WolframModelRuleProperties -> wolframModelRuleValue[rule, $WolframModelRuleProperties]]
+
+WolframModelRuleValue::invalidRule = "The rule specification `1` should either be a Rule or a List of rules.";
+
+wolframModelRuleValue[rule : Except[$rulePattern], _ : {}] := (
+  Message[WolframModelRuleValue::invalidRule, rule];
+  Throw[$Failed];
+)
 
 WolframModelRuleValue::unknownProperty = "Property `1` should be one of $WolframModelRuleProperties.";
 
-wolframModelRuleValue[rule_, property_String : Except[Alternatives @@ $WolframModelRuleProperties]] := (
+wolframModelRuleValue[rule : $rulePattern, property : Except[Alternatives @@ $WolframModelRuleProperties, _String]] := (
   Message[WolframModelRuleValue::unknownProperty, property];
   Throw[$Failed];
 )
 
 WolframModelRuleValue::invalidProperty = "Property `1` should be either a String or a List of properties.";
 
-wolframModelRuleValue[rule_, property : Except[_List | _String]] := (
+wolframModelRuleValue[rule : $rulePattern, property : Except[_List | _String]] := (
   Message[WolframModelRuleValue::invalidProperty, property];
   Throw[$Failed];
 )
 
 (* Connectedness *)
 
-wolframModelRuleValue[rules_List, property : "ConnectedInput" | "ConnectedOutput" | "ConnectedInputOutputUnion"] :=
+wolframModelRuleValue[
+    rules : {Rule[_, _]...}, property : "ConnectedInput" | "ConnectedOutput" | "ConnectedInputOutputUnion"] :=
   And @@ (wolframModelRuleValue[#, property] &) /@ rules
 
-wolframModelRuleValue[rule_Rule, "ConnectedInput"] := connectedHypergraphQ[First[rule]]
+wolframModelRuleValue[input_ -> _, "ConnectedInput"] := connectedHypergraphQ[input]
 
-wolframModelRuleValue[rule_Rule, "ConnectedOutput"] := connectedHypergraphQ[Last[rule]]
+wolframModelRuleValue[_ -> output_, "ConnectedOutput"] := connectedHypergraphQ[output]
 
-wolframModelRuleValue[rule_Rule, "ConnectedInputOutputUnion"] := connectedHypergraphQ[Flatten[List @@ rule, 1]]
+wolframModelRuleValue[input_ -> output_, "ConnectedInputOutputUnion"] :=
+  connectedHypergraphQ[Flatten[{input, output}, 1]]
+
+(* Listable properties *)
+
+wolframModelRuleValue[
+    rules : {Rule[_, _]...},
+    property :
+      "MaximumArity" | "RuleNodeCounts" | "RuleNodesDroppedAdded" | "RuleSignature" | "RuleSignatureTraditionalForm"] :=
+  wolframModelRuleValue[#, property] & /@ rules
 
 (* Arity *)
 
-wolframModelRuleValue[rules_List, "MaximumArity"] := Max[wolframModelRuleValue[#, "MaximumArity"] & /@ rules]
-
-wolframModelRuleValue[rule_Rule, "MaximumArity"] :=
-  Max[maximumHypergraphArity /@ toCanonicalHypergraphForm /@ List @@ rule]
+wolframModelRuleValue[input_ -> output_, "MaximumArity"] :=
+  Max[maximumHypergraphArity /@ toCanonicalHypergraphForm /@ {input, output}]
 
 maximumHypergraphArity[edges_List] := Max[Length /@ edges]
 
 (* Node Counts *)
 
-wolframModelRuleValue[rules_List, "RuleNodeCounts"] := wolframModelRuleValue[#, "RuleNodeCounts"] & /@ rules
-
-wolframModelRuleValue[rule_Rule, "RuleNodeCounts"] := Length @* vertexList /@ rule
+wolframModelRuleValue[rule : Rule[_, _], "RuleNodeCounts"] := Length @* vertexList /@ rule
 
 (* Nodes dropped and added *)
 
-wolframModelRuleValue[rules_List, "RuleNodesDroppedAdded"] :=
-  wolframModelRuleValue[#, "RuleNodesDroppedAdded"] & /@ rules
+wolframModelRuleValue[input_ -> output_, "RuleNodesDroppedAdded"] :=
+  Length /@ ({Complement[#1, #2], Complement[#2, #1]} &) @@ vertexList /@ {input, output}
 
-wolframModelRuleValue[rule_Rule, "RuleNodesDroppedAdded"] :=
-  Length /@ ({Complement[#1, #2], Complement[#2, #1]} &) @@ vertexList /@ List @@ rule
+(* Rule signature *)
+
+wolframModelRuleValue[rule : Rule[_, _], "RuleSignature"] := hypergraphSignature /@ toCanonicalHypergraphForm /@ rule
+
+hypergraphSignature[edges_] := Reverse /@ Tally[Length /@ edges]
+
+wolframModelRuleValue[rule : Rule[_, _], "RuleSignatureTraditionalForm"] :=
+  Row /@ Apply[Subscript, wolframModelRuleValue[rule, "RuleSignature"], {2}]
+
+(* Rule count *)
+
+wolframModelRuleValue[rule : Rule[_, _], "TransformationCount"] := wolframModelRuleValue[{rule}, "TransformationCount"]
+
+wolframModelRuleValue[rules : {Rule[_, _]...}, "TransformationCount"] := Length[rules]
