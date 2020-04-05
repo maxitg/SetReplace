@@ -42,11 +42,13 @@ Each change to the code must fundamentally pass through 5 steps, more or less in
 
 ### Writing code
 
-This is self-explanatory. To help you get started, see how the code is [organized](#code-structure) and our notes on [code style](#code-style).
+In addition to the code itself, each pull request should include unit tests and documentation.
 
-TODO: mention should include unit tests and documentation.
+To help you get started, see how the code is [organized](#code-structure) and our notes on [code style](#code-style). Also, we are keeping dependencies to a minimum to make the paclet as easy to compile and run as possible. So, avoid adding dependencies if at all possible. That includes Wolfram Function Repository functions. Even though they don't require installation, most of them are not stable enough for use in *SetReplace*. In addition, using them will result in unexpected behavior (as they can be updated independently of *SetReplace*, and there is no way to enforce a specific version), generate unexpected messages (i.e., for updates) and use Internet connection causing unexpected slowdowns. If you still think adding a dependency is worth it, please open a feature request first to discuss it.
 
-TODO: mention dependencies
+The unit tests are particularly important if you are implementing a weed fix, as we need to make sure the weed you are fixing is not going to return in the future. And if you are implementing a new function, unit tests should not only cover the functionality, but also the behavior in case the function is called with invalid arguments. Each function should have at least some unit tests, otherwise one of the tests in [meta.wlt](Tests/meta.wlt) will fail.
+
+You should also modify documentation in the [README](README.md) if you are implementing new functionality, or causing any outputs already in the [README](README.md) to change.
 
 ### Opening a pull request
 
