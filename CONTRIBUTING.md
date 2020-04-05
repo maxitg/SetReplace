@@ -97,7 +97,7 @@ Please, [be polite](https://help.github.com/en/github/site-policy/github-communi
 
 ### Merging
 
-Once you see the green "Squash and merge" button, congratulations! :tada: That means all the necessary checks have passed, and you can merge your pull request! Push the green button, ***paste your pull request message to the commit message field***, and confirm. Your changes are now in, and will be available for the paclet server (`PacletInstall["SetReplace"]`) users within a week or so.
+Once you see the green "Squash and merge" button, congratulations! :tada: That means all the necessary checks have passed, and you can merge your pull request! Push the green button, ***paste your pull request message to the commit message field***, and confirm. Your changes are now in, and will be available to the paclet server (`PacletInstall["SetReplace"]`) users within a week or so.
 
 ## Code structure
 
@@ -106,3 +106,7 @@ TODO: add content, start by explaining how WL packages work.
 ## Code style
 
 Avoid `Flatten`, `Replace`, use `Thread` carefully.
+
+TODO: add content.
+
+That's all for our guidelines, now go figure out the fundamental theory of physics! :microscope: :telescope:
