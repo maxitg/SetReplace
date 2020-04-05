@@ -97,7 +97,7 @@ Please, [be polite](https://help.github.com/en/github/site-policy/github-communi
 
 ### Merging
 
-Once you see the green "Squash and merge" button, congratulations! :tada: That means all the necessary checks have passed, and you can merge your pull request! Push the green button, ***paste your pull request message to the commit message field***, and confirm. Your changes are now in, and will be available for paclet server (`PacletInstall["SetReplace"]`) users within a week or so.
+Once you see the green "Squash and merge" button, congratulations! :tada: That means all the necessary checks have passed, and you can merge your pull request! Push the green button, ***paste your pull request message to the commit message field***, and confirm. Your changes are now in, and will be available for the paclet server (`PacletInstall["SetReplace"]`) users within a week or so.
 
 ## Code structure
 
