@@ -154,6 +154,8 @@ The main dispatch function of *SetReplace* is the package-scope [`setSubstitutio
 
 [`setSubstitutionSystem$cpp`](Kernel/setSubstitutionSystem$cpp.m) on the other hand is the LibraryLink interface to [libSetReplace](#libsetreplace), which is the C++ implementation of Wolfram models.
 
+TODO: talk about `utilities.m`.
+
 ### libSetReplace
 
 libSetReplace is the C++ library that implements the `"LowLevel"` method of `WolframModel`. It lives in [`libSetReplace`](libSetReplace) directory, and there is also the [Xcode project](SetReplace.xcodeproj) for it. [`SetReplace.cpp`](libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](libSetReplace/SetReplace.hpp) implement the interface with Wolfram Language code.
@@ -161,6 +163,38 @@ libSetReplace is the C++ library that implements the `"LowLevel"` method of `Wol
 Every time `WolframModel` is called, an instance of class [`Set`](libSetReplace/Set.hpp) is created. `Set` in turn uses an instance of [`Matcher`](libSetReplace/Match.hpp) class to perform the actual matching of expressions. [This class](libSetReplace/Match.cpp) is the core of *SetReplace*.
 
 ### Tests
+
+Unit tests live in the [`Tests` folder](Tests). They are technically .wlt files, however, they contain more structure than ordinary .wlt files.
+
+Each file contains an [`Association`](https://reference.wolfram.com/language/ref/Association.html) with the following contents:
+
+```
+<|"FunctionName" -> <|"init" -> ..., "tests" -> {VerificationTest[...], ...}, "options" -> ...|>, ...|>
+```
+
+`"FunctionName"` is the name of the test group. It's what appears in the command line output of the test script to the left from `[ok]`. `"init"` is the code that is run before the tests. It usually contains definitions of test functions or variables commonly used in the tests. `"tests"` is code, which if evaluated after `"init"` results in the arbitrarily-nested structure of lists of [`VerificationTest`](https://reference.wolfram.com/language/ref/VerificationTest.html)s. Finally, `"options"` is currently only used to disable parallelization, which can be done by setting it to `{"Parallel" -> False}`.
+
+Apart from [`VerificationTest`](https://reference.wolfram.com/language/ref/VerificationTest.html), there are other convenience testing functions defined in [testUtilities.m](Kernel/testUtilities.m). For example, `"testUnevaluated"` can be used to test that the function returns unevaluated for given arguments, and produces a specified set of messages. `"testSymbolLeak"` can check if internal symbols are being produced and not garbage-collected during the evaluation of a function. Since these are `PackageScope` functions, they need to be used as, i.e., ``SetReplace`PackageScope`testUnevaluated[VerificationTest, args]``. To avoid typing `PackageScope` every time, however, it is convenient to define them in `"init"` as, i.e.,
+
+```
+Attributes[Global`testUnevaluated] = {HoldAll};
+Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+```
+
+This way, the test itself can be defined simply as
+
+```
+testUnevaluated[
+  MakeUniverse[42],
+  {MakeUniverse::badUniverse}
+]
+```
+
+Note that it's important to test not only the functionality, but also the behavior of the function in case it's called with invalid (or missing) arguments.
+
+The tests should be deterministic so that they can be reproduced. If the test cases are randomly generated, this can be achieved by setting [`SeedRandom`](https://reference.wolfram.com/language/ref/SeedRandom.html).
+
+If you want to implement performance tests, leave a very large leeway for the performance target, as the performance of CI servers may be different than what you would expect, and could fluctuate from run to run, which could result in randomly failing CI runs.
 
 ### README and CONTRIBUTING
 
