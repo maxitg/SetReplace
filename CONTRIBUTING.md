@@ -52,7 +52,21 @@ You should also modify documentation in the [README](README.md) if you are imple
 
 ### Opening a pull request
 
-TODO: add content
+Each pull request message should include detailed information on what was changed, optional comments for the reviewer, and **examples**, including screenshots if the output is a graphics. If your pull request closes an existing issue (as it generally should, as it's best to discuss your changes before implementing them), reference that issue in your pull request message. For an example of a good pull request message, see [#268](https://github.com/maxitg/SetReplace/pull/268).
+
+Next, assign one of the type [labels](https://github.com/maxitg/SetReplace/labels) to your pull request:
+* `feature`: new functionality, or change in existing functionality.
+* `optimization`: does not change functionality, but makes code faster.
+* `refactor`: does not change functionality, but makes the code more readable.
+* `weed`: fixes a weed.
+
+In addition, one or both of the following may be used:
+* `critical`: fixes something that severely breaks the package (usually used for weeds).
+* `breaking`: introduces API changes that would break existing code, better to avoid if possible.
+
+Next, assign a reviewer to your pull request. Ideally, it should be someone who have recently edited the same files you are changing. If in doubt, assign to [@maxitg](https://github.com/maxitg).
+
+It is important to keep your pull requests as small as possible (definitely under 1000 lines). This not only makes them easier to review and generally improves review quality, but also makes it more likely your changes will find their way into master, as it's always possible you will get distructed and won't be able to finish a one giant pull request. It also helps with keeping your pull requests up-to-date with master, which is important because changes in master might introduce conflicts or break your code.
 
 ### Automated tests
 
