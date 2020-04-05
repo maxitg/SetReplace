@@ -48,7 +48,7 @@ To help you get started, see how the code is [organized](#code-structure) and ou
 
 The unit tests are particularly important if you are implementing a weed fix, as we need to make sure the weed you are fixing is not going to return in the future. And if you are implementing a new function, unit tests should not only cover the functionality, but also the behavior in case the function is called with invalid arguments. Each function should have at least some unit tests, otherwise one of the tests in [meta.wlt](Tests/meta.wlt) will fail.
 
-If sharing variables between multiple tests, use `With` instead of `Module` or global assignment, because otherwise variables will not appear resolves in the command line error message if the test fails (which makes it harder to weed whack). In addition, try to avoid very large inputs and outputs for the tests if at all possible.
+If sharing variables between multiple tests, use [`With`](https://reference.wolfram.com/language/ref/With.html) instead of [`Module`](https://reference.wolfram.com/language/ref/Module.html) or global assignment, because otherwise variables will not appear resolves in the command line error message if the test fails (which makes it harder to weed whack). In addition, try to avoid very large inputs and outputs for the tests if at all possible.
 
 You should also modify documentation in the [README](README.md) if you are implementing new functionality, or causing any outputs already in the [README](README.md) to change.
 
@@ -101,7 +101,41 @@ Once you see the green "Squash and merge" button, congratulations! :tada: That m
 
 ## Code structure
 
-TODO: add content, start by explaining how WL packages work.
+The most important components of the package are the [Wolfram Language code](#wolfram-language-code), [C++ code](#libsetreplace), [unit tests](#tests), [documentation](#readme-and-contributing), and [various scripts](#scripts).
+
+### Wolfram Language code
+
+The Wolfram Language code, which constitutes the most of the package, lives in the [Kernel](Kernel) directory. We use the [new-style package structure](https://mathematica.stackexchange.com/a/176489/46895).
+
+Specifically, [init.m](Kernel/init.m) is loaded first, followed by the rest of the files which are picked up automatically. Generally, each Wolfram Language symbol would go to a separate file except for very small ones (like constants), or very large functions (like [`WolframModel`](Kernel/WolframModel.m)).
+
+Each file should start with a ``Package["SetReplace`"]`` line, followed by lines of the form `PackageExport["PublicSymbolName"]` for publicly available symbols, and `PackageScope["PackageSymbolName"]` for private symbols which still need to be used in other files. The symbols not included in either of these declarations will be private to that specific file.
+
+In addition, your public symbols should include a `Usage` message, which should be created with a [`usageString`](Kernel/usageString.m) function. Each argument, number and ellipsis should be [enclosed in backticks](https://github.com/maxitg/SetReplace/blob/048311f4139cd7146e3879c710b02cc0c90a72e5/Kernel/GeneralizedGridGraph.m#L7), which would automatically convert it to the correct style.
+
+Further, public symbols must include [`SyntaxInformation`](https://reference.wolfram.com/language/ref/SyntaxInformation.html), see [an example](https://github.com/maxitg/SetReplace/blob/048311f4139cd7146e3879c710b02cc0c90a72e5/Kernel/WolframModel.m#L45) for `WolframModel`.
+
+It is very important that functions correctly handle invalid inputs. For example, if you try to evaluate
+
+```
+In[] := WolframModel[1 -> 2, 1]
+WolframModel::invalidState: The initial state specification 1 should be a List.
+Out[] = WolframModel[1 -> 2, 1]
+```
+
+If we did not check here that the second argument should be a list, we would instead get the following effect:
+
+<img src="READMEImages/NoArgumentChecks.png" width="582">
+
+and the function would not even terminate, which is confusing and hostile to the user.
+
+### libSetReplace
+
+### Tests
+
+### README and CONTRIBUTING
+
+### Scripts
 
 ## Code style
 
@@ -109,4 +143,8 @@ Avoid `Flatten`, `Replace`, use `Thread` carefully.
 
 TODO: add content.
 
-That's all for our guidelines, now go figure out the fundamental theory of physics! :microscope: :telescope:
+That's all for our guidelines, now go figure out the fundamental theory of physics! :microscope: :telescope: :rocket:
+
+TODO: add navigation.
+
+TODO: change PR and issue templates.
