@@ -48,6 +48,8 @@ To help you get started, see how the code is [organized](#code-structure) and ou
 
 The unit tests are particularly important if you are implementing a weed fix, as we need to make sure the weed you are fixing is not going to return in the future. And if you are implementing a new function, unit tests should not only cover the functionality, but also the behavior in case the function is called with invalid arguments. Each function should have at least some unit tests, otherwise one of the tests in [meta.wlt](Tests/meta.wlt) will fail.
 
+If sharing variables between multiple tests, use `With` instead of `Module` or global assignment, because otherwise variables will not appear resolves in the command line error message if the test fails (which makes it harder to weed whack). In addition, try to avoid very large inputs and outputs for the tests if at all possible.
+
 You should also modify documentation in the [README](README.md) if you are implementing new functionality, or causing any outputs already in the [README](README.md) to change.
 
 ### Opening a pull request
@@ -70,11 +72,28 @@ It is important to keep your pull requests as small as possible (definitely unde
 
 ### Automated tests
 
-TODO: add content
+To run the tests, `cd` to the repository root, and run `./build.wls && ./install.wls && ./test.wls` from the command line. If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
+
+We have a CI that automatically runs tests for all commits on all branches (kudos to [Circle CI](https://circleci.com) for providing free resources for this project).
+
+We use a (private) docker image `maxitg/set-replace:ci` running *Ubuntu* and *Wolfram Engine*, which [runs](https://app.circleci.com/pipelines/github/maxitg/SetReplace/408/workflows/8577ff51-2f5a-4517-992c-b20c76dcf170/jobs/444) [build](build.wls), [install](install.wls) and [test](test.wls) scripts.
+
+Your code must successfully pass [test](test.wls) script to be mergeable to master.
+
+We also have a setup within Wolfram Research that allows us to build the paclet containing compiled binary libraries for all platforms, which we use for releases, but it's only available to developers working in the company.
 
 ### Code review
 
-TODO: add content
+First, if you have been assigned a `critical` pull request, please stop reading and review it (understand what the issue is, and verify the fix works) as soon as possible. Many people might be blocked by it right now.
+
+Otherwise, please review within one business day (24 hours except weekends), or at least notify the pull request author if you won't be able to do that.
+
+The main objectives for the code review is to:
+1. Verify that the code works (i.e., make sure you can reproduce examples in the pull request message).
+2. Read the code, understand it, and see if you can spot any potential weeds / unnecessary slowdowns / issues with it (including issues with code style as we don't currently have a linter).
+3. Check the pull request contains unit tests and changes documentation if appropriate.
+
+Please, [be polite](https://help.github.com/en/github/site-policy/github-community-guidelines), and comment directly on lines of code (which you can do on GitHub, or use [Reviewable](https://reviewable.io) if you prefer). Also, if you are commenting about something small (line insignificant code style style), add "Nit: " (for nitpicking) to the beginning of your comment.
 
 ### Merging
 
@@ -85,3 +104,5 @@ TODO: add content
 TODO: add content, start by explaining how WL packages work.
 
 ## Code style
+
+Avoid `Flatten`, `Replace`, use `Thread` carefully.
