@@ -8,7 +8,7 @@ There are fundamentally two kinds of things you can contribute: issues (reports 
 
 ## Weed reports (something is not working)
 
-First off, while it's common to call problems with the code "bugs", we call them *weeds* here instead (kudos to [@aokellermann](https://github.com/aokellermann)). That's because using the word "bug" in a negative context implicitly sends a message that *bugs* (aka insects) are someone bad and should be squashed. We don't agree with that sentiment, as *bugs* :ant: :beetle: :spider: are living creatures who deserve moral consideration. Hence, let's live "bugs" alone, and go *weed whacking*.
+First off, while it's common to call problems with the code "bugs", we call them *weeds* here instead (kudos to [@aokellermann](https://github.com/aokellermann)). That's because using the word "bug" in a negative context implicitly sends a message that *bugs* (aka insects) are someone bad and should be squashed. We don't agree with that sentiment, as *bugs* :ant: :beetle: :spider: are living creatures who deserve moral consideration. Hence, let's leave "bugs" alone, and go *weed whacking*.
 
 Also note, this repository is all about software. If you have found a issue with our physics model, or a mistake in one of our papers, please contact the author directly, or see our [contact page](???). Also, this repository is only about the *SetReplace* paclet. If you have found a week in a function repository function, use the form on that function's documentation page to contact the author directly.
 
