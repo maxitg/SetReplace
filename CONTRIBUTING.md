@@ -125,6 +125,27 @@ If we did not check here that the second argument should be a list, we would ins
 
 and the function would not even terminate, which is confusing and hostile to the user.
 
+One way to implement such argument checking is to make special `valid*Q` functions which would check each argument before running the function. This could work well for small functions, but it's not an ideal way to do it, because sometimes validity of the arguments can only be detected deep in the evaluation logic, and the validation function would be too complex and lead to code duplication.
+
+A better approach is to setup the function to catch exceptions, i.e.,
+
+```
+MakeUniverse[args___] := Module[{result = Catch[makeUniverse[args]]},
+  result /; result =!= $Failed
+]
+```
+
+and parse the inputs lazily, printing a message and throwing an exception if something is wrong:
+
+```
+makeUniverse[badUniverse_] := (
+  Message[MakeUniverse::bad, badUniverse];
+  Throw[$Failed]
+)
+```
+
+This way the error can occur arbitrarily deeply in the function logic, and it would still be easy to abort and return the function unevaluated.
+
 ### libSetReplace
 
 ### Tests
