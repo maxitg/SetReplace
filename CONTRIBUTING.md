@@ -117,11 +117,7 @@ Further, public symbols must include [`SyntaxInformation`](https://reference.wol
 
 It is very important that functions correctly handle invalid inputs. For example, if you try to evaluate
 
-```
-In[] := WolframModel[1 -> 2, 1]
-WolframModel::invalidState: The initial state specification 1 should be a List.
-Out[] = WolframModel[1 -> 2, 1]
-```
+<img src="READMEImages/ArgumentChecks.png" width="469">
 
 If we did not check here that the second argument should be a list, we would instead get the following effect:
 
