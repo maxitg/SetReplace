@@ -146,6 +146,14 @@ makeUniverse[badUniverse_] := (
 
 This way the error can occur arbitrarily deeply in the function logic, and it would still be easy to abort and return the function unevaluated.
 
+The main dispatch function of *SetReplace* is the package-scope [`setSubstitutionSystem`](Kernel/setSubstitutionSystem.m). It is essentially the generic evolution function. It is used by [`WolframModel`](Kernel/WolframModel.m), [`SetReplace`](Kernel/SetReplace.m), [`SetReplaceAll`](Kernel/SetReplaceAll.m), etc.
+
+[`setSubstitutionSystem`](Kernel/setSubstitutionSystem.m) parses the options (except for `WolframModel` specific ones), and uses one of the method functions, [`setSubstitutionSystem$cpp`](Kernel/setSubstitutionSystem$cpp.m) or [`setSubstitutionSystem$wl`](Kernel/setSubstitutionSystem$wl.m) to run the evolution.
+
+[`setSubstitutionSystem$wl`](Kernel/setSubstitutionSystem$wl.m) is the pure Wolfram Language implementation, which is more general (it supports arbitrary pattern rules and disconnected rules), but less efficient.
+
+[`setSubstitutionSystem$cpp`](Kernel/setSubstitutionSystem$cpp.m) on the other hand is the LibraryLink interface to [libSetReplace](#libsetreplace), which is the C++ implementation of Wolfram models.
+
 ### libSetReplace
 
 ### Tests
