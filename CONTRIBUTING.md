@@ -154,7 +154,7 @@ The main dispatch function of *SetReplace* is the package-scope [`setSubstitutio
 
 [`setSubstitutionSystem$cpp`](Kernel/setSubstitutionSystem$cpp.m) on the other hand is the LibraryLink interface to [libSetReplace](#libsetreplace), which is the C++ implementation of Wolfram models.
 
-TODO: talk about `utilities.m`.
+If you'd like to implement a small utility, which is not to be made public, and is too small to put in a separate file, put it in [utilities.m](Kernel/utilities.m) (and check utilities already there to not reinvent the wheel).
 
 ### libSetReplace
 
