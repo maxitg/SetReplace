@@ -156,6 +156,10 @@ The main dispatch function of *SetReplace* is the package-scope [`setSubstitutio
 
 ### libSetReplace
 
+libSetReplace is the C++ library that implements the `"LowLevel"` method of `WolframModel`. It lives in [`libSetReplace`](libSetReplace) directory, and there is also the [Xcode project](SetReplace.xcodeproj) for it. [`SetReplace.cpp`](libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](libSetReplace/SetReplace.hpp) implement the interface with Wolfram Language code.
+
+Every time `WolframModel` is called, an instance of class [`Set`](libSetReplace/Set.hpp) is created. `Set` in turn uses an instance of [`Matcher`](libSetReplace/Match.hpp) class to perform the actual matching of expressions. [This class](libSetReplace/Match.cpp) is the core of *SetReplace*.
+
 ### Tests
 
 ### README and CONTRIBUTING
