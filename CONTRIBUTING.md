@@ -219,6 +219,8 @@ The comments in the Wolfram Language code are encouraged, but free-style, and th
 
 ### Scripts
 
+The three main scripts of *SetReplace* are [build.wls](build.wls), [install.wls](install.wls) and [test.wls](test.wls). The build script is the most complex of the three, and it uses additional definitions in [buildInit.wl](scripts/buildInit.wl). In addition to building the C++ code and packing the paclet, it also auto-generates the paclet version number based on the number of commits to master from the checkpoint defined in [version.wl](scripts/version.wl). Some of the code in the [scripts](scripts) folder are only used for building *SetReplace* on the internal Wolfram Research systems, which are only available for internal Wolfram developers.
+
 ## Code style
 
 Avoid `Flatten`, `Replace`, use `Thread` carefully.
