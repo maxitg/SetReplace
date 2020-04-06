@@ -168,7 +168,7 @@ If you'd like to implement a small utility, which is not to be made public, and 
 
 libSetReplace is the C++ library that implements the `"LowLevel"` method of [`WolframModel`](/Kernel/WolframModel.m). It lives in [`libSetReplace`](/libSetReplace) directory, and there is also the [Xcode project](/SetReplace.xcodeproj) for it. [`SetReplace.cpp`](/libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](/libSetReplace/SetReplace.hpp) implement the interface with Wolfram Language code.
 
-Every time [`WolframModel`](Kernel/WolframModel.m) is called, an instance of class [`Set`](/libSetReplace/Set.hpp) is created. [`Set`](/libSetReplace/Set.hpp) in turn uses an instance of [`Matcher`](/libSetReplace/Match.hpp) class to perform the actual matching of expressions. [This class](/libSetReplace/Match.cpp) is the core of *SetReplace*.
+Every time [`WolframModel`](/Kernel/WolframModel.m) is called, an instance of class [`Set`](/libSetReplace/Set.hpp) is created. [`Set`](/libSetReplace/Set.hpp) in turn uses an instance of [`Matcher`](/libSetReplace/Match.hpp) class to perform the actual matching of expressions. [This class](/libSetReplace/Match.cpp) is the core of *SetReplace*.
 
 ### Tests
 
@@ -265,8 +265,6 @@ In addition to that, here are some more-or-less established rules:
   * Do not use `using namespace std;`.
 
 That's all for our guidelines, now let's go figure out the fundamental theory of physics! :microscope: :telescope: :rocket:
-
-TODO: Check references.
 
 TODO: Check with grammarly.
 
