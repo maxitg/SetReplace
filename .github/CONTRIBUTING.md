@@ -22,7 +22,7 @@ To report a weed, follow these steps:
   * The output you expect to see.
   * The output of `SystemInformation["Small"]` and `$SetReplaceGitSHA`.
   * If the weed appears randomly and is not easy to reproduce, add details about how often and in what circumstances you encounter it.
-4. If you have a Mathematica notebook with more details, you can attach it to the issue, just compress it to a `ZIP` file.
+4. If you have a Mathematica notebook with more details, you can attach it to the issue, just compress it to a `ZIP` file first.
 5. Click "Submit new issue".
 6. Your issue is now on the list, and a developer will look at it if/when they have a chance. But if it does not get any attention, the best you can do is to [fix it yourself](#code).
 
@@ -36,7 +36,7 @@ The process is similar to weed reports, just use the "Feature request" option in
 
 If you would like to contribute code, thanks again! :tada: :balloon: :tada:
 
-In the sections below, we describe our [development process](#development-processß), [the code structure](#code-structure), and [our code style rules](#code-style). However, if you are unsure about something, don't let these rules deter you from opening pull requests! If something is missing, or if there are issues with the code style, someone will help you fix them during code review.
+In the sections below, we describe our [development process](#development-process), [the code structure](#code-structure), and [our code style rules](#code-style). However, if you are unsure about something, don't let these rules deter you from opening pull requests! If something is missing, or if there are issues with the code style, someone will help you fix them during code review.
 
 ## Development process
 
@@ -174,7 +174,7 @@ Every time the `"LowLevel"` implementation of [`WolframModel`](/Kernel/WolframMo
 
 ### Tests
 
-Unit tests live in the [`Tests` folder](/Tests). They are technically .wlt files, but they contain more structure.
+Unit tests live in the [Tests folder](/Tests). They are technically .wlt files, but they contain more structure.
 
 Each file consists of a single [`Association`](https://reference.wolfram.com/language/ref/Association.html):
 
@@ -258,7 +258,7 @@ In addition to that, here are some more-or-less established rules:
 
 * The function arguments should either all go on the same line, or should each be put on a separate line (except for special cases where a large quantity of short arguments is used).
 * Avoid using [`Flatten`](https://reference.wolfram.com/language/ref/Flatten.html) and [`ReplaceAll`](https://reference.wolfram.com/language/ref/ReplaceAll.html) without explicit level arguments. That is because it is very easy to accidentally assume that the user's input is not a [`List`](https://reference.wolfram.com/language/ref/List.html) (i.e., a vertex name), even though it can be, in which case you would [`Flatten`](https://reference.wolfram.com/language/ref/Flatten.html) too much, and cause a weed. It is preferred to use [`Catenate`](https://reference.wolfram.com/language/ref/Catenate.html) and [`Replace`](https://reference.wolfram.com/language/ref/Replace.html) instead of these functions.
-* Similar issue could happen with [`Thread`](https://reference.wolfram.com/language/ref/Thread.html), especially when used to thread a single element over multiple. For example, if is easy to naively assume `Thread[x -> {1, 2, 3}]` would always yield `{x -> 1, x -> 2, x -> 3}`. Except, sometimes it might be called as `With[{x = {4, 5, 6}}, Thread[x -> {1, 2, 3}]]`.
+* Similar issue could happen with [`Thread`](https://reference.wolfram.com/language/ref/Thread.html), especially when used to thread a single element over multiple. For example, it is easy to assume naively that `Thread[x -> {1, 2, 3}]` would always yield `{x -> 1, x -> 2, x -> 3}`. Except, sometimes it might be called as `With[{x = {4, 5, 6}}, Thread[x -> {1, 2, 3}]]`.
 * Use uppercase camel for public symbols, lowercase camel for internal (including PackageScope) symbols.
 * Start global constants with `$`, whether internal or public, and tags (such as used in [`Throw`](https://reference.wolfram.com/language/ref/Throw.html) or [`Sow`](https://reference.wolfram.com/language/ref/Sow.html), or as generic enum labels) with `$$`.
 * C++ code generally uses the Xcode linter style, with the following clarifications:
