@@ -265,7 +265,3 @@ In addition to that, here are some more-or-less established rules:
   * Do not use `using namespace std;`.
 
 That's all for our guidelines, now let's go figure out the fundamental theory of physics! :microscope: :telescope: :rocket:
-
-TODO: Check with grammarly.
-
-TODO: Check manually.
