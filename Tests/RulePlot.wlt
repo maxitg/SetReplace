@@ -4,6 +4,8 @@
       Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
+      Global`checkGraphics[args___] := SetReplace`PackageScope`checkGraphics[args];
+      Global`graphicsQ[args___] := SetReplace`PackageScope`graphicsQ[args];
 
       $rulesForVertexSizeConsistency = {
         {{1}} -> {{1}},
@@ -58,8 +60,7 @@
       ],
 
       VerificationTest[
-        Head[RulePlot[WolframModel[{{1}} -> {{2}}]]],
-        Graphics
+        graphicsQ[RulePlot[WolframModel[{{1}} -> {{2}}]]]
       ],
 
       testUnevaluated[
@@ -68,8 +69,7 @@
       ],
 
       VerificationTest[
-        Head[RulePlot[WolframModel[{{1}} -> {{2}}, Method -> "$$$AnyMethod$$$"]]],
-        Graphics
+        graphicsQ[RulePlot[WolframModel[{{1}} -> {{2}}, Method -> "$$$AnyMethod$$$"]]]
       ],
 
       testUnevaluated[
@@ -83,8 +83,7 @@
       ],
 
       VerificationTest[
-        Head[RulePlot[WolframModel[{{{1}} -> {{2}}, {{1}} -> {{2}}}]]],
-        Graphics
+        graphicsQ[RulePlot[WolframModel[{{{1}} -> {{2}}, {{1}} -> {{2}}}]]]
       ],
 
       (* Options *)
@@ -92,8 +91,7 @@
       (** EdgeType **)
 
       VerificationTest[
-        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> #]],
-        Graphics
+        graphicsQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "EdgeType" -> #]]
       ] & /@ {"Ordered", "Cyclic"},
 
       testUnevaluated[
@@ -116,7 +114,7 @@
       VerificationTest[
         With[{
             color = RGBColor[0.4, 0.6, 0.2]},
-          FreeQ[RulePlot[WolframModel[#], GraphHighlightStyle -> color], color] & /@
+          FreeQ[checkGraphics @ RulePlot[WolframModel[#], GraphHighlightStyle -> color], color] & /@
             {{{1}} -> {{2}}, {{1}} -> {{1}}, {{1, 2}} -> {{1, 2}}, {{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}}],
         {True, False, False, False, True}
       ],
@@ -124,8 +122,7 @@
       (** HyperedgeRendering **)
 
       VerificationTest[
-        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> #]],
-        Graphics
+        graphicsQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> #]]
       ] & /@ {"Subgraphs", "Polygons"},
 
       testUnevaluated[
@@ -143,7 +140,7 @@
       VerificationTest[
         SameQ @@
           Cases[
-            RulePlot[
+            checkGraphics @ RulePlot[
               WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}],
               VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {2, 0}, 4 -> {3, 0}, 5 -> {4, 0}}],
             Disk[p_, _] :> p,
@@ -156,7 +153,7 @@
         Length[
             Union[
               Cases[
-                RulePlot[
+                checkGraphics @ RulePlot[
                   WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}],
                   VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {0, 0}, 3 -> {0, 0}, 4 -> {0, 0}, 5 -> {0, 0}}],
                 Disk[p_, _] :> p,
@@ -165,8 +162,7 @@
       ],
 
       VerificationTest[
-        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexCoordinateRules -> {}]],
-        Graphics
+        graphicsQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexCoordinateRules -> {}]]
       ],
 
       testUnevaluated[
@@ -177,19 +173,24 @@
       (** VertexLabels **)
 
       VerificationTest[
-        Sort[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexLabels -> Automatic], Text[i_, ___] :> i, All]],
+        Sort[Cases[
+          checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexLabels -> Automatic],
+          Text[i_, ___] :> i,
+          All]],
         {1, 2, 3, 3, 4, 5}
       ],
 
       VerificationTest[
-        Length[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexLabels -> x], Text[x, ___], All]],
+        Length[Cases[
+          checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexLabels -> x], Text[x, ___], All]],
         6
       ],
 
       (** Graphics **)
 
       VerificationTest[
-        Background /. AbsoluteOptions[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Background -> Black], Background],
+        Background /. AbsoluteOptions[
+          checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Background -> Black], Background],
         Black,
         SameTest -> Equal
       ],
@@ -197,8 +198,7 @@
       (** Frame **)
 
       VerificationTest[
-        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> #]],
-        Graphics
+        graphicsQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> #]]
       ] & /@ {False, True, Automatic},
 
       testUnevaluated[
@@ -211,7 +211,8 @@
       VerificationTest[
         MemberQ[
           Cases[
-            RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], FrameStyle -> RGBColor[0.33, 0.66, 0.77], Frame -> True][[1]],
+            checkGraphics @ RulePlot[
+              WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], FrameStyle -> RGBColor[0.33, 0.66, 0.77], Frame -> True][[1]],
             _ ? ColorQ,
             All],
           RGBColor[0.33, 0.66, 0.77]]
@@ -220,7 +221,8 @@
       VerificationTest[
         Not @ MemberQ[
           Cases[
-            RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], FrameStyle -> RGBColor[0.33, 0.66, 0.77], Frame -> False][[1]],
+            checkGraphics @ RulePlot[
+              WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], FrameStyle -> RGBColor[0.33, 0.66, 0.77], Frame -> False][[1]],
             _ ? ColorQ,
             All],
           RGBColor[0.33, 0.66, 0.77]]
@@ -230,28 +232,28 @@
 
       VerificationTest[
         MatchQ[
-          RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], PlotLegends -> "Text"],
+          checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], PlotLegends -> "Text"],
           Legended[_, Placed[StandardForm[{{1, 2, 3}} -> {{3, 4, 5}}], Below]]]
       ],
 
       VerificationTest[
-        MatchQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], PlotLegends -> "test"], Legended[_, "test"]]
+        MatchQ[
+          checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], PlotLegends -> "test"],
+          Legended[_, "test"]]
       ],
 
       VerificationTest[
-        Not @ MatchQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], Legended[___]]
+        Not @ MatchQ[checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], Legended[___]]
       ],
 
       (** Spacings **)
 
       VerificationTest[
-        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]],
-        Graphics
+        graphicsQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]]
       ] & /@ {0, 1, {{1, 0}, {0, 0}}, {{0, 1}, {0, 0}}, {{0, 0}, {1, 0}}, {{0, 0}, {0, 1}}},
 
       VerificationTest[
-        Head[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]],
-        Graphics
+        graphicsQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Spacings -> #]]
       ] & /@ {1, {{1, 1}, {1, 1}}},
 
       testUnevaluated[
@@ -316,21 +318,21 @@
       (** Vertex amplification **)
 
       VerificationTest[
-        First[Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], Disk[_, r_] :> r, All]] > 
-          First[Cases[WolframModelPlot[{{1, 2, 3}}], Disk[_, r_] :> r, All]]
+        First[Cases[checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], Disk[_, r_] :> r, All]] > 
+          First[Cases[checkGraphics @ WolframModelPlot[{{1, 2, 3}}], Disk[_, r_] :> r, All]]
       ],
 
       (** Consistent vertex sizes **)
 
       VerificationTest[
-        SameQ @@ Cases[RulePlot[WolframModel[#]], Disk[_, r_] :> r, All]
+        SameQ @@ Cases[checkGraphics @ RulePlot[WolframModel[#]], Disk[_, r_] :> r, All]
       ] & /@ $rulesForVertexSizeConsistency,
 
       (** Shared vertices are colored **)
 
       VerificationTest[
-        Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], _ ? ColorQ, All] =!=
-          Cases[RulePlot[WolframModel[{{1, 2, 3}} -> {{4, 5, 6}}]], _ ? ColorQ, All]
+        Cases[checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], _ ? ColorQ, All] =!=
+          Cases[checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{4, 5, 6}}]], _ ? ColorQ, All]
       ],
 
       (** RulePartsAspectRatio **)
@@ -350,19 +352,21 @@
         VerificationTest[
           SameQ @@ (ImageSizeRaw /.
               Options[
-                  RulePlot[WolframModel[rule], VertexCoordinateRules -> coordinatesNormal, "RulePartsAspectRatio" -> #],
+                  checkGraphics @ RulePlot[
+                    WolframModel[rule], VertexCoordinateRules -> coordinatesNormal, "RulePartsAspectRatio" -> #],
                   ImageSizeRaw] & /@
                 {0.01, 0.1})
         ],
 
         Function[coordinates, checkAspectRatio[
-            RulePlot[WolframModel[rule], VertexCoordinateRules -> coordinates, "RulePartsAspectRatio" -> #],
+            checkGraphics @ RulePlot[
+              WolframModel[rule], VertexCoordinateRules -> coordinates, "RulePartsAspectRatio" -> #],
             #,
             0.001,
             2] & /@
           {0.01, 0.1, 0.5, 0.8, 1, 1.2, 2, 10, 100}] /@ {coordinatesNormal, coordaintesSquare, coordinatesFlipped},
 
-        checkAspectRatio[RulePlot[WolframModel[rule], VertexCoordinateRules -> #1], #2, #3, 2] & @@@ {
+        checkAspectRatio[checkGraphics @ RulePlot[WolframModel[rule], VertexCoordinateRules -> #1], #2, #3, 2] & @@@ {
           {coordinatesNormal, 2 / 3, 0.1},
           {coordaintesSquare, 1, 0.1},
           {coordinatesFlipped, 2, 0.1},
@@ -371,13 +375,19 @@
 
         (* outer frame *)
         checkAspectRatio[
-            RulePlot[WolframModel[Table[rule, #]], Frame -> True, VertexCoordinateRules -> #2], #3, 0.1, 1] & @@@ {
+            checkGraphics @ RulePlot[WolframModel[Table[rule, #]], Frame -> True, VertexCoordinateRules -> #2],
+            #3,
+            0.1,
+            1] & @@@ {
           {1, coordinatesNormal, 1 / 3},
           {2, coordinatesNormal, 1 / 6},
           {1, coordaintesSquare, 1 / 2},
           {2, coordaintesSquare, 1 / 4},
           {3, coordaintesSquare, 1 / 6}}
       }]
+    },
+    "options" -> {
+      "Parallel" -> False
     }
   |>
 |>
