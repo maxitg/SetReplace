@@ -125,11 +125,11 @@ Further, public symbols must include [`SyntaxInformation`](https://reference.wol
 
 It is very important that functions correctly handle invalid inputs. For example, if you try to evaluate
 
-<img src="READMEImages/ArgumentChecks.png" width="469">
+<img src="../READMEImages/ArgumentChecks.png" width="469">
 
 If we did not check here that the second argument should be a list, we would instead get the following effect:
 
-<img src="READMEImages/NoArgumentChecks.png" width="582">
+<img src="../READMEImages/NoArgumentChecks.png" width="582">
 
 and the function would not even terminate, which is confusing and hostile to the user.
 
