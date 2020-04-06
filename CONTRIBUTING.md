@@ -101,7 +101,7 @@ Once you see the green "Squash and merge" button, congratulations! :tada: That m
 
 ## Code structure
 
-The most important components of the package are the [Wolfram Language code](#wolfram-language-code), [C++ code](#libsetreplace), [unit tests](#tests), [documentation](#readme-and-contributing), and [various scripts](#scripts).
+The most important components of the package are the [Wolfram Language code](#wolfram-language-code), [C++ code](#libsetreplace), [unit tests](#tests), [documentation](#documentation), and [various scripts](#scripts).
 
 ### Wolfram Language code
 
@@ -196,7 +196,26 @@ The tests should be deterministic so that they can be reproduced. If the test ca
 
 If you want to implement performance tests, leave a very large leeway for the performance target, as the performance of CI servers may be different than what you would expect, and could fluctuate from run to run, which could result in randomly failing CI runs.
 
-### README and CONTRIBUTING
+### Documentation
+
+The *SetReplace* documentation is contained in three places: [README.md](README.md), [CONTRIBUTING.md](.github/CONTRIBUTING.md), and the code comments. The structure of the .md files is for the most part self-explanatory.
+
+Some things to note are:
+* Large section should include navigation bars in the beginning (see the beginning of [README](README.md)).
+* All references to functions should be links, either to [the Wolfram Language documentation](https://reference.wolfram.com/language/), or to the corresponding section in [README](README.md).
+* Images (i.e., of output cells) should be made by selecting the relevant cells in the Front End, copying them as bitmaps, and saving them as .png files to [READMEImages](READMEImages) directory. They should then be inserted using the code similar to this:
+
+  ```
+  <img src="READMEImages/image.png" width="xxx">
+  ```
+
+  where the `width` can be computed as
+
+  ```
+  Round[0.6 First @ Import["$RepoRoot/READMEImages/image.png", "ImageSize"]]
+  ```
+
+The comments in the Wolfram Language code are encouraged, but free-style, and the C++ code is documented using [Doxygen](http://www.doxygen.nl).
 
 ### Scripts
 
