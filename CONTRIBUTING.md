@@ -1,3 +1,5 @@
+[Issues](#issues) | [Code](#code)
+
 First, thanks for contributing! :balloon: :gear: :thumbsup:
 
 These are the guidelines designed to make the development smooth, efficient and fun for all of us. But remember, they are created by us, not set in stone, and anybody is welcome to propose changes. Just open a pull request.
@@ -32,11 +34,15 @@ The process is similar to weed reports, except use "Feature request" option for 
 
 # Code
 
+[Development process](#development-process) | [Code structure](#code-structure) | [Code style](#code-style)
+
 If you would like to contribute code, thanks again! :balloon: :balloon: :balloon: :gear: :thumbsup:
 
 In the sections below, we describe our development process, the code structure, and our code style rules. However, if you are unsure about something, don't let these rules deter you from opening pull requests! If something is missing, or if there are issues with code style, someone will just point them out during code review.
 
 ## Development process
+
+[Writing code](#writing-code) | [Opening a pull request](#opening-a-pull-request) | [Automated tests](#automated-tests) | [Code review](#code-review) | [Merging](#merging)
 
 Each change to the code must fundamentally pass through 5 steps, more or less in that order: writing code, opening a pull request, passing automated tests, passing code review, and merging the PR.
 
@@ -100,6 +106,8 @@ Please, [be polite](https://help.github.com/en/github/site-policy/github-communi
 Once you see the green "Squash and merge" button, congratulations! :tada: That means all the necessary checks have passed, and you can merge your pull request! Push the green button, ***paste your pull request message to the commit message field***, and confirm. Your changes are now in, and will be available to the paclet server (`PacletInstall["SetReplace"]`) users within a week or so.
 
 ## Code structure
+
+[Wolfram Language code](#wolfram-language-code) | [libSetReplace](#libsetreplace) | [Tests](#tests) | [Documentation](#documentation) | [Scripts](#scripts)
 
 The most important components of the package are the [Wolfram Language code](#wolfram-language-code), [C++ code](#libsetreplace), [unit tests](#tests), [documentation](#documentation), and [various scripts](#scripts).
 
@@ -257,8 +265,6 @@ In addition to that, here are some more-or-less established rules:
   * Do not use `using namespace std;`.
 
 That's all for our guidelines, now let's go figure out the fundamental theory of physics! :microscope: :telescope: :rocket:
-
-TODO: add navigation.
 
 TODO: change PR and issue templates.
 
