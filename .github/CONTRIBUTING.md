@@ -156,7 +156,7 @@ This way the error can occur arbitrarily deeply in the function logic, and it wo
 
 The main dispatch function of *SetReplace* is the package-scope [`setSubstitutionSystem`](/Kernel/setSubstitutionSystem.m). It is essentially the generic evolution function. It is used by [`WolframModel`](/Kernel/WolframModel.m), [`SetReplace`](/Kernel/SetReplace.m), [`SetReplaceAll`](/Kernel/SetReplaceAll.m), etc.
 
-[`setSubstitutionSystem`](/Kernel/setSubstitutionSystem.m) parses the options (except for `WolframModel` specific ones), and uses one of the method functions, [`setSubstitutionSystem$cpp`](/Kernel/setSubstitutionSystem$cpp.m) or [`setSubstitutionSystem$wl`](/Kernel/setSubstitutionSystem$wl.m) to run the evolution.
+[`setSubstitutionSystem`](/Kernel/setSubstitutionSystem.m) parses the options (except for [`WolframModel`](/Kernel/WolframModel.m)-specific ones), and uses one of the method functions, [`setSubstitutionSystem$cpp`](/Kernel/setSubstitutionSystem$cpp.m) or [`setSubstitutionSystem$wl`](/Kernel/setSubstitutionSystem$wl.m) to run the evolution.
 
 [`setSubstitutionSystem$wl`](/Kernel/setSubstitutionSystem$wl.m) is the pure Wolfram Language implementation, which is more general (it supports arbitrary pattern rules and disconnected rules), but less efficient.
 
@@ -166,9 +166,9 @@ If you'd like to implement a small utility, which is not to be made public, and 
 
 ### libSetReplace
 
-libSetReplace is the C++ library that implements the `"LowLevel"` method of `WolframModel`. It lives in [`libSetReplace`](/libSetReplace) directory, and there is also the [Xcode project](/SetReplace.xcodeproj) for it. [`SetReplace.cpp`](/libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](/libSetReplace/SetReplace.hpp) implement the interface with Wolfram Language code.
+libSetReplace is the C++ library that implements the `"LowLevel"` method of [`WolframModel`](/Kernel/WolframModel.m). It lives in [`libSetReplace`](/libSetReplace) directory, and there is also the [Xcode project](/SetReplace.xcodeproj) for it. [`SetReplace.cpp`](/libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](/libSetReplace/SetReplace.hpp) implement the interface with Wolfram Language code.
 
-Every time `WolframModel` is called, an instance of class [`Set`](/libSetReplace/Set.hpp) is created. `Set` in turn uses an instance of [`Matcher`](/libSetReplace/Match.hpp) class to perform the actual matching of expressions. [This class](/libSetReplace/Match.cpp) is the core of *SetReplace*.
+Every time [`WolframModel`](Kernel/WolframModel.m) is called, an instance of class [`Set`](/libSetReplace/Set.hpp) is created. [`Set`](/libSetReplace/Set.hpp) in turn uses an instance of [`Matcher`](/libSetReplace/Match.hpp) class to perform the actual matching of expressions. [This class](/libSetReplace/Match.cpp) is the core of *SetReplace*.
 
 ### Tests
 
@@ -238,7 +238,7 @@ In addition to that, here are some more-or-less established rules:
 * Use at most a single empty line to separate code paragraphs (note, the Front End uses two by default, which should be fixed manually if you use the Front End for editing).
 * Write comments directly, and split them into lines. Don't use section definitions such as `(* ::Text:: *)`.
 * Use spaces instead of tabs, and use 2 spaces for indentation.
-* Close code block function brackets on the new line (for functions such as `Module`, `With` and `If`):
+* Close code block function brackets on the new line (for functions such as [`Module`](https://reference.wolfram.com/language/ref/Module.html), [`With`](https://reference.wolfram.com/language/ref/With.html) and [`If`](https://reference.wolfram.com/language/ref/If.html)):
 
   ```
   Module[{result = f[x]},
@@ -255,10 +255,10 @@ In addition to that, here are some more-or-less established rules:
   ```
 
 * The function arguments should either all go on the same line, or should each be put on a separate line (except for special cases where a large quantity of short arguments is used).
-* Avoid using `Flatten` and `ReplaceAll` with explicit level arguments. That is because it is very easy to accidentally assume that the user's input is not a list (i.e., a vertex name), even though it can be, in which case you would `Flatten` too much, and cause a weed. It is preferred to use `Catenate` and `Replace` instead of these functions.
-* Similar issue could happen with `Thread` especially when used to thread a single element over multple. For example, `Thread[x -> {1, 2, 3}]` is easy to assume would always yield `{x -> 1, x -> 2, x -> 3}`. Except, sometimes it might be called as `With[{x = {4, 5, 6}}, Thread[x -> {1, 2, 3}]]`.
+* Avoid using [`Flatten`](https://reference.wolfram.com/language/ref/Flatten.html) and [`ReplaceAll`](https://reference.wolfram.com/language/ref/ReplaceAll.html) without explicit level arguments. That is because it is very easy to accidentally assume that the user's input is not a list (i.e., a vertex name), even though it can be, in which case you would [`Flatten`](https://reference.wolfram.com/language/ref/Flatten.html) too much, and cause a weed. It is preferred to use [`Catenate`](https://reference.wolfram.com/language/ref/Catenate.html) and [`Replace`](https://reference.wolfram.com/language/ref/Replace.html) instead of these functions.
+* Similar issue could happen with [`Thread`](https://reference.wolfram.com/language/ref/Thread.html) especially when used to thread a single element over multple. For example, `Thread[x -> {1, 2, 3}]` is easy to assume would always yield `{x -> 1, x -> 2, x -> 3}`. Except, sometimes it might be called as `With[{x = {4, 5, 6}}, Thread[x -> {1, 2, 3}]]`.
 * Use uppercase camel for public symbols, lowercase camel for internal (including PackageScope) symbols.
-* Start global constants with `$`, whether internal or public, and tags (such as used in `Throw` or `Sow`, or as general enum labels) with `$$`.
+* Start global constants with `$`, whether internal or public, and tags (such as used in [`Throw`](https://reference.wolfram.com/language/ref/Throw.html) or [`Sow`](https://reference.wolfram.com/language/ref/Sow.html), or as general enum labels) with `$$`.
 * C++ code generally uses the Xcode linter style, with the following clarifications:
   * Variable and constant names use lowercase camel, class names use uppercase camel.
   * Type definitions are done with `using NewType = OldType;`.
@@ -266,8 +266,8 @@ In addition to that, here are some more-or-less established rules:
 
 That's all for our guidelines, now let's go figure out the fundamental theory of physics! :microscope: :telescope: :rocket:
 
-TODO: change PR and issue templates.
-
-TODO: Add references to all functions.
-
 TODO: Check references.
+
+TODO: Check with grammarly.
+
+TODO: Check manually.
