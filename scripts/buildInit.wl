@@ -56,6 +56,17 @@ copyWLSourceToBuildDirectory[] /; !$internalBuildQ := With[{
 
 fileStringReplace[file_, rules_] := Export[file, StringReplace[Import[file, "Text"], rules], "Text"]
 
+renameContext[Automatic, version_] := Module[{context},
+  context = Replace[
+    If[$internalBuildQ, AntProperty["context"], tryEnvironment["CONTEXT", "SetReplace"]],
+    "Version" -> "SetReplace$" <> StringReplace[version, "." -> "$"]] <> "`";
+  If[context =!= "SetReplace`",
+    Print["Building with context ", context];
+    renameContext[context];
+  ];
+  context
+]
+
 renameContext[newContext_] := fileStringReplace[#, "SetReplace`" -> newContext] & /@
   (FileNameJoin[{$buildDirectory, #}] &) /@
   Select[MatchQ[FileExtension[#], "m" | "wl"] &] @ Import[$buildDirectory]
@@ -101,13 +112,18 @@ updateBuildData[] := With[{
   FileTemplateApply[buildDataFile, buildDataFile];
 ]
 
-packPaclet[] := (
+addModifiedContextFlag[fileName_] := FileNameJoin[Append[
+  Most[FileNameSplit[fileName]],
+  StringJoin[StringRiffle[Most[StringSplit[Last[FileNameSplit[fileName]], "."]], "."], "-C.paclet"]]]
+
+packPaclet[context_] := Module[{pacletFileName},
   If[$internalBuildQ,
     Print["$Version: ", $Version];
     Print["$InstallationDirectory: ", $InstallationDirectory];
     Unset[$MessagePrePrint];
   ];
-  PackPaclet[$buildDirectory, If[$internalBuildQ, AntProperty["output_directory"], $repoRoot]];
+  pacletFileName = PackPaclet[$buildDirectory, If[$internalBuildQ, AntProperty["output_directory"], $repoRoot]];
+  If[context =!= "SetReplace`", RenameFile[pacletFileName, addModifiedContextFlag[pacletFileName]]];
   If[$internalBuildQ,
     SetDirectory[AntProperty["output_directory"]];
     If[TrueQ[FileExistsQ[FileNames["SetReplace*.paclet"][[1]]]],
@@ -115,4 +131,4 @@ packPaclet[] := (
       AntFail["Paclet not produced"]
     ];
   ];
-)
+]

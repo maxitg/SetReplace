@@ -4,6 +4,9 @@
   <property name='system_id' value='### Must be set by Jenkins ###' />
 
   <property environment='env' />
+  <condition property="context" value="${env.CONTEXT}" else="SetReplace">
+    <isset property="env.CONTEXT" />
+  </condition>
   <import file='${env.RE_ANTLIBRARY_HOME}/ant-lib.xml' />
 
   <!--
@@ -66,6 +69,7 @@
     <property name='keep.files_directory' value='true' />
   </target>
   
+  <property name='PacletNew.execute.has-custom' value='true' />
   <target name='PacletNew.SetReplace.execute' extensionOf='PacletNew.execute.custom'>
     <mathematica
       exe='${mathExe}'
