@@ -26,3 +26,6 @@ image of the output
 In[] := $SetReplaceGitSHA
 ```
 paste the output here without quotes.
+
+**Additional context**
+Add any other context or screenshots about the weed report here.
