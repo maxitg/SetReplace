@@ -197,10 +197,8 @@ toListStyleSpec[spec_Association, elements_] := Replace[elements, Reverse[Join[{
 
 toListStyleSpec[spec_List, _] := spec
 
-parseStyles[newSpec : Except[_List | _Association], elements_, Automatic, oldToNewTransform_] := newSpec
-
 parseStyles[newSpec_, elements_, oldSpec_, oldToNewTransform_] /;
-		AllTrue[{oldSpec, newSpec}, MatchQ[#, _List | _Association | Automatic] &] :=
+		AnyTrue[{oldSpec, newSpec}, MatchQ[#, _List | _Association] &] :=
 	MapThread[
 		If[#2 === Automatic, #1, Replace[#1, Automatic -> oldToNewTransform[#2]]] &,
 		toListStyleSpec[#, elements] & /@ {newSpec, oldSpec}]
