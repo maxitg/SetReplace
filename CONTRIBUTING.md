@@ -1,10 +1,10 @@
-[Issues](#issues) | [Code](#code)
-
 First, thanks for contributing! :balloon: :gear: :thumbsup:
 
 These are the guidelines designed to make the development smooth, efficient and fun for all of us. But remember, they are created by us, not set in stone, and anybody is welcome to propose changes. Just open a pull request.
 
 There are fundamentally two kinds of things you can contribute: issues (reports and ideas) and code.
+
+[Issues](#issues) | [Code](#code)
 
 # Issues
 
