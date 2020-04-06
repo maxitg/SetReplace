@@ -61,7 +61,7 @@ Each pull request message should include detailed information on what was change
 Next, assign one of the type [labels](https://github.com/maxitg/SetReplace/labels) to your pull request:
 * `feature`: new functionality, or change in existing functionality.
 * `optimization`: does not change functionality but makes code faster.
-* `refactor`: does not change functionality, but makes the code more readable.
+* `refactor`: does not change functionality, but makes the code better organized or more readable.
 * `weed`: fixes something that was not working.
 
 Also, one of the following may be used:
