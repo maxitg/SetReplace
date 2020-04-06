@@ -332,7 +332,7 @@ hypergraphEmbedding[
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
 	vertices = vertexList[edges];
 	{vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges} =
-		(toNormalEdges[#] /@ edges) & /@ {vertexLayoutEdgeType, edgeLayoutEdgeType};
+		toNormalEdges[edges, #] & /@ {vertexLayoutEdgeType, edgeLayoutEdgeType};
 	normalToHypergraphEmbedding[
 		edges,
 		edgeEmbeddingNormalEdges,
@@ -344,24 +344,37 @@ hypergraphEmbedding[
 			coordinateRules]]
 ]
 
-toNormalEdges["Ordered"][hyperedge_] :=
-	DirectedEdge @@@ Partition[hyperedge, 2, 1]
+toNormalEdges[edges_, partitionArgs___] := DirectedEdge @@@ Partition[#, partitionArgs] & /@ edges
 
-toNormalEdges["Cyclic"][hyperedge : Except[{}]] :=
-	DirectedEdge @@@ Append[Partition[hyperedge, 2, 1], hyperedge[[{-1, 1}]]]
+toNormalEdges[edges_, "Ordered"] := toNormalEdges[edges, 2, 1]
 
-toNormalEdges["Cyclic"][{}] := {}
+toNormalEdges[edges_, "Cyclic"] := toNormalEdges[edges, 2, 1, 1]
 
 graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
 		relevantCoordinateRules, vertexCoordinateRules, unscaledEmbedding},
 	relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
-	vertexCoordinateRules = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
-		relevantCoordinateRules,
-		graphEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules][[1]]
+	unscaledEmbedding = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
+		graphEmbedding[vertices, edgeEmbeddingEdges, layout, relevantCoordinateRules],
+		With[{ve = vertexEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules]},
+			{ve, edgeEmbedding[vertices, edgeEmbeddingEdges, layout, ve]}
+		]
 	];
-	unscaledEmbedding = graphEmbedding[vertices, edgeEmbeddingEdges, layout, vertexCoordinateRules];
 	rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules]
 ]
+
+vertexEmbedding[vertices_, edges_, layout_, {}] := Thread[vertices -> GraphEmbedding[Graph[vertices, edges], layout]]
+
+vertexEmbedding[vertices_, edges_, layout_, coordinateRules_] :=
+	graphEmbedding[vertices, edges, layout, coordinateRules][[1]]
+
+edgeEmbedding[vertices_, edges_, "SpringElectricalEmbedding", vertexCoordinates_] /;
+		SimpleGraphQ[Graph[UndirectedEdge @@@ edges]] := Module[{coordinates},
+	coordinates = Association[vertexCoordinates];
+	Thread[edges -> List @@@ Map[coordinates, edges, {2}]]
+]
+
+edgeEmbedding[vertices_, edges_, layout_, vertexCoordinates_] :=
+	graphEmbedding[vertices, edges, layout, vertexCoordinates][[2]]
 
 graphEmbedding[vertices_, edges_, layout_, coordinateRules_] := Replace[
 	Reap[
