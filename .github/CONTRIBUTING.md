@@ -12,7 +12,7 @@ There are fundamentally two kinds of things you can contribute: issues (reports 
 
 First off, while it's common to call problems with the code "bugs", we call them *weeds* here instead (kudos to [@aokellermann](https://github.com/aokellermann)). That's because using the word "bug" in a negative context implicitly sends a message that *bugs* (aka insects) are someone bad and should be squashed. We don't agree with that sentiment, as *bugs* :ant: :beetle: :spider: are living creatures who deserve moral consideration. Hence, let's leave "bugs" alone, and go *weed whacking*.
 
-Also note, this repository is all about software. If you have found a issue with our physics model, or a mistake in one of our papers, please contact the author directly, or see our [contact page](???). Also, this repository is only about the *SetReplace* paclet. If you have found a week in a function repository function, use the form on that function's documentation page to contact the author directly.
+Also note, this repository is all about software. If you have found a issue with our physics model, or a mistake in one of our papers, please contact the author directly, or see our [contact page](https://www.wolframphysics.org/contact/). Also, this repository is only about the *SetReplace* paclet. If you have found a weed in a function repository function, use the form on that function's documentation page to contact the author directly.
 
 To report a weed, follow these steps:
 1. Go the the [Issues page](https://github.com/maxitg/SetReplace/issues), and use the search to check if the weed you have encountered is in the list already. If it is, and it was not getting much attention recently, the best you can do is to comment that you care abut it being fixed, and leaving the example you have encountered that's not working (if it's different).
@@ -28,7 +28,7 @@ To report a weed, follow these steps:
 
 ## Feature suggestions
 
-If you have an idea to improve an existing function, add a property to `WolframModel`, or for a new function that does not currently exist, you can suggest it by creating a feature request. Someone might implement it if they like the idea, but there are no guarantees. Also note, this repository is all about software, for research ideas see our [contact page](???).
+If you have an idea to improve an existing function, add a property to `WolframModel`, or for a new function that does not currently exist, you can suggest it by creating a feature request. Someone might implement it if they like the idea, but there are no guarantees. Also note, this repository is all about software, for research ideas see our [contact page](https://www.wolframphysics.org/contact/).
 
 The process is similar to weed reports, except use "Feature request" option for the new issue instead of "Weed report", and don't include any version information.
 
