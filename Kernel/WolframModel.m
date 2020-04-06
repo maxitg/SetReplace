@@ -43,7 +43,7 @@ $WolframModelProperties::usage = usageString[
 
 
 SyntaxInformation[WolframModel] =
-	{"ArgumentsPattern" -> {_, _..., OptionsPattern[]}};
+	{"ArgumentsPattern" -> {_, _ ..., OptionsPattern[]}};
 
 
 (* ::Section:: *)

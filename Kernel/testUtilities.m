@@ -2,6 +2,8 @@ Package["SetReplace`"]
 
 PackageScope["testUnevaluated"]
 PackageScope["testSymbolLeak"]
+PackageScope["checkGraphics"]
+PackageScope["graphicsQ"]
 
 (* VerificationTest should not directly appear here, as it is replaced by test.wls into other heads during evaluation.
     Use testHead argument instead. *)
@@ -29,3 +31,22 @@ testSymbolLeak[testHead_, expr_, opts___] :=
     0,
     opts
   ];
+
+(* UsingFrontEnd is necessary while running from wolframscript *)
+(* Flashes a new frontend window momentarily, but that is ok, because this function is mostly for use in the CI *)
+frontEndErrors[expr_] := UsingFrontEnd @ Module[{notebook, result},
+  notebook = CreateDocument[ExpressionCell[expr]];
+  SelectionMove[notebook, All, Notebook];
+  result = MathLink`CallFrontEnd[FrontEnd`GetErrorsInSelectionPacket[notebook]];
+  NotebookClose[notebook];
+  result
+]
+
+checkGraphics::frontEndErrors := "``";
+
+checkGraphics[graphics_] := (
+  Message[checkGraphics::frontEndErrors, #] & /@ Flatten[frontEndErrors[graphics]];
+  graphics
+)
+
+graphicsQ[graphics_] := Head[graphics] === Graphics && frontEndErrors[graphics] === {}
