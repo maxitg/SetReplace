@@ -223,12 +223,45 @@ The three main scripts of *SetReplace* are [build.wls](build.wls), [install.wls]
 
 ## Code style
 
-Avoid `Flatten`, `Replace`, use `Thread` carefully.
+Unfortunately, there is no established style guidelines for Wolfram Language code, and even different source files in *SetReplace* currently use slightly different conventions (we are working on it). The best rule here is to try to be consistent as much as possible with the specific file you are editing.
 
-TODO: add content.
+In addition to that, here are some more-or-less established rules:
+* Keep line widths within 120 (does not apply to .md files).
+* Use at most a single empty line to separate code paragraphs (note, the Front End uses two by default, which should be fixed manually if you use the Front End for editing).
+* Write comments directly, and split them into lines. Don't use section definitions such as `(* ::Text:: *)`.
+* Use spaces instead of tabs, and use 2 spaces for indentation.
+* Close code block function brackets on the new line (for functions such as `Module`, `With` and `If`):
 
-That's all for our guidelines, now go figure out the fundamental theory of physics! :microscope: :telescope: :rocket:
+  ```
+  Module[{result = f[x]},
+    result *= 2;
+    result
+  ]
+  ```
+
+* However, close the brackets of ordinary functions on the same line as the last argument:
+
+  ```
+  veryLongFunctionCall[
+    longArgument1, longArgument2, longArgument3]
+  ```
+
+* The function arguments should either all go on the same line, or should each be put on a separate line (except for special cases where a large quantity of short arguments is used).
+* Avoid using `Flatten` and `ReplaceAll` with explicit level arguments. That is because it is very easy to accidentally assume that the user's input is not a list (i.e., a vertex name), even though it can be, in which case you would `Flatten` too much, and cause a weed. It is preferred to use `Catenate` and `Replace` instead of these functions.
+* Similar issue could happen with `Thread` especially when used to thread a single element over multple. For example, `Thread[x -> {1, 2, 3}]` is easy to assume would always yield `{x -> 1, x -> 2, x -> 3}`. Except, sometimes it might be called as `With[{x = {4, 5, 6}}, Thread[x -> {1, 2, 3}]]`.
+* Use uppercase camel for public symbols, lowercase camel for internal (including PackageScope) symbols.
+* Start global constants with `$`, whether internal or public, and tags (such as used in `Throw` or `Sow`, or as general enum labels) with `$$`.
+* C++ code generally uses the Xcode linter style, with the following clarifications:
+  * Variable and constant names use lowercase camel, class names use uppercase camel.
+  * Type definitions are done with `using NewType = OldType;`.
+  * Do not use `using namespace std;`.
+
+That's all for our guidelines, now let's go figure out the fundamental theory of physics! :microscope: :telescope: :rocket:
 
 TODO: add navigation.
 
 TODO: change PR and issue templates.
+
+TODO: Add references to all functions.
+
+TODO: Check references.
