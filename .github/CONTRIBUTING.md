@@ -56,7 +56,7 @@ The unit tests are particularly important if you are implementing a weed fix, as
 
 If sharing variables between multiple tests, use [`With`](https://reference.wolfram.com/language/ref/With.html) instead of [`Module`](https://reference.wolfram.com/language/ref/Module.html) or global assignment, because otherwise variables will not appear resolves in the command line error message if the test fails (which makes it harder to weed whack). In addition, try to avoid very large inputs and outputs for the tests if at all possible.
 
-You should also modify documentation in the [README](README.md) if you are implementing new functionality, or causing any outputs already in the [README](README.md) to change.
+You should also modify documentation in the [README](/README.md) if you are implementing new functionality, or causing any outputs already in the [README](/README.md) to change.
 
 ### Opening a pull request
 
@@ -82,9 +82,9 @@ To run the tests, `cd` to the repository root, and run `./build.wls && ./install
 
 We have a CI that automatically runs tests for all commits on all branches (kudos to [Circle CI](https://circleci.com) for providing free resources for this project).
 
-We use a (private) docker image `maxitg/set-replace:ci` running *Ubuntu* and *Wolfram Engine*, which [runs](https://app.circleci.com/pipelines/github/maxitg/SetReplace/408/workflows/8577ff51-2f5a-4517-992c-b20c76dcf170/jobs/444) [build](build.wls), [install](install.wls) and [test](test.wls) scripts.
+We use a (private) docker image `maxitg/set-replace:ci` running *Ubuntu* and *Wolfram Engine*, which [runs](https://app.circleci.com/pipelines/github/maxitg/SetReplace/408/workflows/8577ff51-2f5a-4517-992c-b20c76dcf170/jobs/444) [build](/build.wls), [install](/install.wls) and [test](/test.wls) scripts.
 
-Your code must successfully pass [test](test.wls) script to be mergeable to master.
+Your code must successfully pass [test](/test.wls) script to be mergeable to master.
 
 We also have a setup within Wolfram Research that allows us to build the paclet containing compiled binary libraries for all platforms, which we use for releases, but it's only available to developers working in the company.
 
@@ -113,23 +113,23 @@ The most important components of the package are the [Wolfram Language code](#wo
 
 ### Wolfram Language code
 
-The Wolfram Language code, which constitutes the most of the package, lives in the [Kernel](Kernel) directory. We use the [new-style package structure](https://mathematica.stackexchange.com/a/176489/46895).
+The Wolfram Language code, which constitutes the most of the package, lives in the [Kernel](/Kernel) directory. We use the [new-style package structure](https://mathematica.stackexchange.com/a/176489/46895).
 
-Specifically, [init.m](Kernel/init.m) is loaded first, followed by the rest of the files which are picked up automatically. Generally, each Wolfram Language symbol would go to a separate file except for very small ones (like constants), or very large functions (like [`WolframModel`](Kernel/WolframModel.m)).
+Specifically, [init.m](/Kernel/init.m) is loaded first, followed by the rest of the files which are picked up automatically. Generally, each Wolfram Language symbol would go to a separate file except for very small ones (like constants), or very large functions (like [`WolframModel`](/Kernel/WolframModel.m)).
 
 Each file should start with a ``Package["SetReplace`"]`` line, followed by lines of the form `PackageExport["PublicSymbolName"]` for publicly available symbols, and `PackageScope["PackageSymbolName"]` for private symbols which still need to be used in other files. The symbols not included in either of these declarations will be private to that specific file.
 
-In addition, your public symbols should include a `Usage` message, which should be created with a [`usageString`](Kernel/usageString.m) function. Each argument, number and ellipsis should be [enclosed in backticks](https://github.com/maxitg/SetReplace/blob/048311f4139cd7146e3879c710b02cc0c90a72e5/Kernel/GeneralizedGridGraph.m#L7), which would automatically convert it to the correct style.
+In addition, your public symbols should include a `Usage` message, which should be created with a [`usageString`](/Kernel/usageString.m) function. Each argument, number and ellipsis should be [enclosed in backticks](https://github.com/maxitg/SetReplace/blob/048311f4139cd7146e3879c710b02cc0c90a72e5/Kernel/GeneralizedGridGraph.m#L7), which would automatically convert it to the correct style.
 
 Further, public symbols must include [`SyntaxInformation`](https://reference.wolfram.com/language/ref/SyntaxInformation.html), see [an example](https://github.com/maxitg/SetReplace/blob/048311f4139cd7146e3879c710b02cc0c90a72e5/Kernel/WolframModel.m#L45) for `WolframModel`.
 
 It is very important that functions correctly handle invalid inputs. For example, if you try to evaluate
 
-<img src="../READMEImages/ArgumentChecks.png" width="469">
+<img src="/READMEImages/ArgumentChecks.png" width="469">
 
 If we did not check here that the second argument should be a list, we would instead get the following effect:
 
-<img src="../READMEImages/NoArgumentChecks.png" width="582">
+<img src="/READMEImages/NoArgumentChecks.png" width="582">
 
 and the function would not even terminate, which is confusing and hostile to the user.
 
@@ -154,25 +154,25 @@ makeUniverse[badUniverse_] := (
 
 This way the error can occur arbitrarily deeply in the function logic, and it would still be easy to abort and return the function unevaluated.
 
-The main dispatch function of *SetReplace* is the package-scope [`setSubstitutionSystem`](Kernel/setSubstitutionSystem.m). It is essentially the generic evolution function. It is used by [`WolframModel`](Kernel/WolframModel.m), [`SetReplace`](Kernel/SetReplace.m), [`SetReplaceAll`](Kernel/SetReplaceAll.m), etc.
+The main dispatch function of *SetReplace* is the package-scope [`setSubstitutionSystem`](/Kernel/setSubstitutionSystem.m). It is essentially the generic evolution function. It is used by [`WolframModel`](/Kernel/WolframModel.m), [`SetReplace`](/Kernel/SetReplace.m), [`SetReplaceAll`](/Kernel/SetReplaceAll.m), etc.
 
-[`setSubstitutionSystem`](Kernel/setSubstitutionSystem.m) parses the options (except for `WolframModel` specific ones), and uses one of the method functions, [`setSubstitutionSystem$cpp`](Kernel/setSubstitutionSystem$cpp.m) or [`setSubstitutionSystem$wl`](Kernel/setSubstitutionSystem$wl.m) to run the evolution.
+[`setSubstitutionSystem`](/Kernel/setSubstitutionSystem.m) parses the options (except for `WolframModel` specific ones), and uses one of the method functions, [`setSubstitutionSystem$cpp`](/Kernel/setSubstitutionSystem$cpp.m) or [`setSubstitutionSystem$wl`](/Kernel/setSubstitutionSystem$wl.m) to run the evolution.
 
-[`setSubstitutionSystem$wl`](Kernel/setSubstitutionSystem$wl.m) is the pure Wolfram Language implementation, which is more general (it supports arbitrary pattern rules and disconnected rules), but less efficient.
+[`setSubstitutionSystem$wl`](/Kernel/setSubstitutionSystem$wl.m) is the pure Wolfram Language implementation, which is more general (it supports arbitrary pattern rules and disconnected rules), but less efficient.
 
-[`setSubstitutionSystem$cpp`](Kernel/setSubstitutionSystem$cpp.m) on the other hand is the LibraryLink interface to [libSetReplace](#libsetreplace), which is the C++ implementation of Wolfram models.
+[`setSubstitutionSystem$cpp`](/Kernel/setSubstitutionSystem$cpp.m) on the other hand is the LibraryLink interface to [libSetReplace](#libsetreplace), which is the C++ implementation of Wolfram models.
 
-If you'd like to implement a small utility, which is not to be made public, and is too small to put in a separate file, put it in [utilities.m](Kernel/utilities.m) (and check utilities already there to not reinvent the wheel).
+If you'd like to implement a small utility, which is not to be made public, and is too small to put in a separate file, put it in [utilities.m](/Kernel/utilities.m) (and check utilities already there to not reinvent the wheel).
 
 ### libSetReplace
 
-libSetReplace is the C++ library that implements the `"LowLevel"` method of `WolframModel`. It lives in [`libSetReplace`](libSetReplace) directory, and there is also the [Xcode project](SetReplace.xcodeproj) for it. [`SetReplace.cpp`](libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](libSetReplace/SetReplace.hpp) implement the interface with Wolfram Language code.
+libSetReplace is the C++ library that implements the `"LowLevel"` method of `WolframModel`. It lives in [`libSetReplace`](/libSetReplace) directory, and there is also the [Xcode project](/SetReplace.xcodeproj) for it. [`SetReplace.cpp`](/libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](/libSetReplace/SetReplace.hpp) implement the interface with Wolfram Language code.
 
-Every time `WolframModel` is called, an instance of class [`Set`](libSetReplace/Set.hpp) is created. `Set` in turn uses an instance of [`Matcher`](libSetReplace/Match.hpp) class to perform the actual matching of expressions. [This class](libSetReplace/Match.cpp) is the core of *SetReplace*.
+Every time `WolframModel` is called, an instance of class [`Set`](/libSetReplace/Set.hpp) is created. `Set` in turn uses an instance of [`Matcher`](/libSetReplace/Match.hpp) class to perform the actual matching of expressions. [This class](/libSetReplace/Match.cpp) is the core of *SetReplace*.
 
 ### Tests
 
-Unit tests live in the [`Tests` folder](Tests). They are technically .wlt files, however, they contain more structure than ordinary .wlt files.
+Unit tests live in the [`Tests` folder](/Tests). They are technically .wlt files, however, they contain more structure than ordinary .wlt files.
 
 Each file contains an [`Association`](https://reference.wolfram.com/language/ref/Association.html) with the following contents:
 
@@ -182,7 +182,7 @@ Each file contains an [`Association`](https://reference.wolfram.com/language/ref
 
 `"FunctionName"` is the name of the test group. It's what appears in the command line output of the test script to the left from `[ok]`. `"init"` is the code that is run before the tests. It usually contains definitions of test functions or variables commonly used in the tests. `"tests"` is code, which if evaluated after `"init"` results in the arbitrarily-nested structure of lists of [`VerificationTest`](https://reference.wolfram.com/language/ref/VerificationTest.html)s. Finally, `"options"` is currently only used to disable parallelization, which can be done by setting it to `{"Parallel" -> False}`.
 
-Apart from [`VerificationTest`](https://reference.wolfram.com/language/ref/VerificationTest.html), there are other convenience testing functions defined in [testUtilities.m](Kernel/testUtilities.m). For example, `"testUnevaluated"` can be used to test that the function returns unevaluated for given arguments, and produces a specified set of messages. `"testSymbolLeak"` can check if internal symbols are being produced and not garbage-collected during the evaluation of a function. Since these are `PackageScope` functions, they need to be used as, i.e., ``SetReplace`PackageScope`testUnevaluated[VerificationTest, args]``. To avoid typing `PackageScope` every time, however, it is convenient to define them in `"init"` as, i.e.,
+Apart from [`VerificationTest`](https://reference.wolfram.com/language/ref/VerificationTest.html), there are other convenience testing functions defined in [testUtilities.m](/Kernel/testUtilities.m). For example, `"testUnevaluated"` can be used to test that the function returns unevaluated for given arguments, and produces a specified set of messages. `"testSymbolLeak"` can check if internal symbols are being produced and not garbage-collected during the evaluation of a function. Since these are `PackageScope` functions, they need to be used as, i.e., ``SetReplace`PackageScope`testUnevaluated[VerificationTest, args]``. To avoid typing `PackageScope` every time, however, it is convenient to define them in `"init"` as, i.e.,
 
 ```
 Attributes[Global`testUnevaluated] = {HoldAll};
@@ -206,12 +206,12 @@ If you want to implement performance tests, leave a very large leeway for the pe
 
 ### Documentation
 
-The *SetReplace* documentation is contained in three places: [README.md](README.md), [CONTRIBUTING.md](.github/CONTRIBUTING.md), and the code comments. The structure of the .md files is for the most part self-explanatory.
+The *SetReplace* documentation is contained in three places: [README.md](/README.md), [CONTRIBUTING.md](/.github/CONTRIBUTING.md), and the code comments. The structure of the .md files is for the most part self-explanatory.
 
 Some things to note are:
-* Large section should include navigation bars in the beginning (see the beginning of [README](README.md)).
-* All references to functions should be links, either to [the Wolfram Language documentation](https://reference.wolfram.com/language/), or to the corresponding section in [README](README.md).
-* Images (i.e., of output cells) should be made by selecting the relevant cells in the Front End, copying them as bitmaps, and saving them as .png files to [READMEImages](READMEImages) directory. They should then be inserted using the code similar to this:
+* Large section should include navigation bars in the beginning (see the beginning of [README](/README.md)).
+* All references to functions should be links, either to [the Wolfram Language documentation](https://reference.wolfram.com/language/), or to the corresponding section in [README](/README.md).
+* Images (i.e., of output cells) should be made by selecting the relevant cells in the Front End, copying them as bitmaps, and saving them as .png files to [READMEImages](/READMEImages) directory. They should then be inserted using the code similar to this:
 
   ```
   <img src="READMEImages/image.png" width="xxx">
@@ -227,7 +227,7 @@ The comments in the Wolfram Language code are encouraged, but free-style, and th
 
 ### Scripts
 
-The three main scripts of *SetReplace* are [build.wls](build.wls), [install.wls](install.wls) and [test.wls](test.wls). The build script is the most complex of the three, and it uses additional definitions in [buildInit.wl](scripts/buildInit.wl). In addition to building the C++ code and packing the paclet, it also auto-generates the paclet version number based on the number of commits to master from the checkpoint defined in [version.wl](scripts/version.wl). Some of the code in the [scripts](scripts) folder are only used for building *SetReplace* on the internal Wolfram Research systems, which are only available for internal Wolfram developers.
+The three main scripts of *SetReplace* are [build.wls](/build.wls), [install.wls](/install.wls) and [test.wls](/test.wls). The build script is the most complex of the three, and it uses additional definitions in [buildInit.wl](/scripts/buildInit.wl). In addition to building the C++ code and packing the paclet, it also auto-generates the paclet version number based on the number of commits to master from the checkpoint defined in [version.wl](/scripts/version.wl). Some of the code in the [scripts](/scripts) folder are only used for building *SetReplace* on the internal Wolfram Research systems, which are only available for internal Wolfram developers.
 
 ## Code style
 
