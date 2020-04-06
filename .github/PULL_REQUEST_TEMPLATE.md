@@ -1,7 +1,9 @@
 ## Changes
-
+* Reference resolved issues.
 * Add a few comments about what this pull request changes.
 
-## Tests
+## Comments
+* Add comments for the reviewer.
 
-* Add explicit commands and instructions on how to test the changes.
+## Examples
+* Add explicit inputs and outputs (as screenshots in case of graphics) showcasing new functionality.
