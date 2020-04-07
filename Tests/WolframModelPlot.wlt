@@ -249,25 +249,17 @@
         graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {4, {1, 2, 3}}]]
       ],
 
-      (* Valid GraphHighlightStyle *)
-
-      testUnevaluated[
-        WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> None],
-        {WolframModelPlot::invalidHighlightStyle}
-      ],
-
-      testUnevaluated[
-        WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> 2],
-        {WolframModelPlot::invalidHighlightStyle}
-      ],
-
-      testUnevaluated[
-        WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> "Dashed"],
-        {WolframModelPlot::invalidHighlightStyle}
+      VerificationTest[
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> Black]]
       ],
 
       VerificationTest[
-        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> Black]]
+        graphicsQ[WolframModelPlot[
+          {{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> Directive[Black, Thick]]]
+      ],
+
+      VerificationTest[
+        !graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> "Dashed"]]
       ],
 
       (* Valid VertexSize and "ArrowheadLength" *)
@@ -570,15 +562,15 @@
 
       (* GraphHighlightStyle *)
 
-      VerificationTest[
-        With[{
-            color = RGBColor[0.4, 0.6, 0.2]},
-          FreeQ[
-              checkGraphics @ WolframModelPlot[
-                {{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> #, GraphHighlightStyle -> color],
-              color] & /@
-            {{}, {4}, {{1, 2, 3}}}],
-        {True, False, False}
+      With[{color = RGBColor[0.4, 0.6, 0.2]},
+        With[{style = #},
+          VerificationTest[
+            FreeQ[checkGraphics @ WolframModelPlot[
+                {{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> #, GraphHighlightStyle -> color], color] & /@
+              {{}, {4}, {{1, 2, 3}}},
+            {True, False, False}
+          ]
+        ] & /@ {color, Directive[Thick, color]}
       ],
 
       (* Scaling consistency *)

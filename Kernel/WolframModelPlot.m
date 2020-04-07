@@ -63,9 +63,6 @@ General::invalidCoordinates =
 WolframModelPlot::invalidHighlight =
 	"GraphHighlight value `1` should be a list of vertices and edges.";
 
-General::invalidHighlightStyle =
-	"GraphHighlightStyle `1` should be a color.";
-
 General::invalidSize =
 	"`1` `2` should be a non-negative number.";
 
@@ -215,7 +212,6 @@ correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
 			{"HyperedgeRendering", $hyperedgeRenderings}})) &&
 	correctCoordinateRulesQ[head, OptionValue[WolframModelPlot, opts, VertexCoordinateRules]] &&
 	correctHighlightQ[OptionValue[WolframModelPlot, opts, GraphHighlight]] &&
-	correctHighlightStyleQ[head, OptionValue[WolframModelPlot, opts, GraphHighlightStyle]] &&
 	correctSizeQ[head, "Vertex size", OptionValue[WolframModelPlot, opts, VertexSize], {}] &&
 	correctSizeQ[head, "Arrowhead length", OptionValue[WolframModelPlot, opts, "ArrowheadLength"], {Automatic}] &&
 	correctPlotStyleQ[head, OptionValue[WolframModelPlot, opts, PlotStyle]] &&
@@ -237,9 +233,6 @@ correctHighlightQ[highlight_] := (
 	If[!ListQ[highlight], Message[WolframModelPlot::invalidHighlight, highlight]];
 	ListQ[highlight]
 )
-
-correctHighlightStyleQ[head_, highlightStyle_] :=
-	If[ColorQ[highlightStyle], True, Message[head::invalidHighlightStyle, highlightStyle]; False]
 
 correctSizeQ[head_, capitalizedName_, size_ ? (# >= 0 &), _] := True
 
