@@ -1,6 +1,12 @@
 <|
   "WolframModelPlot" -> <|
     "init" -> (
+      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
+      Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+      Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
+      Global`checkGraphics[args___] := SetReplace`PackageScope`checkGraphics[args];
+      Global`graphicsQ[args___] := SetReplace`PackageScope`graphicsQ[args];
+
       $edgeTypes = {"Ordered", "Cyclic"};
 
       $simpleHypergraphs = {
@@ -33,10 +39,6 @@
         Missing[],
         All];
 
-      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
-      Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
-      Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
-
       {color, color2, color3, color4, color5} =
         BlockRandom[Table[RGBColor[RandomReal[{0, 1}, 3]], 5], RandomSeeding -> 0];
 
@@ -50,7 +52,7 @@
         Outer[
           VerificationTest[
             With[{
-                plot = WolframModelPlot[set, #1, "HyperedgeRendering" -> #2, Sequence @@ opts]},
+                plot = checkGraphics @ WolframModelPlot[set, #1, "HyperedgeRendering" -> #2, Sequence @@ opts]},
               And @@ (If[shouldExistQ, Not, Identity][FreeQ[plot, #]] & /@ colors)
             ]
           ] &,
@@ -61,6 +63,9 @@
 
       testColorPresence[args___] := testColor[True, args];
     ),
+    "options" -> {
+      "Parallel" -> False
+    },
     "tests" -> {
       (* Symbol Leak *)
 
@@ -106,9 +111,8 @@
       ],
 
       VerificationTest[
-        WolframModelPlot[{{}}],
-        {_Graphics},
-        SameTest -> MatchQ
+        graphicsQ /@ WolframModelPlot[{{}}],
+        {True}
       ],
 
       testUnevaluated[
@@ -161,13 +165,11 @@
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered"]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered"]]
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, "Cyclic"]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, "Cyclic"]]
       ],
 
       (* Valid options *)
@@ -205,13 +207,11 @@
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0, 0}}]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0, 0}}]]
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered", VertexCoordinateRules -> {1 -> {0, 0}}]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered", VertexCoordinateRules -> {1 -> {0, 0}}]]
       ],
 
       (* Valid GraphHighlight *)
@@ -222,60 +222,44 @@
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}}]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}}]]
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {6}]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {6}]]
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2}}]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2}}]]
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}, {1, 2, 3}}]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}, {1, 2, 3}}]]
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}]]
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {{1, 2, 3}}]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {{1, 2, 3}}]]
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {4, {1, 2, 3}}]],
-        Graphics
-      ],
-
-      (* Valid GraphHighlightStyle *)
-
-      testUnevaluated[
-        WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> None],
-        {WolframModelPlot::invalidHighlightStyle}
-      ],
-
-      testUnevaluated[
-        WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> 2],
-        {WolframModelPlot::invalidHighlightStyle}
-      ],
-
-      testUnevaluated[
-        WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> "Dashed"],
-        {WolframModelPlot::invalidHighlightStyle}
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {4, {1, 2, 3}}]]
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> Black]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> Black]]
+      ],
+
+      VerificationTest[
+        graphicsQ[WolframModelPlot[
+          {{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> Directive[Black, Thick]]]
+      ],
+
+      VerificationTest[
+        !graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> "Dashed"]]
       ],
 
       (* Valid VertexSize and "ArrowheadLength" *)
@@ -292,26 +276,22 @@
         ],
 
         VerificationTest[
-          Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, # -> 1]],
-          Graphics
+          graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, # -> 1]]
         ]
       } & /@ {VertexSize, "ArrowheadLength"},
 
       VerificationTest[
-        Head[WolframModelPlot[#, "ArrowheadLength" -> Automatic]],
-        Graphics
+        graphicsQ[WolframModelPlot[#, "ArrowheadLength" -> Automatic]]
       ] & /@ {{{1, 2, 3}, {3, 4, 5}}, {{1, 1}}, {{1}}, {}},
 
       (* HypergraphPlot can still be used *)
 
       VerificationTest[
-        Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}]],
-        Graphics
+        graphicsQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}]]
       ],
 
       VerificationTest[
-        Head[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered"]],
-        Graphics
+        graphicsQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered"]]
       ],
 
       (* Implementation *)
@@ -319,32 +299,31 @@
       (** Simple examples **)
 
       Table[With[{hypergraph = hypergraph}, VerificationTest[
-        Head[WolframModelPlot[hypergraph, #]],
-        Graphics
+        graphicsQ[WolframModelPlot[hypergraph, #]]
       ]] & /@ $edgeTypes, {hypergraph, $simpleHypergraphs}],
 
       (** Large graphs **)
 
       VerificationTest[
-        Head @ WolframModelPlot @ SetReplace[
+        graphicsQ @ WolframModelPlot @ SetReplace[
           {{0, 1}, {0, 2}, {0, 3}},
           ToPatternRules[
             {{0, 1}, {0, 2}, {0, 3}} ->
             {{4, 5}, {5, 4}, {4, 6}, {6, 4},
               {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}],
-          #],
-        Graphics
+          #]
       ] & /@ {10, 5000},
 
       (* EdgeType *)
 
       VerificationTest[
-        diskCoordinates[WolframModelPlot[#, "Ordered"]] != diskCoordinates[WolframModelPlot[#, "Cyclic"]]
+        diskCoordinates[checkGraphics @ WolframModelPlot[#, "Ordered"]] !=
+          diskCoordinates[checkGraphics @ WolframModelPlot[#, "Cyclic"]]
       ] & /@ $layoutTestHypergraphs,
 
       VerificationTest[
         Length[Union[Cases[
-          WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs", "ArrowheadLength" -> 0],
+          checkGraphics @ WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs", "ArrowheadLength" -> 0],
           Polygon[___],
           All]]],
         0
@@ -352,7 +331,7 @@
 
       VerificationTest[
         Length[Union[Cases[
-          WolframModelPlot[#, "HyperedgeRendering" -> "Polygons", "ArrowheadLength" -> 0],
+          checkGraphics @ WolframModelPlot[#, "HyperedgeRendering" -> "Polygons", "ArrowheadLength" -> 0],
           Polygon[___],
           All]]],
         0 + Length[#]
@@ -362,7 +341,7 @@
 
       VerificationTest[
         MissingQ[FirstCase[
-          WolframModelPlot[#, VertexLabels -> None],
+          checkGraphics @ WolframModelPlot[#, VertexLabels -> None],
           Text[___],
           Missing[],
           All]]
@@ -370,7 +349,7 @@
 
       VerificationTest[
         !MissingQ[FirstCase[
-          WolframModelPlot[#, VertexLabels -> Automatic],
+          checkGraphics @ WolframModelPlot[#, VertexLabels -> Automatic],
           Text[___],
           Missing[],
           All]]
@@ -379,12 +358,12 @@
       (* Single-vertex edges *)
 
       VerificationTest[
-        WolframModelPlot[{{1}, {1, 2}}] =!= WolframModelPlot[{{1, 2}}]
+        checkGraphics @ WolframModelPlot[{{1}, {1, 2}}] =!= checkGraphics @ WolframModelPlot[{{1, 2}}]
       ],
 
       VerificationTest[
         MissingQ[FirstCase[
-          WolframModelPlot[{{1, 2}}, VertexLabels -> None],
+          checkGraphics @ WolframModelPlot[{{1, 2}}, VertexLabels -> None],
           Circle[___],
           Missing[],
           All]]
@@ -392,7 +371,7 @@
 
       VerificationTest[
         !MissingQ[FirstCase[
-          WolframModelPlot[{{1}, {1, 2}}, VertexLabels -> Automatic],
+          checkGraphics @ WolframModelPlot[{{1}, {1, 2}}, VertexLabels -> Automatic],
           Circle[___],
           Missing[],
           All]]
@@ -402,7 +381,7 @@
 
       VerificationTest[
         And @@ (MemberQ[
-            diskCoordinates[WolframModelPlot[
+            diskCoordinates[checkGraphics @ WolframModelPlot[
               {{1, 2, 3}, {3, 4, 5}, {3, 3}},
               VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}}]],
             #] & /@
@@ -410,13 +389,13 @@
       ],
 
       VerificationTest[
-        Chop @ diskCoordinates[WolframModelPlot[
+        Chop @ diskCoordinates[checkGraphics @ WolframModelPlot[
           {{1, 2, 3}, {3, 4, 5}},
           VertexCoordinateRules -> {3 -> {0, 0}}]] != Table[{0, 0}, 5]
       ],
 
       VerificationTest[
-        Chop @ diskCoordinates[WolframModelPlot[
+        Chop @ diskCoordinates[checkGraphics @ WolframModelPlot[
           {{1, 2, 3}, {3, 4, 5}},
           VertexCoordinateRules -> {3 -> {1, 0}, 3 -> {0, 0}}]] != Table[{0, 0}, 5]
       ],
@@ -424,7 +403,7 @@
       (** Same coordinates should not produce any messages **)
       VerificationTest[
         And @@ Cases[
-          WolframModelPlot[{{1, 2, 3}}, VertexCoordinateRules -> {1 -> {1, 0}, 2 -> {1, 0}}],
+          checkGraphics @ WolframModelPlot[{{1, 2, 3}}, VertexCoordinateRules -> {1 -> {1, 0}, 2 -> {1, 0}}],
           Rotate[_, {v1_, v2_}] :> v1 != {0, 0} && v2 != {0, 0},
           All]
       ],
@@ -552,44 +531,51 @@
       testColorAbsense[{{1}, {1, 2}, {2, 3, 4}}, {GraphHighlight -> {5}, GraphHighlightStyle -> color}, {color}],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, VertexSize -> 0.3]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, VertexSize -> 0.3]]
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, "ArrowheadLength" -> 0.3]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, "ArrowheadLength" -> 0.3]]
       ],
 
       VerificationTest[
-        Head[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, VertexSize -> 0.4, "ArrowheadLength" -> 0.3]],
-        Graphics
+        graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, VertexSize -> 0.4, "ArrowheadLength" -> 0.3]]
+      ],
+
+      (* weed #286 *)
+      VerificationTest[
+        graphicsQ[WolframModelPlot[{}, VertexStyle -> {}, EdgeStyle -> {}]]
       ],
 
       (* GraphHighlight *)
 
       VerificationTest[
-        Length[Union @ Cases[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {#}], _ ? ColorQ, All]] >
-          Length[Union @ Cases[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}], _ ? ColorQ, All]]
+        Length[Union @ Cases[
+            checkGraphics @ WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {#}], _ ? ColorQ, All]] >
+          Length[Union @ Cases[checkGraphics @ WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}], _ ? ColorQ, All]]
       ] & /@ {4, {1, 2, 3}},
 
       (** Test multi-edge highlighting **)
       VerificationTest[
         Differences[
           Length[Union[Cases[#, _?ColorQ, All]]] & /@
-            (WolframModelPlot[{{1, 2}, {1, 2}}, "HyperedgeRendering" -> "Subgraphs", GraphHighlight -> #] &) /@
+            (checkGraphics[WolframModelPlot[
+              {{1, 2}, {1, 2}}, "HyperedgeRendering" -> "Subgraphs", GraphHighlight -> #]] &) /@
             {{}, {{1, 2}}, {{1, 2}, {1, 2}}}],
         {1, -1}
       ],
 
       (* GraphHighlightStyle *)
 
-      VerificationTest[
-        With[{
-            color = RGBColor[0.4, 0.6, 0.2]},
-          FreeQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> #, GraphHighlightStyle -> color], color] & /@
-            {{}, {4}, {{1, 2, 3}}}],
-        {True, False, False}
+      With[{color = RGBColor[0.4, 0.6, 0.2]},
+        With[{style = #},
+          VerificationTest[
+            FreeQ[checkGraphics @ WolframModelPlot[
+                {{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> #, GraphHighlightStyle -> color], color] & /@
+              {{}, {4}, {{1, 2, 3}}},
+            {True, False, False}
+          ]
+        ] & /@ {color, Directive[Thick, color]}
       ],
 
       (* Scaling consistency *)
@@ -597,7 +583,7 @@
 
       VerificationTest[
         SameQ @@ (
-          Union[Cases[WolframModelPlot[#], Disk[_, r_] :> r, All]] & /@
+          Union[Cases[checkGraphics @ WolframModelPlot[#], Disk[_, r_] :> r, All]] & /@
             {{{1}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
       ],
 
@@ -605,7 +591,7 @@
         VerificationTest[
           Length[DeleteDuplicates[
             Mean[Cases[
-                WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs"],
+                checkGraphics @ WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs"],
                 Line[pts_] :> EuclideanDistance @@ pts,
                 All]] & /@
               {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3, 4, 5, 1}}},
@@ -619,7 +605,7 @@
                 First[
                   Nearest[
                     Cases[
-                      WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs"],
+                      checkGraphics @ WolframModelPlot[#, "HyperedgeRendering" -> "Subgraphs"],
                       Line[pts_] :> RegionMeasure[Line[pts]],
                       All],
                     $selfLoopLength]] -
@@ -634,7 +620,7 @@
 
       (* Automatic image size *)
       VerificationTest[
-        Table[OrderedQ[(ImageSizeRaw /. AbsoluteOptions[WolframModelPlot[#], ImageSizeRaw])[[k, 1]] & /@
+        Table[OrderedQ[(ImageSizeRaw /. AbsoluteOptions[checkGraphics @ WolframModelPlot[#], ImageSizeRaw])[[k, 1]] & /@
           {{{1}}, {{1, 1}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 7}, {7, 8, 1}}}], {k, 2}],
         {True, True}
       ],
@@ -647,7 +633,7 @@
       VerificationTest[
         With[{
             sizes = (ImageSize /. AbsoluteOptions[#, ImageSize][[1]] & /@
-              WolframModel[{{x, y}, {y, z}} -> {{w, y}, {y, z}, {z, w}, {x, w}}, {{0, 0}, {0, 0}}, 10][
+              checkGraphics /@ WolframModel[{{x, y}, {y, z}} -> {{w, y}, {y, z}, {z, w}, {x, w}}, {{0, 0}, {0, 0}}, 10][
                 "StatesPlotsList", "MaxImageSize" -> #]) & /@ {100, 200}},
           AllTrue[sizes[[1]], # < 100.0001 &] &&
           !AllTrue[sizes[[1]], # > 99.9999 &] &&
@@ -658,7 +644,7 @@
       VerificationTest[
         With[{
             sizes = (ImageSize /. AbsoluteOptions[#, ImageSize][[1]] & /@
-              WolframModel[{{x, y}, {y, z}} -> {{w, y}, {y, z}, {z, w}, {x, w}}, {{0, 0}, {0, 0}}, 10][
+              checkGraphics /@ WolframModel[{{x, y}, {y, z}} -> {{w, y}, {y, z}, {z, w}, {x, w}}, {{0, 0}, {0, 0}}, 10][
                 "StatesPlotsList", "MaxImageSize" -> #]) & /@ {{100, 30}, {200, 60}}},
           AllTrue[sizes[[1, All, 1]], # < 100.0001 &] &&
           AllTrue[sizes[[1, All, 2]], # < 30.0001 &] &&
@@ -670,15 +656,51 @@
 
       (* Multiple hypergraphs *)
       VerificationTest[
-        Head /@ WolframModelPlot[{{{1, 2, 3}, {3, 4, 5}}, {{3, 4, 5}, {5, 6, 7}}, {{5, 6, 7}, {7, 8, 5}}}, ##],
-        {Graphics, Graphics, Graphics}
+        graphicsQ /@ WolframModelPlot[{{{1, 2, 3}, {3, 4, 5}}, {{3, 4, 5}, {5, 6, 7}}, {{5, 6, 7}, {7, 8, 5}}}, ##],
+        ConstantArray[True, 3]
       ] & @@@ {
         {},
         {GraphHighlight -> {3, {3, 4, 5}}},
         {VertexSize -> 0.1, "ArrowheadLength" -> 0.2},
         {EdgeStyle -> Red},
         {VertexCoordinateRules -> {3 -> {0, 0}, 4 -> {1, 0}}}
-      }
+      },
+
+      (* GraphHighlight and style interaction *)
+
+      With[{color1 = RGBColor[0.46, 0.51, 0.87], color2 = RGBColor[0.13, 0.64, 0.27]},
+        testColorPresence[
+          {{1, 2}},
+          {GraphHighlight -> {2}, GraphHighlightStyle -> color1, VertexStyle -> color2},
+          {color1, color2}
+        ]
+      ],
+
+      (* Style inheritance *)
+      SeedRandom[288];
+      With[{
+          colors = Table[RandomColor[5]], edgeColor = RandomColor[], extraColor = RandomColor[],
+          set = {{1, 2, 3}, {3, 4, 5}}},
+        {testColorPresence[set, #, #2, Replace[#4, All -> Sequence[]]],
+            testColorAbsense[set, #, #3, Replace[#4, All -> Sequence[]]]} & @@@ {
+          {{PlotStyle -> colors[[1]], EdgeStyle -> edgeColor, VertexStyle -> colors[[2]]},          {colors[[2]]},    {colors[[1]]}, All},
+          {{PlotStyle -> colors[[1]], EdgeStyle -> edgeColor, VertexStyle -> Automatic},            {colors[[1]]},    {},            All},
+          {{PlotStyle -> colors[[1]], EdgeStyle -> edgeColor, VertexStyle -> <|3 -> colors[[2]]|>}, colors[[1 ;; 2]], {},            All},
+          {{PlotStyle -> extraColor,  EdgeStyle -> edgeColor, VertexStyle -> colors},               colors,           {extraColor},  All},
+          {{PlotStyle -> Automatic,                           VertexStyle -> colors[[1]]},          {colors[[1]]},    {},            All},
+          {{PlotStyle -> Automatic,                           VertexStyle -> Automatic},            {},               {},            All},
+          {{PlotStyle -> Automatic,                           VertexStyle -> <|3 -> colors[[1]]|>}, {colors[[1]]},    {},            All},
+          {{PlotStyle -> Automatic,                           VertexStyle -> colors},               colors,           {},            All},
+          {{PlotStyle -> <|3 -> colors[[1]]|>,                VertexStyle -> colors[[2]]},          {colors[[2]]},    {colors[[1]]}, All},
+          {{PlotStyle -> <|3 -> colors[[1]]|>,                VertexStyle -> Automatic},            {colors[[1]]},    {},            All},
+          {{PlotStyle -> <|3 -> colors[[1]]|>,                VertexStyle -> <|4 -> colors[[2]]|>}, colors[[1 ;; 2]], {},            All},
+          {{PlotStyle -> <|3 -> extraColor|>,                 VertexStyle -> colors},               colors,           {extraColor},  All},
+          {{EdgeStyle -> colors[[1 ;; 2]],   "EdgePolygonStyle" -> colors[[3]]},                    colors[[1 ;; 3]], {},            {"Polygons"}},
+          {{EdgeStyle -> colors[[1 ;; 2]],   "EdgePolygonStyle" -> Automatic},                      colors[[1 ;; 2]], {},            {"Polygons"}},
+          {{EdgeStyle -> colors[[1 ;; 2]],   "EdgePolygonStyle" -> <|{1, 2, 3} -> colors[[3]]|>},   colors[[1 ;; 3]], {},            {"Polygons"}},
+          {{EdgeStyle -> colors[[1 ;; 2]],   "EdgePolygonStyle" -> colors[[3 ;; 4]]},               colors[[1 ;; 4]], {},            {"Polygons"}}
+        }
+      ]
     }
   |>
 |>

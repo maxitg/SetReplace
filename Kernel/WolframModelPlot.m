@@ -63,9 +63,6 @@ General::invalidCoordinates =
 WolframModelPlot::invalidHighlight =
 	"GraphHighlight value `1` should be a list of vertices and edges.";
 
-General::invalidHighlightStyle =
-	"GraphHighlightStyle `1` should be a color.";
-
 General::invalidSize =
 	"`1` `2` should be a non-negative number.";
 
@@ -197,10 +194,8 @@ toListStyleSpec[spec_Association, elements_] := Replace[elements, Reverse[Join[{
 
 toListStyleSpec[spec_List, _] := spec
 
-parseStyles[newSpec : Except[_List | _Association], elements_, Automatic, oldToNewTransform_] := newSpec
-
 parseStyles[newSpec_, elements_, oldSpec_, oldToNewTransform_] /;
-		AllTrue[{oldSpec, newSpec}, MatchQ[#, _List | _Association | Automatic] &] :=
+		AnyTrue[{oldSpec, newSpec}, MatchQ[#, _List | _Association] &] :=
 	MapThread[
 		If[#2 === Automatic, #1, Replace[#1, Automatic -> oldToNewTransform[#2]]] &,
 		toListStyleSpec[#, elements] & /@ {newSpec, oldSpec}]
@@ -217,14 +212,21 @@ correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
 			{"HyperedgeRendering", $hyperedgeRenderings}})) &&
 	correctCoordinateRulesQ[head, OptionValue[WolframModelPlot, opts, VertexCoordinateRules]] &&
 	correctHighlightQ[OptionValue[WolframModelPlot, opts, GraphHighlight]] &&
-	correctHighlightStyleQ[head, OptionValue[WolframModelPlot, opts, GraphHighlightStyle]] &&
 	correctSizeQ[head, "Vertex size", OptionValue[WolframModelPlot, opts, VertexSize], {}] &&
 	correctSizeQ[head, "Arrowhead length", OptionValue[WolframModelPlot, opts, "ArrowheadLength"], {Automatic}] &&
 	correctPlotStyleQ[head, OptionValue[WolframModelPlot, opts, PlotStyle]] &&
 	correctStyleLengthQ[
-		head, "vertices", MatchQ[edges, {$hypergraphPattern...}], Length[vertexList[edges]], OptionValue[WolframModelPlot, opts, VertexStyle]] &&
+		head,
+		"vertices",
+		MatchQ[edges, {$hypergraphPattern..}],
+		Length[vertexList[edges]],
+		OptionValue[WolframModelPlot, opts, VertexStyle]] &&
 	And @@ (correctStyleLengthQ[
-		head, "edges", MatchQ[edges, {$hypergraphPattern...}], Length[edges], OptionValue[WolframModelPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
+		head,
+		"edges",
+		MatchQ[edges, {$hypergraphPattern..}],
+		Length[edges],
+		OptionValue[WolframModelPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
 
 correctCoordinateRulesQ[head_, coordinateRules_] :=
 	If[!MatchQ[coordinateRules,
@@ -239,9 +241,6 @@ correctHighlightQ[highlight_] := (
 	If[!ListQ[highlight], Message[WolframModelPlot::invalidHighlight, highlight]];
 	ListQ[highlight]
 )
-
-correctHighlightStyleQ[head_, highlightStyle_] :=
-	If[ColorQ[highlightStyle], True, Message[head::invalidHighlightStyle, highlightStyle]; False]
 
 correctSizeQ[head_, capitalizedName_, size_ ? (# >= 0 &), _] := True
 
@@ -334,7 +333,7 @@ hypergraphEmbedding[
 		vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
 	vertices = vertexList[edges];
 	{vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges} =
-		(toNormalEdges[#] /@ edges) & /@ {vertexLayoutEdgeType, edgeLayoutEdgeType};
+		toNormalEdges[edges, #] & /@ {vertexLayoutEdgeType, edgeLayoutEdgeType};
 	normalToHypergraphEmbedding[
 		edges,
 		edgeEmbeddingNormalEdges,
@@ -346,24 +345,37 @@ hypergraphEmbedding[
 			coordinateRules]]
 ]
 
-toNormalEdges["Ordered"][hyperedge_] :=
-	DirectedEdge @@@ Partition[hyperedge, 2, 1]
+toNormalEdges[edges_, partitionArgs___] := DirectedEdge @@@ Partition[#, partitionArgs] & /@ edges
 
-toNormalEdges["Cyclic"][hyperedge : Except[{}]] :=
-	DirectedEdge @@@ Append[Partition[hyperedge, 2, 1], hyperedge[[{-1, 1}]]]
+toNormalEdges[edges_, "Ordered"] := toNormalEdges[edges, 2, 1]
 
-toNormalEdges["Cyclic"][{}] := {}
+toNormalEdges[edges_, "Cyclic"] := toNormalEdges[edges, 2, 1, 1]
 
 graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
 		relevantCoordinateRules, vertexCoordinateRules, unscaledEmbedding},
 	relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
-	vertexCoordinateRules = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
-		relevantCoordinateRules,
-		graphEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules][[1]]
+	unscaledEmbedding = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
+		graphEmbedding[vertices, edgeEmbeddingEdges, layout, relevantCoordinateRules],
+		With[{ve = vertexEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules]},
+			{ve, edgeEmbedding[vertices, edgeEmbeddingEdges, layout, ve]}
+		]
 	];
-	unscaledEmbedding = graphEmbedding[vertices, edgeEmbeddingEdges, layout, vertexCoordinateRules];
 	rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules]
 ]
+
+vertexEmbedding[vertices_, edges_, layout_, {}] := Thread[vertices -> GraphEmbedding[Graph[vertices, edges], layout]]
+
+vertexEmbedding[vertices_, edges_, layout_, coordinateRules_] :=
+	graphEmbedding[vertices, edges, layout, coordinateRules][[1]]
+
+edgeEmbedding[vertices_, edges_, "SpringElectricalEmbedding", vertexCoordinates_] /;
+		SimpleGraphQ[Graph[UndirectedEdge @@@ edges]] := Module[{coordinates},
+	coordinates = Association[vertexCoordinates];
+	Thread[edges -> List @@@ Map[coordinates, edges, {2}]]
+]
+
+edgeEmbedding[vertices_, edges_, layout_, vertexCoordinates_] :=
+	graphEmbedding[vertices, edges, layout, vertexCoordinates][[2]]
 
 graphEmbedding[vertices_, edges_, layout_, coordinateRules_] := Replace[
 	Reap[
@@ -460,6 +472,27 @@ applyStyle[style : Except[_List], shapes_] := With[{trimmedShapes = DeleteCases[
 
 applyStyle[style_List, shapes_] := Replace[DeleteCases[Transpose[{style, shapes}], {_, {}}], {} -> Nothing]
 
+vertexLabelsGraphics[embedding_, vertexSize_, vertexLabels_] := Module[{
+		pointsToVertices, edges, vertexCoordinatesDiagonal, graphPlotVertexSize},
+	pointsToVertices =
+		Association[Reverse /@ Catenate[Function[{v, pts}, v -> # & /@ Cases[pts, _Point]] @@@ embedding[[1]]]];
+	edges =
+		Cases[embedding[[2]], Line[{pt1_, ___, pt2_}] :> UndirectedEdge @@ pointsToVertices /@ Point /@ {pt1, pt2}, All];
+	vertexCoordinatesDiagonal = EuclideanDistance @@ Transpose[CoordinateBounds[First /@ Keys[pointsToVertices]]];
+	graphPlotVertexSize = If[vertexCoordinatesDiagonal == 0,
+		2 vertexSize,
+		{"Scaled", 2 vertexSize / vertexCoordinatesDiagonal}
+	];
+	GraphPlot[
+		Graph[Values[pointsToVertices], edges],
+		VertexCoordinates -> Thread[Values[pointsToVertices] -> First /@ Keys[pointsToVertices]],
+		VertexLabels -> vertexLabels,
+		GraphLayout -> "SpringElectricalEmbedding", (* smart vertex placement does not seem to work otherwise *)
+		VertexSize -> graphPlotVertexSize,
+		VertexShapeFunction -> None,
+		EdgeShapeFunction -> None]
+]
+
 drawEmbedding[
 			styles_,
 			vertexLabels_,
@@ -482,11 +515,7 @@ drawEmbedding[
 					Cases[#, Point[pts_] :> Circle[pts, getSingleVertexEdgeRadius[pts]], All] & /@ embedding[[2, All, 2]]]}],
 		If[vertexLabels === None,
 			Graphics[{}],
-			GraphPlot[
-				Graph[embedding[[1, All, 1]], {}],
-				VertexCoordinates -> embedding[[1, All, 2, 1, 1]],
-				VertexLabels -> vertexLabels,
-				VertexShapeFunction -> None,
-				EdgeShapeFunction -> None]]
+			vertexLabelsGraphics[embedding, vertexSize, vertexLabels]
+		]
 	]
 ]
