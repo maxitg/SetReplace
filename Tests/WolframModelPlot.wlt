@@ -542,6 +542,11 @@
         graphicsQ[WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, VertexSize -> 0.4, "ArrowheadLength" -> 0.3]]
       ],
 
+      (* weed #286 *)
+      VerificationTest[
+        graphicsQ[WolframModelPlot[{}, VertexStyle -> {}, EdgeStyle -> {}]]
+      ],
+
       (* GraphHighlight *)
 
       VerificationTest[

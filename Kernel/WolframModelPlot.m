@@ -216,9 +216,17 @@ correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
 	correctSizeQ[head, "Arrowhead length", OptionValue[WolframModelPlot, opts, "ArrowheadLength"], {Automatic}] &&
 	correctPlotStyleQ[head, OptionValue[WolframModelPlot, opts, PlotStyle]] &&
 	correctStyleLengthQ[
-		head, "vertices", MatchQ[edges, {$hypergraphPattern...}], Length[vertexList[edges]], OptionValue[WolframModelPlot, opts, VertexStyle]] &&
+		head,
+		"vertices",
+		MatchQ[edges, {$hypergraphPattern..}],
+		Length[vertexList[edges]],
+		OptionValue[WolframModelPlot, opts, VertexStyle]] &&
 	And @@ (correctStyleLengthQ[
-		head, "edges", MatchQ[edges, {$hypergraphPattern...}], Length[edges], OptionValue[WolframModelPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
+		head,
+		"edges",
+		MatchQ[edges, {$hypergraphPattern..}],
+		Length[edges],
+		OptionValue[WolframModelPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
 
 correctCoordinateRulesQ[head_, coordinateRules_] :=
 	If[!MatchQ[coordinateRules,
