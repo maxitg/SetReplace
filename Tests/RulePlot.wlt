@@ -106,9 +106,8 @@
 
       (** GraphhighlightStyle **)
 
-      testUnevaluated[
-        RulePlot[WolframModel[{{1, 2, 3}, {3, 4, 5}} -> {{3, 4, 5}, {5, 6, 7}}], GraphHighlightStyle -> 1],
-        {RulePlot::invalidHighlightStyle}
+      VerificationTest[
+        !graphicsQ[RulePlot[WolframModel[{{1, 2, 3}, {3, 4, 5}} -> {{3, 4, 5}, {5, 6, 7}}], GraphHighlightStyle -> 1]]
       ],
 
       VerificationTest[

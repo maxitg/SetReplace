@@ -1,14 +1,14 @@
 Package["SetReplace`"]
 
-PackageScope["vertexList"]
 PackageScope["fromCounts"]
 PackageScope["multisetIntersection"]
 PackageScope["multisetUnion"]
 PackageScope["multisetComplement"]
 PackageScope["multisetFilterRules"]
+PackageScope["toCanonicalHypergraphForm"]
+PackageScope["vertexList"]
 PackageScope["indexHypergraph"]
-
-vertexList[edges_] := Sort[Union[Catenate[edges]]]
+PackageScope["connectedHypergraphQ"]
 
 fromCounts[association_] := Catenate @ KeyValueMap[ConstantArray] @ association
 
@@ -23,4 +23,20 @@ multisetFilterRules[rules_, filter_] := Catenate @ MapThread[
   {Normal @ KeySort @ KeyTake[Merge[Association /@ Join[rules, # -> Nothing & /@ filter], # &], filter],
     Values @ KeySort @ Counts[filter]}]
 
-indexHypergraph[e_] := With[{vertices = vertexList[e]}, Replace[e, Thread[vertices -> Range[Length[vertices]]], {2}]]
+toCanonicalHypergraphForm[edge : Except[_List]] := toCanonicalHypergraphForm[{edge}]
+
+toCanonicalHypergraphForm[edges_List] := toCanonicalEdgeForm /@ edges
+
+toCanonicalEdgeForm[edge : Except[_List]] := {edge}
+
+toCanonicalEdgeForm[edge_List] := edge
+
+vertexList[edges_] := Sort[Union[Catenate[toCanonicalHypergraphForm[edges]]]]
+
+indexHypergraph[e_] := With[{vertices = vertexList[e]},
+  Replace[toCanonicalHypergraphForm[e], Thread[vertices -> Range[Length[vertices]]], {2}]
+]
+
+connectedHypergraphQ[edges_] := ConnectedGraphQ[Graph[Catenate[toNormalEdges /@ toCanonicalHypergraphForm[edges]]]]
+
+toNormalEdges[edge_] := UndirectedEdge @@@ Partition[edge, 2, 1, 1]
