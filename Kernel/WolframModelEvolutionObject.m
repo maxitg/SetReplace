@@ -290,9 +290,12 @@ propertyEvaluate[___][
 (*Correct options*)
 
 
+$newCausalGraphOptions = {Background -> Automatic, VertexStyle -> Automatic, EdgeStyle -> Automatic};
+$causalGraphOptions = Join[FilterRules[Options[Graph], Except[$newCausalGraphOptions]], $newCausalGraphOptions];
+
 $propertyOptions = <|
-	"CausalGraph" -> Options[Graph],
-	"LayeredCausalGraph" -> Options[Graph],
+	"CausalGraph" -> $causalGraphOptions,
+	"LayeredCausalGraph" -> $causalGraphOptions,
 	"StatesPlotsList" -> Options[WolframModelPlot],
 	"EventsStatesPlotsList" -> Options[WolframModelPlot],
 	"FinalStatePlot" -> Options[WolframModelPlot]
@@ -775,16 +778,22 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 		property : "CausalGraph",
 		o : OptionsPattern[]] /;
 			(Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) := With[{
-		$eventsToDelete = Alternatives @@ eventsToDelete[includeBoundaryEvents]},
+		$eventsToDelete = Alternatives @@ eventsToDelete[includeBoundaryEvents],
+		allOptionValues = Flatten[Join[{o}, $propertyOptions[property]]]},
 	Graph[
 		DeleteCases[Union[data[$creatorEvents], data[$destroyerEvents]], $eventsToDelete],
 		Select[FreeQ[#, $eventsToDelete] &] @ Thread[data[$creatorEvents] \[DirectedEdge] data[$destroyerEvents]],
-		o,
-		VertexStyle -> Select[Head[#] =!= Rule || !MatchQ[#[[1]], $eventsToDelete] &] @ {
-			style[$lightTheme][$causalGraphVertexStyle],
-			0 -> style[$lightTheme][$causalGraphInitialVertexStyle],
-			Infinity -> style[$lightTheme][$causalGraphFinalVertexStyle]},
-		EdgeStyle -> style[$lightTheme][$causalGraphEdgeStyle]]
+		VertexStyle -> Replace[
+			OptionValue[allOptionValues, VertexStyle],
+			Automatic -> Select[Head[#] =!= Rule || !MatchQ[#[[1]], $eventsToDelete] &] @ {
+				style[$lightTheme][$causalGraphVertexStyle],
+				0 -> style[$lightTheme][$causalGraphInitialVertexStyle],
+				Infinity -> style[$lightTheme][$causalGraphFinalVertexStyle]}],
+		EdgeStyle -> Replace[
+			OptionValue[allOptionValues, EdgeStyle], Automatic -> style[$lightTheme][$causalGraphEdgeStyle]],
+		Background -> Replace[
+			OptionValue[allOptionValues, Background], Automatic -> style[$lightTheme][$causalGraphBackground]],
+		allOptionValues]
 ]
 
 
