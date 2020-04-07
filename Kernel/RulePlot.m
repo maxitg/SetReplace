@@ -17,9 +17,12 @@ $newOptions = {
   "ArrowheadLength" -> style[$lightTheme][$ruleArrowheadLength]
 };
 
+$defaultBehaviorGraphicsOptions =
+  Fold[FilterRules, {Options[RulePlot], Options[Graphics], Except[{Frame, FrameStyle, Background}]}];
+
 $allowedOptions = Join[
-  FilterRules[Options[RulePlot], Options[Graphics]][[All, 1]], {
-  Frame, FrameStyle, PlotLegends, Spacings},
+  FilterRules[Options[RulePlot], Options[Graphics]][[All, 1]],
+  {PlotLegends, Spacings},
   $newOptions[[All, 1]]];
 
 Unprotect[RulePlot];
@@ -65,13 +68,13 @@ rulePlot$parse[{
   rulePlot[
         rulesSpec,
         ##,
-        FilterRules[{opts}, FilterRules[Options[Graphics], Except[Frame]]]] & @@
+        FilterRules[{opts}, $defaultBehaviorGraphicsOptions]] & @@
       OptionValue[
         RulePlot,
         {opts},
         {"EdgeType", GraphHighlightStyle, "HyperedgeRendering", VertexCoordinateRules, VertexLabels, Frame, FrameStyle,
           PlotLegends, Spacings, "RulePartsAspectRatio", PlotStyle, VertexStyle, EdgeStyle, "EdgePolygonStyle",
-          VertexSize, "ArrowheadLength"}] /;
+          VertexSize, "ArrowheadLength", Background}] /;
     correctOptionsQ[{rulesSpec, o}, {opts}]
 
 hypergraphRulesSpecQ[rulesSpec_List ? wolframModelRulesSpecQ] := Fold[# && hypergraphRulesSpecQ[#2] &, True, rulesSpec]
@@ -151,12 +154,13 @@ rulePlot[
     edgePolygonStyle_,
     vertexSize_,
     arrowheadLength_,
+    background_,
     graphicsOpts_] :=
   If[PlotLegends === None, Identity, Legended[#, Replace[plotLegends, "Text" -> Placed[StandardForm[rules], Below]]] &][
     rulePlot[
       rules, edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
         spacings, rulePartsAspectRatio, plotStyle, vertexStyle, edgeStyle, edgePolygonStyle, vertexSize,
-        arrowheadLength, graphicsOpts]
+        arrowheadLength, background, graphicsOpts]
   ]
 
 rulePlot[
@@ -176,11 +180,12 @@ rulePlot[
     edgePolygonStyle_,
     vertexSize_,
     arrowheadLength_,
+    background_,
     graphicsOpts_] :=
   rulePlot[
     {rule}, edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
       spacings, rulePartsAspectRatio, plotStyle, vertexStyle, edgeStyle, edgePolygonStyle, vertexSize, arrowheadLength,
-      graphicsOpts]
+      background, graphicsOpts]
 
 rulePlot[
     rules_List,
@@ -199,6 +204,7 @@ rulePlot[
     edgePolygonStyle_,
     vertexSize_,
     arrowheadLength_,
+    background_,
     graphicsOpts_] := Module[{explicitSpacings, explicitAspectRatio, singlePlots, shapes, plotRange},
   explicitSpacings = toListSpacings[Replace[spacings, Automatic -> style[$lightTheme][$ruleSidesSpacing]]];
   hypergraphPlots =
@@ -220,6 +226,7 @@ rulePlot[
   Graphics[
     shapes,
     graphicsOpts,
+    Background -> Replace[background, Automatic -> style[$lightTheme][$ruleBackground]],
     PlotRange -> plotRange,
     ImageSizeRaw -> style[$lightTheme][$ruleImageSizePerPlotRange] (plotRange[[1, 2]] - plotRange[[1, 1]])]
 ]
