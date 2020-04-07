@@ -293,9 +293,13 @@ propertyEvaluate[___][
 $newCausalGraphOptions = {Background -> Automatic, VertexStyle -> Automatic, EdgeStyle -> Automatic};
 $causalGraphOptions = Join[FilterRules[Options[Graph], Except[$newCausalGraphOptions]], $newCausalGraphOptions];
 
+$newLayeredCausalGraphOptions = {GraphLayout -> Automatic};
+$layeredCausalGraphOptions =
+	Join[FilterRules[$causalGraphOptions, Except[$newLayeredCausalGraphOptions]], $newLayeredCausalGraphOptions];
+
 $propertyOptions = <|
 	"CausalGraph" -> $causalGraphOptions,
-	"LayeredCausalGraph" -> $causalGraphOptions,
+	"LayeredCausalGraph" -> $layeredCausalGraphOptions,
 	"StatesPlotsList" -> Options[WolframModelPlot],
 	"EventsStatesPlotsList" -> Options[WolframModelPlot],
 	"FinalStatePlot" -> Options[WolframModelPlot]
@@ -809,14 +813,14 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 			(Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) :=
 	Graph[
 		propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "CausalGraph", ##] & @@
-			FilterRules[{o}, $causalGraphOptions],
-		FilterRules[{o}, Options[Graph]],
-		GraphLayout -> {
-			"LayeredDigraphEmbedding",
-			"VertexLayerPosition" ->
-				(propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "TotalGenerationsCount"] -
-						propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "AllEventsGenerationsList"])}
-	]
+			FilterRules[FilterRules[{o}, $causalGraphOptions], Except[$newLayeredCausalGraphOptions]],
+		GraphLayout -> Replace[
+			OptionValue[Flatten[Join[{o}, $propertyOptions[property]]], GraphLayout],
+			Automatic -> {
+				"LayeredDigraphEmbedding",
+				"VertexLayerPosition" ->
+					(propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "TotalGenerationsCount"] -
+							propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "AllEventsGenerationsList"])}]]
 
 
 (* ::Subsubsection:: *)
