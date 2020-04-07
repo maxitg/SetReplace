@@ -4,6 +4,7 @@
       Global`multisetComplement = SetReplace`PackageScope`multisetComplement;
       Global`multisetFilterRules = SetReplace`PackageScope`multisetFilterRules;
       Global`multisetUnion = SetReplace`PackageScope`multisetUnion;
+      Global`connectedHypergraphQ = SetReplace`PackageScope`connectedHypergraphQ;
     ),
     "tests" -> {
       (* multisetComplement *)
@@ -155,6 +156,73 @@
       VerificationTest[
         multisetUnion[{{1, 5}, {1, 4}, {1, 5}, 3, 5}, {{1, 5}, 2, 2, 3, 4}],
         {{1, 5}, {1, 5}, {1, 4}, 3, 5, 2, 2, 4}
+      ],
+
+      (* connectedHypergraphQ *)
+
+      VerificationTest[
+        connectedHypergraphQ[1],
+        True
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{1}],
+        True
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{1, 2}],
+        False
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{1, {1, 2}}],
+        True
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{{1, 3}, {1, 2}}],
+        True
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{{1, 2}, {2, 3}}],
+        True
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{{{1, 0}, {2, 0}}, {{2, 0}, {3, 0}}}],
+        True
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{{{1, 0}, {2, 0}}, {{3, 0}, {4, 0}}}],
+        False
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{{1}, {2, 3}}],
+        False
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{{1}, {1, 2}}],
+        True
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{{1, 2, 3}, {2, 4, 5}}],
+        True
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{{10, 17, 14}, {15, 8, 9}, {18, 15, 14}, {3, 12, 18}, {0, 16, 5}, {8, 13, 14}}],
+        False
+      ],
+
+      VerificationTest[
+        connectedHypergraphQ[{{13, 1, 14}, {13, 2, 16}, {16, 14, 18}, {6, 10, 15}, {1, 13, 15}, {13, 13, 15}}],
+        True
       ]
     }
   |>
