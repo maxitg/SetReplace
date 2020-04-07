@@ -464,6 +464,27 @@ applyStyle[style : Except[_List], shapes_] := With[{trimmedShapes = DeleteCases[
 
 applyStyle[style_List, shapes_] := Replace[DeleteCases[Transpose[{style, shapes}], {_, {}}], {} -> Nothing]
 
+vertexLabelsGraphics[embedding_, vertexSize_, vertexLabels_] := Module[{
+		pointsToVertices, edges, vertexCoordinatesDiagonal, graphPlotVertexSize},
+	pointsToVertices =
+		Association[Reverse /@ Catenate[Function[{v, pts}, v -> # & /@ Cases[pts, _Point]] @@@ embedding[[1]]]];
+	edges =
+		Cases[embedding[[2]], Line[{pt1_, ___, pt2_}] :> UndirectedEdge @@ pointsToVertices /@ Point /@ {pt1, pt2}, All];
+	vertexCoordinatesDiagonal = EuclideanDistance @@ Transpose[CoordinateBounds[First /@ Keys[pointsToVertices]]];
+	graphPlotVertexSize = If[vertexCoordinatesDiagonal == 0,
+		2 vertexSize,
+		{"Scaled", 2 vertexSize / vertexCoordinatesDiagonal}
+	];
+	GraphPlot[
+		Graph[Values[pointsToVertices], edges],
+		VertexCoordinates -> Thread[Values[pointsToVertices] -> First /@ Keys[pointsToVertices]],
+		VertexLabels -> vertexLabels,
+		GraphLayout -> "SpringElectricalEmbedding", (* smart vertex placement does not seem to work otherwise *)
+		VertexSize -> graphPlotVertexSize,
+		VertexShapeFunction -> None,
+		EdgeShapeFunction -> None]
+]
+
 drawEmbedding[
 			styles_,
 			vertexLabels_,
@@ -486,11 +507,7 @@ drawEmbedding[
 					Cases[#, Point[pts_] :> Circle[pts, getSingleVertexEdgeRadius[pts]], All] & /@ embedding[[2, All, 2]]]}],
 		If[vertexLabels === None,
 			Graphics[{}],
-			GraphPlot[
-				Graph[embedding[[1, All, 1]], {}],
-				VertexCoordinates -> embedding[[1, All, 2, 1, 1]],
-				VertexLabels -> vertexLabels,
-				VertexShapeFunction -> None,
-				EdgeShapeFunction -> None]]
+			vertexLabelsGraphics[embedding, vertexSize, vertexLabels]
+		]
 	]
 ]
