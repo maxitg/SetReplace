@@ -865,6 +865,31 @@
         0
       ],
 
+      (* time constraint should scale as well *)
+      VerificationTest[
+        #1 < #2 / 2 & @@ (
+          First[AbsoluteTiming[
+              WolframModel[{{1, 1}, {1, 1}, {1, 1}} -> {{1, 1}, {1, 1}, {1, 1}, {1, 1}}, Automatic, #]]] & /@
+            {{Automatic, 0.2}, Automatic})
+      ],
+
+      (* even non-evolution properties should return if an automatic time constraint is triggered *)
+      VerificationTest[
+        ListQ @ WolframModel[{{1, 1}, {1, 1}, {1, 1}} -> {{1, 1}, {1, 1}, {1, 1}, {1, 1}}, Automatic, #, "FinalState"]
+      ] & /@ {Automatic, {Automatic, 0.2}},
+
+      (* even if the time constraint is manually specified *)
+      VerificationTest[
+        ListQ @ WolframModel[
+          {{1, 1}, {1, 1}, {1, 1}} -> {{1, 1}, {1, 1}, {1, 1}, {1, 1}},
+          Automatic,
+          Automatic,
+          "FinalState",
+          TimeConstraint ->
+            First[AbsoluteTiming[
+              WolframModel[{{1, 1}, {1, 1}, {1, 1}} -> {{1, 1}, {1, 1}, {1, 1}, {1, 1}}, Automatic, Automatic]]] / 2]
+      ],
+
       (** Properties **)
 
       VerificationTest[
