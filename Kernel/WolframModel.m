@@ -127,7 +127,8 @@ fromStepsSpec[init_, {Automatic, factor_}, timeConstraint_] := {
 	<|$maxEvents -> Round[factor $automaticMaxEvents],
 		$maxFinalExpressions -> Max[Round[factor $automaticMaxFinalExpressions], Length[init]]|>,
 	Automatic, (* termination reason *)
-	{TimeConstraint -> Min[timeConstraint, factor $automaticStepsTimeConstraint], "IncludePartialGenerations" -> False},
+	{TimeConstraint -> Min[timeConstraint, Replace[factor, 0 | 0. -> 1] $automaticStepsTimeConstraint],
+		"IncludePartialGenerations" -> False},
 	$$noAbort
 }
 
