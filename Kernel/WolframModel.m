@@ -108,8 +108,11 @@ fromStepsSpec[init_, generations : (_Integer | Infinity), timeConstraint_] :=
 
 
 fromStepsSpec[_, spec_Association, _] := With[{
-		stepSpecInverse = Association[Reverse /@ Normal[$stepSpecKeys]]},
-	{KeyMap[# /. stepSpecInverse &, spec], Inherited (* termination reason *), {} (* options override *)}
+		stepSpecInverse = Association[Reverse /@ Normal[$stepSpecKeys]]}, {
+			KeyMap[# /. stepSpecInverse &, spec],
+			Inherited (* termination reason *),
+			{} (* options override *),
+			$$nonEvolutionOutputAbort}
 ]
 
 
@@ -124,7 +127,8 @@ fromStepsSpec[init_, {Automatic, factor_}, timeConstraint_] := {
 	<|$maxEvents -> Round[factor $automaticMaxEvents],
 		$maxFinalExpressions -> Max[Round[factor $automaticMaxFinalExpressions], Length[init]]|>,
 	Automatic, (* termination reason *)
-	{TimeConstraint -> Min[timeConstraint, $automaticStepsTimeConstraint], "IncludePartialGenerations" -> False}
+	{TimeConstraint -> Min[timeConstraint, factor $automaticStepsTimeConstraint], "IncludePartialGenerations" -> False},
+	$$noAbort
 }
 
 
@@ -197,11 +201,11 @@ WolframModel[
 			property : _ ? wolframModelPropertyQ : "EvolutionObject",
 			o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] :=
 	Module[{
-			patternRules, initialSet, steps, terminationReasonOverride, optionsOverride, overridenOptionValue, evolution,
-			modifiedEvolution, propertyEvaluateWithOptions, result},
+			patternRules, initialSet, steps, terminationReasonOverride, optionsOverride, abortBehavior, overridenOptionValue,
+			evolution, modifiedEvolution, propertyEvaluateWithOptions, result},
 		patternRules = fromRulesSpec[rulesSpec];
 		initialSet = Catch[fromInitSpec[rulesSpec, initSpec]];
-		{steps, terminationReasonOverride, optionsOverride} =
+		{steps, terminationReasonOverride, optionsOverride, abortBehavior} =
 			fromStepsSpec[initialSet, stepsSpec, OptionValue[TimeConstraint]];
 		overridenOptionValue = OptionValue[WolframModel, Join[optionsOverride, {o}], #] &;
 		evolution = If[initialSet =!= $Failed,
@@ -211,7 +215,10 @@ WolframModel[
 					initialSet,
 					steps,
 					WolframModel,
-					property === "EvolutionObject",
+					Switch[abortBehavior,
+						$$nonEvolutionOutputAbort, property === "EvolutionObject",
+						$$noAbort, True,
+						_, False],
 					Method -> overridenOptionValue[Method],
 					TimeConstraint -> overridenOptionValue[TimeConstraint],
 					"EventOrderingFunction" -> overridenOptionValue["EventOrderingFunction"]],
