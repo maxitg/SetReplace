@@ -71,7 +71,7 @@ $styleNames = KeySort /@ KeySort @ <|
   "EvolutionObject" -> <|"Icon" -> $evolutionObjectIcon|>,
   "SpatialGraph" -> <|
     "DestroyedEdgeStyle" -> $destroyedEdgeStyle,
-    "CreatedEdgeStyle" -> $destroyedEdgeStyle,
+    "CreatedEdgeStyle" -> $createdEdgeStyle,
     "DestroyedAndCreatedEdgeStyle" -> $destroyedAndCreatedEdgeStyle,
     "VertexSize" -> $vertexSize,
     "ArrowheadLengthFunction" -> $arrowheadLengthFunction,
