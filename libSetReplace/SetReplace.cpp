@@ -137,9 +137,9 @@ namespace SetReplace {
         appendToTensor({static_cast<mint>(expressions.size())});
         for (size_t expressionIndex = 0; expressionIndex < expressions.size(); ++expressionIndex) {
             appendToTensor({
-                expressions[expressionIndex].creatorEvent,
-                expressions[expressionIndex].destroyerEvent,
-                expressions[expressionIndex].generation,
+                static_cast<mint>(expressions[expressionIndex].creatorEvent),
+                static_cast<mint>(expressions[expressionIndex].destroyerEvent),
+                static_cast<mint>(expressions[expressionIndex].generation),
                 static_cast<mint>(atomsPointer)});
             atomsPointer += expressions[expressionIndex].atoms.size();
         }
@@ -147,10 +147,18 @@ namespace SetReplace {
         // Put fake event at the end so that the length of final expression can be determined on WL side.
         constexpr EventID fakeEvent = -3;
         constexpr Generation fakeGeneration = -1;
-        appendToTensor({fakeEvent, fakeEvent, fakeGeneration, static_cast<mint>(atomsPointer)});
+        appendToTensor({
+            static_cast<mint>(fakeEvent),
+            static_cast<mint>(fakeEvent),
+            static_cast<mint>(fakeGeneration),
+            static_cast<mint>(atomsPointer)});
         
         for (size_t expressionIndex = 0; expressionIndex < expressions.size(); ++expressionIndex) {
-            appendToTensor(expressions[expressionIndex].atoms);
+            std::vector<mint> atoms(expressions[expressionIndex].atoms.size());
+            for (int i = 0; i < expressions[expressionIndex].atoms.size(); ++i) {
+                atoms[i] = static_cast<mint>(expressions[expressionIndex].atoms[i]);
+            }
+            appendToTensor(atoms);
         }
         
         return output;
