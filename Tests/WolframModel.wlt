@@ -1360,6 +1360,18 @@
         {{1, 3}, {3, 2}}
       ],
 
+      (*** weed #300 ***)
+      (*** should not fail for non-atom non-list edges ***)
+      VerificationTest[
+        WolframModel[
+          <|"PatternRules" -> {f[x_], f[y_]} :> {f[x + y], f[x - y]}|>,
+          {f[1], f[1]},
+          4,
+          "StatesList",
+          "VertexNamingFunction" -> All],
+        {{1, 1}, {2, 3}, {2, 2}, {4, 3}, {4, 4}}
+      ],
+
       (** TimeConstraint **)
 
       With[{timeConstraintRule = $timeConstraintRule, timeConstraintInit = $timeConstraintInit}, {
