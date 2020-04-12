@@ -118,6 +118,12 @@ To build:
 
 A less frequently updated version is available through the Wolfram public paclet server and can be installed with `PacletInstall["SetReplace"]`.
 
+## Contributing
+
+Keep in mind that this is an active research project. While we try to keep the main functionality backward compatible, it might change in the future as we adjust our models and find better ways of analysis. Keep that in mind when building on top of *SetReplace*, and keep track of [git SHAs](#build-data) as you go.
+
+*SetReplace* is an open-source project, and everyone is welcome to contribute. Read our [contributing guidelines](/.github/CONTRIBUTING.md) to get started.
+
 # Symbols and Functions
 
 [SetReplace\*](#setreplace) | [ToPatternRules](#topatternrules) | [WolframModel and WolframModelEvolutionObject](#wolframmodel-and-wolframmodelevolutionobject) | [WolframModelPlot](#wolframmodelplot) | [RulePlot of WolframModel](#ruleplot-of-wolframmodel) | [Utility Functions](#utility-functions)
