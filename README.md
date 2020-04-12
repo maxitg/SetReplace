@@ -1,8 +1,8 @@
-[Set Substitution Systems](#set-substitution-systems) | [Getting Started](#getting-started) | [Symbols and Functions](#symbols-and-functions) | [Physics](#physics) | [Acknowledgements](#acknowledgements)
+[Wolfram Models as Set Substitution Systems](#wolfram-models-as-set-substitution-systems) | [Getting Started](#getting-started) | [Symbols and Functions](#symbols-and-functions) | [Physics](#physics) | [Acknowledgements](#acknowledgements)
 
-# Set Substitution Systems
+# Wolfram Models as Set Substitution Systems
 
-## Basic Example
+## Set Substitution Systems
 
 **SetReplace** is a [Wolfram Language](https://www.wolfram.com/language/) package for manipulating set substitution systems. To understand what a set substitution system does consider an unordered set of elements:
 
@@ -30,9 +30,9 @@ In[] := SubsetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> a + b]
 Out[] = {3, 8, 6}
 ```
 
-## Relations between Set Elements
+## Wolfram Models
 
-A more interesting case (and the only one we have studied in any reasonable detail) is one where the set elements are related to each other. Specifically, we can consider a set of ordered lists of atomic vertices; in other words, an ordered hypergraph.
+A more interesting case (which we call a Wolfram model) is one where the set elements are related to each other. Specifically, we can consider a set of ordered lists of atomic vertices; in other words, an ordered hypergraph.
 
 As an example consider a set:
 
@@ -43,7 +43,7 @@ As an example consider a set:
 We can render it as a collection of ordered hyperedges:
 
 ```
-In[] := HypergraphPlot[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
@@ -59,7 +59,7 @@ We can then have a rule which would pick a subset of these hyperedges related th
 Note the [`Module`](https://reference.wolfram.com/language/ref/Module.html) on the right-hand side creates a new variable (vertex) which causes the hypergraph to grow. After a single replacement we get this (the new vertex is `v11`, due to optimizations it's not always a [`Module`](https://reference.wolfram.com/language/ref/Module.html) that creates vertices, so the naming may be different):
 
 ```
-In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
   {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]],
  VertexLabels -> Automatic]
@@ -70,7 +70,7 @@ In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
 After 10 steps, we get a more complicated structure:
 
 ```
-In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
   {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 10],
  VertexLabels -> Automatic]
@@ -81,7 +81,7 @@ In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
 And after 100 steps, it gets even more elaborate:
 
 ```
-In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
   {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 100]]
 ```
