@@ -526,6 +526,27 @@ Any combination of these can be used, in which case the earliest triggered condi
 
 Note also that `"MaxGenerations"` works differently from the other limiters, as the matching algorithm would not even attempt to match edges with generations over the limit. Therefore unlike, i.e., `"MaxVertices"`, which would terminate the evolution immediately once the limit-violating event is attempted, `"MaxGenerations"` would keep "filling in" events for as long as possible until no further matches within allowed generations are possible.
 
+It is also possible to set the step count to `Automatic`, in which case `WolframModel` tries to automatically pick a number of steps that showcases the evolution without taking too long. It stops the evolution sooner if the state grows quickly:
+
+```
+In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
+    3}},
+ {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, Automatic]
+```
+
+<img src="READMEImages/AutomaticStepsGrowing.png" width="491">
+
+But evolves the rule much longer if it does not grow:
+
+```
+In[] := WolframModel[<|"PatternRules" -> {{a_, b_}} :> {{a + b, a - b}}|>,
+ {{1, 1}}, Automatic]
+```
+
+<img src="READMEImages/AutomaticStepsNotGrowing.png" width="565">
+
+Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, setting `TimeConstraint -> 5` (it still returns values for all properties even if terminated due to time constraint), and `"IncludePartialGenerations" -> False`, but it may be adjusted in future updates.
+
 ### Properties
 
 [States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout Evolution](#all-edges-throughout-evolution) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules)
