@@ -1823,29 +1823,21 @@ Out[] = {{{{3, 1}, {3, 4}, {2, 3}}, <|1 -> 3, 2 -> 1|>, <|1 -> 3, 2 -> 2|>},
 
 In the first output here `{{{3, 1}, {3, 4}, {2, 3}}, <|1 -> 3, 2 -> 1|>, <|1 -> 3, 2 -> 2|>}`, the graphs are overlapping by a shared edge `{2, 3}`, and two inputs are matched respectively to `{{2, 3}, {3, 1}}` and `{{2, 3}, {3, 4}}`.
 
-All unifications can be visualized by coloring shared edges in purple, edges mapped to only the first argument in red, and the second argument in blue:
+All unifications can be visualized with **`HypergraphUnificationsPlot`**:
 
 ```
-In[] := WolframModelPlot[#,
-   EdgeStyle ->
-    ReplacePart[Table[Automatic, Length[#]],
-     Join[Thread[Intersection[Values[#2], Values[#3]] -> Purple],
-      Thread[Values[#2] -> Red], Thread[Values[#3] -> Blue]]]] & @@@
- HypergraphUnifications[{{1, 2}, {2, 3}}, {{1, 2}, {2, 3}}]
+In[] := HypergraphUnificationsPlot[{{1, 2}, {2, 3}}, {{1, 2}, {2, 3}}]
 ```
 
 <img src="READMEImages/HypergraphUnificationsPlot.png" width="745">
 
+Vertex labels here show the vertex names in the input graphs to which the unification is matched.
+
 A more complicated example with edges of various arities is
 
 ```
-In[] := WolframModelPlot[#,
-   EdgeStyle ->
-    ReplacePart[Table[Automatic, Length[#]],
-     Join[Thread[Intersection[Values[#2], Values[#3]] -> Purple],
-      Thread[Values[#2] -> Red], Thread[Values[#3] -> Blue]]]] & @@@
- HypergraphUnifications[{{1, 2, 3}, {4, 5, 6}, {1, 4}}, {{1, 2, 3}, {4, 5,
-     6}, {1, 4}}]
+In[] := HypergraphUnificationsPlot[{{1, 2, 3}, {4, 5, 6}, {1, 4}},
+ {{1, 2, 3}, {4, 5, 6}, {1, 4}}, VertexLabels -> Automatic]
 ```
 
 <img src="READMEImages/HypergraphUnificationsPlotWithMultipleArities.png" width="746">
