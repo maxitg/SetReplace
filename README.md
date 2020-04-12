@@ -1474,12 +1474,12 @@ In[] := WolframModelPlot[{{1, 2, 3}, {1, 2, 3}, {3, 4}, {3, 4}, {3,
 
 <img src="READMEImages/PlotWithMultiedgeHighlight.png" width="478">
 
-The color of the highlight can be specified with **`GraphHighlightStyle`** (only colors, other style specifiers are not supported at the moment):
+The style of the highlight can be specified with **`GraphHighlightStyle`**:
 
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
    9}, {9}}, GraphHighlight -> {{1, 2, 3}, 4, {9}},
- GraphHighlightStyle -> Darker @ Green]
+ GraphHighlightStyle -> Directive[Darker @ Green, Thick]]
 ```
 
 <img src="READMEImages/PlotWithGreenHighlight.png" width="478">
