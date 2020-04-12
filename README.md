@@ -1745,7 +1745,7 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
 
 [Transformation Count](#transformation-count) | [Arity](#arity) | [Node Counts](#node-counts) | [Connectedness](#connectedness)
 
-**`WolframModelRuleValues`** computes simple properties of rules, which can be determined without running the evolution. Only anonymous (not pattern) rules are supported at the moment. The full list of supported properties can be obtained with **`$WolframModelRuleProperties`**:
+**`WolframModelRuleValue`** computes simple properties of rules, which can be determined without running the evolution. Only anonymous (not pattern) rules are supported at the moment. The full list of supported properties can be obtained with **`$WolframModelRuleProperties`**:
 
 ```
 In[] := $WolframModelRuleProperties
@@ -1756,7 +1756,7 @@ Out[] = {"ConnectedInput", "ConnectedInputOutputUnion", "ConnectedOutput",
 
 #### Transformation Count
 
-**`TransformationCount`** is a very simple property that simply returns the number of rules in the system:
+**`TransformationCount`** is a very simple property that returns the number of rules in the system:
 
 ```
 In[] := WolframModelRuleValue[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2,
@@ -1817,7 +1817,7 @@ In[] := WolframModelRuleValue[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2,
 Out[] = {{0, 1}, {1, 0}}
 ```
 
-Keep in mind however that rule dropping a vertex does not imply this vertex would be deleted from the state, as there may be other edges containing this vertex.
+Keep in mind that rule dropping a vertex does not imply this vertex would be deleted from the state, as there may be other edges containing this vertex.
 
 #### Connectedness
 
