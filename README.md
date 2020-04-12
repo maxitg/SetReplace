@@ -1860,7 +1860,7 @@ In[] := $SetReplaceGitSHA
 Out[] = "320b91b5ca1d91b9b7890aa181ad457de3e38939"
 ```
 
-If the build directory were not clean, it would have "\*" at the end,
+If the build directory were not clean, it would have "\*" at the end.
 
 **`$SetReplaceBuildTime`** gives a date object of when the paclet was created:
 
