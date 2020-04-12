@@ -1596,9 +1596,9 @@ In[] := WolframModelPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}}, ImageSize -> 100]
 
 ### Style Options
 
-There are four styling options: **`PlotStyle`**, **`VertexStyle`**, **`EdgeStyle`** and **`"EdgePolygonStyle"`**.
+There are four styling options: `PlotStyle`, `VertexStyle`, `EdgeStyle` and `"EdgePolygonStyle"`.
 
-`PlotStyle` controls the overall style for everything, `VertexStyle` and `EdgeStyle` inherit from it:
+**`PlotStyle`** controls the overall style for everything, `VertexStyle` and `EdgeStyle` inherit from it:
 
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
@@ -1607,7 +1607,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 
 <img src="READMEImages/PlotWithCustomPlotStyle.png" width="478">
 
-`VertexStyle` works similar to [`GraphPlot`](https://reference.wolfram.com/language/ref/GraphPlot.html):
+**`VertexStyle`** works similar to [`GraphPlot`](https://reference.wolfram.com/language/ref/GraphPlot.html):
 
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
@@ -1616,7 +1616,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 
 <img src="READMEImages/PlotWithCustomVertexStyle.png" width="478">
 
-`EdgeStyle` controls edge lines, and `"EdgePolygonStyle"` inherits from it (automatically adding transparency):
+**`EdgeStyle`** controls edge lines, and `"EdgePolygonStyle"` inherits from it (automatically adding transparency):
 
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
@@ -1626,7 +1626,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 
 <img src="READMEImages/PlotWithCustomEdgeStyle.png" width="478">
 
-Finally, `"EdgePolygonStyle"` controls the hyperedge polygons:
+Finally, **`"EdgePolygonStyle"`** controls the hyperedge polygons:
 
 ```
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
