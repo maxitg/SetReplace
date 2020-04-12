@@ -1400,7 +1400,7 @@ Note the difference between a hyper-self-loop and two binary edges pointing in o
 In[] := WolframModelPlot[{{1, 2, 1}, {2, 3}, {3, 2}}]
 ```
 
-<img src="READMEImages/HyperSelfLoopDoubleBinaryEdgesComparison.png" width="460">
+<img src="READMEImages/HyperSelfLoopDoubleBinaryEdgesComparison.png" width="478">
 
 Multiedges are shown in a darker color (because of overlayed partially transparent polygons), or as separate polygons depending on the layout (and are admittedly sometimes hard to understand):
 
