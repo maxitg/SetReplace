@@ -1068,7 +1068,7 @@ Out[] = {2, 4, 8, 16, 28, 54, 98, 184, 342, 648, 1244}
 
 #### Final Element Counts
 
-These properties are similar to corresponding [`*List`](#element-count-lists) ones, except we don't have `"FinalVertexCount"` and instead have **`"FinalDistinctElementsCount"`** (aka `"AtomsCountFinal"`) and **`"FinalEdgeCount"`** (aka `"ExpressionsCountFinal"`) (we should have `"FinalVertexCount"` and `"FinalDistinctElementsCountList"`, but they are not currently implemented).
+**`FinalDistinctElementsCount`** (aka `"AtomsCountFinal"`) and **`FinalEdgeCount`** (aka `"ExpressionsCountFinal"`) are similar to corresponding [`*List`](#element-count-lists) properties, except we don't have `"FinalVertexCount"` (we should have it and also `"DistinctElementsCountList"`, but they are not currently implemented).
 
 The difference is that [`"VertexCountList"`](#element-count-lists) counts expressions on level 2 in the states whereas `"FinalDistinctElementsCount"` counts all expressions matching `_ ? AtomQ` (on any level). The difference becomes apparent for edges that contain non-trivially nested lists.
 
