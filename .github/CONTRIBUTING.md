@@ -54,6 +54,8 @@ If sharing variables among multiple tests, use [`With`](https://reference.wolfra
 
 You should also modify the [README](/README.md) documentation if you are implementing new functionality, or causing any outputs there to change.
 
+**Never put notebooks (.nb files) in the repository**, as they, even though text files, are not human readable, cannot be reviewed line-by-line, and are guaranteed to cause conflicts, which would be almost impossible to resolve.
+
 ### Opening a pull request
 
 Each pull request message should include detailed information on what was changed, optional comments for the reviewer, and **examples**, including screenshots if the output is a [`Graphics`](https://reference.wolfram.com/language/ref/Graphics.html) object. If your pull request closes an existing issue (as it generally should, as it's best to discuss your changes before implementing them), reference that issue in your pull request message. For an example of a good pull request message, see [#268](https://github.com/maxitg/SetReplace/pull/268).
