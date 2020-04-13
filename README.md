@@ -16,7 +16,7 @@ We can set up an operation on this set which would take any of the two elements 
 {a_, b_} :> {a + b}
 ```
 
-In **SetReplace**, this can be expressed as the following (the new element is put at the end)
+In **SetReplace**, this can be expressed as the following (the new element `1 + 2 -> 3` is put at the end)
 
 ```
 In[] := SetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> {a + b}]
