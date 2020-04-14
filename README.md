@@ -2009,9 +2009,9 @@ These constants are particularly useful for reporting issues with the code.
 
 A hypothesis is that spacetime at small scales is a network, and the fundamental law of physics is a system similar to the one this package implements.
 
-A slightly different version of this system was first introduced in Stephen Wolfram's [A New Kind Of Science](https://www.wolframscience.com/nks/chap-9--fundamental-physics/).
+A slightly different version of this system was first introduced in *Stephen Wolfram*'s [A New Kind Of Science](https://www.wolframscience.com/nks/chap-9--fundamental-physics/).
 
-Stay tuned for the upcoming **Technical Introduction**, where we will present many more details about our physics results.
+You can find many more details about our physics results in *Stephen Wolfram*'s [Technical Introduction](https://www.wolframphysics.org/technical-introduction/), and *Jonathan Gorard*'s papers on [Relativity](https://www.wolframcloud.com/obj/wolframphysics/Documents/some-relativistic-and-gravitational-properties-of-the-wolfram-model.pdf) and [Quantum Mechanics](https://www.wolframcloud.com/obj/wolframphysics/Documents/some-quantum-mechanical-properties-of-the-wolfram-model.pdf). And there is much more on [wolframphysics.org](https://www.wolframphysics.org).
 
 # Acknowledgements
 
