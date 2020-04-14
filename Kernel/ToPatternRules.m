@@ -31,10 +31,7 @@ PackageScope["toPatternRules"]
 
 
 ToPatternRules::usage = usageString[
-	"ToPatternRules[`r`] converts a list of anonymous rules `r` into a list of ",
-	"rules that can be supplied into SetReplace.",
-	"\n",
-	"As an example, try ToPatternRules[{{{1, 2}} -> {{1, 2, 3}}}]."];
+	"ToPatternRules[`r`] converts a list of anonymous rules `r` to explicit pattern rules."];
 
 
 (* ::Section:: *)

@@ -7,8 +7,9 @@ PackageExport["WolframPhysicsProjectStyleData"]
 WolframPhysicsProjectStyleData::usage = usageString[
   "WolframPhysicsProjectStyleData[] yields an association describing default styles used in Wolfram Physics Project.\n",
   "WolframPhysicsProjectStyleData[`theme`] gives styles for a particular `theme`.\n",
-  "WolframPhysicsProjectStyleData[`g`, `e`] gives a value for a particular style element `e` from group `g`.\n",
-  "WolframPhysicsProjectStyleData[`theme`, `g`, `e`] gives a value for an element `e` from group `g` of `theme`."];
+  "WolframPhysicsProjectStyleData[`t`] gives styles for a particular plot type `t`.\n",
+  "WolframPhysicsProjectStyleData[`t`, `e`] gives a value for a particular style element `e` of plot type `t`.\n",
+  "WolframPhysicsProjectStyleData[`theme`, `t`, `e`] gives a value for an element `e` of plot type `t` for `theme`."];
 
 SyntaxInformation[WolframPhysicsProjectStyleData] = {"ArgumentsPattern" -> {_., _., _.}};
 
