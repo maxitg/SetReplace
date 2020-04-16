@@ -1,6 +1,8 @@
 #ifndef IDTypes_h
 #define IDTypes_h
 
+#include <cstdint>
+
 namespace SetReplace {
     /** @brief Identifiers for atoms, which are the elements of expressions, i.e., vertices in the graph.
      * @details Positive IDs refer to specific atoms, negative IDs refer to patterns (as, for instance, can be used in the rules).
