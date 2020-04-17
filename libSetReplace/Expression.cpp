@@ -26,14 +26,16 @@ namespace SetReplace {
             }
             
             for (const auto& atom : involvedAtoms) {
-                auto& currentExpressions = index_[atom];
-                for (const auto& expression : expressionsToDelete) {
-                    if (currentExpressions.empty()) {
-                        break;
+                auto expressionIterator = index_[atom].begin();
+                while (expressionIterator != index_[atom].end()) {
+                    if (expressionsToDelete.count(*expressionIterator)) {
+                        expressionIterator = index_[atom].erase(expressionIterator);
                     }
-                    currentExpressions.erase(expression);
+                    else {
+                        ++expressionIterator;
+                    }
                 }
-                if (currentExpressions.empty()) {
+                if (index_[atom].empty()) {
                     index_.erase(atom);
                 }
             }
