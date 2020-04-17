@@ -49,11 +49,8 @@ namespace SetReplace {
         }
         
         const std::unordered_set<ExpressionID> expressionsContainingAtom(const Atom atom) const {
-            if (index_.count(atom)) {
-                return index_.at(atom);
-            } else {
-                return {};
-            }
+            const auto resultIterator = index_.find(atom);
+            return resultIterator != index_.end() ? resultIterator->second : std::unordered_set<ExpressionID>();
         }
     };
     
