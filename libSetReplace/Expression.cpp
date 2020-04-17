@@ -13,28 +13,27 @@ namespace SetReplace {
         Implementation(const std::function<AtomsVector(ExpressionID)>& getAtomsVector) : getAtomsVector_(getAtomsVector) {}
         
         void removeExpressions(const std::vector<ExpressionID>& expressionIDs) {
-            std::unordered_set<ExpressionID> expressionsToDelete;
-            for (const auto& expression : expressionIDs) {
-                expressionsToDelete.insert(expression);
-            }
+            const std::unordered_set<ExpressionID> expressionsToDelete(expressionIDs.begin(), expressionIDs.end());
             
             std::unordered_set<Atom> involvedAtoms;
             for (const auto& expression : expressionIDs) {
-                for (const auto& atom : getAtomsVector_(expression)) {
+                const auto atomsVector = getAtomsVector_(expression);
+                // Increase set capacity to reduce number of memory allocations
+                involvedAtoms.reserve(involvedAtoms.size() + atomsVector.size());
+                for (const auto& atom : atomsVector) {
                     involvedAtoms.insert(atom);
                 }
             }
             
             for (const auto& atom : involvedAtoms) {
-                auto expressionIterator = index_[atom].begin();
-                while (expressionIterator != index_[atom].end()) {
-                    if (expressionsToDelete.count(*expressionIterator)) {
-                        expressionIterator = index_[atom].erase(expressionIterator);
-                    } else {
-                        ++expressionIterator;
+                auto& currentExpressions = index_[atom];
+                for (const auto& expression : expressionsToDelete) {
+                    if (currentExpressions.empty()) {
+                        break;
                     }
+                    currentExpressions.erase(expression);
                 }
-                if (index_[atom].empty()) {
+                if (currentExpressions.empty()) {
                     index_.erase(atom);
                 }
             }
