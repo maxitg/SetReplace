@@ -6,7 +6,7 @@ PackageExport["HypergraphUnifications"]
 
 HypergraphUnifications::usage = usageString[
   "HypergraphUnifications[`e1`, `e2`] yields a list of edge pairings ",
-  "between isomophic subgraphs of both `e1` and `e2`."];
+  "to hypergraphs containing both `e1` and `e2` as rule input matches."];
 
 SyntaxInformation[HypergraphUnifications] = {"ArgumentsPattern" -> {_, _}};
 
