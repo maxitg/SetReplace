@@ -137,7 +137,7 @@ One way to implement such argument checking is to make special `valid*Q` functio
 
 A better approach is to setup the function to catch exceptions, i.e.,
 
-```
+```wl
 MakeUniverse[args___] := Module[{result = Catch[makeUniverse[args]]},
   result /; result =!= $Failed
 ]
@@ -145,7 +145,7 @@ MakeUniverse[args___] := Module[{result = Catch[makeUniverse[args]]},
 
 and parse the inputs lazily, printing a message, and throwing an exception if something is wrong:
 
-```
+```wl
 failUniverse[badUniverse_] := (
   Message[MakeUniverse::bad, badUniverse];
   Throw[$Failed]
@@ -180,7 +180,7 @@ Unit tests live in the [Tests folder](/Tests). They are technically .wlt files, 
 
 Each file consists of a single [`Association`](https://reference.wolfram.com/language/ref/Association.html):
 
-```
+```wl
 <|"FunctionName" -> <|"init" -> ..., "tests" -> {VerificationTest[...], ...}, "options" -> ...|>, ...|>
 ```
 
@@ -188,14 +188,14 @@ Each file consists of a single [`Association`](https://reference.wolfram.com/lan
 
 Apart from [`VerificationTest`](https://reference.wolfram.com/language/ref/VerificationTest.html), there are other convenience testing functions defined in [testUtilities.m](/Kernel/testUtilities.m). For example, `"testUnevaluated"` can be used to test if the function returns unevaluated for given arguments. `"testSymbolLeak"` can check if internal symbols are not garbage-collected during the evaluation. Since these are `PackageScope` functions, they need to be used as, i.e., ``SetReplace`PackageScope`testUnevaluated[VerificationTest, args]``. To avoid typing `PackageScope` every time, however, it is convenient to define them in `"init"` as, i.e.,
 
-```
+```wl
 Attributes[Global`testUnevaluated] = {HoldAll};
 Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
 ```
 
 This way, the test itself can simply be defined as
 
-```
+```wl
 testUnevaluated[
   MakeUniverse[42],
   {MakeUniverse::badUniverse}
@@ -217,13 +217,13 @@ Some things to note are:
 * All references to functions should be links, either to [the Wolfram Language documentation](https://reference.wolfram.com/language/) or to the corresponding section in [README](/README.md).
 * Images (i.e., of output cells) should be made by selecting the relevant cells in the Front End, copying them as bitmaps, and saving them as .png files to [READMEImages](/READMEImages) directory. They should then be inserted using the code similar to this:
 
-  ```
+  ```html
   <img src="READMEImages/image.png" width="xxx">
   ```
 
   where the `width` should be computed as
 
-  ```
+  ```wl
   Round[0.6 First @ Import["$RepoRoot/READMEImages/image.png", "ImageSize"]]
   ```
 
@@ -244,7 +244,7 @@ In addition to that, here are some more-or-less established rules:
 * Use spaces instead of tabs, and use 2 spaces for indentation.
 * Close code block function brackets on the new line (for functions such as [`Module`](https://reference.wolfram.com/language/ref/Module.html), [`With`](https://reference.wolfram.com/language/ref/With.html) and [`If`](https://reference.wolfram.com/language/ref/If.html)):
 
-  ```
+  ```wl
   Module[{result = f[x]},
     result *= 2;
     result
@@ -253,7 +253,7 @@ In addition to that, here are some more-or-less established rules:
 
 * However, close the brackets of ordinary functions on the same line as the last argument:
 
-  ```
+  ```wl
   veryLongFunctionCall[
     longArgument1, longArgument2, longArgument3]
   ```
