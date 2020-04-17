@@ -18,14 +18,14 @@ namespace SetReplace {
                 expressionsToDelete.insert(expression);
             }
             
-            std::unordered_set<Atom> involedAtoms;
+            std::unordered_set<Atom> involvedAtoms;
             for (const auto& expression : expressionIDs) {
                 for (const auto& atom : getAtomsVector_(expression)) {
-                    involedAtoms.insert(atom);
+                    involvedAtoms.insert(atom);
                 }
             }
             
-            for (const auto& atom : involedAtoms) {
+            for (const auto& atom : involvedAtoms) {
                 auto expressionIterator = index_[atom].begin();
                 while (expressionIterator != index_[atom].end()) {
                     if (expressionsToDelete.count(*expressionIterator)) {
@@ -65,7 +65,7 @@ namespace SetReplace {
         implementation_->removeExpressions(expressionIDs);
     }
     
-    void AtomsIndex::addExpressions(const std::vector<ExpressionID> &expressionIDs) {
+    void AtomsIndex::addExpressions(const std::vector<ExpressionID>& expressionIDs) {
         implementation_->addExpressions(expressionIDs);
     }
     

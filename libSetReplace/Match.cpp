@@ -415,7 +415,7 @@ namespace SetReplace {
     
     bool Matcher::substituteMissingAtomsIfPossible(const std::vector<AtomsVector> inputPatterns,
                                                    const std::vector<AtomsVector> patternMatches,
-                                                   std::vector<AtomsVector> &atomsToReplace) {
+                                                   std::vector<AtomsVector>& atomsToReplace) {
         if (inputPatterns.size() != patternMatches.size()) return false;
         
         std::unordered_map<Atom, Atom> match;
