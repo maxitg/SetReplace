@@ -66,14 +66,14 @@ namespace SetReplace {
         
         static int compareSortedIDs(const MatchPtr a, const MatchPtr b, const bool reverseOrder) {
             std::vector<ExpressionID> aExpressions = a->inputExpressions;
-            std::sort(aExpressions.begin(), aExpressions.end());
-            
             std::vector<ExpressionID> bExpressions = b->inputExpressions;
-            std::sort(bExpressions.begin(), bExpressions.end());
-            
-            if (reverseOrder) {
-                std::reverse(aExpressions.begin(), aExpressions.end());
-                std::reverse(bExpressions.begin(), bExpressions.end());
+
+            if (!reverseOrder) {
+                std::sort(aExpressions.begin(), aExpressions.end(), std::less<Atom>());
+                std::sort(bExpressions.begin(), bExpressions.end(), std::less<Atom>());
+            } else {
+                std::sort(aExpressions.begin(), aExpressions.end(), std::greater<Atom>());
+                std::sort(bExpressions.begin(), bExpressions.end(), std::greater<Atom>());
             }
             return compareVectors(aExpressions, bExpressions);
         }
