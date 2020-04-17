@@ -2,7 +2,7 @@
 
 Paclet[
 	Name -> "SetReplace",
-	Version -> "0.2",
+	Version -> "0.3",
 	MathematicaVersion -> "12.1+",
 	Description -> "SetReplace implements WolframModel and other functions used in the Wolfram Physics Project.",
 	Creator -> "Wolfram Research",
