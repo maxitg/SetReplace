@@ -61,15 +61,15 @@ namespace SetReplace {
             return getData(tensorData, tensorLength, readIndex++);
         };
         
-        const mint setLength = getSetData();
-        std::vector<AtomsVector> set;
-        for (mint expressionIndex = 0; expressionIndex < setLength; ++expressionIndex) {
+        std::vector<AtomsVector> set(getSetData());
+        for (auto& atomsVector : set) {
             const mint expressionLength = getSetData();
-            set.push_back(AtomsVector());
+            atomsVector.resize(expressionLength);
             for (mint atomIndex = 0; atomIndex < expressionLength; ++atomIndex) {
-                set[expressionIndex].push_back(static_cast<Atom>(getSetData()));
+                atomsVector[atomIndex] = static_cast<Atom>(getSetData());
             }
         }
+
         return set;
     }
 
@@ -77,10 +77,11 @@ namespace SetReplace {
         mint tensorLength = libData->MTensor_getFlattenedLength(orderingSpecTensor);
         mint* tensorData = libData->MTensor_getIntegerData(orderingSpecTensor);
         Matcher::OrderingSpec result;
+        result.reserve(tensorLength);
         for (mint i = 0; i < tensorLength; i += 2) {
-            result.push_back({
+            result.emplace_back(std::make_pair<Matcher::OrderingFunction, Matcher::OrderingDirection>(
                 static_cast<Matcher::OrderingFunction>(getData(tensorData, tensorLength, i)),
-                static_cast<Matcher::OrderingDirection>(getData(tensorData, tensorLength, i + 1))});
+                static_cast<Matcher::OrderingDirection>(getData(tensorData, tensorLength, i + 1))));
         }
         return result;
     }
@@ -321,7 +322,7 @@ namespace SetReplace {
             mint position[1];
             for (size_t event = 1; event < ruleIDs.size(); ++event) {
                 position[0] = ++writeIndex;
-                libData->MTensor_setInteger(output, position, ruleIDs[event] + 1);
+                libData->MTensor_setInteger(output, position, static_cast<mint>(ruleIDs[event]) + 1);
             }
             
             MArgument_setMTensor(result, output);
