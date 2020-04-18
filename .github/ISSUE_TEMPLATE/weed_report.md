@@ -9,7 +9,7 @@ assignees: ''
 
 ### The problem
 A clear and concise description of what is not working.
-```
+```wl
 In[] := minimal input that is not working
 ```
 image of the actual output.
@@ -18,12 +18,12 @@ image of the actual output.
 A clear and concise description of what you expected to happen.
 
 ### Version
-```
+```wl
 In[] := SystemInformation["Small"]
 ```
 image of the output
 
-```
+```wl
 In[] := $SetReplaceGitSHA
 ```
 paste the output here without quotes.
