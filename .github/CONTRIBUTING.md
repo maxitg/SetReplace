@@ -276,6 +276,10 @@ The following are exceptions to Google C++ Style:
 * Maximum line length is 120 characters.
 * Variable names, including const and constexpr variables, use lower camel case.
 * C++ exceptions may be thrown.
+* All indentation uses four spaces, except for access specifiers which uses one.
+* White space in pointer and reference declarations goes after the `*` or `&` character. For example:
+    * `int* foo;` 
+    * `const std::string& string;`
 
 A useful tool for confirming your code's adherence to the above code style is to use
 [cpplint](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py). You can lint a C++ source
