@@ -13,24 +13,25 @@ namespace SetReplace {
         Implementation(const std::function<AtomsVector(ExpressionID)>& getAtomsVector) : getAtomsVector_(getAtomsVector) {}
         
         void removeExpressions(const std::vector<ExpressionID>& expressionIDs) {
-            std::unordered_set<ExpressionID> expressionsToDelete;
-            for (const auto& expression : expressionIDs) {
-                expressionsToDelete.insert(expression);
-            }
+            const std::unordered_set<ExpressionID> expressionsToDelete(expressionIDs.begin(), expressionIDs.end());
             
-            std::unordered_set<Atom> involedAtoms;
+            std::unordered_set<Atom> involvedAtoms;
             for (const auto& expression : expressionIDs) {
-                for (const auto& atom : getAtomsVector_(expression)) {
-                    involedAtoms.insert(atom);
+                const auto atomsVector = getAtomsVector_(expression);
+                // Increase set capacity to reduce number of memory allocations
+                involvedAtoms.reserve(involvedAtoms.size() + atomsVector.size());
+                for (const auto& atom : atomsVector) {
+                    involvedAtoms.insert(atom);
                 }
             }
             
-            for (const auto& atom : involedAtoms) {
+            for (const auto& atom : involvedAtoms) {
                 auto expressionIterator = index_[atom].begin();
                 while (expressionIterator != index_[atom].end()) {
                     if (expressionsToDelete.count(*expressionIterator)) {
                         expressionIterator = index_[atom].erase(expressionIterator);
-                    } else {
+                    }
+                    else {
                         ++expressionIterator;
                     }
                 }
@@ -49,11 +50,8 @@ namespace SetReplace {
         }
         
         const std::unordered_set<ExpressionID> expressionsContainingAtom(const Atom atom) const {
-            if (index_.count(atom)) {
-                return index_.at(atom);
-            } else {
-                return {};
-            }
+            const auto resultIterator = index_.find(atom);
+            return resultIterator != index_.end() ? resultIterator->second : std::unordered_set<ExpressionID>();
         }
     };
     
@@ -65,7 +63,7 @@ namespace SetReplace {
         implementation_->removeExpressions(expressionIDs);
     }
     
-    void AtomsIndex::addExpressions(const std::vector<ExpressionID> &expressionIDs) {
+    void AtomsIndex::addExpressions(const std::vector<ExpressionID>& expressionIDs) {
         implementation_->addExpressions(expressionIDs);
     }
     
