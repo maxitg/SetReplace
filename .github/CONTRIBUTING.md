@@ -277,4 +277,16 @@ The following are exceptions to Google C++ Style:
 * Variable names, including const and constexpr variables, use lower camel case
 * Exceptions are allowed
 
+A useful tool for confirming your code's adherence to the above code style is to use
+[cpplint](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py). You can lint a C++ source
+or header file like this:
+```bash
+cpplint.py --linelength=120 file_name
+```
+If cpplint flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
+positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
+space, or `// NOLINTNEXTLINE` on a new line above if there is no space. For any usages of `// NOLINT` or
+`// NOLINTNEXTLINE`, please describe the reason for its inclusion both in a code comment and in your pull request's
+comments section.
+
 That's all for our guidelines, now let's go figure out the fundamental theory of physics! :rocket:
