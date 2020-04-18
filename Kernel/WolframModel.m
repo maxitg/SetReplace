@@ -146,7 +146,7 @@ renameNodes[evolution_, _, None] := evolution
 renameNodesExceptExisting[
 		evolution_, patternRulesQ_, existing_List] := Module[{
 			evolutionAtoms, existingAtoms, atomsToName, newNames},
-	{evolutionAtoms, existingAtoms} = (DeleteDuplicates @ Catenate[If[AtomQ[#], {#}, #] & /@ #]) & /@
+	{evolutionAtoms, existingAtoms} = (DeleteDuplicates @ Catenate[If[ListQ[#], #, {#}] & /@ #]) & /@
 		{evolution[[1]][$atomLists], existing};
 	atomsToName = DeleteCases[evolutionAtoms, Alternatives @@ existingAtoms];
 	newNames = Take[
