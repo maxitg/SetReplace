@@ -273,9 +273,9 @@ conform to this specification. You can track the progress of this refactoring
 [here](https://github.com/maxitg/SetReplace/projects/2).
 
 The following are exceptions to Google C++ Style:
-* Maximum line length is 120 characters
-* Variable names, including const and constexpr variables, use lower camel case
-* Exceptions are allowed
+* Maximum line length is 120 characters.
+* Variable names, including const and constexpr variables, use lower camel case.
+* C++ exceptions may be thrown.
 
 A useful tool for confirming your code's adherence to the above code style is to use
 [cpplint](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py). You can lint a C++ source
