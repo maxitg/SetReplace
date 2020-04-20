@@ -2,6 +2,7 @@
 #define IDTypes_h
 
 #include <cstdint>
+#include <vector>
 
 namespace SetReplace {
     /** @brief Identifiers for atoms, which are the elements of expressions, i.e., vertices in the graph.
@@ -28,6 +29,10 @@ namespace SetReplace {
      */
     using Generation = int64_t;
     constexpr Generation initialGeneration = 0;
+
+    /** @brief List of atoms without references to events, as can be used in, i.e., rule specification.
+     */
+    using AtomsVector = std::vector<Atom>;
 }
 
 #endif /* IDTypes_h */

@@ -1,21 +1,26 @@
+#include "SetReplace.hpp"
+
+#include "Set.hpp"
+
 #include <chrono>
 #include <random>
 #include <string>
 #include <unordered_map>
 
-#include "SetReplace.hpp"
+namespace SetReplace { namespace {
+    // in C++ all the declarations in an anonymous namespace are equivalent to the 'static'
+    // keyword in C (ie. they get static linkage and mangling).
+    // as such, they become local to the translation unit they're defined in, enabling
+    // more opportunities to get optimized (ie. inlining) by the compiler
 
-#include "Set.hpp"
-
-mint getData(mint* data, mint length, mint index) {
-    if (index >= length || index < 0) {
-        throw LIBRARY_FUNCTION_ERROR;
-    } else {
-        return data[index];
+    mint getData(mint* data, mint length, mint index) {
+        if (index >= length || index < 0) {
+            throw LIBRARY_FUNCTION_ERROR;
+        } else {
+            return data[index];
+        }
     }
-}
 
-namespace SetReplace {
     // These are global variables that keep all sets returned to Wolfram Language until they are destroyed.
     // Pointers are not returned directly for security reasons.
     using SetID = int64_t;
@@ -190,7 +195,7 @@ namespace SetReplace {
             thisSetID = distribution(randomGenerator);
         } while (sets_.count(thisSetID) > 0);
         try {
-            sets_.insert({thisSetID, Set(rules, initialExpressions, orderingSpec, randomSeed)});
+            sets_.insert({thisSetID, Set(std::move(rules), initialExpressions, orderingSpec, randomSeed)});
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -199,7 +204,7 @@ namespace SetReplace {
         return LIBRARY_NO_ERROR;
     }
 
-    int setDelete(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    int setDelete(WolframLibraryData /*libData*/, mint argc, MArgument *argv, MArgument /*result*/) {
         if (argc != 1) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -226,7 +231,7 @@ namespace SetReplace {
         }
     }
 
-    int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument /*result*/) {
         if (argc != 2) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -286,7 +291,7 @@ namespace SetReplace {
         return LIBRARY_NO_ERROR;
     }
 
-    int terminationReason(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    int terminationReason(WolframLibraryData /*libData*/, mint argc, MArgument *argv, MArgument result) {
         if (argc != 1) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -332,17 +337,17 @@ namespace SetReplace {
         
         return LIBRARY_NO_ERROR;
     }
-}
+}}
 
 EXTERN_C mint WolframLibrary_getVersion() {
     return WolframLibraryVersion;
 }
 
-EXTERN_C int WolframLibrary_initialize(WolframLibraryData libData) {
+EXTERN_C int WolframLibrary_initialize(WolframLibraryData /*libData*/) {
     return 0;
 }
 
-EXTERN_C void WolframLibrary_uninitialize(WolframLibraryData libData) {
+EXTERN_C void WolframLibrary_uninitialize(WolframLibraryData /*libData*/) {
     return;
 }
 

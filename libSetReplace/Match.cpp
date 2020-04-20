@@ -11,9 +11,9 @@ namespace SetReplace {
         const Matcher::OrderingSpec orderingSpec_;
         
     public:
-        MatchComparator(const Matcher::OrderingSpec& orderingSpec) : orderingSpec_(orderingSpec) {}
+        MatchComparator(Matcher::OrderingSpec orderingSpec) : orderingSpec_ {std::move(orderingSpec)} {}
         
-        bool operator()(const MatchPtr a, const MatchPtr b) const {
+        bool operator()(const MatchPtr& a, const MatchPtr& b) const {
             for (const auto& ordering : orderingSpec_) {
                 int comparison = compare(a, b, ordering.first);
                 if (comparison != 0) {
@@ -32,7 +32,7 @@ namespace SetReplace {
             return false;
         }
         
-        static int compare(const MatchPtr a, const MatchPtr b, const Matcher::OrderingFunction ordering) {
+        static int compare(const MatchPtr& a, const MatchPtr& b, const Matcher::OrderingFunction ordering) {
             switch (ordering) {
                 case Matcher::OrderingFunction::SortedExpressionIDs:
                     return compareSortedIDs(a, b, false);
@@ -64,7 +64,7 @@ namespace SetReplace {
             else return 0;
         }
         
-        static int compareSortedIDs(const MatchPtr a, const MatchPtr b, const bool reverseOrder) {
+        static int compareSortedIDs(const MatchPtr& a, const MatchPtr& b, const bool reverseOrder) {
             std::vector<ExpressionID> aExpressions = a->inputExpressions;
             std::vector<ExpressionID> bExpressions = b->inputExpressions;
 
@@ -78,7 +78,7 @@ namespace SetReplace {
             return compareVectors(aExpressions, bExpressions);
         }
         
-        static int compareUnsortedIDs(const MatchPtr a, const MatchPtr& b) {
+        static int compareUnsortedIDs(const MatchPtr& a, const MatchPtr& b) {
             return compareVectors(a->inputExpressions, b->inputExpressions);
         }
     };
@@ -86,7 +86,7 @@ namespace SetReplace {
     // Hashes the values of the matches, not the pointer itself.
     class MatchHasher {
     public:
-        size_t operator()(MatchPtr ptr) const {
+        size_t operator()(const MatchPtr& ptr) const {
             std::size_t result = 0;
             hash_combine(result, ptr->rule);
             for (const auto expression : ptr->inputExpressions) {
@@ -106,7 +106,7 @@ namespace SetReplace {
 
     class MatchEquality {
     public:
-        size_t operator()(MatchPtr a, MatchPtr b) const {
+        size_t operator()(const MatchPtr& a, const MatchPtr& b) const {
             if (a->rule != b->rule || a->inputExpressions.size() != b->inputExpressions.size()) return false;
             for (size_t i = 0; i < a->inputExpressions.size(); ++i) {
                 if (a->inputExpressions[i] != b->inputExpressions[i]) return false;
@@ -119,7 +119,8 @@ namespace SetReplace {
     private:
         const std::vector<Rule>& rules_;
         AtomsIndex& atomsIndex_;
-        const std::function<AtomsVector(ExpressionID)> getAtomsVector_;
+        // this could be removed and its uses replaced by AtomsIndex::getAtomsVector()
+        const std::function<AtomsVector(ExpressionID)>& getAtomsVector_;
         
         // Matches are arranged in buckets. Each bucket contains matches that are equivalent in terms of the ordering
         // function, however, buckets themselves are ordered according to that function.
@@ -144,18 +145,18 @@ namespace SetReplace {
         MatchPtr nextMatch_;
         
     public:
-        Implementation(const std::vector<Rule>& rules,
+        Implementation(std::vector<Rule> rules,
                        AtomsIndex& atomsIndex,
-                       const std::function<AtomsVector(ExpressionID)> getAtomsVector,
+                       const std::function<AtomsVector(ExpressionID)>& getAtomsVector,
                        const OrderingSpec orderingSpec,
                        const unsigned int randomSeed) :
-            rules_(rules),
-            atomsIndex_(atomsIndex),
-            getAtomsVector_(getAtomsVector),
-            matchQueue_(orderingSpec),
-            randomGenerator_(randomSeed) {}
+            rules_{std::move(rules)},
+            atomsIndex_{atomsIndex},
+            getAtomsVector_{getAtomsVector},
+            matchQueue_{orderingSpec},
+            randomGenerator_{randomSeed} {}
         
-        void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort) {
+        void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()>& shouldAbort) {
             for (size_t i = 0; i < rules_.size(); ++i) {
                 addMatchesForRule(expressionIDs, static_cast<RuleID>(i), shouldAbort);
             }
@@ -170,7 +171,7 @@ namespace SetReplace {
             OrderingSpec fullOrderingSpec = {
                 {OrderingFunction::ExpressionIDs, OrderingDirection::Normal},
                 {OrderingFunction::RuleID, OrderingDirection::Normal}};
-            std::set<MatchPtr, MatchComparator> matchesToDelete(fullOrderingSpec);
+            std::set<MatchPtr, MatchComparator> matchesToDelete{fullOrderingSpec};
             
             for (const auto& expression : expressionIDs) {
                 const auto& matches = expressionToMatches_[expression];
@@ -190,7 +191,7 @@ namespace SetReplace {
             return matchQueue_.empty();
         }
         
-        MatchPtr nextMatch() const {
+        const MatchPtr& nextMatch() const {
             return nextMatch_;
         }
         
@@ -205,7 +206,7 @@ namespace SetReplace {
         }
         
     private:
-        void addMatchesForRule(const std::vector<ExpressionID>& expressionIDs, const RuleID& ruleID, const std::function<bool()> shouldAbort) {
+        void addMatchesForRule(const std::vector<ExpressionID>& expressionIDs, RuleID ruleID, const std::function<bool()>& shouldAbort) {
             for (size_t i = 0; i < rules_[ruleID].inputs.size(); ++i) {
                 Match emptyMatch{ruleID, std::vector<ExpressionID>(rules_[ruleID].inputs.size(), -1)};
                 completeMatchesStartingWithInput(emptyMatch, rules_[ruleID].inputs, i, expressionIDs, shouldAbort);
@@ -216,7 +217,7 @@ namespace SetReplace {
                                               const std::vector<AtomsVector>& partiallyMatchedInputs,
                                               const size_t nextInputIdx,
                                               const std::vector<ExpressionID>& potentialExpressionIDs,
-                                              const std::function<bool()> shouldAbort) {
+                                              const std::function<bool()>& shouldAbort) {
             for (const auto expressionID : potentialExpressionIDs) {
                 if (isExpressionUnused(incompleteMatch, expressionID)) {
                     attemptMatchExpressionToInput(incompleteMatch, partiallyMatchedInputs, nextInputIdx, expressionID, shouldAbort);
@@ -235,7 +236,7 @@ namespace SetReplace {
                                            const std::vector<AtomsVector>& partiallyMatchedInputs,
                                            const size_t nextInputIdx,
                                            const ExpressionID potentialExpressionID,
-                                           const std::function<bool()> shouldAbort) {
+                                           const std::function<bool()>& shouldAbort) {
             // If WL wants to abort, abort
             if (shouldAbort()) {
                 throw Error::Aborted;
@@ -254,7 +255,7 @@ namespace SetReplace {
             if (!Matcher::substituteMissingAtomsIfPossible({input}, {expressionAtoms}, newInputs)) return;
             
             if (isMatchComplete(newMatch)) {
-                insertMatch(newMatch);
+                insertMatch(std::move(newMatch));
                 return;
             }
             
@@ -268,9 +269,9 @@ namespace SetReplace {
             }
         }
         
-        void insertMatch(const Match& newMatch) {
+        void insertMatch(Match newMatch) {
             // careful, don't create different pointers to the same match!
-            const auto matchPtr = std::make_shared<Match>(newMatch);
+            const auto matchPtr = std::make_shared<Match>(std::move(newMatch));
             
             if (allMatches_.count(matchPtr)) {
                 return;
@@ -295,7 +296,7 @@ namespace SetReplace {
             }
         }
         
-        void deleteMatch(const MatchPtr matchPtr) {
+        void deleteMatch(const MatchPtr& matchPtr) {
             allMatches_.erase(matchPtr);
             
             const auto& expressions = matchPtr->inputExpressions;
@@ -389,15 +390,18 @@ namespace SetReplace {
         }
     };
     
-    Matcher::Matcher(const std::vector<Rule>& rules,
+    Matcher::Matcher(std::vector<Rule> rules,
                      AtomsIndex& atomsIndex,
-                     const std::function<AtomsVector(ExpressionID)> getAtomsVector,
+                     const std::function<AtomsVector(ExpressionID)>& getAtomsVector,
                      const OrderingSpec orderingSpec,
-                     const unsigned int randomSeed) {
-        implementation_ = std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector, orderingSpec, randomSeed);
+                     const unsigned int randomSeed) :
+        implementation_ {std::make_unique<Implementation>(std::move(rules), atomsIndex, getAtomsVector, orderingSpec, randomSeed)}
+    {
     }
     
-    void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort) {
+    Matcher::~Matcher() = default;
+    
+    void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()>& shouldAbort) {
         implementation_->addMatchesInvolvingExpressions(expressionIDs, shouldAbort);
     }
     
@@ -409,13 +413,13 @@ namespace SetReplace {
         return implementation_->empty();
     }
     
-    MatchPtr Matcher::nextMatch() const {
+    const MatchPtr& Matcher::nextMatch() const {
         return implementation_->nextMatch();
     }
     
-    bool Matcher::substituteMissingAtomsIfPossible(const std::vector<AtomsVector> inputPatterns,
-                                                   const std::vector<AtomsVector> patternMatches,
-                                                   std::vector<AtomsVector>& atomsToReplace) {
+    bool Matcher::substituteMissingAtomsIfPossible(const std::vector<AtomsVector>& inputPatterns,
+                                                   const std::vector<AtomsVector>& patternMatches,
+                                                   std::vector<AtomsVector> &atomsToReplace) {
         if (inputPatterns.size() != patternMatches.size()) return false;
         
         std::unordered_map<Atom, Atom> match;
@@ -449,7 +453,7 @@ namespace SetReplace {
         return true;
     }
 
-    const std::vector<MatchPtr> Matcher::allMatches() const {
+    std::vector<MatchPtr> Matcher::allMatches() const {
         return implementation_->allMatches();
     }
 }

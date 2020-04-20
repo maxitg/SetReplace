@@ -1,13 +1,13 @@
 #ifndef Set_hpp
 #define Set_hpp
 
-#include <functional>
-#include <memory>
-#include <vector>
-
 #include "Expression.hpp"
 #include "Match.hpp"
 #include "Rule.hpp"
+
+#include <functional>
+#include <memory>
+#include <vector>
 
 namespace SetReplace {
     /** @brief Set is the set of expressions (i.e., the graph, the Universe) that is being evolved.
@@ -52,22 +52,24 @@ namespace SetReplace {
          * @param orderingSpec in which order to apply events.
          * @param randomSeed the seed to use for selecting matches in random evaluation case.
          */
-        Set(const std::vector<Rule>& rules,
+        Set(std::vector<Rule> rules,
             const std::vector<AtomsVector>& initialExpressions,
             const Matcher::OrderingSpec orderingSpec,
             const unsigned int randomSeed = 0);
+        
+        ~Set();
         
         /** @brief Perform a single substitution, create the corresponding event, and output expressions.
          * @param shouldAbort function that should return true if Wolfram Language abort is in progress.
          * @return 1 if substitution was made, 0 if no matches were found.
          */
-        int64_t replaceOnce(const std::function<bool()> shouldAbort);
+        int64_t replaceOnce(const std::function<bool()>& shouldAbort);
         
         /** @brief Run replaceOnce() stepSpec.maxEvents times, or until the next expression violates constraints imposed by stepSpec.
          * @param shouldAbort function that should return true if Wolfram Language abort is in progress.
          * @return The number of subtitutions made, could be between 0 and stepSpec.maxEvents.
          */
-        int64_t replace(const StepSpecification stepSpec, const std::function<bool()> shouldAbort);
+        int64_t replace(const StepSpecification stepSpec, const std::function<bool()>& shouldAbort);
         
         /** @brief List of all expressions in the set, past and present.
          */
@@ -76,7 +78,7 @@ namespace SetReplace {
         /** @brief Returns the largest generation that has both been reached, and has no matches that would produce expressions with that or lower generation.
          * @details Takes O(matches count) + as long as it would take to do the next step (because new expressions need to be indexed).
          */
-        Generation maxCompleteGeneration(const std::function<bool()> shouldAbort);
+        Generation maxCompleteGeneration(const std::function<bool()>& shouldAbort);
         
         /** @brief Yields termination reason for the previous evaluation, or TerminationReason::NotTerminated if no evaluation was done yet.
          */

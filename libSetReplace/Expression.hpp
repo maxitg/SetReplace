@@ -1,17 +1,13 @@
 #ifndef Expression_hpp
 #define Expression_hpp
 
-#include <functional>
-#include <memory>
-#include <vector>
-#include <unordered_set>
-
 #include "IDTypes.hpp"
 
+#include <functional>
+#include <memory>
+#include <unordered_set>
+
 namespace SetReplace {
-    /** @brief List of atoms without references to events, as can be used in, i.e., rule specification.
-     */
-    using AtomsVector = std::vector<Atom>;
     
     /** @brief Expression, as a part of the set, i.e., (hyper)edges in the graph.
      */
@@ -40,7 +36,8 @@ namespace SetReplace {
         /** @brief Creates an empty index.
          * @param getAtomsVector datasource function that returns the list of atoms for a requested expression.
          */
-        AtomsIndex(const std::function<AtomsVector(ExpressionID)>& getAtomsVector);
+        AtomsIndex(std::function<AtomsVector(ExpressionID)> getAtomsVector);
+        ~AtomsIndex();
         
         /** @brief Removes expressions with specified IDs from the index.
          */
@@ -52,11 +49,13 @@ namespace SetReplace {
         
         /** @brief Returns the list of expressions containing a specified atom.
          */
-        const std::unordered_set<ExpressionID> expressionsContainingAtom(const Atom atom) const;
+        std::unordered_set<ExpressionID> expressionsContainingAtom(const Atom atom) const;
+        
+        const std::function<AtomsVector(ExpressionID)>& getAtomsVector() const;
         
     private:
         class Implementation;
-        std::shared_ptr<Implementation> implementation_;
+        std::unique_ptr<Implementation> implementation_;
     };
 }
 

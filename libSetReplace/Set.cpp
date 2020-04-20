@@ -41,15 +41,15 @@ namespace SetReplace {
         std::vector<ExpressionID> unindexedExpressions_;
         
     public:
-        Implementation(const std::vector<Rule>& rules,
+        Implementation(std::vector<Rule> rules,
                        const std::vector<AtomsVector>& initialExpressions,
                        const Matcher::OrderingSpec orderingSpec,
                        const unsigned int randomSeed) :
-            Implementation(rules, initialExpressions, orderingSpec, randomSeed, [this](const int64_t expressionID) {
+            Implementation{std::move(rules), initialExpressions, orderingSpec, randomSeed, [this](const int64_t expressionID) {
                 return expressions_.at(expressionID).atoms;
-            }) {}
+            }} {}
         
-        int64_t replaceOnce(const std::function<bool()> shouldAbort) {
+        int64_t replaceOnce(const std::function<bool()>& shouldAbort) {
             terminationReason_ = TerminationReason::NotTerminated;
 
             if (eventRuleIDs_.size() > stepSpec_.maxEvents) {
@@ -116,7 +116,7 @@ namespace SetReplace {
             return 1;
         }
         
-        int64_t replace(const StepSpecification stepSpec, const std::function<bool()> shouldAbort) {
+        int64_t replace(const StepSpecification stepSpec, const std::function<bool()>& shouldAbort) {
             updateStepSpec(stepSpec);
             int64_t count = 0;
             while (true) {
@@ -145,7 +145,7 @@ namespace SetReplace {
             return result;
         }
         
-        Generation maxCompleteGeneration(const std::function<bool()> shouldAbort) {
+        Generation maxCompleteGeneration(const std::function<bool()>& shouldAbort) {
             indexNewExpressions(shouldAbort);
             return std::min(smallestGeneration(matcher_.allMatches()), largestGeneration_);
         }
@@ -159,14 +159,14 @@ namespace SetReplace {
         }
 
     private:
-        Implementation(const std::vector<Rule>& rules,
+        Implementation(std::vector<Rule> rules,
                        const std::vector<AtomsVector>& initialExpressions,
                        const Matcher::OrderingSpec orderingSpec,
                        const unsigned int randomSeed,
-                       const std::function<AtomsVector(ExpressionID)>& getAtomsVector) :
-        rules_(rules),
-        atomsIndex_(getAtomsVector),
-        matcher_(rules_, atomsIndex_, getAtomsVector, orderingSpec, randomSeed) {
+                       std::function<AtomsVector(ExpressionID)> getAtomsVector) :
+        rules_{rules},
+        atomsIndex_{std::move(getAtomsVector)},
+        matcher_{rules_, atomsIndex_, atomsIndex_.getAtomsVector(), orderingSpec, randomSeed} {
             for (const auto& expression : initialExpressions) {
                 for (const auto& atom : expression) {
                     if (atom <= 0) throw Error::NonPositiveAtoms;
@@ -196,15 +196,15 @@ namespace SetReplace {
             }
         }
         
-        void indexNewExpressions(const std::function<bool()> shouldAbort) {
+        void indexNewExpressions(const std::function<bool()>& shouldAbort) {
             // Atoms index must be updated first, because the matcher uses it to discover expressions.
             atomsIndex_.addExpressions(unindexedExpressions_);
             matcher_.addMatchesInvolvingExpressions(unindexedExpressions_, shouldAbort);
             unindexedExpressions_.clear();
         }
         
-        TerminationReason willExceedAtomLimits(const std::vector<AtomsVector> explicitRuleInputs,
-                                               const std::vector<AtomsVector> explicitRuleOutputs) const {
+        TerminationReason willExceedAtomLimits(const std::vector<AtomsVector>& explicitRuleInputs,
+                                               const std::vector<AtomsVector>& explicitRuleOutputs) const {
             const int64_t currentAtomsCount = static_cast<int64_t>(atomDegrees_.size());
             
             std::unordered_map<Atom, int64_t> atomDegreeDeltas;
@@ -254,8 +254,8 @@ namespace SetReplace {
             }
         }
         
-        TerminationReason willExceedExpressionsLimit(const std::vector<AtomsVector> explicitRuleInputs,
-                                                     const std::vector<AtomsVector> explicitRuleOutputs) const {
+        TerminationReason willExceedExpressionsLimit(const std::vector<AtomsVector>& explicitRuleInputs,
+                                                     const std::vector<AtomsVector>& explicitRuleOutputs) const {
             const int64_t currentExpressionsCount = nextExpressionID_ - destroyedExpressionsCount_;
             const int64_t newExpressionsCount = currentExpressionsCount
                                                 - static_cast<int64_t>(explicitRuleInputs.size())
@@ -345,18 +345,20 @@ namespace SetReplace {
         }
     };
     
-    Set::Set(const std::vector<Rule>& rules,
+    Set::Set(std::vector<Rule> rules,
              const std::vector<AtomsVector>& initialExpressions,
              const Matcher::OrderingSpec orderingSpec,
              const unsigned int randomSeed) {
-        implementation_ = std::make_shared<Implementation>(rules, initialExpressions, orderingSpec, randomSeed);
+        implementation_ = std::make_shared<Implementation>(std::move(rules), initialExpressions, orderingSpec, randomSeed);
     }
     
-    int64_t Set::replaceOnce(const std::function<bool()> shouldAbort) {
+    Set::~Set() = default;
+    
+    int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) {
         return implementation_->replaceOnce(shouldAbort);
     }
     
-    int64_t Set::replace(const StepSpecification stepSpec, const std::function<bool()> shouldAbort) {
+    int64_t Set::replace(const StepSpecification stepSpec, const std::function<bool()>& shouldAbort) {
         return implementation_->replace(stepSpec, shouldAbort);
     }
     
@@ -364,7 +366,7 @@ namespace SetReplace {
         return implementation_->expressions();
     }
     
-    Generation Set::maxCompleteGeneration(const std::function<bool()> shouldAbort) {
+    Generation Set::maxCompleteGeneration(const std::function<bool()>& shouldAbort) {
         return implementation_->maxCompleteGeneration(shouldAbort);
     }
 

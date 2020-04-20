@@ -10,7 +10,7 @@ namespace SetReplace {
         std::unordered_map<Atom, std::unordered_set<ExpressionID>> index_;
         
     public:
-        Implementation(const std::function<AtomsVector(ExpressionID)>& getAtomsVector) : getAtomsVector_(getAtomsVector) {}
+        Implementation(std::function<AtomsVector(ExpressionID)> getAtomsVector) : getAtomsVector_{std::move(getAtomsVector)} {}
         
         void removeExpressions(const std::vector<ExpressionID>& expressionIDs) {
             const std::unordered_set<ExpressionID> expressionsToDelete(expressionIDs.begin(), expressionIDs.end());
@@ -26,16 +26,17 @@ namespace SetReplace {
             }
             
             for (const auto& atom : involvedAtoms) {
-                auto expressionIterator = index_[atom].begin();
-                while (expressionIterator != index_[atom].end()) {
+                auto& atomExpressions = index_[atom];
+                auto expressionIterator = atomExpressions.begin();
+                while (expressionIterator != atomExpressions.end()) {
                     if (expressionsToDelete.count(*expressionIterator)) {
-                        expressionIterator = index_[atom].erase(expressionIterator);
+                        expressionIterator = atomExpressions.erase(expressionIterator);
                     }
                     else {
                         ++expressionIterator;
                     }
                 }
-                if (index_[atom].empty()) {
+                if (atomExpressions.empty()) {
                     index_.erase(atom);
                 }
             }
@@ -53,11 +54,18 @@ namespace SetReplace {
             const auto resultIterator = index_.find(atom);
             return resultIterator != index_.end() ? resultIterator->second : std::unordered_set<ExpressionID>();
         }
+        
+        const std::function<AtomsVector(ExpressionID)>& getAtomsVector() const {
+            return getAtomsVector_;
+        }
     };
     
-    AtomsIndex::AtomsIndex(const std::function<AtomsVector(ExpressionID)>& getAtomsVector) {
-        implementation_ = std::make_shared<Implementation>(getAtomsVector);
+    AtomsIndex::AtomsIndex(std::function<AtomsVector(ExpressionID)> getAtomsVector) :
+        implementation_{std::make_unique<Implementation>(std::move(getAtomsVector))}
+    {
     }
+    
+    AtomsIndex::~AtomsIndex() = default;
     
     void AtomsIndex::removeExpressions(const std::vector<ExpressionID>& expressionIDs) {
         implementation_->removeExpressions(expressionIDs);
@@ -67,7 +75,11 @@ namespace SetReplace {
         implementation_->addExpressions(expressionIDs);
     }
     
-    const std::unordered_set<ExpressionID> AtomsIndex::expressionsContainingAtom(const Atom atom) const {
+    std::unordered_set<ExpressionID> AtomsIndex::expressionsContainingAtom(const Atom atom) const {
         return implementation_->expressionsContainingAtom(atom);
+    }
+    
+    const std::function<AtomsVector(ExpressionID)>& AtomsIndex::getAtomsVector() const {
+        return implementation_->getAtomsVector();
     }
 }
