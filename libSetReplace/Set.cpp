@@ -43,7 +43,7 @@ namespace SetReplace {
     public:
         Implementation(const std::vector<Rule>& rules,
                        const std::vector<AtomsVector>& initialExpressions,
-                       const Matcher::OrderingSpec orderingSpec,
+                       const Matcher::OrderingSpec& orderingSpec,
                        const unsigned int randomSeed) :
             Implementation(rules, initialExpressions, orderingSpec, randomSeed, [this](const int64_t expressionID) {
                 return expressions_.at(expressionID).atoms;
@@ -347,24 +347,24 @@ namespace SetReplace {
     
     Set::Set(const std::vector<Rule>& rules,
              const std::vector<AtomsVector>& initialExpressions,
-             const Matcher::OrderingSpec orderingSpec,
-             const unsigned int randomSeed) {
+             const Matcher::OrderingSpec& orderingSpec,
+             unsigned int randomSeed) {
         implementation_ = std::make_shared<Implementation>(rules, initialExpressions, orderingSpec, randomSeed);
     }
-    
-    int64_t Set::replaceOnce(const std::function<bool()> shouldAbort) {
+
+    int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) {
         return implementation_->replaceOnce(shouldAbort);
     }
-    
-    int64_t Set::replace(const StepSpecification stepSpec, const std::function<bool()> shouldAbort) {
+
+    int64_t Set::replace(const StepSpecification& stepSpec, const std::function<bool()>& shouldAbort) {
         return implementation_->replace(stepSpec, shouldAbort);
     }
     
     std::vector<SetExpression> Set::expressions() const {
         return implementation_->expressions();
     }
-    
-    Generation Set::maxCompleteGeneration(const std::function<bool()> shouldAbort) {
+
+    Generation Set::maxCompleteGeneration(const std::function<bool()>& shouldAbort) {
         return implementation_->maxCompleteGeneration(shouldAbort);
     }
 

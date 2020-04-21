@@ -7,7 +7,7 @@
 
 #include "Set.hpp"
 
-mint getData(mint* data, mint length, mint index) {
+mint getData(const mint* data, mint length, mint index) {
     if (index >= length || index < 0) {
         throw LIBRARY_FUNCTION_ERROR;
     } else {
@@ -21,56 +21,51 @@ namespace SetReplace {
     using SetID = int64_t;
     std::unordered_map<SetID, Set> sets_;
 
+    std::vector<AtomsVector> getNextSet(mint tensorLength, const mint* tensorData, mint& startReadIndex) {
+        const auto getDataFunc = [&tensorData, &tensorLength, &startReadIndex]() -> mint {
+            return getData(tensorData, tensorLength, startReadIndex++);
+        };
+
+        const mint setLength = getDataFunc();
+        std::vector<AtomsVector> set(setLength);
+        for (mint expressionIndex = 0; expressionIndex < setLength; ++expressionIndex) {
+            const mint expressionLength = getDataFunc();
+            auto& currentSet = set[expressionIndex];
+            currentSet.reserve(expressionLength);
+            for (mint atomIndex = 0; atomIndex < expressionLength; ++atomIndex) {
+                currentSet.emplace_back(static_cast<Atom>(getDataFunc()));
+            }
+        }
+        return set;
+    }
+
     std::vector<Rule> getRules(WolframLibraryData libData, MTensor& rulesTensor) {
-        mint tensorLength = libData->MTensor_getFlattenedLength(rulesTensor);
-        mint* tensorData = libData->MTensor_getIntegerData(rulesTensor);
+        const mint tensorLength = libData->MTensor_getFlattenedLength(rulesTensor);
+        const mint* tensorData = libData->MTensor_getIntegerData(rulesTensor);
         mint readIndex = 0;
-        const auto getRulesData = [&tensorData, &tensorLength, &readIndex]() -> mint {
+        const auto getRulesData = [tensorData, tensorLength, &readIndex]() -> mint {
             return getData(tensorData, tensorLength, readIndex++);
         };
         
         const mint rulesCount = getRulesData();
         std::vector<Rule> rules;
+        rules.reserve(rulesCount);
         for (mint ruleIndex = 0; ruleIndex < rulesCount; ++ruleIndex) {
             if (getRulesData() != 2) {
                 throw LIBRARY_FUNCTION_ERROR;
             } else {
-                std::vector<std::vector<AtomsVector>> ruleInputsAndOutputs(2);
-                
-                for (auto& set : ruleInputsAndOutputs) {
-                    const mint setLength = getRulesData();
-                    for (mint expressionIndex = 0; expressionIndex < setLength; ++expressionIndex) {
-                        const mint expressionLength = getRulesData();
-                        set.push_back(AtomsVector());
-                        for (mint atomIndex = 0; atomIndex < expressionLength; ++atomIndex) {
-                            set[expressionIndex].push_back(static_cast<Atom>(getRulesData()));
-                        }
-                    }
-                }
-                rules.push_back(Rule{ruleInputsAndOutputs[0], ruleInputsAndOutputs[1]});
+                rules.emplace_back(Rule{getNextSet(tensorLength, tensorData, readIndex),
+                                        getNextSet(tensorLength, tensorData, readIndex)});
             }
         }
         return rules;
     }
     
     std::vector<AtomsVector> getSet(WolframLibraryData libData, MTensor& setTensor) {
-        mint tensorLength = libData->MTensor_getFlattenedLength(setTensor);
-        mint* tensorData = libData->MTensor_getIntegerData(setTensor);
         mint readIndex = 0;
-        const auto getSetData = [&tensorData, &tensorLength, &readIndex]() -> mint {
-            return getData(tensorData, tensorLength, readIndex++);
-        };
-        
-        std::vector<AtomsVector> set(getSetData());
-        for (auto& atomsVector : set) {
-            const mint expressionLength = getSetData();
-            atomsVector.resize(expressionLength);
-            for (mint atomIndex = 0; atomIndex < expressionLength; ++atomIndex) {
-                atomsVector[atomIndex] = static_cast<Atom>(getSetData());
-            }
-        }
-
-        return set;
+        return getNextSet(libData->MTensor_getFlattenedLength(setTensor),
+                          libData->MTensor_getIntegerData(setTensor),
+                          readIndex);
     }
 
     Matcher::OrderingSpec getOrderingSpec(WolframLibraryData libData, MTensor& orderingSpecTensor) {
@@ -98,14 +93,10 @@ namespace SetReplace {
                 stepSpecElements[k] = static_cast<int64_t>(getData(tensorData, specLength, k));
                 if (stepSpecElements[k] < 0) throw LIBRARY_FUNCTION_ERROR;
             }
-            Set::StepSpecification result;
-            result.maxEvents = stepSpecElements[0];
-            result.maxGenerationsLocal = stepSpecElements[1];
-            result.maxFinalAtoms = stepSpecElements[2];
-            result.maxFinalAtomDegree = stepSpecElements[3];
-            result.maxFinalExpressions = stepSpecElements[4];
-            
-            return result;
+
+            return Set::StepSpecification{stepSpecElements[0], stepSpecElements[1],
+                                          stepSpecElements[2], stepSpecElements[3],
+                                          stepSpecElements[4]};;
         }
     }
     
@@ -117,18 +108,18 @@ namespace SetReplace {
         // The rest of the result are the atoms, positions to which are referenced in each expression spec.
         // This is where the first atom will be located.
         size_t atomsPointer = tensorLength + 1;
-        
-        for (size_t i = 0; i < expressions.size(); ++i) {
-            tensorLength += expressions[i].atoms.size();
+
+        for (const auto& expression : expressions) {
+            tensorLength += expression.atoms.size();
         }
-        
-        mint dimensions[1] = {static_cast<mint>(tensorLength)};
+
+        const mint dimensions[1] = {static_cast<mint>(tensorLength)};
         MTensor output;
         libData->MTensor_new(MType_Integer, 1, dimensions, &output);
         
         mint writeIndex = 0;
         mint position[1];
-        const auto appendToTensor = [libData, &writeIndex, &position, &output](const std::vector<mint> numbers) {
+        const auto appendToTensor = [libData, &writeIndex, &position, &output](const std::vector<mint>& numbers) {
             for (const auto number : numbers) {
                 position[0] = ++writeIndex;
                 libData->MTensor_setInteger(output, position, number);
@@ -136,36 +127,31 @@ namespace SetReplace {
         };
         
         appendToTensor({static_cast<mint>(expressions.size())});
-        for (size_t expressionIndex = 0; expressionIndex < expressions.size(); ++expressionIndex) {
-            appendToTensor({
-                static_cast<mint>(expressions[expressionIndex].creatorEvent),
-                static_cast<mint>(expressions[expressionIndex].destroyerEvent),
-                static_cast<mint>(expressions[expressionIndex].generation),
-                static_cast<mint>(atomsPointer)});
-            atomsPointer += expressions[expressionIndex].atoms.size();
+        for (const auto& expression : expressions) {
+            appendToTensor({static_cast<mint>(expression.creatorEvent),
+                            static_cast<mint>(expression.destroyerEvent),
+                            static_cast<mint>(expression.generation),
+                            static_cast<mint>(atomsPointer)});
+            atomsPointer += expression.atoms.size();
         }
         
         // Put fake event at the end so that the length of final expression can be determined on WL side.
         constexpr EventID fakeEvent = -3;
         constexpr Generation fakeGeneration = -1;
         appendToTensor({
-            static_cast<mint>(fakeEvent),
-            static_cast<mint>(fakeEvent),
-            static_cast<mint>(fakeGeneration),
-            static_cast<mint>(atomsPointer)});
-        
-        for (size_t expressionIndex = 0; expressionIndex < expressions.size(); ++expressionIndex) {
-            std::vector<mint> atoms(expressions[expressionIndex].atoms.size());
-            for (int i = 0; i < expressions[expressionIndex].atoms.size(); ++i) {
-                atoms[i] = static_cast<mint>(expressions[expressionIndex].atoms[i]);
-            }
-            appendToTensor(atoms);
+                           static_cast<mint>(fakeEvent),
+                           static_cast<mint>(fakeEvent),
+                           static_cast<mint>(fakeGeneration),
+                           static_cast<mint>(atomsPointer)});
+
+        for (const auto& expression : expressions) {
+            appendToTensor(expression.atoms);
         }
         
         return output;
     }
 
-    int setCreate(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, MArgument result) {
         if (argc != 4) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -175,9 +161,9 @@ namespace SetReplace {
         Matcher::OrderingSpec orderingSpec;
         unsigned int randomSeed;
         try {
-            rules = getRules(libData, MArgument_getMTensor(argv[0]));
-            initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
-            orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[2]));
+            rules = std::move(getRules(libData, MArgument_getMTensor(argv[0])));
+            initialExpressions = std::move(getSet(libData, MArgument_getMTensor(argv[1])));
+            orderingSpec = std::move(getOrderingSpec(libData, MArgument_getMTensor(argv[2])));
             randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[3]));
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
@@ -204,23 +190,26 @@ namespace SetReplace {
             return LIBRARY_FUNCTION_ERROR;
         }
         const SetID setToDelete = MArgument_getInteger(argv[0]);
-        if (sets_.count(setToDelete)) {
-            sets_.erase(setToDelete);
+
+        const auto setToDeleteIterator = sets_.find(setToDelete);
+        if (setToDeleteIterator != sets_.end()) {
+            sets_.erase(setToDeleteIterator);
         } else {
             return LIBRARY_FUNCTION_ERROR;
         }
         return LIBRARY_NO_ERROR;
     }
-    
-    const std::function<bool()> shouldAbort(WolframLibraryData& libData) {
+
+    std::function<bool()> shouldAbort(WolframLibraryData& libData) {
         return [&libData]() {
             return static_cast<bool>(libData->AbortQ());
         };
     }
 
     Set& setFromID(const SetID id) {
-        if (sets_.count(id)) {
-            return sets_.at(id);
+        const auto setIDIterator = sets_.find(id);
+        if (setIDIterator != sets_.end()) {
+            return setIDIterator->second;
         } else {
             throw LIBRARY_FUNCTION_ERROR;
         }
@@ -314,7 +303,7 @@ namespace SetReplace {
         
         try {
             const auto ruleIDs = setFromID(setID).eventRuleIDs();
-            mint dimensions[1] = {static_cast<mint>(ruleIDs.size() - 1)};
+            const mint dimensions[1] = {static_cast<mint>(ruleIDs.size() - 1)};
             MTensor output;
             libData->MTensor_new(MType_Integer, 1, dimensions, &output);
             
