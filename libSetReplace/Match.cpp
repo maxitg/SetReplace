@@ -59,7 +59,7 @@ namespace SetReplace {
 
         static int compareVectors(const std::vector<ExpressionID>& first, const std::vector<ExpressionID>& second) {
             const auto mismatchingIterators = std::mismatch(first.begin(), first.end(), second.begin(), second.end());
-            if (mismatchingIterators.first != first.end())
+            if (mismatchingIterators.first != first.end() && mismatchingIterators.second != second.end())
                 return compare(*mismatchingIterators.first, *mismatchingIterators.second);
             else
                 return compare(first.size(), second.size());
@@ -108,10 +108,13 @@ namespace SetReplace {
     class MatchEquality {
      public:
         size_t operator()(const MatchPtr& a, const MatchPtr& b) const {
-            return (a->rule == b->rule) && (a->inputExpressions.size() == b->inputExpressions.size()) &&
-                (std::mismatch(a->inputExpressions.begin(), a->inputExpressions.end(),
-                               b->inputExpressions.begin(), b->inputExpressions.end())
-                    .first == a->inputExpressions.end());
+            if (a->rule != b->rule || a->inputExpressions.size() != b->inputExpressions.size())
+                return false;
+
+            const auto mismatchedIterators = std::mismatch(a->inputExpressions.begin(), a->inputExpressions.end(),
+                                                           b->inputExpressions.begin(), b->inputExpressions.end());
+            return mismatchedIterators.first == a->inputExpressions.end() &&
+                   mismatchedIterators.second == b->inputExpressions.end();
         }
     };
 
