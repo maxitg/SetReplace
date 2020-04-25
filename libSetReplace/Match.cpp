@@ -179,9 +179,7 @@ namespace SetReplace {
 
             for (const auto& expression : expressionIDs) {
                 const auto& matches = expressionToMatches_[expression];
-                for (const auto& matchPtr : matches) {
-                    matchesToDelete.insert(matchPtr);
-                }
+                matchesToDelete.insert(matches.begin(), matches.end());
             }
 
             for (const auto& match : matchesToDelete) {
@@ -214,9 +212,10 @@ namespace SetReplace {
         void addMatchesForRule(const std::vector<ExpressionID>& expressionIDs,
                                const RuleID& ruleID,
                                const std::function<bool()>& shouldAbort) {
-            for (size_t i = 0; i < rules_[ruleID].inputs.size(); ++i) {
-                const Match emptyMatch{ruleID, std::vector<ExpressionID>(rules_[ruleID].inputs.size(), -1)};
-                completeMatchesStartingWithInput(emptyMatch, rules_[ruleID].inputs, i, expressionIDs, shouldAbort);
+            const auto& ruleInputExpressions = rules_[ruleID].inputs;
+            for (size_t i = 0; i < ruleInputExpressions.size(); ++i) {
+                const Match emptyMatch{ruleID, std::vector<ExpressionID>(ruleInputExpressions.size(), -1)};
+                completeMatchesStartingWithInput(emptyMatch, ruleInputExpressions, i, expressionIDs, shouldAbort);
             }
         }
 

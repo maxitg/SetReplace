@@ -19,9 +19,7 @@ namespace SetReplace {
 
             std::unordered_set<Atom> involvedAtoms;
             for (const auto& expression : expressionIDs) {
-                const auto atomsVector = getAtomsVector_(expression);
-                // Increase set capacity to reduce number of memory allocations
-                involvedAtoms.reserve(involvedAtoms.size() + atomsVector.size());
+                const auto& atomsVector = getAtomsVector_(expression);
                 involvedAtoms.insert(atomsVector.begin(), atomsVector.end());
             }
 
@@ -43,8 +41,8 @@ namespace SetReplace {
         }
 
         void addExpressions(const std::vector<ExpressionID>& expressionIDs) {
-            for (const auto expressionID : expressionIDs) {
-                for (const auto atom : getAtomsVector_(expressionID)) {
+            for (const auto& expressionID : expressionIDs) {
+                for (const auto& atom : getAtomsVector_(expressionID)) {
                     index_[atom].insert(expressionID);
                 }
             }

@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 namespace SetReplace {
     class Set::Implementation {
@@ -74,8 +75,9 @@ namespace SetReplace {
             
             const auto& ruleInputs = rules_[match->rule].inputs;
             std::vector<AtomsVector> inputExpressions;
+            inputExpressions.reserve(match->inputExpressions.size());
             for (const auto& expressionID : match->inputExpressions) {
-                inputExpressions.push_back(expressions_.at(expressionID).atoms);
+                inputExpressions.emplace_back(expressions_.at(expressionID).atoms);
             }
             
             auto explicitRuleInputs = ruleInputs;
@@ -116,7 +118,7 @@ namespace SetReplace {
             return 1;
         }
         
-        int64_t replace(const StepSpecification stepSpec, const std::function<bool()> shouldAbort) {
+        int64_t replace(const StepSpecification stepSpec, const std::function<bool()>& shouldAbort) {
             updateStepSpec(stepSpec);
             int64_t count = 0;
             while (true) {
@@ -129,23 +131,20 @@ namespace SetReplace {
         }
         
         std::vector<SetExpression> expressions() const {
-            std::vector<std::pair<ExpressionID, SetExpression>> idsAndExpressions;
-            idsAndExpressions.reserve(expressions_.size());
-            for (const auto& idAndExpression : expressions_) {
-                idsAndExpressions.push_back(idAndExpression);
-            }
+            std::vector<std::pair<ExpressionID, SetExpression>> idsAndExpressions(expressions_.begin(),
+                                                                                  expressions_.end());
             std::sort(idsAndExpressions.begin(), idsAndExpressions.end(), [](const auto& a, const auto& b) {
                 return a.first < b.first;
             });
             std::vector<SetExpression> result;
             result.reserve(idsAndExpressions.size());
             for (const auto& idAndExpression : idsAndExpressions) {
-                result.push_back(idAndExpression.second);
+                result.emplace_back(idAndExpression.second);
             }
             return result;
         }
         
-        Generation maxCompleteGeneration(const std::function<bool()> shouldAbort) {
+        Generation maxCompleteGeneration(const std::function<bool()>& shouldAbort) {
             indexNewExpressions(shouldAbort);
             return std::min(smallestGeneration(matcher_.allMatches()), largestGeneration_);
         }
@@ -159,12 +158,12 @@ namespace SetReplace {
         }
 
     private:
-        Implementation(const std::vector<Rule>& rules,
+        Implementation(std::vector<Rule>  rules,
                        const std::vector<AtomsVector>& initialExpressions,
-                       const Matcher::OrderingSpec orderingSpec,
+                       const Matcher::OrderingSpec& orderingSpec,
                        const unsigned int randomSeed,
                        const std::function<AtomsVector(ExpressionID)>& getAtomsVector) :
-        rules_(rules),
+        rules_(std::move(rules)),
         atomsIndex_(getAtomsVector),
         matcher_(rules_, atomsIndex_, getAtomsVector, orderingSpec, randomSeed) {
             for (const auto& expression : initialExpressions) {
@@ -196,15 +195,15 @@ namespace SetReplace {
             }
         }
         
-        void indexNewExpressions(const std::function<bool()> shouldAbort) {
+        void indexNewExpressions(const std::function<bool()>& shouldAbort) {
             // Atoms index must be updated first, because the matcher uses it to discover expressions.
             atomsIndex_.addExpressions(unindexedExpressions_);
             matcher_.addMatchesInvolvingExpressions(unindexedExpressions_, shouldAbort);
             unindexedExpressions_.clear();
         }
         
-        TerminationReason willExceedAtomLimits(const std::vector<AtomsVector> explicitRuleInputs,
-                                               const std::vector<AtomsVector> explicitRuleOutputs) const {
+        TerminationReason willExceedAtomLimits(const std::vector<AtomsVector>& explicitRuleInputs,
+                                               const std::vector<AtomsVector>& explicitRuleOutputs) const {
             const int64_t currentAtomsCount = static_cast<int64_t>(atomDegrees_.size());
             
             std::unordered_map<Atom, int64_t> atomDegreeDeltas;
@@ -241,11 +240,8 @@ namespace SetReplace {
                                       const int64_t deltaCount,
                                       bool deleteIfZero = true) {
             for (const auto& expression : deltaExpressions) {
-                std::unordered_set<Atom> expressionAtoms;
-                for (const auto atom : expression) {
-                    expressionAtoms.insert(atom);
-                }
-                for (const auto atom : expressionAtoms) {
+                const std::unordered_set<Atom> expressionAtoms(expression.begin(), expression.end());
+                for (const auto& atom : expressionAtoms) {
                     atomDegrees[atom] += deltaCount;
                     if (deleteIfZero && atomDegrees[atom] == 0) {
                         atomDegrees.erase(atom);
@@ -254,8 +250,8 @@ namespace SetReplace {
             }
         }
         
-        TerminationReason willExceedExpressionsLimit(const std::vector<AtomsVector> explicitRuleInputs,
-                                                     const std::vector<AtomsVector> explicitRuleOutputs) const {
+        TerminationReason willExceedExpressionsLimit(const std::vector<AtomsVector>& explicitRuleInputs,
+                                                     const std::vector<AtomsVector>& explicitRuleOutputs) const {
             const int64_t currentExpressionsCount = nextExpressionID_ - destroyedExpressionsCount_;
             const int64_t newExpressionsCount = currentExpressionsCount
                                                 - static_cast<int64_t>(explicitRuleInputs.size())
@@ -287,13 +283,11 @@ namespace SetReplace {
         std::vector<ExpressionID> addExpressions(const std::vector<AtomsVector>& expressions,
                                                  const EventID creatorEvent,
                                                  const Generation generation) {
-            const auto ids = assignExpressionIDs(expressions, creatorEvent, generation);
+            auto ids = assignExpressionIDs(expressions, creatorEvent, generation);
             
             // If generation is at least maxGeneration_, we will never use these expressions as inputs, so no need adding them to the index.
             if (generation < stepSpec_.maxGenerationsLocal) {
-                for (const auto id : ids) {
-                    unindexedExpressions_.push_back(id);
-                }
+                unindexedExpressions_.insert(unindexedExpressions_.end(), ids.begin(), ids.end());
             }
             
             updateAtomDegrees(atomDegrees_, expressions, +1);
@@ -304,6 +298,8 @@ namespace SetReplace {
                                                       const EventID creatorEvent,
                                                       const Generation generation) {
             std::vector<ExpressionID> ids;
+            ids.reserve(expressions.size());
+            expressions_.reserve(expressions_.size() + expressions.size());
             for (const auto& expression : expressions) {
                 ids.push_back(nextExpressionID_);
                 expressions_.insert(std::make_pair(nextExpressionID_++,
@@ -326,8 +322,9 @@ namespace SetReplace {
                                const std::vector<ExpressionID>& deltaExpressionIDs,
                                const int64_t deltaCount) const {
             std::vector<AtomsVector> expressions;
+            expressions.reserve(deltaExpressionIDs.size());
             for (const auto id : deltaExpressionIDs) {
-                expressions.push_back(expressions_.at(id).atoms);
+                expressions.emplace_back(expressions_.at(id).atoms);
             }
             updateAtomDegrees(atomDegrees, expressions, deltaCount);
         }
@@ -348,9 +345,8 @@ namespace SetReplace {
     Set::Set(const std::vector<Rule>& rules,
              const std::vector<AtomsVector>& initialExpressions,
              const Matcher::OrderingSpec& orderingSpec,
-             unsigned int randomSeed) {
-        implementation_ = std::make_shared<Implementation>(rules, initialExpressions, orderingSpec, randomSeed);
-    }
+             unsigned int randomSeed) :
+             implementation_(new Implementation(rules, initialExpressions, orderingSpec, randomSeed)) {}
 
     int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) {
         return implementation_->replaceOnce(shouldAbort);
