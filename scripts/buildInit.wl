@@ -31,7 +31,7 @@ buildLibSetReplace[] := With[{
         "Windows",
           {"/std:c++17", "/EHsc"},
         _,
-          "-std=c++17"],
+          {"-std=c++17", "-pthread"}],
       "Compiler" -> ToExpression @ tryEnvironment["COMPILER", Automatic],
       "CompilerInstallation" -> tryEnvironment["COMPILER_INSTALLATION", Automatic],
       "Language" -> "C++",

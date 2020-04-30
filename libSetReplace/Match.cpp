@@ -5,6 +5,9 @@
 #include <random>
 #include <unordered_map>
 #include <utility>
+#include <mutex>
+#include <thread>
+#include <atomic>
 
 namespace SetReplace {
     class MatchComparator {
@@ -105,7 +108,7 @@ namespace SetReplace {
         }
     };
 
-    class MatchEquality {
+    class MatchEquality  {
      public:
         size_t operator()(const MatchPtr& a, const MatchPtr& b) const {
             if (a->rule != b->rule || a->inputExpressions.size() != b->inputExpressions.size())
@@ -147,6 +150,18 @@ namespace SetReplace {
         std::mt19937 randomGenerator_;
         MatchPtr nextMatch_;
 
+        /**
+         * This variable is typically monitored in abortFunc such that other threads can check if they should abort.
+         * Since it is written to and read by multiple threads, it must be atomic.
+         */
+        std::atomic<Error> currentError;
+
+        /**
+         * This mutex should be used to gain access to the above match structures.
+         * Currently only insertMatch is executed concurrently, and therefore it is only used there (for now).
+         */
+        mutable std::mutex matchMutex;
+
      public:
         Implementation(const std::vector<Rule>& rules,
                        AtomsIndex& atomsIndex,
@@ -157,13 +172,40 @@ namespace SetReplace {
             atomsIndex_(atomsIndex),
             getAtomsVector_(std::move(getAtomsVector)),
             matchQueue_(orderingSpec),
-            randomGenerator_(randomSeed) {}
+            randomGenerator_(randomSeed),
+            currentError(None) {}
 
         void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
                                             const std::function<bool()>& shouldAbort) {
-            for (size_t i = 0; i < rules_.size(); ++i) {
-                addMatchesForRule(expressionIDs, static_cast<RuleID>(i), shouldAbort);
+            // If one thread errors, alert other threads with this function
+            const std::function<bool()> abortFunc = [this, &shouldAbort]() {
+                return currentError != None || shouldAbort();
+            };
+
+            // Only create threads if there is more than one rule
+            const size_t numThreads = rules_.size() > 1 ? rules_.size() : 0;
+            if (numThreads > 0) {
+                // Multi-threaded path
+                std::thread threads[numThreads];
+                for (size_t i = 0; i < rules_.size(); ++i) {
+                    threads[i] = std::thread(&Implementation::addMatchesForRule, this, expressionIDs, i, abortFunc);
+                }
+                for (size_t i = 0; i < numThreads; ++i) {
+                    threads[i].join();
+                }
+            } else {
+                // Single-threaded path
+                for (size_t i = 0; i < rules_.size(); ++i)
+                    addMatchesForRule(expressionIDs, i, abortFunc);
             }
+
+            if (currentError != None) {
+                // Reset currentError before throwing
+                Error toThrow(currentError);
+                currentError = None;
+                throw toThrow;
+            }
+
             chooseNextMatch();
         }
 
@@ -215,7 +257,16 @@ namespace SetReplace {
             const auto& ruleInputExpressions = rules_[ruleID].inputs;
             for (size_t i = 0; i < ruleInputExpressions.size(); ++i) {
                 const Match emptyMatch{ruleID, std::vector<ExpressionID>(ruleInputExpressions.size(), -1)};
-                completeMatchesStartingWithInput(emptyMatch, ruleInputExpressions, i, expressionIDs, shouldAbort);
+                try {
+                    completeMatchesStartingWithInput(emptyMatch, ruleInputExpressions, i, expressionIDs, shouldAbort);
+                } catch (Error e) {
+                    // If any thread throws an error, catch and atomically set shared error.
+                    // This will cause other threads to return if abortFunc is evaluated
+                    if (currentError == None)
+                        currentError = e;
+
+                    return;
+                }
             }
         }
 
@@ -281,6 +332,7 @@ namespace SetReplace {
             // careful, don't create different pointers to the same match!
             const auto matchPtr = std::make_shared<Match>(newMatch);
 
+            std::lock_guard<std::mutex> lock(matchMutex);
             if (!allMatches_.insert(matchPtr).second)
                 return;
 
