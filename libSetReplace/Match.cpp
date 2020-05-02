@@ -200,10 +200,8 @@ namespace SetReplace {
         std::vector<MatchPtr> allMatches() const {
             std::vector<MatchPtr> result;
             for (const auto& exampleAndBucket : matchQueue_) {
-                result.reserve(result.size() + exampleAndBucket.second.second.size());
-                for (const auto& matchPtr : exampleAndBucket.second.second) {
-                    result.emplace_back(matchPtr);
-                }
+                result.insert(result.end(), exampleAndBucket.second.second.begin(),
+                              exampleAndBucket.second.second.end());
             }
             return result;
         }
