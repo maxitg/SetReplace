@@ -279,14 +279,16 @@ The following are exceptions to Google C++ Style:
 * C++ exceptions may be thrown.
 * All indentation uses four spaces, except for access specifiers which uses one.
 * White space in pointer and reference declarations goes after the `*` or `&` character. For example:
-    * `int* foo;` 
+    * `int* foo;`
     * `const std::string& string;`
+* License, authors, and file descriptions should not be put at the top of files.
+* Doxygen is used for documentation.
 
 A useful tool for confirming your code's adherence to the above code style is to use
 [cpplint](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py). You can lint a C++ source
 or header file like this:
 ```bash
-cpplint.py --linelength=120 file_name
+cpplint.py --linelength=120 --filter=-legal/copyright file_name
 ```
 If cpplint flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
 positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
