@@ -275,6 +275,7 @@ conform to this specification. You can track the progress of this refactoring
 The following are exceptions to Google C++ Style:
 * Maximum line length is 120 characters.
 * Function and variable names, including const and constexpr variables, use lower camel case.
+* Namespace and class names use upper camel case.
 * C++ exceptions may be thrown.
 * All indentation uses four spaces, except for access specifiers which uses one.
 * White space in pointer and reference declarations goes after the `*` or `&` character. For example:
