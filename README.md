@@ -56,7 +56,7 @@ We can then have a rule which would pick a subset of these hyperedges related th
  Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]
 ```
 
-Note the [`Module`](https://reference.wolfram.com/language/ref/Module.html) on the right-hand side creates a new variable (vertex) which causes the hypergraph to grow. After a single replacement we get this (the new vertex is `v11`, due to optimizations it's not always a [`Module`](https://reference.wolfram.com/language/ref/Module.html) that creates vertices, so the naming may be different):
+Note the [`Module`](https://reference.wolfram.com/language/ref/Module.html) on the right-hand side creates a new variable (vertex) which causes the hypergraph to grow. Due to optimizations, it's not always a [`Module`](https://reference.wolfram.com/language/ref/Module.html) that creates vertices, so its name may be different. After a single replacement we get this (the new vertex is v11):
 
 ```wl
 In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
@@ -595,7 +595,7 @@ In[] := WolframModelPlot /@ (WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 
 <img src="READMEImages/StatesListPlot.png" width="746">
 
-In fact `"Generation"` property can be omitted and the index of the generation can be used directly:
+In fact, the `"Generation"` property can be omitted and the index of the generation can be used directly:
 
 ```wl
 In[] := WolframModelPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
@@ -606,7 +606,7 @@ In[] := WolframModelPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 
 <img src="READMEImages/StatesListPlot.png" width="746">
 
-`"StatesList"` shows a compressed version of the evolution. To see how state changes with each applied replacement, use **`"AllEventsStatesList"`**:
+`"StatesList"` shows a compressed version of the evolution. To see how the state changes with each applied replacement, use **`"AllEventsStatesList"`**:
 
 ```wl
 In[] := WolframModelPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
@@ -1300,7 +1300,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
 
 <img src="READMEImages/NonoverlappingEvolutionWithNewestEdgeOrdering.png" width="513">
 
-In this particular, so-called non-overlapping, system the order of replacements does not matter, as regardless of order the same final state (upto renaming of vertices) is produced for the same fixed number of generations. This will always be the case if there is only a single edge on the left-hand side of the rule:
+In this particular so-called non-overlapping system, the order of replacements does not matter. Regardless of order, the same final state (up to renaming of vertices) is produced for the same fixed number of generations. This will always be the case if there is only a single edge on the left-hand side of the rule:
 
 ```wl
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
@@ -1335,7 +1335,7 @@ Possible sorting criteria are:
 
 * `"NewestEdge"`: similar to `"OldestEdge"` except edges are chosen from the end of the list rather than from the beginning.
 
-* `"LeastRecentEdge"`: this is similar to `"OldestEdge"`, but instead of greedely choosing the oldest edges, it instead avoids choosing newest ones. The difference is best demonstrated in an example:
+* `"LeastRecentEdge"`: this is similar to `"OldestEdge"`, but instead of greedily choosing the oldest edges, it instead avoids choosing newest ones. The difference is best demonstrated in an example:
 
     ```wl
     In[] := WolframModel[{{x, y}, {y, z}} -> {},
@@ -1346,13 +1346,13 @@ Possible sorting criteria are:
     Out[] = {{{1, {1, 4} -> {}}}, {{1, {2, 3} -> {}}}}
     ```
 
-    Note that in this example `"OldestEdge"` has selected the first and the last edge, whereas `"LeastRecentEdge"`, in an attempt to avoid the most "recent" last edge, has select the second and the third ones. In this case, similarly to `"OldestEdge"`, a fixed set of edges is guaranteed to be chosen, but potentially in multiple orders.
+    Note that in this example `"OldestEdge"` has selected the first and the last edge, whereas `"LeastRecentEdge"`, in an attempt to avoid the most "recent" last edge, has selected the second and the third ones. In this case, similarly to `"OldestEdge"`, a fixed set of edges is guaranteed to be chosen, but potentially in multiple orders.
 
 * `"LeastOldEdge"`: similar to `"LeastRecentEdge"`, but avoids old edges instead of new ones.
 
     Note that counterintuitively `"OldestEdge"` sorting is not equivalent to the reverse of `"NewestEdge"` sorting, it is equivalent to the reverse of `"LeastOldEdge"`. Similarly, `"NewestEdge"` is the reverse of `"LeastRecentEdge"`.
 
-* `"RuleOrdering"`: similarly to `"OldestEdge"` greedely chooses edges from the beginning of the list, however unlike `"OldestEdge"` which would pick the oldest edge with *any* available matches, it chooses edges in the order the left-hand side of (any) rule is written. The difference is best demonstrated in an example:
+* `"RuleOrdering"`: similarly to `"OldestEdge"` greedily chooses edges from the beginning of the list, however unlike `"OldestEdge"` which would pick the oldest edge with *any* available matches, it chooses edges in the order the left-hand side of (any) rule is written. The difference is best demonstrated in an example:
 
     ```wl
     In[] := WolframModel[{{x, y}, {y, z}} -> {},
@@ -1404,7 +1404,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}]
 
 <img src="READMEImages/WolframModelPlot.png" width="478">
 
-Edges of any arity can be mixed, the binary edges are displayed as non-filled arrows, and the unary edges are shown as circles around the vertices:
+Edges of any arity can be mixed. The binary edges are displayed as non-filled arrows, and the unary edges are shown as circles around the vertices:
 
 ```wl
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4}, {4, 3}, {4, 5,
@@ -1438,7 +1438,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6,
 
 <img src="READMEImages/MultiedgesPlot.png" width="478">
 
-`WolframModelPlot` is listable, multiple hypergraphs can be plotted at the same time:
+`WolframModelPlot` is listable. Multiple hypergraphs can be plotted at the same time:
 
 ```wl
 In[] := WolframModelPlot[{{{1, 2, 3}},
@@ -1492,7 +1492,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 
 ### "HyperedgeRendering"
 
-By default, `WolframModelPlot` represents each hyperedge as a polygon. It is possible instead of drop the polygons (and the vertex layout adjustments that come with them), and simply split each hyperedge into a collection of binary edges by setting **`"HyperedgeRendering"`** to `"Subgraphs"`. This looses information (`{{1, 2}, {2, 3}}` and `{{1, 2, 3}}` would look the same), but might be useful if one does not care to see the separation between hyperedges:
+By default, `WolframModelPlot` represents each hyperedge as a polygon. It is possible instead to drop the polygons (and the vertex layout adjustments that come with them), and simply split each hyperedge into a collection of binary edges by setting **`"HyperedgeRendering"`** to `"Subgraphs"`. This loses information (`{{1, 2}, {2, 3}}` and `{{1, 2, 3}}` would look the same), but might be useful if one does not care to see the separation between hyperedges:
 
 ```wl
 In[] := WolframModelPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
@@ -1879,7 +1879,7 @@ In[] := GeneralizedGridGraph[{3 -> {"Directed", "Circular"}, 6}]
 
 <img src="READMEImages/DirectedCircularGridGraph.png" width="478">
 
-Same options as [`GridGraph`](https://reference.wolfram.com/language/ref/GridGraph.html) are supported. In addition `"VertexNamingFunction" -> "Coordinates"` names vertices according to their position in a grid:
+The same options as [`GridGraph`](https://reference.wolfram.com/language/ref/GridGraph.html) are supported. In addition `"VertexNamingFunction" -> "Coordinates"` names vertices according to their position in a grid:
 
 ```wl
 In[] := GeneralizedGridGraph[{4, 5, 2},
