@@ -235,10 +235,12 @@ The three main scripts of *SetReplace* are [build.wls](/build.wls), [install.wls
 
 ## Code style
 
+#### Wolfram Language
+
 Unfortunately, there are no established style guidelines for Wolfram Language code, and even different source files in *SetReplace* currently use slightly different conventions (we are working on it). The best rule here is to try to be consistent as much as possible with the specific file you are editing.
 
 In addition to that, here are some more-or-less established rules:
-* Keep line widths within 120 characters (does not apply to .md files).
+* Keep line widths within 120 characters.
 * Use at most a single empty line to separate code paragraphs (note, the Front End uses two by default, which should be manually fixed if you use the Front End for editing).
 * Don't use section and cell definitions for comments, such as `(* ::Text:: *)`.
 * Use spaces instead of tabs, and use 2 spaces for indentation.
@@ -263,9 +265,35 @@ In addition to that, here are some more-or-less established rules:
 * Similar issue could happen with [`Thread`](https://reference.wolfram.com/language/ref/Thread.html), especially when used to thread a single element over multiple. For example, it is easy to assume naively that `Thread[x -> {1, 2, 3}]` would always yield `{x -> 1, x -> 2, x -> 3}`. Except, sometimes it might be called as `With[{x = {4, 5, 6}}, Thread[x -> {1, 2, 3}]]`.
 * Use uppercase camel for public symbols, lowercase camel for internal (including PackageScope) symbols.
 * Start global constants with `$`, whether internal or public, and tags (such as used in [`Throw`](https://reference.wolfram.com/language/ref/Throw.html) or [`Sow`](https://reference.wolfram.com/language/ref/Sow.html), or as generic enum labels) with `$$`.
-* C++ code generally uses the Xcode linter style, with the following clarifications:
-  * Variable and constant names use a lowercase camel, and class names use uppercase camel.
-  * Type definitions are done with `using NewType = OldType;`.
-  * Do not use `using namespace std;`.
+
+#### C++
+New code should follow [Google C++ Style](https://google.github.io/styleguide/cppguide.html) guidelines, save for
+the exceptions laid out in the list below. The code in this repository is currently undergoing refactoring to
+conform to this specification. You can track the progress of this refactoring
+[here](https://github.com/maxitg/SetReplace/projects/2).
+
+The following are exceptions to Google C++ Style:
+* Maximum line length is 120 characters.
+* Function and variable names, including const and constexpr variables, use lower camel case.
+* Namespace and class names use upper camel case.
+* C++ exceptions may be thrown.
+* All indentation uses four spaces, except for access specifiers which uses one.
+* White space in pointer and reference declarations goes after the `*` or `&` character. For example:
+    * `int* foo;`
+    * `const std::string& string;`
+* License, authors, and file descriptions should not be put at the top of files.
+* Doxygen is used for documentation.
+
+A useful tool for confirming your code's adherence to the above code style is to use
+[cpplint](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py). You can lint a C++ source
+or header file like this:
+```bash
+cpplint.py --linelength=120 --filter=-legal/copyright file_name
+```
+If cpplint flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
+positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
+space, or `// NOLINTNEXTLINE` on a new line above if there is no space. For any usages of `// NOLINT` or
+`// NOLINTNEXTLINE`, please describe the reason for its inclusion both in a code comment and in your pull request's
+comments section.
 
 That's all for our guidelines, now let's go figure out the fundamental theory of physics! :rocket:
