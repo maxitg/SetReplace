@@ -140,6 +140,10 @@ Print["Report file: ", $reportFile];
 
 If[$MessageList =!= {}, $successQ = False];
 
+If[Environment["STATUS_FILE"] === "1",
+  Export["exit_status.txt", If[$successQ, 0, 1]];
+];
+
 If[$successQ,
   Print["Tests passed."];
   Exit[0],
