@@ -1,6 +1,6 @@
 First, thanks for contributing! :thumbsup:
 
-These are the guidelines designed to make the development smooth, efficient, and fun for all of us. But remember, we are the ones who writes them, and *anybody* is welcome to propose changes. Just open a pull request.
+These are the guidelines designed to make the development smooth, efficient, and fun for all of us. But remember, we are the ones who write them, and *anybody* is welcome to propose changes. Just open a pull request.
 
 There are fundamentally two kinds of things you can contribute: [issues](#issues) ([reports](#weed-reports-something-is-not-working) and [ideas](#feature-suggestions)) and [code](#code).
 
