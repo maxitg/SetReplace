@@ -27,13 +27,16 @@ If[!IntegerQ[$measurementsCount],
 Attributes[meanAroundTiming] = {HoldAll};
 meanAroundTiming[expr_] := MeanAround @ Table[First @ AbsoluteTiming[expr], $measurementsCount]
 
-runTests[tests_] := Module[{result},
+runTests[tests_] := Module[{result, kernel},
   Print["Testing ", GitSHA[$gitRepo, $gitRepo["HEAD"]]];
   Run["./build.wls"];
   Run["./install.wls"];
-  PacletDataRebuild[];
-  << SetReplace`;
-  result = meanAroundTiming @@@ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]];
+  CloseKernels[];
+  {kernel} = LaunchKernels[1];
+  result = ParallelEvaluate[
+    << SetReplace`; meanAroundTiming @@@ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]],
+    kernel
+  ];
   Print[""];
   result
 ]
