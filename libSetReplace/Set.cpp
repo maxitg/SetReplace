@@ -299,7 +299,6 @@ namespace SetReplace {
                                                       const Generation generation) {
             std::vector<ExpressionID> ids;
             ids.reserve(expressions.size());
-            expressions_.reserve(expressions_.size() + expressions.size());
             for (const auto& expression : expressions) {
                 ids.push_back(nextExpressionID_);
                 expressions_.insert(std::make_pair(nextExpressionID_++,
