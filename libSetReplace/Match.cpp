@@ -395,7 +395,8 @@ namespace SetReplace {
                      const std::function<AtomsVector(ExpressionID)>& getAtomsVector,
                      const OrderingSpec& orderingSpec,
                      const unsigned int randomSeed)
-        : implementation_(new Implementation(rules, atomsIndex, getAtomsVector, orderingSpec, randomSeed)) {}
+        : implementation_(std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector, orderingSpec, randomSeed))
+        {}
 
     void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
                                                  const std::function<bool()>& shouldAbort) {

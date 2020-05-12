@@ -55,7 +55,7 @@ namespace SetReplace {
     };
 
     AtomsIndex::AtomsIndex(const std::function<AtomsVector(ExpressionID)>& getAtomsVector)
-        : implementation_(new Implementation(getAtomsVector)) {}
+        : implementation_(std::make_shared<Implementation>(getAtomsVector)) {}
 
     void AtomsIndex::removeExpressions(const std::vector<ExpressionID>& expressionIDs) {
         implementation_->removeExpressions(expressionIDs);

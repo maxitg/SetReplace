@@ -346,7 +346,7 @@ namespace SetReplace {
              const std::vector<AtomsVector>& initialExpressions,
              const Matcher::OrderingSpec& orderingSpec,
              unsigned int randomSeed) :
-             implementation_(new Implementation(rules, initialExpressions, orderingSpec, randomSeed)) {}
+             implementation_(std::make_shared<Implementation>(rules, initialExpressions, orderingSpec, randomSeed)) {}
 
     int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) {
         return implementation_->replaceOnce(shouldAbort);
