@@ -53,15 +53,16 @@ namespace SetReplace {
          */
         Matcher(const std::vector<Rule>& rules,
                 AtomsIndex& atomsIndex,
-                const std::function<AtomsVector(ExpressionID)> getAtomsVector,
-                const OrderingSpec orderingSpec,
-                const unsigned int randomSeed = 0);
-        
+                const std::function<AtomsVector(ExpressionID)>& getAtomsVector,
+                const OrderingSpec& orderingSpec,
+                unsigned int randomSeed = 0);
+
         /** @brief Finds and adds to the index all matches involving specified expressions.
          * @details Calls shouldAbort() frequently, and throws Error::Aborted if that returns true. Otherwise might take significant time to evaluate depending on the system.
          */
-        void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs, const std::function<bool()> shouldAbort);
-        
+        void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
+                                            const std::function<bool()>& shouldAbort);
+
         /** @brief Removes matches containing specified expression IDs from the index.
          */
         void removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs);
@@ -80,14 +81,14 @@ namespace SetReplace {
          * @param patternMatches explicit atoms corresponding to patterns in inputPatterns.
          * @param atomsToReplace patterns, which would be replaced the same way as inputPatterns are matched to patternMatches.
          */
-        static bool substituteMissingAtomsIfPossible(const std::vector<AtomsVector> inputPatterns,
-                                                     const std::vector<AtomsVector> patternMatches,
+        static bool substituteMissingAtomsIfPossible(const std::vector<AtomsVector>& inputPatterns,
+                                                     const std::vector<AtomsVector>& patternMatches,
                                                      std::vector<AtomsVector>& atomsToReplace);
         
         /** @brief Returns the set of expression IDs matched in any match. */
-        const std::vector<MatchPtr> allMatches() const;
-        
-    private:
+        std::vector<MatchPtr> allMatches() const;
+
+     private:
         class Implementation;
         std::shared_ptr<Implementation> implementation_;
     };
