@@ -7,7 +7,7 @@
 
 #include "Set.hpp"
 
-mint getData(const mint* data, mint length, mint index) {
+mint getData(const mint* data, const mint& length, const mint& index) {
     if (index >= length || index < 0) {
         throw LIBRARY_FUNCTION_ERROR;
     } else {
@@ -21,7 +21,7 @@ namespace SetReplace {
     using SetID = int64_t;
     std::unordered_map<SetID, Set> sets_;
 
-    std::vector<AtomsVector> getNextSet(mint tensorLength, const mint* tensorData, mint& startReadIndex) {
+    std::vector<AtomsVector> getNextSet(const mint& tensorLength, const mint* tensorData, mint& startReadIndex) {
         const auto getDataFunc = [&tensorData, &tensorLength, &startReadIndex]() -> mint {
             return getData(tensorData, tensorLength, startReadIndex++);
         };
@@ -43,7 +43,7 @@ namespace SetReplace {
         const mint tensorLength = libData->MTensor_getFlattenedLength(rulesTensor);
         const mint* tensorData = libData->MTensor_getIntegerData(rulesTensor);
         mint readIndex = 0;
-        const auto getRulesData = [tensorData, tensorLength, &readIndex]() -> mint {
+        const auto getRulesData = [&tensorData, &tensorLength, &readIndex]() -> mint {
             return getData(tensorData, tensorLength, readIndex++);
         };
         
@@ -138,11 +138,10 @@ namespace SetReplace {
         // Put fake event at the end so that the length of final expression can be determined on WL side.
         constexpr EventID fakeEvent = -3;
         constexpr Generation fakeGeneration = -1;
-        appendToTensor({
-                           static_cast<mint>(fakeEvent),
-                           static_cast<mint>(fakeEvent),
-                           static_cast<mint>(fakeGeneration),
-                           static_cast<mint>(atomsPointer)});
+        appendToTensor({static_cast<mint>(fakeEvent),
+                        static_cast<mint>(fakeEvent),
+                        static_cast<mint>(fakeGeneration),
+                        static_cast<mint>(atomsPointer)});
 
         for (const auto& expression : expressions) {
             appendToTensor(expression.atoms);

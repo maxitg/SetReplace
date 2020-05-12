@@ -13,7 +13,7 @@ namespace SetReplace {
 
         template<typename T>
         static int compare(T a, T b) {
-            return a < b ? -1 : static_cast<bool>(a > b);
+            return a < b ? -1 : static_cast<int>(a > b);
         }
 
      public:
@@ -59,10 +59,11 @@ namespace SetReplace {
 
         static int compareVectors(const std::vector<ExpressionID>& first, const std::vector<ExpressionID>& second) {
             const auto mismatchingIterators = std::mismatch(first.begin(), first.end(), second.begin(), second.end());
-            if (mismatchingIterators.first != first.end() && mismatchingIterators.second != second.end())
+            if (mismatchingIterators.first != first.end() && mismatchingIterators.second != second.end()) {
                 return compare(*mismatchingIterators.first, *mismatchingIterators.second);
-            else
+            } else {
                 return compare(first.size(), second.size());
+            }
         }
 
         static int compareSortedIDs(const MatchPtr& a, const MatchPtr& b, const bool reverseOrder) {
@@ -108,8 +109,9 @@ namespace SetReplace {
     class MatchEquality {
      public:
         size_t operator()(const MatchPtr& a, const MatchPtr& b) const {
-            if (a->rule != b->rule || a->inputExpressions.size() != b->inputExpressions.size())
+            if (a->rule != b->rule || a->inputExpressions.size() != b->inputExpressions.size()) {
                 return false;
+            }
 
             const auto mismatchedIterators = std::mismatch(a->inputExpressions.begin(), a->inputExpressions.end(),
                                                            b->inputExpressions.begin(), b->inputExpressions.end());
@@ -436,11 +438,11 @@ namespace SetReplace {
             }
         }
 
-        for (auto& av : atomsToReplace) {
-            for (auto& a : av) {
-                const auto matchIterator = match.find(a);
+        for (auto& atomsVectorToReplace : atomsToReplace) {
+            for (auto& atomToReplace : atomsVectorToReplace) {
+                const auto matchIterator = match.find(atomToReplace);
                 if (matchIterator != match.end()) {
-                    a = matchIterator->second;
+                    atomToReplace = matchIterator->second;
                 }
             }
         }
