@@ -38,7 +38,7 @@ namespace SetReplace {
             SortedExpressionIDs = 0,
             ReverseSortedExpressionIDs = 1,
             ExpressionIDs = 2,
-            RuleID = 3};
+            RuleIndex = 3};
         
         /** @brief Whether to sort in normal or reverse order.
          */

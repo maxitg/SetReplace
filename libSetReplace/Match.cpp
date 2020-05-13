@@ -49,7 +49,7 @@ namespace SetReplace {
                 case Matcher::OrderingFunction::ExpressionIDs:
                     return compareUnsortedIDs(a, b);
 
-                case Matcher::OrderingFunction::RuleID:
+                case Matcher::OrderingFunction::RuleIndex:
                     return compare(a->rule, b->rule);
 
                 default:
@@ -176,7 +176,7 @@ namespace SetReplace {
             // any ordering spec works here, as long as it's complete.
             OrderingSpec fullOrderingSpec = {
                 {OrderingFunction::ExpressionIDs, OrderingDirection::Normal},
-                {OrderingFunction::RuleID, OrderingDirection::Normal}};
+                {OrderingFunction::RuleIndex, OrderingDirection::Normal}};
             std::set<MatchPtr, MatchComparator> matchesToDelete(fullOrderingSpec);
 
             for (const auto& expression : expressionIDs) {
@@ -268,13 +268,11 @@ namespace SetReplace {
             }
 
             const auto nextInputIdxAndCandidateExpressions = nextBestInputAndExpressionsToTry(newMatch, newInputs);
-            if (nextInputIdxAndCandidateExpressions.first >= 0) {
-                completeMatchesStartingWithInput(newMatch,
-                                                 newInputs,
-                                                 nextInputIdxAndCandidateExpressions.first,
-                                                 nextInputIdxAndCandidateExpressions.second,
-                                                 shouldAbort);
-            }
+            completeMatchesStartingWithInput(newMatch,
+                                             newInputs,
+                                             nextInputIdxAndCandidateExpressions.first,
+                                             nextInputIdxAndCandidateExpressions.second,
+                                             shouldAbort);
         }
 
         void insertMatch(const Match& newMatch) {
@@ -326,7 +324,7 @@ namespace SetReplace {
 
         std::pair<size_t, std::vector<ExpressionID>> nextBestInputAndExpressionsToTry(const Match& incompleteMatch,
                                                                                       const std::vector<AtomsVector>& partiallyMatchedInputs) const {
-            size_t nextInputIdx = -1;
+            int64_t nextInputIdx = -1;
             std::vector<ExpressionID> nextExpressionsToTry;
 
             // For each input, we will see how many expressions in the set contain atoms appearing in this input.
@@ -349,7 +347,7 @@ namespace SetReplace {
 
                 // For each expression, we will count how many of the input atoms appear in it.
                 // We will then only use expressions that have all the required atoms.
-                std::unordered_map<ExpressionID, int64_t> inputAtomsCountByExpression;
+                std::unordered_map<ExpressionID, uint64_t> inputAtomsCountByExpression;
                 for (const auto atom : appearingAtoms) {
                     for (const auto expression : atomsIndex_.expressionsContainingAtom(atom)) {
                         inputAtomsCountByExpression[expression]++;
@@ -368,7 +366,7 @@ namespace SetReplace {
                 // Note, if there are zero matching expressions, it means the match is not possible, because none of the expressions contain all the atoms needed.
                 if (nextInputIdx == -1 || potentialExpressions.size() < nextExpressionsToTry.size()) {
                     nextExpressionsToTry = potentialExpressions;
-                    nextInputIdx = i;
+                    nextInputIdx = static_cast<int64_t>(i);
                 }
             }
 

@@ -53,7 +53,7 @@ namespace SetReplace {
         int64_t replaceOnce(const std::function<bool()> shouldAbort) {
             terminationReason_ = TerminationReason::NotTerminated;
 
-            if (eventRuleIDs_.size() > stepSpec_.maxEvents) {
+            if (eventRuleIDs_.size() > static_cast<size_t>(stepSpec_.maxEvents)) {
                 terminationReason_ = TerminationReason::MaxEvents;
                 return 0;
             }

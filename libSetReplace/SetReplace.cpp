@@ -160,9 +160,9 @@ namespace SetReplace {
         Matcher::OrderingSpec orderingSpec;
         unsigned int randomSeed;
         try {
-            rules = std::move(getRules(libData, MArgument_getMTensor(argv[0])));
-            initialExpressions = std::move(getSet(libData, MArgument_getMTensor(argv[1])));
-            orderingSpec = std::move(getOrderingSpec(libData, MArgument_getMTensor(argv[2])));
+            rules = getRules(libData, MArgument_getMTensor(argv[0]));
+            initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
+            orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[2]));
             randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[3]));
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
@@ -184,7 +184,10 @@ namespace SetReplace {
         return LIBRARY_NO_ERROR;
     }
 
-    int setDelete(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    int setDelete([[maybe_unused]] WolframLibraryData libData,
+                  mint argc,
+                  MArgument* argv,
+                  [[maybe_unused]] MArgument result) {
         if (argc != 1) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -214,7 +217,7 @@ namespace SetReplace {
         }
     }
 
-    int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    int setReplace(WolframLibraryData libData, mint argc, MArgument *argv, [[maybe_unused]] MArgument result) {
         if (argc != 2) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -274,7 +277,7 @@ namespace SetReplace {
         return LIBRARY_NO_ERROR;
     }
 
-    int terminationReason(WolframLibraryData libData, mint argc, MArgument *argv, MArgument result) {
+    int terminationReason([[maybe_unused]] WolframLibraryData, mint argc, MArgument *argv, MArgument result) {
         if (argc != 1) {
             return LIBRARY_FUNCTION_ERROR;
         }
@@ -288,7 +291,7 @@ namespace SetReplace {
             return LIBRARY_FUNCTION_ERROR;
         }
         
-        MArgument_setInteger(result, (int)terminationReason);
+        MArgument_setInteger(result, static_cast<int>(terminationReason));
 
         return LIBRARY_NO_ERROR;
     }
@@ -326,11 +329,11 @@ EXTERN_C mint WolframLibrary_getVersion() {
     return WolframLibraryVersion;
 }
 
-EXTERN_C int WolframLibrary_initialize(WolframLibraryData libData) {
+EXTERN_C int WolframLibrary_initialize([[maybe_unused]] WolframLibraryData libData) {
     return 0;
 }
 
-EXTERN_C void WolframLibrary_uninitialize(WolframLibraryData libData) {
+EXTERN_C void WolframLibrary_uninitialize([[maybe_unused]] WolframLibraryData libData) {
     return;
 }
 
