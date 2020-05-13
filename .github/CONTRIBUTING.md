@@ -168,7 +168,7 @@ If you'd like to implement a small utility useful throughout the package, put it
 
 ### libSetReplace
 
-libSetReplace is the C++ library that implements the `"LowLevel"` method of [`WolframModel`](/Kernel/WolframModel.m). It lives in [`libSetReplace`](/libSetReplace) directory, and there is also the [Xcode project](/SetReplace.xcodeproj) for it. [`SetReplace.cpp`](/libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](/libSetReplace/SetReplace.hpp) implement the interface with Wolfram Language code.
+libSetReplace is the C++ library that implements the `"LowLevel"` method of [`WolframModel`](/Kernel/WolframModel.m). It lives in the [`libSetReplace`](/libSetReplace) directory, and there is also an [Xcode project](/SetReplace.xcodeproj) as well as [CMakeLists.txt](/CMakeLists.txt) for it. [`SetReplace.cpp`](/libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](/libSetReplace/SetReplace.hpp) implement the interface with Wolfram Language code.
 
 The C++ implementation keeps an index of all possible rule matches and updates it after every replacement. The reindexing algorithm looks only at the local region of the graph close to the rewrite site. Thus time complexity does not depend on the graph size as long as vertex degrees are small. The downside is that it has exponential complexity (both in time and memory) in the vertex degrees. Currently, it also does not work for non-local rules (i.e., rule inputs that do not form a connected hypergraph) and rules that are not hypergraph rules (i.e., pattern rules that have non-trivial nesting or conditions).
 
