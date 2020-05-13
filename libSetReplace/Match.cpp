@@ -187,11 +187,11 @@ namespace SetReplace {
             if (numThreads > 0) {
                 // Multi-threaded path
                 std::vector<std::thread> threads(numThreads);
-                for (size_t i = 0; i < rules_.size(); ++i) {
+                for (size_t i = 0; i < numThreads; ++i) {
                     threads[i] = std::thread(&Implementation::addMatchesForRule, this, expressionIDs, i, abortFunc);
                 }
-                for (size_t i = 0; i < numThreads; ++i) {
-                    threads[i].join();
+                for (auto& thread : threads) {
+                    thread.join();
                 }
             } else {
                 // Single-threaded path
