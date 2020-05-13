@@ -29,8 +29,9 @@ If[!IntegerQ[$measurementsCount],
 Attributes[meanAroundTiming] = {HoldAll};
 meanAroundTiming[expr_] := MeanAround @ Table[First @ AbsoluteTiming[expr], $measurementsCount]
 
-runTests[tests_] := Module[{result, kernel},
-  Print["Testing ", GitSHA[$gitRepo, $gitRepo["HEAD"]]];
+runTests[repo_, sha_, tests_] := Module[{result, kernel},
+  Print["Testing ", sha];
+  GitCheckoutReference[repo, sha];
   Run["./build.wls"];
   Run["./install.wls"];
   CloseKernels[];
@@ -39,6 +40,7 @@ runTests[tests_] := Module[{result, kernel},
     << SetReplace`; meanAroundTiming @@@ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]],
     kernel
   ];
+  Run["git checkout -"];
   Print[""];
   result
 ]
@@ -54,14 +56,10 @@ If[!$cleanQ,
   Exit[1];
 ];
 
-$oldSHA = If[Length @ $ScriptCommandLine >= 2, $ScriptCommandLine[[2]], GitMergeBase[$gitRepo, "HEAD", "master"]];
+$oldSHA = If[Length @ $ScriptCommandLine >= 2, $ScriptCommandLine[[2]], "master"];
 $newSHA = If[Length @ $ScriptCommandLine >= 3, $ScriptCommandLine[[3]], $currentSHA];
 
-GitCheckoutReference[$gitRepo, $oldSHA];
-$oldResults = runTests[tests];
-GitCheckoutReference[$gitRepo, $newSHA];
-$newResults = runTests[tests];
-GitCheckoutReference[$gitRepo, "@{-2}"];
+{$oldResults, $newResults} = runTests[$gitRepo, #, tests] & /@ {$oldSHA, $newSHA};
 
 $speedup = speedupDelta[$oldResults, $newResults];
 
