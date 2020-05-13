@@ -92,7 +92,7 @@ In addition to correctness tests, we have a performance testing tool, which is c
 ./performanceTest.wls oldCommit newCommit testCount
 ```
 
-Here `oldCommit` and `newCommit` are the git SHAs or branch names which should be compared, and `testCount` determines how many times to run each test for averaging (higher numbers decrease errors proportion to the square root, but take linearly longer to evaluate).
+Here `oldCommit` and `newCommit` are the git SHAs or branch names which should be compared, and `testCount` determines how many times to run each test for averaging (higher numbers decrease errors proportional to the square root, but take linearly longer to evaluate).
 
 A short-hand syntax is available as well, specifically, `./performanceTest.wls oldCommit newCommit` runs each test 5 times, `./performanceTest.wls oldCommit` compares the `HEAD` to the `oldCommit`, and `./performanceTest.wls` compares the `HEAD` to `master`.
 
