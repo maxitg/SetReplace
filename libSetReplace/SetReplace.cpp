@@ -288,7 +288,7 @@ namespace SetReplace {
             return LIBRARY_FUNCTION_ERROR;
         }
         
-        MArgument_setInteger(result, (int)terminationReason);
+        MArgument_setInteger(result, static_cast<int>(terminationReason));
 
         return LIBRARY_NO_ERROR;
     }

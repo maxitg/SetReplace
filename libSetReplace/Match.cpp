@@ -49,7 +49,7 @@ namespace SetReplace {
                 case Matcher::OrderingFunction::ExpressionIDs:
                     return compareUnsortedIDs(a, b);
 
-                case Matcher::OrderingFunction::RuleID:
+                case Matcher::OrderingFunction::RuleIDs:
                     return compare(a->rule, b->rule);
 
                 default:
@@ -176,7 +176,7 @@ namespace SetReplace {
             // any ordering spec works here, as long as it's complete.
             OrderingSpec fullOrderingSpec = {
                 {OrderingFunction::ExpressionIDs, OrderingDirection::Normal},
-                {OrderingFunction::RuleID, OrderingDirection::Normal}};
+                {OrderingFunction::RuleIDs, OrderingDirection::Normal}};
             std::set<MatchPtr, MatchComparator> matchesToDelete(fullOrderingSpec);
 
             for (const auto& expression : expressionIDs) {
