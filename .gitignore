@@ -13,3 +13,7 @@ Build/
 # Built paclets
 
 *.paclet
+
+# CMake build directory
+
+cmake-build-debug/
