@@ -86,6 +86,41 @@ Your code must successfully pass all tests to be mergeable to master.
 
 We also have a setup within Wolfram Research that allows us to build the paclet containing compiled binary libraries for all platforms, which we use for releases, but it's only available to developers working in the company. If you need such paclet for a version that is not a current release, please contact [@maxitg](https://github.com/maxitg).
 
+In addition to correctness tests, we have a performance testing tool, which is currently in the early stage of development, and only allows testing of the performance of the evolution. To use it, run in the repository root:
+
+```bash
+./performanceTest.wls oldCommit newCommit testCount
+```
+
+Here `oldCommit` and `newCommit` are the git SHAs or branch names which should be compared, and `testCount` determines how many times to run each test for averaging (higher numbers decrease errors proportion to the square root, but take linearly longer to evaluate).
+
+A short-hand syntax is available as well, specifically, `./performanceTest.wls oldCommit newCommit` runs each test 5 times, `./performanceTest.wls oldCommit` compares the `HEAD` to the `oldCommit`, and `./performanceTest.wls` compares the `HEAD` to `master`.
+
+The tool will checkout other branches while testing, so don't use git/modify any files while it's running. Results depend on the other activity happening on the machine, so do not perform any CPU-intensive tasks while running tests to avoid introducing bias to the results.
+
+As an example, test an optimization done to `libSetReplace` by [@aokellermann](https://github.com/aokellermann):
+
+```
+> ./performanceTest.wls db6f15c7b4ae1be98be5ced0c188859e2f9eef29 8910175fe9be3847f96a1cf3c877a3b54a64823d
+
+Testing db6f15c7b4ae1be98be5ced0c188859e2f9eef29
+Build done.
+Installed. Restart running kernels to complete installation.
+
+Testing 8910175fe9be3847f96a1cf3c877a3b54a64823d
+Build done.
+Installed. Restart running kernels to complete installation.
+
+Single-input rule                       15.2 ± 0.6 %
+Medium rule                             6.6 ± 0.8 %
+Sequential rule                         6.6 ± 1.4 %
+Large rule                              8.7 ± 0.5 %
+Exponential-match-count rule            23.7 ± 0.8 %
+CA emulator                             0.42 ± 0.21 %
+```
+
+Note, percentages correspond to runtime difference compared to the `oldBranch`, so, i.e., a positive `67 %` means there is a 3x improvement, whereas `-100 %` implies there is a 2x regression.
+
 ### Code review
 
 First, if someone has assigned a `critical` pull request to you, please stop reading and review it as soon as possible (understand what the issue is, and verify the fix works). Many people might be blocked by it right now.
