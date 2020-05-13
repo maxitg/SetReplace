@@ -268,13 +268,11 @@ namespace SetReplace {
             }
 
             const auto nextInputIdxAndCandidateExpressions = nextBestInputAndExpressionsToTry(newMatch, newInputs);
-            if (nextInputIdxAndCandidateExpressions.first >= 0) {
-                completeMatchesStartingWithInput(newMatch,
-                                                 newInputs,
-                                                 nextInputIdxAndCandidateExpressions.first,
-                                                 nextInputIdxAndCandidateExpressions.second,
-                                                 shouldAbort);
-            }
+            completeMatchesStartingWithInput(newMatch,
+                                             newInputs,
+                                             nextInputIdxAndCandidateExpressions.first,
+                                             nextInputIdxAndCandidateExpressions.second,
+                                             shouldAbort);
         }
 
         void insertMatch(const Match& newMatch) {
@@ -349,7 +347,7 @@ namespace SetReplace {
 
                 // For each expression, we will count how many of the input atoms appear in it.
                 // We will then only use expressions that have all the required atoms.
-                std::unordered_map<ExpressionID, int64_t> inputAtomsCountByExpression;
+                std::unordered_map<ExpressionID, uint64_t> inputAtomsCountByExpression;
                 for (const auto atom : appearingAtoms) {
                     for (const auto expression : atomsIndex_.expressionsContainingAtom(atom)) {
                         inputAtomsCountByExpression[expression]++;
@@ -366,13 +364,13 @@ namespace SetReplace {
 
                 // If there are fewer expressions, that is what we'll want to try first.
                 // Note, if there are zero matching expressions, it means the match is not possible, because none of the expressions contain all the atoms needed.
-                if (nextInputIdx == -1 || potentialExpressions.size() < nextExpressionsToTry.size()) {
+                if (nextInputIdx == static_cast<size_t>(-1) || potentialExpressions.size() < nextExpressionsToTry.size()) {
                     nextExpressionsToTry = potentialExpressions;
                     nextInputIdx = i;
                 }
             }
 
-            if (nextInputIdx == -1) {
+            if (nextInputIdx == static_cast<size_t>(-1)) {
                 // We could not find any potential inputs, which means, all inputs not already matched are fully patterns,
                 // and don't have any specific atom references.
                 // That implies rule inputs are not a connected graph, which is not supported at the moment,
