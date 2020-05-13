@@ -160,9 +160,9 @@ namespace SetReplace {
         Matcher::OrderingSpec orderingSpec;
         unsigned int randomSeed;
         try {
-            rules = std::move(getRules(libData, MArgument_getMTensor(argv[0])));
-            initialExpressions = std::move(getSet(libData, MArgument_getMTensor(argv[1])));
-            orderingSpec = std::move(getOrderingSpec(libData, MArgument_getMTensor(argv[2])));
+            rules = getRules(libData, MArgument_getMTensor(argv[0]));
+            initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
+            orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[2]));
             randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[3]));
         } catch (...) {
             return LIBRARY_FUNCTION_ERROR;
