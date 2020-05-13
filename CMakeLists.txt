@@ -3,7 +3,10 @@
 cmake_minimum_required(VERSION 3.16)
 project(SetReplace)
 
-set(CMAKE_CXX_FLAGS "-std=c++17")
+set(CMAKE_CXX_FLAGS "-std=c++17 -Wall -Wextra -Werror -pedantic -Wcast-align -Wcast-qual -Wctor-dtor-privacy \
+    -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-include-dirs \
+    -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-promo \
+    -Wswitch-default -Wundef -Wno-unused")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Mathematica ${CMAKE_MODULE_PATH})
