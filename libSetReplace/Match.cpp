@@ -324,7 +324,7 @@ namespace SetReplace {
 
         std::pair<size_t, std::vector<ExpressionID>> nextBestInputAndExpressionsToTry(const Match& incompleteMatch,
                                                                                       const std::vector<AtomsVector>& partiallyMatchedInputs) const {
-            size_t nextInputIdx = -1;
+            int64_t nextInputIdx = -1;
             std::vector<ExpressionID> nextExpressionsToTry;
 
             // For each input, we will see how many expressions in the set contain atoms appearing in this input.
@@ -364,13 +364,13 @@ namespace SetReplace {
 
                 // If there are fewer expressions, that is what we'll want to try first.
                 // Note, if there are zero matching expressions, it means the match is not possible, because none of the expressions contain all the atoms needed.
-                if (nextInputIdx == static_cast<size_t>(-1) || potentialExpressions.size() < nextExpressionsToTry.size()) {
+                if (nextInputIdx == -1 || potentialExpressions.size() < nextExpressionsToTry.size()) {
                     nextExpressionsToTry = potentialExpressions;
-                    nextInputIdx = i;
+                    nextInputIdx = static_cast<int64_t>(i);
                 }
             }
 
-            if (nextInputIdx == static_cast<size_t>(-1)) {
+            if (nextInputIdx == -1) {
                 // We could not find any potential inputs, which means, all inputs not already matched are fully patterns,
                 // and don't have any specific atom references.
                 // That implies rule inputs are not a connected graph, which is not supported at the moment,
