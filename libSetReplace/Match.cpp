@@ -186,7 +186,7 @@ namespace SetReplace {
             const size_t numThreads = rules_.size() > 1 ? rules_.size() : 0;
             if (numThreads > 0) {
                 // Multi-threaded path
-                std::thread threads[numThreads];
+                std::vector<std::thread> threads(numThreads);
                 for (size_t i = 0; i < rules_.size(); ++i) {
                     threads[i] = std::thread(&Implementation::addMatchesForRule, this, expressionIDs, i, abortFunc);
                 }
