@@ -40,7 +40,7 @@ runTests[repo_, sha_, tests_] := Module[{result, kernel},
     << SetReplace`; meanAroundTiming @@@ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]],
     kernel
   ];
-  Run["git checkout -"];
+  Run["git checkout -q -"];
   Print[""];
   result
 ]
