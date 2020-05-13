@@ -62,7 +62,7 @@ $defaultMeasurementsCount = 5;
 $measurementsCount = If[Length @ $ScriptCommandLine >= 4,
   ToExpression[$ScriptCommandLine[[4]]],
   $defaultMeasurementsCount];
-If[!IntegerQ[$measurementsCount],
+If[!IntegerQ[$measurementsCount] || $measurementsCount < 2,
   Print["The third argument should be an integer measurements count."];
   Exit[1];
 ];
