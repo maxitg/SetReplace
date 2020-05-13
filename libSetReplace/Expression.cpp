@@ -2,72 +2,70 @@
 
 #include <algorithm>
 #include <unordered_map>
+#include <utility>
 
 namespace SetReplace {
     class AtomsIndex::Implementation {
-    private:
+     private:
         const std::function<AtomsVector(ExpressionID)> getAtomsVector_;
         std::unordered_map<Atom, std::unordered_set<ExpressionID>> index_;
-        
-    public:
-        Implementation(const std::function<AtomsVector(ExpressionID)>& getAtomsVector) : getAtomsVector_(getAtomsVector) {}
-        
+
+     public:
+        explicit Implementation(std::function<AtomsVector(ExpressionID)> getAtomsVector)
+            : getAtomsVector_(std::move(getAtomsVector)) {}
+
         void removeExpressions(const std::vector<ExpressionID>& expressionIDs) {
             const std::unordered_set<ExpressionID> expressionsToDelete(expressionIDs.begin(), expressionIDs.end());
-            
+
             std::unordered_set<Atom> involvedAtoms;
             for (const auto& expression : expressionIDs) {
-                const auto atomsVector = getAtomsVector_(expression);
-                // Increase set capacity to reduce number of memory allocations
-                involvedAtoms.reserve(involvedAtoms.size() + atomsVector.size());
-                for (const auto& atom : atomsVector) {
-                    involvedAtoms.insert(atom);
-                }
+                const auto& atomsVector = getAtomsVector_(expression);
+                involvedAtoms.insert(atomsVector.begin(), atomsVector.end());
             }
-            
+
             for (const auto& atom : involvedAtoms) {
-                auto expressionIterator = index_[atom].begin();
-                while (expressionIterator != index_[atom].end()) {
-                    if (expressionsToDelete.count(*expressionIterator)) {
-                        expressionIterator = index_[atom].erase(expressionIterator);
-                    }
-                    else {
-                        ++expressionIterator;
+                auto& atomExpressionSet = index_[atom];
+                auto atomExpressionIterator = atomExpressionSet.begin();
+                const auto atomExpressionSetEnd = atomExpressionSet.cend();
+                while (atomExpressionIterator != atomExpressionSetEnd) {
+                    if (expressionsToDelete.count(*atomExpressionIterator)) {
+                        atomExpressionIterator = atomExpressionSet.erase(atomExpressionIterator);
+                    } else {
+                        ++atomExpressionIterator;
                     }
                 }
-                if (index_[atom].empty()) {
+                if (atomExpressionSet.empty()) {
                     index_.erase(atom);
                 }
             }
         }
-        
+
         void addExpressions(const std::vector<ExpressionID>& expressionIDs) {
-            for (const auto expressionID : expressionIDs) {
-                for (const auto atom : getAtomsVector_(expressionID)) {
+            for (const auto& expressionID : expressionIDs) {
+                for (const auto& atom : getAtomsVector_(expressionID)) {
                     index_[atom].insert(expressionID);
                 }
             }
         }
-        
-        const std::unordered_set<ExpressionID> expressionsContainingAtom(const Atom atom) const {
+
+        std::unordered_set<ExpressionID> expressionsContainingAtom(const Atom atom) const {
             const auto resultIterator = index_.find(atom);
             return resultIterator != index_.end() ? resultIterator->second : std::unordered_set<ExpressionID>();
         }
     };
-    
-    AtomsIndex::AtomsIndex(const std::function<AtomsVector(ExpressionID)>& getAtomsVector) {
-        implementation_ = std::make_shared<Implementation>(getAtomsVector);
-    }
-    
+
+    AtomsIndex::AtomsIndex(const std::function<AtomsVector(ExpressionID)>& getAtomsVector)
+        : implementation_(std::make_shared<Implementation>(getAtomsVector)) {}
+
     void AtomsIndex::removeExpressions(const std::vector<ExpressionID>& expressionIDs) {
         implementation_->removeExpressions(expressionIDs);
     }
-    
+
     void AtomsIndex::addExpressions(const std::vector<ExpressionID>& expressionIDs) {
         implementation_->addExpressions(expressionIDs);
     }
-    
-    const std::unordered_set<ExpressionID> AtomsIndex::expressionsContainingAtom(const Atom atom) const {
+
+    std::unordered_set<ExpressionID> AtomsIndex::expressionsContainingAtom(const Atom atom) const {
         return implementation_->expressionsContainingAtom(atom);
     }
 }

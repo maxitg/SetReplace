@@ -24,4 +24,4 @@ jobs:
 
       - run:
           name: Test
-          command: ./test.wls
+          command: ./.circleci/test.sh
