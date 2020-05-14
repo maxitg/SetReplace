@@ -156,7 +156,7 @@ namespace SetReplace {
          * This variable is typically monitored in abortFunc such that other threads can check if they should abort.
          * It is volatile, but not atomic because it is locked before being written to.
          */
-        volatile Error currentError;
+        mutable volatile Error currentError;
         mutable std::mutex currentErrorMutex;
 
         /**
@@ -259,18 +259,7 @@ namespace SetReplace {
             const auto& ruleInputExpressions = rules_[ruleID].inputs;
             for (size_t i = 0; i < ruleInputExpressions.size(); ++i) {
                 const Match emptyMatch{ruleID, std::vector<ExpressionID>(ruleInputExpressions.size(), -1)};
-                try {
-                    completeMatchesStartingWithInput(emptyMatch, ruleInputExpressions, i, expressionIDs, shouldAbort);
-                } catch (Error e) {
-                    // If any thread throws an error, catch and atomically set shared error.
-                    // This will cause other threads to return if abortFunc is evaluated
-                    std::lock_guard<std::mutex> lock(currentErrorMutex);
-                    if (currentError == None) {
-                        currentError = e;
-                    }
-
-                    return;
-                }
+                completeMatchesStartingWithInput(emptyMatch, ruleInputExpressions, i, expressionIDs, shouldAbort);
             }
         }
 
@@ -295,6 +284,13 @@ namespace SetReplace {
                              match.inputExpressions.end(), expressionID) == match.inputExpressions.end();
         }
 
+        void setCurrentErrorIfNone(Error newError) const {
+            std::lock_guard<std::mutex> lock(currentErrorMutex);
+            if (currentError == None) {
+                currentError = newError;
+            }
+        }
+
         void attemptMatchExpressionToInput(const Match& incompleteMatch,
                                            const std::vector<AtomsVector>& partiallyMatchedInputs,
                                            const size_t nextInputIdx,
@@ -302,7 +298,8 @@ namespace SetReplace {
                                            const std::function<bool()>& shouldAbort) {
             // If WL wants to abort, abort
             if (shouldAbort()) {
-                throw Error::Aborted;
+                setCurrentErrorIfNone(Error::Aborted);
+                return;
             }
 
             const auto& input = partiallyMatchedInputs[nextInputIdx];
@@ -323,6 +320,10 @@ namespace SetReplace {
             }
 
             const auto nextInputIdxAndCandidateExpressions = nextBestInputAndExpressionsToTry(newMatch, newInputs);
+            if (currentError != None) {
+                return;
+            }
+
             completeMatchesStartingWithInput(newMatch,
                                              newInputs,
                                              nextInputIdxAndCandidateExpressions.first,
@@ -335,22 +336,28 @@ namespace SetReplace {
             const auto matchPtr = std::make_shared<Match>(newMatch);
 
             std::lock_guard<std::mutex> lock(matchMutex);
-            if (!allMatches_.insert(matchPtr).second)
-                return;
 
-            auto bucketIt = matchQueue_.find(matchPtr); // works because comparison is smart
-            if (bucketIt == matchQueue_.end()) {
-                bucketIt = matchQueue_.insert({matchPtr, {{}, {}}}).first;
-            }
-            auto& bucket = bucketIt->second;
-            if (!bucket.first.count(matchPtr)) { // works because hashing is smart
-                bucket.second.push_back(matchPtr);
-                bucket.first[matchPtr] = bucket.second.size() - 1;
-
-                const auto& expressions = matchPtr->inputExpressions;
-                for (const auto expression : expressions) {
-                    expressionToMatches_[expression].insert(matchPtr);
+            try {
+                if (!allMatches_.insert(matchPtr).second) {
+                    return;
                 }
+
+                auto bucketIt = matchQueue_.find(matchPtr); // works because comparison is smart
+                if (bucketIt == matchQueue_.end()) {
+                    bucketIt = matchQueue_.insert({matchPtr, {{}, {}}}).first;
+                }
+                auto& bucket = bucketIt->second;
+                if (!bucket.first.count(matchPtr)) { // works because hashing is smart
+                    bucket.second.push_back(matchPtr);
+                    bucket.first[matchPtr] = bucket.second.size() - 1;
+
+                    const auto& expressions = matchPtr->inputExpressions;
+                    for (const auto expression : expressions) {
+                        expressionToMatches_[expression].insert(matchPtr);
+                    }
+                }
+            } catch (Error e) {
+                setCurrentErrorIfNone(e);
             }
         }
 
@@ -431,7 +438,8 @@ namespace SetReplace {
                 // and don't have any specific atom references.
                 // That implies rule inputs are not a connected graph, which is not supported at the moment,
                 // and would require custom logic to implement efficiently.
-                throw Error::DisconnectedInputs;
+                setCurrentErrorIfNone(Error::DisconnectedInputs);
+                return {};
             } else {
                 return {nextInputIdx, nextExpressionsToTry};
             }
