@@ -196,8 +196,9 @@ namespace SetReplace {
                 }
             } else {
                 // Single-threaded path
-                for (size_t i = 0; i < rules_.size(); ++i)
+                for (size_t i = 0; i < rules_.size(); ++i) {
                     addMatchesForRule(expressionIDs, i, abortFunc);
+                }
             }
 
             if (currentError != None) {
