@@ -1,0 +1,16 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+#### Required dependencies  ####
+# find_dependency(Boost REQUIRED COMPONENTS program_options filesystem graph)
+
+#### Optional dependencies based on SetReplace options ####
+if(@SET_REPLACE_WITH_MATHEMATICA@) # True when SET_REPLACE_WITH_MATHEMATICA=ON
+  find_dependency(Mathematica REQUIRED)
+endif()
+
+get_filename_component(SET_REPLACE_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+if(NOT TARGET SetReplace)
+  include ("${SET_REPLACE_CMAKE_DIR}/SetReplaceTargets.cmake")
+endif()

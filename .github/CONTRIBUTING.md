@@ -209,6 +209,51 @@ The C++ implementation keeps an index of all possible rule matches and updates i
 
 Every time the `"LowLevel"` implementation of [`WolframModel`](/Kernel/WolframModel.m) is called, an instance of class [`Set`](/libSetReplace/Set.hpp) is created. [`Set`](/libSetReplace/Set.hpp) in turn uses the [`Matcher`](/libSetReplace/Match.hpp) class to perform the matching of set elements to rule inputs. [This class](/libSetReplace/Match.cpp) is the core of *SetReplace*.
 
+#### Compile C++ library with CMake
+
+The `SetReplace` library can be used outside of Mathematica. It provides a CMake project for easy interaction with the C++ ecosystem.
+To compile the core library using CMake:
+
+```bash
+mkdir build; cd build;
+cmake ../SetReplace-source-dir
+cmake --build .
+```
+
+Options available for CMake:
+
+- `SET_REPLACE_BUILD_TESTING`:
+Enable cpp testing using googletest. It downloads gtest at build time.
+
+- `SET_REPLACE_WITH_MATHEMATICA`:
+Generates the target `SetReplaceMathematica`, that provides an interface for using SetReplace in Mathematica.
+Use the variable `Mathematica_ROOT` to point to the root directory of the wolfram engine.
+This directory might contain a `.CreationID` file. i.e `Mathematica_ROOT:FILEPATH=/usr/local/Wolfram/WolframEngine/12.1`
+
+```bash
+cmake ../SetReplace-source-dir -DSET_REPLACE_WITH_MATHEMATICA:BOOL=ON -DMathematica_ROOT=/path/to/WolframEngine/X.Y
+cmake --build .
+```
+
+- `SET_REPLACE_ENABLE_ALLWARNINGS`:
+For developers and contributors. Useful for continuous integration. Add compile options to the targets enabling extra warnings and treating warnings as errors.
+
+#### Using SetReplace in ThirdParty CMake projects
+
+If a third party project wants to use `SetReplace`, it is enough to write in their `CMakeLists.txt`:
+
+```
+add_library(foo ...)
+
+find_package(SetReplace)
+target_link_libraries(foo SetReplace::SetReplace)
+#or target_link_libraries(foo SetReplace::SetReplaceMathematica)
+```
+
+and provide to their CMake project the CMake variable: `SetReplace_DIR` pointing to the file `SetReplaceConfig.cmake`.
+This file can be found in the build directory of SetReplace, or in the `$CMAKE_INSTALL_PREFIX/lib/cmake/SetReplace`
+if the project was installed.
+
 ### Tests
 
 Unit tests live in the [Tests folder](/Tests). They are technically .wlt files, but they contain more structure.
