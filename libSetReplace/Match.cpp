@@ -152,9 +152,10 @@ namespace SetReplace {
 
         /**
          * This variable is typically monitored in abortFunc such that other threads can check if they should abort.
-         * Since it is written to and read by multiple threads, it must be atomic.
+         * It is volatile, but not atomic because it is locked before being written to.
          */
-        std::atomic<Error> currentError;
+        volatile Error currentError;
+        mutable std::mutex currentErrorMutex;
 
         /**
          * This mutex should be used to gain access to the above match structures.
@@ -262,8 +263,10 @@ namespace SetReplace {
                 } catch (Error e) {
                     // If any thread throws an error, catch and atomically set shared error.
                     // This will cause other threads to return if abortFunc is evaluated
-                    if (currentError == None)
+                    std::lock_guard<std::mutex> lock(currentErrorMutex);
+                    if (currentError == None) {
                         currentError = e;
+                    }
 
                     return;
                 }
