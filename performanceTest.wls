@@ -102,6 +102,8 @@ $newSHA = If[Length @ $ScriptCommandLine >= 3, $ScriptCommandLine[[3]], $current
 
 {$oldResults, $newResults} = runTests[$gitRepo, #, tests] & /@ {$oldSHA, $newSHA};
 
+GitCheckoutReference[$gitRepo, $currentSHA];
+
 $speedup = speedupDelta[$oldResults, $newResults];
 
 $redColor = "\033[0;31m";
