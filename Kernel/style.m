@@ -15,6 +15,7 @@ PackageScope["$causalGraphVertexStyle"]
 PackageScope["$causalGraphInitialVertexStyle"]
 PackageScope["$causalGraphFinalVertexStyle"]
 PackageScope["$causalGraphEdgeStyle"]
+PackageScope["$causalGraphBackground"]
 PackageScope["$vertexSize"]
 PackageScope["$arrowheadLengthFunction"]
 PackageScope["$edgeArrowheadShape"]
@@ -31,6 +32,7 @@ PackageScope["$highlightedEdgePolygonStyleDirective"]
 PackageScope["$highlightStyle"]
 PackageScope["$hyperedgeRendering"]
 PackageScope["$wolframModelPlotImageSize"]
+PackageScope["$spatialGraphBackground"]
 PackageScope["$sharedRuleElementsHighlight"]
 PackageScope["$ruleHyperedgeRendering"]
 PackageScope["$ruleVertexSize"]
@@ -47,6 +49,7 @@ PackageScope["$ruleArrowPadding"]
 PackageScope["$ruleArrowStyle"]
 PackageScope["$ruleGridColor"]
 PackageScope["$ruleImageSizePerPlotRange"]
+PackageScope["$ruleBackground"]
 PackageScope["$spatialGraph3DVertexStyle"]
 PackageScope["$spatialGraph3DEdgeStyle"]
 PackageScope["$statesGraphVertexStyle"]
@@ -85,13 +88,15 @@ $styleNames = KeySort /@ KeySort @ <|
     "HighlightedEdgePolygonStyleDirective" -> $highlightedEdgePolygonStyleDirective,
     "HighlightStyle" -> $highlightStyle,
     "HyperedgeRendering" -> $hyperedgeRendering,
-    "DefaultImageSize" -> $wolframModelPlotImageSize
+    "DefaultImageSize" -> $wolframModelPlotImageSize,
+    "Background" -> $spatialGraphBackground
   |>,
   "CausalGraph" -> <|
     "VertexStyle" -> $causalGraphVertexStyle,
     "InitialVertexStyle" -> $causalGraphInitialVertexStyle,
     "FinalVertexStyle" -> $causalGraphFinalVertexStyle,
-    "EdgeStyle" -> $causalGraphEdgeStyle
+    "EdgeStyle" -> $causalGraphEdgeStyle,
+    "Background" -> $causalGraphBackground
   |>,
   "Rule" -> <|
     "SharedElementHighlight" -> $sharedRuleElementsHighlight,
@@ -109,7 +114,8 @@ $styleNames = KeySort /@ KeySort @ <|
     "ArrowPadding" -> $ruleArrowPadding,
     "ArrowStyle" -> $ruleArrowStyle,
     "GridColor" -> $ruleGridColor,
-    "ImageSizePerPlotRange" -> $ruleImageSizePerPlotRange
+    "ImageSizePerPlotRange" -> $ruleImageSizePerPlotRange,
+    "Background" -> $ruleBackground
   |>,
 
   (* For future use *)
@@ -181,6 +187,7 @@ style[$lightTheme] = <|
     Directive[RGBColor[{0.259, 0.576, 1}], EdgeForm[{RGBColor[{0.259, 0.576, 1}], Opacity[1]}]],
   $causalGraphFinalVertexStyle -> Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
   $causalGraphEdgeStyle -> Hue[0, 1, 0.56],
+  $causalGraphBackground -> None,
 
   (* WolframModelPlot *)
   $vertexSize -> 0.06,
@@ -202,6 +209,7 @@ style[$lightTheme] = <|
   $highlightStyle -> Red,
   $hyperedgeRendering -> "Polygons",
   $wolframModelPlotImageSize -> {{360}, {420}},
+  $spatialGraphBackground -> None,
 
   (* RulePlot *)
   $sharedRuleElementsHighlight -> RGBColor[0.5, 0.5, 0.95],
@@ -223,6 +231,7 @@ style[$lightTheme] = <|
   $ruleArrowStyle -> GrayLevel[0.65],
   $ruleGridColor -> GrayLevel[0.85],
   $ruleImageSizePerPlotRange -> 128,
+  $ruleBackground -> None,
 
   (* Spatial graph 3D *)
   $spatialGraph3DVertexStyle -> Directive[Hue[0.65, 0.64, 0.68], Specularity[Hue[0.71, 0.6, 0.64], 10]],

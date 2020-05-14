@@ -22,7 +22,7 @@ $plotStyleAutomatic = <|
 |>;
 
 (* Automatic style pickes up, and possibly modifies the style it inherits from. *)
-Options[WolframModelPlot] = Join[{
+$newOptions = {
 	"EdgePolygonStyle" -> Automatic, (* inherits from EdgeStyle, with specified small opacity *)
 	EdgeStyle -> Automatic, (* inherits from PlotStyle *)
 	GraphHighlight -> {},
@@ -34,8 +34,12 @@ Options[WolframModelPlot] = Join[{
 	VertexSize -> style[$lightTheme][$vertexSize],
 	"ArrowheadLength" -> Automatic,
 	VertexStyle -> Automatic, (* inherits from PlotStyle *)
-	"MaxImageSize" -> Automatic},
-	Options[Graphics]];
+	"MaxImageSize" -> Automatic,
+	Background -> Automatic};
+
+$defaultGraphicsOptions = FilterRules[Options[Graphics], Except[$newOptions]];
+
+Options[WolframModelPlot] = Join[$newOptions, $defaultGraphicsOptions];
 
 $edgeTypes = {"Ordered", "Cyclic"};
 $defaultEdgeType = "Ordered";
@@ -176,14 +180,16 @@ wolframModelPlot$parse[
 				Identity],
 			Automatic -> $plotStyleAutomatic[$edgePolygon],
 			{0, 1}]|>;
-	wolframModelPlot[edges, edgeType, styles, ##, FilterRules[{o}, Options[Graphics]]] & @@
+	wolframModelPlot[
+		edges, edgeType, styles, ##, FilterRules[{o}, $defaultGraphicsOptions]] & @@
 			(optionValue /@ {
 				"HyperedgeRendering",
 				VertexCoordinateRules,
 				VertexLabels,
 				VertexSize,
 				"ArrowheadLength",
-				"MaxImageSize"})
+				"MaxImageSize",
+				Background})
 ]
 
 toListStyleSpec[Automatic, elements_] := toListStyleSpec[<||>, elements]
@@ -285,6 +291,7 @@ wolframModelPlot[
 		vertexSize_,
 		arrowheadLength_,
 		maxImageSize_,
+		background_,
 		graphicsOptions_] := Catch[Module[{embedding, graphics, imageSizeScaleFactor},
 	embedding = hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @ edges;
 	numericArrowheadLength = Replace[
@@ -296,6 +303,7 @@ wolframModelPlot[
 	Show[
 		graphics,
 		graphicsOptions,
+		Background -> Replace[background, Automatic -> style[$lightTheme][$spatialGraphBackground]],
 		If[maxImageSize === Automatic,
 			ImageSizeRaw -> style[$lightTheme][$wolframModelPlotImageSize] imageSizeScaleFactor,
 			ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]]]

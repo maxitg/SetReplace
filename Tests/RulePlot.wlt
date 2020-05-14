@@ -194,6 +194,10 @@
         SameTest -> Equal
       ],
 
+      VerificationTest[
+        graphicsQ @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Background -> Automatic]
+      ],
+
       (** Frame **)
 
       VerificationTest[

@@ -1139,6 +1139,60 @@
         SameTest -> MatchQ
       ] & @@@ {{None, {}}, {"Final", {Infinity -> _}}, {All, {0 -> _, Infinity -> _}}},
 
+      VerificationTest[
+        graphicsQ @ GraphPlot[WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][#, Background -> Automatic]]
+      ] & /@ {"CausalGraph", "LayeredCausalGraph"},
+
+      VerificationTest[
+        Options[
+          checkGraphics @ GraphPlot[
+            WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][#, Background -> RGBColor[0.2, 0.5, 0.3]]],
+          Background],
+        {Background -> RGBColor[0.2, 0.5, 0.3]}
+      ] & /@ {"CausalGraph", "LayeredCausalGraph"},
+
+      VerificationTest[
+        Options[
+          WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][#, EdgeStyle -> Automatic, VertexStyle -> Automatic],
+          {EdgeStyle, VertexStyle}],
+        Options[
+          WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][#],
+          {EdgeStyle, VertexStyle}]
+      ] & /@ {"CausalGraph", "LayeredCausalGraph"},
+
+      VerificationTest[
+        Options[
+          WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][
+            #, EdgeStyle -> RGBColor[0.2, 0.3, 0.4], VertexStyle -> RGBColor[0.5, 0.6, 0.7]],
+          {EdgeStyle, VertexStyle}],
+        Options[
+          Graph[
+            WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4, #],
+            EdgeStyle -> RGBColor[0.2, 0.3, 0.4],
+            VertexStyle -> RGBColor[0.5, 0.6, 0.7]],
+          {EdgeStyle, VertexStyle}]
+      ] & /@ {"CausalGraph", "LayeredCausalGraph"},
+
+      VerificationTest[
+        Options[
+          WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4]["LayeredCausalGraph", GraphLayout -> Automatic],
+          GraphLayout],
+        Options[WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4]["LayeredCausalGraph"], GraphLayout]
+      ],
+
+      VerificationTest[
+        Options[
+          WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][
+            "LayeredCausalGraph", GraphLayout -> "SpringElectricalEmbedding"],
+          GraphLayout
+        ],
+        Options[
+          Graph[
+            WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4, "LayeredCausalGraph"],
+            GraphLayout -> "SpringElectricalEmbedding"],
+          GraphLayout]
+      ],
+
       (* AllEventsList *)
 
       Table[With[{method = method}, {

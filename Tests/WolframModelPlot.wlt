@@ -700,6 +700,16 @@
           {{EdgeStyle -> colors[[1 ;; 2]],   "EdgePolygonStyle" -> <|{1, 2, 3} -> colors[[3]]|>},   colors[[1 ;; 3]], {},            {"Polygons"}},
           {{EdgeStyle -> colors[[1 ;; 2]],   "EdgePolygonStyle" -> colors[[3 ;; 4]]},               colors[[1 ;; 4]], {},            {"Polygons"}}
         }
+      ],
+
+      VerificationTest[
+        graphicsQ @ WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, Background -> Automatic]
+      ],
+
+      VerificationTest[
+        Options[
+          checkGraphics @ WolframModelPlot[{{1, 2, 3}, {3, 4, 5}}, Background -> RGBColor[0.2, 0.5, 0.3]], Background],
+        {Background -> RGBColor[0.2, 0.5, 0.3]}
       ]
     }
   |>
