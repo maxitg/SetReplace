@@ -16,7 +16,7 @@ namespace SetReplace {
 
         template<typename T>
         static int compare(T a, T b) {
-            return a < b ? -1 : static_cast<bool>(a > b);
+            return a < b ? -1 : static_cast<int>(a > b);
         }
 
      public:
@@ -52,7 +52,7 @@ namespace SetReplace {
                 case Matcher::OrderingFunction::ExpressionIDs:
                     return compareUnsortedIDs(a, b);
 
-                case Matcher::OrderingFunction::RuleID:
+                case Matcher::OrderingFunction::RuleIndex:
                     return compare(a->rule, b->rule);
 
                 default:
@@ -62,10 +62,11 @@ namespace SetReplace {
 
         static int compareVectors(const std::vector<ExpressionID>& first, const std::vector<ExpressionID>& second) {
             const auto mismatchingIterators = std::mismatch(first.begin(), first.end(), second.begin(), second.end());
-            if (mismatchingIterators.first != first.end() && mismatchingIterators.second != second.end())
+            if (mismatchingIterators.first != first.end() && mismatchingIterators.second != second.end()) {
                 return compare(*mismatchingIterators.first, *mismatchingIterators.second);
-            else
+            } else {
                 return compare(first.size(), second.size());
+            }
         }
 
         static int compareSortedIDs(const MatchPtr& a, const MatchPtr& b, const bool reverseOrder) {
@@ -108,11 +109,12 @@ namespace SetReplace {
         }
     };
 
-    class MatchEquality  {
+    class MatchEquality {
      public:
         size_t operator()(const MatchPtr& a, const MatchPtr& b) const {
-            if (a->rule != b->rule || a->inputExpressions.size() != b->inputExpressions.size())
+            if (a->rule != b->rule || a->inputExpressions.size() != b->inputExpressions.size()) {
                 return false;
+            }
 
             const auto mismatchedIterators = std::mismatch(a->inputExpressions.begin(), a->inputExpressions.end(),
                                                            b->inputExpressions.begin(), b->inputExpressions.end());
@@ -218,7 +220,7 @@ namespace SetReplace {
             // any ordering spec works here, as long as it's complete.
             OrderingSpec fullOrderingSpec = {
                 {OrderingFunction::ExpressionIDs, OrderingDirection::Normal},
-                {OrderingFunction::RuleID, OrderingDirection::Normal}};
+                {OrderingFunction::RuleIndex, OrderingDirection::Normal}};
             std::set<MatchPtr, MatchComparator> matchesToDelete(fullOrderingSpec);
 
             for (const auto& expression : expressionIDs) {
@@ -244,10 +246,8 @@ namespace SetReplace {
         std::vector<MatchPtr> allMatches() const {
             std::vector<MatchPtr> result;
             for (const auto& exampleAndBucket : matchQueue_) {
-                result.reserve(result.size() + exampleAndBucket.second.second.size());
-                for (const auto& matchPtr : exampleAndBucket.second.second) {
-                    result.emplace_back(matchPtr);
-                }
+                result.insert(result.end(), exampleAndBucket.second.second.begin(),
+                              exampleAndBucket.second.second.end());
             }
             return result;
         }
@@ -323,13 +323,11 @@ namespace SetReplace {
             }
 
             const auto nextInputIdxAndCandidateExpressions = nextBestInputAndExpressionsToTry(newMatch, newInputs);
-            if (nextInputIdxAndCandidateExpressions.first >= 0) {
-                completeMatchesStartingWithInput(newMatch,
-                                                 newInputs,
-                                                 nextInputIdxAndCandidateExpressions.first,
-                                                 nextInputIdxAndCandidateExpressions.second,
-                                                 shouldAbort);
-            }
+            completeMatchesStartingWithInput(newMatch,
+                                             newInputs,
+                                             nextInputIdxAndCandidateExpressions.first,
+                                             nextInputIdxAndCandidateExpressions.second,
+                                             shouldAbort);
         }
 
         void insertMatch(const Match& newMatch) {
@@ -382,7 +380,7 @@ namespace SetReplace {
 
         std::pair<size_t, std::vector<ExpressionID>> nextBestInputAndExpressionsToTry(const Match& incompleteMatch,
                                                                                       const std::vector<AtomsVector>& partiallyMatchedInputs) const {
-            size_t nextInputIdx = -1;
+            int64_t nextInputIdx = -1;
             std::vector<ExpressionID> nextExpressionsToTry;
 
             // For each input, we will see how many expressions in the set contain atoms appearing in this input.
@@ -405,7 +403,7 @@ namespace SetReplace {
 
                 // For each expression, we will count how many of the input atoms appear in it.
                 // We will then only use expressions that have all the required atoms.
-                std::unordered_map<ExpressionID, int64_t> inputAtomsCountByExpression;
+                std::unordered_map<ExpressionID, uint64_t> inputAtomsCountByExpression;
                 for (const auto atom : appearingAtoms) {
                     for (const auto expression : atomsIndex_.expressionsContainingAtom(atom)) {
                         inputAtomsCountByExpression[expression]++;
@@ -424,7 +422,7 @@ namespace SetReplace {
                 // Note, if there are zero matching expressions, it means the match is not possible, because none of the expressions contain all the atoms needed.
                 if (nextInputIdx == -1 || potentialExpressions.size() < nextExpressionsToTry.size()) {
                     nextExpressionsToTry = potentialExpressions;
-                    nextInputIdx = i;
+                    nextInputIdx = static_cast<int64_t>(i);
                 }
             }
 
@@ -453,7 +451,8 @@ namespace SetReplace {
                      const std::function<AtomsVector(ExpressionID)>& getAtomsVector,
                      const OrderingSpec& orderingSpec,
                      const unsigned int randomSeed)
-        : implementation_(new Implementation(rules, atomsIndex, getAtomsVector, orderingSpec, randomSeed)) {}
+        : implementation_(std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector, orderingSpec, randomSeed))
+        {}
 
     void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
                                                  const std::function<bool()>& shouldAbort) {
@@ -493,11 +492,11 @@ namespace SetReplace {
             }
         }
 
-        for (auto& av : atomsToReplace) {
-            for (auto& a : av) {
-                const auto matchIterator = match.find(a);
+        for (auto& atomsVectorToReplace : atomsToReplace) {
+            for (auto& atomToReplace : atomsVectorToReplace) {
+                const auto matchIterator = match.find(atomToReplace);
                 if (matchIterator != match.end()) {
-                    a = matchIterator->second;
+                    atomToReplace = matchIterator->second;
                 }
             }
         }

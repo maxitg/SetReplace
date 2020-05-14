@@ -53,7 +53,7 @@ namespace SetReplace {
         int64_t replaceOnce(const std::function<bool()> shouldAbort) {
             terminationReason_ = TerminationReason::NotTerminated;
 
-            if (eventRuleIDs_.size() > stepSpec_.maxEvents) {
+            if (eventRuleIDs_.size() > static_cast<size_t>(stepSpec_.maxEvents)) {
                 terminationReason_ = TerminationReason::MaxEvents;
                 return 0;
             }
@@ -299,7 +299,6 @@ namespace SetReplace {
                                                       const Generation generation) {
             std::vector<ExpressionID> ids;
             ids.reserve(expressions.size());
-            expressions_.reserve(expressions_.size() + expressions.size());
             for (const auto& expression : expressions) {
                 ids.push_back(nextExpressionID_);
                 expressions_.insert(std::make_pair(nextExpressionID_++,
@@ -346,7 +345,7 @@ namespace SetReplace {
              const std::vector<AtomsVector>& initialExpressions,
              const Matcher::OrderingSpec& orderingSpec,
              unsigned int randomSeed) :
-             implementation_(new Implementation(rules, initialExpressions, orderingSpec, randomSeed)) {}
+             implementation_(std::make_shared<Implementation>(rules, initialExpressions, orderingSpec, randomSeed)) {}
 
     int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) {
         return implementation_->replaceOnce(shouldAbort);
