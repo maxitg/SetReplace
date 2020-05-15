@@ -929,7 +929,7 @@
 
       testUnevaluated[
         WolframModel[1 -> 2, {1}, 2, {"CausalGraph", 3}],
-        {WolframModel::invalidProperty}
+        {WolframModel::nonopt}
       ],
 
       testUnevaluated[
