@@ -50,15 +50,16 @@ BreakConstructorInitializersBeforeComma: false
 BreakConstructorInitializers: BeforeColon
 BreakAfterJavaFieldAnnotations: false
 BreakStringLiterals: true
-ColumnLimit:     80
-CommentPragmas:  '^ IWYU pragma:'
+ColumnLimit:     120
+# NOLINT(reason) is used heavily by existing code (cpplint)
+CommentPragmas: 'NOLINT:.*'
 CompactNamespaces: false
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
 DeriveLineEnding: true
-DerivePointerAlignment: true
+DerivePointerAlignment: false
 DisableFormat:   false
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
@@ -72,15 +73,15 @@ IncludeCategories:
     Priority:        2
     SortPriority:    0
   - Regex:           '^<.*\.h>'
-    Priority:        1
+    Priority:        2
     SortPriority:    0
   - Regex:           '^<.*'
-    Priority:        2
+    Priority:        1
     SortPriority:    0
   - Regex:           '.*'
     Priority:        3
     SortPriority:    0
-IncludeIsMainRegex: '([-_](test|unittest))?$'
+IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
 IndentCaseLabels: true
 IndentGotoLabels: true
