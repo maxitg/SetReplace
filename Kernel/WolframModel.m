@@ -239,10 +239,10 @@ WolframModel[
 			overridenOptionValue["IncludeBoundaryEvents"]][
 			modifiedEvolution,
 			WolframModel,
-			#] &;
+			If[ListQ[#], Sequence @@ #, #]] &;
 		result = Check[
 			If[modifiedEvolution =!= $Failed,
-				If[ListQ[property],
+				If[VectorQ[property, wolframModelPropertyQ],
 						Catch[
 							Check[propertyEvaluateWithOptions[#], Throw[$Failed, $propertyMessages]] & /@ property,
 							$propertyMessages,
@@ -380,9 +380,11 @@ wolframModelPropertyQ[property_String] /;
 	MemberQ[$WolframModelProperties, property] := True
 
 
-wolframModelPropertyQ[{property___String}] /;
+wolframModelPropertyQ[{property___}] /;
 	And @@ (wolframModelPropertyQ /@ {property}) := True
 
+
+wolframModelPropertyQ[{property_String ? wolframModelPropertyQ, ___, o : OptionsPattern[]}] := True
 
 wolframModelPropertyQ[_] := False
 
