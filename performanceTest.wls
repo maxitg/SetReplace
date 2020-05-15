@@ -100,7 +100,7 @@ $oldSHA = If[Length @ $ScriptCommandLine >= 2, $ScriptCommandLine[[2]], "master"
 $newSHA = If[Length @ $ScriptCommandLine >= 3, $ScriptCommandLine[[3]], $currentSHA];
 
 $symbolicRef = RunProcess[{"git", "symbolic-ref", "--short", "HEAD"}];
-$originalRef = If[$symbolicRef["ExitCode"] == 0, StringExtract[$symbolicRef["StandardOutput"], 1], $currentSHA];
+$originalRef = If[$symbolicRef["ExitCode"] === 0, StringExtract[$symbolicRef["StandardOutput"], 1], $currentSHA];
 
 {$oldResults, $newResults} = runTests[$gitRepo, #, tests] & /@ {$oldSHA, $newSHA};
 
