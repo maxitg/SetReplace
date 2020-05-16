@@ -299,19 +299,23 @@ propertyEvaluate[___][
 (*Correct options*)
 
 
-$newCausalGraphOptions = {Background -> Automatic, VertexStyle -> Automatic, EdgeStyle -> Automatic};
-$causalGraphOptions = Join[FilterRules[Options[Graph], Except[$newCausalGraphOptions]], $newCausalGraphOptions];
+$newGraphOptions = {Background -> Automatic, VertexStyle -> Automatic, EdgeStyle -> Automatic};
+$graphOptions = Join[FilterRules[Options[Graph], Except[$newGraphOptions]], $newGraphOptions];
+
+$causalGraphOptions = $graphOptions;
 
 $newLayeredCausalGraphOptions = {GraphLayout -> Automatic};
 $layeredCausalGraphOptions =
-	Join[FilterRules[$causalGraphOptions, Except[$newLayeredCausalGraphOptions]], $newLayeredCausalGraphOptions];
+    Join[FilterRules[$graphOptions, Except[$newLayeredCausalGraphOptions]], $newLayeredCausalGraphOptions];
+
+$plotOptions = Join[Options[WolframModelPlot], $graphOptions];
 
 $propertyOptions = <|
 	"CausalGraph" -> $causalGraphOptions,
 	"LayeredCausalGraph" -> $layeredCausalGraphOptions,
-	"StatesPlotsList" -> Options[WolframModelPlot],
-	"EventsStatesPlotsList" -> Options[WolframModelPlot],
-	"FinalStatePlot" -> Options[WolframModelPlot]
+	"StatesPlotsList" -> $plotOptions,
+	"EventsStatesPlotsList" -> $plotOptions,
+	"FinalStatePlot" -> $plotOptions
 |>;
 
 
@@ -958,10 +962,8 @@ expr : WolframModelEvolutionObject[
     },
     propertyCount = wolframModelPropertyCount[{property}];
     {joinedPropertyOptions, masterOptions} = joinPropertyOptions[If[propertyCount > 1, First @ {{property}}, {property}], {opts}];
-    objectOptions = FilterRules[masterOptions, 
-        Except[Alternatives @@ First /@ Options[WolframModel]]];
-    unrecognizedOptions = FilterRules[masterOptions, Except[Alternatives @@ First /@ Join @@ Options /@ 
-        {WolframModel, WolframModelPlot, WolframModelEvolutionObject}]
+    objectOptions = FilterRules[masterOptions, Except[Options[WolframModel]]];
+    unrecognizedOptions = FilterRules[masterOptions, Except[Join @@ Options /@ {WolframModel, WolframModelPlot, WolframModelEvolutionObject}]
     ];
     (
         result = Check[
