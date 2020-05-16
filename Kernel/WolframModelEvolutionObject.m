@@ -21,7 +21,7 @@ PackageScope["joinPropertyOptions"]
 
 PackageScope["$propertiesParameterless"]
 PackageScope["$newParameterlessProperties"]
-
+PackageScope["$allPropertyOptions"]
 
 (* ::Text:: *)
 (*Keys in the data association.*)
@@ -308,8 +308,6 @@ $newLayeredCausalGraphOptions = {GraphLayout -> Automatic};
 $layeredCausalGraphOptions =
     Join[FilterRules[$graphOptions, Except[$newLayeredCausalGraphOptions]], $newLayeredCausalGraphOptions];
 
-$plotOptions = Join[Options[WolframModelPlot], $graphOptions];
-
 $propertyOptions = <|
 	"CausalGraph" -> $causalGraphOptions,
 	"LayeredCausalGraph" -> $layeredCausalGraphOptions,
@@ -317,6 +315,8 @@ $propertyOptions = <|
 	"EventsStatesPlotsList" -> $plotOptions,
 	"FinalStatePlot" -> $plotOptions
 |>;
+
+$allPropertyOptions := DeleteDuplicatesBy[Catenate[Values[$propertyOptions]], First];
 
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
@@ -944,7 +944,7 @@ joinPropertyOptions[property_, opts_] := Module[{joinedPropertyOptions, masterOp
         MapAt[Join[#["ExplicitOptions"], FilterRules[opts, #["ImplicitOptions"]]] &, 2],
         propertyOptions[property]
     ];
-    masterOptions = FilterRules[{opts}, Except[Alternatives @@ Flatten @ joinedPropertyOptions[[All, 2, All, 1]]]];
+    masterOptions = FilterRules[{opts}, Except[Flatten @ joinedPropertyOptions[[All, 2, All, 1]]]];
     {joinedPropertyOptions, masterOptions}
 ]
 
@@ -958,25 +958,23 @@ expr : WolframModelEvolutionObject[
         property__ ? (Not[MatchQ[{#}, OptionsPattern[]]] &),
         opts : OptionsPattern[]] := Module[{
             prunedObject, propertyCount, joinedPropertyOptions, masterOptions,
-            objectOptions, unrecognizedOptions, result
+            objectOptions, $unrecognizedOptions, result
     },
     propertyCount = wolframModelPropertyCount[{property}];
     {joinedPropertyOptions, masterOptions} = joinPropertyOptions[If[propertyCount > 1, First @ {{property}}, {property}], {opts}];
-    objectOptions = FilterRules[masterOptions, Except[Options[WolframModel]]];
-    unrecognizedOptions = FilterRules[masterOptions, Except[Join @@ Options /@ {WolframModel, WolframModelPlot, WolframModelEvolutionObject}]
-    ];
+    $unrecognizedOptions = FilterRules[masterOptions, Except[Join[$wolframObjectOptions, $allPropertyOptions]]];
     (
         result = Check[
         (propertyEvaluate @@
                 (OptionValue[Join[masterOptions, $masterOptions], #] & /@ {"IncludePartialGenerations", "IncludeBoundaryEvents"}))[
                 WolframModelEvolutionObject[data],
                 OptionValue[WolframModelEvolutionObject, {objOpts}, "Caller"],
-                ##, Sequence @@ objectOptions], $Failed] & @@@ Join @@@ joinedPropertyOptions;
+                ##], $Failed] & @@@ Join @@@ joinedPropertyOptions;
         If[propertyCount == 1 && Length[result] > 0, result = First @ result];
         result /; result =!= $Failed
-    ) /; unrecognizedOptions === {} || Message[
+    ) /; $unrecognizedOptions === {} || Message[
         WolframModelEvolutionObject::optx,
-        unrecognizedOptions[[1]],
+        $unrecognizedOptions[[1]],
         Defer[expr]
     ]
 ]

@@ -6,6 +6,7 @@ PackageExport["WolframModelPlot"]
 PackageScope["correctWolframModelPlotOptionsQ"]
 PackageScope["$edgeTypes"]
 PackageScope["hypergraphEmbedding"]
+PackageScope["$plotOptions"]
 
 (* Documentation *)
 
@@ -40,6 +41,8 @@ $newOptions = {
 $defaultGraphicsOptions = FilterRules[Options[Graphics], Except[$newOptions]];
 
 Options[WolframModelPlot] = Join[$newOptions, $defaultGraphicsOptions];
+
+$plotOptions = Options[WolframModelPlot];
 
 $edgeTypes = {"Ordered", "Cyclic"};
 $defaultEdgeType = "Ordered";

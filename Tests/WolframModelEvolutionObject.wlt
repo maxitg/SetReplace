@@ -1453,7 +1453,7 @@
       ],
 
       VerificationTest[
-        graphicsQ @ WolframModel[1 -> 2, {1}, 2, "FinalStatePlot", ImageSize -> 256],
+        graphicsQ @ WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "FinalStatePlot", ImageSize -> 256],
         True
       ]
     },
