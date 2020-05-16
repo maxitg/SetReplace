@@ -968,7 +968,7 @@
             pathGraph17,
             4][type, 1, "str" -> 3],
           WolframModelEvolutionObject[___][type, 1, "str" -> 3],
-          {WolframModelEvolutionObject::nonopt},
+          {WolframModelEvolutionObject::optx},
           SameTest -> MatchQ
         ],
   
