@@ -17,6 +17,8 @@ PackageExport["$WolframModelProperties"]
 
 PackageScope["unrecognizedOptions"]
 PackageScope["wolframModelRulesSpecQ"]
+PackageScope["wolframModelPropertyQ"]
+PackageScope["wolframModelPropertyCount"]
 
 
 (* ::Section:: *)
@@ -195,20 +197,28 @@ overrideTerminationReason[newReason_][evolution_] :=
 (*Normal form*)
 
 
+$evolutionOptions = Options[WolframModel, {Method, TimeConstraint, "EventOrderingFunction"}];
+
+$objectOptions = FilterRules[Options[WolframModel], Except[Alternatives @@ First /@ $evolutionOptions]];
+
+
 WolframModel[
 			rulesSpec_ ? wolframModelRulesSpecQ,
 			initSpec_ ? wolframModelInitSpecQ,
 			stepsSpec : _ ? wolframModelStepsSpecQ : 1,
 			property : _ ? wolframModelPropertyQ : "EvolutionObject",
-			o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] :=
+			o : OptionsPattern[]] /; unrecognizedOptions[WolframModel, {o}, property] === {} :=
 	Module[{
-			patternRules, initialSet, steps, terminationReasonOverride, optionsOverride, abortBehavior, overridenOptionValue,
-			evolution, modifiedEvolution, propertyEvaluateWithOptions, result},
+			patternRules, initialSet, steps, terminationReasonOverride, optionsOverride, abortBehavior,
+			joinedPropertyOptions, masterOptions, objectOptions, overridenOptionValue,
+			evolution, modifiedEvolution, obj, result},
 		patternRules = fromRulesSpec[rulesSpec];
 		initialSet = Catch[fromInitSpec[rulesSpec, initSpec]];
-		{steps, terminationReasonOverride, optionsOverride, abortBehavior} =
-			fromStepsSpec[initialSet, stepsSpec, OptionValue[TimeConstraint]];
-		overridenOptionValue = OptionValue[WolframModel, Join[optionsOverride, {o}], #] &;
+        {joinedPropertyOptions, masterOptions} = joinPropertyOptions[property, {o}];
+        objectOptions = FilterRules[masterOptions, $objectOptions];
+        {steps, terminationReasonOverride, optionsOverride, abortBehavior} =
+            fromStepsSpec[initialSet, stepsSpec, OptionValue[WolframModel, masterOptions, TimeConstraint]];
+		overridenOptionValue = OptionValue[WolframModel, Join[optionsOverride, masterOptions], #] &;
 		evolution = If[initialSet =!= $Failed,
 			Check[
 				setSubstitutionSystem[
@@ -234,26 +244,31 @@ WolframModel[
 					overridenOptionValue["VertexNamingFunction"]],
 				$Failed],
 			$Failed];
-		propertyEvaluateWithOptions = propertyEvaluate[
-			overridenOptionValue["IncludePartialGenerations"],
-			overridenOptionValue["IncludeBoundaryEvents"]][
-			modifiedEvolution,
-			WolframModel,
-			If[ListQ[#], Sequence @@ #, #]] &;
-		result = Check[
-			If[modifiedEvolution =!= $Failed,
-				If[VectorQ[property, wolframModelPropertyQ],
-						Catch[
-							Check[propertyEvaluateWithOptions[#], Throw[$Failed, $propertyMessages]] & /@ property,
-							$propertyMessages,
-							$Failed &],
-						propertyEvaluateWithOptions @ property] /.
-					HoldPattern[WolframModelEvolutionObject[data_Association]] :>
-						WolframModelEvolutionObject[Join[data, <|$rules -> rulesSpec|>]],
-				$Failed],
-			$Failed];
-		result /; result =!= $Failed
-	]
+        result = Check[
+            If[modifiedEvolution =!= $Failed,
+                Catch[
+                    Check[
+                        obj = propertyEvaluate[
+                            overridenOptionValue["IncludePartialGenerations"],
+                            overridenOptionValue["IncludeBoundaryEvents"]][
+                            modifiedEvolution,
+                            WolframModel
+                            ];
+                        obj[##, Sequence @@ objectOptions] & @@@ Join @@@ joinedPropertyOptions,
+                        Throw[$Failed, $propertyMessages]
+                    ],
+                    $propertyMessages,
+                    $Failed &
+                ] /.
+                    HoldPattern[WolframModelEvolutionObject[data_Association]] :>
+                        WolframModelEvolutionObject[Join[data, <|$rules -> rulesSpec|>]],
+                $Failed
+            ],
+            $Failed
+        ];
+        If[wolframModelPropertyCount[property] == 1 && Length[result] > 0, result = First @ result];
+        result /; result =!= $Failed
+    ]
 
 
 (* ::Subsection:: *)
@@ -296,8 +311,8 @@ WolframModel[args0___][args1___] := 0 /;
 (* ::Subsection:: *)
 (*Options*)
 
-
-unrecognizedOptions[func_, opts_] := FilterRules[opts, Except[Options[func]]]
+unrecognizedOptions[func_, opts_, property_: {}] :=
+    FilterRules[opts, Except[Join[Options[func], Catenate @ Values @ joinPropertyOptions[property, opts]]]]
 
 
 expr : WolframModel[
@@ -306,7 +321,7 @@ expr : WolframModel[
 		stepsSpec : _ ? wolframModelStepsSpecQ : 1,
 		property : _ ? wolframModelPropertyQ : "EvolutionObject",
 		o : OptionsPattern[]] := 0 /; With[{
-	unrecognizedOptions = unrecognizedOptions[WolframModel, {o}]},
+	unrecognizedOptions = unrecognizedOptions[WolframModel, {o}, property]},
 	If[unrecognizedOptions =!= {},
 		Message[
 			WolframModel::optx,
@@ -389,6 +404,16 @@ wolframModelPropertyQ[{property_String ? wolframModelPropertyQ, ___, o : Options
 wolframModelPropertyQ[_] := False
 
 
+wolframModelPropertyCount[{property___}] /;
+    And @@ (wolframModelPropertyQ /@ {property}) := Total[wolframModelPropertyCount /@ {property}]
+
+wolframModelPropertyCount[{property_String ? wolframModelPropertyQ, ___, o : OptionsPattern[]}] := 1
+
+wolframModelPropertyCount[{} | {0}] := 0
+
+wolframModelPropertyCount[_] := 1
+
+
 (* ::Subsection:: *)
 (*Incorrect arguments messages*)
 
@@ -462,7 +487,7 @@ WolframModel[
 		initSpec_ ? wolframModelInitSpecQ,
 		stepsSpec_ ? wolframModelStepsSpecQ,
 		property : Except[OptionsPattern[]] ? (Not[wolframModelPropertyQ[#]] &),
-		o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}] := 0 /;
+		o : OptionsPattern[]] := 0 /;
 	Message[WolframModel::invalidProperty, property]
 
 
