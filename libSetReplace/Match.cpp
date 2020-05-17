@@ -1,9 +1,11 @@
 #include "Match.hpp"
 
 #include <algorithm>
+#include <functional>
 #include <map>
 #include <random>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 namespace SetReplace {
@@ -17,7 +19,7 @@ class MatchComparator {
   }
 
  public:
-  MatchComparator(Matcher::OrderingSpec orderingSpec) : orderingSpec_(std::move(orderingSpec)) {}
+  explicit MatchComparator(Matcher::OrderingSpec orderingSpec) : orderingSpec_(std::move(orderingSpec)) {}
 
   bool operator()(const MatchPtr& a, const MatchPtr& b) const {
     for (const auto& ordering : orderingSpec_) {
@@ -90,9 +92,9 @@ class MatchHasher {
  public:
   size_t operator()(const MatchPtr& ptr) const {
     std::size_t result = 0;
-    hash_combine(result, ptr->rule);
+    hash_combine(&result, ptr->rule);
     for (const auto expression : ptr->inputExpressions) {
-      hash_combine(result, expression);
+      hash_combine(&result, expression);
     }
     return result;
   }
@@ -100,9 +102,9 @@ class MatchHasher {
  private:
   // https://stackoverflow.com/a/2595226
   template <class T>
-  static void hash_combine(std::size_t& seed, const T& value) {
+  static void hash_combine(std::size_t* seed, const T& value) {
     std::hash<T> hasher;
-    seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    *seed ^= hasher(value) + 0x9e3779b9 + (*seed << 6) + (*seed >> 2);
   }
 };
 
@@ -150,14 +152,14 @@ class Matcher::Implementation {
 
  public:
   Implementation(const std::vector<Rule>& rules,
-                 AtomsIndex& atomsIndex,
+                 AtomsIndex* atomsIndex,
                  std::function<AtomsVector(ExpressionID)> getAtomsVector,
                  const OrderingSpec& orderingSpec,
                  const unsigned int randomSeed)
       : rules_(rules),
-        atomsIndex_(atomsIndex),
+        atomsIndex_(*atomsIndex),
         getAtomsVector_(std::move(getAtomsVector)),
-        matchQueue_(orderingSpec),
+        matchQueue_(MatchComparator(orderingSpec)),
         randomGenerator_(randomSeed) {}
 
   void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
@@ -175,7 +177,7 @@ class Matcher::Implementation {
     // any ordering spec works here, as long as it's complete.
     OrderingSpec fullOrderingSpec = {{OrderingFunction::ExpressionIDs, OrderingDirection::Normal},
                                      {OrderingFunction::RuleIndex, OrderingDirection::Normal}};
-    std::set<MatchPtr, MatchComparator> matchesToDelete(fullOrderingSpec);
+    std::set<MatchPtr, MatchComparator> matchesToDelete((MatchComparator(fullOrderingSpec)));
 
     for (const auto& expression : expressionIDs) {
       const auto& matches = expressionToMatches_[expression];
@@ -249,7 +251,7 @@ class Matcher::Implementation {
     newMatch.inputExpressions[nextInputIdx] = potentialExpressionID;
 
     auto newInputs = partiallyMatchedInputs;
-    if (!Matcher::substituteMissingAtomsIfPossible({input}, {expressionAtoms}, newInputs)) return;
+    if (!Matcher::substituteMissingAtomsIfPossible({input}, {expressionAtoms}, &newInputs)) return;
 
     if (isMatchComplete(newMatch)) {
       insertMatch(newMatch);
@@ -381,7 +383,7 @@ class Matcher::Implementation {
 };
 
 Matcher::Matcher(const std::vector<Rule>& rules,
-                 AtomsIndex& atomsIndex,
+                 AtomsIndex* atomsIndex,
                  const std::function<AtomsVector(ExpressionID)>& getAtomsVector,
                  const OrderingSpec& orderingSpec,
                  const unsigned int randomSeed)
@@ -402,7 +404,7 @@ MatchPtr Matcher::nextMatch() const { return implementation_->nextMatch(); }
 
 bool Matcher::substituteMissingAtomsIfPossible(const std::vector<AtomsVector>& inputPatterns,
                                                const std::vector<AtomsVector>& patternMatches,
-                                               std::vector<AtomsVector>& atomsToReplace) {
+                                               std::vector<AtomsVector>* atomsToReplace) {
   if (inputPatterns.size() != patternMatches.size()) return false;
 
   std::unordered_map<Atom, Atom> match;
@@ -421,7 +423,7 @@ bool Matcher::substituteMissingAtomsIfPossible(const std::vector<AtomsVector>& i
     }
   }
 
-  for (auto& atomsVectorToReplace : atomsToReplace) {
+  for (auto& atomsVectorToReplace : *atomsToReplace) {
     for (auto& atomToReplace : atomsVectorToReplace) {
       const auto matchIterator = match.find(atomToReplace);
       if (matchIterator != match.end()) {

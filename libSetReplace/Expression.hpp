@@ -1,5 +1,5 @@
-#ifndef Expression_hpp
-#define Expression_hpp
+#ifndef LIBSETREPLACE_EXPRESSION_HPP_
+#define LIBSETREPLACE_EXPRESSION_HPP_
 
 #include <functional>
 #include <memory>
@@ -60,4 +60,4 @@ class AtomsIndex {
 };
 }  // namespace SetReplace
 
-#endif /* Expression_hpp */
+#endif  // LIBSETREPLACE_EXPRESSION_HPP_

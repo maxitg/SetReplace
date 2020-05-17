@@ -1,9 +1,10 @@
 #include "SetReplace.hpp"
 
-#include <chrono>
+#include <limits>
 #include <random>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "Set.hpp"
 
@@ -21,9 +22,9 @@ namespace SetReplace {
 using SetID = int64_t;
 std::unordered_map<SetID, Set> sets_;
 
-std::vector<AtomsVector> getNextSet(const mint& tensorLength, const mint* tensorData, mint& startReadIndex) {
-  const auto getDataFunc = [&tensorData, &tensorLength, &startReadIndex]() -> mint {
-    return getData(tensorData, tensorLength, startReadIndex++);
+std::vector<AtomsVector> getNextSet(const mint& tensorLength, const mint* tensorData, mint* startReadIndex) {
+  const auto getDataFunc = [&tensorData, &tensorLength, startReadIndex]() -> mint {
+    return getData(tensorData, tensorLength, (*startReadIndex)++);
   };
 
   const mint setLength = getDataFunc();
@@ -39,7 +40,7 @@ std::vector<AtomsVector> getNextSet(const mint& tensorLength, const mint* tensor
   return set;
 }
 
-std::vector<Rule> getRules(WolframLibraryData libData, MTensor& rulesTensor) {
+std::vector<Rule> getRules(WolframLibraryData libData, MTensor rulesTensor) {
   const mint tensorLength = libData->MTensor_getFlattenedLength(rulesTensor);
   const mint* tensorData = libData->MTensor_getIntegerData(rulesTensor);
   mint readIndex = 0;
@@ -55,32 +56,32 @@ std::vector<Rule> getRules(WolframLibraryData libData, MTensor& rulesTensor) {
       throw LIBRARY_FUNCTION_ERROR;
     } else {
       rules.emplace_back(
-          Rule{getNextSet(tensorLength, tensorData, readIndex), getNextSet(tensorLength, tensorData, readIndex)});
+          Rule{getNextSet(tensorLength, tensorData, &readIndex), getNextSet(tensorLength, tensorData, &readIndex)});
     }
   }
   return rules;
 }
 
-std::vector<AtomsVector> getSet(WolframLibraryData libData, MTensor& setTensor) {
+std::vector<AtomsVector> getSet(WolframLibraryData libData, MTensor setTensor) {
   mint readIndex = 0;
   return getNextSet(
-      libData->MTensor_getFlattenedLength(setTensor), libData->MTensor_getIntegerData(setTensor), readIndex);
+      libData->MTensor_getFlattenedLength(setTensor), libData->MTensor_getIntegerData(setTensor), &readIndex);
 }
 
-Matcher::OrderingSpec getOrderingSpec(WolframLibraryData libData, MTensor& orderingSpecTensor) {
+Matcher::OrderingSpec getOrderingSpec(WolframLibraryData libData, MTensor orderingSpecTensor) {
   mint tensorLength = libData->MTensor_getFlattenedLength(orderingSpecTensor);
   mint* tensorData = libData->MTensor_getIntegerData(orderingSpecTensor);
   Matcher::OrderingSpec result;
   result.reserve(tensorLength);
   for (mint i = 0; i < tensorLength; i += 2) {
-    result.emplace_back(std::make_pair<Matcher::OrderingFunction, Matcher::OrderingDirection>(
+    result.emplace_back(std::make_pair(
         static_cast<Matcher::OrderingFunction>(getData(tensorData, tensorLength, i)),
         static_cast<Matcher::OrderingDirection>(getData(tensorData, tensorLength, i + 1))));
   }
   return result;
 }
 
-Set::StepSpecification getStepSpec(WolframLibraryData libData, MTensor& stepsTensor) {
+Set::StepSpecification getStepSpec(WolframLibraryData libData, MTensor stepsTensor) {
   mint tensorLength = libData->MTensor_getFlattenedLength(stepsTensor);
   constexpr mint specLength = 5;
   if (tensorLength != specLength) {
@@ -200,8 +201,8 @@ int setDelete([[maybe_unused]] WolframLibraryData libData,
   return LIBRARY_NO_ERROR;
 }
 
-std::function<bool()> shouldAbort(WolframLibraryData& libData) {
-  return [&libData]() { return static_cast<bool>(libData->AbortQ()); };
+std::function<bool()> shouldAbort(WolframLibraryData libData) {
+  return [libData]() { return static_cast<bool>(libData->AbortQ()); };
 }
 
 Set& setFromID(const SetID id) {

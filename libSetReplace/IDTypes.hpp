@@ -1,5 +1,5 @@
-#ifndef IDTypes_h
-#define IDTypes_h
+#ifndef LIBSETREPLACE_IDTYPES_HPP_
+#define LIBSETREPLACE_IDTYPES_HPP_
 
 #include <cstdint>
 
@@ -33,4 +33,4 @@ using Generation = int64_t;
 constexpr Generation initialGeneration = 0;
 }  // namespace SetReplace
 
-#endif /* IDTypes_h */
+#endif  // LIBSETREPLACE_IDTYPES_HPP_

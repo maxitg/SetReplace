@@ -1,5 +1,5 @@
-#ifndef Set_hpp
-#define Set_hpp
+#ifndef LIBSETREPLACE_SET_HPP_
+#define LIBSETREPLACE_SET_HPP_
 
 #include <functional>
 #include <memory>
@@ -101,4 +101,4 @@ class Set {
 };
 }  // namespace SetReplace
 
-#endif /* Set_hpp */
+#endif  // LIBSETREPLACE_SET_HPP_

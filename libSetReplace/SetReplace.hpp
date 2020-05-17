@@ -1,7 +1,7 @@
 // Library definition for Wolfram LibraryLink
 
-#ifndef SetReplace_hpp
-#define SetReplace_hpp
+#ifndef LIBSETREPLACE_SETREPLACE_HPP_
+#define LIBSETREPLACE_SETREPLACE_HPP_
 
 #include "WolframLibrary.h"
 
@@ -43,4 +43,4 @@ EXTERN_C DLLEXPORT int terminationReason(WolframLibraryData libData, mint argc, 
  */
 EXTERN_C DLLEXPORT int eventRuleIDs(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result);
 
-#endif /* SetReplace_hpp */
+#endif  // LIBSETREPLACE_SETREPLACE_HPP_

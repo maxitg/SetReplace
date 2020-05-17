@@ -1,5 +1,5 @@
-#ifndef Rule_hpp
-#define Rule_hpp
+#ifndef LIBSETREPLACE_RULE_HPP_
+#define LIBSETREPLACE_RULE_HPP_
 
 #include <vector>
 
@@ -14,4 +14,4 @@ struct Rule {
 };
 }  // namespace SetReplace
 
-#endif /* Rule_hpp */
+#endif  // LIBSETREPLACE_RULE_HPP_

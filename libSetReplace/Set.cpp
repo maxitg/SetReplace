@@ -1,6 +1,7 @@
 #include "Set.hpp"
 
 #include <algorithm>
+#include <limits>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -81,11 +82,11 @@ class Set::Implementation {
     }
 
     auto explicitRuleInputs = ruleInputs;
-    Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, explicitRuleInputs);
+    Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, &explicitRuleInputs);
 
     // Identify output atoms that appear in the input, that still leaves newly created atoms as patterns.
     auto explicitRuleOutputs = rules_[match->rule].outputs;
-    Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, explicitRuleOutputs);
+    Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, &explicitRuleOutputs);
 
     for (const auto function : {&Implementation::willExceedAtomLimits, &Implementation::willExceedExpressionsLimit}) {
       const auto willExceedAtomLimitsStatus = (this->*function)(explicitRuleInputs, explicitRuleOutputs);
@@ -159,7 +160,7 @@ class Set::Implementation {
                  const std::function<AtomsVector(ExpressionID)>& getAtomsVector)
       : rules_(std::move(rules)),
         atomsIndex_(getAtomsVector),
-        matcher_(rules_, atomsIndex_, getAtomsVector, orderingSpec, randomSeed) {
+        matcher_(rules_, &atomsIndex_, getAtomsVector, orderingSpec, randomSeed) {
     for (const auto& expression : initialExpressions) {
       for (const auto& atom : expression) {
         if (atom <= 0) throw Error::NonPositiveAtoms;
@@ -201,8 +202,8 @@ class Set::Implementation {
     const int64_t currentAtomsCount = static_cast<int64_t>(atomDegrees_.size());
 
     std::unordered_map<Atom, int64_t> atomDegreeDeltas;
-    updateAtomDegrees(atomDegreeDeltas, explicitRuleInputs, -1, false);
-    updateAtomDegrees(atomDegreeDeltas, explicitRuleOutputs, +1, false);
+    updateAtomDegrees(&atomDegreeDeltas, explicitRuleInputs, -1, false);
+    updateAtomDegrees(&atomDegreeDeltas, explicitRuleOutputs, +1, false);
 
     int64_t newAtomsCount = currentAtomsCount;
     for (const auto& atomAndDegreeDelta : atomDegreeDeltas) {
@@ -228,16 +229,16 @@ class Set::Implementation {
     }
   }
 
-  static void updateAtomDegrees(std::unordered_map<Atom, int64_t>& atomDegrees,
+  static void updateAtomDegrees(std::unordered_map<Atom, int64_t>* atomDegrees,
                                 const std::vector<AtomsVector>& deltaExpressions,
                                 const int64_t deltaCount,
                                 bool deleteIfZero = true) {
     for (const auto& expression : deltaExpressions) {
       const std::unordered_set<Atom> expressionAtoms(expression.begin(), expression.end());
       for (const auto& atom : expressionAtoms) {
-        atomDegrees[atom] += deltaCount;
-        if (deleteIfZero && atomDegrees[atom] == 0) {
-          atomDegrees.erase(atom);
+        (*atomDegrees)[atom] += deltaCount;
+        if (deleteIfZero && (*atomDegrees)[atom] == 0) {
+          atomDegrees->erase(atom);
         }
       }
     }
@@ -283,7 +284,7 @@ class Set::Implementation {
       unindexedExpressions_.insert(unindexedExpressions_.end(), ids.begin(), ids.end());
     }
 
-    updateAtomDegrees(atomDegrees_, expressions, +1);
+    updateAtomDegrees(&atomDegrees_, expressions, +1);
     return ids;
   }
 
@@ -307,10 +308,10 @@ class Set::Implementation {
       }
       expressions_.at(id).destroyerEvent = destroyerEvent;
     }
-    updateAtomDegrees(atomDegrees_, expressions, -1);
+    updateAtomDegrees(&atomDegrees_, expressions, -1);
   }
 
-  void updateAtomDegrees(std::unordered_map<Atom, int64_t>& atomDegrees,
+  void updateAtomDegrees(std::unordered_map<Atom, int64_t>* atomDegrees,
                          const std::vector<ExpressionID>& deltaExpressionIDs,
                          const int64_t deltaCount) const {
     std::vector<AtomsVector> expressions;

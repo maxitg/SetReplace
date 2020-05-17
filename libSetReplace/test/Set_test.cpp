@@ -1,15 +1,14 @@
 #include "Set.hpp"
 
-#include <iostream>
-
 #include <gtest/gtest.h>
+
+#include <iostream>
 
 #include "IDTypes.hpp"
 #include "Match.hpp"
 #include "Rule.hpp"
 
-using namespace SetReplace;
-
+namespace SetReplace {
 TEST(SetReplace, createSetAndReplace) {
   // Negative atoms refer to patterns (useful for rules)
   std::vector<Rule> rules;
@@ -35,3 +34,4 @@ TEST(SetReplace, createSetAndReplace) {
   stepSpec.maxFinalExpressions = 100000;
   EXPECT_TRUE(a_set.replace(stepSpec, shouldAbort));
 }
+}  // namespace SetReplace

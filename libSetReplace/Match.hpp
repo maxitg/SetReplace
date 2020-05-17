@@ -1,7 +1,9 @@
-#ifndef Match_hpp
-#define Match_hpp
+#ifndef LIBSETREPLACE_MATCH_HPP_
+#define LIBSETREPLACE_MATCH_HPP_
 
+#include <memory>
 #include <set>
+#include <utility>
 #include <vector>
 
 #include "Expression.hpp"
@@ -54,7 +56,7 @@ class Matcher {
    * @details This is an O(1) operation, does not do any matching yet.
    */
   Matcher(const std::vector<Rule>& rules,
-          AtomsIndex& atomsIndex,
+          AtomsIndex* atomsIndex,
           const std::function<AtomsVector(ExpressionID)>& getAtomsVector,
           const OrderingSpec& orderingSpec,
           unsigned int randomSeed = 0);
@@ -87,7 +89,7 @@ class Matcher {
    */
   static bool substituteMissingAtomsIfPossible(const std::vector<AtomsVector>& inputPatterns,
                                                const std::vector<AtomsVector>& patternMatches,
-                                               std::vector<AtomsVector>& atomsToReplace);
+                                               std::vector<AtomsVector>* atomsToReplace);
 
   /** @brief Returns the set of expression IDs matched in any match. */
   std::vector<MatchPtr> allMatches() const;
@@ -98,4 +100,4 @@ class Matcher {
 };
 }  // namespace SetReplace
 
-#endif /* Match_hpp */
+#endif  // LIBSETREPLACE_MATCH_HPP_
