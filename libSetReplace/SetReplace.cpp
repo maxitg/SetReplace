@@ -96,7 +96,7 @@ namespace SetReplace {
 
             return Set::StepSpecification{stepSpecElements[0], stepSpecElements[1],
                                           stepSpecElements[2], stepSpecElements[3],
-                                          stepSpecElements[4]};;
+                                          stepSpecElements[4]};
         }
     }
     
@@ -244,7 +244,7 @@ namespace SetReplace {
             return LIBRARY_FUNCTION_ERROR;
         }
         
-        const SetID setID = MArgument_getInteger(argv[0]);;
+        const SetID setID = MArgument_getInteger(argv[0]);
         
         std::vector<SetExpression> expressions;
         try {
@@ -263,7 +263,7 @@ namespace SetReplace {
             return LIBRARY_FUNCTION_ERROR;
         }
         
-        const SetID setID = MArgument_getInteger(argv[0]);;
+        const SetID setID = MArgument_getInteger(argv[0]);
         
         Generation maxCompleteGeneration;
         try {

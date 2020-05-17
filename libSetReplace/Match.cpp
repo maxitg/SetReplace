@@ -424,7 +424,7 @@ namespace SetReplace {
         for (size_t i = 0; i < inputPatterns.size(); ++i) {
             const auto& pattern = inputPatterns[i];
             const auto& patternMatch = patternMatches[i];
-            if (pattern.size() != patternMatch.size()) return false;;
+            if (pattern.size() != patternMatch.size()) return false;
             for (size_t j = 0; j < pattern.size(); ++j) {
                 const auto matchIterator = match.find(pattern[j]);
                 const Atom inputAtom = matchIterator != match.end() ? matchIterator->second : pattern[j];
