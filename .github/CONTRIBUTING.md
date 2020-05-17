@@ -347,33 +347,29 @@ In addition to that, here are some more-or-less established rules:
 * Start global constants with `$`, whether internal or public, and tags (such as used in [`Throw`](https://reference.wolfram.com/language/ref/Throw.html) or [`Sow`](https://reference.wolfram.com/language/ref/Sow.html), or as generic enum labels) with `$$`.
 
 #### C++
-New code should follow [Google C++ Style](https://google.github.io/styleguide/cppguide.html) guidelines, save for
-the exceptions laid out in the list below. The code in this repository is currently undergoing refactoring to
-conform to this specification. You can track the progress of this refactoring
-[here](https://github.com/maxitg/SetReplace/projects/2).
-
-The following are exceptions to Google C++ Style:
+The code should follow [Google C++ Style](https://google.github.io/styleguide/cppguide.html) guidelines, save for the
+following exceptions:
 * Maximum line length is 120 characters.
 * Function and variable names, including const and constexpr variables, use lower camel case.
 * Namespace and class names use upper camel case.
 * C++ exceptions may be thrown.
-* All indentation uses four spaces, except for access specifiers which uses one.
-* White space in pointer and reference declarations goes after the `*` or `&` character. For example:
-    * `int* foo;`
-    * `const std::string& string;`
 * License, authors, and file descriptions should not be put at the top of files.
 * Doxygen is used for documentation.
+* We use `.cpp` and `.hpp` extensions for source files.
 
-A useful tool for confirming your code's adherence to the above code style is to use
-[cpplint](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py). You can lint a C++ source
-or header file like this:
-```bash
-cpplint.py --linelength=120 --filter=-legal/copyright file_name
-```
-If cpplint flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
+We use [`clang-format`](https://clang.llvm.org/docs/ClangFormat.html) for formatting and
+[`cpplint`](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py) for linting.
+
+To run these automatically, call `./lint.sh`. This will print error messages from both tools. To format the code in
+place use `./lint.sh -i`.
+
+If `cpplint` flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
 positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
 space, or `// NOLINTNEXTLINE` on a new line above if there is no space. For any usages of `// NOLINT` or
 `// NOLINTNEXTLINE`, please describe the reason for its inclusion both in a code comment and in your pull request's
 comments section.
+
+If you want to disable formatting, use `// clang-format off` and `// clang-format on` around the manually formatted
+code.
 
 That's all for our guidelines, now let's go figure out the fundamental theory of physics! :rocket:
