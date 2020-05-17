@@ -4,6 +4,7 @@
 #include <random>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "Set.hpp"
@@ -74,9 +75,9 @@ Matcher::OrderingSpec getOrderingSpec(WolframLibraryData libData, MTensor orderi
   Matcher::OrderingSpec result;
   result.reserve(tensorLength);
   for (mint i = 0; i < tensorLength; i += 2) {
-    result.emplace_back(std::make_pair(
-        static_cast<Matcher::OrderingFunction>(getData(tensorData, tensorLength, i)),
-        static_cast<Matcher::OrderingDirection>(getData(tensorData, tensorLength, i + 1))));
+    result.emplace_back(
+        std::make_pair(static_cast<Matcher::OrderingFunction>(getData(tensorData, tensorLength, i)),
+                       static_cast<Matcher::OrderingDirection>(getData(tensorData, tensorLength, i + 1))));
   }
   return result;
 }

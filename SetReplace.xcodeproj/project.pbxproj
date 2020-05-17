@@ -22,6 +22,8 @@
 /* Begin PBXFileReference section */
 		6909EBA922258611001458D2 /* Match.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Match.cpp; sourceTree = "<group>"; };
 		6909EBAA22258611001458D2 /* Match.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Match.hpp; sourceTree = "<group>"; };
+		691E077A2471CED500D2BDD5 /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		691E077C2471D1DD00D2BDD5 /* Set_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Set_test.cpp; sourceTree = "<group>"; };
 		695F486E222443F20058E057 /* Set.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Set.cpp; sourceTree = "<group>"; };
 		695F486F222443F20058E057 /* Set.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Set.hpp; sourceTree = "<group>"; };
 		6961A1D523184ABC009461C8 /* Expression.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Expression.cpp; sourceTree = "<group>"; };
@@ -44,6 +46,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		691E07792471CED500D2BDD5 /* test */ = {
+			isa = PBXGroup;
+			children = (
+				691E077A2471CED500D2BDD5 /* CMakeLists.txt */,
+				691E077C2471D1DD00D2BDD5 /* Set_test.cpp */,
+			);
+			path = test;
+			sourceTree = "<group>";
+		};
 		695F485A222440B90058E057 = {
 			isa = PBXGroup;
 			children = (
@@ -63,16 +74,17 @@
 		695F4865222440B90058E057 /* libSetReplace */ = {
 			isa = PBXGroup;
 			children = (
-				69ED0F4023170D5D0014A48E /* IDTypes.hpp */,
 				69B2D41122244AFC008778A3 /* Expression.hpp */,
 				6961A1D523184ABC009461C8 /* Expression.cpp */,
-				69B2D41422244D1F008778A3 /* Rule.hpp */,
+				69ED0F4023170D5D0014A48E /* IDTypes.hpp */,
 				6909EBAA22258611001458D2 /* Match.hpp */,
 				6909EBA922258611001458D2 /* Match.cpp */,
+				69B2D41422244D1F008778A3 /* Rule.hpp */,
 				695F486F222443F20058E057 /* Set.hpp */,
 				695F486E222443F20058E057 /* Set.cpp */,
-				69CAF8732257B23B006F9C60 /* SetReplace.cpp */,
 				69CAF8742257B23B006F9C60 /* SetReplace.hpp */,
+				69CAF8732257B23B006F9C60 /* SetReplace.cpp */,
+				691E07792471CED500D2BDD5 /* test */,
 			);
 			path = libSetReplace;
 			sourceTree = "<group>";
