@@ -326,6 +326,17 @@ unrecognizedOptions[func_, opts_, property_: {}] :=
     FilterRules[opts, Except[Join[Options[func], Catenate @ Values @ joinPropertyOptions[property, opts]]]]
 
 
+expr : WolframModel[
+        rulesSpec_ ? wolframModelRulesSpecQ,
+        o : OptionsPattern[]] := 0 /; With[{
+    unrecognizedOptions = unrecognizedOptions[WolframModel, {o}]},
+    If[unrecognizedOptions =!= {},
+        Message[
+            WolframModel::optx,
+            unrecognizedOptions[[1]],
+            Defer @ expr]]]
+
+
 (* ::Subsection:: *)
 (*Rules*)
 
