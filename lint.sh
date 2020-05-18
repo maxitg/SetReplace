@@ -23,7 +23,7 @@ do
     echo
     echo "Options:"
     echo "  -i  Inplace edit files with clang-format."
-    shift
+    exit 1
     ;;
   esac
 done
