@@ -1,6 +1,7 @@
 #include "SetReplace.hpp"
 
-#include <chrono>
+// NOLINTNEXTLINE(build/c++11)
+#include <chrono>  // <chrono> is banned in Chromium, so cpplint flags it https://stackoverflow.com/a/33653404/905496
 #include <limits>
 #include <random>
 #include <string>
