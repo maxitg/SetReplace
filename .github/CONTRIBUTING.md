@@ -360,8 +360,8 @@ following exceptions:
 We use [`clang-format`](https://clang.llvm.org/docs/ClangFormat.html) for formatting and
 [`cpplint`](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py) for linting.
 
-To run these automatically, call `./lint.sh`. This will print error messages from both tools. To format the code in
-place use `./lint.sh -i`.
+To run these automatically, call `./lint.sh`. This will print a formatting diff and error messages from `cpplint`.
+To edit the code in place with the fixed formatting use `./lint.sh -i`.
 
 If `cpplint` flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
 positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
