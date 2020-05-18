@@ -365,6 +365,7 @@ We use [`clang-format`](https://clang.llvm.org/docs/ClangFormat.html) for format
 [`cpplint`](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py) for linting.
 
 To run these automatically, call `./lint.sh`. This will print a formatting diff and error messages from `cpplint`.
+If there are no errors found, it will exit with no output.
 To edit the code in place with the fixed formatting use `./lint.sh -i`.
 
 If `cpplint` flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
