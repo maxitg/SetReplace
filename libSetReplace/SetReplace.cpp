@@ -144,7 +144,8 @@ namespace SetReplace {
                         static_cast<mint>(atomsPointer)});
 
         for (const auto& expression : expressions) {
-            appendToTensor(expression.atoms);
+            // Cannot do static_cast due to 32-bit Windows support
+            appendToTensor(std::vector<mint>(expression.atoms.begin(), expression.atoms.end()));
         }
         
         return output;
