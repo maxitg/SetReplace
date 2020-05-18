@@ -82,8 +82,11 @@ updateVersion[] /; Names["GitLink`*"] =!= {} := Module[{
   Check[
     versionInformation = Import[FileNameJoin[{$repoRoot, "scripts", "version.wl"}]];
     gitRepo = GitOpen[$repoRoot];
+    If[$internalBuildQ, GitFetch[gitRepo, "origin"]];
     minorVersionNumber = Max[0, Length[GitRange[
-      gitRepo, Except[versionInformation["Checkpoint"]], GitMergeBase[gitRepo, "HEAD", "master"]]] - 1];
+      gitRepo,
+      Except[versionInformation["Checkpoint"]],
+      GitMergeBase[gitRepo, "HEAD", If[$internalBuildQ, "origin/master", "master"]]]] - 1];
     pacletInfoFilename = FileNameJoin[{$buildDirectory, "PacletInfo.m"}];
     pacletInfo = Association @@ Import[pacletInfoFilename];
     versionString = pacletInfo[Version] <> "." <> ToString[minorVersionNumber];,
