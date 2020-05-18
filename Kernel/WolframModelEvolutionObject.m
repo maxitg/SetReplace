@@ -316,7 +316,7 @@ $propertyOptions = <|
 	"FinalStatePlot" -> $plotOptions
 |>;
 
-$allPropertyOptions := DeleteDuplicatesBy[Catenate[Values[$propertyOptions]], First];
+$allPropertyOptions = DeleteDuplicatesBy[Catenate[Values[$propertyOptions]], First];
 
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
