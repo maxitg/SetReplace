@@ -353,6 +353,7 @@ following exceptions:
 * Function and variable names, including const and constexpr variables, use lower camel case.
 * Namespace and class names use upper camel case.
 * C++ exceptions may be thrown.
+* If splitting function arguments into multiple lines, each argument should go on a separate line.
 * License, authors, and file descriptions should not be put at the top of files.
 * Doxygen is used for documentation.
 * We use `.cpp` and `.hpp` extensions for source files.
