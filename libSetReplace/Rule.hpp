@@ -1,17 +1,17 @@
-#ifndef Rule_hpp
-#define Rule_hpp
+#ifndef LIBSETREPLACE_RULE_HPP_
+#define LIBSETREPLACE_RULE_HPP_
 
 #include <vector>
 
 #include "Expression.hpp"
 
 namespace SetReplace {
-    /** @brief Substitution rule used in the evolution.
-     */
-    struct Rule {
-        const std::vector<AtomsVector> inputs;
-        const std::vector<AtomsVector> outputs;
-    };
-}
+/** @brief Substitution rule used in the evolution.
+ */
+struct Rule {
+  const std::vector<AtomsVector> inputs;
+  const std::vector<AtomsVector> outputs;
+};
+}  // namespace SetReplace
 
-#endif /* Rule_hpp */
+#endif  // LIBSETREPLACE_RULE_HPP_
