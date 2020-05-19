@@ -20,7 +20,9 @@ PackageScope["joinPropertyOptions"]
 
 
 PackageScope["$propertiesParameterless"]
-PackageScope["$newParameterlessProperties"]
+PackageScope["$propertyArgumentCounts"]
+PackageScope["$allProperties"]
+PackageScope["$parameterlessProperties"]
 PackageScope["$allPropertyOptions"]
 
 (* ::Text:: *)
@@ -183,6 +185,8 @@ $oldToNewPropertyNames = <|
 	"SetAfterEvent" -> "StateAfterEvent"
 |>;
 
+$propertyArgumentCounts = Association[$propertyArgumentCounts, Map[$propertyArgumentCounts, $oldToNewPropertyNames]]
+
 
 $propertiesParameterless = Join[
   Keys @ Select[#[[1]] == 0 &] @ $propertyArgumentCounts,
@@ -190,7 +194,9 @@ $propertiesParameterless = Join[
 ];
 
 
-$newParameterlessProperties = Intersection[$propertiesParameterless, Keys[$propertyArgumentCounts]];
+$parameterlessProperties = Intersection[$propertiesParameterless, Keys[$propertyArgumentCounts]];
+
+$allProperties = Union[Values[$oldToNewPropertyNames], Keys[$propertyArgumentCounts]];
 
 
 (* ::Subsection:: *)
@@ -575,7 +581,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 			obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			caller_,
 			"Generation",
-			g_] := Module[{positiveGeneration, futureEventsToInfinity},
+			g_Integer] := Module[{positiveGeneration, futureEventsToInfinity},
 	positiveGeneration = toPositiveStep[
 		propertyEvaluate[True, None][obj, caller, "TotalGenerationsCount"], g, caller, "Generation"];
 	futureEventsToInfinity = Dispatch @ Thread[Union[
@@ -593,6 +599,12 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 		Position[
 			data[$destroyerEvents] /. futureEventsToInfinity, Infinity][[All, 1]]]]]
 ]
+
+propertyEvaluate[True, includeBoundaryEvents_][
+            obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
+            caller_,
+            "Generation",
+            {gs__Integer}] := propertyEvaluate[True, includeBoundaryEvents][obj, caller, "Generation", #] & /@ {gs}
 
 
 (* ::Subsubsection:: *)
@@ -926,15 +938,17 @@ $masterOptions = {
 
 
 (* returns {{property_, args___} -> <|"ImplicitOptions" -> {option___}, "ExplicitOptions" -> {option___}|>, ...} *)
+propertyOptions[g : _Integer] := {{"Generation", g} -> Association[Values @ propertyOptions["Generation"]]}
+
 propertyOptions[property_String] := {{property} -> <|
     "ImplicitOptions" -> Lookup[$propertyOptions, property, {}],
     "ExplicitOptions" -> {}|>
 }
 
-propertyOptions[properties_ ? (VectorQ[#, wolframModelPropertyQ] &)] := Catenate[propertyOptions /@ properties]
-
-propertyOptions[{property_String, args___ ? (Not[MatchQ[{#}, OptionsPattern[]]] &), o : OptionsPattern[]}] :=
+propertyOptions[{property_String, args___, o : OptionsPattern[]} ? wolframModelPropertyQ] :=
     {{property, args} -> Association[Values @ propertyOptions[property], "ExplicitOptions" -> {o}]}
+
+propertyOptions[properties_ ? wolframModelPropertiesQ] := Catenate[propertyOptions /@ properties]
 
 propertyOptions[_] := {}
 
@@ -949,28 +963,25 @@ joinPropertyOptions[property_, opts_] := Module[{joinedPropertyOptions, masterOp
 ]
 
 
-WolframModelEvolutionObject[data_ ? evolutionDataQ][g_ ? IntegerQ, OptionsPattern[]] :=
-    WolframModelEvolutionObject[data]["Generation", g]
-
-
 expr : WolframModelEvolutionObject[
         data_ ? evolutionDataQ, objOpts: OptionsPattern[]][
-        property__ ? (Not[MatchQ[{#}, OptionsPattern[]]] &),
+        property__ /; wolframModelPropertiesQ[property],
         opts : OptionsPattern[]] := Module[{
-            prunedObject, propertyCount, joinedPropertyOptions, masterOptions,
-            objectOptions, $unrecognizedOptions, result
+            prunedObject, caller, properties, joinedPropertyOptions, masterOptions,
+            $unrecognizedOptions, result
     },
-    propertyCount = wolframModelPropertyCount[{property}];
-    {joinedPropertyOptions, masterOptions} = joinPropertyOptions[If[propertyCount > 1, First @ {{property}}, {property}], {opts}];
-    $unrecognizedOptions = FilterRules[masterOptions, Except[Join[$wolframObjectOptions, $allPropertyOptions]]];
+    caller = Lookup[{objOpts}, "Caller", WolframModelEvolutionObject];
+    properties = If[wolframModelPropertyCount[{property}] > 1, First @ {{property}}, {property}];
+    {joinedPropertyOptions, masterOptions} = joinPropertyOptions[properties, {opts}];
+    $unrecognizedOptions = FilterRules[masterOptions, Except[$allPropertyOptions]];
     (
         result = Check[
         (propertyEvaluate @@
                 (OptionValue[Join[masterOptions, $masterOptions], #] & /@ {"IncludePartialGenerations", "IncludeBoundaryEvents"}))[
                 WolframModelEvolutionObject[data],
-                OptionValue[WolframModelEvolutionObject, {objOpts}, "Caller"],
+                caller,
                 ##], $Failed] & @@@ Join @@@ joinedPropertyOptions;
-        If[propertyCount == 1 && Length[result] > 0, result = First @ result];
+        If[wolframModelPropertyQ[property] && Length[result] > 0, result = First @ result];
         result /; result =!= $Failed
     ) /; $unrecognizedOptions === {} || Message[
         WolframModelEvolutionObject::optx,
@@ -978,7 +989,6 @@ expr : WolframModelEvolutionObject[
         Defer[expr]
     ]
 ]
-
 
 
 (* ::Section:: *)
