@@ -19,7 +19,6 @@ PackageScope["unrecognizedOptions"]
 PackageScope["wolframModelRulesSpecQ"]
 PackageScope["wolframModelPropertyQ"]
 PackageScope["wolframModelPropertiesQ"]
-PackageScope["wolframModelPropertyCount"]
 PackageScope["$wolframObjectOptions"]
 
 
@@ -203,7 +202,7 @@ expr : WolframModel[
             rulesSpec_ ? wolframModelRulesSpecQ,
             initSpec_ ? wolframModelInitSpecQ,
             stepsSpec : _ ? wolframModelStepsSpecQ : 1,
-            property : _ ? wolframModelPropertiesQ : "EvolutionObject",
+            property : _ ? (wolframModelPropertyQ[#] || wolframModelPropertiesQ[#] & ) : "EvolutionObject",
             o : OptionsPattern[]] :=
     Module[{
             patternRules, initialSet, steps, terminationReasonOverride, optionsOverride, abortBehavior,
@@ -214,7 +213,7 @@ expr : WolframModel[
     {joinedPropertyOptions, masterOptions} = joinPropertyOptions[property, {o}];
     $unrecognizedOptions = FilterRules[masterOptions, Except[Join[Options[WolframModel], $allPropertyOptions]]];
     (
-        objectOptions = FilterRules[masterOptions, Except[Options[WolframModel]]];
+        objectOptions = FilterRules[masterOptions, Except[Options[setSubstitutionSystem]]];
         masterOptions = FilterRules[masterOptions, Options[WolframModel]];
         {steps, terminationReasonOverride, optionsOverride, abortBehavior} =
             fromStepsSpec[initialSet, stepsSpec, OptionValue[WolframModel, masterOptions, TimeConstraint]];
@@ -294,7 +293,7 @@ WolframModel[
 
 
 $WolframModelProperties =
-	Complement[$propertiesParameterless, {"Properties", "Rules"}];
+	Complement[$allProperties, {"Properties", "Rules"}];
 
 
 (* ::Section:: *)
@@ -385,11 +384,11 @@ wolframModelStepsSpecQ[_] := False
 
 wolframModelPropertyQ[_Integer] := True
 
-wolframModelPropertyQ[property_String] /;
-    MemberQ[$parameterlessProperties, property] := True
+wolframModelPropertyQ[property_String, OptionsPattern[]] /;
+    MemberQ[$propertiesParameterless, property] := True
 
 wolframModelPropertyQ[
-        property_String ? (MemberQ[Complement[$allProperties, $parameterlessProperties], #] &), 
+        property_String ? (MemberQ[$propertiesWithParameters, #] &), 
         args__,
         o : OptionsPattern[]
     ] := With[{argumentsCountRange = $propertyArgumentCounts[property]},
@@ -397,7 +396,7 @@ wolframModelPropertyQ[
         argumentsCountRange[[1]] <= Length[{args}] <= argumentsCountRange[[2]]
 ]
 
-wolframModelPropertyQ[property_List] /; Length[property] > 1 := wolframModelPropertyQ @@ property
+wolframModelPropertyQ[property_List] := Apply[wolframModelPropertyQ, property] && Not[AllTrue[property, wolframModelPropertyQ]]
 
 wolframModelPropertyQ[___] := False
 
@@ -405,15 +404,7 @@ wolframModelPropertyQ[___] := False
 wolframModelPropertiesQ[{property___}] /;
     AllTrue[{property}, wolframModelPropertyQ] := True
 
-wolframModelPropertiesQ[property___] := wolframModelPropertyQ[property]
-
-
-wolframModelPropertyCount[{property___}] /;
-    AllTrue[{property}, wolframModelPropertyQ] := Total[wolframModelPropertyCount /@ {property}]
-
-wolframModelPropertyCount[___ ? wolframModelPropertyQ] := 1
-
-wolframModelPropertyCount[___] := 0
+wolframModelPropertiesQ[___] := False
 
 
 (* ::Subsection:: *)
@@ -489,7 +480,7 @@ WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
 		initSpec_ ? wolframModelInitSpecQ,
 		stepsSpec_ ? wolframModelStepsSpecQ,
-		property : Except[OptionsPattern[]] ? (Not[wolframModelPropertiesQ[#]] &),
+		property : Except[OptionsPattern[]] ? (Not[wolframModelPropertyQ[##] || wolframModelPropertiesQ[##]] &),
 		o : OptionsPattern[]] := 0 /;
 	Message[WolframModel::invalidProperty, property]
 
@@ -497,5 +488,5 @@ WolframModel[
 (* ::Section:: *)
 (*Autocompletion*)
 
-With[{properties = $parameterlessProperties},
+With[{properties = $propertiesParameterless},
 	FE`Evaluate[FEPrivate`AddSpecialArgCompletion["WolframModel" -> {0, 0, 0, properties}]]];

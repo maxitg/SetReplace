@@ -17,7 +17,7 @@
       (* Symbol Leak *)
 
       testSymbolLeak[
-        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 5] /@ $WolframModelProperties
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 5] /@ $propertiesParameterless
       ],
 
       (** Argument checks **)

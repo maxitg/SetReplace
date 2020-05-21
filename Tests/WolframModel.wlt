@@ -908,13 +908,13 @@
       ],
 
       VerificationTest[
-        WolframModel[{{1}} -> {{2}}, {{1}}, 2, #] & /@ $WolframModelProperties // Length,
-        Length[$WolframModelProperties]
+        WolframModel[{{1}} -> {{2}}, {{1}}, 2, #] & /@ $propertiesParameterless // Length,
+        Length[$propertiesParameterless]
       ],
 
       VerificationTest[
-        WolframModel[{{1}} -> {{2}}, {{1}}, 2, $WolframModelProperties] // Length,
-        WolframModel[{{1}} -> {{2}}, {{1}}, 2, #] & /@ $WolframModelProperties // Length
+        WolframModel[{{1}} -> {{2}}, {{1}}, 2, $propertiesParameterless] // Length,
+        WolframModel[{{1}} -> {{2}}, {{1}}, 2, #] & /@ $propertiesParameterless // Length
       ],
 
       testUnevaluated[
@@ -1761,7 +1761,7 @@
 
       VerificationTest[
         AllTrue[
-          $WolframModelProperties,
+          $propertiesParameterless,
           Head[WolframModel[{{0}} -> {{1}}, {{0}}, 1, #]] =!= WolframModel &]
       ]
     }
