@@ -1438,23 +1438,6 @@
       VerificationTest[
         graphicsQ /@ WolframModel[{} -> {{1, 2}}, {}, <|"MaxEvents" -> 1|>, "EventsStatesPlotsList"],
         {True, True}
-      ],
-
-      (* Smart property options *)
-
-      testUnevaluated[
-        WolframModel[1 -> 2, {1}, 2, "CausalGraph", WorkingPrecision -> 10],
-        {WolframModel::optx}
-      ],
-
-      VerificationTest[
-        WolframModel[1 -> 2, {1}, 2, "FinalState", ImageSize -> 256],
-        {3}
-      ],
-
-      VerificationTest[
-        graphicsQ @ WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "FinalStatePlot", ImageSize -> 256],
-        True
       ]
     },
     "options" -> {

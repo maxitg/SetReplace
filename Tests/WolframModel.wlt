@@ -1713,6 +1713,28 @@
       VerificationTest[
         WolframModel[{1, {2}} -> {2, {3}}, Automatic][0],
         {1, {1}}
+      ],
+
+      (* Smart property options *)
+
+      testUnevaluated[
+        WolframModel[1 -> 2, {1}, 2, "CausalGraph", WorkingPrecision -> 10],
+        {WolframModel::optx}
+      ],
+
+      VerificationTest[
+        WolframModel[1 -> 2, {1}, 2, "FinalState", ImageSize -> 256],
+        {3}
+      ],
+
+      VerificationTest[
+        graphicsQ @ WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "FinalStatePlot", ImageSize -> 256],
+        True
+      ],
+      
+      VerificationTest[
+        graphicsQ /@ WolframModel[1 -> 2, {1}, 2, {"FinalStatePlot", "CausalGraph"}, ImageSize -> 256],
+        {True, True}
       ]
     }
   |>,
