@@ -310,15 +310,12 @@ propertyEvaluate[___][
 (* ::Subsubsection:: *)
 (*Correct options*)
 
-
-$newGraphOptions = {Background -> Automatic, VertexStyle -> Automatic, EdgeStyle -> Automatic};
-$graphOptions = Join[FilterRules[Options[Graph], Except[$newGraphOptions]], $newGraphOptions];
-
-$causalGraphOptions = $graphOptions;
+$newCausalGraphOptions = {Background -> Automatic, VertexStyle -> Automatic, EdgeStyle -> Automatic};
+$causalGraphOptions = Join[FilterRules[Options[Graph], Except[$newCausalGraphOptions]], $newCausalGraphOptions];
 
 $newLayeredCausalGraphOptions = {GraphLayout -> Automatic};
 $layeredCausalGraphOptions =
-    Join[FilterRules[$graphOptions, Except[$newLayeredCausalGraphOptions]], $newLayeredCausalGraphOptions];
+    Join[FilterRules[$causalGraphOptions, Except[$newLayeredCausalGraphOptions]], $newLayeredCausalGraphOptions];
 
 $propertyOptions = <|
 	"CausalGraph" -> $causalGraphOptions,
