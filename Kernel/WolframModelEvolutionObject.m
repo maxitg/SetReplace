@@ -577,11 +577,18 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 (*Positive generations*)
 
 
+propertyEvaluate[True, includeBoundaryEvents_][
+            obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
+            caller_,
+            "Generation",
+            {gs__}] := propertyEvaluate[True, includeBoundaryEvents][obj, caller, "Generation", #] & /@ {gs}
+
+
 propertyEvaluate[True, includeBoundaryEventsPattern][
 			obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			caller_,
 			"Generation",
-			g_Integer] := Module[{positiveGeneration, futureEventsToInfinity},
+			g_] := Module[{positiveGeneration, futureEventsToInfinity},
 	positiveGeneration = toPositiveStep[
 		propertyEvaluate[True, None][obj, caller, "TotalGenerationsCount"], g, caller, "Generation"];
 	futureEventsToInfinity = Dispatch @ Thread[Union[
@@ -599,12 +606,6 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 		Position[
 			data[$destroyerEvents] /. futureEventsToInfinity, Infinity][[All, 1]]]]]
 ]
-
-propertyEvaluate[True, includeBoundaryEvents_][
-            obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
-            caller_,
-            "Generation",
-            {gs__Integer}] := propertyEvaluate[True, includeBoundaryEvents][obj, caller, "Generation", #] & /@ {gs}
 
 
 (* ::Subsubsection:: *)
