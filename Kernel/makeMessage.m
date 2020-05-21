@@ -74,6 +74,10 @@ messageTemplate["unknownProperty"] =
 	"Property \"`2`\" should be one of \"Properties\".";
 
 
+messageTemplate["invalidProperty"] =
+    "Property \"`2`\" is invalid.";
+
+
 messageTemplate["pargx"] =
 	"Property \"`2`\" requested with `3` argument`4`; " <>
 	"`5``6``7``8` argument`9` `10` expected.";

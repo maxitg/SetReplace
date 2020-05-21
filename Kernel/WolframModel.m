@@ -411,11 +411,7 @@ wolframModelPropertiesQ[property___] := wolframModelPropertyQ[property]
 wolframModelPropertyCount[{property___}] /;
     AllTrue[{property}, wolframModelPropertyQ] := Total[wolframModelPropertyCount /@ {property}]
 
-wolframModelPropertyCount[_ ? wolframModelPropertyQ] := 1
-
-wolframModelPropertyCount[{}] := 0
-
-wolframModelPropertyCount[_] := 1
+wolframModelPropertyCount[___ ? wolframModelPropertyQ] := 1
 
 wolframModelPropertyCount[___] := 0
 
