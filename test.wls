@@ -120,7 +120,7 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
   ];
 
   (* Return the report, we'll need it later *)
-  testGroupName -> testReport
+  testGroupName -> Iconize @ testReport
 ]], $testGroups]];
 
 (* Create a notebook with results *)
