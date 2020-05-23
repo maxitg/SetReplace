@@ -1,8 +1,11 @@
 #include "Expression.hpp"
 
 #include <algorithm>
+#include <memory>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 namespace SetReplace {
 class AtomsIndex::Implementation {

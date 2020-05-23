@@ -1,14 +1,18 @@
 #include "Match.hpp"
 
+#include <algorithm>
+#include <atomic>
 #include <functional>
 #include <map>
+#include <memory>
+#include <mutex>
 #include <random>
+#include <set>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-#include <mutex>
-#include <thread>
-#include <atomic>
+#include <vector>
 
 namespace SetReplace {
 class MatchComparator {
@@ -153,9 +157,9 @@ class Matcher::Implementation {
   MatchPtr nextMatch_;
 
   /**
- * This variable is typically monitored in abortFunc such that other threads can check if they should abort.
- * It is volatile, but not atomic because it is locked before being written to.
- */
+   * This variable is typically monitored in abortFunc such that other threads can check if they should abort.
+   * It is volatile, but not atomic because it is locked before being written to.
+   */
   mutable volatile Error currentError;
   mutable std::mutex currentErrorMutex;
 
@@ -181,9 +185,7 @@ class Matcher::Implementation {
   void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
                                       const std::function<bool()>& shouldAbort) {
     // If one thread errors, alert other threads with this function
-    const std::function<bool()> abortFunc = [this, &shouldAbort]() {
-      return currentError != None || shouldAbort();
-    };
+    const std::function<bool()> abortFunc = [this, &shouldAbort]() { return currentError != None || shouldAbort(); };
 
     // Only create threads if there is more than one rule
     const size_t numThreads = rules_.size() > 1 ? rules_.size() : 0;
@@ -332,12 +334,12 @@ class Matcher::Implementation {
         return;
       }
 
-      auto bucketIt = matchQueue_.find(matchPtr); // works because comparison is smart
+      auto bucketIt = matchQueue_.find(matchPtr);  // works because comparison is smart
       if (bucketIt == matchQueue_.end()) {
         bucketIt = matchQueue_.insert({matchPtr, {{}, {}}}).first;
       }
       auto& bucket = bucketIt->second;
-      if (!bucket.first.count(matchPtr)) { // works because hashing is smart
+      if (!bucket.first.count(matchPtr)) {  // works because hashing is smart
         bucket.second.push_back(matchPtr);
         bucket.first[matchPtr] = bucket.second.size() - 1;
 
