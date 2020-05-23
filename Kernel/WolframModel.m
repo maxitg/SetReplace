@@ -15,7 +15,6 @@ PackageExport["WolframModel"]
 PackageExport["$WolframModelProperties"]
 
 
-PackageScope["unrecognizedOptions"]
 PackageScope["wolframModelRulesSpecQ"]
 
 
@@ -295,9 +294,6 @@ WolframModel[args0___][args1___] := 0 /;
 
 (* ::Subsection:: *)
 (*Options*)
-
-
-unrecognizedOptions[func_, opts_] := FilterRules[opts, Except[Options[func]]]
 
 
 expr : WolframModel[

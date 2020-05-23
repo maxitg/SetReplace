@@ -1,7 +1,10 @@
 Package["SetReplace`"]
 
+PackageScope["unrecognizedOptions"]
 PackageScope["supportedOptionQ"]
 PackageScope["knownOptionsQ"]
+
+unrecognizedOptions[func_, opts_] := FilterRules[opts, Except[Options[func]]]
 
 General::invalidFiniteOption =
   "Value `2` of option `1` should be one of `3`.";

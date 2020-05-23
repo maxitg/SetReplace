@@ -16,6 +16,8 @@ PackageScope["$causalGraphInitialVertexStyle"]
 PackageScope["$causalGraphFinalVertexStyle"]
 PackageScope["$causalGraphEdgeStyle"]
 PackageScope["$causalGraphBackground"]
+PackageScope["$futureOverlapVertexStyle"]
+PackageScope["$futureOverlapEdgeStyle"]
 PackageScope["$vertexSize"]
 PackageScope["$arrowheadLengthFunction"]
 PackageScope["$edgeArrowheadShape"]
@@ -97,6 +99,10 @@ $styleNames = KeySort /@ KeySort @ <|
     "FinalVertexStyle" -> $causalGraphFinalVertexStyle,
     "EdgeStyle" -> $causalGraphEdgeStyle,
     "Background" -> $causalGraphBackground
+  |>,
+  "FutureOverlapsGraph" -> <|
+    "VertexStyle" -> $futureOverlapVertexStyle,
+    "EdgeStyle" -> $futureOverlapEdgeStyle
   |>,
   "Rule" -> <|
     "SharedElementHighlight" -> $sharedRuleElementsHighlight,
@@ -188,6 +194,10 @@ style[$lightTheme] = <|
   $causalGraphFinalVertexStyle -> Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
   $causalGraphEdgeStyle -> Hue[0, 1, 0.56],
   $causalGraphBackground -> None,
+
+  (* Future overlaps graph *)
+  $futureOverlapVertexStyle -> RGBColor[0.853, 0.650, 0.300],
+  $futureOverlapEdgeStyle -> Directive[RGBColor[0.680, 0.300, 0.000], Thickness[Large]],
 
   (* WolframModelPlot *)
   $vertexSize -> 0.06,
