@@ -1,6 +1,5 @@
 #include "Match.hpp"
 
-#include <algorithm>
 #include <functional>
 #include <map>
 #include <random>
