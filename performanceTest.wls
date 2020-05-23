@@ -81,7 +81,6 @@ runTests[repo_, sha_, tests_] := Module[{result, kernel},
     << SetReplace`; meanAroundTiming @@@ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]],
     kernel
   ];
-  Run["git checkout -q -"];
   Print[""];
   result
 ]
@@ -100,7 +99,12 @@ If[!$cleanQ,
 $oldSHA = If[Length @ $ScriptCommandLine >= 2, $ScriptCommandLine[[2]], "master"];
 $newSHA = If[Length @ $ScriptCommandLine >= 3, $ScriptCommandLine[[3]], $currentSHA];
 
+$symbolicRef = RunProcess[{"git", "symbolic-ref", "--short", "HEAD"}];
+$originalRef = If[$symbolicRef["ExitCode"] === 0, StringExtract[$symbolicRef["StandardOutput"], 1], $currentSHA];
+
 {$oldResults, $newResults} = runTests[$gitRepo, #, tests] & /@ {$oldSHA, $newSHA};
+
+RunProcess[{"git", "checkout", "-q", $originalRef}];
 
 $speedup = speedupDelta[$oldResults, $newResults];
 

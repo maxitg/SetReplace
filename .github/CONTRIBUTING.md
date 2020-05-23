@@ -209,6 +209,51 @@ The C++ implementation keeps an index of all possible rule matches and updates i
 
 Every time the `"LowLevel"` implementation of [`WolframModel`](/Kernel/WolframModel.m) is called, an instance of class [`Set`](/libSetReplace/Set.hpp) is created. [`Set`](/libSetReplace/Set.hpp) in turn uses the [`Matcher`](/libSetReplace/Match.hpp) class to perform the matching of set elements to rule inputs. [This class](/libSetReplace/Match.cpp) is the core of *SetReplace*.
 
+#### Compile C++ library with CMake
+
+The `SetReplace` library can be used outside of Mathematica. It provides a CMake project for easy interaction with the C++ ecosystem.
+To compile the core library using CMake:
+
+```bash
+mkdir build; cd build;
+cmake ../SetReplace-source-dir
+cmake --build .
+```
+
+Options available for CMake:
+
+- `SET_REPLACE_BUILD_TESTING`:
+Enable cpp testing using googletest. It downloads gtest at build time.
+
+- `SET_REPLACE_WITH_MATHEMATICA`:
+Generates the target `SetReplaceMathematica`, that provides an interface for using SetReplace in Mathematica.
+Use the variable `Mathematica_ROOT` to point to the root directory of the wolfram engine.
+This directory might contain a `.CreationID` file. i.e `Mathematica_ROOT:FILEPATH=/usr/local/Wolfram/WolframEngine/12.1`
+
+```bash
+cmake ../SetReplace-source-dir -DSET_REPLACE_WITH_MATHEMATICA:BOOL=ON -DMathematica_ROOT=/path/to/WolframEngine/X.Y
+cmake --build .
+```
+
+- `SET_REPLACE_ENABLE_ALLWARNINGS`:
+For developers and contributors. Useful for continuous integration. Add compile options to the targets enabling extra warnings and treating warnings as errors.
+
+#### Using SetReplace in ThirdParty CMake projects
+
+If a third party project wants to use `SetReplace`, it is enough to write in their `CMakeLists.txt`:
+
+```
+add_library(foo ...)
+
+find_package(SetReplace)
+target_link_libraries(foo SetReplace::SetReplace)
+#or target_link_libraries(foo SetReplace::SetReplaceMathematica)
+```
+
+and provide to their CMake project the CMake variable: `SetReplace_DIR` pointing to the file `SetReplaceConfig.cmake`.
+This file can be found in the build directory of SetReplace, or in the `$CMAKE_INSTALL_PREFIX/lib/cmake/SetReplace`
+if the project was installed.
+
 ### Tests
 
 Unit tests live in the [Tests folder](/Tests). They are technically .wlt files, but they contain more structure.
@@ -302,33 +347,34 @@ In addition to that, here are some more-or-less established rules:
 * Start global constants with `$`, whether internal or public, and tags (such as used in [`Throw`](https://reference.wolfram.com/language/ref/Throw.html) or [`Sow`](https://reference.wolfram.com/language/ref/Sow.html), or as generic enum labels) with `$$`.
 
 #### C++
-New code should follow [Google C++ Style](https://google.github.io/styleguide/cppguide.html) guidelines, save for
-the exceptions laid out in the list below. The code in this repository is currently undergoing refactoring to
-conform to this specification. You can track the progress of this refactoring
-[here](https://github.com/maxitg/SetReplace/projects/2).
-
-The following are exceptions to Google C++ Style:
+The code should follow [Google C++ Style](https://google.github.io/styleguide/cppguide.html) guidelines, save for the
+following exceptions:
 * Maximum line length is 120 characters.
 * Function and variable names, including const and constexpr variables, use lower camel case.
 * Namespace and class names use upper camel case.
 * C++ exceptions may be thrown.
-* All indentation uses four spaces, except for access specifiers which uses one.
 * White space in pointer and reference declarations goes after the `*` or `&` character. For example:
     * `int* foo;`
     * `const std::string& string;`
+* If splitting function arguments into multiple lines, each argument should go on a separate line.
 * License, authors, and file descriptions should not be put at the top of files.
 * Doxygen is used for documentation.
+* We use `.cpp` and `.hpp` extensions for source files.
 
-A useful tool for confirming your code's adherence to the above code style is to use
-[cpplint](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py). You can lint a C++ source
-or header file like this:
-```bash
-cpplint.py --linelength=120 --filter=-legal/copyright file_name
-```
-If cpplint flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
+We use [`clang-format`](https://clang.llvm.org/docs/ClangFormat.html) for formatting and
+[`cpplint`](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py) for linting.
+
+To run these automatically, call `./lint.sh`. This will print a formatting diff and error messages from `cpplint`.
+If there are no errors found, it will exit with no output.
+To edit the code in place with the fixed formatting use `./lint.sh -i`.
+
+If `cpplint` flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
 positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
 space, or `// NOLINTNEXTLINE` on a new line above if there is no space. For any usages of `// NOLINT` or
 `// NOLINTNEXTLINE`, please describe the reason for its inclusion both in a code comment and in your pull request's
 comments section.
+
+If you want to disable formatting, use `// clang-format off` and `// clang-format on` around the manually formatted
+code.
 
 That's all for our guidelines, now let's go figure out the fundamental theory of physics! :rocket:
