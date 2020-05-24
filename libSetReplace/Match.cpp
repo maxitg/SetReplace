@@ -157,7 +157,7 @@ class Matcher::Implementation {
   MatchPtr nextMatch_;
 
   /**
-   * This variable is typically monitored in abortFunc such that other threads can check if they should abort.
+   * This variable is typically monitored in shouldAbort such that other threads can check if they should abort.
    * It is volatile, but not atomic because it is locked before being written to.
    */
   mutable volatile Error currentError;
@@ -183,9 +183,9 @@ class Matcher::Implementation {
         currentError(None) {}
 
   void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
-                                      const std::function<bool()>& shouldAbort) {
+                                      const std::function<bool()>& abortRequested) {
     // If one thread errors, alert other threads with this function
-    const std::function<bool()> abortFunc = [this, &shouldAbort]() { return currentError != None || shouldAbort(); };
+    const std::function<bool()> shouldAbort = [this, &abortRequested]() { return currentError != None || abortRequested(); };
 
     // Only create threads if there is more than one rule
     const size_t numThreads = rules_.size() > 1 ? rules_.size() : 0;
@@ -193,7 +193,7 @@ class Matcher::Implementation {
       // Multi-threaded path
       std::vector<std::thread> threads(numThreads);
       for (size_t i = 0; i < numThreads; ++i) {
-        threads[i] = std::thread(&Implementation::addMatchesForRule, this, expressionIDs, i, abortFunc);
+        threads[i] = std::thread(&Implementation::addMatchesForRule, this, expressionIDs, i, shouldAbort);
       }
       for (auto& thread : threads) {
         thread.join();
@@ -201,7 +201,7 @@ class Matcher::Implementation {
     } else {
       // Single-threaded path
       for (size_t i = 0; i < rules_.size(); ++i) {
-        addMatchesForRule(expressionIDs, i, abortFunc);
+        addMatchesForRule(expressionIDs, i, shouldAbort);
       }
     }
 
