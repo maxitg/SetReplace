@@ -185,7 +185,9 @@ class Matcher::Implementation {
   void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
                                       const std::function<bool()>& abortRequested) {
     // If one thread errors, alert other threads with this function
-    const std::function<bool()> shouldAbort = [this, &abortRequested]() { return currentError != None || abortRequested(); };
+    const std::function<bool()> shouldAbort = [this, &abortRequested]() {
+      return currentError != None || abortRequested();
+    };
 
     // Only create threads if there is more than one rule
     const size_t numThreads = rules_.size() > 1 ? rules_.size() : 0;
@@ -335,27 +337,23 @@ class Matcher::Implementation {
 
     std::lock_guard<std::mutex> lock(matchMutex);
 
-    try {
-      if (!allMatches_.insert(matchPtr).second) {
-        return;
-      }
+    if (!allMatches_.insert(matchPtr).second) {
+      return;
+    }
 
-      auto bucketIt = matchQueue_.find(matchPtr);  // works because comparison is smart
-      if (bucketIt == matchQueue_.end()) {
-        bucketIt = matchQueue_.insert({matchPtr, {{}, {}}}).first;
-      }
-      auto& bucket = bucketIt->second;
-      if (!bucket.first.count(matchPtr)) {  // works because hashing is smart
-        bucket.second.push_back(matchPtr);
-        bucket.first[matchPtr] = bucket.second.size() - 1;
+    auto bucketIt = matchQueue_.find(matchPtr);  // works because comparison is smart
+    if (bucketIt == matchQueue_.end()) {
+      bucketIt = matchQueue_.insert({matchPtr, {{}, {}}}).first;
+    }
+    auto& bucket = bucketIt->second;
+    if (!bucket.first.count(matchPtr)) {  // works because hashing is smart
+      bucket.second.push_back(matchPtr);
+      bucket.first[matchPtr] = bucket.second.size() - 1;
 
-        const auto& expressions = matchPtr->inputExpressions;
-        for (const auto expression : expressions) {
-          expressionToMatches_[expression].insert(matchPtr);
-        }
+      const auto& expressions = matchPtr->inputExpressions;
+      for (const auto expression : expressions) {
+        expressionToMatches_[expression].insert(matchPtr);
       }
-    } catch (Error e) {
-      setCurrentErrorIfNone(e);
     }
   }
 
