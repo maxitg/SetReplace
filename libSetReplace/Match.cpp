@@ -255,6 +255,9 @@ class Matcher::Implementation {
     const auto& ruleInputExpressions = rules_[ruleID].inputs;
     for (size_t i = 0; i < ruleInputExpressions.size(); ++i) {
       const Match emptyMatch{ruleID, std::vector<ExpressionID>(ruleInputExpressions.size(), -1)};
+      if (currentError != None) {
+        return;
+      }
       completeMatchesStartingWithInput(emptyMatch, ruleInputExpressions, i, expressionIDs, shouldAbort);
     }
   }
@@ -265,6 +268,9 @@ class Matcher::Implementation {
                                         const std::vector<ExpressionID>& potentialExpressionIDs,
                                         const std::function<bool()>& shouldAbort) {
     for (const auto expressionID : potentialExpressionIDs) {
+      if (currentError != None) {
+        return;
+      }
       if (isExpressionUnused(incompleteMatch, expressionID)) {
         attemptMatchExpressionToInput(incompleteMatch, partiallyMatchedInputs, nextInputIdx, expressionID, shouldAbort);
       }
