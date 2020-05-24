@@ -432,7 +432,8 @@ class Matcher::Implementation {
       // and don't have any specific atom references.
       // That implies rule inputs are not a connected graph, which is not supported at the moment,
       // and would require custom logic to implement efficiently.
-      throw Error::DisconnectedInputs;
+      setCurrentErrorIfNone(DisconnectedInputs);
+      return {{}, {}};
     } else {
       return {nextInputIdx, nextExpressionsToTry};
     }
