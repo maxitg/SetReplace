@@ -192,7 +192,7 @@ class Matcher::Implementation {
     // Only create threads if there is more than one rule and hardware has more than one thread
     const unsigned int numHardwareThreads = std::thread::hardware_concurrency();  // returns 0 if unknown
     const unsigned int numThreadsToUse = rules_.size() > 1 && numHardwareThreads > 1
-                                             ? std::min(rules_.size(), static_cast<unsigned long>(numHardwareThreads))
+                                             ? std::min(rules_.size(), static_cast<uint64_t>(numHardwareThreads))
                                              : 0;
     const unsigned int ruleRangeSize = rules_.size() / numThreadsToUse;
 
