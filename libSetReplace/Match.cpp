@@ -37,8 +37,6 @@ class MatchComparator {
           case Matcher::OrderingDirection::Reverse:
             comparison = -comparison;
             break;
-          default:
-            throw Matcher::Error::InvalidOrderingDirection;
         }
         return comparison < 0;
       }
@@ -59,9 +57,6 @@ class MatchComparator {
 
       case Matcher::OrderingFunction::RuleIndex:
         return compare(a->rule, b->rule);
-
-      default:
-        throw Matcher::Error::InvalidOrderingFunction;
     }
   }
 
@@ -180,7 +175,15 @@ class Matcher::Implementation {
         getAtomsVector_(std::move(getAtomsVector)),
         matchQueue_(MatchComparator(orderingSpec)),
         randomGenerator_(randomSeed),
-        currentError(None) {}
+        currentError(None) {
+    for (const auto& ordering : orderingSpec) {
+      if (ordering.first < OrderingFunction::SortedExpressionIDs || ordering.first > OrderingFunction::RuleIndex) {
+        throw Matcher::Error::InvalidOrderingFunction;
+      } else if (ordering.second < OrderingDirection::Normal || ordering.second > OrderingDirection::Reverse) {
+        throw Matcher::Error::InvalidOrderingDirection;
+      }
+    }
+  }
 
   void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
                                       const std::function<bool()>& abortRequested) {
