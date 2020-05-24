@@ -196,8 +196,8 @@ class Matcher::Implementation {
                                              : 0;
     const unsigned int ruleRangeSize = rules_.size() / numThreadsToUse;
 
-    auto addMatchesForRuleRange = [=](unsigned int ruleIDBegin, unsigned int ruleIDEnd) {
-      for (unsigned int i = ruleIDBegin; i < ruleIDEnd; ++i) {
+    auto addMatchesForRuleRange = [=](unsigned int start) {
+      for (unsigned int i = start; i < rules_.size(); i += numThreadsToUse) {
         addMatchesForRule(expressionIDs, i, shouldAbort);
       }
     };
@@ -206,7 +206,7 @@ class Matcher::Implementation {
       // Multi-threaded path
       std::vector<std::thread> threads(numThreadsToUse);
       for (unsigned int i = 0; i < numThreadsToUse; ++i) {
-        threads[i] = std::thread(addMatchesForRuleRange, i * ruleRangeSize, (i + 1) * ruleRangeSize);
+        threads[i] = std::thread(addMatchesForRuleRange, i);
       }
       for (auto& thread : threads) {
         thread.join();
