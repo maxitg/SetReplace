@@ -189,13 +189,24 @@ class Matcher::Implementation {
       return currentError != None || abortRequested();
     };
 
-    // Only create threads if there is more than one rule
-    const size_t numThreads = rules_.size() > 1 ? rules_.size() : 0;
-    if (numThreads > 0) {
+    // Only create threads if there is more than one rule and hardware has more than one thread
+    const unsigned int numHardwareThreads = std::thread::hardware_concurrency();  // returns 0 if unknown
+    const unsigned int numThreadsToUse = rules_.size() > 1 && numHardwareThreads > 1
+                                             ? std::min(rules_.size(), static_cast<unsigned long>(numHardwareThreads))
+                                             : 0;
+    const unsigned int ruleRangeSize = rules_.size() / numThreadsToUse;
+
+    auto addMatchesForRuleRange = [=](unsigned int ruleIDBegin, unsigned int ruleIDEnd) {
+      for (unsigned int i = ruleIDBegin; i < ruleIDEnd; ++i) {
+        addMatchesForRule(expressionIDs, i, shouldAbort);
+      }
+    };
+
+    if (numThreadsToUse > 0) {
       // Multi-threaded path
-      std::vector<std::thread> threads(numThreads);
-      for (size_t i = 0; i < numThreads; ++i) {
-        threads[i] = std::thread(&Implementation::addMatchesForRule, this, expressionIDs, i, shouldAbort);
+      std::vector<std::thread> threads(numThreadsToUse);
+      for (unsigned int i = 0; i < numThreadsToUse; ++i) {
+        threads[i] = std::thread(addMatchesForRuleRange, i * ruleRangeSize, (i + 1) * ruleRangeSize);
       }
       for (auto& thread : threads) {
         thread.join();
