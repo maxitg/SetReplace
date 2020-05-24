@@ -37,6 +37,8 @@ class MatchComparator {
           case Matcher::OrderingDirection::Reverse:
             comparison = -comparison;
             break;
+          default:
+            return false;  // throw is called in constructor of Matcher::Implementation
         }
         return comparison < 0;
       }
@@ -57,6 +59,9 @@ class MatchComparator {
 
       case Matcher::OrderingFunction::RuleIndex:
         return compare(a->rule, b->rule);
+
+      default:
+        return 0;  // throw is called in constructor of Matcher::Implementation
     }
   }
 
