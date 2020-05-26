@@ -25,7 +25,7 @@ Let's start with a rule that moves a "particle" (a unary edge) alone directed ed
 In[] := RulePlot[WolframModel[{{1}, {1, 2}} -> {{1, 2}, {2}}]]
 ```
 
-<img src="READMEImages/WanderingParticleRule.png" width="892">
+<img src="Images/WanderingParticleRule.png" width="892">
 
 If we run this system on a path graph with 3 vertices, we get a very simple behavior:
 
@@ -35,7 +35,7 @@ In[] := ResourceFunction["MultiwaySystem"][
     2}, {2, 3}}}, 3, "StatesGraph", VertexSize -> 1]
 ```
 
-<img src="READMEImages/BasicGlobalMultiway.png" width="478">
+<img src="Images/BasicGlobalMultiway.png" width="478">
 
 Now, what happens if we split this graph so that there is non-determinism at play?
 
@@ -46,7 +46,7 @@ In[] := Graph[ResourceFunction["MultiwaySystem"][
   GraphLayout -> "LayeredDigraphEmbedding"]
 ```
 
-<img src="READMEImages/BranchingGlobalMultiway.png" width="560">
+<img src="Images/BranchingGlobalMultiway.png" width="560">
 
 Now, the evolution splits in two branches, mirroring precisely the input graph.
 (Note, we needed to make the "outgoing branches" in the input graph different length, because otherwise the two final states are isomorphic, and the `MultiwaySystem` identifies them as one.)
@@ -66,7 +66,7 @@ In[] := ResourceFunction["MultiwaySystem"][
       1}, {7, 2}}}]
 ```
 
-<img src="READMEImages/RedundantGlobalMultiway.png" width="775">
+<img src="Images/RedundantGlobalMultiway.png" width="775">
 
 Note that even at the first step, the system branches in two different states.
 However, there is no ambiguity.
@@ -165,7 +165,7 @@ In[] := labeledCausalGraph[
         2, 3}}}|>, {{1, 2}}, Infinity]]
 ```
 
-<img src="READMEImages/MatchAllTimelikeMatching.png" width="510">
+<img src="Images/MatchAllTimelikeMatching.png" width="510">
 
 In this case we have two rules, `{{1, 2}} -> {{2, 3}}` and `{{1, 2}, {2, 3}} -> {{1, 2, 3}}`.
 Note that here `1`, `2` and `3` are not patterns but labeled vertices.
@@ -192,7 +192,7 @@ In[] := labeledCausalGraph[
         2, 3}}, {{1, 2}, {1, 2, 3}} -> {{2, 3}}}|>, {{1, 2}}, 6]]
 ```
 
-<img src="READMEImages/MatchAllRepeatingMatching.png" width="510">
+<img src="Images/MatchAllRepeatingMatching.png" width="510">
 
 Similarly, this system will match branchlike events as well, as can be seen in the following example:
 
@@ -203,7 +203,7 @@ In[] := labeledCausalGraph[
          3}, {2, 4}} -> {{2, 3, 4}}}|>, {{1, 2}}, 6]]
 ```
 
-<img src="READMEImages/MatchAllBranchlikeMatching.png" width="995">
+<img src="Images/MatchAllBranchlikeMatching.png" width="995">
 
 Note in the above there are two possibilities to match `{{1, 2}}`, which are incompatibly according to the ordinary `WolframModel` and can only be achieved with different choices of the `"EventOrderingFunction"` (i.e., branchlike).
 However, the match-all system is perfectly happy to match them with the third rule.
@@ -257,7 +257,7 @@ In[] := labeledCausalGraph[
   }
 ```
 
-<img src="READMEImages/SeparationComparison.png" width="1197">
+<img src="Images/SeparationComparison.png" width="1197">
 
 And this separation is typically not too hard to understand for edges that are immediate neighbors in the causal graph.
 However, what if the edges are farther down in history?
@@ -272,7 +272,7 @@ In[] := labeledCausalGraph[
          3}, {3, 4}} -> {{4, 5}, {5, 6}}}|>, {{1, 2}}, Infinity]]
 ```
 
-<img src="READMEImages/MatchAllQuantumSpacelikeMatching.png" width="995">
+<img src="Images/MatchAllQuantumSpacelikeMatching.png" width="995">
 
 But what about something like this?
 
@@ -285,7 +285,7 @@ In[] := labeledCausalGraph[WolframModel[<|"PatternRules" -> {
  ImageSize -> 512]
 ```
 
-<img src="READMEImages/MatchAllSpacelikeBranchlikeMixed.png" width="1375">
+<img src="Images/MatchAllSpacelikeBranchlikeMixed.png" width="1375">
 
 What is the separation between the edges `{v, f, 1}` and `{v, f, 2}`?
 On one hand they are branchlike, because one of their common ancestors is the event `{{v, 1}} -> {{v, 1, 1}, {v, 1, 2}}`.
@@ -326,7 +326,7 @@ In[] := WolframModel[{{1}, {1, 2}} -> {{1, 2}, {2}}, {{a1}, {a1, a2}, {a2,
   Infinity]["LayeredCausalGraph"]
 ```
 
-<img src="READMEImages/RedundantLocalMultiway.png" width="657">
+<img src="Images/RedundantLocalMultiway.png" width="657">
 
 Instead of a mesh of redundant events that the global multiway system produced, we now only have two places where the events merge.
 To examine them more closely, lets "label" the particles:
@@ -338,7 +338,7 @@ In[] := labeledCausalGraph[
     m1}, {m1, m2}}, Infinity], ImageSize -> 896]
 ```
 
-<img src="READMEImages/RedundantLocalMultiwayLabeledParticles.png" width="2335">
+<img src="Images/RedundantLocalMultiwayLabeledParticles.png" width="2335">
 
 If we look closely at the events near the merge points, we can see that some "redundancy" remains, but it is no longer due to the spacelike separated events, but rather due to the "background" edges being rewritten during evolution.
 And as a result, if a particle follows another particle on the same "track", the edges it's going through are different (even though they involve the same vertices), hence the duplication.
