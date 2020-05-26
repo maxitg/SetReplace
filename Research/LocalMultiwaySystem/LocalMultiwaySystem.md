@@ -150,10 +150,12 @@ Furthermore, let's use a little helper function which would helpfully label the 
 labeledCausalGraph[evolution_, opts___] := 
  evolution["LayeredCausalGraph", opts, 
   VertexLabels -> 
-   Thread[Range[evolution["EventsCount"]] -> 
-     StandardForm /@ (Last /@ evolution["EventsList"] /. 
-        edgeIndex_Integer :> 
-         evolution["AllExpressions"][[edgeIndex]])]]
+   Thread[Range[
+      evolution["EventsCount"]] -> (Placed[#, {After, Above}] &) /@ 
+      OutputForm /@ (Column /@ (Riffle[List @@ #, "\[DownArrow]"] &) /@
+            Last /@ evolution["EventsList"] /. 
+         edgeIndex_Integer :> 
+          evolution["AllExpressions"][[edgeIndex]])]]
 ```
 
 Let's then take a look at the following system:
@@ -165,7 +167,7 @@ In[] := labeledCausalGraph[
         2, 3}}}|>, {{1, 2}}, Infinity]]
 ```
 
-<img src="Images/MatchAllTimelikeMatching.png" width="255">
+<img src="Images/MatchAllTimelikeMatching.png" width="137">
 
 In this case we have two rules, `{{1, 2}} -> {{2, 3}}` and `{{1, 2}, {2, 3}} -> {{1, 2, 3}}`.
 Note that here `1`, `2` and `3` are not patterns but labeled vertices.
@@ -192,7 +194,7 @@ In[] := labeledCausalGraph[
         2, 3}}, {{1, 2}, {1, 2, 3}} -> {{2, 3}}}|>, {{1, 2}}, 6]]
 ```
 
-<img src="Images/MatchAllRepeatingMatching.png" width="255">
+<img src="Images/MatchAllRepeatingMatching.png" width="150">
 
 Similarly, this system will match branchlike events as well, as can be seen in the following example:
 
@@ -249,15 +251,14 @@ And in simple systems, it is quite straightforward to understand what the separa
 I.e., in the following three systems, the edges `{2, 3}` and `{3, 4}` are spacelike, branchlike and timelike respectively:
 
 ```wl
-In[] := labeledCausalGraph[
-   WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity]] & /@ {
-  {{1, 2}} -> {{2, 3}, {3, 4}},
-  {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}},
-  {{{1, 2}} -> {{2, 3}}, {{2, 3}} -> {{3, 4}}}
-  }
+In[] := Framed[labeledCausalGraph[
+    WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, 
+     Infinity]]] & /@ {{{1, 2}} -> {{2, 3}, {3, 
+     4}}, {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}}, {{{1, 
+      2}} -> {{2, 3}}, {{2, 3}} -> {{3, 4}}}}
 ```
 
-<img src="Images/SeparationComparison.png" width="598">
+<img src="Images/SeparationComparison.png" width="458">
 
 And this separation is typically not too hard to understand for edges that are immediate neighbors in the causal graph.
 However, what if the edges are farther down in history?
@@ -277,15 +278,14 @@ In[] := labeledCausalGraph[
 But what about something like this?
 
 ```wl
-In[] := labeledCausalGraph[WolframModel[<|"PatternRules" -> {
-     {{v, i}} -> {{v, 1}, {v, 2}},
-     {{v, 1}} -> {{v, 1, 1}, {v, 1, 2}},
-     {{v, 1, 1}, {v, 2}} -> {{v, f, 1}},
-     {{v, 1, 2}, {v, 2}} -> {{v, f, 2}}}|>, {{v, i}}, Infinity], 
- ImageSize -> 512]
+In[] := labeledCausalGraph[
+ WolframModel[<|
+   "PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}}, {{v, 1}} -> {{v, 
+        1, 1}, {v, 1, 2}}, {{v, 1, 1}, {v, 2}} -> {{v, f, 1}}, {{v, 1,
+         2}, {v, 2}} -> {{v, f, 2}}}|>, {{v, i}}, Infinity]]
 ```
 
-<img src="Images/MatchAllSpacelikeBranchlikeMixed.png" width="687">
+<img src="Images/MatchAllSpacelikeBranchlikeMixed.png" width="497">
 
 What is the separation between the edges `{v, f, 1}` and `{v, f, 2}`?
 On one hand they are branchlike, because one of their common ancestors is the event `{{v, 1}} -> {{v, 1, 1}, {v, 1, 2}}`.
@@ -335,10 +335,10 @@ To examine them more closely, lets "label" the particles:
 In[] := labeledCausalGraph[
  WolframModel[{{p, x, 1}, {1, 2}} -> {{1, 2}, {p, x, 2}}, {{p, a, 
     a1}, {a1, a2}, {a2, a3}, {a3, m1}, {p, b, b1}, {b1, b2}, {b2, 
-    m1}, {m1, m2}}, Infinity], ImageSize -> 896]
+    m1}, {m1, m2}}, Infinity], ImageSize -> 384]
 ```
 
-<img src="Images/RedundantLocalMultiwayLabeledParticles.png" width="1167">
+<img src="Images/RedundantLocalMultiwayLabeledParticles.png" width="527">
 
 If we look closely at the events near the merge points, we can see that some "redundancy" remains, but it is no longer due to the spacelike separated events, but rather due to the "background" edges being rewritten during evolution.
 And as a result, if a particle follows another particle on the same "track", the edges it's going through are different (even though they involve the same vertices), hence the duplication.
