@@ -1,6 +1,6 @@
 set(_link_libraries SetReplace ${GTEST_LIBRARIES})
 
-add_executable(SetTest SetTest.cpp)
-target_link_libraries(SetTest ${_link_libraries})
+add_executable(Set_test Set_test.cpp)
+target_link_libraries(Set_test ${_link_libraries})
 
-gtest_discover_tests(SetTest)
+gtest_discover_tests(Set_test)
