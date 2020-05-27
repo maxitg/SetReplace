@@ -103,16 +103,22 @@ Set::StepSpecification getStepSpec(WolframLibraryData libData, MTensor stepsTens
 }
 
 MTensor putSet(const std::vector<SetExpression>& expressions, WolframLibraryData libData) {
-  // creator + destroyer events + generation + atoms count
+  // creator event + destroyer events pointer + generation + atoms list pointer
   // add fake event at the end to specify the length of the last expression
   size_t tensorLength = 1 + 4 * (expressions.size() + 1);
 
-  // The rest of the result are the atoms, positions to which are referenced in each expression spec.
+  // Atoms are next, positions to which are referenced in each expression spec.
   // This is where the first atom will be located.
   size_t atomsPointer = tensorLength + 1;
-
   for (const auto& expression : expressions) {
     tensorLength += expression.atoms.size();
+  }
+
+  // Finally, destroyer events.
+  // This is where the first list of destroyer events is located.
+  size_t destroyerPointer = tensorLength + 1;
+  for (const auto& expression : expressions) {
+    tensorLength += expression.destroyerEvents.size();
   }
 
   const mint dimensions[1] = {static_cast<mint>(tensorLength)};
@@ -131,23 +137,28 @@ MTensor putSet(const std::vector<SetExpression>& expressions, WolframLibraryData
   appendToTensor({static_cast<mint>(expressions.size())});
   for (const auto& expression : expressions) {
     appendToTensor({static_cast<mint>(expression.creatorEvent),
-                    static_cast<mint>(expression.destroyerEvent),
+                    static_cast<mint>(destroyerPointer),
                     static_cast<mint>(expression.generation),
                     static_cast<mint>(atomsPointer)});
     atomsPointer += expression.atoms.size();
+    destroyerPointer += expression.destroyerEvents.size();
   }
 
   // Put fake event at the end so that the length of final expression can be determined on WL side.
   constexpr EventID fakeEvent = -3;
   constexpr Generation fakeGeneration = -1;
   appendToTensor({static_cast<mint>(fakeEvent),
-                  static_cast<mint>(fakeEvent),
+                  static_cast<mint>(destroyerPointer),
                   static_cast<mint>(fakeGeneration),
                   static_cast<mint>(atomsPointer)});
 
   for (const auto& expression : expressions) {
     // Cannot do static_cast due to 32-bit Windows support
     appendToTensor(std::vector<mint>(expression.atoms.begin(), expression.atoms.end()));
+  }
+
+  for (const auto& expression : expressions) {
+    appendToTensor(expression.destroyerEvents);
   }
 
   return output;
@@ -160,13 +171,15 @@ int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, MArg
 
   std::vector<Rule> rules;
   std::vector<AtomsVector> initialExpressions;
+  Set::EventSelectionFunction eventSelectionFunction;
   Matcher::OrderingSpec orderingSpec;
   unsigned int randomSeed;
   try {
     rules = getRules(libData, MArgument_getMTensor(argv[0]));
     initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
-    orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[2]));
-    randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[3]));
+    eventSelectionFunction = static_cast<Set::EventSelectionFunction>(MArgument_getInteger(argv[2]));
+    orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[3]));
+    randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[4]));
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
@@ -178,7 +191,7 @@ int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, MArg
     thisSetID = distribution(randomGenerator);
   } while (sets_.count(thisSetID) > 0);
   try {
-    sets_.insert({thisSetID, Set(rules, initialExpressions, orderingSpec, randomSeed)});
+    sets_.insert({thisSetID, Set(rules, initialExpressions, eventSelectionFunction, orderingSpec, randomSeed)});
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }

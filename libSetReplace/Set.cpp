@@ -17,6 +17,7 @@ class Set::Implementation {
 
   // Determines the limiting conditions for the evaluation.
   StepSpecification stepSpec_;
+  EventSelectionFunction eventSelectionFunction_;
   TerminationReason terminationReason_ = TerminationReason::NotTerminated;
 
   std::unordered_map<ExpressionID, SetExpression> expressions_;
@@ -45,11 +46,15 @@ class Set::Implementation {
  public:
   Implementation(const std::vector<Rule>& rules,
                  const std::vector<AtomsVector>& initialExpressions,
+                 const EventSelectionFunction& eventSelectionFunction,
                  const Matcher::OrderingSpec& orderingSpec,
                  const unsigned int randomSeed)
-      : Implementation(rules, initialExpressions, orderingSpec, randomSeed, [this](const int64_t expressionID) {
-          return expressions_.at(expressionID).atoms;
-        }) {}
+      : Implementation(rules,
+                       initialExpressions,
+                       eventSelectionFunction,
+                       orderingSpec,
+                       randomSeed,
+                       [this](const int64_t expressionID) { return expressions_.at(expressionID).atoms; }) {}
 
   int64_t replaceOnce(const std::function<bool()> shouldAbort) {
     terminationReason_ = TerminationReason::NotTerminated;
@@ -98,11 +103,18 @@ class Set::Implementation {
 
     // At this point, we are committed to modifying the set.
 
+    // This goes first, as if the event selection function is invalid, we want to fail before modifying anything else.
+    if (eventSelectionFunction_ == EventSelectionFunction::GlobalSpacelike) {
+      matcher_.removeMatchesInvolvingExpressions(match->inputExpressions);
+      atomsIndex_.removeExpressions(match->inputExpressions);
+    } else if (eventSelectionFunction_ == EventSelectionFunction::None) {
+      matcher_.deleteMatch(match);
+    } else {
+      throw Error::InvalidEventSelectionFunction;
+    }
+
     // Name newly created atoms as well, now all atoms in the output are explicitly named.
     const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
-
-    matcher_.removeMatchesInvolvingExpressions(match->inputExpressions);
-    atomsIndex_.removeExpressions(match->inputExpressions);
 
     Generation outputGeneration = 0;
     for (const auto& inputExpression : match->inputExpressions) {
@@ -155,10 +167,12 @@ class Set::Implementation {
  private:
   Implementation(std::vector<Rule> rules,
                  const std::vector<AtomsVector>& initialExpressions,
+                 const EventSelectionFunction& eventSelectionFunction,
                  const Matcher::OrderingSpec& orderingSpec,
                  const unsigned int randomSeed,
                  const std::function<AtomsVector(ExpressionID)>& getAtomsVector)
       : rules_(std::move(rules)),
+        eventSelectionFunction_(eventSelectionFunction),
         atomsIndex_(getAtomsVector),
         matcher_(rules_, &atomsIndex_, getAtomsVector, orderingSpec, randomSeed) {
     for (const auto& expression : initialExpressions) {
@@ -295,18 +309,17 @@ class Set::Implementation {
     ids.reserve(expressions.size());
     for (const auto& expression : expressions) {
       ids.push_back(nextExpressionID_);
-      expressions_.insert(
-          std::make_pair(nextExpressionID_++, SetExpression{expression, creatorEvent, finalStateEvent, generation}));
+      expressions_.insert(std::make_pair(nextExpressionID_++, SetExpression{expression, creatorEvent, {}, generation}));
     }
     return ids;
   }
 
   void assignDestroyerEvent(const std::vector<ExpressionID>& expressions, const EventID destroyerEvent) {
     for (const auto id : expressions) {
-      if (expressions_.at(id).destroyerEvent == finalStateEvent) {
+      if (expressions_.at(id).destroyerEvents.empty()) {
         ++destroyedExpressionsCount_;
       }
-      expressions_.at(id).destroyerEvent = destroyerEvent;
+      expressions_.at(id).destroyerEvents.push_back(destroyerEvent);
     }
     updateAtomDegrees(&atomDegrees_, expressions, -1);
   }
@@ -337,9 +350,11 @@ class Set::Implementation {
 
 Set::Set(const std::vector<Rule>& rules,
          const std::vector<AtomsVector>& initialExpressions,
+         const EventSelectionFunction& eventSelectionFunction,
          const Matcher::OrderingSpec& orderingSpec,
          unsigned int randomSeed)
-    : implementation_(std::make_shared<Implementation>(rules, initialExpressions, orderingSpec, randomSeed)) {}
+    : implementation_(std::make_shared<Implementation>(
+          rules, initialExpressions, eventSelectionFunction, orderingSpec, randomSeed)) {}
 
 int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) { return implementation_->replaceOnce(shouldAbort); }
 

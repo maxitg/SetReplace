@@ -28,6 +28,7 @@ $cpp$setCreate = If[$libraryFile =!= $Failed,
 		"setCreate",
 		{{Integer, 1}, (* rules *)
 			{Integer, 1}, (* initial set *)
+			Integer, (* event selection function *)
 			{Integer, 1}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
 			Integer}, (* random seed *)
 		Integer], (* set ptr *)
@@ -121,14 +122,15 @@ encodeNestedLists[list_List] :=
 
 decodeExpressions[list_List] := Module[{
 		count = list[[1]],
-		creatorEvents, destroyerEvents, generations, atomPointers,
-		atomRanges, atomLists},
-	{creatorEvents, destroyerEvents, generations, atomPointers} =
+		creatorEvents, destroyerPointers, generations, atomPointers,
+		atomRanges, atomLists, destroyerRanges, destroyerLists},
+	{creatorEvents, destroyerPointers, generations, atomPointers} =
 		Transpose[Partition[list[[2 ;; 4 (count + 1) + 1]], 4]];
-	atomRanges = Partition[atomPointers, 2, 1];
-	atomLists = list[[#[[1]] ;; #[[2]] - 1]] & /@ atomRanges;
+	{atomRanges, destroyerRanges} = Partition[#, 2, 1] & /@ {atomPointers, destroyerPointers};
+	{atomLists, destroyerLists} = Map[list[[#[[1]] ;; #[[2]] - 1]] &, {atomRanges, destroyerRanges}, {2}];
 	<|$creatorEvents -> Most[creatorEvents],
-		$destroyerEvents -> Most[destroyerEvents] /. {-1 -> Infinity},
+		(* We only call libSetReplace with a singleway evolution (for now), so we can assume there is only one destroyer *)
+		$destroyerEvents -> Replace[destroyerLists, {{} -> Infinity, {e_, ___} :> e}, {1}],
 		$generations -> Most[generations],
 		$atomLists -> atomLists|>
 ]
@@ -212,6 +214,12 @@ $terminationReasonCodes = <|
 |>;
 
 
+$eventSelectionFunctionCodes = <|
+	$globalSpacelike -> 0,
+	None -> 1
+|>;
+
+
 $orderingFunctionCodes = <|
 	$sortedExpressionIDs -> 0,
 	$reverseSortedExpressionIDs -> 1,
@@ -245,6 +253,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 	setPtr = $cpp$setCreate[
 		encodeNestedLists[List @@@ mappedRules],
 		encodeNestedLists[mappedSet],
+		Replace[$globalSpacelike, $eventSelectionFunctionCodes], (* hardcode global spacelike (singleway) system for now *)
 		Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
 		RandomInteger[{0, $maxUnsignedInt}]];
 	TimeConstrained[

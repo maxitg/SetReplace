@@ -16,7 +16,7 @@ class Set {
  public:
   /** @brief Type of the error occurred during evaluation.
    */
-  enum class Error { Aborted, DisconnectedInputs, NonPositiveAtoms, AtomCountOverflow };
+  enum class Error { Aborted, DisconnectedInputs, NonPositiveAtoms, AtomCountOverflow, InvalidEventSelectionFunction };
 
   /** @brief Specification of conditions upon which to stop evaluation.
    * @details Each of these is UpTo, i.e., the evolution is terminated when the first of these, fixed point, or an abort
@@ -38,6 +38,13 @@ class Set {
     int64_t maxFinalExpressions = 0;
   };
 
+  /** @brief All possible functions available to select events. Some of these will cause multiway evolution.
+   */
+  enum class EventSelectionFunction {
+    GlobalSpacelike = 0,  // default singleway evolution, a single branch of the multiway system
+    None = 1              // match-all multiway system, a single event can match branchlike and timelike expressions
+  };
+
   /** @brief Status of evaluation / termination reason if evaluation is finished.
    */
   enum class TerminationReason {
@@ -54,11 +61,13 @@ class Set {
   /** @brief Creates a new set with a given set of evolution rules, and initial condition.
    * @param rules substittion rules used for evolution. Note, these rules cannot be changed.
    * @param initialExpressions initial condition. It will be lazily indexed before the first replacement.
+   * @param selectionFunction which events to apply (i.e., singleway vs. different types of multiway systems).
    * @param orderingSpec in which order to apply events.
    * @param randomSeed the seed to use for selecting matches in random evaluation case.
    */
   Set(const std::vector<Rule>& rules,
       const std::vector<AtomsVector>& initialExpressions,
+      const EventSelectionFunction& selectionFunction,
       const Matcher::OrderingSpec& orderingSpec,
       unsigned int randomSeed = 0);
 

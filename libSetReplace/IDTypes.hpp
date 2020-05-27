@@ -23,7 +23,6 @@ using ExpressionID = int64_t;
  */
 using EventID = int64_t;
 constexpr EventID initialConditionEvent = 0;
-constexpr EventID finalStateEvent = -1;
 
 /** @brief Layer this expression belongs to in the causal network.
  * @details Specifically, if the largest generation of expressions in the event inputs is n, the generation of its
