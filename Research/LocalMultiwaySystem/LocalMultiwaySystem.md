@@ -2,11 +2,12 @@
 
 ## WolframModel
 
-`WolframModel`, as implemented right now, is not compatible with quantum mechanics.
-The incompatibility is related to the fact that if two matches are possible such that their sets of inputs overlap, only one of the matches is selected, and the other one is ignored and deleted.
+Multiway branching is not yet implemented in `WolframModel`.
+If two matches are possible such that their sets of inputs overlap, only one of the matches is selected, and the other one is ignored and deleted.
 
-As a consequence of that, many-world branching does not happen, and compatibility with quantum mechanics is unlikely.
-Also, it introduces arbitrariness to the system, as now a system of rules is insufficient, and one has to specify the event ordering function as well.
+However, branching is desirable, as it makes it much easier to think about quantum mechanics in these models.
+Also, choosing a single path of evolution introduces arbitrariness to the system.
+Now, a system of rules is insufficient, and one has to specify the event ordering function as well.
 
 ## Global Multiway System
 
