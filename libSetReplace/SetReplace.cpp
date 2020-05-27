@@ -165,7 +165,7 @@ MTensor putSet(const std::vector<SetExpression>& expressions, WolframLibraryData
 }
 
 int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, MArgument result) {
-  if (argc != 4) {
+  if (argc != 5) {
     return LIBRARY_FUNCTION_ERROR;
   }
 
