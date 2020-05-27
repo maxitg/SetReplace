@@ -75,7 +75,7 @@ For example, the two events highlighted red are the same event, as they both cor
 So, based on the above, there are two issues with the global multiway system.
 
 First, there is an incredible amount of redundancy.
-In particular, if there is an event that happened somewhere in Alpha Centaury, it would mean the entire Universe, including all of the edges here on Earth, duplicates, which seems both strange and unnecessary, and is fundamentally non-local.
+In particular, if there is an event that happened somewhere in a far away galaxy, it would mean the entire Universe, including all of the edges here on Earth, duplicates, which seems both strange and unnecessary, and is fundamentally non-local.
 In other words, there are exponentially more data in the global multiway system that is necessary to describe completely the state of the Universe.
 
 Second, it is hard to distinguish between purely classical space evolving in disconnected regions in parallel (i.e., spacelike events), and multiway branching that happens due to overlapping event inputs (i.e., branchlike events).
