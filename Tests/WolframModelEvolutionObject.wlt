@@ -26,7 +26,7 @@
 
       testUnevaluated[
         WolframModelEvolutionObject[],
-        {WolframModelEvolutionObject::argx}
+        {WolframModelEvolutionObject::argt}
       ],
 
       testUnevaluated[

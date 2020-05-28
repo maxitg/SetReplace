@@ -4,6 +4,10 @@
       Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
+      Global`checkGraphics[args___] := SetReplace`PackageScope`checkGraphics[args];
+      Global`graphicsQ[args___] := SetReplace`PackageScope`graphicsQ[args];
+
+      Global`$propertiesParameterless := SetReplace`PackageScope`$propertiesParameterless;
 
       $interestingRule = {{0, 1}, {0, 2}, {0, 3}} ->
         {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6},
@@ -263,7 +267,7 @@
 
       testUnevaluated[
         WolframModel[<|"PatternRules" -> {1 -> 2, a_ :> Module[{b}, b]}|>, {1}, x],
-        {WolframModel::invalidSteps}
+        {WolframModel::badProperty, WolframModel::invalidSteps}
       ],
 
       (** Steps **)
@@ -282,12 +286,12 @@
 
       testUnevaluated[
         WolframModel[1 -> 2, {1}, 2.2],
-        {WolframModel::invalidSteps}
+        {WolframModel::badProperty, WolframModel::invalidSteps}
       ],
 
       testUnevaluated[
         WolframModel[1 -> 2, {1}, "sdfsdf"],
-        {WolframModel::invalidSteps}
+        {WolframModel::unknownProperty, WolframModel::invalidSteps}
       ],
 
       VerificationTest[
@@ -295,9 +299,9 @@
         0
       ],
 
-      testUnevaluated[
+      VerificationTest[
         WolframModel[1 -> 2, {1}, -1],
-        {WolframModel::invalidSteps}
+        {2}
       ],
 
       VerificationTest[
@@ -338,7 +342,7 @@
 
       testUnevaluated[
         WolframModel[{{0, 1}, {1, 2}} -> {{0, 2}}, {{0, 1}, {1, 2}, {2, 3}, {3, 4}}, <|"x" -> 2|>],
-        {WolframModel::invalidSteps}
+        {WolframModel::badProperty, WolframModel::invalidSteps}
       ],
 
       testUnevaluated[
@@ -346,7 +350,7 @@
           {{0, 1}, {1, 2}} -> {{0, 2}},
           {{0, 1}, {1, 2}, {2, 3}, {3, 4}},
           <|"x" -> 2, "MaxGenerations" -> 2|>],
-        {WolframModel::invalidSteps}
+        {WolframModel::badProperty, WolframModel::invalidSteps}
       ],
 
       VerificationTest[
@@ -360,7 +364,7 @@
       Table[With[{method = method, $simpleGrowingRule = {{1, 2}} -> {{1, 3}, {3, 2}}, $simpleGrowingInit = {{1, 1}}}, {
         testUnevaluated[
           WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxVertices" -> x|>, Method -> method],
-          {WolframModel::invalidSteps}
+          {WolframModel::badProperty, WolframModel::invalidSteps}
         ],
 
         testUnevaluated[
@@ -518,7 +522,7 @@
       Table[With[{method = method, $simpleGrowingRule = {{1, 2}} -> {{1, 3}, {3, 2}}, $simpleGrowingInit = {{1, 1}}}, {
         testUnevaluated[
           WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxEdges" -> x|>, Method -> method],
-          {WolframModel::invalidSteps}
+          {WolframModel::badProperty, WolframModel::invalidSteps}
         ],
 
         testUnevaluated[
@@ -622,7 +626,7 @@
           maxVertexDegree = maxVertexDegree}, {
         testUnevaluated[
           WolframModel[$simpleGrowingRule, $simpleGrowingInit, <|"MaxVertexDegree" -> x|>, Method -> method],
-          {WolframModel::invalidSteps}
+          {WolframModel::badProperty, WolframModel::invalidSteps}
         ],
 
         testUnevaluated[
@@ -917,24 +921,24 @@
         WolframModel[{{1}} -> {{2}}, {{1}}, 2, #] & /@ $propertiesParameterless // Length
       ],
 
-      testUnevaluated[
+      VerificationTest[
         WolframModel[1 -> 2, {1}, 2, 2],
-        {WolframModel::invalidProperty}
+        {3}
       ],
 
       testUnevaluated[
         WolframModel[1 -> 2, {1}, 2, {2, 3}],
-        {WolframModel::invalidProperty}
+        {WolframModel::stepTooLarge}
       ],
 
       testUnevaluated[
         WolframModel[1 -> 2, {1}, 2, {"CausalGraph", 3}],
-        {WolframModel::nonopt}
+        {WolframModel::stepTooLarge}
       ],
 
       testUnevaluated[
         WolframModel[1 -> 2, {1}, 2, {3, "CausalGraph"}],
-        {WolframModel::invalidProperty}
+        {WolframModel::stepTooLarge}
       ],
 
       VerificationTest[
@@ -942,14 +946,14 @@
         ConstantArray[{DirectedEdge[1, 2]}, 2]
       ],
 
-      testUnevaluated[
+      VerificationTest[
         WolframModel[1 -> 2, {1}, 2, "Rules"],
-        {WolframModel::invalidProperty}
+        1 -> 2
       ],
 
-      testUnevaluated[
-        WolframModel[1 -> 2, {1}, 2, "Properties"],
-        {WolframModel::invalidProperty}
+      VerificationTest[
+        AllTrue[StringQ, WolframModel[1 -> 2, {1}, 2, "Properties"]],
+        True
       ],
 
       (** Missing arguments **)
@@ -961,7 +965,7 @@
 
       testUnevaluated[
         WolframModel[1 -> 2, {1}, "sdfds" -> 2, "xcvxcv" -> 3],
-        {WolframModel::optx}
+        {WolframModel::optx, WolframModel::optx, WolframModel::badProperty}
       ],
 
       testUnevaluated[
@@ -1731,9 +1735,10 @@
         graphicsQ @ WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "FinalStatePlot", ImageSize -> 256],
         True
       ],
-      
+
       VerificationTest[
-        graphicsQ /@ WolframModel[1 -> 2, {1}, 2, {"FinalStatePlot", "CausalGraph"}, ImageSize -> 256],
+        graphicsQ /@ WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3,
+            {{"FinalStatePlot", ImageSize -> 128}, "FinalStatePlot"}, ImageSize -> 256],
         {True, True}
       ]
     }
