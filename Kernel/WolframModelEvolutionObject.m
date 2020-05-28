@@ -278,36 +278,6 @@ propertyEvaluate[___][
 
 
 (* ::Subsubsection:: *)
-(*Property argument counts*)
-
-
-makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := makeMessage[
-	caller,
-	"pargx",
-	property,
-	givenArgs,
-	If[givenArgs == 1, "", "s"],
-	If[expectedArgs[[1]] != expectedArgs[[2]], "between ", ""],
-	expectedArgs[[1]],
-	If[expectedArgs[[1]] != expectedArgs[[2]], " and ", ""],
-	If[expectedArgs[[1]] != expectedArgs[[2]], expectedArgs[[2]], ""],
-	If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "s", ""],
-	If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "are", "is"]
-]
-
-
-propertyEvaluate[___][
-		WolframModelEvolutionObject[data_ ? evolutionDataQ],
-		caller_,
-		s_String,
-		args___] := 0 /;
-	With[{argumentsCountRange = $propertyArgumentCounts[s]},
-		Not[MissingQ[argumentsCountRange]] &&
-		Not[argumentsCountRange[[1]] <= Length[{args}] <= argumentsCountRange[[2]]] &&
-		makePargxMessage[s, caller, Length[{args}], argumentsCountRange]]
-
-
-(* ::Subsubsection:: *)
 (*Correct options*)
 
 $newCausalGraphOptions = {Background -> Automatic, VertexStyle -> Automatic, EdgeStyle -> Automatic};
@@ -953,12 +923,12 @@ propertyOptions[property_String] := {{property} -> <|
     "ExplicitOptions" -> {}|>
 }
 
-propertyOptions[p : PatternSequence[property_String, args___, o : OptionsPattern[]]] /; wolframModelPropertyQ[p] :=
-    {{property, args} -> Association[Values @ propertyOptions[property], "ExplicitOptions" -> {o}]}
+propertyOptions[properties_ ? wolframModelPropertiesQ] := Catenate[propertyOptions /@ properties]
 
 propertyOptions[property_ ? wolframModelPropertyQ] := propertyOptions @@ property
 
-propertyOptions[properties_ ? wolframModelPropertiesQ] := Catenate[propertyOptions /@ properties]
+propertyOptions[p : PatternSequence[property_String, args___, o : OptionsPattern[]]] /; wolframModelPropertyQ[p] :=
+    {{property, args} -> Association[Values @ propertyOptions[property], "ExplicitOptions" -> {o}]}
 
 propertyOptions[___] := {}
 
@@ -972,13 +942,16 @@ joinPropertyOptions[property__, opts_] := Module[{joinedPropertyOptions, masterO
     {joinedPropertyOptions, masterOptions}
 ]
 
+$allowedOptions := $allowedOptions = Except[Join[
+    FilterRules[Options[WolframModel], Except[Options[setSubstitutionSystem]]],
+    $allPropertyOptions
+]];
 
 expr : WolframModelEvolutionObject[
         data_ ? evolutionDataQ, objOpts : OptionsPattern[]][
         property__ ? (MatchQ[{##}, Except[OptionsPattern[]]] &),
         opts : OptionsPattern[]] := Module[{
-            caller, joinedPropertyOptions, masterOptions,
-            $unrecognizedOptions, results
+            caller, joinedPropertyOptions, masterOptions, results
     },
     (
         results = Check[
@@ -989,27 +962,18 @@ expr : WolframModelEvolutionObject[
                 ##] & @@@ Join @@@ joinedPropertyOptions,
             $Failed
         ];
-        If[wolframModelPropertyQ[property], First @ results, results] /; results =!= $Failed
-    ) /; (
-        wolframModelPropertyQ[property] || wolframModelPropertiesQ[property] ||
-        makeMessage[
-            WolframModelEvolutionObject,
-            "invalidProperty",
-            {property, opts}
-        ]
-    ) && (
+        If[Not[wolframModelPropertiesQ[property]], First @ results, results] /; results =!= $Failed
+    ) /; Check[
         caller = Lookup[{objOpts}, "Caller", WolframModelEvolutionObject];
-        {joinedPropertyOptions, masterOptions} = joinPropertyOptions[property, {opts}];
-        $unrecognizedOptions = FilterRules[masterOptions,
-            Except[Join[FilterRules[Options[WolframModel], Except[Options[setSubstitutionSystem]]], $allPropertyOptions]]
-        ];
-        $unrecognizedOptions === {} ||
-        Message[
-            WolframModelEvolutionObject::optx,
-            $unrecognizedOptions[[1]],
-            Defer[expr]
-        ]
-    )
+        propertyCheck[caller][property];
+        {joinedPropertyOptions, masterOptions} = optionsCheck[
+            Defer[expr],
+            caller,
+            $allowedOptions][property, opts];
+        True,
+
+        False
+    ]
 ]
 
 

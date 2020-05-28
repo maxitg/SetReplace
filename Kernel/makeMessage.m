@@ -16,6 +16,7 @@ Package["SetReplace`"]
 
 
 PackageScope["makeMessage"]
+PackageScope["makePargxMessage"]
 
 
 (* ::Section:: *)
@@ -26,6 +27,25 @@ makeMessage[function_, type_String, args___] := (
 	MessageName[function, type] = messageTemplate[type];
 	Message[MessageName[function, type], function, args]
 )
+
+
+(* ::Subsubsection:: *)
+(*Property argument counts*)
+
+
+makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := makeMessage[
+    caller,
+    "pargx",
+    property,
+    givenArgs,
+    If[givenArgs == 1, "", "s"],
+    If[expectedArgs[[1]] != expectedArgs[[2]], "between ", ""],
+    expectedArgs[[1]],
+    If[expectedArgs[[1]] != expectedArgs[[2]], " and ", ""],
+    If[expectedArgs[[1]] != expectedArgs[[2]], expectedArgs[[2]], ""],
+    If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "s", ""],
+    If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "are", "is"]
+]
 
 
 (* ::Section:: *)
@@ -74,8 +94,12 @@ messageTemplate["unknownProperty"] =
 	"Property \"`2`\" should be one of \"Properties\".";
 
 
-messageTemplate["invalidProperty"] =
-    "Property \"`2`\" is invalid.";
+messageTemplate["badProperty"] =
+    "Ill-formed property \"`2`\".";
+
+
+messageTemplate["ambiguousProperty"] =
+    "Property \"`2`\" is ambiguous.";
 
 
 messageTemplate["pargx"] =
