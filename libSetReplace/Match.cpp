@@ -203,7 +203,6 @@ class Matcher::Implementation {
         rules_.size() > 1 && numHardwareThreads > 1
             ? std::min(static_cast<uint64_t>(rules_.size()), static_cast<uint64_t>(numHardwareThreads))
             : 0;
-    const unsigned int ruleRangeSize = rules_.size() / numThreadsToUse;
 
     auto addMatchesForRuleRange = [=](unsigned int start) {
       for (unsigned int i = start; i < rules_.size(); i += numThreadsToUse) {
