@@ -125,15 +125,19 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
 
 (* Create a notebook with results *)
 
-$reportFile = UsingFrontEnd @ Export[
-  FileNameJoin[Join[FileNameSplit[CreateDirectory[]], {"testReport.nb"}]],
-  Notebook @ Catenate @ Prepend[KeyValueMap[
-    {Cell[Last @ FileNameSplit @ #1, "Section"],
-      Cell[
-        BoxData[RowBox[{"TestReport", "[", "\"" <> #1 <> "\"", "]"}]],
-        "Input"],
-      Cell[BoxData[ToBoxes[#2]], "Output"]} &,
-    $results], {Cell["SetReplace Test Report", "Title"]}]];
+$reportFile = UsingFrontEnd[
+  $NotebookInlineStorageLimit = Infinity;
+  Export[
+    FileNameJoin[Join[FileNameSplit[CreateDirectory[]], {"testReport.nb"}]],
+    Notebook @ Catenate @ Prepend[KeyValueMap[
+      {Cell[Last @ FileNameSplit @ #1, "Section"],
+        Cell[
+          BoxData[RowBox[{"TestReport", "[", "\"" <> #1 <> "\"", "]"}]],
+          "Input"],
+        Cell[BoxData[ToBoxes[#2]], "Output"]} &,
+      $results], {Cell["SetReplace Test Report", "Title"]}]
+  ]
+];
 
 
 Print["Report file: ", $reportFile];
