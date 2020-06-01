@@ -204,8 +204,8 @@ class Matcher::Implementation {
             ? std::min(static_cast<uint64_t>(rules_.size()), static_cast<uint64_t>(numHardwareThreads))
             : 0;
 
-    auto addMatchesForRuleRange = [=](unsigned int start) {
-      for (unsigned int i = start; i < rules_.size(); i += numThreadsToUse) {
+    auto addMatchesForRuleRange = [=](uint64_t start) {
+      for (uint64_t i = start; i < static_cast<uint64_t>(rules_.size()); i += numThreadsToUse) {
         addMatchesForRule(expressionIDs, i, shouldAbort);
       }
     };
@@ -213,7 +213,7 @@ class Matcher::Implementation {
     if (numThreadsToUse > 0) {
       // Multi-threaded path
       std::vector<std::thread> threads(numThreadsToUse);
-      for (unsigned int i = 0; i < numThreadsToUse; ++i) {
+      for (uint64_t i = 0; i < numThreadsToUse; ++i) {
         threads[i] = std::thread(addMatchesForRuleRange, i);
       }
       for (auto& thread : threads) {
