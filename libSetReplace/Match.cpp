@@ -339,10 +339,6 @@ class Matcher::Implementation {
     }
 
     const auto nextInputIdxAndCandidateExpressions = nextBestInputAndExpressionsToTry(newMatch, newInputs);
-    if (currentError != None) {
-      return;
-    }
-
     completeMatchesStartingWithInput(newMatch,
                                      newInputs,
                                      nextInputIdxAndCandidateExpressions.first,
