@@ -38,15 +38,17 @@ class Matcher {
   /** @brief All possible functions available to sort matches. Random is the default that is always applied last.
    */
   enum class OrderingFunction {
-    SortedExpressionIDs = 0,
+    First = 0,
+    SortedExpressionIDs = First,
     ReverseSortedExpressionIDs = 1,
     ExpressionIDs = 2,
-    RuleIndex = 3
+    RuleIndex = 3,
+    Last = 4
   };
 
   /** @brief Whether to sort in normal or reverse order.
    */
-  enum class OrderingDirection { Normal = 0, Reverse = 1 };
+  enum class OrderingDirection { First = 0, Normal = First, Reverse = 1, Last = 2 };
 
   /** @brief Full specification for the sequence of ordering functions.
    */

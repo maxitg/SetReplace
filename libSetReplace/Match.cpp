@@ -182,9 +182,9 @@ class Matcher::Implementation {
         randomGenerator_(randomSeed),
         currentError(None) {
     for (const auto& ordering : orderingSpec) {
-      if (ordering.first < OrderingFunction::SortedExpressionIDs || ordering.first > OrderingFunction::RuleIndex) {
+      if (ordering.first < OrderingFunction::First || ordering.first >= OrderingFunction::Last) {
         throw Matcher::Error::InvalidOrderingFunction;
-      } else if (ordering.second < OrderingDirection::Normal || ordering.second > OrderingDirection::Reverse) {
+      } else if (ordering.second < OrderingDirection::First || ordering.second >= OrderingDirection::Last) {
         throw Matcher::Error::InvalidOrderingDirection;
       }
     }
