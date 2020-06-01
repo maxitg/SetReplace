@@ -36,6 +36,8 @@ class Matcher {
   enum Error { None, Aborted, DisconnectedInputs, NoMatches, InvalidOrderingFunction, InvalidOrderingDirection };
 
   /** @brief All possible functions available to sort matches. Random is the default that is always applied last.
+   *
+   * If adding additional values, preserve First and Last, as these are used for valid enum checking.
    */
   enum class OrderingFunction {
     First = 0,
@@ -47,6 +49,8 @@ class Matcher {
   };
 
   /** @brief Whether to sort in normal or reverse order.
+   *
+   * If adding additional values, preserve First and Last, as these are used for valid enum checking.
    */
   enum class OrderingDirection { First = 0, Normal = First, Reverse = 1, Last = 2 };
 
