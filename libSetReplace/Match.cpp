@@ -201,7 +201,7 @@ class Matcher::Implementation {
     const uint64_t numHardwareThreads = std::thread::hardware_concurrency();  // returns 0 if unknown
     const uint64_t numThreadsToUse =
         rules_.size() > 1 && numHardwareThreads > 1
-            ? std::min(static_cast<uint64_t>(rules_.size()), static_cast<uint64_t>(numHardwareThreads))
+            ? std::min(static_cast<uint64_t>(rules_.size()), numHardwareThreads)
             : 0;
 
     auto addMatchesForRuleRange = [=](uint64_t start) {
