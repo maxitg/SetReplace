@@ -354,7 +354,7 @@
             {{x, y}, {x, z}, {y, x}, {y, z}, {z, x}, {z, y}},
             2]
         ],
-  
+
           VerificationTest[
             Table[
               WolframModel[
@@ -514,6 +514,16 @@
           {{{Pattern[Pattern[a, _], _], v2_}} :> {}, {{Pattern[2, _], v1_}} :> Module[{v2}, {v2}]},
           Method -> "Symbolic"],
         {Pattern::patvar}
+      ],
+
+      (** Relatively large prime number of rules **)
+      VerificationTest[
+        WolframModel[
+          Array[{Range[1, #1]} -> {} &, 59],
+          Array[Range[1, #1] &, 59],
+          "FinalState"],
+        {},
+        SameTest -> SameQ
       ]
     }
   |>
