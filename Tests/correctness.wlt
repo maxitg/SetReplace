@@ -516,7 +516,7 @@
         {Pattern::patvar}
       ],
 
-      (** Relatively large prime number of rules **)
+      (** Relatively large prime number of rules to verify all rules are allocated to threads when matching. **)
       VerificationTest[
         WolframModel[
           Array[{Range[1, #1]} -> {} &, 59],
