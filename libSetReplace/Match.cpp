@@ -8,6 +8,7 @@
 #include <mutex>
 #include <random>
 #include <set>
+#include <shared_mutex>  // NOLINT cpplint thinks this is a C system header for some reason
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
@@ -161,7 +162,7 @@ class Matcher::Implementation {
    * It is volatile, but not atomic because it is locked before being written to.
    */
   mutable volatile Error currentError;
-  mutable std::mutex currentErrorMutex;
+  mutable std::shared_mutex currentErrorMutex;
 
   /**
    * This mutex should be used to gain access to the above match structures.
@@ -194,7 +195,7 @@ class Matcher::Implementation {
                                       const std::function<bool()>& abortRequested) {
     // If one thread errors, alert other threads with this function
     const std::function<bool()> shouldAbort = [this, &abortRequested]() {
-      return currentError != None || abortRequested();
+      return getCurrentError() != None || abortRequested();
     };
 
     // Only create threads if there is more than one rule and hardware has more than one thread
@@ -285,7 +286,7 @@ class Matcher::Implementation {
                                         const std::vector<ExpressionID>& potentialExpressionIDs,
                                         const std::function<bool()>& shouldAbort) {
     for (const auto expressionID : potentialExpressionIDs) {
-      if (currentError != None) {
+      if (getCurrentError() != None) {
         return;
       }
       if (isExpressionUnused(incompleteMatch, expressionID)) {
@@ -300,10 +301,15 @@ class Matcher::Implementation {
   }
 
   void setCurrentErrorIfNone(Error newError) const {
-    std::lock_guard<std::mutex> lock(currentErrorMutex);
+    std::unique_lock lock(currentErrorMutex);
     if (currentError == None) {
       currentError = newError;
     }
+  }
+
+  Error getCurrentError() const {
+    std::shared_lock lock(currentErrorMutex);
+    return currentError;
   }
 
   void attemptMatchExpressionToInput(const Match& incompleteMatch,
