@@ -33,20 +33,26 @@ class Matcher {
  public:
   /** @brief Type of the error occurred during evaluation.
    */
-  enum Error { Aborted, DisconnectedInputs, NoMatches, InvalidOrderingFunction, InvalidOrderingDirection };
+  enum Error { None, Aborted, DisconnectedInputs, NoMatches, InvalidOrderingFunction, InvalidOrderingDirection };
 
   /** @brief All possible functions available to sort matches. Random is the default that is always applied last.
+   *
+   * If adding additional values, preserve First and Last, as these are used for valid enum checking.
    */
   enum class OrderingFunction {
-    SortedExpressionIDs = 0,
+    First = 0,
+    SortedExpressionIDs = First,
     ReverseSortedExpressionIDs = 1,
     ExpressionIDs = 2,
-    RuleIndex = 3
+    RuleIndex = 3,
+    Last = 4
   };
 
   /** @brief Whether to sort in normal or reverse order.
+   *
+   * If adding additional values, preserve First and Last, as these are used for valid enum checking.
    */
-  enum class OrderingDirection { Normal = 0, Reverse = 1 };
+  enum class OrderingDirection { First = 0, Normal = First, Reverse = 1, Last = 2 };
 
   /** @brief Full specification for the sequence of ordering functions.
    */
