@@ -1,10 +1,11 @@
+#include "Set.hpp"
+
 #include <gtest/gtest.h>
 
 #include <vector>
 
 #include "Match.hpp"
 #include "Rule.hpp"
-#include "Set.hpp"
 
 namespace SetReplace {
 TEST(SetReplace, createSetAndReplace) {
