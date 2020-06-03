@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		691C67D42486A44100BC0D82 /* Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 691C67D22486A44100BC0D82 /* Event.cpp */; };
+		691C67D52486A44100BC0D82 /* Event.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 691C67D32486A44100BC0D82 /* Event.hpp */; };
 		6961A1D623184ABC009461C8 /* Expression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6961A1D523184ABC009461C8 /* Expression.cpp */; };
 		69CAF86D2257B162006F9C60 /* Match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6909EBA922258611001458D2 /* Match.cpp */; };
 		69CAF86E2257B162006F9C60 /* Set.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 695F486E222443F20058E057 /* Set.cpp */; };
@@ -22,6 +24,8 @@
 /* Begin PBXFileReference section */
 		6909EBA922258611001458D2 /* Match.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Match.cpp; sourceTree = "<group>"; };
 		6909EBAA22258611001458D2 /* Match.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Match.hpp; sourceTree = "<group>"; };
+		691C67D22486A44100BC0D82 /* Event.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Event.cpp; sourceTree = "<group>"; };
+		691C67D32486A44100BC0D82 /* Event.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Event.hpp; sourceTree = "<group>"; };
 		691E077A2471CED500D2BDD5 /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		691E077C2471D1DD00D2BDD5 /* Set_test.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Set_test.cpp; sourceTree = "<group>"; };
 		695F486E222443F20058E057 /* Set.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Set.cpp; sourceTree = "<group>"; };
@@ -74,6 +78,8 @@
 		695F4865222440B90058E057 /* libSetReplace */ = {
 			isa = PBXGroup;
 			children = (
+				691C67D32486A44100BC0D82 /* Event.hpp */,
+				691C67D22486A44100BC0D82 /* Event.cpp */,
 				69B2D41122244AFC008778A3 /* Expression.hpp */,
 				6961A1D523184ABC009461C8 /* Expression.cpp */,
 				69ED0F4023170D5D0014A48E /* IDTypes.hpp */,
@@ -101,6 +107,7 @@
 				69CAF8702257B1CE006F9C60 /* Match.hpp in Headers */,
 				69CAF8712257B1D0006F9C60 /* Rule.hpp in Headers */,
 				69CAF8722257B1D2006F9C60 /* Set.hpp in Headers */,
+				691C67D52486A44100BC0D82 /* Event.hpp in Headers */,
 				69ED0F4123170D5D0014A48E /* IDTypes.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -165,6 +172,7 @@
 				6961A1D623184ABC009461C8 /* Expression.cpp in Sources */,
 				69CAF86D2257B162006F9C60 /* Match.cpp in Sources */,
 				69CAF86E2257B162006F9C60 /* Set.cpp in Sources */,
+				691C67D42486A44100BC0D82 /* Event.cpp in Sources */,
 				69CB70E0231C245400488D26 /* SetReplace.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
