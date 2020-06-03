@@ -6,7 +6,7 @@ namespace SetReplace {
 class CausalGraph::Implementation {
   // the first event is the "fake" initialization event
   std::vector<Event> events_;
-  std::vector<EventID> creatorEvents_;
+  std::vector<EventID> expressionIDsToCreatorEvents_;
 
   // needed to return the largest generation in O(1)
   Generation largestGeneration_ = 0;
@@ -15,7 +15,7 @@ class CausalGraph::Implementation {
 
  public:
   explicit Implementation(const int initialExpressionsCount) {
-    events_.push_back({initialConditionRule, {}, createExpressions(initialConditionEvent, initialExpressionsCount), 0});
+    addEvent(initialConditionRule, {}, initialExpressionsCount);
   }
 
   std::vector<ExpressionID> addEvent(const RuleID ruleID,
@@ -32,19 +32,21 @@ class CausalGraph::Implementation {
 
   size_t eventsCount() const { return events_.size() - 1; }
 
-  std::vector<ExpressionID> allExpressionIDs() const { return idsRange(0, creatorEvents_.size()); }
+  std::vector<ExpressionID> allExpressionIDs() const { return idsRange(0, expressionIDsToCreatorEvents_.size()); }
 
-  size_t expressionsCount() const { return creatorEvents_.size(); }
+  size_t expressionsCount() const { return expressionIDsToCreatorEvents_.size(); }
 
-  Generation expressionGeneration(const ExpressionID id) const { return events_[creatorEvents_[id]].generation; }
+  Generation expressionGeneration(const ExpressionID id) const {
+    return events_[expressionIDsToCreatorEvents_[id]].generation;
+  }
 
   Generation largestGeneration() const { return largestGeneration_; }
 
  private:
   std::vector<ExpressionID> createExpressions(const EventID creatorEvent, const int count) {
-    const size_t beginIndex = creatorEvents_.size();
-    creatorEvents_.insert(creatorEvents_.end(), count, creatorEvent);
-    return idsRange(beginIndex, creatorEvents_.size());
+    const size_t beginIndex = expressionIDsToCreatorEvents_.size();
+    expressionIDsToCreatorEvents_.insert(expressionIDsToCreatorEvents_.end(), count, creatorEvent);
+    return idsRange(beginIndex, expressionIDsToCreatorEvents_.size());
   }
 
   static std::vector<ExpressionID> idsRange(const ExpressionID beginIndex, const ExpressionID endIndex) {
@@ -59,7 +61,8 @@ class CausalGraph::Implementation {
   Generation newEventGeneration(const std::vector<ExpressionID>& inputExpressions) const {
     Generation newEventGeneration = 0;
     for (const auto& inputExpression : inputExpressions) {
-      newEventGeneration = std::max(newEventGeneration, events_[creatorEvents_[inputExpression]].generation + 1);
+      newEventGeneration =
+          std::max(newEventGeneration, events_[expressionIDsToCreatorEvents_[inputExpression]].generation + 1);
     }
     return newEventGeneration;
   }

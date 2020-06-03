@@ -10,7 +10,7 @@ namespace SetReplace {
 /** @brief Event is an instantiated replacement that has taken place in the system.
  */
 struct Event {
-  /** @brief ID for the rule this match corresponds to.
+  /** @brief ID for the rule this event corresponds to.
    */
   const RuleID rule;
 
@@ -22,18 +22,22 @@ struct Event {
    */
   const std::vector<ExpressionID> outputExpressions;
 
-  /** @brief Layer of the causal network this event belongs to.
+  /** @brief Layer of the causal graph this event belongs to.
    */
   const Generation generation;
 };
 
+/** @brief CausalGraph keeps track of causal relationships between events and expressions.
+ @details It does not care and does not know about atoms at all because they are only used for matching. Expressions are
+ only identified by IDs.
+ */
 class CausalGraph {
  public:
-  /** @brief Constructs a CausalGraph with an initial condition represented by initialExpressions.
+  /** @brief Creates a new CausalGraph with a given number of initial expressions.
    */
   explicit CausalGraph(int initialExpressionsCount);
 
-  /** @brief Adds new event, names its output expressions, and returns their IDs.
+  /** @brief Adds a new event, names its output expressions, and returns their IDs.
    */
   std::vector<ExpressionID> addEvent(RuleID ruleID,
                                      const std::vector<ExpressionID>& inputExpressions,
