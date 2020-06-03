@@ -155,7 +155,9 @@ decodeEvents[list_List] := Module[{
 (* assumes a single creator/destroyer event per edge, which is ok because we are only currently calling libSetReplace*)
 (*with EventSelectionFunction -> GlobalSpacelike.*)
 expressionEvents[expressionsCount_][inputsOrOutputs_, missingEventID_] :=
-	Replace[Position[inputsOrOutputs, #], {{{event_, _}} :> event, {} -> missingEventID}] & /@ Range[expressionsCount]
+	Sort[Join[
+		Catenate[Thread /@ Transpose[{inputsOrOutputs, Range[Length[inputsOrOutputs]]}]],
+		Thread[{Complement[Range[expressionsCount], Catenate[inputsOrOutputs]], missingEventID}]]][[All, 2]]
 
 
 decodeExpressions[atomLists_List, events_Association] := Module[{creators, destroyers, eventToGeneration},
