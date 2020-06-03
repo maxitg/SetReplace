@@ -37,7 +37,7 @@ buildLibSetReplace[] := With[{
         "Windows",
           {"/std:c++17", "/EHsc"},
         "MacOSX",
-          Join[{"-std=c++17"}, $warningsFlags, {"-mmacosx-version-min=10.12"}],
+          Join[{"-std=c++17"}, $warningsFlags, {"-mmacosx-version-min=10.12"}], (* for std::shared_mutex support *)
         "Unix",
           Join[{"-std=c++17"}, $warningsFlags]],
       "Compiler" -> ToExpression @ tryEnvironment["COMPILER", Automatic],
