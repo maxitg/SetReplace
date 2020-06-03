@@ -169,9 +169,9 @@ MTensor putEvents(const std::vector<Event>& events, WolframLibraryData libData) 
   appendToTensor({static_cast<mint>(events.size())});
   for (const auto& event : events) {
     appendToTensor({static_cast<mint>(event.rule),
-      static_cast<mint>(inputsPointer),
-      static_cast<mint>(outputsPointer),
-      static_cast<mint>(event.generation)});
+                    static_cast<mint>(inputsPointer),
+                    static_cast<mint>(outputsPointer),
+                    static_cast<mint>(event.generation)});
     inputsPointer += event.inputExpressions.size();
     outputsPointer += event.outputExpressions.size();
   }
@@ -180,9 +180,9 @@ MTensor putEvents(const std::vector<Event>& events, WolframLibraryData libData) 
   constexpr ExpressionID fakeRule = -2;
   constexpr Generation fakeGeneration = -1;
   appendToTensor({static_cast<mint>(fakeRule),
-    static_cast<mint>(inputsPointer),
-    static_cast<mint>(outputsPointer),
-    static_cast<mint>(fakeGeneration)});
+                  static_cast<mint>(inputsPointer),
+                  static_cast<mint>(outputsPointer),
+                  static_cast<mint>(fakeGeneration)});
 
   for (const auto& event : events) {
     // Cannot do static_cast due to 32-bit Windows support
