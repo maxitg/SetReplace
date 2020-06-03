@@ -13,26 +13,6 @@ namespace SetReplace {
  */
 using AtomsVector = std::vector<Atom>;
 
-/** @brief Expression, as a part of the set, i.e., (hyper)edges in the graph.
- */
-struct SetExpression {
-  /** @brief Ordered list of atoms the expression contains.
-   */
-  AtomsVector atoms;
-
-  /** @brief Substitution event that has this expression as part of its output.
-   */
-  EventID creatorEvent;
-
-  /** @brief Substitution events that have this expression as part of their inputs.
-   */
-  std::vector<EventID> destroyerEvents = {};
-
-  /** @brief Layer of the causal network this expression belongs to.
-   */
-  Generation generation;
-};
-
 /** @brief AtomsIndex keeps references to set expressions accessible by atoms, which is useful for matching.
  */
 class AtomsIndex {

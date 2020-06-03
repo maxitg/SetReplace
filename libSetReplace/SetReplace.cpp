@@ -102,23 +102,15 @@ Set::StepSpecification getStepSpec(WolframLibraryData libData, MTensor stepsTens
   }
 }
 
-MTensor putSet(const std::vector<SetExpression>& expressions, WolframLibraryData libData) {
-  // creator event + destroyer events pointer + generation + atoms list pointer
-  // add fake event at the end to specify the length of the last expression
-  size_t tensorLength = 1 + 4 * (expressions.size() + 1);
+MTensor putSet(const std::vector<AtomsVector>& expressions, WolframLibraryData libData) {
+  // count + atoms list pointer for each expression + an extra pointer at the end to the element one past the end
+  size_t tensorLength = 1 + (expressions.size() + 1);
 
   // Atoms are next, positions to which are referenced in each expression spec.
   // This is where the first atom will be located.
   size_t atomsPointer = tensorLength + 1;
   for (const auto& expression : expressions) {
-    tensorLength += expression.atoms.size();
-  }
-
-  // Finally, destroyer events.
-  // This is where the first list of destroyer events is located.
-  size_t destroyerPointer = tensorLength + 1;
-  for (const auto& expression : expressions) {
-    tensorLength += expression.destroyerEvents.size();
+    tensorLength += expression.size();
   }
 
   const mint dimensions[1] = {static_cast<mint>(tensorLength)};
@@ -136,29 +128,70 @@ MTensor putSet(const std::vector<SetExpression>& expressions, WolframLibraryData
 
   appendToTensor({static_cast<mint>(expressions.size())});
   for (const auto& expression : expressions) {
-    appendToTensor({static_cast<mint>(expression.creatorEvent),
-                    static_cast<mint>(destroyerPointer),
-                    static_cast<mint>(expression.generation),
-                    static_cast<mint>(atomsPointer)});
-    atomsPointer += expression.atoms.size();
-    destroyerPointer += expression.destroyerEvents.size();
+    appendToTensor({static_cast<mint>(atomsPointer)});
+    atomsPointer += expression.size();
   }
-
-  // Put fake event at the end so that the length of final expression can be determined on WL side.
-  constexpr EventID fakeEvent = -3;
-  constexpr Generation fakeGeneration = -1;
-  appendToTensor({static_cast<mint>(fakeEvent),
-                  static_cast<mint>(destroyerPointer),
-                  static_cast<mint>(fakeGeneration),
-                  static_cast<mint>(atomsPointer)});
+  appendToTensor({static_cast<mint>(atomsPointer)});
 
   for (const auto& expression : expressions) {
     // Cannot do static_cast due to 32-bit Windows support
-    appendToTensor(std::vector<mint>(expression.atoms.begin(), expression.atoms.end()));
+    appendToTensor(std::vector<mint>(expression.begin(), expression.end()));
   }
 
-  for (const auto& expression : expressions) {
-    appendToTensor(expression.destroyerEvents);
+  return output;
+}
+
+MTensor putEvents(const std::vector<Event>& events, WolframLibraryData libData) {
+  // ruleID + input expressions pointer + output expressions pointer + generation
+  // add fake rule ID and generation at the end to specify the length of the last expression
+  size_t tensorLength = 1 + 4 * (events.size() + 1);
+
+  size_t inputsPointer = tensorLength + 1;
+  size_t outputsPointer = tensorLength + 1;
+  for (const auto& event : events) {
+    tensorLength += event.inputExpressions.size() + event.outputExpressions.size();
+    outputsPointer += event.inputExpressions.size();
+  }
+
+  const mint dimensions[1] = {static_cast<mint>(tensorLength)};
+  MTensor output;
+  libData->MTensor_new(MType_Integer, 1, dimensions, &output);
+
+  mint writeIndex = 0;
+  mint position[1];
+  const auto appendToTensor = [libData, &writeIndex, &position, &output](const std::vector<mint>& numbers) {
+    for (const auto number : numbers) {
+      position[0] = ++writeIndex;
+      libData->MTensor_setInteger(output, position, number);
+    }
+  };
+
+  appendToTensor({static_cast<mint>(events.size())});
+  for (const auto& event : events) {
+    appendToTensor({static_cast<mint>(event.rule),
+      static_cast<mint>(inputsPointer),
+      static_cast<mint>(outputsPointer),
+      static_cast<mint>(event.generation)});
+    inputsPointer += event.inputExpressions.size();
+    outputsPointer += event.outputExpressions.size();
+  }
+
+  // Put fake event at the end so that the length of final expression can be determined on WL side.
+  constexpr ExpressionID fakeRule = -2;
+  constexpr Generation fakeGeneration = -1;
+  appendToTensor({static_cast<mint>(fakeRule),
+    static_cast<mint>(inputsPointer),
+    static_cast<mint>(outputsPointer),
+    static_cast<mint>(fakeGeneration)});
+
+  for (const auto& event : events) {
+    // Cannot do static_cast due to 32-bit Windows support
+    appendToTensor(event.inputExpressions);
+    outputsPointer += event.inputExpressions.size();
+  }
+
+  for (const auto& event : events) {
+    appendToTensor(event.outputExpressions);
   }
 
   return output;
@@ -260,7 +293,7 @@ int setExpressions(WolframLibraryData libData, mint argc, MArgument* argv, MArgu
 
   const SetID setID = MArgument_getInteger(argv[0]);
 
-  std::vector<SetExpression> expressions;
+  std::vector<AtomsVector> expressions;
   try {
     expressions = setFromID(setID).expressions();
   } catch (...) {
@@ -268,6 +301,25 @@ int setExpressions(WolframLibraryData libData, mint argc, MArgument* argv, MArgu
   }
 
   MArgument_setMTensor(result, putSet(expressions, libData));
+
+  return LIBRARY_NO_ERROR;
+}
+
+int setEvents(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
+  if (argc != 1) {
+    return LIBRARY_FUNCTION_ERROR;
+  }
+
+  const SetID setID = MArgument_getInteger(argv[0]);
+
+  std::vector<Event> events;
+  try {
+    events = setFromID(setID).events();
+  } catch (...) {
+    return LIBRARY_FUNCTION_ERROR;
+  }
+
+  MArgument_setMTensor(result, putEvents(events, libData));
 
   return LIBRARY_NO_ERROR;
 }
@@ -309,34 +361,6 @@ int terminationReason([[maybe_unused]] WolframLibraryData, mint argc, MArgument*
 
   return LIBRARY_NO_ERROR;
 }
-
-int eventRuleIDs(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
-  if (argc != 1) {
-    return LIBRARY_FUNCTION_ERROR;
-  }
-
-  const SetID setID = MArgument_getInteger(argv[0]);
-
-  try {
-    const auto ruleIDs = setFromID(setID).eventRuleIDs();
-    const mint dimensions[1] = {static_cast<mint>(ruleIDs.size() - 1)};
-    MTensor output;
-    libData->MTensor_new(MType_Integer, 1, dimensions, &output);
-
-    mint writeIndex = 0;
-    mint position[1];
-    for (size_t event = 1; event < ruleIDs.size(); ++event) {
-      position[0] = ++writeIndex;
-      libData->MTensor_setInteger(output, position, static_cast<mint>(ruleIDs[event]) + 1);
-    }
-
-    MArgument_setMTensor(result, output);
-  } catch (...) {
-    return LIBRARY_FUNCTION_ERROR;
-  }
-
-  return LIBRARY_NO_ERROR;
-}
 }  // namespace SetReplace
 
 EXTERN_C mint WolframLibrary_getVersion() { return WolframLibraryVersion; }
@@ -361,14 +385,14 @@ EXTERN_C int setExpressions(WolframLibraryData libData, mint argc, MArgument* ar
   return SetReplace::setExpressions(libData, argc, argv, result);
 }
 
+EXTERN_C int setEvents(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
+  return SetReplace::setEvents(libData, argc, argv, result);
+}
+
 EXTERN_C int maxCompleteGeneration(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
   return SetReplace::maxCompleteGeneration(libData, argc, argv, result);
 }
 
 EXTERN_C int terminationReason(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
   return SetReplace::terminationReason(libData, argc, argv, result);
-}
-
-EXTERN_C int eventRuleIDs(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
-  return SetReplace::eventRuleIDs(libData, argc, argv, result);
 }

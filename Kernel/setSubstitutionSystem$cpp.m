@@ -63,6 +63,15 @@ $cpp$setExpressions = If[$libraryFile =!= $Failed,
 	$Failed];
 
 
+$cpp$setEvents = If[$libraryFile =!= $Failed,
+	LibraryFunctionLoad[
+		$libraryFile,
+		"setEvents",
+		{Integer}, (* set ptr *)
+		{Integer, 1}], (* expressions *)
+	$Failed];
+
+
 $cpp$maxCompleteGeneration = If[$libraryFile =!= $Failed,
 	LibraryFunctionLoad[
 		$libraryFile,
@@ -78,15 +87,6 @@ $cpp$terminationReason = If[$libraryFile =!= $Failed,
 		"terminationReason",
 		{Integer}, (* set ptr *)
 		Integer], (* reason *)
-	$Failed];
-
-
-$cpp$eventRuleIDs = If[$libraryFile =!= $Failed,
-	LibraryFunctionLoad[
-		$libraryFile,
-		"eventRuleIDs",
-		{Integer}, (* set ptr *)
-		{Integer, 1}], (* ids *)
 	$Failed];
 
 
@@ -120,19 +120,54 @@ encodeNestedLists[list_List] :=
 (*This is the reverse, used to decode set data (a list of expressions) from libSetReplace*)
 
 
-decodeExpressions[list_List] := Module[{
+decodeAtomLists[list_List] := Module[{count, atomPointers, atomRanges, atomLists},
+	count = list[[1]];
+	atomPointers = list[[2 ;; (count + 1) + 1]];
+	atomRanges = Partition[atomPointers, 2, 1];
+	list[[#[[1]] ;; #[[2]] - 1]] & /@ atomRanges
+]
+
+
+(* ::Text:: *)
+(*Similar function for the events*)
+
+
+decodeEvents[list_List] := Module[{
 		count = list[[1]],
-		creatorEvents, destroyerPointers, generations, atomPointers,
-		atomRanges, atomLists, destroyerRanges, destroyerLists},
-	{creatorEvents, destroyerPointers, generations, atomPointers} =
+		ruleIDs, inputPointers, outputPointers, generations,
+		inputRanges, inputLists, outputRanges, outputLists},
+	{ruleIDs, inputPointers, outputPointers, generations} =
 		Transpose[Partition[list[[2 ;; 4 (count + 1) + 1]], 4]];
-	{atomRanges, destroyerRanges} = Partition[#, 2, 1] & /@ {atomPointers, destroyerPointers};
-	{atomLists, destroyerLists} = Map[list[[#[[1]] ;; #[[2]] - 1]] &, {atomRanges, destroyerRanges}, {2}];
-	<|$creatorEvents -> Most[creatorEvents],
-		(* We only call libSetReplace with a singleway evolution (for now), so we can assume there is only one destroyer *)
-		$destroyerEvents -> Replace[destroyerLists, {{} -> Infinity, {e_, ___} :> e}, {1}],
-		$generations -> Most[generations],
-		$atomLists -> atomLists|>
+	{inputRanges, outputRanges} = Partition[#, 2, 1] & /@ {inputPointers, outputPointers};
+	{inputLists, outputLists} = Map[list[[#[[1]] ;; #[[2]] - 1]] &, {inputRanges, outputRanges}, {2}];
+	<|$eventRuleIDs -> Most[ruleIDs] + 1, (* Remove the fake event at the end *)
+		$eventInputs -> inputLists + 1, (* C++ indexing starts from 0 *)
+		$eventOutputs -> outputLists + 1,
+		$eventGenerations -> Most[generations]|>
+]
+
+
+(* ::Text:: *)
+(*We use this function for now to obtain the expressions-based representation of the evolution object.*)
+(*Once we transition to the event-based representation, this will no longer be necessary.*)
+
+
+(* assumes a single creator/destroyer event per edge, which is ok because we are only currently calling libSetReplace*)
+(*with EventSelectionFunction -> GlobalSpacelike.*)
+expressionEvents[expressionsCount_][inputsOrOutputs_, missingEventID_] :=
+	Replace[Position[inputsOrOutputs, #], {{{event_, _}} :> event, {} -> missingEventID}] & /@ Range[expressionsCount]
+
+
+decodeExpressions[atomLists_List, events_Association] := Module[{creators, destroyers, eventToGeneration},
+	{creators, destroyers} =
+		expressionEvents[Length[atomLists]] @@@ {{events[$eventOutputs], 0}, {events[$eventInputs], Infinity}};
+	eventToGeneration =
+		Association[Append[Thread[Range[Length[events[$eventGenerations]]] -> events[$eventGenerations]], 0 -> 0]];
+	<|$creatorEvents -> creators,
+		$destroyerEvents -> destroyers,
+		$generations -> eventToGeneration /@ creators,
+		$atomLists -> atomLists,
+		$eventRuleIDs -> events[$eventRuleIDs]|>
 ]
 
 
@@ -234,7 +269,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
-		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, terminationReason, eventRuleIDs,
+		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, terminationReason,
 		resultAtoms, inversePartialGlobalMap, inverseGlobalMap},
 	canonicalRules = toCanonicalRules[rules];
 	setAtoms = Hold /@ Union[Catenate[set]];
@@ -266,13 +301,12 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 			If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]],
 		timeConstraint,
 		If[!returnOnAbortQ, Return[$Aborted], terminationReason = $timeConstraint]];
-	cppOutput = decodeExpressions @ $cpp$setExpressions[setPtr];
+	cppOutput = decodeExpressions[decodeAtomLists[$cpp$setExpressions[setPtr]], decodeEvents[$cpp$setEvents[setPtr]]];
 	maxCompleteGeneration =
 		Replace[$cpp$maxCompleteGeneration[setPtr], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]];
 	terminationReason = Replace[$terminationReasonCodes[$cpp$terminationReason[setPtr]], {
 		$Aborted -> terminationReason,
 		$notTerminated -> $timeConstraint}];
-	eventRuleIDs = $cpp$eventRuleIDs[setPtr];
 	$cpp$setDelete[setPtr];
 	resultAtoms = Union[Catenate[cppOutput[$atomLists]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
@@ -284,7 +318,6 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 				ReleaseHold @ Map[inverseGlobalMap, cppOutput[$atomLists], {2}],
 			$rules -> rules,
 			$maxCompleteGeneration -> maxCompleteGeneration,
-			$terminationReason -> terminationReason,
-			$eventRuleIDs -> eventRuleIDs
+			$terminationReason -> terminationReason
 		|>]]
 ]

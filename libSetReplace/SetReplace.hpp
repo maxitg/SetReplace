@@ -29,6 +29,10 @@ EXTERN_C DLLEXPORT int setReplace(WolframLibraryData libData, mint argc, MArgume
  */
 EXTERN_C DLLEXPORT int setExpressions(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result);
 
+/** @brief Returns the list of events for a specified set pointer.
+ */
+EXTERN_C DLLEXPORT int setEvents(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result);
+
 /** @brief Returns the largest generation that has both been reached, and has no matches that would produce expressions
  * with that or lower generation.
  * @details Is abortable, in which case returns LIBRARY_FUNCTION_ERROR.
@@ -38,9 +42,5 @@ EXTERN_C DLLEXPORT int maxCompleteGeneration(WolframLibraryData libData, mint ar
 /** @brief Returns a number corresponding to the termination reason.
  */
 EXTERN_C DLLEXPORT int terminationReason(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result);
-
-/** @brief Returns the list of indices of rules used for each event.
- */
-EXTERN_C DLLEXPORT int eventRuleIDs(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result);
 
 #endif  // LIBSETREPLACE_SETREPLACE_HPP_

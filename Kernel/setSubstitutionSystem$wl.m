@@ -363,6 +363,7 @@ setSubstitutionSystem$wl[
 		$destroyerEvents -> result[[All, 3]],
 		$generations -> result[[All, 4]],
 		$atomLists -> result[[All, 5]],
+		$eventRuleIDs -> If[outputWithMetadata[[2, 2]] == {}, {}, outputWithMetadata[[2, 2, 1]]],
 		$rules -> rules,
 		$maxCompleteGeneration -> CheckAbort[
 			maxCompleteGeneration[outputWithMetadata[[1, 1]], renamedRules],
@@ -370,8 +371,7 @@ setSubstitutionSystem$wl[
 				Missing["Unknown", $Aborted],
 				Return[$Aborted]
 			]],
-		$terminationReason -> outputWithMetadata[[1, 2]],
-		$eventRuleIDs -> If[outputWithMetadata[[2, 2]] == {}, {}, outputWithMetadata[[2, 2, 1]]]|>];
+		$terminationReason -> outputWithMetadata[[1, 2]]|>];
 	WolframModelEvolutionObject[
 		Join[
 			intermediateEvolution[[1]],

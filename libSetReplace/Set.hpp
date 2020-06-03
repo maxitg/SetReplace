@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "Event.hpp"
 #include "Expression.hpp"
 #include "Match.hpp"
 #include "Rule.hpp"
@@ -86,7 +87,7 @@ class Set {
 
   /** @brief List of all expressions in the set, past and present.
    */
-  std::vector<SetExpression> expressions() const;
+  std::vector<AtomsVector> expressions() const;
 
   /** @brief Returns the largest generation that has both been reached, and has no matches that would produce
    * expressions with that or lower generation.
@@ -102,7 +103,7 @@ class Set {
 
   /** @brief Yields rule IDs corresponding to each event.
    */
-  const std::vector<RuleID>& eventRuleIDs() const;
+  std::vector<Event> events() const;
 
  private:
   class Implementation;
