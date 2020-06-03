@@ -94,10 +94,11 @@ Exploring the hypergraph models of this variety is the primary purpose of this p
 
 ## Dependencies
 
-You only need two things to use **SetReplace**:
+You only need three things to use **SetReplace**:
 
+* Windows, macOS 10.12+, or Linux.
 * [Wolfram Language 12.1+](https://www.wolfram.com/language/) including [WolframScript](https://www.wolfram.com/wolframscript/). A free version is available as [Wolfram Engine](https://www.wolfram.com/engine/).
-* A C++ compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in WolframScript are [here](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
+* A C++17 compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in WolframScript are [here](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
 
 ## Build Instructions
 
