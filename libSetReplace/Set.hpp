@@ -27,11 +27,11 @@ class Set {
     FinalStateStepSpecificationForMultiwaySystem
   };
 
-  static constexpr int64_t maxStepLimit = std::numeric_limits<int64_t>::max();
+  static constexpr int64_t stepLimitDisabled = std::numeric_limits<int64_t>::max();
 
   /** @brief Specification of conditions upon which to stop evaluation.
    * @details Each of these is UpTo, i.e., the evolution is terminated when the first of these, fixed point, or an abort
-   * is reached. Set to maxStepLimit to disable.
+   * is reached.
    * @var maxEvents Total number of events to produce.
    * @var maxGenerationsLocal Total number of generations. Local means the expressions of max generation will never even
    * be matched, which means the evaluation order might be different than if the equivalent number of events is
@@ -42,11 +42,11 @@ class Set {
    * @var maxFinalExpressions Same as for the atoms above, but for expressions.
    */
   struct StepSpecification {
-    int64_t maxEvents = maxStepLimit;
-    int64_t maxGenerationsLocal = maxStepLimit;
-    int64_t maxFinalAtoms = maxStepLimit;
-    int64_t maxFinalAtomDegree = maxStepLimit;
-    int64_t maxFinalExpressions = maxStepLimit;
+    int64_t maxEvents = stepLimitDisabled;
+    int64_t maxGenerationsLocal = stepLimitDisabled;
+    int64_t maxFinalAtoms = stepLimitDisabled;
+    int64_t maxFinalAtomDegree = stepLimitDisabled;
+    int64_t maxFinalExpressions = stepLimitDisabled;
   };
 
   /** @brief All possible functions available to select events. Some of these will cause multiway evolution.

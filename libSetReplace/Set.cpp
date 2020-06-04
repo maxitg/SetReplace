@@ -187,7 +187,7 @@ class Set::Implementation {
   }
 
   void updateStepSpec(const StepSpecification newStepSpec) {
-    checkStepSpec(newStepSpec);
+    throwIfInvalidStepSpec(newStepSpec);
     const auto previousMaxGeneration = stepSpec_.maxGenerationsLocal;
     stepSpec_ = newStepSpec;
     if (newStepSpec.maxGenerationsLocal > previousMaxGeneration) {
@@ -199,13 +199,13 @@ class Set::Implementation {
     }
   }
 
-  void checkStepSpec(const StepSpecification& stepSpec) const {
-    if (eventSelectionFunction_ != EventSelectionFunction::GlobalSpacelike) {
+  void throwIfInvalidStepSpec(const StepSpecification& stepSpec) const {
+    if (isMultiway()) {
       // cannot support final state step limiters for a multiway system.
       const std::vector<int64_t> finalStateStepLimits = {
           stepSpec.maxFinalAtoms, stepSpec.maxFinalAtomDegree, stepSpec.maxFinalExpressions};
       for (const auto stepLimit : finalStateStepLimits) {
-        if (stepLimit != maxStepLimit) throw Error::FinalStateStepSpecificationForMultiwaySystem;
+        if (stepLimit != stepLimitDisabled) throw Error::FinalStateStepSpecificationForMultiwaySystem;
       }
     }
   }
