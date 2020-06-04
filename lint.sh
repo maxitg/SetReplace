@@ -41,7 +41,7 @@ for file in $sourceFiles; do
   fi
 done
 
-if ! cpplint --quiet --linelength=120 --filter=-legal/copyright $sourceFiles; then
+if ! cpplint --quiet --extensions=hpp,cpp $sourceFiles; then
   exitStatus=1
 fi
 

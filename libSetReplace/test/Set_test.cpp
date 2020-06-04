@@ -1,10 +1,9 @@
 #include "Set.hpp"
 
+#include <vector>
+
 #include <gtest/gtest.h>
 
-#include <iostream>
-
-#include "IDTypes.hpp"
 #include "Match.hpp"
 #include "Rule.hpp"
 

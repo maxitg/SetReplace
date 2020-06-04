@@ -1,12 +1,19 @@
 #include "Match.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <functional>
 #include <map>
+#include <memory>
+#include <mutex>
 #include <random>
+#include <set>
+#include <shared_mutex>  // NOLINT cpplint thinks this is a C system header for some reason
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 namespace SetReplace {
 class MatchComparator {
@@ -32,7 +39,7 @@ class MatchComparator {
             comparison = -comparison;
             break;
           default:
-            throw Matcher::Error::InvalidOrderingDirection;
+            return false;  // throw is called in constructor of Matcher::Implementation
         }
         return comparison < 0;
       }
@@ -55,7 +62,7 @@ class MatchComparator {
         return compare(a->rule, b->rule);
 
       default:
-        throw Matcher::Error::InvalidOrderingFunction;
+        return 0;  // throw is called in constructor of Matcher::Implementation
     }
   }
 
@@ -150,6 +157,19 @@ class Matcher::Implementation {
   std::mt19937 randomGenerator_;
   MatchPtr nextMatch_;
 
+  /**
+   * This variable is typically monitored in shouldAbort such that other threads can check if they should abort.
+   * It is volatile, but not atomic because it is locked before being written to.
+   */
+  mutable volatile Error currentError;
+  mutable std::shared_mutex currentErrorMutex;
+
+  /**
+   * This mutex should be used to gain access to the above match structures.
+   * Currently only insertMatch is executed concurrently, and therefore it is only used there (for now).
+   */
+  mutable std::mutex matchMutex;
+
  public:
   Implementation(const std::vector<Rule>& rules,
                  AtomsIndex* atomsIndex,
@@ -160,13 +180,59 @@ class Matcher::Implementation {
         atomsIndex_(*atomsIndex),
         getAtomsVector_(std::move(getAtomsVector)),
         matchQueue_(MatchComparator(orderingSpec)),
-        randomGenerator_(randomSeed) {}
+        randomGenerator_(randomSeed),
+        currentError(None) {
+    for (const auto& ordering : orderingSpec) {
+      if (ordering.first < OrderingFunction::First || ordering.first >= OrderingFunction::Last) {
+        throw Matcher::Error::InvalidOrderingFunction;
+      } else if (ordering.second < OrderingDirection::First || ordering.second >= OrderingDirection::Last) {
+        throw Matcher::Error::InvalidOrderingDirection;
+      }
+    }
+  }
 
   void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
-                                      const std::function<bool()>& shouldAbort) {
-    for (size_t i = 0; i < rules_.size(); ++i) {
-      addMatchesForRule(expressionIDs, static_cast<RuleID>(i), shouldAbort);
+                                      const std::function<bool()>& abortRequested) {
+    // If one thread errors, alert other threads with this function
+    const std::function<bool()> shouldAbort = [this, &abortRequested]() {
+      return getCurrentError() != None || abortRequested();
+    };
+
+    // Only create threads if there is more than one rule and hardware has more than one thread
+    const uint64_t numHardwareThreads = std::thread::hardware_concurrency();  // returns 0 if unknown
+    const uint64_t numThreadsToUse = rules_.size() > 1 && numHardwareThreads > 1
+                                         ? std::min(static_cast<uint64_t>(rules_.size()), numHardwareThreads)
+                                         : 0;
+
+    auto addMatchesForRuleRange = [=](uint64_t start) {
+      for (uint64_t i = start; i < static_cast<uint64_t>(rules_.size()); i += numThreadsToUse) {
+        addMatchesForRule(expressionIDs, i, shouldAbort);
+      }
+    };
+
+    if (numThreadsToUse > 0) {
+      // Multi-threaded path
+      std::vector<std::thread> threads(numThreadsToUse);
+      for (uint64_t i = 0; i < numThreadsToUse; ++i) {
+        threads[i] = std::thread(addMatchesForRuleRange, i);
+      }
+      for (auto& thread : threads) {
+        thread.join();
+      }
+    } else {
+      // Single-threaded path
+      for (size_t i = 0; i < rules_.size(); ++i) {
+        addMatchesForRule(expressionIDs, i, shouldAbort);
+      }
     }
+
+    if (currentError != None) {
+      // Reset currentError before throwing
+      Error toThrow(currentError);
+      currentError = None;
+      throw toThrow;
+    }
+
     chooseNextMatch();
   }
 
@@ -220,6 +286,9 @@ class Matcher::Implementation {
                                         const std::vector<ExpressionID>& potentialExpressionIDs,
                                         const std::function<bool()>& shouldAbort) {
     for (const auto expressionID : potentialExpressionIDs) {
+      if (getCurrentError() != None) {
+        return;
+      }
       if (isExpressionUnused(incompleteMatch, expressionID)) {
         attemptMatchExpressionToInput(incompleteMatch, partiallyMatchedInputs, nextInputIdx, expressionID, shouldAbort);
       }
@@ -231,6 +300,18 @@ class Matcher::Implementation {
            match.inputExpressions.end();
   }
 
+  void setCurrentErrorIfNone(Error newError) const {
+    std::unique_lock lock(currentErrorMutex);
+    if (currentError == None) {
+      currentError = newError;
+    }
+  }
+
+  Error getCurrentError() const {
+    std::shared_lock lock(currentErrorMutex);
+    return currentError;
+  }
+
   void attemptMatchExpressionToInput(const Match& incompleteMatch,
                                      const std::vector<AtomsVector>& partiallyMatchedInputs,
                                      const size_t nextInputIdx,
@@ -238,7 +319,8 @@ class Matcher::Implementation {
                                      const std::function<bool()>& shouldAbort) {
     // If WL wants to abort, abort
     if (shouldAbort()) {
-      throw Error::Aborted;
+      setCurrentErrorIfNone(Error::Aborted);
+      return;
     }
 
     const auto& input = partiallyMatchedInputs[nextInputIdx];
@@ -270,7 +352,11 @@ class Matcher::Implementation {
     // careful, don't create different pointers to the same match!
     const auto matchPtr = std::make_shared<Match>(newMatch);
 
-    if (!allMatches_.insert(matchPtr).second) return;
+    std::lock_guard<std::mutex> lock(matchMutex);
+
+    if (!allMatches_.insert(matchPtr).second) {
+      return;
+    }
 
     auto bucketIt = matchQueue_.find(matchPtr);  // works because comparison is smart
     if (bucketIt == matchQueue_.end()) {
@@ -367,7 +453,8 @@ class Matcher::Implementation {
       // and don't have any specific atom references.
       // That implies rule inputs are not a connected graph, which is not supported at the moment,
       // and would require custom logic to implement efficiently.
-      throw Error::DisconnectedInputs;
+      setCurrentErrorIfNone(DisconnectedInputs);
+      return {{}, {}};
     } else {
       return {nextInputIdx, nextExpressionsToTry};
     }
