@@ -286,12 +286,16 @@
 		69CAF86A2257B062006F9C60 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 4FZCW36HH2;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
-				HEADER_SEARCH_PATHS = "/Applications/Wolfram\\ Desktop.app/Contents/SystemFiles/IncludeFiles/C";
+				HEADER_SEARCH_PATHS = (
+					"/Applications/Wolfram\\ Desktop.app/Contents/SystemFiles/IncludeFiles/C",
+					/Applications/Mathematica.app/Contents/SystemFiles/IncludeFiles/C,
+				);
 				LIBRARY_SEARCH_PATHS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -301,12 +305,16 @@
 		69CAF86B2257B062006F9C60 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 4FZCW36HH2;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
-				HEADER_SEARCH_PATHS = "/Applications/Wolfram\\ Desktop.app/Contents/SystemFiles/IncludeFiles/C";
+				HEADER_SEARCH_PATHS = (
+					"/Applications/Wolfram\\ Desktop.app/Contents/SystemFiles/IncludeFiles/C",
+					/Applications/Mathematica.app/Contents/SystemFiles/IncludeFiles/C,
+				);
 				LIBRARY_SEARCH_PATHS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
