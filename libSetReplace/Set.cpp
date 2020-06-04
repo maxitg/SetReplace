@@ -16,7 +16,7 @@ class Set::Implementation {
   const std::vector<Rule> rules_;
 
   // Determines the limiting conditions for the evaluation.
-  StepSpecification stepSpec_ = {0, 0, 0, 0, 0}; // don't evolve unless asked to.
+  StepSpecification stepSpec_ = {0, 0, 0, 0, 0};  // don't evolve unless asked to.
   const EventSelectionFunction eventSelectionFunction_;
   TerminationReason terminationReason_ = TerminationReason::NotTerminated;
 
@@ -202,7 +202,8 @@ class Set::Implementation {
   void checkStepSpec(const StepSpecification& stepSpec) const {
     if (eventSelectionFunction_ != EventSelectionFunction::GlobalSpacelike) {
       // cannot support final state step limiters for a multiway system.
-      const std::vector<int64_t> finalStateStepLimits = {stepSpec.maxFinalAtoms, stepSpec.maxFinalAtomDegree, stepSpec.maxFinalExpressions};
+      const std::vector<int64_t> finalStateStepLimits = {
+          stepSpec.maxFinalAtoms, stepSpec.maxFinalAtomDegree, stepSpec.maxFinalExpressions};
       for (const auto stepLimit : finalStateStepLimits) {
         if (stepLimit != maxStepLimit) throw Error::FinalStateStepSpecificationForMultiwaySystem;
       }
@@ -216,9 +217,7 @@ class Set::Implementation {
     unindexedExpressions_.clear();
   }
 
-  bool isMultiway() const {
-    return eventSelectionFunction_ != EventSelectionFunction::GlobalSpacelike;
-  }
+  bool isMultiway() const { return eventSelectionFunction_ != EventSelectionFunction::GlobalSpacelike; }
 
   TerminationReason willExceedAtomLimits(const std::vector<AtomsVector>& explicitRuleInputs,
                                          const std::vector<AtomsVector>& explicitRuleOutputs) const {

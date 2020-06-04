@@ -17,7 +17,14 @@ class Set {
  public:
   /** @brief Type of the error occurred during evaluation.
    */
-  enum class Error { Aborted, DisconnectedInputs, NonPositiveAtoms, AtomCountOverflow, InvalidEventSelectionFunction, FinalStateStepSpecificationForMultiwaySystem };
+  enum class Error {
+    Aborted,
+    DisconnectedInputs,
+    NonPositiveAtoms,
+    AtomCountOverflow,
+    InvalidEventSelectionFunction,
+    FinalStateStepSpecificationForMultiwaySystem
+  };
 
   static constexpr int64_t maxStepLimit = std::numeric_limits<int64_t>::max();
 
