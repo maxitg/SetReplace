@@ -2,6 +2,7 @@
 #define LIBSETREPLACE_SET_HPP_
 
 #include <functional>
+#include <limits>
 #include <memory>
 #include <vector>
 
