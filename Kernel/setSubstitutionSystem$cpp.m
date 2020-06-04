@@ -235,8 +235,8 @@ $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
 (*setSubstitutionSystem$cpp*)
 
 
-$maxInt = 2^31 - 1;
-$maxUnsignedInt = 2^32 - 1;
+$maxInt64 = 2^63 - 1;
+$maxUInt32 = 2^32 - 1;
 
 
 $terminationReasonCodes = <|
@@ -292,14 +292,14 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 		encodeNestedLists[mappedSet],
 		Replace[$globalSpacelike, $eventSelectionFunctionCodes], (* hardcode global spacelike (singleway) system for now *)
 		Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
-		RandomInteger[{0, $maxUnsignedInt}]];
+		RandomInteger[{0, $maxUInt32}]];
 	TimeConstrained[
 		CheckAbort[
 			$cpp$setReplace[
 				setPtr,
 				stepSpec /@ {
 						$maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalVertexDegree, $maxFinalExpressions} /.
-					{Infinity | (_ ? MissingQ) -> $maxInt}],
+					{Infinity | (_ ? MissingQ) -> $maxInt64}],
 			If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]],
 		timeConstraint,
 		If[!returnOnAbortQ, Return[$Aborted], terminationReason = $timeConstraint]];

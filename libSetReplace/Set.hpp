@@ -17,11 +17,13 @@ class Set {
  public:
   /** @brief Type of the error occurred during evaluation.
    */
-  enum class Error { Aborted, DisconnectedInputs, NonPositiveAtoms, AtomCountOverflow, InvalidEventSelectionFunction };
+  enum class Error { Aborted, DisconnectedInputs, NonPositiveAtoms, AtomCountOverflow, InvalidEventSelectionFunction, FinalStateStepSpecificationForMultiwaySystem };
+
+  static constexpr int64_t maxStepLimit = std::numeric_limits<int64_t>::max();
 
   /** @brief Specification of conditions upon which to stop evaluation.
    * @details Each of these is UpTo, i.e., the evolution is terminated when the first of these, fixed point, or an abort
-   * is reached.
+   * is reached. Set to maxStepLimit to disable.
    * @var maxEvents Total number of events to produce.
    * @var maxGenerationsLocal Total number of generations. Local means the expressions of max generation will never even
    * be matched, which means the evaluation order might be different than if the equivalent number of events is
@@ -32,11 +34,11 @@ class Set {
    * @var maxFinalExpressions Same as for the atoms above, but for expressions.
    */
   struct StepSpecification {
-    int64_t maxEvents = 0;
-    int64_t maxGenerationsLocal = 0;
-    int64_t maxFinalAtoms = 0;
-    int64_t maxFinalAtomDegree = 0;
-    int64_t maxFinalExpressions = 0;
+    int64_t maxEvents = maxStepLimit;
+    int64_t maxGenerationsLocal = maxStepLimit;
+    int64_t maxFinalAtoms = maxStepLimit;
+    int64_t maxFinalAtomDegree = maxStepLimit;
+    int64_t maxFinalExpressions = maxStepLimit;
   };
 
   /** @brief All possible functions available to select events. Some of these will cause multiway evolution.

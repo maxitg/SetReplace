@@ -16,8 +16,8 @@ class Set::Implementation {
   const std::vector<Rule> rules_;
 
   // Determines the limiting conditions for the evaluation.
-  StepSpecification stepSpec_;
-  EventSelectionFunction eventSelectionFunction_;
+  StepSpecification stepSpec_ = {0, 0, 0, 0, 0}; // don't evolve unless asked to.
+  const EventSelectionFunction eventSelectionFunction_;
   TerminationReason terminationReason_ = TerminationReason::NotTerminated;
 
   std::unordered_map<ExpressionID, AtomsVector> expressions_;
@@ -87,11 +87,14 @@ class Set::Implementation {
     auto explicitRuleOutputs = rules_[match->rule].outputs;
     Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, &explicitRuleOutputs);
 
-    for (const auto function : {&Implementation::willExceedAtomLimits, &Implementation::willExceedExpressionsLimit}) {
-      const auto willExceedAtomLimitsStatus = (this->*function)(explicitRuleInputs, explicitRuleOutputs);
-      if (willExceedAtomLimitsStatus != TerminationReason::NotTerminated) {
-        terminationReason_ = willExceedAtomLimitsStatus;
-        return 0;
+    // only makes sense to have final state step limits for a singleway system.
+    if (!isMultiway()) {
+      for (const auto function : {&Implementation::willExceedAtomLimits, &Implementation::willExceedExpressionsLimit}) {
+        const auto willExceedAtomLimitsStatus = (this->*function)(explicitRuleInputs, explicitRuleOutputs);
+        if (willExceedAtomLimitsStatus != TerminationReason::NotTerminated) {
+          terminationReason_ = willExceedAtomLimitsStatus;
+          return 0;
+        }
       }
     }
 
@@ -101,6 +104,8 @@ class Set::Implementation {
     if (eventSelectionFunction_ == EventSelectionFunction::GlobalSpacelike) {
       matcher_.removeMatchesInvolvingExpressions(match->inputExpressions);
       atomsIndex_.removeExpressions(match->inputExpressions);
+      destroyedExpressionsCount_ += match->inputExpressions.size();
+      updateAtomDegrees(&atomDegrees_, match->inputExpressions, -1);
     } else if (eventSelectionFunction_ == EventSelectionFunction::None) {
       matcher_.deleteMatch(match);
     } else {
@@ -182,6 +187,7 @@ class Set::Implementation {
   }
 
   void updateStepSpec(const StepSpecification newStepSpec) {
+    checkStepSpec(newStepSpec);
     const auto previousMaxGeneration = stepSpec_.maxGenerationsLocal;
     stepSpec_ = newStepSpec;
     if (newStepSpec.maxGenerationsLocal > previousMaxGeneration) {
@@ -193,11 +199,25 @@ class Set::Implementation {
     }
   }
 
+  void checkStepSpec(const StepSpecification& stepSpec) const {
+    if (eventSelectionFunction_ != EventSelectionFunction::GlobalSpacelike) {
+      // cannot support final state step limiters for a multiway system.
+      const std::vector<int64_t> finalStateStepLimits = {stepSpec.maxFinalAtoms, stepSpec.maxFinalAtomDegree, stepSpec.maxFinalExpressions};
+      for (const auto stepLimit : finalStateStepLimits) {
+        if (stepLimit != maxStepLimit) throw Error::FinalStateStepSpecificationForMultiwaySystem;
+      }
+    }
+  }
+
   void indexNewExpressions(const std::function<bool()>& shouldAbort) {
     // Atoms index must be updated first, because the matcher uses it to discover expressions.
     atomsIndex_.addExpressions(unindexedExpressions_);
     matcher_.addMatchesInvolvingExpressions(unindexedExpressions_, shouldAbort);
     unindexedExpressions_.clear();
+  }
+
+  bool isMultiway() const {
+    return eventSelectionFunction_ != EventSelectionFunction::GlobalSpacelike;
   }
 
   TerminationReason willExceedAtomLimits(const std::vector<AtomsVector>& explicitRuleInputs,
@@ -289,7 +309,8 @@ class Set::Implementation {
       }
     }
 
-    updateAtomDegrees(&atomDegrees_, expressions, +1);
+    // atom degrees are only used for final state step limiters
+    if (!isMultiway()) updateAtomDegrees(&atomDegrees_, expressions, +1);
   }
 
   void updateAtomDegrees(std::unordered_map<Atom, int64_t>* atomDegrees,
