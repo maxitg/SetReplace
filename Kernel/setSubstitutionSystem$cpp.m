@@ -315,11 +315,12 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 	inverseGlobalMap = Association @ Thread[resultAtoms
 		-> (Lookup[inversePartialGlobalMap, #, Unique["v", {Temporary}]] & /@ resultAtoms)];
 	WolframModelEvolutionObject[Join[
-		cppOutput,
+		KeyDrop[cppOutput, $eventRuleIDs],
 		<|$atomLists ->
 				ReleaseHold @ Map[inverseGlobalMap, cppOutput[$atomLists], {2}],
 			$rules -> rules,
 			$maxCompleteGeneration -> maxCompleteGeneration,
-			$terminationReason -> terminationReason
+			$terminationReason -> terminationReason,
+			$eventRuleIDs -> cppOutput[$eventRuleIDs]
 		|>]]
 ]
