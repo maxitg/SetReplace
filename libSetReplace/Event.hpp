@@ -44,8 +44,9 @@ class CausalGraph {
                                      int outputExpressionsCount);
 
   /** @brief Yields a vector of all events throughout history.
+   @details This includes the initial event, so the size of the result is one larger than eventsCount().
    */
-  std::vector<Event> events() const;
+  const std::vector<Event>& events() const;
 
   /** @brief Total number of events.
    */

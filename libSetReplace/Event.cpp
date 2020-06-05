@@ -11,8 +11,6 @@ class CausalGraph::Implementation {
   // needed to return the largest generation in O(1)
   Generation largestGeneration_ = 0;
 
-  static constexpr RuleID initialConditionRule = -1;
-
  public:
   explicit Implementation(const int initialExpressionsCount) {
     addEvent(initialConditionRule, {}, initialExpressionsCount);
@@ -28,7 +26,7 @@ class CausalGraph::Implementation {
     return newExpressions;
   }
 
-  std::vector<Event> events() const { return std::vector<Event>(events_.begin() + 1, events_.end()); }
+  const std::vector<Event>& events() const { return events_; }
 
   size_t eventsCount() const { return events_.size() - 1; }
 
@@ -77,7 +75,7 @@ std::vector<ExpressionID> CausalGraph::addEvent(const RuleID ruleID,
   return implementation_->addEvent(ruleID, inputExpressions, outputExpressionsCount);
 }
 
-std::vector<Event> CausalGraph::events() const { return implementation_->events(); }
+const std::vector<Event>& CausalGraph::events() const { return implementation_->events(); }
 
 size_t CausalGraph::eventsCount() const { return implementation_->eventsCount(); }
 

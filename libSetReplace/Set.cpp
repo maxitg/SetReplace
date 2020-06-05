@@ -155,7 +155,7 @@ class Set::Implementation {
 
   TerminationReason terminationReason() const { return terminationReason_; }
 
-  std::vector<Event> events() const { return causalGraph_.events(); }
+  const std::vector<Event>& events() const { return causalGraph_.events(); }
 
  private:
   Implementation(std::vector<Rule> rules,
@@ -358,5 +358,5 @@ Generation Set::maxCompleteGeneration(const std::function<bool()>& shouldAbort) 
 
 Set::TerminationReason Set::terminationReason() const { return implementation_->terminationReason(); }
 
-std::vector<Event> Set::events() const { return implementation_->events(); }
+const std::vector<Event>& Set::events() const { return implementation_->events(); }
 }  // namespace SetReplace

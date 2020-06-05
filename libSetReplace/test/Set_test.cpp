@@ -37,10 +37,10 @@ TEST(Set, globalSpacelike) {
   EXPECT_EQ(aSet.terminationReason(), Set::TerminationReason::MaxEvents);
   EXPECT_EQ(aSet.expressions(), (std::vector<AtomsVector>{{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}, {2}, {4}}));
 
-  EXPECT_EQ(aSet.events()[1].generation, 1);
-  EXPECT_EQ(aSet.events()[1].inputExpressions, (std::vector<ExpressionID>{2, 3}));
-  EXPECT_EQ(aSet.events()[1].outputExpressions, (std::vector<ExpressionID>{8}));
-  EXPECT_EQ(aSet.events()[1].rule, 0);
+  EXPECT_EQ(aSet.events()[2].generation, 1);
+  EXPECT_EQ(aSet.events()[2].inputExpressions, (std::vector<ExpressionID>{2, 3}));
+  EXPECT_EQ(aSet.events()[2].outputExpressions, (std::vector<ExpressionID>{8}));
+  EXPECT_EQ(aSet.events()[2].rule, 0);
 
   EXPECT_EQ(aSet.replace(Set::StepSpecification(), doNotAbort), 3);
   // in the global spacelike case, only one of the {5}'s can make it to {6} because there is only one {5, 6} to use.

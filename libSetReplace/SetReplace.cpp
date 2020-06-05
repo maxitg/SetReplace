@@ -312,14 +312,12 @@ int setEvents(WolframLibraryData libData, mint argc, MArgument* argv, MArgument 
 
   const SetID setID = MArgument_getInteger(argv[0]);
 
-  std::vector<Event> events;
   try {
-    events = setFromID(setID).events();
+    const auto& events = setFromID(setID).events();
+    MArgument_setMTensor(result, putEvents(events, libData));
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
-
-  MArgument_setMTensor(result, putEvents(events, libData));
 
   return LIBRARY_NO_ERROR;
 }

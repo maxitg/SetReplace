@@ -156,20 +156,19 @@ decodeEvents[list_List] := Module[{
 (*with EventSelectionFunction -> GlobalSpacelike.*)
 expressionEvents[expressionsCount_][inputsOrOutputs_, missingEventID_] :=
 	Sort[Join[
-		Catenate[Thread /@ Transpose[{inputsOrOutputs, Range[Length[inputsOrOutputs]]}]],
+		Catenate[Thread /@ Transpose[{inputsOrOutputs, Range[Length[inputsOrOutputs]] - 1}]],
 		Thread[{Complement[Range[expressionsCount], Catenate[inputsOrOutputs]], missingEventID}]]][[All, 2]]
 
 
 decodeExpressions[atomLists_List, events_Association] := Module[{creators, destroyers, eventToGeneration},
 	{creators, destroyers} =
 		expressionEvents[Length[atomLists]] @@@ {{events[$eventOutputs], 0}, {events[$eventInputs], Infinity}};
-	eventToGeneration =
-		Association[Append[Thread[Range[Length[events[$eventGenerations]]] -> events[$eventGenerations]], 0 -> 0]];
+	eventToGeneration = Association[Thread[Range[Length[events[$eventGenerations]]] - 1 -> events[$eventGenerations]]];
 	<|$creatorEvents -> creators,
 		$destroyerEvents -> destroyers,
 		$generations -> eventToGeneration /@ creators,
 		$atomLists -> atomLists,
-		$eventRuleIDs -> events[$eventRuleIDs]|>
+		$eventRuleIDs -> Rest[events[$eventRuleIDs]]|>
 ]
 
 

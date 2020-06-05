@@ -113,7 +113,7 @@ class Set {
 
   /** @brief Yields rule IDs corresponding to each event.
    */
-  std::vector<Event> events() const;
+  const std::vector<Event>& events() const;
 
  private:
   class Implementation;
