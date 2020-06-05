@@ -18,10 +18,10 @@ Set testSet(const Set::EventSelectionFunction eventSelectionFunction) {
   std::vector<AtomsVector> initialExpressions = {{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}};
 
   Matcher::OrderingSpec orderingSpec = {
-    {Matcher::OrderingFunction::SortedExpressionIDs, Matcher::OrderingDirection::Normal},
-    {Matcher::OrderingFunction::ReverseSortedExpressionIDs, Matcher::OrderingDirection::Normal},
-    {Matcher::OrderingFunction::ExpressionIDs, Matcher::OrderingDirection::Normal},
-    {Matcher::OrderingFunction::RuleIndex, Matcher::OrderingDirection::Normal}};
+      {Matcher::OrderingFunction::SortedExpressionIDs, Matcher::OrderingDirection::Normal},
+      {Matcher::OrderingFunction::ReverseSortedExpressionIDs, Matcher::OrderingDirection::Normal},
+      {Matcher::OrderingFunction::ExpressionIDs, Matcher::OrderingDirection::Normal},
+      {Matcher::OrderingFunction::RuleIndex, Matcher::OrderingDirection::Normal}};
   unsigned int randomSeed = 0;
   return Set(rules, initialExpressions, eventSelectionFunction, orderingSpec, randomSeed);
 }
@@ -44,13 +44,16 @@ TEST(Set, globalSpacelike) {
 
   EXPECT_EQ(aSet.replace(Set::StepSpecification(), doNotAbort), 3);
   // in the global spacelike case, only one of the {5}'s can make it to {6} because there is only one {5, 6} to use.
-  EXPECT_EQ(aSet.expressions(), (std::vector<AtomsVector>{{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}, {2}, {4}, {5}, {5}, {6}}));}
+  EXPECT_EQ(aSet.expressions(),
+            (std::vector<AtomsVector>{{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}, {2}, {4}, {5}, {5}, {6}}));
+}
 
 TEST(Set, matchAllMultiway) {
   Set aSet = testSet(Set::EventSelectionFunction::None);
   // Unlike the global spacelike case, the edge {5, 6} can now be used twice, so there is an extra event
   EXPECT_EQ(aSet.replace(Set::StepSpecification(), doNotAbort), 6);
   // and two {6}'s in the list of expressions
-  EXPECT_EQ(aSet.expressions(), (std::vector<AtomsVector>{{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}, {2}, {4}, {5}, {5}, {6}, {6}}));
+  EXPECT_EQ(aSet.expressions(),
+            (std::vector<AtomsVector>{{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}, {2}, {4}, {5}, {5}, {6}, {6}}));
 }
 }  // namespace SetReplace
