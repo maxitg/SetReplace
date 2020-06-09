@@ -45,6 +45,7 @@ message(STATUS "SET_REPLACE_WITH_MATHEMATICA: ${SET_REPLACE_WITH_MATHEMATICA}")
 message(STATUS "SET_REPLACE_EXTRA_COMPILE_OPTIONS: ${SET_REPLACE_EXTRA_COMPILE_OPTIONS}")
 
 set(libSetReplace_headers
+    Event.hpp
     Rule.hpp
     IDTypes.hpp
     Expression.hpp
@@ -52,6 +53,7 @@ set(libSetReplace_headers
     Set.hpp
     )
 set(libSetReplace_sources
+    Event.cpp
     Expression.cpp
     Match.cpp
     Set.cpp

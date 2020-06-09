@@ -16,25 +16,20 @@ class Set::Implementation {
   const std::vector<Rule> rules_;
 
   // Determines the limiting conditions for the evaluation.
-  StepSpecification stepSpec_;
+  StepSpecification stepSpec_ = {0, 0, 0, 0, 0};  // don't evolve unless asked to.
+  const EventSelectionFunction eventSelectionFunction_;
   TerminationReason terminationReason_ = TerminationReason::NotTerminated;
 
-  std::unordered_map<ExpressionID, SetExpression> expressions_;
-  std::vector<RuleID> eventRuleIDs_ = {-1};
+  std::unordered_map<ExpressionID, AtomsVector> expressions_;
+  CausalGraph causalGraph_;
 
   Atom nextAtom_ = 1;
-  ExpressionID nextExpressionID_ = 0;
 
   int64_t destroyedExpressionsCount_ = 0;
 
   // In another words, expressions counts by atom.
   // Note, we cannot use atomsIndex_, because it does not keep last generation expressions.
   std::unordered_map<Atom, int64_t> atomDegrees_;
-
-  // Largest generation produced so far.
-  // Note, this is not the same as max of generations of all expressions,
-  // because there might exist an event that deletes expressions, but does not create any new ones.
-  Generation largestGeneration_ = 0;
 
   AtomsIndex atomsIndex_;
 
@@ -45,16 +40,20 @@ class Set::Implementation {
  public:
   Implementation(const std::vector<Rule>& rules,
                  const std::vector<AtomsVector>& initialExpressions,
+                 const EventSelectionFunction& eventSelectionFunction,
                  const Matcher::OrderingSpec& orderingSpec,
                  const unsigned int randomSeed)
-      : Implementation(rules, initialExpressions, orderingSpec, randomSeed, [this](const int64_t expressionID) {
-          return expressions_.at(expressionID).atoms;
-        }) {}
+      : Implementation(rules,
+                       initialExpressions,
+                       eventSelectionFunction,
+                       orderingSpec,
+                       randomSeed,
+                       [this](const int64_t expressionID) { return expressions_.at(expressionID); }) {}
 
   int64_t replaceOnce(const std::function<bool()> shouldAbort) {
     terminationReason_ = TerminationReason::NotTerminated;
 
-    if (eventRuleIDs_.size() > static_cast<size_t>(stepSpec_.maxEvents)) {
+    if (causalGraph_.eventsCount() >= static_cast<size_t>(stepSpec_.maxEvents)) {
       terminationReason_ = TerminationReason::MaxEvents;
       return 0;
     }
@@ -65,7 +64,7 @@ class Set::Implementation {
       return isAborted;
     });
     if (matcher_.empty()) {
-      if (largestGeneration_ == stepSpec_.maxGenerationsLocal) {
+      if (causalGraph_.largestGeneration() == stepSpec_.maxGenerationsLocal) {
         terminationReason_ = TerminationReason::MaxGenerationsLocal;
       } else {
         terminationReason_ = TerminationReason::FixedPoint;
@@ -78,7 +77,7 @@ class Set::Implementation {
     std::vector<AtomsVector> inputExpressions;
     inputExpressions.reserve(match->inputExpressions.size());
     for (const auto& expressionID : match->inputExpressions) {
-      inputExpressions.emplace_back(expressions_.at(expressionID).atoms);
+      inputExpressions.emplace_back(expressions_.at(expressionID));
     }
 
     auto explicitRuleInputs = ruleInputs;
@@ -88,32 +87,38 @@ class Set::Implementation {
     auto explicitRuleOutputs = rules_[match->rule].outputs;
     Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, &explicitRuleOutputs);
 
-    for (const auto function : {&Implementation::willExceedAtomLimits, &Implementation::willExceedExpressionsLimit}) {
-      const auto willExceedAtomLimitsStatus = (this->*function)(explicitRuleInputs, explicitRuleOutputs);
-      if (willExceedAtomLimitsStatus != TerminationReason::NotTerminated) {
-        terminationReason_ = willExceedAtomLimitsStatus;
-        return 0;
+    // only makes sense to have final state step limits for a singleway system.
+    if (!isMultiway()) {
+      for (const auto function : {&Implementation::willExceedAtomLimits, &Implementation::willExceedExpressionsLimit}) {
+        const auto willExceedAtomLimitsStatus = (this->*function)(explicitRuleInputs, explicitRuleOutputs);
+        if (willExceedAtomLimitsStatus != TerminationReason::NotTerminated) {
+          terminationReason_ = willExceedAtomLimitsStatus;
+          return 0;
+        }
       }
     }
 
     // At this point, we are committed to modifying the set.
 
+    // This goes first, as if the event selection function is invalid, we want to fail before modifying anything else.
+    if (eventSelectionFunction_ == EventSelectionFunction::GlobalSpacelike) {
+      matcher_.removeMatchesInvolvingExpressions(match->inputExpressions);
+      atomsIndex_.removeExpressions(match->inputExpressions);
+      destroyedExpressionsCount_ += match->inputExpressions.size();
+      updateAtomDegrees(&atomDegrees_, match->inputExpressions, -1);
+    } else if (eventSelectionFunction_ == EventSelectionFunction::None) {
+      matcher_.deleteMatch(match);
+    } else {
+      throw Error::InvalidEventSelectionFunction;
+    }
+
     // Name newly created atoms as well, now all atoms in the output are explicitly named.
     const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
 
-    matcher_.removeMatchesInvolvingExpressions(match->inputExpressions);
-    atomsIndex_.removeExpressions(match->inputExpressions);
+    const auto outputExpressionIDs =
+        causalGraph_.addEvent(match->rule, match->inputExpressions, static_cast<int>(namedRuleOutputs.size()));
 
-    Generation outputGeneration = 0;
-    for (const auto& inputExpression : match->inputExpressions) {
-      outputGeneration = std::max(outputGeneration, expressions_[inputExpression].generation + 1);
-    }
-    largestGeneration_ = std::max(largestGeneration_, outputGeneration);
-
-    const EventID eventID = static_cast<EventID>(eventRuleIDs_.size());
-    addExpressions(namedRuleOutputs, eventID, outputGeneration);
-    assignDestroyerEvent(match->inputExpressions, eventID);
-    eventRuleIDs_.push_back(match->rule);
+    addExpressions(outputExpressionIDs, namedRuleOutputs);
 
     return 1;
   }
@@ -130,12 +135,12 @@ class Set::Implementation {
     }
   }
 
-  std::vector<SetExpression> expressions() const {
-    std::vector<std::pair<ExpressionID, SetExpression>> idsAndExpressions(expressions_.begin(), expressions_.end());
+  std::vector<AtomsVector> expressions() const {
+    std::vector<std::pair<ExpressionID, AtomsVector>> idsAndExpressions(expressions_.begin(), expressions_.end());
     std::sort(idsAndExpressions.begin(), idsAndExpressions.end(), [](const auto& a, const auto& b) {
       return a.first < b.first;
     });
-    std::vector<SetExpression> result;
+    std::vector<AtomsVector> result;
     result.reserve(idsAndExpressions.size());
     for (const auto& idAndExpression : idsAndExpressions) {
       result.emplace_back(idAndExpression.second);
@@ -145,20 +150,23 @@ class Set::Implementation {
 
   Generation maxCompleteGeneration(const std::function<bool()>& shouldAbort) {
     indexNewExpressions(shouldAbort);
-    return std::min(smallestGeneration(matcher_.allMatches()), largestGeneration_);
+    return std::min(smallestGeneration(matcher_.allMatches()), causalGraph_.largestGeneration());
   }
 
   TerminationReason terminationReason() const { return terminationReason_; }
 
-  const std::vector<RuleID>& eventRuleIDs() const { return eventRuleIDs_; }
+  const std::vector<Event>& events() const { return causalGraph_.events(); }
 
  private:
   Implementation(std::vector<Rule> rules,
                  const std::vector<AtomsVector>& initialExpressions,
+                 const EventSelectionFunction& eventSelectionFunction,
                  const Matcher::OrderingSpec& orderingSpec,
                  const unsigned int randomSeed,
                  const std::function<AtomsVector(ExpressionID)>& getAtomsVector)
       : rules_(std::move(rules)),
+        eventSelectionFunction_(eventSelectionFunction),
+        causalGraph_(static_cast<int>(initialExpressions.size())),
         atomsIndex_(getAtomsVector),
         matcher_(rules_, &atomsIndex_, getAtomsVector, orderingSpec, randomSeed) {
     for (const auto& expression : initialExpressions) {
@@ -168,7 +176,7 @@ class Set::Implementation {
         incrementNextAtom();
       }
     }
-    addExpressions(initialExpressions, initialConditionEvent, initialGeneration);
+    addExpressions(causalGraph_.allExpressionIDs(), initialExpressions);
   }
 
   Atom incrementNextAtom() {
@@ -179,13 +187,25 @@ class Set::Implementation {
   }
 
   void updateStepSpec(const StepSpecification newStepSpec) {
+    throwIfInvalidStepSpec(newStepSpec);
     const auto previousMaxGeneration = stepSpec_.maxGenerationsLocal;
     stepSpec_ = newStepSpec;
     if (newStepSpec.maxGenerationsLocal > previousMaxGeneration) {
       for (const auto& idAndExpression : expressions_) {
-        if (idAndExpression.second.generation == previousMaxGeneration) {
+        if (causalGraph_.expressionGeneration(idAndExpression.first) == previousMaxGeneration) {
           unindexedExpressions_.push_back(idAndExpression.first);
         }
+      }
+    }
+  }
+
+  void throwIfInvalidStepSpec(const StepSpecification& stepSpec) const {
+    if (isMultiway()) {
+      // cannot support final state step limiters for a multiway system.
+      const std::vector<int64_t> finalStateStepLimits = {
+          stepSpec.maxFinalAtoms, stepSpec.maxFinalAtomDegree, stepSpec.maxFinalExpressions};
+      for (const auto stepLimit : finalStateStepLimits) {
+        if (stepLimit != stepLimitDisabled) throw Error::FinalStateStepSpecificationForMultiwaySystem;
       }
     }
   }
@@ -196,6 +216,8 @@ class Set::Implementation {
     matcher_.addMatchesInvolvingExpressions(unindexedExpressions_, shouldAbort);
     unindexedExpressions_.clear();
   }
+
+  bool isMultiway() const { return eventSelectionFunction_ != EventSelectionFunction::GlobalSpacelike; }
 
   TerminationReason willExceedAtomLimits(const std::vector<AtomsVector>& explicitRuleInputs,
                                          const std::vector<AtomsVector>& explicitRuleOutputs) const {
@@ -246,7 +268,7 @@ class Set::Implementation {
 
   TerminationReason willExceedExpressionsLimit(const std::vector<AtomsVector>& explicitRuleInputs,
                                                const std::vector<AtomsVector>& explicitRuleOutputs) const {
-    const int64_t currentExpressionsCount = nextExpressionID_ - destroyedExpressionsCount_;
+    const int64_t currentExpressionsCount = causalGraph_.expressionsCount() - destroyedExpressionsCount_;
     const int64_t newExpressionsCount = currentExpressionsCount - static_cast<int64_t>(explicitRuleInputs.size()) +
                                         static_cast<int64_t>(explicitRuleOutputs.size());
     if (newExpressionsCount > stepSpec_.maxFinalExpressions) {
@@ -273,42 +295,21 @@ class Set::Implementation {
     return result;
   }
 
-  std::vector<ExpressionID> addExpressions(const std::vector<AtomsVector>& expressions,
-                                           const EventID creatorEvent,
-                                           const Generation generation) {
-    auto ids = assignExpressionIDs(expressions, creatorEvent, generation);
+  void addExpressions(const std::vector<ExpressionID>& ids, const std::vector<AtomsVector>& expressions) {
+    if (ids.empty()) return;
 
-    // If generation is at least maxGeneration_, we will never use these expressions as inputs, so no need adding them
-    // to the index.
-    if (generation < stepSpec_.maxGenerationsLocal) {
-      unindexedExpressions_.insert(unindexedExpressions_.end(), ids.begin(), ids.end());
-    }
+    for (size_t index = 0; index < ids.size(); ++index) {
+      expressions_.insert(std::make_pair(ids[index], expressions[index]));
 
-    updateAtomDegrees(&atomDegrees_, expressions, +1);
-    return ids;
-  }
-
-  std::vector<ExpressionID> assignExpressionIDs(const std::vector<AtomsVector>& expressions,
-                                                const EventID creatorEvent,
-                                                const Generation generation) {
-    std::vector<ExpressionID> ids;
-    ids.reserve(expressions.size());
-    for (const auto& expression : expressions) {
-      ids.push_back(nextExpressionID_);
-      expressions_.insert(
-          std::make_pair(nextExpressionID_++, SetExpression{expression, creatorEvent, finalStateEvent, generation}));
-    }
-    return ids;
-  }
-
-  void assignDestroyerEvent(const std::vector<ExpressionID>& expressions, const EventID destroyerEvent) {
-    for (const auto id : expressions) {
-      if (expressions_.at(id).destroyerEvent == finalStateEvent) {
-        ++destroyedExpressionsCount_;
+      // If generation is at least maxGeneration_, we will never use these expressions as inputs, so no need adding them
+      // to the index.
+      if (causalGraph_.expressionGeneration(ids[index]) < stepSpec_.maxGenerationsLocal) {
+        unindexedExpressions_.push_back(ids[index]);
       }
-      expressions_.at(id).destroyerEvent = destroyerEvent;
     }
-    updateAtomDegrees(&atomDegrees_, expressions, -1);
+
+    // atom degrees are only used for final state step limiters
+    if (!isMultiway()) updateAtomDegrees(&atomDegrees_, expressions, +1);
   }
 
   void updateAtomDegrees(std::unordered_map<Atom, int64_t>* atomDegrees,
@@ -317,7 +318,7 @@ class Set::Implementation {
     std::vector<AtomsVector> expressions;
     expressions.reserve(deltaExpressionIDs.size());
     for (const auto id : deltaExpressionIDs) {
-      expressions.emplace_back(expressions_.at(id).atoms);
+      expressions.emplace_back(expressions_.at(id));
     }
     updateAtomDegrees(atomDegrees, expressions, deltaCount);
   }
@@ -327,7 +328,7 @@ class Set::Implementation {
     for (const auto& match : matches) {
       Generation largestForTheMatch = 0;
       for (const ExpressionID id : match->inputExpressions) {
-        largestForTheMatch = std::max(largestForTheMatch, expressions_.at(id).generation);
+        largestForTheMatch = std::max(largestForTheMatch, causalGraph_.expressionGeneration(id));
       }
       smallestSoFar = std::min(smallestSoFar, largestForTheMatch);
     }
@@ -337,9 +338,11 @@ class Set::Implementation {
 
 Set::Set(const std::vector<Rule>& rules,
          const std::vector<AtomsVector>& initialExpressions,
+         const EventSelectionFunction& eventSelectionFunction,
          const Matcher::OrderingSpec& orderingSpec,
          unsigned int randomSeed)
-    : implementation_(std::make_shared<Implementation>(rules, initialExpressions, orderingSpec, randomSeed)) {}
+    : implementation_(std::make_shared<Implementation>(
+          rules, initialExpressions, eventSelectionFunction, orderingSpec, randomSeed)) {}
 
 int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) { return implementation_->replaceOnce(shouldAbort); }
 
@@ -347,7 +350,7 @@ int64_t Set::replace(const StepSpecification& stepSpec, const std::function<bool
   return implementation_->replace(stepSpec, shouldAbort);
 }
 
-std::vector<SetExpression> Set::expressions() const { return implementation_->expressions(); }
+std::vector<AtomsVector> Set::expressions() const { return implementation_->expressions(); }
 
 Generation Set::maxCompleteGeneration(const std::function<bool()>& shouldAbort) {
   return implementation_->maxCompleteGeneration(shouldAbort);
@@ -355,5 +358,5 @@ Generation Set::maxCompleteGeneration(const std::function<bool()>& shouldAbort) 
 
 Set::TerminationReason Set::terminationReason() const { return implementation_->terminationReason(); }
 
-const std::vector<RuleID>& Set::eventRuleIDs() const { return implementation_->eventRuleIDs(); }
+const std::vector<Event>& Set::events() const { return implementation_->events(); }
 }  // namespace SetReplace
