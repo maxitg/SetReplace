@@ -28,6 +28,7 @@ $cpp$setCreate = If[$libraryFile =!= $Failed,
 		"setCreate",
 		{{Integer, 1}, (* rules *)
 			{Integer, 1}, (* initial set *)
+			Integer, (* event selection function *)
 			{Integer, 1}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
 			Integer}, (* random seed *)
 		Integer], (* set ptr *)
@@ -62,6 +63,15 @@ $cpp$setExpressions = If[$libraryFile =!= $Failed,
 	$Failed];
 
 
+$cpp$setEvents = If[$libraryFile =!= $Failed,
+	LibraryFunctionLoad[
+		$libraryFile,
+		"setEvents",
+		{Integer}, (* set ptr *)
+		{Integer, 1}], (* expressions *)
+	$Failed];
+
+
 $cpp$maxCompleteGeneration = If[$libraryFile =!= $Failed,
 	LibraryFunctionLoad[
 		$libraryFile,
@@ -77,15 +87,6 @@ $cpp$terminationReason = If[$libraryFile =!= $Failed,
 		"terminationReason",
 		{Integer}, (* set ptr *)
 		Integer], (* reason *)
-	$Failed];
-
-
-$cpp$eventRuleIDs = If[$libraryFile =!= $Failed,
-	LibraryFunctionLoad[
-		$libraryFile,
-		"eventRuleIDs",
-		{Integer}, (* set ptr *)
-		{Integer, 1}], (* ids *)
 	$Failed];
 
 
@@ -119,18 +120,55 @@ encodeNestedLists[list_List] :=
 (*This is the reverse, used to decode set data (a list of expressions) from libSetReplace*)
 
 
-decodeExpressions[list_List] := Module[{
-		count = list[[1]],
-		creatorEvents, destroyerEvents, generations, atomPointers,
-		atomRanges, atomLists},
-	{creatorEvents, destroyerEvents, generations, atomPointers} =
-		Transpose[Partition[list[[2 ;; 4 (count + 1) + 1]], 4]];
+decodeAtomLists[list_List] := Module[{count, atomPointers, atomRanges, atomLists},
+	count = list[[1]];
+	atomPointers = list[[2 ;; (count + 1) + 1]];
 	atomRanges = Partition[atomPointers, 2, 1];
-	atomLists = list[[#[[1]] ;; #[[2]] - 1]] & /@ atomRanges;
-	<|$creatorEvents -> Most[creatorEvents],
-		$destroyerEvents -> Most[destroyerEvents] /. {-1 -> Infinity},
-		$generations -> Most[generations],
-		$atomLists -> atomLists|>
+	list[[#[[1]] ;; #[[2]] - 1]] & /@ atomRanges
+]
+
+
+(* ::Text:: *)
+(*Similar function for the events*)
+
+
+decodeEvents[list_List] := Module[{
+		count = list[[1]],
+		ruleIDs, inputPointers, outputPointers, generations,
+		inputRanges, inputLists, outputRanges, outputLists},
+	{ruleIDs, inputPointers, outputPointers, generations} =
+		Transpose[Partition[list[[2 ;; 4 (count + 1) + 1]], 4]];
+	{inputRanges, outputRanges} = Partition[#, 2, 1] & /@ {inputPointers, outputPointers};
+	{inputLists, outputLists} = Map[list[[#[[1]] ;; #[[2]] - 1]] &, {inputRanges, outputRanges}, {2}];
+	<|$eventRuleIDs -> Most[ruleIDs] + 1, (* Remove the fake event at the end *)
+		$eventInputs -> inputLists + 1, (* C++ indexing starts from 0 *)
+		$eventOutputs -> outputLists + 1,
+		$eventGenerations -> Most[generations]|>
+]
+
+
+(* ::Text:: *)
+(*We use this function for now to obtain the expressions-based representation of the evolution object.*)
+(*Once we transition to the event-based representation, this will no longer be necessary.*)
+
+
+(* assumes a single creator/destroyer event per edge, which is ok because we are only currently calling libSetReplace*)
+(*with EventSelectionFunction -> GlobalSpacelike.*)
+expressionEvents[expressionsCount_][inputsOrOutputs_, missingEventID_] :=
+	Sort[Join[
+		Catenate[Thread /@ Transpose[{inputsOrOutputs, Range[Length[inputsOrOutputs]] - 1}]],
+		Thread[{Complement[Range[expressionsCount], Catenate[inputsOrOutputs]], missingEventID}]]][[All, 2]]
+
+
+decodeExpressions[atomLists_List, events_Association] := Module[{creators, destroyers, eventToGeneration},
+	{creators, destroyers} =
+		expressionEvents[Length[atomLists]] @@@ {{events[$eventOutputs], 0}, {events[$eventInputs], Infinity}};
+	eventToGeneration = Association[Thread[Range[Length[events[$eventGenerations]]] - 1 -> events[$eventGenerations]]];
+	<|$creatorEvents -> creators,
+		$destroyerEvents -> destroyers,
+		$generations -> eventToGeneration /@ creators,
+		$atomLists -> atomLists,
+		$eventRuleIDs -> Rest[events[$eventRuleIDs]]|>
 ]
 
 
@@ -196,8 +234,8 @@ $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
 (*setSubstitutionSystem$cpp*)
 
 
-$maxInt = 2^31 - 1;
-$maxUnsignedInt = 2^32 - 1;
+$maxInt64 = 2^63 - 1;
+$maxUInt32 = 2^32 - 1;
 
 
 $terminationReasonCodes = <|
@@ -209,6 +247,12 @@ $terminationReasonCodes = <|
 	5 -> $maxFinalExpressions,
 	6 -> $fixedPoint,
 	7 -> $Aborted
+|>;
+
+
+$eventSelectionFunctionCodes = <|
+	$globalSpacelike -> 0,
+	None -> 1
 |>;
 
 
@@ -226,7 +270,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
-		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, terminationReason, eventRuleIDs,
+		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, terminationReason,
 		resultAtoms, inversePartialGlobalMap, inverseGlobalMap},
 	canonicalRules = toCanonicalRules[rules];
 	setAtoms = Hold /@ Union[Catenate[set]];
@@ -245,37 +289,37 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 	setPtr = $cpp$setCreate[
 		encodeNestedLists[List @@@ mappedRules],
 		encodeNestedLists[mappedSet],
+		Replace[$globalSpacelike, $eventSelectionFunctionCodes], (* hardcode global spacelike (singleway) system for now *)
 		Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
-		RandomInteger[{0, $maxUnsignedInt}]];
+		RandomInteger[{0, $maxUInt32}]];
 	TimeConstrained[
 		CheckAbort[
 			$cpp$setReplace[
 				setPtr,
 				stepSpec /@ {
 						$maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalVertexDegree, $maxFinalExpressions} /.
-					{Infinity | (_ ? MissingQ) -> $maxInt}],
+					{Infinity | (_ ? MissingQ) -> $maxInt64}],
 			If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]],
 		timeConstraint,
 		If[!returnOnAbortQ, Return[$Aborted], terminationReason = $timeConstraint]];
-	cppOutput = decodeExpressions @ $cpp$setExpressions[setPtr];
+	cppOutput = decodeExpressions[decodeAtomLists[$cpp$setExpressions[setPtr]], decodeEvents[$cpp$setEvents[setPtr]]];
 	maxCompleteGeneration =
 		Replace[$cpp$maxCompleteGeneration[setPtr], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]];
 	terminationReason = Replace[$terminationReasonCodes[$cpp$terminationReason[setPtr]], {
 		$Aborted -> terminationReason,
 		$notTerminated -> $timeConstraint}];
-	eventRuleIDs = $cpp$eventRuleIDs[setPtr];
 	$cpp$setDelete[setPtr];
 	resultAtoms = Union[Catenate[cppOutput[$atomLists]]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
 	inverseGlobalMap = Association @ Thread[resultAtoms
 		-> (Lookup[inversePartialGlobalMap, #, Unique["v", {Temporary}]] & /@ resultAtoms)];
 	WolframModelEvolutionObject[Join[
-		cppOutput,
+		KeyDrop[cppOutput, $eventRuleIDs],
 		<|$atomLists ->
 				ReleaseHold @ Map[inverseGlobalMap, cppOutput[$atomLists], {2}],
 			$rules -> rules,
 			$maxCompleteGeneration -> maxCompleteGeneration,
 			$terminationReason -> terminationReason,
-			$eventRuleIDs -> eventRuleIDs
+			$eventRuleIDs -> cppOutput[$eventRuleIDs]
 		|>]]
 ]

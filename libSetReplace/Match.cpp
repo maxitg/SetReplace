@@ -257,6 +257,25 @@ class Matcher::Implementation {
     chooseNextMatch();
   }
 
+  void deleteMatch(const MatchPtr& matchPtr) {
+    allMatches_.erase(matchPtr);
+
+    const auto& expressions = matchPtr->inputExpressions;
+    for (const auto expression : expressions) {
+      expressionToMatches_[expression].erase(matchPtr);
+      if (expressionToMatches_[expression].empty()) expressionToMatches_.erase(expression);
+    }
+
+    auto& bucket = matchQueue_[matchPtr];
+    const auto bucketIndex = bucket.first.at(matchPtr);
+    // O(1) order-non-preserving deletion from a vector
+    std::swap(bucket.second[bucketIndex], bucket.second[bucket.second.size() - 1]);
+    bucket.first[bucket.second[bucketIndex]] = bucketIndex;
+    bucket.first.erase(bucket.second[bucket.second.size() - 1]);
+    bucket.second.pop_back();
+    if (bucket.first.empty()) matchQueue_.erase(matchPtr);
+  }
+
   bool empty() const { return matchQueue_.empty(); }
 
   MatchPtr nextMatch() const { return nextMatch_; }
@@ -374,25 +393,6 @@ class Matcher::Implementation {
     }
   }
 
-  void deleteMatch(const MatchPtr& matchPtr) {
-    allMatches_.erase(matchPtr);
-
-    const auto& expressions = matchPtr->inputExpressions;
-    for (const auto expression : expressions) {
-      expressionToMatches_[expression].erase(matchPtr);
-      if (expressionToMatches_[expression].empty()) expressionToMatches_.erase(expression);
-    }
-
-    auto& bucket = matchQueue_[matchPtr];
-    const auto bucketIndex = bucket.first.at(matchPtr);
-    // O(1) order-non-preserving deletion from a vector
-    std::swap(bucket.second[bucketIndex], bucket.second[bucket.second.size() - 1]);
-    bucket.first[bucket.second[bucketIndex]] = bucketIndex;
-    bucket.first.erase(bucket.second[bucket.second.size() - 1]);
-    bucket.second.pop_back();
-    if (bucket.first.empty()) matchQueue_.erase(matchPtr);
-  }
-
   static bool isMatchComplete(const Match& match) {
     return std::find_if(match.inputExpressions.begin(), match.inputExpressions.end(), [](const auto& ex) -> bool {
              return ex < 0;
@@ -484,6 +484,8 @@ void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& ex
 void Matcher::removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs) {
   implementation_->removeMatchesInvolvingExpressions(expressionIDs);
 }
+
+void Matcher::deleteMatch(const MatchPtr matchPtr) { implementation_->deleteMatch(matchPtr); }
 
 bool Matcher::empty() const { return implementation_->empty(); }
 
