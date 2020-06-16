@@ -62,14 +62,18 @@ SetReplace[args___] := 0 /;
 (*Options*)
 
 
-Options[SetReplace] := Options[setSubstitutionSystem]
+Options[SetReplace] = {
+	Method -> Automatic,
+	TimeConstraint -> Infinity,
+	"EventOrderingFunction" -> Automatic};
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
-SetReplace[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] :=
+expr : SetReplace[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
+		recognizedOptionsQ[expr, SetReplace, {o}] :=
 	Module[{result},
 		result = Check[
 			setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplace, False, o],

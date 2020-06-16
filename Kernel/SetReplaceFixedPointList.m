@@ -51,14 +51,18 @@ SetReplaceFixedPointList[args___] := 0 /;
 (*Options*)
 
 
-Options[SetReplaceFixedPointList] := Options[setSubstitutionSystem]
+Options[SetReplaceFixedPointList] = {
+	Method -> Automatic,
+	TimeConstraint -> Infinity,
+	"EventOrderingFunction" -> Automatic};
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
-SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] := Module[{result},
+SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] /;
+		recognizedOptionsQ[expr, SetReplaceFixedPointList, {o}] := Module[{result},
 	result = Check[
 		setSubstitutionSystem[
 			rules, set, <||>, SetReplaceFixedPointList, False, o],

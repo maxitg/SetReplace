@@ -42,21 +42,25 @@ SyntaxInformation[SetReplaceList] = {"ArgumentsPattern" -> {_, _, _, OptionsPatt
 
 
 SetReplaceList[args___] := 0 /;
-	!Developer`CheckArgumentCount[SetReplaceList[args], 3, 3] && False
+	!Developer`CheckArgumentCount[SetReplaceList[args], 2, 3] && False
 
 
 (* ::Section:: *)
 (*Options*)
 
 
-Options[SetReplaceList] := Options[setSubstitutionSystem]
+Options[SetReplaceList] = {
+	Method -> Automatic,
+	TimeConstraint -> Infinity,
+	"EventOrderingFunction" -> Automatic};
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
-SetReplaceList[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] :=
+SetReplaceList[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
+		recognizedOptionsQ[expr, SetReplaceList, {o}] :=
 	Module[{result},
 		result = Check[
 			setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplaceList, False, o],
