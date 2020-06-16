@@ -120,16 +120,16 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
 		TimeConstrained[
 			CheckAbort[
 				{FixedPoint[
-					AbortProtect[Module[{newResult, deletedExpressions, ruleIndices},
+					AbortProtect[Module[{newResult, deletedExpressions, events},
 						If[eventsCount++ == Lookup[stepSpec, $maxEvents, Infinity],
 							Throw[{previousResult, $maxEvents}, $$setReplaceResult];
 						];
-						{newResult, {deletedExpressions, ruleIndices}} = Reap[
+						{newResult, {deletedExpressions, events}} = Reap[
 							Catch[
 								Replace[#, normalRules],
 								$$reachedAtomDegreeLimit,
 								Throw[{previousResult, $maxFinalVertexDegree}, $$setReplaceResult] &],
-							{$$deletedExpressions, $$ruleIndex}];
+							{$$deletedExpressions, $$events}];
 						If[vertexCount[vertexIndex] > Lookup[stepSpec, $maxFinalVertices, Infinity],
 							Throw[{previousResult, $maxFinalVertices}, $$setReplaceResult];
 						];
@@ -137,7 +137,7 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
 							Throw[{previousResult, $maxFinalExpressions}, $$setReplaceResult];
 						];
 						Map[Sow[#, $$deletedExpressions] &, deletedExpressions, {2}];
-						Map[Sow[#, $$ruleIndex] &, ruleIndices, {2}];
+						Map[Sow[#, $$events] &, events, {2}];
 						previousResult = newResult]] &,
 					List @@ set], $fixedPoint},
 				If[returnOnAbortQ,
@@ -164,60 +164,55 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
 
 addMetadataManagement[
 			input_List :> output_Module,
-			getNextEvent_,
+			ruleID_,
 			getNextExpression_,
 			maxGeneration_,
 			maxVertexDegree_,
 			vertexIndex_] := Module[{
 		inputIDs = Table[Unique["id", {Temporary}], Length[input]],
 		wholeInputPatternNames = Table[Unique["inputExpression", {Temporary}], Length[input]],
-		inputCreators = Table[Unique["creator", {Temporary}], Length[input]],
-		inputGenerations = Table[Unique["generation", {Temporary}], Length[input]],
-		nextEvent},
+		inputGenerations = Table[Unique["generation", {Temporary}], Length[input]]},
 	With[{
 			heldModule = Map[Hold, Hold[output], {2}]},
 		With[{
 				moduleArguments = Append[
 					ReleaseHold @ Map[Hold, heldModule[[1, 1]], {2}],
-					Hold[nextEvent = getNextEvent[]]],
+					With[{outputExpressionCount = Length[heldModule[[1, 2]][[1]]]},
+						Hold[newExpressionIDs = Table[getNextExpression[], outputExpressionCount]]]],
 				moduleOutput = heldModule[[1, 2]]},
 			With[{
 					newModuleContents = Join[
-						(* old expressions *)
-						(* don't put them in the main set, sow them instead,
-							that's much faster.
-							Given that these look just like normal expressions,
+						(* event *)
+						(* Given that these look just like normal expressions,
 							which just output Nothing at the end,
 							they pass just fine through all the transformation. *)
-						With[{expr = #[[5]]},
-								Hold[Sow[#, $$deletedExpressions]; deleteFromVertexIndex[vertexIndex, expr]; Nothing]] & @* ({
-							#[[1]], #[[2]], nextEvent, #[[3]], #[[4]]} &) /@
-								Transpose[{
-									inputIDs,
-									inputCreators,
-									inputGenerations,
-									wholeInputPatternNames}],
+						{With[{event = {ruleID, inputIDs -> newExpressionIDs, Max[0, inputGenerations] + 1}},
+							Hold[Sow[event, $$events]; Nothing]]},
+						(* old expressions *)
+						(* don't put them in the main set, sow them instead,
+							that's much faster. *)
+						With[{expr = #[[3]]},
+								Hold[Sow[#, $$deletedExpressions]; deleteFromVertexIndex[vertexIndex, expr]; Nothing]] & /@
+							Transpose[{
+								inputIDs,
+								inputGenerations,
+								wholeInputPatternNames}],
 						(* new expressions *)
-						ReleaseHold @ Map[
+						ReleaseHold @ MapIndexed[
 							Function[
-								o,
-								{Hold[getNextExpression[]],
-								 nextEvent,
-								 Infinity,
+								{expr, index},
+								{Hold[newExpressionIDs[[index[[-1]]]]],
 								 Max[0, inputGenerations] + 1,
-								 Hold[addToVertexIndex[vertexIndex, o, maxVertexDegree]]},
+								 Hold[addToVertexIndex[vertexIndex, expr, maxVertexDegree]]},
 								HoldAll],
 							moduleOutput,
 							{2}]],
 					originalInput = input},
 				{Pattern[Evaluate[#[[1]]], Blank[]],
-				 Pattern[Evaluate[#[[2]]], Blank[]],
-				 Infinity,
-				 Pattern[Evaluate[#[[3]]], Blank[]] ? (# < maxGeneration &),
-				 Pattern[Evaluate[#[[5]]], #[[4]]]} & /@
+				 Pattern[Evaluate[#[[2]]], Blank[]] ? (# < maxGeneration &),
+				 Pattern[Evaluate[#[[4]]], #[[3]]]} & /@
 						Transpose[{
 							inputIDs,
-							inputCreators,
 							inputGenerations,
 							originalInput,
 							wholeInputPatternNames}] :>
@@ -230,14 +225,17 @@ addMetadataManagement[
 (*smallestMatchGeneration*)
 
 
-$generationMetadataIndex = 4;
+$generationMetadataIndex = 2;
 
 
 maxCompleteGeneration[output_, rulesNoMetadata_] := Module[{
 		patternToMatch, matches},
 	patternToMatch = toNormalRules[
-		addMetadataManagement[#, Infinity &, Infinity &, Infinity, Infinity, $noIndex] & /@ rulesNoMetadata];
-	matches = Reap[FirstCase[SortBy[output, #[[$generationMetadataIndex]] &], patternToMatch, Sow[$noMatch], {0}]][[2]];
+		addMetadataManagement[#, Infinity, Infinity &, Infinity, Infinity, $noIndex] & /@ rulesNoMetadata];
+	matches = Reap[
+		FirstCase[
+			SortBy[output, #[[$generationMetadataIndex]] &], patternToMatch, Sow[$noMatch, $$deletedExpressions], {0}],
+		$$deletedExpressions][[2]];
 	Switch[matches,
 		{{$noMatch}},
 			Infinity,
@@ -323,12 +321,12 @@ vertexCount[$noIndex] := 0
 
 setSubstitutionSystem$wl[
 			caller_, rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_] := Module[{
-		setWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, result,
-		nextExpressionID = 1, nextEventID = 1, expressionsCountsPerVertex, vertexIndex, nextExpression,
-		intermediateEvolution},
+		setWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, allExpressions,
+		nextExpressionID = 1, expressionsCountsPerVertex, vertexIndex, nextExpression,
+		initialEvent, allEvents, generationsCount, maxCompleteGenerationAssumingExceedingStepSpecGenerationsDontExist},
 	nextExpression = nextExpressionID++ &;
 	(* {id, creator, destroyer, generation, atoms} *)
-	setWithMetadata = {nextExpression[], 0, \[Infinity], 0, #} & /@ set;
+	setWithMetadata = {nextExpression[], 0, #} & /@ set;
 	renamedRules = renameRuleInputs[toCanonicalRules[rules]];
 	If[renamedRules === $Failed, Return[$Failed]];
 	vertexIndex = If[MissingQ[stepSpec[$maxFinalVertices]] && MissingQ[stepSpec[$maxFinalVertexDegree]],
@@ -339,7 +337,7 @@ setSubstitutionSystem$wl[
 	rulesWithMetadata = MapIndexed[
 		addMetadataManagement[
 			#,
-			With[{ruleIndex = #2[[1]]}, (Sow[ruleIndex, $$ruleIndex]; nextEventID++) &],
+			#2[[1]],
 			nextExpression,
 			Lookup[stepSpec, $maxGenerationsLocal, Infinity],
 			Lookup[stepSpec, $maxFinalVertexDegree, Infinity],
@@ -348,42 +346,41 @@ setSubstitutionSystem$wl[
 	outputWithMetadata = Catch[
 		Reap[
 			setReplace$wl[setWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint],
-			{$$deletedExpressions, $$ruleIndex}],
+			{$$deletedExpressions, $$events}],
 		$$nonListExpression,
 		(makeMessage[caller, "nonListExpressions", #];
-			Return[$Failed]) &]; (* {{finalState, terminationReason}, {deletedExpressions}} *)
+			Return[$Failed]) &]; (* {{finalState, terminationReason}, {{deletedExpressions}, {events}}} *)
 	If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
-	result = SortBy[
+	allExpressions = SortBy[
 		Join[
 			outputWithMetadata[[1, 1]],
 			If[outputWithMetadata[[2, 1]] == {}, {}, outputWithMetadata[[2, 1, 1]]]],
 		First];
-	intermediateEvolution = WolframModelEvolutionObject[<|
-		$creatorEvents -> result[[All, 2]],
-		$destroyerEvents -> result[[All, 3]],
-		$generations -> result[[All, 4]],
-		$atomLists -> result[[All, 5]],
+	initialEvent = {0, {} -> setWithMetadata[[All, 1]], 0};
+	allEvents = Join[{initialEvent}, If[outputWithMetadata[[2, 2]] == {}, {}, outputWithMetadata[[2, 2, 1]]]];
+	generationsCount = Max[allEvents[[All, 3]], 0];
+	maxCompleteGenerationAssumingExceedingStepSpecGenerationsDontExist = CheckAbort[
+		maxCompleteGeneration[outputWithMetadata[[1, 1]], renamedRules],
+		If[returnOnAbortQ,
+			Missing["Unknown", $Aborted],
+			Return[$Aborted]
+		]];
+
+	WolframModelEvolutionObject[<|
+		$version -> 2,
 		$rules -> rules,
-		$maxCompleteGeneration -> CheckAbort[
-			maxCompleteGeneration[outputWithMetadata[[1, 1]], renamedRules],
-			If[returnOnAbortQ,
-				Missing["Unknown", $Aborted],
-				Return[$Aborted]
-			]],
-		$terminationReason -> outputWithMetadata[[1, 2]],
-		$eventRuleIDs -> If[outputWithMetadata[[2, 2]] == {}, {}, outputWithMetadata[[2, 2, 1]]]|>];
-	WolframModelEvolutionObject[
-		Join[
-			intermediateEvolution[[1]],
-			<|$maxCompleteGeneration -> With[{
-					possibleInfinityResult = intermediateEvolution[[1, Key[$maxCompleteGeneration]]]},
-				If[MissingQ[possibleInfinityResult],
-					possibleInfinityResult,
-					Min[possibleInfinityResult, intermediateEvolution["TotalGenerationsCount"]]]],
-			$terminationReason -> Replace[
-				intermediateEvolution[[1, Key[$terminationReason]]],
-				$fixedPoint ->
-					If[intermediateEvolution["TotalGenerationsCount"] == Lookup[stepSpec, $maxGenerationsLocal, Infinity],
-						$maxGenerationsLocal,
-						$fixedPoint]]|>]]
+		$maxCompleteGeneration -> If[MissingQ[maxCompleteGenerationAssumingExceedingStepSpecGenerationsDontExist],
+			maxCompleteGenerationAssumingExceedingStepSpecGenerationsDontExist,
+			Min[maxCompleteGenerationAssumingExceedingStepSpecGenerationsDontExist, generationsCount]],
+		$terminationReason -> Replace[
+			outputWithMetadata[[1, 2]],
+			$fixedPoint ->
+				If[generationsCount == Lookup[stepSpec, $maxGenerationsLocal, Infinity],
+					$maxGenerationsLocal,
+					$fixedPoint]],
+		$atomLists -> allExpressions[[All, 3]],
+		$eventRuleIDs -> allEvents[[All, 1]],
+		$eventInputs -> allEvents[[All, 2, 1]],
+		$eventOutputs -> allEvents[[All, 2, 2]],
+		$eventGenerations -> allEvents[[All, 3]]|>]
 ]
