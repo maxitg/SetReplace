@@ -356,9 +356,10 @@ Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList",
   "GenerationEventsCountList", "GenerationEventsList",
   "FinalDistinctElementsCount", "AllEventsDistinctElementsCount",
   "VertexCountList", "EdgeCountList", "FinalEdgeCount",
-  "AllEventsEdgesCount", "AllEventsGenerationsList", "CausalGraph",
-  "LayeredCausalGraph", "TerminationReason", "AllEventsRuleIndices",
-  "AllEventsList", "EventsStatesList", "EdgeCreatorEventIndices",
+  "AllEventsEdgesCount", "AllEventsGenerationsList",
+  "ExpressionsEventsGraph", "CausalGraph", "LayeredCausalGraph",
+  "TerminationReason", "AllEventsRuleIndices", "AllEventsList",
+  "EventsStatesList", "EdgeCreatorEventIndices",
   "EdgeDestroyerEventsIndices", "EdgeDestroyerEventIndices",
   "EdgeGenerationsList", "Properties", "Version", "Rules",
   "CompleteGenerationsCount", "AllEventsEdgesList"}
@@ -407,9 +408,10 @@ Out[] = {"AllEventsCount", "AllEventsDistinctElementsCount",
   "EventsCount", "EventsList", "EventsStatesList",
   "EventsStatesPlotsList", "EvolutionObject", "ExpressionGenerations",
    "ExpressionsCountFinal", "ExpressionsCountTotal",
-  "FinalDistinctElementsCount", "FinalEdgeCount", "FinalState",
-  "FinalStatePlot", "GenerationComplete", "GenerationEventsCountList",
-   "GenerationEventsList", "GenerationsCount", "LayeredCausalGraph",
+  "ExpressionsEventsGraph", "FinalDistinctElementsCount",
+  "FinalEdgeCount", "FinalState", "FinalStatePlot",
+  "GenerationComplete", "GenerationEventsCountList",
+  "GenerationEventsList", "GenerationsCount", "LayeredCausalGraph",
   "MaxCompleteGeneration", "PartialGenerationsCount", "StatesList",
   "StatesPlotsList", "TerminationReason", "TotalGenerationsCount",
   "UpdatedStatesList", "Version", "VertexCountList"}
@@ -833,20 +835,25 @@ Out[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, Infinity,
 
 #### Causal Graphs
 
-An event **A** *causes* an event **B** if there exists a set element created by **A** and destroyed by **B**. If we then consider all such relationships between events, we create a **`"CausalGraph"`**. In a causal graph, vertices correspond to events, and edges correspond to the set elements (aka spatial edges).
+An event **A** *causes* an event **B** if there exists an expression (set element) created by **A** and destroyed by **B**. If we then consider all such relationships between events, we create a **`"CausalGraph"`**. In a causal graph, vertices correspond to events, and edges correspond to the set elements (aka spatial edges).
 
-For example, if we consider our simple arithmetic model `{a_, b_} :> a + b` starting from `{3, 8, 8, 8, 2, 10, 0, 9, 7}` we get a causal graph which quite clearly describes what's going on (we label each event here with explicit values for a and b):
+To make it even more explicit, we have another property, **`"ExpressionsEventsGraph"`**. In this graph, there are two types of vertices corresponding to events and expressions, and edges correspond to a given expression being an input or an output of a given event.
+
+For example, if we consider our simple arithmetic model `{a_, b_} :> a + b` starting from `{3, 8, 8, 8, 2, 10, 0, 9, 7}` we get an expressions-events graph which quite clearly describes what's going on:
 
 ```wl
-In[] := With[{
-  evolution = WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
-    {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]}, With[{
-   causalGraph = evolution["CausalGraph"]},
-  Graph[causalGraph,
-   VertexLabels ->
-    Thread[VertexList[causalGraph] ->
-      Map[evolution["AllEventsEdgesList"][[#]] &,
-       Last /@ evolution["AllEventsList"], {2}]]]]]
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
+  {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
+```
+
+<img src="READMEImages/ArithmeticModelExpressionsEventsGraph.png" width="478">
+
+The causal graph is very similar, it just has the expression-vertices contracted:
+
+```wl
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
+ {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity, "CausalGraph"]
 ```
 
 <img src="READMEImages/ArithmeticModelCausalGraph.png" width="478">
@@ -865,40 +872,25 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 **`"LayeredCausalGraph"`** generates the same graph but layers events generation-by-generation. For example, in our arithmetic causal graph, note how it's arranged differently from an example above:
 
 ```wl
-In[] := With[{
-  evolution = WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
-    {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]}, With[{
-   causalGraph = evolution["LayeredCausalGraph"]},
-  Graph[causalGraph,
-   VertexLabels ->
-    Thread[VertexList[causalGraph] ->
-      Map[evolution["AllEventsEdgesList"][[#]] &,
-       Last /@ evolution["AllEventsList"], {2}]]]]]
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
+ {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity, "LayeredCausalGraph"]
 ```
 
 <img src="READMEImages/ArithmeticModelLayeredCausalGraph.png" width="478">
 
-Furthermore, if we include the initial condition as a "fake" event (see [`"IncludeBoundaryEvents"`](#includeboundaryevents) option for more information), note how slices through the causal graph correspond to states returned by [`"StatesList"`](#states):
+Note how slices through the expressions-events graph correspond to states returned by [`"StatesList"`](#states). Pay attention to intersections of the slices with edges as well, as they correspond to unused expressions from previous generations that remain in the state:
 
 ```wl
-In[] := With[{
-  evolution = WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
-    {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]}, With[{
-   causalGraph =
-    evolution["LayeredCausalGraph",
-     "IncludeBoundaryEvents" -> "Initial"]},
-  Graph[causalGraph,
-   VertexLabels ->
-    Thread[VertexList[causalGraph] ->
-      Map[evolution["AllEventsEdgesList",
-          "IncludeBoundaryEvents" -> "Initial"][[#]] &,
-       Last /@ evolution["AllEventsList",
-         "IncludeBoundaryEvents" -> "Initial"], {2}]],
-   Epilog -> {Red, Dotted,
-     Table[Line[{{-10, k}, {10, k}}], {k, 0.5, 4.5}]}]]]
+In[] := With[{evolution =
+   WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
+    {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]},
+ evolution["ExpressionsEventsGraph",
+  VertexLabels -> Placed[Automatic, {After, Above}],
+  Epilog -> {Red, Dotted,
+    Table[Line[{{-10, k}, {10, k}}], {k, 0, 9, 2}]}]]
 ```
 
-<img src="READMEImages/FoliatedCausalGraph.png" width="478">
+<img src="READMEImages/FoliatedExpressionsEventsGraph.png" width="478">
 
 ```wl
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
@@ -907,7 +899,7 @@ Out[] = {{3, 8, 8, 8, 2, 10, 0, 9, 7}, {7, 11, 16, 12, 9}, {9, 18, 28}, {28,
   27}, {55}}
 ```
 
-`"CausalGraph"` property accepts the same options as [`Graph`](https://reference.wolfram.com/language/ref/Graph.html), as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html).
+`"CausalGraph"`, `"LayeredCausalGraph"` and `"ExpressionsEventsGraph"` properties all accept [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) options, as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html). Some options have special behavior for the [`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html) value, i.e., `VertexLabels -> Automatic` in `"ExpressionsEventsGraph"` displays the contents of expressions, which are not the vertex names in that graph (as there can be multiple expressions with the same contents).
 
 #### Rule Indices for Events
 
@@ -967,7 +959,7 @@ In[] := With[{
 
 <img src="READMEImages/GenerationColoredStatePlots.png" width="746">
 
-Event generations correspond to layers in [`"LayeredCausalGraph"`](#causal-graphs):
+Event and expression generations correspond to layers in [`"LayeredCausalGraph"`](#causal-graphs) and [`"ExpressionsEventsGraph"`](#causal-graphs):
 
 ```wl
 In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
@@ -1219,26 +1211,18 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
 
 #### "IncludeBoundaryEvents"
 
-**`"IncludeBoundaryEvents"`** allows one to include "fake" initial and final events in properties such as [`"CausalGraph"`](#causal-graphs). It does not affect the evolution itself and does not affect the evolution object. It has 4 settings: [`None`](https://reference.wolfram.com/language/ref/None.html), `"Initial"`, `"Final"` and [`All`](https://reference.wolfram.com/language/ref/All.html).
+**`"IncludeBoundaryEvents"`** allows one to include "fake" initial and final events in properties such as [`"ExpressionsEventsGraph"`](#causal-graphs). It does not affect the evolution itself and does not affect the evolution object. It has 4 settings: [`None`](https://reference.wolfram.com/language/ref/None.html), `"Initial"`, `"Final"` and [`All`](https://reference.wolfram.com/language/ref/All.html).
 
-We have already [demonstrated](#causal-graphs) it previously for our arithmetic model. Here is an example with the final "event" included as well (event labels are kept for reference):
+Here is an example of an [`"ExpressionsEventsGraph"`](#causal-graphs) with the initial and final "events" included:
 
 ```wl
-In[] := With[{
-  evolution = WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
-    {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]}, With[{
-   causalGraph =
-    evolution["LayeredCausalGraph", "IncludeBoundaryEvents" -> All]},
-  Graph[causalGraph,
-   VertexLabels ->
-    Thread[VertexList[causalGraph] ->
-      Map[evolution["AllEventsEdgesList",
-          "IncludeBoundaryEvents" -> All][[#]] &,
-       Last /@ evolution["AllEventsList",
-         "IncludeBoundaryEvents" -> All], {2}]]]]]
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
+  {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]["ExpressionsEventsGraph",
+ "IncludeBoundaryEvents" -> All,
+ VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="READMEImages/CausalGraphWithFinalEvent.png" width="478">
+<img src="READMEImages/ExpressionsEventsGraphWithBoundaryEvents.png" width="475">
 
 Properties like [`"AllEventsList"`](#events) are affected as well:
 
