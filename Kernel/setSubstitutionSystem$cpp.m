@@ -147,31 +147,6 @@ decodeEvents[list_List] := Module[{
 ]
 
 
-(* ::Text:: *)
-(*We use this function for now to obtain the expressions-based representation of the evolution object.*)
-(*Once we transition to the event-based representation, this will no longer be necessary.*)
-
-
-(* assumes a single creator/destroyer event per edge, which is ok because we are only currently calling libSetReplace*)
-(*with EventSelectionFunction -> GlobalSpacelike.*)
-expressionEvents[expressionsCount_][inputsOrOutputs_, missingEventID_] :=
-	Sort[Join[
-		Catenate[Thread /@ Transpose[{inputsOrOutputs, Range[Length[inputsOrOutputs]] - 1}]],
-		Thread[{Complement[Range[expressionsCount], Catenate[inputsOrOutputs]], missingEventID}]]][[All, 2]]
-
-
-decodeExpressions[atomLists_List, events_Association] := Module[{creators, destroyers, eventToGeneration},
-	{creators, destroyers} =
-		expressionEvents[Length[atomLists]] @@@ {{events[$eventOutputs], 0}, {events[$eventInputs], Infinity}};
-	eventToGeneration = Association[Thread[Range[Length[events[$eventGenerations]]] - 1 -> events[$eventGenerations]]];
-	<|$creatorEvents -> creators,
-		$destroyerEvents -> destroyers,
-		$generations -> eventToGeneration /@ creators,
-		$atomLists -> atomLists,
-		$eventRuleIDs -> Rest[events[$eventRuleIDs]]|>
-]
-
-
 (* ::Subsection:: *)
 (*ruleAtoms*)
 
@@ -270,7 +245,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
-		mappedSet, localIndices, mappedRules, setPtr, cppOutput, maxCompleteGeneration, terminationReason,
+		mappedSet, localIndices, mappedRules, setPtr, numericAtomLists, events, maxCompleteGeneration, terminationReason,
 		resultAtoms, inversePartialGlobalMap, inverseGlobalMap},
 	canonicalRules = toCanonicalRules[rules];
 	setAtoms = Hold /@ Union[Catenate[set]];
@@ -302,24 +277,23 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 			If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]],
 		timeConstraint,
 		If[!returnOnAbortQ, Return[$Aborted], terminationReason = $timeConstraint]];
-	cppOutput = decodeExpressions[decodeAtomLists[$cpp$setExpressions[setPtr]], decodeEvents[$cpp$setEvents[setPtr]]];
+	numericAtomLists = decodeAtomLists[$cpp$setExpressions[setPtr]];
+	events = decodeEvents[$cpp$setEvents[setPtr]];
 	maxCompleteGeneration =
 		Replace[$cpp$maxCompleteGeneration[setPtr], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]];
 	terminationReason = Replace[$terminationReasonCodes[$cpp$terminationReason[setPtr]], {
 		$Aborted -> terminationReason,
 		$notTerminated -> $timeConstraint}];
 	$cpp$setDelete[setPtr];
-	resultAtoms = Union[Catenate[cppOutput[$atomLists]]];
+	resultAtoms = Union[Catenate[numericAtomLists]];
 	inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
 	inverseGlobalMap = Association @ Thread[resultAtoms
 		-> (Lookup[inversePartialGlobalMap, #, Unique["v", {Temporary}]] & /@ resultAtoms)];
 	WolframModelEvolutionObject[Join[
-		KeyDrop[cppOutput, $eventRuleIDs],
-		<|$atomLists ->
-				ReleaseHold @ Map[inverseGlobalMap, cppOutput[$atomLists], {2}],
+		<|$version -> 2,
 			$rules -> rules,
 			$maxCompleteGeneration -> maxCompleteGeneration,
 			$terminationReason -> terminationReason,
-			$eventRuleIDs -> cppOutput[$eventRuleIDs]
-		|>]]
+			$atomLists -> ReleaseHold @ Map[inverseGlobalMap, numericAtomLists, {2}]|>,
+		events]]
 ]
