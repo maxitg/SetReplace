@@ -288,22 +288,20 @@ One can easily see its internal structure in its [`InputForm`](https://reference
 
 ```wl
 Out[] = WolframModelEvolutionObject[<|
-  "CreatorEvents" -> {0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5,
-    5, 5},
-  "DestroyerEvents" -> {1, 1, 2, 3, 2, 3, 4, 4, Infinity, 5, 5,
-    Infinity, Infinity, Infinity, Infinity, Infinity, Infinity,
-    Infinity},
-  "Generations" -> {0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3,
-     3},
-  "AtomLists" -> {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}, {5, 8, 1}, {8, 4,
-     2}, {4, 5, 3}, {7, 9, 8}, {9, 6, 4}, {6, 7, 2}, {1, 10, 4}, {10,
-     8, 5}, {8, 1, 3}, {4, 11, 7}, {11, 6, 9}, {6, 4, 8}, {5, 12,
-     1}, {12, 8, 10}, {8, 5, 4}},
+  "Version" -> 2,
   "Rules" -> {{1, 2, 3}, {2, 4, 5}} ->
     {{5, 6, 1}, {6, 4, 2}, {4, 5, 3}},
   "MaxCompleteGeneration" -> 3,
   "TerminationReason" -> "MaxGenerationsLocal",
-  "EventRuleIDs" -> {1, 1, 1, 1, 1}|>]
+  "AtomLists" -> {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}, {5, 8, 1}, {8, 4,
+     2}, {4, 5, 3}, {7, 9, 8}, {9, 6, 4}, {6, 7, 2}, {1, 10, 4}, {10,
+     8, 5}, {8, 1, 3}, {4, 11, 7}, {11, 6, 9}, {6, 4, 8}, {5, 12,
+     1}, {12, 8, 10}, {8, 5, 4}},
+  "EventRuleIDs" -> {0, 1, 1, 1, 1, 1},
+  "EventInputs" -> {{}, {1, 2}, {5, 3}, {6, 4}, {7, 8}, {10, 11}},
+  "EventOutputs" -> {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11,
+     12}, {13, 14, 15}, {16, 17, 18}},
+  "EventGenerations" -> {0, 1, 2, 2, 3, 3}|>]
 ```
 
 The most important part of this [`Association`](https://reference.wolfram.com/language/ref/Association.html) is `"AtomLists"` which includes all set elements (aka expressions or edges) ever created throughout evolution.
@@ -325,15 +323,16 @@ Out[] = {{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
 
 Note that a set element is not duplicated in `"AtomLists"` if it exists in multiple steps. For example, `{6, 7, 2}` appears in the set after both two and three steps, but it only appears in `"AtomLists"` once because it was never used as an input during the 3rd step.
 
-Each edge in `"AtomLists"` has properties which are stored in other lists of the evolution object:
+Other properties of the evolution object describe the relationships between edges and the features of the evolution:
 
-* `"CreatorEvents"` shows which event (aka replacement) referenced by its index has this edge as one of its outputs.
-* `"DestroyerEvents"` shows which event has this edge as an input. Note that even though multiple matches could be possible that involve a particular edge, in the current implementation, only one of these matches is used (see [`"EventOrderingFunction"`](#eventorderingfunction) option on how to control which match to use).
-* `"Generations"` shows how many layers of predecessors a given edge has.
-* `"Rules"` is an exact copy of the `WolframModel` argument.
+* `"Version"` is the data format of the evolution object. This description is for version 2, which is the first version to support multiway systems. Version 1 does not have the `"Version"` key. The objects of older versions are automatically migrated when they are evaluated.
+* `"Rules"` is an exact copy of the corresponding `WolframModel` argument.
 * `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions of this or earlier generations. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](#step-limiters) is used.
 * `"TerminationReason"` shows the reason evaluation was stopped. See the [`"TerminationReason"`](#termination-reason) property for more details.
-* Finally, `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example only has one rule. See [Rule Indices for Events](#rule-indices-for-events) for a more interesting case.
+* `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example only has one rule. See [Rule Indices for Events](#rule-indices-for-events) for a more interesting case. The first value, `0`, corresponds to the initial event, which is included in the evolution object but is omitted [by default](#includeboundaryevents) when computing [properties](#properties).
+* `"EventInputs"` shows which edge indices from `"AtomLists"` were used in each event. The order corresponds to the input patterns of the rules. The first value, `{}`, again corresponds to the initial event.
+* `"EventOutputs"` similarly shows which edge indices from `"AtomLists"` were produced by each event. There are no duplicates in these lists because events always generate new edges.
+* `"EventGenerations"` shows how many layers of predecessors a given event has.
 
 A specific property can be requested from an evolution object by supplying it as an argument to the object itself:
 
@@ -352,17 +351,17 @@ Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList",
   "StatesPlotsList", "EventsStatesPlotsList",
   "AllEventsStatesEdgeIndicesList", "AllEventsStatesList",
   "Generation", "StateEdgeIndicesAfterEvent", "StateAfterEvent",
-  "Rules", "TotalGenerationsCount", "PartialGenerationsCount",
+  "TotalGenerationsCount", "PartialGenerationsCount",
   "GenerationsCount", "GenerationComplete", "AllEventsCount",
   "GenerationEventsCountList", "GenerationEventsList",
   "FinalDistinctElementsCount", "AllEventsDistinctElementsCount",
   "VertexCountList", "EdgeCountList", "FinalEdgeCount",
   "AllEventsEdgesCount", "AllEventsGenerationsList", "CausalGraph",
   "LayeredCausalGraph", "TerminationReason", "AllEventsRuleIndices",
-  "AllEventsList", "EventsStatesList", "Properties",
-  "EdgeCreatorEventIndices", "EdgeDestroyerEventIndices",
-  "EdgeGenerationsList", "AllEventsEdgesList",
-  "CompleteGenerationsCount"}
+  "AllEventsList", "EventsStatesList", "EdgeCreatorEventIndices",
+  "EdgeDestroyerEventsIndices", "EdgeDestroyerEventIndices",
+  "EdgeGenerationsList", "Properties", "Version", "Rules",
+  "CompleteGenerationsCount", "AllEventsEdgesList"}
 ```
 
 Some properties take additional arguments, which can be supplied after the property name:
@@ -399,21 +398,21 @@ In[] := $WolframModelProperties
 Out[] = {"AllEventsCount", "AllEventsDistinctElementsCount",
   "AllEventsEdgesCount", "AllEventsEdgesList",
   "AllEventsGenerationsList", "AllEventsList", "AllEventsRuleIndices",
-  "AllEventsStatesEdgeIndicesList", "AllEventsStatesList",
+   "AllEventsStatesEdgeIndicesList", "AllEventsStatesList",
   "AllExpressions", "AtomsCountFinal", "AtomsCountTotal",
   "CausalGraph", "CompleteGenerationsCount", "CreatorEvents",
   "DestroyerEvents", "EdgeCountList", "EdgeCreatorEventIndices",
-  "EdgeDestroyerEventIndices", "EdgeGenerationsList",
-  "EventGenerations", "EventGenerationsList", "EventsCount",
-  "EventsList", "EventsStatesList", "EventsStatesPlotsList",
-  "EvolutionObject", "ExpressionGenerations", "ExpressionsCountFinal",
-  "ExpressionsCountTotal", "FinalDistinctElementsCount",
-  "FinalEdgeCount", "FinalState", "FinalStatePlot",
-  "GenerationComplete", "GenerationEventsCountList",
-  "GenerationEventsList", "GenerationsCount", "LayeredCausalGraph",
+  "EdgeDestroyerEventIndices", "EdgeDestroyerEventsIndices",
+  "EdgeGenerationsList", "EventGenerations", "EventGenerationsList",
+  "EventsCount", "EventsList", "EventsStatesList",
+  "EventsStatesPlotsList", "EvolutionObject", "ExpressionGenerations",
+   "ExpressionsCountFinal", "ExpressionsCountTotal",
+  "FinalDistinctElementsCount", "FinalEdgeCount", "FinalState",
+  "FinalStatePlot", "GenerationComplete", "GenerationEventsCountList",
+   "GenerationEventsList", "GenerationsCount", "LayeredCausalGraph",
   "MaxCompleteGeneration", "PartialGenerationsCount", "StatesList",
   "StatesPlotsList", "TerminationReason", "TotalGenerationsCount",
-  "UpdatedStatesList", "VertexCountList"}
+  "UpdatedStatesList", "Version", "VertexCountList"}
 ```
 
 Multiple properties can also be specified in a list (only in `WolframModel`, not in `WolframModelEvolutionObject`):
@@ -556,7 +555,7 @@ Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, s
 
 ### Properties
 
-[States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout Evolution](#all-edges-throughout-evolution) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules)
+[States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout Evolution](#all-edges-throughout-evolution) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules) | [Version](#version)
 
 #### States
 
@@ -798,7 +797,7 @@ Out[] = {{{1, {1} -> {2, 3, 4, 5}}, {2, 3, 4, 5}},
 
 #### Creator and Destroyer Events
 
-An event is said to *destroy* the edges in its input, and *create* the edges in its output. Creator and destroyer events for each edge can be obtained with **`"EdgeCreatorEventIndices"`** (aka `"CreatorEvents"`) and **`"EdgeDestroyerEventIndices"`** (aka `"DestroyerEvents"`) properties.
+An event is said to *destroy* the edges in its input, and *create* the edges in its output. Creator and destroyer events for each edge can be obtained with **`"EdgeCreatorEventIndices"`** (aka `"CreatorEvents"`) and **`"EdgeDestroyerEventsIndices"`** properties.
 
 As an example, for a simple rule that splits each edge in two, one can see that edges are created in pairs:
 
@@ -813,14 +812,24 @@ and destroyed one-by-one:
 
 ```wl
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
+ {{1, 1}}, 4, "EdgeDestroyerEventsIndices"]
+Out[] = {{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12},
+   {13}, {14}, {15}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+   {}, {}, {}, {}}
+```
+
+Here 0 refers to the initial state. Note the format is different for creator and destroyer events. That is because each edge has a unique creator event, but can have multiple destroyer events in multiway systems.
+
+There is another property, **`"EdgeDestroyerEventIndices"`** (aka `"DestroyerEvents"`), left for compatibility reasons, which has the same format as **`"EdgeCreatorEventIndices"`**.
+
+```wl
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
  {{1, 1}}, 4, "EdgeDestroyerEventIndices"]
 Out[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, Infinity,
   Infinity, Infinity, Infinity, Infinity, Infinity, Infinity,
   Infinity, Infinity, Infinity, Infinity, Infinity, Infinity,
   Infinity, Infinity, Infinity}
 ```
-
-Here 0 refers to the initial state, and [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html) means an edge was never destroyed by any event (and thus appears in the final state).
 
 #### Causal Graphs
 
@@ -1126,6 +1135,17 @@ Out[] = <|"PatternRules" -> {{a_}} :> {{a + 1}, {a - 1}, {{a + 2, a - 2}}}|>
 ```
 
 This is useful for display in the information box of the evolution object, and if one needs to reproduce an evolution object, the input for which is no longer available.
+
+#### Version
+
+**`"Version"`** returns the version of the data structure used in the evolution object. It will always be the same for the same version of *SetReplace*:
+
+```wl
+In[] := WolframModel[1 -> 2, {1}]["Version"]
+Out[] = 2
+```
+
+Objects are automatically converted to the latest version when they are encountered by the newer version of *SetReplace*.
 
 ### Options
 

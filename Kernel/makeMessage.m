@@ -96,3 +96,7 @@ messageTemplate["nonopt"] =
 messageTemplate["optx"] =
 	"Unknown option `2` for \"CausalGraph\" property. " <>
 	"Only Graph options are accepted.";
+
+
+messageTemplate["multiwayState"] =
+	"Multiple destroyer events found for edge index `2`. States are not supported for multiway systems.";

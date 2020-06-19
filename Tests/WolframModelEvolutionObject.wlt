@@ -248,6 +248,14 @@
           4]
       ],
 
+      (* Version *)
+
+      (* Will need to be updated with each new version. *)
+      VerificationTest[
+        WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 1, Method -> #]["Version"],
+        2
+      ] & /@ {"LowLevel", "Symbolic"},
+
       (* Rules *)
 
       VerificationTest[
@@ -881,6 +889,13 @@
         Append[Riffle @@ ConstantArray[Range[15], 2], Infinity]
       ] & /@ {"DestroyerEvents", "EdgeDestroyerEventIndices"},
 
+      (* EdgeDestroyerEventsIndices, lists of destroyer events *)
+
+      VerificationTest[
+        WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, pathGraph17, 4]["EdgeDestroyerEventsIndices"],
+        Append[Riffle @@ ConstantArray[List /@ Range[15], 2], {}]
+      ],
+
       (* ExpressionGenerations *)
 
       VerificationTest[
@@ -1140,18 +1155,6 @@
       ] & @@@ {{None, {}}, {"Final", {Infinity -> _}}, {All, {0 -> _, Infinity -> _}}},
 
       VerificationTest[
-        graphicsQ @ GraphPlot[WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][#, Background -> Automatic]]
-      ] & /@ {"CausalGraph", "LayeredCausalGraph"},
-
-      VerificationTest[
-        Options[
-          checkGraphics @ GraphPlot[
-            WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][#, Background -> RGBColor[0.2, 0.5, 0.3]]],
-          Background],
-        {Background -> RGBColor[0.2, 0.5, 0.3]}
-      ] & /@ {"CausalGraph", "LayeredCausalGraph"},
-
-      VerificationTest[
         Options[
           WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][#, EdgeStyle -> Automatic, VertexStyle -> Automatic],
           {EdgeStyle, VertexStyle}],
@@ -1263,6 +1266,12 @@
       VerificationTest[
         WolframModel[{{{1, 2}} -> {{}}, {{}} -> {{1, 2}}}, {{}}, 4]["AllEventsList"],
         {{2, {1} -> {2}}, {1, {2} -> {3}}, {2, {3} -> {4}}, {1, {4} -> {5}}}
+      ],
+
+      (* #372, event inputs should be returned in the correct order *)
+      VerificationTest[
+        WolframModel[{{1, 2}, {2, 3, 4}} -> {{1, 2, 3, 4}}, {{2, 3, 4}, {1, 2}}, "EventsList"],
+        {{1, {2, 1} -> {3}}}
       ],
 
       (* EventsStatesList *)
@@ -1438,10 +1447,93 @@
       VerificationTest[
         graphicsQ /@ WolframModel[{} -> {{1, 2}}, {}, <|"MaxEvents" -> 1|>, "EventsStatesPlotsList"],
         {True, True}
-      ]
+      ],
+
+      (* CausalGraph *)
+
+      VerificationTest[
+        graphicsQ @ GraphPlot[WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][#, Background -> Automatic]]
+      ] & /@ {"CausalGraph", "LayeredCausalGraph"},
+
+      VerificationTest[
+        Options[
+          checkGraphics @ GraphPlot[
+            WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 4][#, Background -> RGBColor[0.2, 0.5, 0.3]]],
+          Background],
+        {Background -> RGBColor[0.2, 0.5, 0.3]}
+      ] & /@ {"CausalGraph", "LayeredCausalGraph"}
     },
     "options" -> {
       "Parallel" -> False
+    }
+  |>,
+  "evolutionObjectMigration" -> <|
+    "init" -> (
+      Attributes[Global`testUnevaluated] = {HoldAll};
+      Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+    ),
+    "tests" -> {
+      (* v1 -> v2 *)
+      VerificationTest[
+        WolframModelEvolutionObject[<|"CreatorEvents" -> {0, 0, 0, 0, 1, 2, 3},
+                                      "DestroyerEvents" -> {1, 1, 2, 2, 3, 3, Infinity},
+                                      "Generations" -> {0, 0, 0, 0, 1, 1, 2},
+                                      "AtomLists" -> {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {1, 3}, {3, 5}, {1, 5}},
+                                      "Rules" -> {{1, 2}, {2, 3}} -> {{1, 3}},
+                                      "MaxCompleteGeneration" -> 2,
+                                      "TerminationReason" -> "FixedPoint",
+                                      "EventRuleIDs" -> {1, 1, 1}|>],
+        WolframModelEvolutionObject[<|"Version" -> 2,
+                                      "Rules" -> {{1, 2}, {2, 3}} -> {{1, 3}},
+                                      "MaxCompleteGeneration" -> 2,
+                                      "TerminationReason" -> "FixedPoint",
+                                      "AtomLists" -> {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {1, 3}, {3, 5}, {1, 5}},
+                                      "EventRuleIDs" -> {0, 1, 1, 1},
+                                      "EventInputs" -> {{}, {1, 2}, {3, 4}, {5, 6}},
+                                      "EventOutputs" -> {{1, 2, 3, 4}, {5}, {6}, {7}},
+                                      "EventGenerations" -> {0, 1, 1, 2}|>],
+        {WolframModelEvolutionObject::migrationInputOrdering}
+      ],
+
+      (* reorder data in v1 *)
+      VerificationTest[
+        WolframModelEvolutionObject[<|"Rules" -> {{1, 2}, {2, 3}} -> {{1, 3}},
+                                      "CreatorEvents" -> {0, 0, 0, 0, 1, 2, 3},
+                                      "DestroyerEvents" -> {1, 1, 2, 2, 3, 3, Infinity},
+                                      "Generations" -> {0, 0, 0, 0, 1, 1, 2},
+                                      "AtomLists" -> {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {1, 3}, {3, 5}, {1, 5}},
+                                      "MaxCompleteGeneration" -> 2,
+                                      "TerminationReason" -> "FixedPoint",
+                                      "EventRuleIDs" -> {1, 1, 1}|>],
+        WolframModelEvolutionObject[<|"Version" -> 2,
+                                      "Rules" -> {{1, 2}, {2, 3}} -> {{1, 3}},
+                                      "MaxCompleteGeneration" -> 2,
+                                      "TerminationReason" -> "FixedPoint",
+                                      "AtomLists" -> {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {1, 3}, {3, 5}, {1, 5}},
+                                      "EventRuleIDs" -> {0, 1, 1, 1},
+                                      "EventInputs" -> {{}, {1, 2}, {3, 4}, {5, 6}},
+                                      "EventOutputs" -> {{1, 2, 3, 4}, {5}, {6}, {7}},
+                                      "EventGenerations" -> {0, 1, 1, 2}|>],
+        {WolframModelEvolutionObject::migrationInputOrdering}
+      ],
+
+      (* missing keys *)
+      testUnevaluated[
+        WolframModelEvolutionObject[<|"Rules" -> {{1, 2}, {2, 3}} -> {{1, 3}},
+                                      "CreatorEvents" -> {0, 0, 0, 0, 1, 2, 3},
+                                      "DestroyerEvents" -> {1, 1, 2, 2, 3, 3, DirectedInfinity[1]},
+                                      "Generations" -> {0, 0, 0, 0, 1, 1, 2},
+                                      "AtomLists" -> {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {1, 3}, {3, 5}, {1, 5}},
+                                      "MaxCompleteGeneration" -> 2,
+                                      "EventRuleIDs" -> {1, 1, 1}|>],
+        {WolframModelEvolutionObject::corrupt}
+      ],
+
+      (* future version *)
+      testUnevaluated[
+        WolframModelEvolutionObject[<|"Version" -> 100|>],
+        {WolframModelEvolutionObject::future}
+      ]
     }
   |>
 |>
