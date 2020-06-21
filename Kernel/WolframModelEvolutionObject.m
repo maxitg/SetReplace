@@ -153,6 +153,7 @@ $propertyArgumentCounts = Join[
 		"FinalEdgeCount" -> {0, 0},
 		"AllEventsEdgesCount" -> {0, 0},
 		"AllEventsGenerationsList" -> {0, 0},
+		"ExpressionsEventsGraph" -> {0, Infinity},
 		"CausalGraph" -> {0, Infinity},
 		"LayeredCausalGraph" -> {0, Infinity},
 		"TerminationReason" -> {0, 0},
@@ -314,7 +315,13 @@ $newLayeredCausalGraphOptions = {GraphLayout -> Automatic};
 $layeredCausalGraphOptions =
 	Join[FilterRules[$causalGraphOptions, Except[$newLayeredCausalGraphOptions]], $newLayeredCausalGraphOptions];
 
+$newExpressionsEventsGraphOptions = {VertexLabels -> None};
+$expressionsEventrsGraphOptions = Join[
+	FilterRules[$layeredCausalGraphOptions, Except[$newExpressionsEventsGraphOptions]],
+	$newExpressionsEventsGraphOptions];
+
 $propertyOptions = <|
+	"ExpressionsEventsGraph" -> $expressionsEventrsGraphOptions,
 	"CausalGraph" -> $causalGraphOptions,
 	"LayeredCausalGraph" -> $layeredCausalGraphOptions,
 	"StatesPlotsList" -> Options[WolframModelPlot],
@@ -792,6 +799,112 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 
 
 (* ::Subsection:: *)
+(*Event/expression causal relations*)
+
+
+(* Returns {<|event -> {output expression, ...}, ...|>, <|expression -> {destroyer event, ...}|> *)
+eventsExpressionsRelations[obj_, caller_, boundary_] := Module[{
+		eventIndices, events, eventsToOutputs, expressionDestroyers, expressionsToDestroyers},
+	eventIndices = If[MatchQ[boundary, "Initial" | All], Prepend[0], Identity] @
+		If[MatchQ[boundary, All | "Final"], Append[Infinity], Identity] @
+			Range[Length[obj[[1]][$eventRuleIDs]] - 1];
+	events = propertyEvaluate[True, boundary][obj, caller, "AllEventsList"];
+	eventsToOutputs = Association[Thread[eventIndices -> events[[All, 2, 2]]]];
+
+	expressionDestroyers = propertyEvaluate[True, boundary][obj, caller, "EdgeDestroyerEventsIndices"];
+	expressionsToDestroyers = Association[Thread[Range[Length[expressionDestroyers]] -> expressionDestroyers]];
+
+	{eventsToOutputs, expressionsToDestroyers}
+]
+
+
+(* ::Subsection:: *)
+(*Rules list*)
+
+
+rulesList[rule_Association] := rulesList[rule["PatternRules"]]
+
+rulesList[rule : (_Rule | _RuleDelayed)] := {rule}
+
+rulesList[rules_List] := rules
+
+
+(* ::Subsection:: *)
+(*ExpressionsEventsGraph*)
+
+
+propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
+			obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
+			caller_,
+			property : "ExpressionsEventsGraph",
+			o : OptionsPattern[]] /;
+				(Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) := Module[{
+		eventsToOutputs, expressionsToDestroyers, labeledEvents, labeledOutputs, labeledExpressions, labeledDestroyers,
+		graphVertices, allOptionValues, vertexLabelsOptionValue, automaticVertexLabelsPattern, rules, eventRuleIDs,
+		allExpressions, placementFunction},
+	{eventsToOutputs, expressionsToDestroyers} = eventsExpressionsRelations[obj, caller, boundary];
+	{labeledEvents, labeledOutputs, labeledExpressions, labeledDestroyers} =
+		Function[{list, label, level}, Map[{label, #} &, list, level]] @@@ {
+			{Keys[eventsToOutputs], "Event", {1}},
+			{Values[eventsToOutputs], "Expression", {2}},
+			{Keys[expressionsToDestroyers], "Expression", {1}},
+			{Values[expressionsToDestroyers], "Event", {2}}};
+	graphVertices = Join[labeledEvents, labeledExpressions];
+
+	allOptionValues = Flatten[Join[{o}, $propertyOptions[property]]];
+
+	vertexLabelsOptionValue = OptionValue[allOptionValues, VertexLabels];
+	automaticVertexLabelsPattern = Automatic | Placed[Automatic, ___];
+	If[MatchQ[vertexLabelsOptionValue, automaticVertexLabelsPattern],
+		rules = rulesList[propertyEvaluate[True, None][obj, caller, "Rules"]];
+		eventRuleIDs = propertyEvaluate[True, None][obj, caller, "AllEventsRuleIndices"];
+		allExpressions = propertyEvaluate[True, None][obj, caller, "AllExpressions"];
+		placementFunction = Replace[vertexLabelsOptionValue, {
+			Automatic -> Identity,
+			Placed[Automatic, args___] :> (Placed[#, args] &)
+		}];
+	];
+
+	Graph[
+		graphVertices,
+		Catenate[Function[{key, values}, key -> # & /@ values] @@@
+			Catenate[Transpose /@ {{labeledEvents, labeledOutputs}, {labeledExpressions, labeledDestroyers}}]],
+		VertexStyle -> Replace[
+			OptionValue[allOptionValues, VertexStyle],
+			Automatic :> Join[
+				{{"Event", _} -> style[$lightTheme][$causalGraphVertexStyle],
+				 {"Expression", _} -> style[$lightTheme][$expressionVertexStyle]},
+				Cases[
+					graphVertices,
+					v : {"Event", e : 0 | Infinity} :> v -> style[$lightTheme][Switch[e,
+						0, $causalGraphInitialVertexStyle,
+						Infinity, $causalGraphFinalVertexStyle]],
+					{1}]]],
+		EdgeStyle -> Replace[
+			OptionValue[allOptionValues, EdgeStyle], Automatic :> style[$lightTheme][$causalGraphEdgeStyle]],
+		VertexLabels -> Replace[
+			OptionValue[allOptionValues, VertexLabels],
+			automaticVertexLabelsPattern :> Replace[graphVertices, {
+				v : {"Event", 0} :> v -> placementFunction["Initial event"],
+				v : {"Event", Infinity} :> v -> placementFunction["Final event"],
+				v : {"Event", idx_} :> v ->
+					If[Length[rules] > 1, placementFunction["Rule " <> ToString[eventRuleIDs[[idx]]]], None],
+				v : {"Expression", idx_} :> v -> placementFunction[ToString[allExpressions[[idx]]]]}, {1}]],
+		GraphLayout -> Replace[
+			OptionValue[allOptionValues, GraphLayout],
+			Automatic :> {
+				"LayeredDigraphEmbedding",
+				"VertexLayerPosition" -> Catenate[{
+					2 ("TotalGenerationsCount" - "AllEventsGenerationsList") + 1,
+					2 ("TotalGenerationsCount" - "EdgeGenerationsList")} /.
+						p_String :> propertyEvaluate[True, boundary][obj, caller, p]]}],
+		Background -> Replace[
+			OptionValue[allOptionValues, Background], Automatic :> style[$lightTheme][$causalGraphBackground]],
+		allOptionValues]
+]
+
+
+(* ::Subsection:: *)
 (*CausalGraph / LayeredCausalGraph*)
 
 
@@ -809,27 +922,18 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
 			property : "CausalGraph",
 			o : OptionsPattern[]] /;
 				(Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) := Module[{
-		eventIndices, events, eventsToExpressions, expressionDestroyers, expressionsToEvents, eventsToEvents, causalEdges,
-		allOptionValues},
-	eventIndices = If[MatchQ[boundary, "Initial" | All], Prepend[0], Identity] @
-		If[MatchQ[boundary, All | "Final"], Append[Infinity], Identity] @
-			Range[Length[data[$eventRuleIDs]] - 1];
-	events = propertyEvaluate[True, boundary][obj, caller, "AllEventsList"];
-	eventsToExpressions = Association[Thread[eventIndices -> events[[All, 2, 2]]]];
-
-	expressionDestroyers = propertyEvaluate[True, boundary][obj, caller, "EdgeDestroyerEventsIndices"];
-	expressionsToEvents = Association[Thread[Range[Length[expressionDestroyers]] -> expressionDestroyers]];
-
-	eventsToEvents = Catenate /@ Map[expressionsToEvents, eventsToExpressions, {2}];
+		eventsToOutputs, expressionsToDestroyers, eventsToEvents, causalEdges, allOptionValues},
+	{eventsToOutputs, expressionsToDestroyers} = eventsExpressionsRelations[obj, caller, boundary];
+	eventsToEvents = Catenate /@ Map[expressionsToDestroyers, eventsToOutputs, {2}];
 	causalEdges = Catenate[Thread /@ Normal[eventsToEvents]];
 
 	allOptionValues = Flatten[Join[{o}, $propertyOptions[property]]];
 	Graph[
-		eventIndices,
+		Keys[eventsToOutputs],
 		causalEdges,
 		VertexStyle -> Replace[
 			OptionValue[allOptionValues, VertexStyle],
-			Automatic -> Select[Head[#] =!= Rule || MatchQ[#[[1]], Alternatives @@ eventIndices] &] @ {
+			Automatic -> Select[Head[#] =!= Rule || MatchQ[#[[1]], Alternatives @@ Keys[eventsToOutputs]] &] @ {
 				style[$lightTheme][$causalGraphVertexStyle],
 				0 -> style[$lightTheme][$causalGraphInitialVertexStyle],
 				Infinity -> style[$lightTheme][$causalGraphFinalVertexStyle]}],

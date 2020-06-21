@@ -12,6 +12,7 @@ PackageScope["$destroyedEdgeStyle"]
 PackageScope["$createdEdgeStyle"]
 PackageScope["$destroyedAndCreatedEdgeStyle"]
 PackageScope["$causalGraphVertexStyle"]
+PackageScope["$expressionVertexStyle"]
 PackageScope["$causalGraphInitialVertexStyle"]
 PackageScope["$causalGraphFinalVertexStyle"]
 PackageScope["$causalGraphEdgeStyle"]
@@ -93,6 +94,14 @@ $styleNames = KeySort /@ KeySort @ <|
   |>,
   "CausalGraph" -> <|
     "VertexStyle" -> $causalGraphVertexStyle,
+    "InitialVertexStyle" -> $causalGraphInitialVertexStyle,
+    "FinalVertexStyle" -> $causalGraphFinalVertexStyle,
+    "EdgeStyle" -> $causalGraphEdgeStyle,
+    "Background" -> $causalGraphBackground
+  |>,
+  "ExpressionsEventsGraph" -> <|
+    "EventVertexStyle" -> $causalGraphVertexStyle,
+    "ExpressionVertexStyle" -> $expressionVertexStyle,
     "InitialVertexStyle" -> $causalGraphInitialVertexStyle,
     "FinalVertexStyle" -> $causalGraphFinalVertexStyle,
     "EdgeStyle" -> $causalGraphEdgeStyle,
@@ -183,6 +192,8 @@ style[$lightTheme] = <|
 
   (* Causal graph *)
   $causalGraphVertexStyle -> Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
+  $expressionVertexStyle ->
+    Directive[Hue[0.63, 0.66, 0.81], Opacity[0.1], EdgeForm[Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]]]],
   $causalGraphInitialVertexStyle ->
     Directive[RGBColor[{0.259, 0.576, 1}], EdgeForm[{RGBColor[{0.259, 0.576, 1}], Opacity[1]}]],
   $causalGraphFinalVertexStyle -> Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
