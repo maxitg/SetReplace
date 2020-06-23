@@ -5,7 +5,7 @@
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
 
-      sameGraphQ[g1_, g2_] := And @@ (Equal @@ Sort /@ # /@ {g1, g2} & /@ {VertexList, EdgeList});
+      sameGraphQ[g1_, g2_] := And @@ (SameQ @@ Sort /@ # /@ {g1, g2} & /@ {VertexList, EdgeList});
 
       $largeEvolution = Hold[WolframModel[
         {{0, 1}, {0, 2}, {0, 3}} ->
