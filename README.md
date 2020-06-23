@@ -899,6 +899,17 @@ Out[] = {{3, 8, 8, 8, 2, 10, 0, 9, 7}, {7, 11, 16, 12, 9}, {9, 18, 28}, {28,
   27}, {55}}
 ```
 
+`"ExpressionsEventsGraph"` is particularly useful for multiway systems, as it allows one to immediately see multiway branching. For example, here the expression-vertex `{2}` has the out-degree of 2, which indicates it was used in two conflicting events, which indicates multiway branching:
+
+```wl
+In[] := WolframModel[{{1}, {1, 2}} -> {{2}}, {{1}, {1, 2}, {2, 3}, {2, 4}},
+  Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
+```
+
+<img src="READMEImages/MultiwayExpressionsEventsGraph.png" width="466">
+
 `"CausalGraph"`, `"LayeredCausalGraph"` and `"ExpressionsEventsGraph"` properties all accept [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) options, as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html). Some options have special behavior for the [`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html) value, i.e., `VertexLabels -> Automatic` in `"ExpressionsEventsGraph"` displays the contents of expressions, which are not the vertex names in that graph (as there can be multiple expressions with the same contents).
 
 #### Rule Indices for Events
@@ -1408,19 +1419,22 @@ On the other hand, `None` (aka match-all) event selection function matches every
 For example, consider a system
 
 ```wl
-In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}},
- {{1, 2}, {2, 3}, {2, 4}}, Infinity, "AllEventsEdgesList"]
-Out[] = {{1, 2}, {2, 3}, {2, 4}, {1, 3}}
+In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {2, 3}, {2, 4}},
+  Infinity]["ExpressionsEventsGraph", VertexLabels -> Automatic]
 ```
+
+<img src="READMEImages/GlobalSpacelikeEvolution.png" width="419">
 
 In this example we used the default `"GlobalSpacelike"` selection function, and the evolution terminated after a single event, because the edge `{1, 2}` was used, and it could not be reused to be matched with `{2, 4}`. However, let's look at what `"EventSelectionFunction" -> None` will do:
 
 ```wl
-In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}},
- {{1, 2}, {2, 3}, {2, 4}}, Infinity, "AllEventsEdgesList",
- "EventSelectionFunction" -> None]
-Out[] = {{1, 2}, {2, 3}, {2, 4}, {1, 3}, {1, 4}}
+In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {2, 3}, {2, 4}},
+  Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Automatic]
 ```
+
+<img src="READMEImages/SpacelikeMatching.png" width="478">
 
 In this case, the edge `{1, 2}` was matched twice, which we can also see by looking at its list of destroyer events:
 
@@ -1437,22 +1451,25 @@ The edges `{1, 2, 3}` and `{1, 2, 4}` in the next example are branchlike, they c
 
 ```wl
 In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
-  {{1, 2, 3}, {1, 2, 4}} -> {{1, 2, 3, 4}}},
- {{1, 2}, {2, 3}, {2, 4}}, Infinity, "AllEventsEdgesList",
- "EventSelectionFunction" -> None]
-Out[] = {{1, 2}, {2, 3}, {2, 4}, {1, 2, 3}, {1, 2, 4}, {1, 2, 3, 4}, {1, 2, 4,
-   3}}
+   {{1, 2, 3}, {1, 2, 4}} -> {{1, 2, 3, 4}}},
+  {{1, 2}, {2, 3}, {2, 4}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
 ```
+
+<img src="READMEImages/BranchlikeMatching.png" width="373">
 
 Similarly, it matches timelike edges `{1, 2}` and `{1, 2, 3}` below:
 
 ```wl
 In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
-  {{1, 2}, {1, 2, 3}} -> {{1, 2, 3, 4}}},
- {{1, 2}, {2, 3}}, Infinity, "AllEventsEdgesList",
- "EventSelectionFunction" -> None]
-Out[] = {{1, 2}, {2, 3}, {1, 2, 3}, {1, 2, 3, 4}}
+   {{1, 2}, {1, 2, 3}} -> {{1, 2, 3, 4}}},
+  {{1, 2}, {2, 3}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
 ```
+
+<img src="READMEImages/TimelikeMatching.png" width="247">
 
 Because of this branchlike and timelike matching, branches in `"EventSelectionFunction" -> None` evolution are not separated but can "interfere" with one another.
 
