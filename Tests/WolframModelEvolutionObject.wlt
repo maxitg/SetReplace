@@ -1660,6 +1660,22 @@
         SameTest -> sameGraphQ
       ],
 
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["ExpressionsEventsGraph"],
+        Graph[
+          Join[Thread[{"Event", Range[7]}], Thread[{"Expression", Range[9]}]],
+          {{"Expression", 1} -> {"Event", 1}, {"Expression", 1} -> {"Event", 3}, {"Expression", 1} -> {"Event", 5},
+           {"Expression", 2} -> {"Event", 1}, {"Expression", 2} -> {"Event", 2}, {"Expression", 3} -> {"Event", 2},
+           {"Expression", 3} -> {"Event", 4}, {"Expression", 4} -> {"Event", 3}, {"Event", 1} -> {"Expression", 5},
+           {"Event", 2} -> {"Expression", 6}, {"Event", 3} -> {"Expression", 7}, {"Expression", 5} -> {"Event", 4},
+           {"Expression", 6} -> {"Event", 5}, {"Event", 4} -> {"Expression", 8}, {"Event", 5} -> {"Expression", 9},
+           {"Expression", 8} -> {"Event", 6}, {"Expression", 8} -> {"Event", 7}, {"Expression", 9} -> {"Event", 6},
+           {"Expression", 9} -> {"Event", 7}}],
+        SameTest -> sameGraphQ
+      ],
 
       (* AllEventsList *)
 
