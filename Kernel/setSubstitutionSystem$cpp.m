@@ -241,7 +241,8 @@ $orderingFunctionCodes = <|
 |>;
 
 
-setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_] /;
+setSubstitutionSystem$cpp[
+				rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_, eventSelectionFunction_] /;
 			$cppSetReplaceAvailable := Module[{
 		canonicalRules,
 		setAtoms, atomsInRules, globalAtoms, globalIndex,
@@ -264,7 +265,7 @@ setSubstitutionSystem$cpp[rules_, set_, stepSpec_, returnOnAbortQ_, timeConstrai
 	setPtr = $cpp$setCreate[
 		encodeNestedLists[List @@@ mappedRules],
 		encodeNestedLists[mappedSet],
-		Replace[$globalSpacelike, $eventSelectionFunctionCodes], (* hardcode global spacelike (singleway) system for now *)
+		Replace[eventSelectionFunction, $eventSelectionFunctionCodes],
 		Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
 		RandomInteger[{0, $maxUInt32}]];
 	TimeConstrained[

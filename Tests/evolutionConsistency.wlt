@@ -52,6 +52,7 @@
       $features = <|
         "VertexNamingFunction" -> {Automatic, None, All},
         "IncludePartialGenerations" -> {True, False},
+        "EventSelectionFunction" -> {"GlobalSpacelike", None},
         "EventOrderingFunction" -> {Automatic, "NewestEdge", "OldestEdge", "Random",
                                     {"NewestEdge", "RuleIndex"},
                                     {"NewestEdge", "RuleOrdering", "RuleIndex"}},
@@ -61,9 +62,11 @@
         "TimeConstraint" -> {Infinity, $singleSystemTimeConstraint / 2}
       |>;
 
-      $featureCombinations = {{"VertexNamingFunction"},
-                              {"IncludePartialGenerations"},
+      $featureCombinations = {{"VertexNamingFunction", "EventSelectionFunction"},
+                              {"IncludePartialGenerations", "EventSelectionFunction"},
+                              {"EventOrderingFunction", "EventSelectionFunction"},
                               {"Seed", "EventOrderingFunction"},
+                              {"StepLimiter", "EventSelectionFunction"},
                               {"StepLimiter", "Method"},
                               {"Method", "TimeConstraint"}};
 
@@ -81,7 +84,8 @@
       nothingIfSmaller[value_, min_] := If[value < min, Nothing, value];
 
       $systemsWithSteps = ParallelMap[Module[{timedEvolution, stepLimitValue, stepLimit},
-        If[#Method === Automatic && (AssociationQ[#Rule] ||
+        If[#EventSelectionFunction =!= "GlobalSpacelike" && !MatchQ[#StepLimiter, "MaxEvents" | "MaxGenerations"] ||
+           #Method === Automatic && (AssociationQ[#Rule] ||
              !AllTrue[Replace[#Rule, {r_Rule :> {r}}], SetReplace`PackageScope`connectedHypergraphQ[#[[1]]] &]) ||
            #StepLimiter === "MaxVertexDegree" && AssociationQ[#Rule],
           Nothing,
@@ -92,6 +96,7 @@
                                         Infinity,
                                         "VertexNamingFunction" -> #VertexNamingFunction,
                                         "IncludePartialGenerations" -> #IncludePartialGenerations,
+                                        "EventSelectionFunction" -> #EventSelectionFunction,
                                         "EventOrderingFunction" -> #EventOrderingFunction,
                                         Method -> #Method,
                                         TimeConstraint -> $singleSystemTimeConstraint];
@@ -127,6 +132,7 @@
                                    #StepLimit,
                                    "VertexNamingFunction" -> #VertexNamingFunction,
                                    "IncludePartialGenerations" -> #IncludePartialGenerations,
+                                   "EventSelectionFunction" -> #EventSelectionFunction,
                                    "EventOrderingFunction" -> #EventOrderingFunction,
                                    Method -> #Method,
                                    TimeConstraint -> #TimeConstraint]]
@@ -139,6 +145,7 @@
                        #StepLimit,
                        "VertexNamingFunction" -> #VertexNamingFunction,
                        "IncludePartialGenerations" -> #IncludePartialGenerations,
+                       "EventSelectionFunction" -> #EventSelectionFunction,
                        "EventOrderingFunction" -> #EventOrderingFunction,
                        Method -> "Symbolic"],
           SeedRandom[#Seed];
@@ -147,6 +154,7 @@
                        #StepLimit,
                        "VertexNamingFunction" -> #VertexNamingFunction,
                        "IncludePartialGenerations" -> #IncludePartialGenerations,
+                       "EventSelectionFunction" -> #EventSelectionFunction,
                        "EventOrderingFunction" -> #EventOrderingFunction,
                        Method -> "LowLevel"]
         ] & /@ $methodComparisonSystems

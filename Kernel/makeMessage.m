@@ -16,6 +16,7 @@ Package["SetReplace`"]
 
 
 PackageScope["makeMessage"]
+PackageScope["recognizedOptionsQ"]
 
 
 (* ::Section:: *)
@@ -26,6 +27,17 @@ makeMessage[function_, type_String, args___] := (
 	MessageName[function, type] = messageTemplate[type];
 	Message[MessageName[function, type], function, args]
 )
+
+
+Attributes[recognizedOptionsQ] = HoldFirst;
+recognizedOptionsQ[expr_, func_, opts_] := With[{unrecognizedOptions = FilterRules[opts, Except[Options[func]]]},
+	If[unrecognizedOptions === {},
+		True,
+	(* else, some options are not recognized *)
+		Message[func::optx, unrecognizedOptions[[1]], Defer[expr]];
+		False
+	]
+]
 
 
 (* ::Section:: *)
@@ -85,6 +97,10 @@ messageTemplate["stepTooLarge"] =
 
 messageTemplate["stepNotInteger"] =
 	"`2` `3` must be an integer.";
+
+
+messageTemplate["multiwayFinalStepLimit"] =
+	"The limit for the `2` is not supported for multiway systems.";
 
 
 messageTemplate["nonopt"] =

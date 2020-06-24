@@ -72,6 +72,13 @@
 				{SetReplace::nonIntegerIterations}
 			],
 
+			(** Options are valid **)
+
+			testUnevaluated[
+				SetReplace[{{0}}, {{0}} -> {{1}}, # -> 123],
+				{SetReplace::optx}
+			] & /@ {"$$$InvalidOption###", "EventSelectionFunction"},
+
 			(** Method is valid **)
 
 			testUnevaluated[

@@ -5,6 +5,8 @@
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
 
+      sameGraphQ[g1_, g2_] := And @@ (SameQ @@ Sort /@ # /@ {g1, g2} & /@ {VertexList, EdgeList});
+
       $largeEvolution = Hold[WolframModel[
         {{0, 1}, {0, 2}, {0, 3}} ->
           {{4, 5}, {5, 6}, {6, 4}, {4, 6}, {6, 5}, {5, 4},
@@ -297,6 +299,14 @@
         1
       ],
 
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["TotalGenerationsCount"],
+        3
+      ],
+
       (* PartialGenerationsCount *)
 
       VerificationTest[
@@ -308,11 +318,10 @@
       ],
 
       VerificationTest[
-        WolframModel[
-          {{1, 2}} -> {{1, 3}, {3, 2}},
-          {{1, 1}},
-          <|"MaxEvents" -> 30|>][
-          "PartialGenerationsCount"],
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     <|"MaxEvents" -> 6|>,
+                     "EventSelectionFunction" -> None]["PartialGenerationsCount"],
         1
       ],
 
@@ -333,6 +342,14 @@
           <|"MaxEvents" -> 30|>][
           "CompleteGenerationsCount"],
         4
+      ],
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     <|"MaxEvents" -> 6|>,
+                     "EventSelectionFunction" -> None]["CompleteGenerationsCount"],
+        2
       ],
 
       (* GenerationsCount *)
@@ -370,6 +387,14 @@
         {4, 1}
       ],
 
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     <|"MaxEvents" -> 6|>,
+                     "EventSelectionFunction" -> None]["GenerationsCount"],
+        {2, 1}
+      ],
+
       (* GenerationComplete *)
 
       VerificationTest[
@@ -400,6 +425,14 @@
         evo["GenerationComplete", #],
         {WolframModelEvolutionObject::stepTooLarge}
       ] & /@ {-10, -7}],
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     <|"MaxEvents" -> 6|>,
+                     "EventSelectionFunction" -> None]["GenerationComplete", #] & /@ {0, 1, 2, 3},
+        {True, True, True, False}
+      ],
 
       (* EventsCount *)
 
@@ -435,6 +468,14 @@
         2
       ],
 
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["EventsCount", "IncludeBoundaryEvents" -> #],
+        #2
+      ] & @@@ {{None, 7}, {"Initial", 8}, {"Final", 8}, {All, 9}},
+
       (* GenerationEventsCountList *)
 
       VerificationTest[
@@ -452,6 +493,14 @@
           "GenerationEventsCountList", "IncludeBoundaryEvents" -> #] & /@ {None, "Initial", "Final", All},
         {{1, 3, 9, 27}, {1, 1, 3, 9, 27}, {1, 3, 9, 27, 1}, {1, 1, 3, 9, 27, 1}}
       ],
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["GenerationEventsCountList", "IncludeBoundaryEvents" -> #],
+        #2
+      ] & @@@ {{None, {3, 2, 2}}, {"Initial", {1, 3, 2, 2}}, {"Final", {3, 2, 2, 1}}, {All, {1, 3, 2, 2, 1}}},
 
       (* GenerationEventsList *)
 
@@ -476,6 +525,28 @@
         }
       ],
 
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["GenerationEventsList"],
+        {{{1, {1, 2} -> {5}}, {1, {2, 3} -> {6}}, {1, {1, 4} -> {7}}},
+         {{1, {5, 3} -> {8}}, {1, {1, 6} -> {9}}},
+         {{2, {8, 9} -> {}}, {2, {9, 8} -> {}}}}
+      ],
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["GenerationEventsList", "IncludeBoundaryEvents" -> All],
+        {{{0, {} -> {1, 2, 3, 4}}},
+         {{1, {1, 2} -> {5}}, {1, {2, 3} -> {6}}, {1, {1, 4} -> {7}}},
+         {{1, {5, 3} -> {8}}, {1, {1, 6} -> {9}}},
+         {{2, {8, 9} -> {}}, {2, {9, 8} -> {}}},
+         {{Infinity, {7} -> {}}}}
+      ],
+
       (* VertexCountList *)
 
       VerificationTest[
@@ -493,6 +564,16 @@
         {1, 2, 5, 14, 41}
       ],
 
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["VertexCountList"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
+      ],
+
       (* EdgeCountList *)
 
       VerificationTest[
@@ -503,6 +584,16 @@
       VerificationTest[
         WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 0]["EdgeCountList"],
         {1}
+      ],
+
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["EdgeCountList"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
       ],
 
       (* SetAfterEvent *)
@@ -577,6 +668,24 @@
         #2
       ] & @@@ {{0, {{1, 2}, {2, 3}}}, {1, {{2, 3}}}, {2, {}}},
 
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["SetAfterEvent", #] & /@ {0, 1},
+        {{{1, 2}, {2, 3}, {3, 4}, {2, 5}}, {{3, 4}, {2, 5}, {1, 3}}}
+      ],
+
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["SetAfterEvent", #],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
+      ] & /@ {2, 3, 4, 5, 6, 7},
+
       (* FinalState *)
 
       VerificationTest[
@@ -604,6 +713,16 @@
           {{1, 2}, {2, 3}},
           2]["FinalState"],
         {}
+      ],
+
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["FinalState"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
       ],
 
       (* UpdatedStatesList *)
@@ -635,6 +754,16 @@
         {{{1, 2}, {2, 3}}, {{2, 3}}, {}}
       ] & /@ {"UpdatedStatesList", "AllEventsStatesList"},
 
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["UpdatedStatesList"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
+      ],
+
       (* AllEventsStatesEdgeIndicesList *)
 
       VerificationTest[
@@ -662,6 +791,16 @@
           {{1, 2}, {2, 3}},
           2]["AllEventsStatesEdgeIndicesList"],
         {{1, 2}, {2}, {}}
+      ],
+
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["AllEventsStatesEdgeIndicesList"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
       ],
 
       (* Generation *)
@@ -736,6 +875,24 @@
         #2
       ] & @@@ {{0, {{1, 2}, {2, 3}}}, {1, {}}},
 
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["Generation", 0],
+        {{1, 2}, {2, 3}, {3, 4}, {2, 5}}
+      ],
+
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["Generation", #],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
+      ] & /@ {1, 2, 3},
+
       (* StatesList *)
 
       VerificationTest[
@@ -763,6 +920,16 @@
           {{1, 2}, {2, 3}},
           2]["StatesList"],
         {{{1, 2}, {2, 3}}, {}}
+      ],
+
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["StatesList"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
       ],
 
       (* AtomsCountFinal *)
@@ -799,6 +966,16 @@
         0
       ],
 
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["AtomsCountFinal"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
+      ],
+
       (* AtomsCountTotal *)
 
       VerificationTest[
@@ -833,6 +1010,14 @@
         3
       ],
 
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["AtomsCountTotal"],
+        5
+      ],
+
       (* ExpressionsCountFinal *)
 
       VerificationTest[
@@ -849,6 +1034,16 @@
           {{1, 2}, {2, 3}},
           2]["ExpressionsCountFinal"],
         0
+      ],
+
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["ExpressionsCountFinal"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
       ],
 
       (* ExpressionsCountTotal *)
@@ -869,6 +1064,14 @@
         2
       ],
 
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["ExpressionsCountTotal"],
+        9
+      ],
+
       (* CreatorEvents *)
 
       VerificationTest[
@@ -878,6 +1081,14 @@
           4][#],
         Join[Table[0, 16], Range[15]]
       ] & /@ {"CreatorEvents", "EdgeCreatorEventIndices"},
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["CreatorEvents"],
+        {0, 0, 0, 0, 1, 2, 3, 4, 5}
+      ],
 
       (* DestroyerEvents *)
 
@@ -889,11 +1100,35 @@
         Append[Riffle @@ ConstantArray[Range[15], 2], Infinity]
       ] & /@ {"DestroyerEvents", "EdgeDestroyerEventIndices"},
 
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["DestroyerEvents"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
+      ],
+
       (* EdgeDestroyerEventsIndices, lists of destroyer events *)
 
       VerificationTest[
         WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, pathGraph17, 4]["EdgeDestroyerEventsIndices"],
         Append[Riffle @@ ConstantArray[List /@ Range[15], 2], {}]
+      ],
+
+      VerificationTest[
+        WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {2, 3}, {2, 4}}, 1, "EventSelectionFunction" -> None][
+          "EdgeDestroyerEventsIndices"],
+        {{1, 2}, {1}, {2}, {}, {}}
+      ],
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["EdgeDestroyerEventsIndices"],
+        {{1, 3, 5}, {1, 2}, {2, 4}, {3}, {4}, {5}, {}, {6, 7}, {6, 7}}
       ],
 
       (* ExpressionGenerations *)
@@ -906,6 +1141,14 @@
         Catenate[Table[Table[k, 2^(4 - k)], {k, 0, 4}]]
       ] & /@ {"ExpressionGenerations", "EdgeGenerationsList"},
 
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["ExpressionGenerations"],
+        {0, 0, 0, 0, 1, 1, 1, 2, 2}
+      ],
+
       (* AllExpressions *)
 
       VerificationTest[
@@ -915,6 +1158,14 @@
           4][#],
         Catenate[Table[Partition[Range[1, 17, 2^k], 2, 1], {k, 0, 4}]]
       ] & /@ {"AllExpressions", "AllEventsEdgesList"},
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["AllExpressions"],
+        {{1, 2}, {2, 3}, {3, 4}, {2, 5}, {1, 3}, {2, 4}, {1, 5}, {1, 4}, {1, 4}}
+      ],
 
       (* EventGenerations *)
 
@@ -952,6 +1203,17 @@
           2]["EventGenerations"],
         {1, 1}
       ],
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["EventGenerations", "IncludeBoundaryEvents" -> #],
+        #2
+      ] & @@@ {{None, {1, 1, 1, 2, 2, 3, 3}},
+               {"Initial", {0, 1, 1, 1, 2, 2, 3, 3}},
+               {"Final", {1, 1, 1, 2, 2, 3, 3, 4}},
+               {All, {0, 1, 1, 1, 2, 2, 3, 3, 4}}},
 
       (* #258 *)
       VerificationTest[
@@ -1363,6 +1625,7 @@
         Join[Join[{10}, 2 Floor[Log2[16 - Range[15]]] + 2, {0}], 2 Floor[Log2[32 - Range[31]]] + 1]
       ],
 
+
       Function[{events, sameStyleQ},
         VerificationTest[
           SameQ @@ (events /. (VertexStyle /. Options[
@@ -1376,6 +1639,43 @@
         {{{"Event", 0}, {"Event", 1}}, False},
         {{{"Event", 0}, {"Event", Infinity}}, False},
         {{{"Event", 1}, {"Event", Infinity}}, False}},
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["CausalGraph"],
+        Graph[Range[7], {1 -> 4, 2 -> 5, 4 -> 6, 4 -> 7, 5 -> 6, 5 -> 7}],
+        SameTest -> sameGraphQ
+      ],
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["CausalGraph", "IncludeBoundaryEvents" -> All],
+        Graph[Append[Range[0, 7], Infinity],
+              {0 -> 1, 0 -> 1, 0 -> 2, 0 -> 2, 0 -> 3, 0 -> 3, 0 -> 4, 0 -> 5, 1 -> 4, 2 -> 5, 4 -> 6, 4 -> 7, 5 -> 6,
+               5 -> 7, 3 -> Infinity}],
+        SameTest -> sameGraphQ
+      ],
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["ExpressionsEventsGraph"],
+        Graph[
+          Join[Thread[{"Event", Range[7]}], Thread[{"Expression", Range[9]}]],
+          {{"Expression", 1} -> {"Event", 1}, {"Expression", 1} -> {"Event", 3}, {"Expression", 1} -> {"Event", 5},
+           {"Expression", 2} -> {"Event", 1}, {"Expression", 2} -> {"Event", 2}, {"Expression", 3} -> {"Event", 2},
+           {"Expression", 3} -> {"Event", 4}, {"Expression", 4} -> {"Event", 3}, {"Event", 1} -> {"Expression", 5},
+           {"Event", 2} -> {"Expression", 6}, {"Event", 3} -> {"Expression", 7}, {"Expression", 5} -> {"Event", 4},
+           {"Expression", 6} -> {"Event", 5}, {"Event", 4} -> {"Expression", 8}, {"Event", 5} -> {"Expression", 9},
+           {"Expression", 8} -> {"Event", 6}, {"Expression", 8} -> {"Event", 7}, {"Expression", 9} -> {"Event", 6},
+           {"Expression", 9} -> {"Event", 7}}],
+        SameTest -> sameGraphQ
+      ],
 
       (* AllEventsList *)
 
@@ -1455,6 +1755,24 @@
         {{1, {2, 1} -> {3}}}
       ],
 
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["AllEventsList"],
+        {{1, {1, 2} -> {5}}, {1, {2, 3} -> {6}}, {1, {1, 4} -> {7}}, {1, {5, 3} -> {8}}, {1, {1, 6} -> {9}},
+         {2, {8, 9} -> {}}, {2, {9, 8} -> {}}}
+      ],
+
+      VerificationTest[
+        WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                     Infinity,
+                     "EventSelectionFunction" -> None]["AllEventsList", "IncludeBoundaryEvents" -> All],
+        {{0, {} -> {1, 2, 3, 4}}, {1, {1, 2} -> {5}}, {1, {2, 3} -> {6}}, {1, {1, 4} -> {7}}, {1, {5, 3} -> {8}},
+         {1, {1, 6} -> {9}}, {2, {8, 9} -> {}}, {2, {9, 8} -> {}}, {Infinity, {7} -> {}}}
+      ],
+
       (* EventsStatesList *)
 
       VerificationTest[
@@ -1494,6 +1812,16 @@
           {{1, {3} -> {6, 7}}, {4, 5, 6, 7}},
           {{DirectedInfinity[1], {4, 5, 6, 7} -> {}}, {}}
         }
+      ],
+
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["EventsStatesList"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
       ]
     }]
   |>,
@@ -1540,6 +1868,16 @@
         {WolframModelPlot::invalidSize}
       ]],
 
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["FinalStatePlot"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
+      ],
+
       (* StatesPlotsList *)
 
       VerificationTest[
@@ -1573,6 +1911,16 @@
         evo["StatesPlotsList", VertexSize -> x],
         {WolframModelPlot::invalidSize}
       ]],
+
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["StatesPlotsList"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
+      ],
 
       (* EventsStatesPlotsList *)
 
@@ -1628,6 +1976,16 @@
       VerificationTest[
         graphicsQ /@ WolframModel[{} -> {{1, 2}}, {}, <|"MaxEvents" -> 1|>, "EventsStatesPlotsList"],
         {True, True}
+      ],
+
+      With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
+                                     {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
+                                     Infinity,
+                                     "EventSelectionFunction" -> None]},
+        testUnevaluated[
+          evolution["EventsStatesPlotsList"],
+          {WolframModelEvolutionObject::multiwayState}
+        ]
       ],
 
       (* CausalGraph *)

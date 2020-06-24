@@ -53,7 +53,10 @@ SetReplaceAll[args___] := 0 /;
 (*Options*)
 
 
-Options[SetReplaceAll] := Options[setSubstitutionSystem]
+Options[SetReplaceAll] = {
+	Method -> Automatic,
+	TimeConstraint -> Infinity,
+	"EventOrderingFunction" -> Automatic};
 
 
 (* ::Section:: *)
@@ -64,8 +67,9 @@ Options[SetReplaceAll] := Options[setSubstitutionSystem]
 (*We just run SetSubstitutionSystem for the specified number of generations, and take the last set.*)
 
 
-SetReplaceAll[
-		set_, rules_, generations : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] :=
+expr : SetReplaceAll[
+		set_, rules_, generations : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
+			recognizedOptionsQ[expr, SetReplaceAll, {o}] :=
 	Module[{result},
 		result = Check[
 			setSubstitutionSystem[

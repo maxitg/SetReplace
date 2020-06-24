@@ -57,6 +57,13 @@
         {SetReplaceAll::nonIntegerIterations}
       ],
 
+      (** Options are valid **)
+
+      testUnevaluated[
+        SetReplaceAll[{1, 2, 3}, n_ :> -n, # -> 123],
+        {SetReplaceAll::optx}
+      ] & /@ {"$$$InvalidOption###", "EventSelectionFunction"},
+
       (* Implementation *)
 
       VerificationTest[ 

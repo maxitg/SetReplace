@@ -63,8 +63,8 @@ WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`Ch
 
 rulePlot$parse[{
     rulesSpec_ ? hypergraphRulesSpecQ,
-    o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}},
-    {opts : OptionsPattern[]}] :=
+    o : OptionsPattern[]},
+    {opts : OptionsPattern[]}] /; recognizedOptionsQ[RulePlot[rulesSpec, o], WolframModel, {o}] :=
   rulePlot[
         rulesSpec,
         ##,
