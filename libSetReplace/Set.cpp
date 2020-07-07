@@ -43,12 +43,13 @@ class Set::Implementation {
                  const EventSelectionFunction& eventSelectionFunction,
                  const Matcher::OrderingSpec& orderingSpec,
                  const unsigned int randomSeed)
-      : Implementation(rules,
-                       initialExpressions,
-                       eventSelectionFunction,
-                       orderingSpec,
-                       randomSeed,
-                       [this](const int64_t expressionID) { return expressions_.at(expressionID); }) {}
+      : Implementation(
+            rules,
+            initialExpressions,
+            eventSelectionFunction,
+            orderingSpec,
+            randomSeed,
+            [this](const int64_t& expressionID) -> const AtomsVector& { return expressions_.at(expressionID); }) {}
 
   int64_t replaceOnce(const std::function<bool()> shouldAbort) {
     terminationReason_ = TerminationReason::NotTerminated;
@@ -163,7 +164,7 @@ class Set::Implementation {
                  const EventSelectionFunction& eventSelectionFunction,
                  const Matcher::OrderingSpec& orderingSpec,
                  const unsigned int randomSeed,
-                 const std::function<AtomsVector(ExpressionID)>& getAtomsVector)
+                 const GetAtomsVectorFunc& getAtomsVector)
       : rules_(std::move(rules)),
         eventSelectionFunction_(eventSelectionFunction),
         causalGraph_(static_cast<int>(initialExpressions.size())),
