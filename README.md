@@ -753,6 +753,18 @@ Out[] = {18, 19, 29, 34, 35, 36, 37, 39, 40, 42, 43, 44, 45, 49, 50, 51, 52,
   88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101}
 ```
 
+and **`"GenerationEdgeIndices"`** is an analog of [`"Generation"`](#states):
+
+```wl
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
+   {{2, 7, 8}, {3, 9, 10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11,
+     10}, {13, 7}, {14, 9}},
+  {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}},
+  6]["GenerationEdgeIndices", 2]
+Out[] = {10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+  27, 28, 29}
+```
+
 #### Events
 
 **`"AllEventsList"`** (aka `"EventsList"`) and **`"GenerationEventsList"`** both return all replacement events throughout the evolution. The only difference is how the events are arranged. `"AllEventsList"` returns the flat list of all events, whereas `"GenerationEventsList"` splits them into sublists for each generation:
