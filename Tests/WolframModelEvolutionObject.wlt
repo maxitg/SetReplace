@@ -197,6 +197,16 @@
         SameTest -> MatchQ
       ],
 
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["GenerationEdgeIndices", 5],
+        WolframModelEvolutionObject[___]["GenerationEdgeIndices", 5],
+        {WolframModelEvolutionObject::stepTooLarge},
+        SameTest -> MatchQ
+      ],
+
       (* IncludeBoundaryEvents *)
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 2}}, {{1, 1}}, 1]},
@@ -879,19 +889,56 @@
         WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
                      {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
                      Infinity,
-                     "EventSelectionFunction" -> None]["Generation", 0],
-        {{1, 2}, {2, 3}, {3, 4}, {2, 5}}
-      ],
+                     "EventSelectionFunction" -> None][#1, 0],
+        #2
+      ] & @@@ {{"Generation", {{1, 2}, {2, 3}, {3, 4}, {2, 5}}}, {"GenerationEdgeIndices", Range[4]}},
 
       With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
                                      {{1, 2}, {2, 3}, {3, 4}, {2, 5}},
                                      Infinity,
                                      "EventSelectionFunction" -> None]},
         testUnevaluated[
-          evolution["Generation", #],
+          evolution[#1, #2],
           {WolframModelEvolutionObject::multiwayState}
         ]
-      ] & /@ {1, 2, 3},
+      ] & @@@ Tuples[{{"Generation", "GenerationEdgeIndices"}, {1, 2, 3}}],
+
+      (* GenerationEdgeIndices *)
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["GenerationEdgeIndices", 0],
+        Range[Length[pathGraph17]]
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["GenerationEdgeIndices", 1],
+        Range[Length[pathGraph17] + 1, Length[pathGraph17] + Length[pathGraph17] / 2]
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["GenerationEdgeIndices", 3],
+        {29, 30}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["GenerationEdgeIndices", -2],
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4]["GenerationEdgeIndices", 3]
+      ],
 
       (* StatesList *)
 
