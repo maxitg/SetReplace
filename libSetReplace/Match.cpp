@@ -133,7 +133,7 @@ class Matcher::Implementation {
  private:
   const std::vector<Rule>& rules_;
   AtomsIndex& atomsIndex_;
-  const std::function<AtomsVector(ExpressionID)> getAtomsVector_;
+  const GetAtomsVectorFunc getAtomsVector_;
 
   // Matches are arranged in buckets. Each bucket contains matches that are equivalent in terms of the ordering
   // function, however, buckets themselves are ordered according to that function.
@@ -173,7 +173,7 @@ class Matcher::Implementation {
  public:
   Implementation(const std::vector<Rule>& rules,
                  AtomsIndex* atomsIndex,
-                 std::function<AtomsVector(ExpressionID)> getAtomsVector,
+                 GetAtomsVectorFunc getAtomsVector,
                  const OrderingSpec& orderingSpec,
                  const unsigned int randomSeed)
       : rules_(rules),
@@ -471,7 +471,7 @@ class Matcher::Implementation {
 
 Matcher::Matcher(const std::vector<Rule>& rules,
                  AtomsIndex* atomsIndex,
-                 const std::function<AtomsVector(ExpressionID)>& getAtomsVector,
+                 const GetAtomsVectorFunc& getAtomsVector,
                  const OrderingSpec& orderingSpec,
                  const unsigned int randomSeed)
     : implementation_(std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector, orderingSpec, randomSeed)) {}

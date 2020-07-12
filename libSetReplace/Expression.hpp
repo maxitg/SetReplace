@@ -13,6 +13,10 @@ namespace SetReplace {
  */
 using AtomsVector = std::vector<Atom>;
 
+/** @brief Function type used to get an expression's corresponding AtomsVector.
+ */
+using GetAtomsVectorFunc = std::function<const AtomsVector&(const ExpressionID&)>;
+
 /** @brief AtomsIndex keeps references to set expressions accessible by atoms, which is useful for matching.
  */
 class AtomsIndex {
@@ -20,7 +24,7 @@ class AtomsIndex {
   /** @brief Creates an empty index.
    * @param getAtomsVector datasource function that returns the list of atoms for a requested expression.
    */
-  explicit AtomsIndex(const std::function<AtomsVector(ExpressionID)>& getAtomsVector);
+  explicit AtomsIndex(const GetAtomsVectorFunc& getAtomsVector);
 
   /** @brief Removes expressions with specified IDs from the index.
    */
