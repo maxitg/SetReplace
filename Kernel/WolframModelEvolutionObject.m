@@ -136,6 +136,7 @@ $propertyArgumentCounts = Join[
 		"EventsStatesPlotsList" -> {0, Infinity},
 		"AllEventsStatesEdgeIndicesList" -> {0, 0},
 		"AllEventsStatesList" -> {0, 0},
+		"GenerationEdgeIndices" -> {1, 1},
 		"Generation" -> {1, 1},
 		"StateEdgeIndicesAfterEvent" -> {1, 1},
 		"StateAfterEvent" -> {1, 1},
@@ -593,6 +594,22 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
 		Range[0, propertyEvaluate[True, None][WolframModelEvolutionObject[data], caller, "AllEventsCount"]]
 
 
+(* ::Subsection::  *)
+(*GenerationEdgeIndices*)
+
+
+propertyEvaluate[True, includeBoundaryEventsPattern][
+			obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
+			caller_,
+			"GenerationEdgeIndices",
+			g_] := Module[{positiveGeneration, eventsUpToGeneration},
+	positiveGeneration = toPositiveStep[
+		propertyEvaluate[True, None][obj, caller, "TotalGenerationsCount"], g, caller, "Generation"];
+	eventsUpToGeneration = First /@ Position[_ ? (# <= positiveGeneration &)] @ data[$eventGenerations] - 1;
+	stateEdgeIndicesAfterEvents[obj, caller, eventsUpToGeneration]
+]
+
+
 (* ::Subsection:: *)
 (*Generation*)
 
@@ -609,12 +626,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 			obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
 			caller_,
 			"Generation",
-			g_] := Module[{positiveGeneration, eventsUpToGeneration},
-	positiveGeneration = toPositiveStep[
-		propertyEvaluate[True, None][obj, caller, "TotalGenerationsCount"], g, caller, "Generation"];
-	eventsUpToGeneration = First /@ Position[_ ? (# <= positiveGeneration &)] @ data[$eventGenerations] - 1;
-	data[$atomLists][[stateEdgeIndicesAfterEvents[obj, caller, eventsUpToGeneration]]]
-]
+			g_] := data[$atomLists][[propertyEvaluate[True, None][obj, caller, "GenerationEdgeIndices", g]]]
 
 
 (* ::Subsubsection:: *)
