@@ -241,15 +241,15 @@ deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := Module[{
 	eventIndicesToKeep = Position[data[$eventGenerations], _ ? (# <= maxCompleteGeneration &)][[All, 1]];
 	newEventOutputs = data[$eventOutputs][[eventIndicesToKeep]];
 	expressionIndicesToKeep = Union[Catenate[newEventOutputs]];
-	oldToNewExpressionIndices = Thread[expressionIndicesToKeep -> Range[Length[expressionIndicesToKeep]]];
+	oldToNewExpressionIndices = Dispatch @ Thread[expressionIndicesToKeep -> Range[Length[expressionIndicesToKeep]]];
 	WolframModelEvolutionObject[<|$version -> data[$version],
 		$rules -> data[$rules],
 		$maxCompleteGeneration -> data[$maxCompleteGeneration],
 		$terminationReason -> data[$terminationReason],
 		$atomLists -> data[$atomLists][[expressionIndicesToKeep]],
 		$eventRuleIDs -> data[$eventRuleIDs][[eventIndicesToKeep]],
-		$eventInputs -> data[$eventInputs][[eventIndicesToKeep]],
-		$eventOutputs -> newEventOutputs,
+		$eventInputs -> Replace[data[$eventInputs][[eventIndicesToKeep]], oldToNewExpressionIndices, {2}],
+		$eventOutputs -> Replace[newEventOutputs, oldToNewExpressionIndices, {2}],
 		$eventGenerations -> data[$eventGenerations][[eventIndicesToKeep]]|>]
 ]
 
