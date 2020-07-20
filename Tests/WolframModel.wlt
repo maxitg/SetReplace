@@ -1518,6 +1518,29 @@
         Range[13]
       ],
 
+      VerificationTest[
+        SeedRandom[2];
+        ConnectedGraphQ[UndirectedGraph[WolframModel[
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 200|>,
+          "ExpressionsEventsGraph",
+          "EventOrderingFunction" -> "Random",
+          "IncludePartialGenerations" -> False]]]
+      ],
+
+      VerificationTest[
+        SeedRandom[2];
+        Sort[Catenate[WolframModel[
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 200|>,
+          "AllEventsList",
+          "EventOrderingFunction" -> "Random",
+          "IncludePartialGenerations" -> False][[All, 2, 2]]]],
+        Range[2, 40]
+      ],
+
       testUnevaluated[
         WolframModel[{{1, 2, 3}} -> {{1, 2, 3}}, {{1, 2, 3}}, 1, "IncludePartialGenerations" -> $$$invalid$$$],
         {WolframModel::invalidFiniteOption}
