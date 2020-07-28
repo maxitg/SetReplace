@@ -1187,18 +1187,6 @@ joinPropertyOptions[property__, opts_] := Module[{joinedPropertyOptions, masterO
     ];
     masterOptions = FilterRules[{opts}, Except[Flatten @ joinedPropertyOptions[[All, 2, All, 1]]]];
     {joinedPropertyOptions, masterOptions}
-WolframModelEvolutionObject[
-		data_ ? evolutionDataQ][
-		property__ ? (Not[MatchQ[#, OptionsPattern[]]] &),
-		opts : OptionsPattern[]] := Module[{result},
-	result = Catch[
-		(propertyEvaluate @@
-				(OptionValue[Join[{opts}, $masterOptions], #] & /@ {"IncludePartialGenerations", "IncludeBoundaryEvents"}))[
-			WolframModelEvolutionObject[data],
-			WolframModelEvolutionObject,
-			property,
-			##] & @@ Flatten[FilterRules[{opts}, Except[$masterOptions]]]];
-	result /; result =!= $Failed
 ]
 
 $allowedOptions := $allowedOptions = Except[Join[
