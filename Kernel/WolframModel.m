@@ -350,10 +350,6 @@ expr : WolframModel[
 (*Operator form*)
 
 
-expr : WolframModel[rulesSpec_ ? wolframModelRulesSpecQ, o : OptionsPattern[]] := 0 /;
-	recognizedOptionsQ[expr, WolframModel, {o}] && False
-
-
 WolframModel[
     rulesSpec_ ? wolframModelRulesSpecQ,
     o : OptionsPattern[] /; Quiet[recognizedOptionsQ[None, WolframModel, {o}]]][
@@ -563,11 +559,11 @@ WolframModel::invalidProperty =
 
 
 expr : WolframModel[
-	rulesSpec_ ? wolframModelRulesSpecQ,
-	initSpec_ ? wolframModelInitSpecQ,
-	stepsSpec_ ? wolframModelStepsSpecQ,
-	property : Except[OptionsPattern[]] ? (Not[wolframModelPropertyQ[##] || wolframModelPropertiesQ[##]] &),
-	o : OptionsPattern[] /; recognizedOptionsQ[expr, WolframModel, {o}]] := 0 /;
+    rulesSpec_ ? wolframModelRulesSpecQ,
+    initSpec_ ? wolframModelInitSpecQ,
+    stepsSpec_ ? wolframModelStepsSpecQ,
+    property : Except[OptionsPattern[]] ? (Not[wolframModelPropertyQ[##] || wolframModelPropertiesQ[##]] &),
+    o : OptionsPattern[] /; recognizedOptionsQ[expr, WolframModel, {o}]] := 0 /;
   Message[WolframModel::invalidProperty, property]
 
 

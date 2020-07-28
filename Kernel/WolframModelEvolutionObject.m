@@ -285,12 +285,12 @@ propertyEvaluate[masterOptions___][
 
 
 propertyEvaluate[___][
-		WolframModelEvolutionObject[data_ ? evolutionDataQ],
-		caller_,
-		property : Except[_Integer],
-		___] := 0 /;
-	!ContainsAll[Keys[$propertyArgumentCounts], Keys[propertyOptions[property]][[All, 1]]] &&
-	makeMessage[caller, "unknownProperty", property]
+        WolframModelEvolutionObject[data_ ? evolutionDataQ],
+        caller_,
+        property : Except[_Integer],
+        ___] := 0 /;
+    !ContainsAll[Keys[$propertyArgumentCounts], Keys[propertyOptions[property]][[All, 1]]] &&
+    makeMessage[caller, "unknownProperty", property]
 
 
 (* ::Subsubsection:: *)
@@ -313,14 +313,14 @@ makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := makeMessage[
 
 
 propertyEvaluate[___][
-		WolframModelEvolutionObject[data_ ? evolutionDataQ],
-		caller_,
-		s_String,
-		args___] := 0 /;
-	With[{argumentsCountRange = $propertyArgumentCounts[s]},
-		Not[MissingQ[argumentsCountRange]] &&
-		Not[argumentsCountRange[[1]] <= Length[{args}] <= argumentsCountRange[[2]]] &&
-		makePargxMessage[s, caller, Length[{args}], argumentsCountRange]]
+        WolframModelEvolutionObject[data_ ? evolutionDataQ],
+        caller_,
+        s_String,
+        args___] := 0 /;
+    With[{argumentsCountRange = $propertyArgumentCounts[s]},
+        Not[MissingQ[argumentsCountRange]] &&
+        Not[argumentsCountRange[[1]] <= Length[{args}] <= argumentsCountRange[[2]]] &&
+        makePargxMessage[s, caller, Length[{args}], argumentsCountRange]]
 
 
 (* ::Subsubsection:: *)
@@ -339,31 +339,31 @@ $expressionsEventrsGraphOptions = Join[
   $newExpressionsEventsGraphOptions];
 
 $propertyOptions = <|
-	"ExpressionsEventsGraph" -> $expressionsEventrsGraphOptions,
-	"CausalGraph" -> $causalGraphOptions,
-	"LayeredCausalGraph" -> $layeredCausalGraphOptions,
-	"StatesPlotsList" -> $plotOptions,
-	"EventsStatesPlotsList" -> $plotOptions,
-	"FinalStatePlot" -> $plotOptions
+    "ExpressionsEventsGraph" -> $expressionsEventrsGraphOptions,
+    "CausalGraph" -> $causalGraphOptions,
+    "LayeredCausalGraph" -> $layeredCausalGraphOptions,
+    "StatesPlotsList" -> $plotOptions,
+    "EventsStatesPlotsList" -> $plotOptions,
+    "FinalStatePlot" -> $plotOptions
 |>;
 
 $allPropertyOptions := $allPropertyOptions = DeleteDuplicatesBy[Catenate[Values[$propertyOptions]], First];
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
-	obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
-	caller_,
-	property : Alternatives @@ Keys[$propertyOptions],
-	o : OptionsPattern[]] := Message[
-		caller::optx,
-		First[Last[Complement[{o}, FilterRules[{o}, Options[$propertyOptions[property]]]]]],
-		Defer[obj[property, o]]]
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    property : Alternatives @@ Keys[$propertyOptions],
+    o : OptionsPattern[]] := Message[
+        caller::optx,
+        First[Last[Complement[{o}, FilterRules[{o}, Options[$propertyOptions[property]]]]]],
+        Defer[obj[property, o]]]
 
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
-	WolframModelEvolutionObject[_ ? evolutionDataQ],
-	caller_,
-	property : Alternatives @@ Keys[$propertyOptions],
-	o___] := makeMessage[caller, "nonopt", property, Last[{o}]]
+    WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    property : Alternatives @@ Keys[$propertyOptions],
+    o___] := makeMessage[caller, "nonopt", property, Last[{o}]]
 
 
 (* ::Subsection:: *)
@@ -1237,7 +1237,7 @@ expr : WolframModelEvolutionObject[
 
 
 WolframModelEvolutionObject[args___] := 0 /;
-	!Developer`CheckArgumentCount[WolframModelEvolutionObject[args], 1, 2] && False
+    !Developer`CheckArgumentCount[WolframModelEvolutionObject[args], 1, 2] && False
 
 
 WolframModelEvolutionObject[data_, objOpts : OptionsPattern[]][opts : OptionsPattern[]] := 0 /;
