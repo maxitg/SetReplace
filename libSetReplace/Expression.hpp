@@ -13,25 +13,9 @@ namespace SetReplace {
  */
 using AtomsVector = std::vector<Atom>;
 
-/** @brief Expression, as a part of the set, i.e., (hyper)edges in the graph.
+/** @brief Function type used to get an expression's corresponding AtomsVector.
  */
-struct SetExpression {
-  /** @brief Ordered list of atoms the expression contains.
-   */
-  AtomsVector atoms;
-
-  /** @brief Substitution event that has this expression as part of its output.
-   */
-  EventID creatorEvent;
-
-  /** @brief Substitution event that has this expression as part of its input.
-   */
-  EventID destroyerEvent = finalStateEvent;
-
-  /** @brief Layer of the causal network this expression belongs to.
-   */
-  Generation generation;
-};
+using GetAtomsVectorFunc = std::function<const AtomsVector&(const ExpressionID&)>;
 
 /** @brief AtomsIndex keeps references to set expressions accessible by atoms, which is useful for matching.
  */
@@ -40,7 +24,7 @@ class AtomsIndex {
   /** @brief Creates an empty index.
    * @param getAtomsVector datasource function that returns the list of atoms for a requested expression.
    */
-  explicit AtomsIndex(const std::function<AtomsVector(ExpressionID)>& getAtomsVector);
+  explicit AtomsIndex(const GetAtomsVectorFunc& getAtomsVector);
 
   /** @brief Removes expressions with specified IDs from the index.
    */

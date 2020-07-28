@@ -16,6 +16,7 @@ Package["SetReplace`"]
 
 
 PackageScope["makeMessage"]
+PackageScope["recognizedOptionsQ"]
 PackageScope["makePargxMessage"]
 
 
@@ -45,6 +46,17 @@ makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := makeMessage[
     If[expectedArgs[[1]] != expectedArgs[[2]], expectedArgs[[2]], ""],
     If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "s", ""],
     If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "are", "is"]
+]
+
+
+Attributes[recognizedOptionsQ] = HoldFirst;
+recognizedOptionsQ[expr_, func_, opts_] := With[{unrecognizedOptions = FilterRules[opts, Except[Options[func]]]},
+	If[unrecognizedOptions === {},
+		True,
+	(* else, some options are not recognized *)
+		Message[func::optx, unrecognizedOptions[[1]], Defer[expr]];
+		False
+	]
 ]
 
 
@@ -115,6 +127,10 @@ messageTemplate["stepNotInteger"] =
 	"`2` `3` must be an integer.";
 
 
+messageTemplate["multiwayFinalStepLimit"] =
+	"The limit for the `2` is not supported for multiway systems.";
+
+
 messageTemplate["nonopt"] =
 	"Options expected (instead of `3`) " <>
 	"beyond position 1 for `2` property. " <>
@@ -124,3 +140,7 @@ messageTemplate["nonopt"] =
 messageTemplate["optx"] =
 	"Unknown option `2` for \"CausalGraph\" property. " <>
 	"Only Graph options are accepted.";
+
+
+messageTemplate["multiwayState"] =
+	"Multiple destroyer events found for edge index `2`. States are not supported for multiway systems.";

@@ -1522,6 +1522,29 @@
         Range[13]
       ],
 
+      VerificationTest[
+        SeedRandom[2];
+        ConnectedGraphQ[UndirectedGraph[WolframModel[
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 200|>,
+          "ExpressionsEventsGraph",
+          "EventOrderingFunction" -> "Random",
+          "IncludePartialGenerations" -> False]]]
+      ],
+
+      VerificationTest[
+        SeedRandom[2];
+        Sort[Catenate[WolframModel[
+          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
+          {{1, 1}},
+          <|"MaxEvents" -> 200|>,
+          "AllEventsList",
+          "EventOrderingFunction" -> "Random",
+          "IncludePartialGenerations" -> False][[All, 2, 2]]]],
+        Range[2, 40]
+      ],
+
       testUnevaluated[
         WolframModel[{{1, 2, 3}} -> {{1, 2, 3}}, {{1, 2, 3}}, 1, "IncludePartialGenerations" -> $$$invalid$$$],
         {WolframModel::invalidFiniteOption}
@@ -1567,66 +1590,34 @@
         3
       ],
 
-      (** EventOrderingFunction **)
+      (** EventOrderingFunction & EventSelectionFunction **)
 
-      VerificationTest[
-        Head[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> Automatic]],
-        WolframModelEvolutionObject
-      ],
+      Function[{optionAndValue},
+        VerificationTest[
+          Head[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, optionAndValue]],
+          WolframModelEvolutionObject
+        ]
+      ] /@ {"EventOrderingFunction" -> Automatic,
+            "EventOrderingFunction" -> "Random",
+            "EventSelectionFunction" -> "GlobalSpacelike",
+            "EventSelectionFunction" -> None},
 
-      VerificationTest[
-        Head[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> "Random"]],
-        WolframModelEvolutionObject
-      ],
+      Function[{optionAndValue},
+        VerificationTest[
+          Head[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, optionAndValue, Method -> "Symbolic"]],
+          WolframModelEvolutionObject
+        ]
+      ] /@ {"EventOrderingFunction" -> Automatic, "EventSelectionFunction" -> "GlobalSpacelike"},
 
-      testUnevaluated[
-        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> "$$$invalid$$$"],
-        {WolframModel::invalidEventOrdering}
-      ],
-
-      testUnevaluated[
-        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> $$$invalid$$$],
-        {WolframModel::invalidEventOrdering}
-      ],
-
-      testUnevaluated[
-        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> 1],
-        {WolframModel::invalidEventOrdering}
-      ],
-
-      VerificationTest[
-        Head[WolframModel[
-          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
-          {{1, 1}},
-          3,
-          "EventOrderingFunction" -> Automatic,
-          Method -> "Symbolic"]],
-        WolframModelEvolutionObject
-      ],
-
-      testUnevaluated[
-        WolframModel[
-          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> "Random", Method -> "Symbolic"],
-        {WolframModel::symbOrdering}
-      ],
-
-      testUnevaluated[
-        WolframModel[
-          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> "$inv$", Method -> "Symbolic"],
-        {WolframModel::invalidEventOrdering}
-      ],
-
-      testUnevaluated[
-        WolframModel[
-          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> $$inv$$, Method -> "Symbolic"],
-        {WolframModel::invalidEventOrdering}
-      ],
-
-      testUnevaluated[
-        WolframModel[
-          {{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, "EventOrderingFunction" -> 1, Method -> "Symbolic"],
-        {WolframModel::invalidEventOrdering}
-      ],
+      Function[{option, message, value, method},
+        testUnevaluated[
+          WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, option -> value, Method -> method],
+          {message}
+        ]
+      ] @@@ Flatten /@ Tuples[{{{"EventOrderingFunction", WolframModel::invalidEventOrdering},
+                               {"EventSelectionFunction", WolframModel::invalidEventSelection}},
+                              {"$$$invalid$$$", $$$invalid$$$, 1},
+                              {Automatic, "Symbolic"}}],
 
       (** AllEventsRuleIndices **)
 

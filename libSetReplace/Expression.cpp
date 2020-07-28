@@ -1,18 +1,20 @@
 #include "Expression.hpp"
 
 #include <algorithm>
+#include <memory>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 namespace SetReplace {
 class AtomsIndex::Implementation {
  private:
-  const std::function<AtomsVector(ExpressionID)> getAtomsVector_;
+  const GetAtomsVectorFunc getAtomsVector_;
   std::unordered_map<Atom, std::unordered_set<ExpressionID>> index_;
 
  public:
-  explicit Implementation(std::function<AtomsVector(ExpressionID)> getAtomsVector)
-      : getAtomsVector_(std::move(getAtomsVector)) {}
+  explicit Implementation(GetAtomsVectorFunc getAtomsVector) : getAtomsVector_(std::move(getAtomsVector)) {}
 
   void removeExpressions(const std::vector<ExpressionID>& expressionIDs) {
     const std::unordered_set<ExpressionID> expressionsToDelete(expressionIDs.begin(), expressionIDs.end());
@@ -54,7 +56,7 @@ class AtomsIndex::Implementation {
   }
 };
 
-AtomsIndex::AtomsIndex(const std::function<AtomsVector(ExpressionID)>& getAtomsVector)
+AtomsIndex::AtomsIndex(const GetAtomsVectorFunc& getAtomsVector)
     : implementation_(std::make_shared<Implementation>(getAtomsVector)) {}
 
 void AtomsIndex::removeExpressions(const std::vector<ExpressionID>& expressionIDs) {

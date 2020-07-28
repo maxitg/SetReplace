@@ -33,20 +33,26 @@ class Matcher {
  public:
   /** @brief Type of the error occurred during evaluation.
    */
-  enum Error { Aborted, DisconnectedInputs, NoMatches, InvalidOrderingFunction, InvalidOrderingDirection };
+  enum Error { None, Aborted, DisconnectedInputs, NoMatches, InvalidOrderingFunction, InvalidOrderingDirection };
 
   /** @brief All possible functions available to sort matches. Random is the default that is always applied last.
+   *
+   * If adding additional values, preserve First and Last, as these are used for valid enum checking.
    */
   enum class OrderingFunction {
-    SortedExpressionIDs = 0,
+    First = 0,
+    SortedExpressionIDs = First,
     ReverseSortedExpressionIDs = 1,
     ExpressionIDs = 2,
-    RuleIndex = 3
+    RuleIndex = 3,
+    Last = 4
   };
 
   /** @brief Whether to sort in normal or reverse order.
+   *
+   * If adding additional values, preserve First and Last, as these are used for valid enum checking.
    */
-  enum class OrderingDirection { Normal = 0, Reverse = 1 };
+  enum class OrderingDirection { First = 0, Normal = First, Reverse = 1, Last = 2 };
 
   /** @brief Full specification for the sequence of ordering functions.
    */
@@ -57,7 +63,7 @@ class Matcher {
    */
   Matcher(const std::vector<Rule>& rules,
           AtomsIndex* atomsIndex,
-          const std::function<AtomsVector(ExpressionID)>& getAtomsVector,
+          const GetAtomsVectorFunc& getAtomsVector,
           const OrderingSpec& orderingSpec,
           unsigned int randomSeed = 0);
 
@@ -71,6 +77,10 @@ class Matcher {
   /** @brief Removes matches containing specified expression IDs from the index.
    */
   void removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs);
+
+  /** @brief Removes a single match from the index.
+   */
+  void deleteMatch(const MatchPtr matchPtr);
 
   /** @brief Yields true if there are no matches left.
    */

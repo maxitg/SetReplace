@@ -15,7 +15,6 @@ PackageExport["WolframModel"]
 PackageExport["$WolframModelProperties"]
 
 
-PackageScope["unrecognizedOptions"]
 PackageScope["wolframModelRulesSpecQ"]
 PackageScope["wolframModelPropertyCheck"]
 PackageScope["wolframModelPropertyQ"]
@@ -109,11 +108,11 @@ fromInitSpec[rulesSpec_Association, Automatic] := (
 (*Steps*)
 
 
-fromStepsSpec[init_, generations : (_Integer | Infinity), timeConstraint_] :=
-	fromStepsSpec[init, <|$stepSpecKeys[$maxGenerationsLocal] -> generations|>, timeConstraint]
+fromStepsSpec[init_, generations : (_Integer | Infinity), timeConstraint_, eventSelectionFunction_] :=
+	fromStepsSpec[init, <|$stepSpecKeys[$maxGenerationsLocal] -> generations|>, timeConstraint, eventSelectionFunction]
 
 
-fromStepsSpec[_, spec_Association, _] := With[{
+fromStepsSpec[_, spec_Association, _, _] := With[{
 		stepSpecInverse = Association[Reverse /@ Normal[$stepSpecKeys]]}, {
 			KeyMap[# /. stepSpecInverse &, spec],
 			Inherited (* termination reason *),
@@ -122,16 +121,19 @@ fromStepsSpec[_, spec_Association, _] := With[{
 ]
 
 
-fromStepsSpec[init_, Automatic, timeConstraint_] := fromStepsSpec[init, {Automatic, 1}, timeConstraint]
+fromStepsSpec[init_, Automatic, timeConstraint_, eventSelectionFunction_] :=
+	fromStepsSpec[init, {Automatic, 1}, timeConstraint, eventSelectionFunction]
 
 
 $automaticMaxEvents = 5000;
 $automaticMaxFinalExpressions = 200;
 $automaticStepsTimeConstraint = 5.0;
 
-fromStepsSpec[init_, {Automatic, factor_}, timeConstraint_] := {
+fromStepsSpec[init_, {Automatic, factor_}, timeConstraint_, eventSelectionFunction_] := {
 	<|$maxEvents -> Round[factor $automaticMaxEvents],
-		$maxFinalExpressions -> Max[Round[factor $automaticMaxFinalExpressions], Length[init]]|>,
+		$maxFinalExpressions -> If[multiwayEventSelectionFunctionQ[eventSelectionFunction],
+			Infinity,
+			Max[Round[factor $automaticMaxFinalExpressions], Length[init]]]|>,
 	Automatic, (* termination reason *)
 	{TimeConstraint -> Min[timeConstraint, Replace[factor, 0 | 0. -> 1] $automaticStepsTimeConstraint],
 		"IncludePartialGenerations" -> False},
@@ -232,6 +234,66 @@ optionsCheck[expr_, caller_, allowedOptions_][property__, opts : OptionsPattern[
     ];
     {joinedPropertyOptions, masterOptions}
 ]
+expr : WolframModel[
+			rulesSpec_ ? wolframModelRulesSpecQ,
+			initSpec_ ? wolframModelInitSpecQ,
+			stepsSpec : _ ? wolframModelStepsSpecQ : 1,
+			property : _ ? wolframModelPropertyQ : "EvolutionObject",
+			o : OptionsPattern[] /; recognizedOptionsQ[expr, WolframModel, {o}]] :=
+	Module[{
+			patternRules, initialSet, steps, terminationReasonOverride, optionsOverride, abortBehavior, overridenOptionValue,
+			evolution, modifiedEvolution, propertyEvaluateWithOptions, result},
+		patternRules = fromRulesSpec[rulesSpec];
+		initialSet = Catch[fromInitSpec[rulesSpec, initSpec]];
+		{steps, terminationReasonOverride, optionsOverride, abortBehavior} =
+			fromStepsSpec[initialSet, stepsSpec, OptionValue[TimeConstraint], OptionValue["EventSelectionFunction"]];
+		overridenOptionValue = OptionValue[WolframModel, Join[optionsOverride, {o}], #] &;
+		evolution = If[initialSet =!= $Failed,
+			Check[
+				setSubstitutionSystem[
+					patternRules,
+					initialSet,
+					steps,
+					WolframModel,
+					Switch[abortBehavior,
+						$$nonEvolutionOutputAbort, property === "EvolutionObject",
+						$$noAbort, True,
+						_, False],
+					Method -> overridenOptionValue[Method],
+					TimeConstraint -> overridenOptionValue[TimeConstraint],
+					"EventOrderingFunction" -> overridenOptionValue["EventOrderingFunction"],
+					"EventSelectionFunction" -> overridenOptionValue["EventSelectionFunction"]],
+				$Failed],
+			$Failed];
+		If[evolution === $Aborted, Return[$Aborted]];
+		modifiedEvolution = If[evolution =!= $Failed,
+			Check[
+				overrideTerminationReason[terminationReasonOverride] @ renameNodes[
+					evolution,
+					AssociationQ[rulesSpec],
+					overridenOptionValue["VertexNamingFunction"]],
+				$Failed],
+			$Failed];
+		propertyEvaluateWithOptions = propertyEvaluate[
+			overridenOptionValue["IncludePartialGenerations"],
+			overridenOptionValue["IncludeBoundaryEvents"]][
+			modifiedEvolution,
+			WolframModel,
+			#] &;
+		result = Catch[Check[
+			If[modifiedEvolution =!= $Failed,
+				If[ListQ[property],
+						Catch[
+							Check[propertyEvaluateWithOptions[#], Throw[$Failed, $propertyMessages]] & /@ property,
+							$propertyMessages,
+							$Failed &],
+						propertyEvaluateWithOptions @ property] /.
+					HoldPattern[WolframModelEvolutionObject[data_Association]] :>
+						WolframModelEvolutionObject[Join[data, <|$rules -> rulesSpec|>]],
+				$Failed],
+			$Failed]];
+		result /; result =!= $Failed
+	]
 
 
 $allowedOptions := $allowedOptions = Except[Join[Options[WolframModel], $allPropertyOptions]];
@@ -344,9 +406,13 @@ expr : WolframModel[
 (*Operator form*)
 
 
+expr : WolframModel[rulesSpec_ ? wolframModelRulesSpecQ, o : OptionsPattern[]] := 0 /;
+	recognizedOptionsQ[expr, WolframModel, {o}] && False
+
+
 WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
-		o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}][
+		o : OptionsPattern[] /; Quiet[recognizedOptionsQ[None, WolframModel, {o}]]][
 		initSpec_ ? wolframModelInitSpecQ] := Module[{result},
 	result = Check[WolframModel[rulesSpec, initSpec, 1, "FinalState", o], $Failed];
 	result /; result =!= $Failed]
@@ -430,7 +496,7 @@ wolframModelStepsSpecQ[stepsSpec_ ? stepCountQ] := True
 
 wolframModelStepsSpecQ[stepsSpec_Association] /;
 	SubsetQ[Values[$stepSpecKeys], Keys[stepsSpec]] &&
-	AllTrue[First[fromStepsSpec[{}, stepsSpec, Infinity]], stepCountQ] := True
+	AllTrue[First[fromStepsSpec[{}, stepsSpec, Infinity, "GlobalSpacelike"]], stepCountQ] := True
 
 
 wolframModelStepsSpecQ[Automatic] := True
@@ -504,7 +570,7 @@ expr : WolframModel[
 
 WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
-		o : OptionsPattern[] /; unrecognizedOptions[WolframModel, {o}] === {}][
+		o : OptionsPattern[] /; Quiet[recognizedOptionsQ[None, WolframModel, {o}]]][
 		initSpec_ ? (Not @* wolframModelInitSpecQ)] := 0 /;
 	Message[WolframModel::invalidState, initSpec]
 
@@ -552,12 +618,12 @@ WolframModel::invalidProperty =
 	"or a List of them.";
 
 
-WolframModel[
+expr : WolframModel[
 		rulesSpec_ ? wolframModelRulesSpecQ,
 		initSpec_ ? wolframModelInitSpecQ,
 		stepsSpec_ ? wolframModelStepsSpecQ,
 		property : Except[OptionsPattern[]] ? (Not[wolframModelPropertyQ[##] || wolframModelPropertiesQ[##]] &),
-		o : OptionsPattern[]] := 0 /;
+		o : OptionsPattern[] /; recognizedOptionsQ[expr, WolframModel, {o}]] := 0 /;
 	Message[WolframModel::invalidProperty, property]
 
 

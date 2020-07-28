@@ -94,10 +94,11 @@ Exploring the hypergraph models of this variety is the primary purpose of this p
 
 ## Dependencies
 
-You only need two things to use **SetReplace**:
+You only need three things to use **SetReplace**:
 
+* Windows, macOS 10.12+, or Linux.
 * [Wolfram Language 12.1+](https://www.wolfram.com/language/) including [WolframScript](https://www.wolfram.com/wolframscript/). A free version is available as [Wolfram Engine](https://www.wolfram.com/engine/).
-* A C++ compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in WolframScript are [here](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
+* A C++17 compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in WolframScript are [here](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
 
 ## Build Instructions
 
@@ -287,22 +288,20 @@ One can easily see its internal structure in its [`InputForm`](https://reference
 
 ```wl
 Out[] = WolframModelEvolutionObject[<|
-  "CreatorEvents" -> {0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5,
-    5, 5},
-  "DestroyerEvents" -> {1, 1, 2, 3, 2, 3, 4, 4, Infinity, 5, 5,
-    Infinity, Infinity, Infinity, Infinity, Infinity, Infinity,
-    Infinity},
-  "Generations" -> {0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3,
-     3},
-  "AtomLists" -> {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}, {5, 8, 1}, {8, 4,
-     2}, {4, 5, 3}, {7, 9, 8}, {9, 6, 4}, {6, 7, 2}, {1, 10, 4}, {10,
-     8, 5}, {8, 1, 3}, {4, 11, 7}, {11, 6, 9}, {6, 4, 8}, {5, 12,
-     1}, {12, 8, 10}, {8, 5, 4}},
+  "Version" -> 2,
   "Rules" -> {{1, 2, 3}, {2, 4, 5}} ->
     {{5, 6, 1}, {6, 4, 2}, {4, 5, 3}},
   "MaxCompleteGeneration" -> 3,
   "TerminationReason" -> "MaxGenerationsLocal",
-  "EventRuleIDs" -> {1, 1, 1, 1, 1}|>]
+  "AtomLists" -> {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}, {5, 8, 1}, {8, 4,
+     2}, {4, 5, 3}, {7, 9, 8}, {9, 6, 4}, {6, 7, 2}, {1, 10, 4}, {10,
+     8, 5}, {8, 1, 3}, {4, 11, 7}, {11, 6, 9}, {6, 4, 8}, {5, 12,
+     1}, {12, 8, 10}, {8, 5, 4}},
+  "EventRuleIDs" -> {0, 1, 1, 1, 1, 1},
+  "EventInputs" -> {{}, {1, 2}, {5, 3}, {6, 4}, {7, 8}, {10, 11}},
+  "EventOutputs" -> {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11,
+     12}, {13, 14, 15}, {16, 17, 18}},
+  "EventGenerations" -> {0, 1, 2, 2, 3, 3}|>]
 ```
 
 The most important part of this [`Association`](https://reference.wolfram.com/language/ref/Association.html) is `"AtomLists"` which includes all set elements (aka expressions or edges) ever created throughout evolution.
@@ -324,15 +323,16 @@ Out[] = {{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
 
 Note that a set element is not duplicated in `"AtomLists"` if it exists in multiple steps. For example, `{6, 7, 2}` appears in the set after both two and three steps, but it only appears in `"AtomLists"` once because it was never used as an input during the 3rd step.
 
-Each edge in `"AtomLists"` has properties which are stored in other lists of the evolution object:
+Other properties of the evolution object describe the relationships between edges and the features of the evolution:
 
-* `"CreatorEvents"` shows which event (aka replacement) referenced by its index has this edge as one of its outputs.
-* `"DestroyerEvents"` shows which event has this edge as an input. Note that even though multiple matches could be possible that involve a particular edge, in the current implementation, only one of these matches is used (see [`"EventOrderingFunction"`](#eventorderingfunction) option on how to control which match to use).
-* `"Generations"` shows how many layers of predecessors a given edge has.
-* `"Rules"` is an exact copy of the `WolframModel` argument.
+* `"Version"` is the data format of the evolution object. This description is for version 2, which is the first version to support multiway systems. Version 1 does not have the `"Version"` key. The objects of older versions are automatically migrated when they are evaluated.
+* `"Rules"` is an exact copy of the corresponding `WolframModel` argument.
 * `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions of this or earlier generations. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](#step-limiters) is used.
 * `"TerminationReason"` shows the reason evaluation was stopped. See the [`"TerminationReason"`](#termination-reason) property for more details.
-* Finally, `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example only has one rule. See [Rule Indices for Events](#rule-indices-for-events) for a more interesting case.
+* `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example only has one rule. See [Rule Indices for Events](#rule-indices-for-events) for a more interesting case. The first value, `0`, corresponds to the initial event, which is included in the evolution object but is omitted [by default](#includeboundaryevents) when computing [properties](#properties).
+* `"EventInputs"` shows which edge indices from `"AtomLists"` were used in each event. The order corresponds to the input patterns of the rules. The first value, `{}`, again corresponds to the initial event. Note, the same index can appear multiple times in [multiway systems](#eventselectionfunction).
+* `"EventOutputs"` similarly shows which edge indices from `"AtomLists"` were produced by each event. There are no duplicates in these lists because events always generate new edges.
+* `"EventGenerations"` shows how many layers of predecessors a given event has.
 
 A specific property can be requested from an evolution object by supplying it as an argument to the object itself:
 
@@ -351,17 +351,18 @@ Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList",
   "StatesPlotsList", "EventsStatesPlotsList",
   "AllEventsStatesEdgeIndicesList", "AllEventsStatesList",
   "Generation", "StateEdgeIndicesAfterEvent", "StateAfterEvent",
-  "Rules", "TotalGenerationsCount", "PartialGenerationsCount",
+  "TotalGenerationsCount", "PartialGenerationsCount",
   "GenerationsCount", "GenerationComplete", "AllEventsCount",
   "GenerationEventsCountList", "GenerationEventsList",
   "FinalDistinctElementsCount", "AllEventsDistinctElementsCount",
   "VertexCountList", "EdgeCountList", "FinalEdgeCount",
-  "AllEventsEdgesCount", "AllEventsGenerationsList", "CausalGraph",
-  "LayeredCausalGraph", "TerminationReason", "AllEventsRuleIndices",
-  "AllEventsList", "EventsStatesList", "Properties",
-  "EdgeCreatorEventIndices", "EdgeDestroyerEventIndices",
-  "EdgeGenerationsList", "AllEventsEdgesList",
-  "CompleteGenerationsCount"}
+  "AllEventsEdgesCount", "AllEventsGenerationsList",
+  "ExpressionsEventsGraph", "CausalGraph", "LayeredCausalGraph",
+  "TerminationReason", "AllEventsRuleIndices", "AllEventsList",
+  "EventsStatesList", "EdgeCreatorEventIndices",
+  "EdgeDestroyerEventsIndices", "EdgeDestroyerEventIndices",
+  "EdgeGenerationsList", "Properties", "Version", "Rules",
+  "CompleteGenerationsCount", "AllEventsEdgesList"}
 ```
 
 Some properties take additional arguments, which can be supplied after the property name:
@@ -398,21 +399,22 @@ In[] := $WolframModelProperties
 Out[] = {"AllEventsCount", "AllEventsDistinctElementsCount",
   "AllEventsEdgesCount", "AllEventsEdgesList",
   "AllEventsGenerationsList", "AllEventsList", "AllEventsRuleIndices",
-  "AllEventsStatesEdgeIndicesList", "AllEventsStatesList",
+   "AllEventsStatesEdgeIndicesList", "AllEventsStatesList",
   "AllExpressions", "AtomsCountFinal", "AtomsCountTotal",
   "CausalGraph", "CompleteGenerationsCount", "CreatorEvents",
   "DestroyerEvents", "EdgeCountList", "EdgeCreatorEventIndices",
-  "EdgeDestroyerEventIndices", "EdgeGenerationsList",
-  "EventGenerations", "EventGenerationsList", "EventsCount",
-  "EventsList", "EventsStatesList", "EventsStatesPlotsList",
-  "EvolutionObject", "ExpressionGenerations", "ExpressionsCountFinal",
-  "ExpressionsCountTotal", "FinalDistinctElementsCount",
+  "EdgeDestroyerEventIndices", "EdgeDestroyerEventsIndices",
+  "EdgeGenerationsList", "EventGenerations", "EventGenerationsList",
+  "EventsCount", "EventsList", "EventsStatesList",
+  "EventsStatesPlotsList", "EvolutionObject", "ExpressionGenerations",
+   "ExpressionsCountFinal", "ExpressionsCountTotal",
+  "ExpressionsEventsGraph", "FinalDistinctElementsCount",
   "FinalEdgeCount", "FinalState", "FinalStatePlot",
   "GenerationComplete", "GenerationEventsCountList",
   "GenerationEventsList", "GenerationsCount", "LayeredCausalGraph",
   "MaxCompleteGeneration", "PartialGenerationsCount", "StatesList",
   "StatesPlotsList", "TerminationReason", "TotalGenerationsCount",
-  "UpdatedStatesList", "VertexCountList"}
+  "UpdatedStatesList", "Version", "VertexCountList"}
 ```
 
 Multiple properties can also be specified in a list (only in `WolframModel`, not in `WolframModelEvolutionObject`):
@@ -555,7 +557,7 @@ Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, s
 
 ### Properties
 
-[States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout Evolution](#all-edges-throughout-evolution) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules)
+[States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout Evolution](#all-edges-throughout-evolution) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules) | [Version](#version)
 
 #### States
 
@@ -751,6 +753,18 @@ Out[] = {18, 19, 29, 34, 35, 36, 37, 39, 40, 42, 43, 44, 45, 49, 50, 51, 52,
   88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101}
 ```
 
+and **`"GenerationEdgeIndices"`** is an analog of [`"Generation"`](#states):
+
+```wl
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
+   {{2, 7, 8}, {3, 9, 10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11,
+     10}, {13, 7}, {14, 9}},
+  {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}},
+  6]["GenerationEdgeIndices", 2]
+Out[] = {10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+  27, 28, 29}
+```
+
 #### Events
 
 **`"AllEventsList"`** (aka `"EventsList"`) and **`"GenerationEventsList"`** both return all replacement events throughout the evolution. The only difference is how the events are arranged. `"AllEventsList"` returns the flat list of all events, whereas `"GenerationEventsList"` splits them into sublists for each generation:
@@ -797,7 +811,7 @@ Out[] = {{{1, {1} -> {2, 3, 4, 5}}, {2, 3, 4, 5}},
 
 #### Creator and Destroyer Events
 
-An event is said to *destroy* the edges in its input, and *create* the edges in its output. Creator and destroyer events for each edge can be obtained with **`"EdgeCreatorEventIndices"`** (aka `"CreatorEvents"`) and **`"EdgeDestroyerEventIndices"`** (aka `"DestroyerEvents"`) properties.
+An event is said to *destroy* the edges in its input, and *create* the edges in its output. Creator and destroyer events for each edge can be obtained with **`"EdgeCreatorEventIndices"`** (aka `"CreatorEvents"`) and **`"EdgeDestroyerEventsIndices"`** properties.
 
 As an example, for a simple rule that splits each edge in two, one can see that edges are created in pairs:
 
@@ -812,6 +826,18 @@ and destroyed one-by-one:
 
 ```wl
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
+ {{1, 1}}, 4, "EdgeDestroyerEventsIndices"]
+Out[] = {{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12},
+   {13}, {14}, {15}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {},
+   {}, {}, {}, {}}
+```
+
+Here 0 refers to the initial state. Note the format is different for creator and destroyer events. That is because each edge has a unique creator event, but can have multiple destroyer events in [multiway systems](#eventselectionfunction).
+
+There is another property, **`"EdgeDestroyerEventIndices"`** (aka `"DestroyerEvents"`), left for compatibility reasons, which has the same format as **`"EdgeCreatorEventIndices"`**. However, it does not work for [multiway systems](#eventselectionfunction).
+
+```wl
+In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
  {{1, 1}}, 4, "EdgeDestroyerEventIndices"]
 Out[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, Infinity,
   Infinity, Infinity, Infinity, Infinity, Infinity, Infinity,
@@ -819,24 +845,27 @@ Out[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, Infinity,
   Infinity, Infinity, Infinity}
 ```
 
-Here 0 refers to the initial state, and [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html) means an edge was never destroyed by any event (and thus appears in the final state).
-
 #### Causal Graphs
 
-An event **A** *causes* an event **B** if there exists a set element created by **A** and destroyed by **B**. If we then consider all such relationships between events, we create a **`"CausalGraph"`**. In a causal graph, vertices correspond to events, and edges correspond to the set elements (aka spatial edges).
+An event **A** *causes* an event **B** if there exists an expression (set element) created by **A** and destroyed by **B**. If we then consider all such relationships between events, we create a **`"CausalGraph"`**. In a causal graph, vertices correspond to events, and edges correspond to the set elements (aka spatial edges).
 
-For example, if we consider our simple arithmetic model `{a_, b_} :> a + b` starting from `{3, 8, 8, 8, 2, 10, 0, 9, 7}` we get a causal graph which quite clearly describes what's going on (we label each event here with explicit values for a and b):
+To make it even more explicit, we have another property, **`"ExpressionsEventsGraph"`**. In this graph, there are two types of vertices corresponding to events and expressions, and edges correspond to a given expression being an input or an output of a given event.
+
+For example, if we consider our simple arithmetic model `{a_, b_} :> a + b` starting from `{3, 8, 8, 8, 2, 10, 0, 9, 7}` we get an expressions-events graph which quite clearly describes what's going on:
 
 ```wl
-In[] := With[{
-  evolution = WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
-    {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]}, With[{
-   causalGraph = evolution["CausalGraph"]},
-  Graph[causalGraph,
-   VertexLabels ->
-    Thread[VertexList[causalGraph] ->
-      Map[evolution["AllEventsEdgesList"][[#]] &,
-       Last /@ evolution["AllEventsList"], {2}]]]]]
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
+  {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
+```
+
+<img src="READMEImages/ArithmeticModelExpressionsEventsGraph.png" width="478">
+
+The causal graph is very similar, it just has the expression-vertices contracted:
+
+```wl
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
+ {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity, "CausalGraph"]
 ```
 
 <img src="READMEImages/ArithmeticModelCausalGraph.png" width="478">
@@ -855,40 +884,25 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 **`"LayeredCausalGraph"`** generates the same graph but layers events generation-by-generation. For example, in our arithmetic causal graph, note how it's arranged differently from an example above:
 
 ```wl
-In[] := With[{
-  evolution = WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
-    {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]}, With[{
-   causalGraph = evolution["LayeredCausalGraph"]},
-  Graph[causalGraph,
-   VertexLabels ->
-    Thread[VertexList[causalGraph] ->
-      Map[evolution["AllEventsEdgesList"][[#]] &,
-       Last /@ evolution["AllEventsList"], {2}]]]]]
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
+ {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity, "LayeredCausalGraph"]
 ```
 
 <img src="READMEImages/ArithmeticModelLayeredCausalGraph.png" width="478">
 
-Furthermore, if we include the initial condition as a "fake" event (see [`"IncludeBoundaryEvents"`](#includeboundaryevents) option for more information), note how slices through the causal graph correspond to states returned by [`"StatesList"`](#states):
+Note how slices through the expressions-events graph correspond to states returned by [`"StatesList"`](#states). Pay attention to intersections of the slices with edges as well, as they correspond to unused expressions from previous generations that remain in the state:
 
 ```wl
-In[] := With[{
-  evolution = WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
-    {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]}, With[{
-   causalGraph =
-    evolution["LayeredCausalGraph",
-     "IncludeBoundaryEvents" -> "Initial"]},
-  Graph[causalGraph,
-   VertexLabels ->
-    Thread[VertexList[causalGraph] ->
-      Map[evolution["AllEventsEdgesList",
-          "IncludeBoundaryEvents" -> "Initial"][[#]] &,
-       Last /@ evolution["AllEventsList",
-         "IncludeBoundaryEvents" -> "Initial"], {2}]],
-   Epilog -> {Red, Dotted,
-     Table[Line[{{-10, k}, {10, k}}], {k, 0.5, 4.5}]}]]]
+In[] := With[{evolution =
+   WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
+    {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]},
+ evolution["ExpressionsEventsGraph",
+  VertexLabels -> Placed[Automatic, {After, Above}],
+  Epilog -> {Red, Dotted,
+    Table[Line[{{-10, k}, {10, k}}], {k, 0, 9, 2}]}]]
 ```
 
-<img src="READMEImages/FoliatedCausalGraph.png" width="478">
+<img src="READMEImages/FoliatedExpressionsEventsGraph.png" width="478">
 
 ```wl
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
@@ -897,7 +911,18 @@ Out[] = {{3, 8, 8, 8, 2, 10, 0, 9, 7}, {7, 11, 16, 12, 9}, {9, 18, 28}, {28,
   27}, {55}}
 ```
 
-`"CausalGraph"` property accepts the same options as [`Graph`](https://reference.wolfram.com/language/ref/Graph.html), as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html).
+`"ExpressionsEventsGraph"` is particularly useful for multiway systems, as it allows one to immediately see multiway branching. For example, here the expression-vertex `{2}` has the out-degree of 2, which indicates it was used in two conflicting events, which indicates multiway branching:
+
+```wl
+In[] := WolframModel[{{1}, {1, 2}} -> {{2}}, {{1}, {1, 2}, {2, 3}, {2, 4}},
+  Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
+```
+
+<img src="READMEImages/MultiwayExpressionsEventsGraph.png" width="466">
+
+`"CausalGraph"`, `"LayeredCausalGraph"` and `"ExpressionsEventsGraph"` properties all accept [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) options, as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html). Some options have special behavior for the [`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html) value, i.e., `VertexLabels -> Automatic` in `"ExpressionsEventsGraph"` displays the contents of expressions, which are not the vertex names in that graph (as there can be multiple expressions with the same contents).
 
 #### Rule Indices for Events
 
@@ -957,7 +982,7 @@ In[] := With[{
 
 <img src="READMEImages/GenerationColoredStatePlots.png" width="746">
 
-Event generations correspond to layers in [`"LayeredCausalGraph"`](#causal-graphs):
+Event and expression generations correspond to layers in [`"LayeredCausalGraph"`](#causal-graphs) and [`"ExpressionsEventsGraph"`](#causal-graphs):
 
 ```wl
 In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
@@ -1126,9 +1151,20 @@ Out[] = <|"PatternRules" -> {{a_}} :> {{a + 1}, {a - 1}, {{a + 2, a - 2}}}|>
 
 This is useful for display in the information box of the evolution object, and if one needs to reproduce an evolution object, the input for which is no longer available.
 
+#### Version
+
+**`"Version"`** returns the version of the data structure used in the evolution object. It will always be the same for the same version of *SetReplace*:
+
+```wl
+In[] := WolframModel[1 -> 2, {1}]["Version"]
+Out[] = 2
+```
+
+Objects are automatically converted to the latest version when they are encountered by the newer version of *SetReplace*.
+
 ### Options
 
-["VertexNamingFunction"](#vertexnamingfunction) | ["IncludePartialGenerations"](#includepartialgenerations) | ["IncludeBoundaryEvents"](#includeboundaryevents) | [Method](#method) | [TimeConstraint](#timeconstraint) | ["EventOrderingFunction"](#eventorderingfunction)
+["VertexNamingFunction"](#vertexnamingfunction) | ["IncludePartialGenerations"](#includepartialgenerations) | ["IncludeBoundaryEvents"](#includeboundaryevents) | [Method](#method) | [TimeConstraint](#timeconstraint) | ["EventOrderingFunction"](#eventorderingfunction) | ["EventSelectionFunction"](#eventselectionfunction)
 
 #### "VertexNamingFunction"
 
@@ -1198,26 +1234,18 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
 
 #### "IncludeBoundaryEvents"
 
-**`"IncludeBoundaryEvents"`** allows one to include "fake" initial and final events in properties such as [`"CausalGraph"`](#causal-graphs). It does not affect the evolution itself and does not affect the evolution object. It has 4 settings: [`None`](https://reference.wolfram.com/language/ref/None.html), `"Initial"`, `"Final"` and [`All`](https://reference.wolfram.com/language/ref/All.html).
+**`"IncludeBoundaryEvents"`** allows one to include "fake" initial and final events in properties such as [`"ExpressionsEventsGraph"`](#causal-graphs). It does not affect the evolution itself and does not affect the evolution object. It has 4 settings: [`None`](https://reference.wolfram.com/language/ref/None.html), `"Initial"`, `"Final"` and [`All`](https://reference.wolfram.com/language/ref/All.html).
 
-We have already [demonstrated](#causal-graphs) it previously for our arithmetic model. Here is an example with the final "event" included as well (event labels are kept for reference):
+Here is an example of an [`"ExpressionsEventsGraph"`](#causal-graphs) with the initial and final "events" included:
 
 ```wl
-In[] := With[{
-  evolution = WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
-    {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]}, With[{
-   causalGraph =
-    evolution["LayeredCausalGraph", "IncludeBoundaryEvents" -> All]},
-  Graph[causalGraph,
-   VertexLabels ->
-    Thread[VertexList[causalGraph] ->
-      Map[evolution["AllEventsEdgesList",
-          "IncludeBoundaryEvents" -> All][[#]] &,
-       Last /@ evolution["AllEventsList",
-         "IncludeBoundaryEvents" -> All], {2}]]]]]
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
+  {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity]["ExpressionsEventsGraph",
+ "IncludeBoundaryEvents" -> All,
+ VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="READMEImages/CausalGraphWithFinalEvent.png" width="478">
+<img src="READMEImages/ExpressionsEventsGraphWithBoundaryEvents.png" width="475">
 
 Properties like [`"AllEventsList"`](#events) are affected as well:
 
@@ -1391,6 +1419,71 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
 ```
 
 <img src="READMEImages/AllEventOrderingFunctionPlots.png" width="746">
+
+#### "EventSelectionFunction"
+
+**`EventSelectionFunction`** allows one to evaluate local multiway systems. Currently, two values are supported, `"GlobalSpacelike"` and `None`.
+
+`"GlobalSpacelike"` is the default, and is the single-way evolution. "Spacelike" refers to relationships between edges, and "global" means each edge is only used once in an event. As a consequence, there are no branchlike pairs of edges.
+
+On the other hand, `None` (aka match-all) event selection function matches everything. It does not disable edges after they were used, so they can be reused repeatedly (each unique match is only used once, though).
+
+For example, consider a system
+
+```wl
+In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {2, 3}, {2, 4}},
+  Infinity]["ExpressionsEventsGraph", VertexLabels -> Automatic]
+```
+
+<img src="READMEImages/GlobalSpacelikeEvolution.png" width="419">
+
+In this example we used the default `"GlobalSpacelike"` selection function, and the evolution terminated after a single event, because the edge `{1, 2}` was used, and it could not be reused to be matched with `{2, 4}`. However, let's look at what `"EventSelectionFunction" -> None` will do:
+
+```wl
+In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {2, 3}, {2, 4}},
+  Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Automatic]
+```
+
+<img src="READMEImages/SpacelikeMatching.png" width="478">
+
+In this case, the edge `{1, 2}` was matched twice, which we can also see by looking at its list of destroyer events:
+
+```wl
+In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}},
+ {{1, 2}, {2, 3}, {2, 4}}, Infinity, "EdgeDestroyerEventsIndices",
+ "EventSelectionFunction" -> None]
+Out[] = {{1, 2}, {1}, {2}, {}, {}}
+```
+
+In the previous example, we matched the same edge twice, but every match's inputs were spacelike with each other. I.e., every edge in the previous input could be generated by choosing a different [`"EventOrderingFunction"`](#eventorderingfunction). However, `"EventSelectionFunction"` also matches edges that are branchlike (i.e., edges from different multiway branches) and timelike (i.e., edges that causally depend on each other).
+
+The edges `{1, 2, 3}` and `{1, 2, 4}` in the next example are branchlike, they can never co-exist in a single `"GlobalSpacelike"` evolution no matter which ["EventOrderingFunction"](#eventorderingfunction) one chooses. The match-all (`"EventSelectionFunction" -> None`) evolution matches them nonetheless.
+
+```wl
+In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
+   {{1, 2, 3}, {1, 2, 4}} -> {{1, 2, 3, 4}}},
+  {{1, 2}, {2, 3}, {2, 4}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
+```
+
+<img src="READMEImages/BranchlikeMatching.png" width="373">
+
+Similarly, it matches timelike edges `{1, 2}` and `{1, 2, 3}` below:
+
+```wl
+In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
+   {{1, 2}, {1, 2, 3}} -> {{1, 2, 3, 4}}},
+  {{1, 2}, {2, 3}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
+```
+
+<img src="READMEImages/TimelikeMatching.png" width="247">
+
+Because of this branchlike and timelike matching, branches in `"EventSelectionFunction" -> None` evolution are not separated but can "interfere" with one another.
 
 ## WolframModelPlot
 

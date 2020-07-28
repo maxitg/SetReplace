@@ -19,6 +19,12 @@ tryEnvironment[var_, default_] := If[# === $Failed, default, #] & @ Environment[
 
 buildLibSetReplace::fail = "Compilation failed. Paclet will be created without low level implementation.";
 
+$warningsFlags = {
+  "-Wall", "-Wextra", "-Werror", "-pedantic", "-Wcast-align", "-Wcast-qual", "-Wctor-dtor-privacy",
+  "-Wdisabled-optimization", "-Wformat=2", "-Winit-self", "-Wmissing-include-dirs", "-Wold-style-cast",
+  "-Woverloaded-virtual", "-Wredundant-decls", "-Wshadow", "-Wsign-promo", "-Wswitch-default", "-Wundef",
+  "-Wno-unused"};
+
 buildLibSetReplace[] := With[{
     libSetReplaceSource = FileNameJoin[{$repoRoot, "libSetReplace"}],
     systemID = If[$internalBuildQ, AntProperty["system_id"], $SystemID]},
@@ -30,11 +36,10 @@ buildLibSetReplace[] := With[{
       "CompileOptions" -> Switch[$OperatingSystem,
         "Windows",
           {"/std:c++17", "/EHsc"},
-        _,
-          {"-std=c++17", "-Wall", "-Wextra", "-Werror", "-pedantic", "-Wcast-align", "-Wcast-qual",
-           "-Wctor-dtor-privacy", "-Wdisabled-optimization", "-Wformat=2", "-Winit-self", "-Wmissing-include-dirs",
-           "-Wold-style-cast", "-Woverloaded-virtual", "-Wredundant-decls", "-Wshadow", "-Wsign-promo",
-           "-Wswitch-default", "-Wundef", "-Wno-unused"}],
+        "MacOSX",
+          Join[{"-std=c++17"}, $warningsFlags, {"-mmacosx-version-min=10.12"}], (* for std::shared_mutex support *)
+        "Unix",
+          Join[{"-std=c++17"}, $warningsFlags]],
       "Compiler" -> ToExpression @ tryEnvironment["COMPILER", Automatic],
       "CompilerInstallation" -> tryEnvironment["COMPILER_INSTALLATION", Automatic],
       "Language" -> "C++",
