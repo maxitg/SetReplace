@@ -19,11 +19,11 @@ PackageExport["SetReplaceList"]
 
 
 SetReplaceList::usage = usageString[
-	"SetReplaceList[`s`, {\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) \[Rule] ",
-	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
-	"\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
-	"\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), \[Ellipsis]}, `n`] performs SetReplace `n` times ",
-	"and returns the list of all intermediate results."];
+  "SetReplaceList[`s`, {\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) \[Rule] ",
+  "\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
+  "\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
+  "\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), \[Ellipsis]}, `n`] performs SetReplace `n` times ",
+  "and returns the list of all intermediate results."];
 
 
 (* ::Section:: *)
@@ -42,7 +42,7 @@ SyntaxInformation[SetReplaceList] = {"ArgumentsPattern" -> {_, _, _, OptionsPatt
 
 
 SetReplaceList[args___] := 0 /;
-	!Developer`CheckArgumentCount[SetReplaceList[args], 2, 3] && False
+  !Developer`CheckArgumentCount[SetReplaceList[args], 2, 3] && False
 
 
 (* ::Section:: *)
@@ -50,9 +50,9 @@ SetReplaceList[args___] := 0 /;
 
 
 Options[SetReplaceList] = {
-	Method -> Automatic,
-	TimeConstraint -> Infinity,
-	"EventOrderingFunction" -> Automatic};
+  Method -> Automatic,
+  TimeConstraint -> Infinity,
+  "EventOrderingFunction" -> Automatic};
 
 
 (* ::Section:: *)
@@ -60,11 +60,11 @@ Options[SetReplaceList] = {
 
 
 SetReplaceList[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
-		recognizedOptionsQ[expr, SetReplaceList, {o}] :=
-	Module[{result},
-		result = Check[
-			setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplaceList, False, o],
-			$Failed];
-		If[result === $Aborted, result, result["SetAfterEvent", #] & /@ Range[0, result["EventsCount"]]] /;
-			result =!= $Failed
-	]
+    recognizedOptionsQ[expr, SetReplaceList, {o}] :=
+  Module[{result},
+    result = Check[
+      setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplaceList, False, o],
+      $Failed];
+    If[result === $Aborted, result, result["SetAfterEvent", #] & /@ Range[0, result["EventsCount"]]] /;
+      result =!= $Failed
+  ]

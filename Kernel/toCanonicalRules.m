@@ -56,7 +56,7 @@ toCanonicalRule[input_ -> output_] := toCanonicalRule[input :> output]
 
 
 toCanonicalRule[input_ :> output : Except[_Module]] :=
-	toCanonicalRule[input :> Module[{}, output]]
+  toCanonicalRule[input :> Module[{}, output]]
 
 
 (* ::Text:: *)
@@ -64,11 +64,11 @@ toCanonicalRule[input_ :> output : Except[_Module]] :=
 
 
 toCanonicalRule[input_ :> output_] /; !ListQ[input] :=
-	toCanonicalRule[{input} :> output]
+  toCanonicalRule[{input} :> output]
 
 
 toCanonicalRule[input_ :> Module[vars_List, expr : Except[_List]]] :=
-	input :> Module[vars, {expr}]
+  input :> Module[vars, {expr}]
 
 
 (* ::Text:: *)
