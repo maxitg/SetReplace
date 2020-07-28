@@ -9,10 +9,10 @@ Check[
     FileNames[FileNameJoin[{$repoRoot, "SetReplace-*.paclet"}]], FileInformation[#, "LastModificationDate"] &];
   
   If[Length[$latestPacletFiles] == 0,
-  	Print[
-  		"No paclet files SetReplace-*.paclet were found. ",
-  		"Run ./build.wls."];
-  	Exit[1];
+    Print[
+      "No paclet files SetReplace-*.paclet were found. ",
+      "Run ./build.wls."];
+    Exit[1];
   ];
 
   If[PacletFind["SetReplace"] =!= {}, PacletUninstall["SetReplace"]];
@@ -21,7 +21,7 @@ Check[
   pacletObjectQ[p_] := PacletObjectQ[p] || Head[p] === PacletManager`Paclet;
 
   If[pacletObjectQ[PacletInstall[First[$latestPacletFiles], "IgnoreVersion" -> True]],
-  	Print["Installed. Restart running kernels to complete installation."],
+    Print["Installed. Restart running kernels to complete installation."],
     Print["Install failed."];
     $successQ = False];,
 

@@ -31,7 +31,7 @@ PackageScope["toPatternRules"]
 
 
 ToPatternRules::usage = usageString[
-	"ToPatternRules[`r`] converts a list of anonymous rules `r` to explicit pattern rules."];
+  "ToPatternRules[`r`] converts a list of anonymous rules `r` to explicit pattern rules."];
 
 
 (* ::Section:: *)
@@ -50,7 +50,7 @@ SyntaxInformation[ToPatternRules] = {"ArgumentsPattern" -> {_}};
 
 
 ToPatternRules[args___] := 0 /;
-	!Developer`CheckArgumentCount[ToPatternRules[args], 1, 1] && False
+  !Developer`CheckArgumentCount[ToPatternRules[args], 1, 1] && False
 
 
 (* ::Subsection:: *)
@@ -61,7 +61,7 @@ anonymousRulesQ[rules_] := MatchQ[rules, {___Rule} | _Rule]
 
 
 toPatternRules[rules_, caller_] := 0 /;
-	!anonymousRulesQ[rules] && makeMessage[caller, "notRules", rules]
+  !anonymousRulesQ[rules] && makeMessage[caller, "notRules", rules]
 
 
 (* ::Section:: *)
@@ -77,31 +77,31 @@ toPatternRules[rules_, caller_] := 0 /;
 
 
 toPatternRules[rule : _Rule, caller_] := Module[
-		{leftSymbols, rightSymbols, symbols, newVertexNames, vertexPatterns,
-		 newLeft, leftVertices, rightVertices, rightOnlyVertices},
-	{leftSymbols, rightSymbols} =
-		Union[Cases[#, _ ? AtomQ, {0, 1}], Cases[#, _, {2}]] & /@ List @@ rule;
-	symbols = DeleteDuplicates @ Join[leftSymbols, rightSymbols];
-	newVertexNames =
-		ToHeldExpression /@ StringTemplate["v``"] /@ Range @ Length @ symbols;
-	vertexPatterns = Pattern[#, Blank[]] & /@ newVertexNames;
-	newLeft = (rule[[1]] /. Thread[symbols -> vertexPatterns]);
-	{leftVertices, rightVertices} =
-		{leftSymbols, rightSymbols} /. Thread[symbols -> newVertexNames];
-	rightOnlyVertices = Complement[rightVertices, leftVertices];
-	With[
-			{moduleVariables = rightOnlyVertices,
-			moduleExpression = rule[[2]] /. Thread[symbols -> newVertexNames]},
-		If[moduleVariables =!= {},
-			newLeft :> Module[moduleVariables, moduleExpression],
-			newLeft :> moduleExpression
-		]
-	] /. Hold[expr_] :> expr
+    {leftSymbols, rightSymbols, symbols, newVertexNames, vertexPatterns,
+     newLeft, leftVertices, rightVertices, rightOnlyVertices},
+  {leftSymbols, rightSymbols} =
+    Union[Cases[#, _ ? AtomQ, {0, 1}], Cases[#, _, {2}]] & /@ List @@ rule;
+  symbols = DeleteDuplicates @ Join[leftSymbols, rightSymbols];
+  newVertexNames =
+    ToHeldExpression /@ StringTemplate["v``"] /@ Range @ Length @ symbols;
+  vertexPatterns = Pattern[#, Blank[]] & /@ newVertexNames;
+  newLeft = (rule[[1]] /. Thread[symbols -> vertexPatterns]);
+  {leftVertices, rightVertices} =
+    {leftSymbols, rightSymbols} /. Thread[symbols -> newVertexNames];
+  rightOnlyVertices = Complement[rightVertices, leftVertices];
+  With[
+      {moduleVariables = rightOnlyVertices,
+      moduleExpression = rule[[2]] /. Thread[symbols -> newVertexNames]},
+    If[moduleVariables =!= {},
+      newLeft :> Module[moduleVariables, moduleExpression],
+      newLeft :> moduleExpression
+    ]
+  ] /. Hold[expr_] :> expr
 ]
 
 
 toPatternRules[rules : {___Rule}, caller_] :=
-	toPatternRules[#, caller] & /@ rules
+  toPatternRules[#, caller] & /@ rules
 
 
 (* ::Subsection:: *)
@@ -109,6 +109,6 @@ toPatternRules[rules : {___Rule}, caller_] :=
 
 
 ToPatternRules[rules_] := Module[{result},
-	result = Check[toPatternRules[rules, ToPatternRules], $Failed];
-	result /; result =!= $Failed
+  result = Check[toPatternRules[rules, ToPatternRules], $Failed];
+  result /; result =!= $Failed
 ]
