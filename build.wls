@@ -1,18 +1,18 @@
 #!/usr/bin/env wolframscript
 
 Check[
-	Get[FileNameJoin[{DirectoryName[$InputFileName], "scripts", "buildInit.wl"}]];
-	deleteBuildDirectory[];,
+  Get[FileNameJoin[{DirectoryName[$InputFileName], "scripts", "buildInit.wl"}]];
+  deleteBuildDirectory[];,
 
-	Exit[1];
+  Exit[1];
 ];
 
 $success = True;
 
 Check[
-	buildLibSetReplace[];,
+  buildLibSetReplace[];,
 
-	$success = False;
+  $success = False;
 ];
 
 Check[
@@ -27,9 +27,9 @@ Check[
 ];
 
 If[$success,
-	Print["Build done."];
-	Exit[0];,
+  Print["Build done."];
+  Exit[0];,
 
   Print["Build failed."];
-	Exit[1];
+  Exit[1];
 ];
