@@ -20,6 +20,7 @@ PackageScope["$causalGraphBackground"]
 PackageScope["$vertexSize"]
 PackageScope["$arrowheadLengthFunction"]
 PackageScope["$edgeArrowheadShape"]
+PackageScope["$edgeArrowheadShape3D"]
 PackageScope["$vertexStyle"]
 PackageScope["$edgeLineStyle"]
 PackageScope["$edgePolygonStyle"]
@@ -207,6 +208,7 @@ style[$lightTheme] = <|
     {-1.10196, -0.289756}, {-1.08585, -0.257073}, {-1.05025, -0.178048}, {-1.03171, -0.130243}, {-1.01512, -0.0824391},
     {-1.0039, -0.037561}, {-1., 0.}, {-1.0039, 0.0341466}, {-1.01512, 0.0780486}, {-1.03171, 0.127805},
     {-1.05025, 0.178538}, {-1.08585, 0.264878}, {-1.10196, 0.301464}, {0., 0.}, {-1.10196, -0.289756}}],
+  $edgeArrowheadShape3D -> Cone[{{-1, 0, 0}, {0, 0, 0}}, 0.3],
   $vertexStyle -> Directive[Hue[0.63, 0.26, 0.89], EdgeForm[Directive[Hue[0.63, 0.7, 0.33], Opacity[0.95]]]],
   $edgeLineStyle -> Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]],
   $edgePolygonStyle -> Directive[Hue[0.63, 0.66, 0.81], Opacity[0.1], EdgeForm[None]],

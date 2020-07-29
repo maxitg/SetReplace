@@ -17,19 +17,19 @@ arrow[shape_, arrowheadLength_, vertexSize_][pts_] := Module[{ptsStartToArrowEnd
   }
 ]
 
-polygonArrowhead[shape_, endPt_, {0 | 0., 0 | 0.}, length_] := {}
+polygonArrowhead[shape_, endPt_, {(0 | 0.)..}, length_] := {}
 
 polygonArrowhead[shape_, endPt_, direction_, length_] := With[{
-    rotationMatrix = RotationMatrix[{{1, 0}, direction}]},
+    rotationMatrix = RotationMatrix[{UnitVector[Length @ direction, 1], direction}]},
   Polygon[Transpose[rotationMatrix.Transpose[length shape[[1]]] + endPt]]
 ]
 
-arrowhead[shape_, endPt_, {0 | 0., 0 | 0.}, length_] := {}
+arrowhead[shape_, endPt_, {(0 | 0.)..}, length_] := {}
 
 arrowhead[shape_, endPt_, direction_, length_] :=
   (Translate[#, endPt] &) @
-  (Rotate[#, {{1, 0}, direction}] &) @
-  (Scale[#, length, {0, 0}] &) @
+  (Rotate[#, {UnitVector[Length @ direction, 1], direction}] &) @
+  (Scale[#, length, Table[0, Length @ direction]] &) @
   shape
 
 lineTake[pts_, start_ ;; end_] := Reverse[lineDrop[Reverse[lineDrop[pts, start]], -end]]

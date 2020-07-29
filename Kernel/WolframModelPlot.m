@@ -2,6 +2,7 @@ Package["SetReplace`"]
 
 PackageExport["HypergraphPlot"]
 PackageExport["WolframModelPlot"]
+PackageExport["WolframModelPlot3D"]
 
 PackageScope["correctWolframModelPlotOptionsQ"]
 PackageScope["$edgeTypes"]
@@ -12,7 +13,14 @@ PackageScope["hypergraphEmbedding"]
 WolframModelPlot::usage = usageString[
   "WolframModelPlot[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph."];
 
+WolframModelPlo3Dt::usage = usageString[
+  "WolframModelPlot3D[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph in 3D."];
+
+
 SyntaxInformation[WolframModelPlot] = {"ArgumentsPattern" -> {_, _., OptionsPattern[]}};
+
+SyntaxInformation[WolframModelPlot3D] = {"ArgumentsPattern" -> {_, _., OptionsPattern[]}};
+
 
 $plotStyleAutomatic = <|
   $vertexPoint -> style[$lightTheme][$vertexStyle],
@@ -39,7 +47,11 @@ $newOptions = {
 
 $defaultGraphicsOptions = FilterRules[Options[Graphics], Except[$newOptions]];
 
+$defaultGraphics3DOptions = FilterRules[Options[Graphics3D], Except[$newOptions]];
+
 Options[WolframModelPlot] = Join[$newOptions, $defaultGraphicsOptions];
+
+Options[WolframModelPlot3D] = Join[$newOptions, $defaultGraphics3DOptions];
 
 $edgeTypes = {"Ordered", "Cyclic"};
 $defaultEdgeType = "Ordered";
@@ -67,6 +79,8 @@ General::invalidCoordinates =
 WolframModelPlot::invalidHighlight =
   "GraphHighlight value `1` should be a list of vertices and edges.";
 
+WolframModelPlot3D::invalidHighlight = WolframModelPlot::invalidHighlight;
+
 General::invalidSize =
   "`1` `2` should be a non-negative number.";
 
@@ -81,35 +95,43 @@ General::multigraphElementwiseStyle =
 
 (* Evaluation *)
 
-func : WolframModelPlot[args___] := Module[{result = wolframModelPlot$parse[args]},
+func : WolframModelPlot[args___] := Module[{result = wolframModelPlot$parse[2, args]},
   result /; result =!= $Failed
 ]
 
+func : WolframModelPlot3D[args___] := Module[{result = wolframModelPlot$parse[3, args]},
+  result /; result =!= $Failed
+]
+
+wolframModelPlotHead[dims_] := If[dims == 3, WolframModelPlot3D, WolframModelPlot]
+
 (* Arguments parsing *)
 
-wolframModelPlot$parse[args___] /; !Developer`CheckArgumentCount[WolframModelPlot[args], 1, 2] := $Failed
+wolframModelPlot$parse[dims_, args___] /; With[{head = wolframModelPlotHead[dims]},
+    !Developer`CheckArgumentCount[head[args], 1, 3]] := $Failed
 
 (* allow composite vertices, but not list-vertices *)
 $hypergraphPattern = _List ? (Function[h, AllTrue[h, ListQ[#] && Length[#] > 0 &] && AllTrue[h, Not @* ListQ, 2]]);
 $multiHypergraphPattern = $hypergraphPattern | {$hypergraphPattern...};
 
-wolframModelPlot$parse[edges : Except[$multiHypergraphPattern], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
-  Message[WolframModelPlot::invalidEdges];
+wolframModelPlot$parse[dims_, edges : Except[$multiHypergraphPattern], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
+  With[{head = wolframModelPlotHead[dims]}, Message[head::invalidEdges]];
   $Failed
 )
 
 wolframModelPlot$parse[
+    dims_,
     edges : $multiHypergraphPattern,
     edgeType : Except[Alternatives[Alternatives @@ $edgeTypes, OptionsPattern[]]],
     o : OptionsPattern[]] := (
-  Message[WolframModelPlot::invalidEdgeType, edgeType, $edgeTypes];
+  With[{head = wolframModelPlotHead[dims]}, Message[head::invalidEdgeType, edgeType, $edgeTypes]];
   $Failed
 )
 
 wolframModelPlot$parse[
-  edges : {$hypergraphPattern..}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
-    correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] :=
-  wolframModelPlot$parse[#, edgeType, o] & /@ edges
+  dims_, edges : {$hypergraphPattern..}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
+    With[{head = wolframModelPlotHead[dims]}, correctWolframModelPlotOptionsQ[head, Defer[head[edges, o]], edges, {o}]] :=
+  wolframModelPlot$parse[dims, #, edgeType, o] & /@ edges
 
 parseHighlight[_, _, {}, _] := ConstantArray[Automatic, 3]
 
@@ -133,11 +155,13 @@ parseHighlight[vertices_, edges_, highlightList_, highlightStyle_] := Module[{
 ]
 
 wolframModelPlot$parse[
-      edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
-        correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] := Module[{
-    optionValue, vertices, highlightedVertexStyles, highlightedEdgeLineStyles, highlightedEdgePointStyles,
+      dims_, edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
+        With[{head = wolframModelPlotHead[dims]},
+            correctWolframModelPlotOptionsQ[head, Defer[head[edges, o]], edges, {o}]] := Module[{
+    head, optionValue, vertices, highlightedVertexStyles, highlightedEdgeLineStyles, highlightedEdgePointStyles,
     highlightedEdgePolygonStyles, styles},
-  optionValue[opt_] := OptionValue[WolframModelPlot, {o}, opt];
+  head = wolframModelPlotHead[dims];
+  optionValue[opt_] := OptionValue[head, {o}, opt];
   vertices = vertexList[edges];
   (* these are either single styles or lists, one style for each element *)
   {highlightedVertexStyles, highlightedEdgeLineStyles, highlightedEdgePolygonStyles} =
@@ -181,7 +205,7 @@ wolframModelPlot$parse[
       Automatic -> $plotStyleAutomatic[$edgePolygon],
       {0, 1}]|>;
   wolframModelPlot[
-    edges, edgeType, styles, ##, FilterRules[{o}, $defaultGraphicsOptions]] & @@
+    dims, edges, edgeType, styles, ##, FilterRules[{o}, $defaultGraphicsOptions]] & @@
       (optionValue /@ {
         "HyperedgeRendering",
         VertexCoordinateRules,
@@ -282,6 +306,7 @@ correctStyleLengthQ[__] := True
 (* Implementation *)
 
 wolframModelPlot[
+    dims_,
     edges_,
     edgeType_,
     styles_,
@@ -293,20 +318,29 @@ wolframModelPlot[
     maxImageSize_,
     background_,
     graphicsOptions_] := Catch[Module[{embedding, graphics, imageSizeScaleFactor},
-  embedding = hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @ edges;
+  embedding = hypergraphEmbedding[dims, edgeType, hyperedgeRendering, vertexCoordinates] @ edges;
   numericArrowheadLength = Replace[
     arrowheadLength,
     Automatic -> style[$lightTheme][$arrowheadLengthFunction][<|"PlotRange" -> vertexEmbeddingRange[embedding[[1]]]|>]];
   graphics =
-    drawEmbedding[styles, vertexLabels, vertexSize, numericArrowheadLength] @ embedding;
+    drawEmbedding[dims, styles, vertexLabels, vertexSize, numericArrowheadLength] @ embedding;
   imageSizeScaleFactor = Min[1, 0.7 (#[[2]] - #[[1]])] & /@ PlotRange[graphics];
   Show[
     graphics,
-    graphicsOptions,
-    Background -> Replace[background, Automatic -> style[$lightTheme][$spatialGraphBackground]],
-    If[maxImageSize === Automatic,
-      ImageSizeRaw -> style[$lightTheme][$wolframModelPlotImageSize] imageSizeScaleFactor,
-      ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]]]
+    Sequence @@ Join[
+        graphicsOptions,
+        If[ dims == 3,
+            {},
+            {
+                Background -> Replace[background, Automatic -> style[$lightTheme][$spatialGraphBackground]],
+                If[ maxImageSize === Automatic,
+                    ImageSizeRaw -> style[$lightTheme][$wolframModelPlotImageSize] imageSizeScaleFactor,
+                    ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]
+                ]
+            }
+        ]
+    ]
+  ]
 ]]
 
 vertexEmbeddingRange[{}] := 0
@@ -315,10 +349,10 @@ vertexEmbeddingRange[vertexEmbedding_] := Max[#2 - #1 & @@@ MinMax /@ Transpose[
 
 adjustImageSize[w_ ? NumericQ, {wScale_, hScale_}] := w wScale
 
-adjustImageSize[dims : {w_ ? NumericQ, h_ ? NumericQ}, scale_] := dims scale
+adjustImageSize[dims : {Repeated[_ ? NumericQ, {2, 3}]}, scale_] := dims scale
 
 WolframModelPlot::invalidMaxImageSize =
-  "MaxImageSize `1` should either be a single number (width) or a list of two numbers (width and height)";
+  "MaxImageSize `1` should either be a single number (width) or a list of numbers (width, height, <depth>)";
 
 adjustImageSize[dims_, _] := (Message[WolframModelPlot::invalidMaxImageSize, dims]; Throw[$Failed])
 
@@ -329,10 +363,11 @@ adjustImageSize[dims_, _] := (Message[WolframModelPlot::invalidMaxImageSize, dim
 
 (*** SpringElectricalEmbedding ***)
 
-hypergraphEmbedding[edgeType_, hyperedgeRendering : "Subgraphs", coordinateRules_] :=
-  hypergraphEmbedding[edgeType, edgeType, hyperedgeRendering, coordinateRules]
+hypergraphEmbedding[dims_, edgeType_, hyperedgeRendering : "Subgraphs", coordinateRules_] :=
+  hypergraphEmbedding[dims, edgeType, edgeType, hyperedgeRendering, coordinateRules]
 
 hypergraphEmbedding[
+      dims_,
       vertexLayoutEdgeType_,
       edgeLayoutEdgeType_,
       hyperedgeRendering : "Subgraphs",
@@ -346,6 +381,7 @@ hypergraphEmbedding[
     edges,
     edgeEmbeddingNormalEdges,
     graphEmbedding[
+      dims,
       vertices,
       Catenate[vertexEmbeddingNormalEdges],
       Catenate[edgeEmbeddingNormalEdges],
@@ -359,35 +395,36 @@ toNormalEdges[edges_, "Ordered"] := toNormalEdges[edges, 2, 1]
 
 toNormalEdges[edges_, "Cyclic"] := toNormalEdges[edges, 2, 1, 1]
 
-graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
+graphEmbedding[dims_, vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
     relevantCoordinateRules, vertexCoordinateRules, unscaledEmbedding},
   relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
   unscaledEmbedding = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
-    graphEmbedding[vertices, edgeEmbeddingEdges, layout, relevantCoordinateRules],
-    With[{ve = vertexEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules]},
-      {ve, edgeEmbedding[vertices, edgeEmbeddingEdges, layout, ve]}
+    graphEmbedding[dims, vertices, edgeEmbeddingEdges, layout, relevantCoordinateRules],
+    With[{ve = vertexEmbedding[dims, vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules]},
+      {ve, edgeEmbedding[dims, vertices, edgeEmbeddingEdges, layout, ve]}
     ]
   ];
-  rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules]
+  rescaleEmbedding[dims, unscaledEmbedding, relevantCoordinateRules]
 ]
 
-vertexEmbedding[vertices_, edges_, layout_, {}] := Thread[vertices -> GraphEmbedding[Graph[vertices, edges], layout]]
+vertexEmbedding[dims_, vertices_, edges_, layout_, {}] :=
+    Thread[vertices -> GraphEmbedding[If[dims === 3, Graph3D, Graph][vertices, edges], layout]]
 
-vertexEmbedding[vertices_, edges_, layout_, coordinateRules_] :=
-  graphEmbedding[vertices, edges, layout, coordinateRules][[1]]
+vertexEmbedding[dims_, vertices_, edges_, layout_, coordinateRules_] :=
+  graphEmbedding[dims, vertices, edges, layout, coordinateRules][[1]]
 
-edgeEmbedding[vertices_, edges_, "SpringElectricalEmbedding", vertexCoordinates_] /;
+edgeEmbedding[dims_, vertices_, edges_, "SpringElectricalEmbedding", vertexCoordinates_] /;
     SimpleGraphQ[Graph[UndirectedEdge @@@ edges]] := Module[{coordinates},
   coordinates = Association[vertexCoordinates];
   Thread[edges -> List @@@ Map[coordinates, edges, {2}]]
 ]
 
-edgeEmbedding[vertices_, edges_, layout_, vertexCoordinates_] :=
-  graphEmbedding[vertices, edges, layout, vertexCoordinates][[2]]
+edgeEmbedding[dims_, vertices_, edges_, layout_, vertexCoordinates_] :=
+  graphEmbedding[dims, vertices, edges, layout, vertexCoordinates][[2]]
 
-graphEmbedding[vertices_, edges_, layout_, coordinateRules_] := Replace[
+graphEmbedding[dims_, vertices_, edges_, layout_, coordinateRules_] := Replace[
   Reap[
-    GraphPlot[
+    If[dims === 3, GraphPlot3D, GraphPlot][
       Graph[vertices, edges],
       GraphLayout -> layout,
       VertexCoordinateRules -> coordinateRules,
@@ -425,12 +462,12 @@ normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
     #[[1, 1]] -> #[[2]] & /@ SortBy[Join[indexedEdgeEmbedding, indexedSingleVertexEdgeEmbedding], #[[1, 2]] &]}
 ]
 
-rescaleEmbedding[unscaledEmbedding_, {_, __}] := unscaledEmbedding
+rescaleEmbedding[dims_, unscaledEmbedding_, {_, __}] := unscaledEmbedding
 
-rescaleEmbedding[unscaledEmbedding_, {v_ -> pivotPoint_}] :=
-  rescaleEmbedding[unscaledEmbedding, pivotPoint, 1 / edgeScale[unscaledEmbedding]]
+rescaleEmbedding[dims_, unscaledEmbedding_, {v_ -> pivotPoint_}] :=
+  rescaleEmbedding[dims, unscaledEmbedding, pivotPoint, 1 / edgeScale[unscaledEmbedding]]
 
-rescaleEmbedding[unscaledEmbedding_, {}] := rescaleEmbedding[unscaledEmbedding, {0 -> {0.0, 0.0}}]
+rescaleEmbedding[dims_, unscaledEmbedding_, {}] := rescaleEmbedding[dims, unscaledEmbedding, {0 -> Table[0.0, dims]}]
 
 lineLength[pts_] := Total[EuclideanDistance @@@ Partition[pts, 2, 1]]
 
@@ -446,18 +483,18 @@ edgeScale[{vertexEmbedding_, {}}] :=
   lineLength[Transpose[MinMax /@ Transpose[vertexEmbedding[[All, 2]]]]] /
     (Sqrt[N[Length[vertexEmbedding]] / 2])
 
-rescaleEmbedding[embedding_, center_, factor_] := Map[
-  (#[[1]] -> (#[[2]] /. coords : {Repeated[_Real, {2}]} :> (coords - center) * factor + center)) &,
+rescaleEmbedding[dims_, embedding_, center_, factor_] := Map[
+  (#[[1]] -> (#[[2]] /. coords : {Repeated[_Real, {dims}]} :> (coords - center) * factor + center)) &,
   embedding,
   {2}
 ]
 
 (*** SpringElectricalPolygons ***)
 
-hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinates_][edges_] := Module[{
+hypergraphEmbedding[dims_, edgeType_, hyperedgeRendering : "Polygons", vertexCoordinates_][edges_] := Module[{
     embeddingWithNoRegions, vertexEmbedding, edgeEmbedding},
   embeddingWithNoRegions =
-    hypergraphEmbedding["Cyclic", edgeType, "Subgraphs", vertexCoordinates][edges];
+    hypergraphEmbedding[dims, "Cyclic", edgeType, "Subgraphs", vertexCoordinates][edges];
   vertexEmbedding = embeddingWithNoRegions[[1]];
   edgeEmbedding = addConvexPolygons[edgeType] @@@ embeddingWithNoRegions[[2]];
   {vertexEmbedding, edgeEmbedding}
@@ -480,7 +517,7 @@ applyStyle[style : Except[_List], shapes_] := With[{trimmedShapes = DeleteCases[
 
 applyStyle[style_List, shapes_] := Replace[DeleteCases[Transpose[{style, shapes}], {_, {}}], {} -> Nothing]
 
-vertexLabelsGraphics[embedding_, vertexSize_, vertexLabels_] := Module[{
+vertexLabelsGraphics[dims_, embedding_, vertexSize_, vertexLabels_] := Module[{
     pointsToVertices, edges, vertexCoordinatesDiagonal, graphPlotVertexSize},
   pointsToVertices =
     Association[Reverse /@ Catenate[Function[{v, pts}, v -> # & /@ Cases[pts, _Point]] @@@ embedding[[1]]]];
@@ -491,7 +528,7 @@ vertexLabelsGraphics[embedding_, vertexSize_, vertexLabels_] := Module[{
     2 vertexSize,
     {"Scaled", 2 vertexSize / vertexCoordinatesDiagonal}
   ];
-  GraphPlot[
+  If[dims == 3, GraphPlot3D, GraphPlot][
     Graph[Values[pointsToVertices], edges],
     VertexCoordinates -> Thread[Values[pointsToVertices] -> First /@ Keys[pointsToVertices]],
     VertexLabels -> vertexLabels,
@@ -502,6 +539,7 @@ vertexLabelsGraphics[embedding_, vertexSize_, vertexLabels_] := Module[{
 ]
 
 drawEmbedding[
+      dims_,
       styles_,
       vertexLabels_,
       vertexSize_,
@@ -512,18 +550,18 @@ drawEmbedding[
     singleVertexEdgeCounts[coords] = Lookup[singleVertexEdgeCounts, Key[coords], vertexSize] + vertexSize
   );
   Show[
-    Graphics[{
+    If[dims == 3, Graphics3D, Graphics][{
       applyStyle[styles[$edgePolygon], Cases[#, _Polygon, All] & /@ embedding[[2, All, 2]]],
       applyStyle[styles[$edgeLine],
         Cases[
-            #, Line[pts_] :> arrow[style[$lightTheme][$edgeArrowheadShape], arrowheadLength, vertexSize][pts], All] & /@
+            #, Line[pts_] :> arrow[style[$lightTheme][If[dims == 3, $edgeArrowheadShape3D, $edgeArrowheadShape]], arrowheadLength, vertexSize][pts], All] & /@
           embedding[[2, All, 2]]],
-      applyStyle[styles[$vertexPoint], Cases[#, Point[pts_] :> Disk[pts, vertexSize], All] & /@ embedding[[1, All, 2]]],
+      applyStyle[styles[$vertexPoint], Cases[#, Point[pts_] :> If[dims == 3, Sphere, Disk][pts, vertexSize], All] & /@ embedding[[1, All, 2]]],
       applyStyle[styles[$edgePoint],
           Cases[#, Point[pts_] :> Circle[pts, getSingleVertexEdgeRadius[pts]], All] & /@ embedding[[2, All, 2]]]}],
     If[vertexLabels === None,
-      Graphics[{}],
-      vertexLabelsGraphics[embedding, vertexSize, vertexLabels]
+      If[dims == 3, Graphics3D, Graphics][{}],
+      vertexLabelsGraphics[dims, embedding, vertexSize, vertexLabels]
     ]
   ]
 ]
