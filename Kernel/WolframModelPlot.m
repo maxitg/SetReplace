@@ -67,7 +67,7 @@ HypergraphPlot = WolframModelPlot;
 (* Messages *)
 
 General::invalidEdges =
-  "First argument of WolframModelPlot must be a hypergraph, i.e., a list of lists, " <>
+  "First argument of `1` must be a hypergraph, i.e., a list of lists, " <>
   "where elements represent vertices, or a list of such hypergraphs.";
 
 General::invalidEdgeType =
@@ -115,7 +115,7 @@ $hypergraphPattern = _List ? (Function[h, AllTrue[h, ListQ[#] && Length[#] > 0 &
 $multiHypergraphPattern = $hypergraphPattern | {$hypergraphPattern...};
 
 wolframModelPlot$parse[dims_, edges : Except[$multiHypergraphPattern], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
-  With[{head = wolframModelPlotHead[dims]}, Message[head::invalidEdges]];
+  With[{head = wolframModelPlotHead[dims]}, Message[head::invalidEdges, head]];
   $Failed
 )
 
@@ -240,35 +240,35 @@ correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
   knownOptionsQ[head, expr, opts] &&
   (And @@ (supportedOptionQ[head, ##, opts] & @@@ {
       {"HyperedgeRendering", $hyperedgeRenderings}})) &&
-  correctCoordinateRulesQ[head, OptionValue[WolframModelPlot, opts, VertexCoordinateRules]] &&
-  correctHighlightQ[OptionValue[WolframModelPlot, opts, GraphHighlight]] &&
-  correctSizeQ[head, "Vertex size", OptionValue[WolframModelPlot, opts, VertexSize], {}] &&
-  correctSizeQ[head, "Arrowhead length", OptionValue[WolframModelPlot, opts, "ArrowheadLength"], {Automatic}] &&
-  correctPlotStyleQ[head, OptionValue[WolframModelPlot, opts, PlotStyle]] &&
+  correctCoordinateRulesQ[head, OptionValue[head, opts, VertexCoordinateRules]] &&
+  correctHighlightQ[head, OptionValue[head, opts, GraphHighlight]] &&
+  correctSizeQ[head, "Vertex size", OptionValue[head, opts, VertexSize], {}] &&
+  correctSizeQ[head, "Arrowhead length", OptionValue[head, opts, "ArrowheadLength"], {Automatic}] &&
+  correctPlotStyleQ[head, OptionValue[head, opts, PlotStyle]] &&
   correctStyleLengthQ[
     head,
     "vertices",
     MatchQ[edges, {$hypergraphPattern..}],
     Length[vertexList[edges]],
-    OptionValue[WolframModelPlot, opts, VertexStyle]] &&
+    OptionValue[head, opts, VertexStyle]] &&
   And @@ (correctStyleLengthQ[
     head,
     "edges",
     MatchQ[edges, {$hypergraphPattern..}],
     Length[edges],
-    OptionValue[WolframModelPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
+    OptionValue[head, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})
 
 correctCoordinateRulesQ[head_, coordinateRules_] :=
   If[!MatchQ[coordinateRules,
       Automatic |
-      {(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
+      {(_ -> {Repeated[_ ? NumericQ, {If[head === WolframModelPlot, 2, 3]}]})...}],
     Message[head::invalidCoordinates, coordinateRules];
     False,
     True
   ]
 
-correctHighlightQ[highlight_] := (
-  If[!ListQ[highlight], Message[WolframModelPlot::invalidHighlight, highlight]];
+correctHighlightQ[head_, highlight_] := (
+  If[!ListQ[highlight], Message[head::invalidHighlight, highlight]];
   ListQ[highlight]
 )
 
@@ -331,7 +331,7 @@ wolframModelPlot[
     Background -> Replace[background, Automatic -> style[$lightTheme][$spatialGraphBackground]],
     If[maxImageSize === Automatic,
         ImageSizeRaw -> style[$lightTheme][$wolframModelPlotImageSize] Take[imageSizeScaleFactor, 2],
-        ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]
+        ImageSize -> adjustImageSize[dims, maxImageSize, imageSizeScaleFactor]
     ]
   ]
 ]]
@@ -340,9 +340,9 @@ vertexEmbeddingRange[{}] := 0
 
 vertexEmbeddingRange[vertexEmbedding_] := Max[#2 - #1 & @@@ MinMax /@ Transpose[vertexEmbedding[[All, 2, 1, 1]]]]
 
-adjustImageSize[w_ ? NumericQ, {wScale_, hScale_}] := w wScale
+adjustImageSize[dims_, w_ ? NumericQ, {wScale_, hScale_}] := w wScale
 
-adjustImageSize[dims : {Repeated[_ ? NumericQ, {2, 3}]}, scale_] := dims scale
+adjustImageSize[dims_, size : {Repeated[_ ? NumericQ, {2, 3}]}, scale_] := size scale
 
 WolframModelPlot::invalidMaxImageSize =
   "MaxImageSize `1` should either be a single number (width) or a list of two numbers (width and height)";
@@ -350,8 +350,8 @@ WolframModelPlot::invalidMaxImageSize =
 WolframModelPlot3D::invalidMaxImageSize =
   "MaxImageSize `1` should either be a single number (width) or a list of three numbers (width, height, depth)";
 
-adjustImageSize[dims_, _] := With[{head = wolframModelPlotHead[dims]},
-    Message[head::invalidMaxImageSize, dims]; Throw[$Failed]
+adjustImageSize[dims_, size_, _] := With[{head = wolframModelPlotHead[dims]},
+    Message[head::invalidMaxImageSize, size]; Throw[$Failed]
 ]
 
 (** Embedding **)
@@ -556,7 +556,7 @@ drawEmbedding[
           embedding[[2, All, 2]]],
       applyStyle[styles[$vertexPoint], Cases[#, Point[pts_] :> If[dims == 3, Sphere, Disk][pts, vertexSize], All] & /@ embedding[[1, All, 2]]],
       applyStyle[styles[$edgePoint],
-          Cases[#, Point[pts_] :> Circle[pts, getSingleVertexEdgeRadius[pts]], All] & /@ embedding[[2, All, 2]]]}],
+          Cases[#, Point[pts_] :> If[dims == 3, Sphere, Circle][pts, getSingleVertexEdgeRadius[pts]], All] & /@ embedding[[2, All, 2]]]}],
     If[vertexLabels === None,
       If[dims == 3, Graphics3D, Graphics][{}],
       vertexLabelsGraphics[dims, embedding, vertexSize, vertexLabels]
