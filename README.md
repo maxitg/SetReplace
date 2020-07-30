@@ -1767,6 +1767,22 @@ In[] := WolframModelPlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
 
 <img src="READMEImages/PlotOfHypergraphFragment.png" width="478">
 
+## `WolframModelPlot3D`
+
+All the above options for `WolframModelPlot` also work in 3D using `WolframModelPlot3D` function:
+
+```wl
+In[] := WolframModelPlot3D[
+ WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} -> {{7, 1, 
+     8}, {9, 3, 10}, {11, 4, 12}, {13, 6, 14}, {7, 13}, {13, 7}, {8, 
+     10}, {10, 8}, {9, 11}, {11, 9}, {12, 14}, {14, 12}}, {{1, 2, 
+    3}, {4, 5, 6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6, 3}}, 6,
+   "FinalState"], 
+ EdgeStyle -> <|{_, _} -> Darker@Green, {_, _, _} -> Darker@Red|>]
+```
+
+<img src="READMEImages/WolframModelPlot3D.png" width="478">
+
 ## RulePlot of WolframModel
 
 **`RulePlot`** can be used to get a [`WolframModelPlot`](#wolframmodelplot)-based visual representation of hypergraph substitution rules:
