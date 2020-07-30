@@ -712,5 +712,505 @@
         {Background -> RGBColor[0.2, 0.5, 0.3]}
       ]
     }
+  |>,
+  "WolframModelPlot3D" -> <|
+    "init" -> (
+      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
+      Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+      Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
+      Global`checkGraphics[args___] := SetReplace`PackageScope`checkGraphics[args];
+      Global`graphics3DQ[args___] := SetReplace`PackageScope`graphics3DQ[args];
+
+      $edgeTypes = {"Ordered", "Cyclic"};
+
+      $simpleHypergraphs = {
+        {{1, 3}, {2, 4}},
+        {},
+        {{1}},
+        {{1}, {1}},
+        {{1}, {2}},
+        {{1}, {1}, {2}},
+        {{1, 2}, {1}}
+      };
+
+      sphereCoordinates[graphics_] := Sort[Cases[graphics, Sphere[i_, ___] :> i, All]];
+
+      $layoutTestHypergraphs = {
+        {{1, 2, 3}, {3, 4, 5}},
+        {{1, 2, 3, 4, 5}, {5, 6, 7, 8, 9}},
+        {{1, 2, 3, 4, 5, 6, 7, 8, 9}, {1, 4, 7}},
+        {{1, 2, 3, 4, 5, 6}, {1, 2, 3, 4}},
+        {{1, 2, 3}, {3, 4, 5}, {1, 2, 3, 4}}
+      };
+
+      {$minArrowheadSize, $maxArrowheadSize} =
+        WolframPhysicsProjectStyleData["SpatialGraph", "ArrowheadLengthFunction"][
+          <|"PlotRange" -> #|>] & /@ {0, 1.*^100};
+
+      $selfLoopLength = FirstCase[
+        WolframModelPlot[{{1, 1}}, "HyperedgeRendering" -> "Subgraphs"],
+        Line[pts_] :> RegionMeasure[Line[pts]],
+        Missing[],
+        All];
+
+    ),
+    "options" -> {
+      "Parallel" -> False
+    },
+    "tests" -> {
+      (* Symbol Leak *)
+
+      testSymbolLeak[
+        SeedRandom[123];
+        WolframModelPlot3D[RandomInteger[200, {100, 3}]]
+      ],
+
+      (* Argument Checks *)
+
+      (** Argument count **)
+
+      testUnevaluated[
+        WolframModelPlot3D[],
+        {WolframModelPlot3D::argt}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2}}, {{1, 2}}, {{1, 2}}],
+        {WolframModelPlot3D::argt}
+      ],
+
+      (** Valid edges **)
+
+      testUnevaluated[
+        WolframModelPlot3D[1],
+        {WolframModelPlot3D::invalidEdges}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{1, 2}],
+        {WolframModelPlot3D::invalidEdges}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 3}, 2}],
+        {WolframModelPlot3D::invalidEdges}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 3}, 6, {2, 4}}],
+        {WolframModelPlot3D::invalidEdges}
+      ],
+
+      VerificationTest[
+        graphics3DQ /@ WolframModelPlot3D[{{}}],
+        {True}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{{}}}],
+        {WolframModelPlot3D::invalidEdges}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 3}, {}}],
+        {WolframModelPlot3D::invalidEdges}
+      ],
+
+      (** Valid EdgeType **)
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, None],
+        {WolframModelPlot3D::invalidEdgeType}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, "$$$Incorrect$$$"],
+        {WolframModelPlot3D::invalidEdgeType}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, {"$$$Incorrect$$$"}],
+        {WolframModelPlot3D::invalidEdgeType}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3} -> "$$$Incorrect$$$"}],
+        {WolframModelPlot3D::invalidEdgeType}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, {None, {1, 2, 3} -> "Ordered"}],
+        {WolframModelPlot3D::invalidEdgeType}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, {"$$$Incorrect$$$", {1, 2, 3} -> "Ordered"}],
+        {WolframModelPlot3D::invalidEdgeType}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[
+          {{1, 2, 3}, {3, 4, 5}},
+          {{3, 4, 5} -> "Ordered", {1, 2, 3} -> "$$$Incorrect$$$"}],
+        {WolframModelPlot3D::invalidEdgeType}
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, "Ordered"]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, "Cyclic"]]
+      ],
+
+      (* Valid options *)
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, "$$$InvalidOption###" -> True],
+        {WolframModelPlot3D::optx}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, "Ordered", "$$$InvalidOption###" -> True],
+        {WolframModelPlot3D::optx}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, "$$$Incorrect$$$", "$$$InvalidOption###" -> True],
+        {WolframModelPlot3D::invalidEdgeType}
+      ],
+
+      (* Valid coordinates *)
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> $$$invalid$$$],
+        {WolframModelPlot3D::invalidCoordinates}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {{0, 0, 0}}],
+        {WolframModelPlot3D::invalidCoordinates}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0}}],
+        {WolframModelPlot3D::invalidCoordinates}
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0, 0, 0}}]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, "Ordered", VertexCoordinateRules -> {1 -> {0, 0, 0}}]]
+      ],
+
+      (* Valid GraphHighlight *)
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> $$$invalid$$$],
+        {WolframModelPlot3D::invalidHighlight}
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}}]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {6}]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2}}]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {1, 2, 3}}, GraphHighlight -> {{1, 2, 3}, {1, 2, 3}}]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {{1, 2, 3}}]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {4, {1, 2, 3}}]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> Black]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[
+          {{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> Directive[Black, Thick]]]
+      ],
+
+      VerificationTest[
+        !graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {1}, GraphHighlightStyle -> "Dashed"]]
+      ],
+
+      (* Valid VertexSize and "ArrowheadLength" *)
+
+      {
+        testUnevaluated[
+          WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, # -> $$$invalid$$$],
+          {WolframModelPlot3D::invalidSize}
+        ],
+
+        testUnevaluated[
+          WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, # -> -1],
+          {WolframModelPlot3D::invalidSize}
+        ],
+
+        VerificationTest[
+          graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, # -> 1]]
+        ]
+      } & /@ {VertexSize, "ArrowheadLength"},
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[#, "ArrowheadLength" -> Automatic]]
+      ] & /@ {{{1, 2, 3}, {3, 4, 5}}, {{1, 1}}, {{1}}, {}},
+
+      (* Implementation *)
+
+      (** Simple examples **)
+
+      Table[With[{hypergraph = hypergraph}, VerificationTest[
+        graphics3DQ[WolframModelPlot3D[hypergraph, #]]
+      ]] & /@ $edgeTypes, {hypergraph, $simpleHypergraphs}],
+
+      (** Large graphs **)
+
+      VerificationTest[
+        graphics3DQ @ WolframModelPlot3D @ SetReplace[
+          {{0, 1}, {0, 2}, {0, 3}},
+          ToPatternRules[
+            {{0, 1}, {0, 2}, {0, 3}} ->
+            {{4, 5}, {5, 4}, {4, 6}, {6, 4},
+              {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}],
+          #]
+      ] & /@ {10, 4000},
+
+      (* EdgeType *)
+
+      VerificationTest[
+        sphereCoordinates[checkGraphics @ WolframModelPlot3D[#, "Ordered"]] !=
+          sphereCoordinates[checkGraphics @ WolframModelPlot3D[#, "Cyclic"]]
+      ] & /@ $layoutTestHypergraphs,
+
+      VerificationTest[
+        Length[Union[Cases[
+          checkGraphics @ WolframModelPlot3D[#, "HyperedgeRendering" -> "Subgraphs", "ArrowheadLength" -> 0],
+          Polygon[___],
+          All]]],
+        0
+      ] & /@ $layoutTestHypergraphs,
+
+      VerificationTest[
+        Length[Union[Cases[
+          checkGraphics @ WolframModelPlot3D[#, "HyperedgeRendering" -> "Polygons", "ArrowheadLength" -> 0],
+          {Polygon[___]..},
+          All]]],
+        0 + Length[#]
+      ] & /@ $layoutTestHypergraphs,
+
+      (* VertexLabels *)
+
+      VerificationTest[
+        MissingQ[FirstCase[
+          checkGraphics @ WolframModelPlot3D[#, VertexLabels -> None],
+          Text[___],
+          Missing[],
+          All]]
+      ] & /@ $layoutTestHypergraphs,
+
+      VerificationTest[
+        !MissingQ[FirstCase[
+          checkGraphics @ WolframModelPlot3D[#, VertexLabels -> Automatic],
+          Text[___],
+          Missing[],
+          All]]
+      ] & /@ $layoutTestHypergraphs,
+
+      (* Single-vertex edges *)
+
+      VerificationTest[
+        checkGraphics @ WolframModelPlot3D[{{1}, {1, 2}}] =!= checkGraphics @ WolframModelPlot3D[{{1, 2}}]
+      ],
+
+      (* 3 spheres for 3 vertices, 1 for 1-edge *)
+      VerificationTest[
+        Count[
+          checkGraphics @ WolframModelPlot3D[{{1}, {1, 2, 3}}],
+          Sphere[___],
+          All] == 3 + 1
+      ],
+
+      (* 1 sphere for vertex, 1 for 1-edge *)
+      VerificationTest[
+        Count[
+          checkGraphics @ WolframModelPlot3D[{{1}}],
+          Sphere[___],
+          All] == 1 + 1
+      ],
+
+      (* VertexCoordinateRules *)
+
+      VerificationTest[
+        And @@ (MemberQ[
+            sphereCoordinates[checkGraphics @ WolframModelPlot3D[
+              {{1, 2, 3}, {3, 4, 5}, {3, 3}},
+              VertexCoordinateRules -> {1 -> {0, 0, 0}, 2 -> {1, 0, 0}}]],
+            #] & /@
+          {{0., 0., 0.}, {1., 0., 0.}})
+      ],
+
+      VerificationTest[
+        Chop @ sphereCoordinates[checkGraphics @ WolframModelPlot3D[
+          {{1, 2, 3}, {3, 4, 5}},
+          VertexCoordinateRules -> {3 -> {0, 0, 0}}]] != Table[{0, 0, 0}, 5]
+      ],
+
+      VerificationTest[
+        Chop @ sphereCoordinates[checkGraphics @ WolframModelPlot3D[
+          {{1, 2, 3}, {3, 4, 5}},
+          VertexCoordinateRules -> {3 -> {1, 0, 0}, 3 -> {0, 0, 0}}]] != Table[{0, 0, 0}, 5]
+      ],
+
+      (** Same coordinates should not produce any messages **)
+      VerificationTest[
+        And @@ Cases[
+          checkGraphics @ WolframModelPlot3D[{{1, 2, 3}}, VertexCoordinateRules -> {1 -> {1, 0, 0}, 2 -> {1, 0, 0}}],
+          Rotate[_, {v1_, v2_}] :> v1 != {0, 0, 0} && v2 != {0, 0, 0},
+          All]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, VertexSize -> 0.3]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, "ArrowheadLength" -> 0.3]]
+      ],
+
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, VertexSize -> 0.4, "ArrowheadLength" -> 0.3]]
+      ],
+
+      (* weed #286 *)
+      VerificationTest[
+        graphics3DQ[WolframModelPlot3D[{}, VertexStyle -> {}, EdgeStyle -> {}]]
+      ],
+
+      (* GraphHighlight *)
+
+      VerificationTest[
+        Length[Union @ Cases[
+            checkGraphics @ WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> {#}], _ ? ColorQ, All]] >
+          Length[Union @ Cases[checkGraphics @ WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}], _ ? ColorQ, All]]
+      ] & /@ {4, {1, 2, 3}},
+
+      (** Test multi-edge highlighting **)
+      VerificationTest[
+        Differences[
+          Length[Union[Cases[#, _?ColorQ, All]]] & /@
+            (checkGraphics[WolframModelPlot3D[
+              {{1, 2}, {1, 2}}, "HyperedgeRendering" -> "Subgraphs", GraphHighlight -> #]] &) /@
+            {{}, {{1, 2}}, {{1, 2}, {1, 2}}}],
+        {1, -1}
+      ],
+
+      (* GraphHighlightStyle *)
+
+      With[{color = RGBColor[0.4, 0.6, 0.2]},
+        With[{style = #},
+          VerificationTest[
+            FreeQ[checkGraphics @ WolframModelPlot3D[
+                {{1, 2, 3}, {3, 4, 5}}, GraphHighlight -> #, GraphHighlightStyle -> color], color] & /@
+              {{}, {4}, {{1, 2, 3}}},
+            {True, False, False}
+          ]
+        ] & /@ {color, Directive[Thick, color]}
+      ],
+
+      (* Scaling consistency *)
+      (* Vertex sizes, arrow sizes, average edge lengths, and loop lengths should always be the same. *)
+
+      VerificationTest[
+        SameQ @@ (
+          Union[Cases[checkGraphics @ WolframModelPlot3D[#], Disk[_, r_] :> r, All]] & /@
+            {{{1}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, RandomInteger[10, {5, 5}]})
+      ],
+
+      With[{$minArrowheadSize = $minArrowheadSize, $maxArrowheadSize = $maxArrowheadSize},
+        VerificationTest[
+          Length[DeleteDuplicates[
+            Mean[Cases[
+                checkGraphics @ WolframModelPlot3D[#, "HyperedgeRendering" -> "Subgraphs"],
+                Line[pts_] :> EuclideanDistance @@ pts,
+                All]] & /@
+              {{{1, 2}}, {{1, 2, 3}}, {{1, 2, 3}, {3, 4, 5}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3, 4, 5, 1}}},
+            #2 - #1 <= $maxArrowheadSize - $minArrowheadSize &]] == 1
+        ]],
+
+      With[{
+          $minArrowheadSize = $minArrowheadSize, $maxArrowheadSize = $maxArrowheadSize, $selfLoopLength = $selfLoopLength},
+        VerificationTest[
+          Abs[
+                First[
+                  Nearest[
+                    Cases[
+                      checkGraphics @ WolframModelPlot3D[#, "HyperedgeRendering" -> "Subgraphs"],
+                      Line[pts_] :> RegionMeasure[Line[pts]],
+                      All],
+                    $selfLoopLength]] -
+              $selfLoopLength] <
+            $maxArrowheadSize - $minArrowheadSize
+        ] & /@ {
+          {{1, 1}},
+          {{1, 2, 3}, {1, 1}},
+          {{1, 2, 3}, {3, 4, 5}, {5, 5}},
+          {{1, 2, 3}, {3, 4, 5}, {5, 6, 1, 1}},
+          {{1, 2, 3, 4, 5, 5, 1}}}],
+
+      (* Automatic image size *)
+      VerificationTest[
+        Table[OrderedQ[(ImageSizeRaw /. AbsoluteOptions[checkGraphics @ WolframModelPlot3D[#], ImageSizeRaw])[[k, 1]] & /@
+          {{{1}}, {{1, 1}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}}, {{1, 2, 3}, {3, 4, 5}, {5, 6, 7}, {7, 8, 1}}}], {k, 2}],
+        {True, True}
+      ],
+
+      testUnevaluated[
+        WolframModelPlot3D[{{1, 2}, {2, 3}, {3, 1}}, "MaxImageSize" -> "$$$invalid$$$"],
+        {WolframModelPlot3D::invalidMaxImageSize}
+      ] & /@ {"$$$invalid$$$", {200, 200, 200}, UpTo[200], {{100, 200}, {100, 200}}, Full, Scaled[0.5]},
+
+
+      (* Multiple hypergraphs *)
+      VerificationTest[
+        graphics3DQ /@ WolframModelPlot3D[{{{1, 2, 3}, {3, 4, 5}}, {{3, 4, 5}, {5, 6, 7}}, {{5, 6, 7}, {7, 8, 5}}}, ##],
+        ConstantArray[True, 3]
+      ] & @@@ {
+        {},
+        {GraphHighlight -> {3, {3, 4, 5}}},
+        {VertexSize -> 0.1, "ArrowheadLength" -> 0.2},
+        {EdgeStyle -> Red},
+        {VertexCoordinateRules -> {3 -> {0, 0, 0}, 4 -> {1, 0, 0}}}
+      },
+
+      VerificationTest[
+        graphics3DQ @ WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, Background -> Automatic]
+      ],
+
+      VerificationTest[
+        Options[
+          checkGraphics @ WolframModelPlot3D[{{1, 2, 3}, {3, 4, 5}}, Background -> RGBColor[0.2, 0.5, 0.3]], Background],
+        {Background -> RGBColor[0.2, 0.5, 0.3]}
+      ]
+    }
   |>
 |>

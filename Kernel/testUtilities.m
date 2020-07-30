@@ -4,6 +4,7 @@ PackageScope["testUnevaluated"]
 PackageScope["testSymbolLeak"]
 PackageScope["checkGraphics"]
 PackageScope["graphicsQ"]
+PackageScope["graphics3DQ"]
 
 (* VerificationTest should not directly appear here, as it is replaced by test.wls into other heads during evaluation.
     Use testHead argument instead. *)
@@ -50,3 +51,5 @@ checkGraphics[graphics_] := (
 )
 
 graphicsQ[graphics_] := Head[graphics] === Graphics && frontEndErrors[graphics] === {}
+
+graphics3DQ[graphics_] := Head[graphics] === Graphics3D && frontEndErrors[graphics] === {}
