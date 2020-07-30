@@ -108,7 +108,7 @@ wolframModelPlotHead[dims_] := If[dims == 3, WolframModelPlot3D, WolframModelPlo
 (* Arguments parsing *)
 
 wolframModelPlot$parse[dims_, args___] /; With[{head = wolframModelPlotHead[dims]},
-    !Developer`CheckArgumentCount[head[args], 1, 3]] := $Failed
+    !Developer`CheckArgumentCount[head[args], 1, 2]] := $Failed
 
 (* allow composite vertices, but not list-vertices *)
 $hypergraphPattern = _List ? (Function[h, AllTrue[h, ListQ[#] && Length[#] > 0 &] && AllTrue[h, Not @* ListQ, 2]]);
@@ -327,18 +327,11 @@ wolframModelPlot[
   imageSizeScaleFactor = Min[1, 0.7 (#[[2]] - #[[1]])] & /@ PlotRange[graphics];
   Show[
     graphics,
-    Sequence @@ Join[
-        graphicsOptions,
-        If[ dims == 3,
-            {},
-            {
-                Background -> Replace[background, Automatic -> style[$lightTheme][$spatialGraphBackground]],
-                If[ maxImageSize === Automatic,
-                    ImageSizeRaw -> style[$lightTheme][$wolframModelPlotImageSize] imageSizeScaleFactor,
-                    ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]
-                ]
-            }
-        ]
+    graphicsOptions,
+    Background -> Replace[background, Automatic -> style[$lightTheme][$spatialGraphBackground]],
+    If[maxImageSize === Automatic,
+        ImageSizeRaw -> style[$lightTheme][$wolframModelPlotImageSize] Take[imageSizeScaleFactor, 2],
+        ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]
     ]
   ]
 ]]
@@ -352,9 +345,14 @@ adjustImageSize[w_ ? NumericQ, {wScale_, hScale_}] := w wScale
 adjustImageSize[dims : {Repeated[_ ? NumericQ, {2, 3}]}, scale_] := dims scale
 
 WolframModelPlot::invalidMaxImageSize =
-  "MaxImageSize `1` should either be a single number (width) or a list of numbers (width, height, <depth>)";
+  "MaxImageSize `1` should either be a single number (width) or a list of two numbers (width and height)";
 
-adjustImageSize[dims_, _] := (Message[WolframModelPlot::invalidMaxImageSize, dims]; Throw[$Failed])
+WolframModelPlot3D::invalidMaxImageSize =
+  "MaxImageSize `1` should either be a single number (width) or a list of three numbers (width, height, depth)";
+
+adjustImageSize[dims_, _] := With[{head = wolframModelPlotHead[dims]},
+    Message[head::invalidMaxImageSize, dims]; Throw[$Failed]
+]
 
 (** Embedding **)
 (** hypergraphEmbedding produces an embedding of vertices and edges. The format is {vertices, edges},
