@@ -47,7 +47,7 @@ Observer only thinks the reality is definite because its memory is disjoint betw
 
 Indeed, consider a system that could be in one of two states: `|0>` or `|1>`. Let's say it's initially in the superposition:
 
-```wl
+```
 1/Sqrt[2] (|0> + |1>)
 ```
 
@@ -55,13 +55,13 @@ After the measurement, the observer can be in two states as well depending on th
 In a wave-function collapse interpretations, after the measurement, we would get one and only one of two cases.
 The decision is non-unitary, non-linear, and the source of non-determinism in the quantum mechanics:
 
-```wl
+```
 |0, o[0]> or |1, o[1]>
 ```
 
 In the many-world interpretation, however, instead of making a choice for the entire universe, the observer itself is now in a superposition, and the state after the measurement is simply
 
-```wl
+```
 1/Sqrt[2] (|0, o[0]> + |1, o[1]>)
 ```
 
@@ -400,25 +400,25 @@ More significantly, it is not clear how to change the basis.
 Consider, for example, a single qubit.
 We can represent its states with two possible edges, say,
 
-```wl
+```
 |0> -> {0, x, y, y, y}, |1> -> {1, x, y, y, y}
 ```
 
 we can then represent combinations of those as branchlike-separated groups of edges, i.e.,
 
-```wl
+```
 1/Sqrt[2] (|0> + |1>) -> {{0, x, y, y, y}, {1, x, y, y, y}}
 ```
 
 and
 
-```wl
+```
 1/Sqrt[2] (|0> + I |1>) -> {{0, x, y, y, y}, {1, y, x, y, y}}
 ```
 
 etc. We can represent unbalanced combinations as well, for example,
 
-```wl
+```
 1/Sqrt[3] (|0> + 2 I |1>) -> {{0, x, y, y, y}, {1, y, x, y, y}, {1, y, x, y, y}}
 ```
 
@@ -427,11 +427,11 @@ At some level it makes sense, as there is indeed no way to encode an infinite-pr
 However, we also expect from the quantum theory that arbitrary-rotated bases are equivalent.
 For example, it appears that we should have a symmetry where we can define
 
-```wl
+```
 1/Sqrt[2] (|0> + |1>) -> |a>
 ```
 
-```wl
+```
 1/Sqrt[2] (|0> - |1>) -> |b>
 ```
 
@@ -440,7 +440,7 @@ However, in our interpretation, two edges will now need to be used for each basi
 
 It appears at first that [Spekkens toy model](https://arxiv.org/abs/quant-ph/0401052) can potentially provide a solution, however, while it works well for single qubits, combinations of them appear to be tricky as states like this
 
-```wl
+```
 1/Sqrt[2] (|00> + |11>)
 ```
 
