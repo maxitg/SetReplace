@@ -47,7 +47,7 @@ Observer only thinks the reality is definite because its memory is disjoint betw
 
 Indeed, consider a system that could be in one of two states: `|0>` or `|1>`. Let's say it's initially in the superposition:
 
-```
+```wl
 1/Sqrt[2] (|0> + |1>)
 ```
 
@@ -55,13 +55,13 @@ After the measurement, the observer can be in two states as well depending on th
 In a wave-function collapse interpretations, after the measurement, we would get one and only one of two cases.
 The decision is non-unitary, non-linear, and the source of non-determinism in the quantum mechanics:
 
-```
+```wl
 |0, o[0]> or |1, o[1]>
 ```
 
 In the many-world interpretation, however, instead of making a choice for the entire universe, the observer itself is now in a superposition, and the state after the measurement is simply
 
-```
+```wl
 1/Sqrt[2] (|0, o[0]> + |1, o[1]>)
 ```
 
@@ -114,26 +114,26 @@ This approach is somewhat similar to [QuantumToMultiwaySystem](https://resources
 
 One example would be a system such that there are four types of edges (assume 1, a, and b never refer the same vertex),
 
-```
+```wl
 {{1, a, b, b, b}, {1, b, a, b, b}, {1, b, b, a, b}, {1, b, b, b, a}}
 ```
 
 which can be transformed into each other according to the following transformation rule:
 
-```
+```wl
 {1, a, b, c, d} -> {1, d, a, b, c}
 ```
 
 Then suppose we have a rule which is invariant under that symmetry.
 The following will work for our example (the aforementioned symmetry only applies to 5-edges):
 
-```
+```wl
 {{1, a, b, c, d}, {1, 2}} -> {{2, d, a, b, c}}
 ```
 
 Note that this rule is in fact invariant:
 
-```
+```wl
 In[] := With[{originalRule = {{1, a, b, c, d}, {1, 2}} -> {{2, d, a, b, c}}}, 
  SameQ @@ ResourceFunction[
     "CanonicalWolframModelRule"] /@ {originalRule, 
@@ -141,14 +141,14 @@ In[] := With[{originalRule = {{1, a, b, c, d}, {1, 2}} -> {{2, d, a, b, c}}},
      originalRule}]
 ```
 
-```
+```wl
 Out[] = True
 ```
 
 Think of `{1, a, b, c, d}` as a particle, and `{1, 2}` as a track along which the particle moves.
 We can visualize the evolution with an expressions-events graph:
 
-```
+```wl
 In[] := WolframModel[{{1, a, b, c, d}, {1, 2}} -> {{2, d, a, b, c}},
   {{1, x, y, y, y}, {1, 2}, {2, 3}, {3, 4}, {4, 5}}, 
   Infinity]["ExpressionsEventsGraph", VertexLabels -> Automatic]
@@ -159,7 +159,7 @@ In[] := WolframModel[{{1, a, b, c, d}, {1, 2}} -> {{2, d, a, b, c}},
 To make it even easier to see, let's label the edges bases on their phase, and remove the "track"-edges from the graph.
 We'll use a helper function for that.
 
-```
+```wl
 particleMotionPlot[evolution_WolframModelEvolutionObject, 
   opts : OptionsPattern[]] := With[{
    expressions = evolution["AllExpressions"],
@@ -181,7 +181,7 @@ particleMotionPlot[evolution_WolframModelEvolutionObject,
 
 We can now see phases more clearly:
 
-```
+```wl
 In[] := particleMotionPlot[
  WolframModel[{{1, a, b, c, d}, {1, 2}} -> {{2, d, a, b, c}},
   {{1, x, y, y, y}, {1, 2}, {2, 3}, {3, 4}, {4, 5}}, Infinity], 
@@ -193,7 +193,7 @@ In[] := particleMotionPlot[
 
 Things get more interesting if the track splits:
 
-```
+```wl
 In[] := particleMotionPlot[
  WolframModel[{{a, b, c, d, e}, {a, f}} -> {{f, e, b, c, d}},
   {{1, x, y, y, y}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {2, 6}, {6, 
@@ -208,7 +208,7 @@ In this case, there are two branches, and in both of them, the particle ends up 
 
 However, if the path lengths are not equal, the interference would be destructive:
 
-```
+```wl
 In[] := particleMotionPlot[
  WolframModel[{{1, a, b, c, d}, {1, 2}} -> {{2, d, a, b, c}},
   {{1, x, y, y, y}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {2, 6}, {6, 
@@ -227,7 +227,7 @@ Note further than once destructive interference occurs (and all relevant branche
 
 To make the destruction more apparent, we can add additional rules that would "delete them" (in the match-all system, they are not actually doing anything, but they are helpful for visualization purposes):
 
-```
+```wl
 In[] := particleMotionPlot[
  WolframModel[{{{1, a, b, c, d}, {1, 2}} -> {{2, d, a, b, c}}, {{n, x,
        y, y, y}, {n, y, y, x, y}} -> {}, {{n, y, x, y, y}, {n, y, y, 
@@ -251,12 +251,12 @@ To do that, let's say we have paths of different lengths going from two slits to
 The difference between lengths is going to depend on the screen point.
 We get something like this (obviously, this is a very crude example since the "metric" between the slits and the screen is not at all euclidean).
 
-```
+```wl
 path[s_, t_, length_] := 
  Partition[Join[{s}, Table[Unique["v"], length], {t}], 2, 1]
 ```
 
-```
+```wl
 In[] := particleMotionPlot[
  WolframModel[{{{a, b, c, d, e}, {a, f}} -> {{f, e, b, c, d}}, {{n, x,
        y, y, y}, {n, y, y, x, y}} -> {}, {{n, y, x, y, y}, {n, y, y, 
@@ -278,7 +278,7 @@ In[] := particleMotionPlot[
 As you can see, the only remaining final states of the particle are `o1`, `o3` and `o5`. The other two have been destroyed.
 If we continue evolving this futher, all the branches will evolve, but only `o1`, `o3` and `o5` will remain "uncancelled":
 
-```
+```wl
 In[] := particleMotionPlot[
  WolframModel[{{{a, b, c, d, e}, {a, f}} -> {{f, e, b, c, d}}, {{n, x,
        y, y, y}, {n, y, y, x, y}} -> {}, {{n, y, x, y, y}, {n, y, y, 
@@ -308,7 +308,7 @@ And let's see what kind of behavior we can get that way.
 
 If the line only has 3 vertices, and we start in the middle, the particle oscillates between being in the middle, and being in the superposition of the sides:
 
-```
+```wl
 In[] := Table[particleMotionPlot[
   WolframModel[{{{1, a, b, c, d}} -> {{1, d, a, b, c}}, {{1, a, b, c, 
        d}, {1, 2}} -> {{2, a, b, c, d}}}, 
@@ -323,7 +323,7 @@ In[] := Table[particleMotionPlot[
 
 We can even write a function to compute probabilities of different positions, and plot the evolution of essentially the wave function over time:
 
-```
+```wl
 positionProbabilities[evolution_] := 
  List @@@ Normal[(Association[
        Rule @@@ 
@@ -343,7 +343,7 @@ positionProbabilities[evolution_] :=
                0]]]][[All, 2]]]], Total]]
 ```
 
-```
+```wl
 motionPlot[init_, width_, steps_] := 
  ArrayPlot[(Sort /@ 
      Table[positionProbabilities[
@@ -355,7 +355,7 @@ motionPlot[init_, width_, steps_] :=
     2]]]
 ```
 
-```
+```wl
 In[] := motionPlot[{{0, x, y, y, y}}, 8, 8]
 ```
 
@@ -366,7 +366,7 @@ The issue we have here is that the "energy" of the particle is very large, the p
 
 Because of that, it's hard to distinguish the interference caused by these discretization effects from the interference caused by, i.e., multiple slits:
 
-```
+```wl
 In[] := motionPlot[{{-1, x, y, y, y}, {1, x, y, y, y}}, 9, 8]
 ```
 
@@ -374,7 +374,7 @@ In[] := motionPlot[{{-1, x, y, y, y}, {1, x, y, y, y}}, 9, 8]
 
 One thing we can do is making slits wider, in which case choosing phases in a certain way, we can get rid of the interference due to discretization:
 
-```
+```wl
 In[] := motionPlot[{{0, x, y, y, y}, {1, y, y, x, y}}, 9, 8]
 ```
 
@@ -382,7 +382,7 @@ In[] := motionPlot[{{0, x, y, y, y}, {1, y, y, x, y}}, 9, 8]
 
 If we now put two such slits close to each other, we can get the interference back (note also that the center column is completely canceled out):
 
-```
+```wl
 In[] := motionPlot[{{-2, x, y, y, y}, {-1, y, y, x, y}, {1, x, y, y, y}, {2, 
    y, y, x, y}}, 10, 8]
 ```
@@ -400,25 +400,25 @@ More significantly, it is not clear how to change the basis.
 Consider, for example, a single qubit.
 We can represent its states with two possible edges, say,
 
-```
+```wl
 |0> -> {0, x, y, y, y}, |1> -> {1, x, y, y, y}
 ```
 
 we can then represent combinations of those as branchlike-separated groups of edges, i.e.,
 
-```
+```wl
 1/Sqrt[2] (|0> + |1>) -> {{0, x, y, y, y}, {1, x, y, y, y}}
 ```
 
 and
 
-```
+```wl
 1/Sqrt[2] (|0> + I |1>) -> {{0, x, y, y, y}, {1, y, x, y, y}}
 ```
 
 etc. We can represent unbalanced combinations as well, for example,
 
-```
+```wl
 1/Sqrt[3] (|0> + 2 I |1>) -> {{0, x, y, y, y}, {1, y, x, y, y}, {1, y, x, y, y}}
 ```
 
@@ -427,11 +427,11 @@ At some level it makes sense, as there is indeed no way to encode an infinite-pr
 However, we also expect from the quantum theory that arbitrary-rotated bases are equivalent.
 For example, it appears that we should have a symmetry where we can define
 
-```
+```wl
 1/Sqrt[2] (|0> + |1>) -> |a>
 ```
 
-```
+```wl
 1/Sqrt[2] (|0> - |1>) -> |b>
 ```
 
@@ -440,7 +440,7 @@ However, in our interpretation, two edges will now need to be used for each basi
 
 It appears at first that [Spekkens toy model](https://arxiv.org/abs/quant-ph/0401052) can potentially provide a solution, however, while it works well for single qubits, combinations of them appear to be tricky as states like this
 
-```
+```wl
 1/Sqrt[2] (|00> + |11>)
 ```
 
