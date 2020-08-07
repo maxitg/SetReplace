@@ -169,32 +169,22 @@ It is called match-all because it will match not only the spacelike sets of edge
 
 #### Evolution
 
-To understand what it means, let's try some examples using the evolution in [2992742](https://github.com/maxitg/SetReplace/commit/299274283dde6d86b6e660a36f64beaed7d73269).
+To understand what it means, let's try some examples.
 In the match-all system, even the most trivial rules become extremely complicated quite quickly, so let's use the pattern rules for this one.
-Furthermore, let's use a little helper function which would label the causal graph vertices with the input and output edges of the corresponding events:
-
-```wl
-labeledCausalGraph[evolution_, opts___] := 
- evolution["LayeredCausalGraph", opts, 
-  VertexLabels -> 
-   Thread[Range[
-      evolution["EventsCount"]] -> (Placed[#, {After, Above}] &) /@ 
-      OutputForm /@ (Column /@ (Riffle[List @@ #, "\[DownArrow]"] &) /@
-            Last /@ evolution["EventsList"] /. 
-         edgeIndex_Integer :> 
-          evolution["AllExpressions"][[edgeIndex]])]]
-```
+We will be using the [`"ExpressionsEventsGraph"`](/README.md#causal-graphs) property of the `WolframModel` which will
+allow us to see both expressions (edges) and events on the same graph.
 
 Let's then take a look at the following system:
 
 ```wl
-In[] := labeledCausalGraph[
- WolframModel[<|
-   "PatternRules" -> {{{1, 2}} -> {{2, 3}}, {{1, 2}, {2, 3}} -> {{1, 
-        2, 3}}}|>, {{1, 2}}, Infinity]]
+In[] := WolframModel[<|"PatternRules" -> {{{1, 2}} -> {{2, 3}},
+     {{1, 2}, {2, 3}} -> {{1, 2, 3}}}|>,
+  {{1, 2}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="Images/MatchAllTimelikeMatching.png" width="137">
+<img src="Images/MatchAllTimelikeMatching.png" width="232">
 
 In this case we have two rules, `{{1, 2}} -> {{2, 3}}` and `{{1, 2}, {2, 3}} -> {{1, 2, 3}}`.
 Note that here `1`, `2` and `3` are not patterns but labeled vertices.
@@ -215,24 +205,26 @@ Therefore it will be matched again by the second rule.
 After that, the second and the third rules will keep "dancing" supplying inputs to one another:
 
 ```wl
-In[] := labeledCausalGraph[
- WolframModel[<|
-   "PatternRules" -> {{{1, 2}} -> {{2, 3}}, {{1, 2}, {2, 3}} -> {{1, 
-        2, 3}}, {{1, 2}, {1, 2, 3}} -> {{2, 3}}}|>, {{1, 2}}, 6]]
+In[] := WolframModel[<|"PatternRules" -> {{{1, 2}} -> {{2, 3}},
+     {{1, 2}, {2, 3}} -> {{1, 2, 3}},
+     {{1, 2}, {1, 2, 3}} -> {{2, 3}}}|>, {{1, 2}}, 6,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, Before]]
 ```
 
-<img src="Images/MatchAllRepeatingMatching.png" width="150">
+<img src="Images/MatchAllRepeatingMatching.png" width="307">
 
 The match-all system will match branchlike events as well, as can be seen in the following example:
 
 ```wl
-In[] := labeledCausalGraph[
- WolframModel[<|
-   "PatternRules" -> {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{2, 4}}, {{2,
-         3}, {2, 4}} -> {{2, 3, 4}}}|>, {{1, 2}}, 6]]
+In[] := WolframModel[<|"PatternRules" -> {{{1, 2}} -> {{2, 3}},
+     {{1, 2}} -> {{2, 4}}, {{2, 3}, {2, 4}} -> {{2, 3, 4}}}|>,
+  {{1, 2}}, 6,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="Images/MatchAllBranchlikeMatching.png" width="497">
+<img src="Images/MatchAllBranchlikeMatching.png" width="225">
 
 Note in the above there are two possibilities to match `{{1, 2}}`, which are incompatible according to the ordinary `WolframModel` and can only be achieved one-at-a-time with different choices of the `"EventOrderingFunction"`.
 However, the match-all system can still match them with the third rule.
@@ -278,14 +270,15 @@ And in simple systems, it is quite straightforward to understand what the separa
 I.e., in the following three systems, the edges `{2, 3}` and `{3, 4}` are spacelike, branchlike and timelike respectively:
 
 ```wl
-In[] := Framed[labeledCausalGraph[
-    WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, 
-     Infinity]]] & /@ {{{1, 2}} -> {{2, 3}, {3, 
-     4}}, {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}}, {{{1, 
-      2}} -> {{2, 3}}, {{2, 3}} -> {{3, 4}}}}
+In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
+     "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+    VertexLabels -> Placed[Automatic, After]],
+   FrameStyle -> LightGray] & /@ {{{1, 2}} -> {{2, 3}, {3, 4}},
+  {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}},
+  {{{1, 2}} -> {{2, 3}}, {{2, 3}} -> {{3, 4}}}}
 ```
 
-<img src="Images/SeparationComparison.png" width="458">
+<img src="Images/SeparationComparison.png" width="512">
 
 And this separation is typically not too hard to understand for edges that are immediate neighbors in the causal graph.
 However, what if the edges are farther down in history?
@@ -294,25 +287,27 @@ For example, what about the edges `{4, 5}` and `{5, 6}` here?
 Presumably, they are spacelike edges in a space created as a result of quantum effects (similar to how the interference pattern from a double-slit experient displayed on a computer monitor is a perfectly classical state inside a computer, but it was nevertheless caused by quantum effects):
 
 ```wl
-In[] := labeledCausalGraph[
- WolframModel[<|
-   "PatternRules" -> {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}, {{2,
-         3}, {3, 4}} -> {{4, 5}, {5, 6}}}|>, {{1, 2}}, Infinity]]
+In[] := WolframModel[<|
+   "PatternRules" -> {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}},
+     {{2, 3}, {3, 4}} -> {{4, 5}, {5, 6}}}|>, {{1, 2}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="Images/MatchAllQuantumSpacelikeMatching.png" width="497">
+<img src="Images/MatchAllQuantumSpacelikeMatching.png" width="351">
 
 But what about something like this?
 
 ```wl
-In[] := labeledCausalGraph[
- WolframModel[<|
-   "PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}}, {{v, 1}} -> {{v, 
-        1, 1}, {v, 1, 2}}, {{v, 1, 1}, {v, 2}} -> {{v, f, 1}}, {{v, 1,
-         2}, {v, 2}} -> {{v, f, 2}}}|>, {{v, i}}, Infinity]]
+In[] := WolframModel[<|"PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}},
+     {{v, 1}} -> {{v, 1, 1}, {v, 1, 2}},
+     {{v, 1, 1}, {v, 2}} -> {{v, f, 1}},
+     {{v, 1, 2}, {v, 2}} -> {{v, f, 2}}}|>, {{v, i}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="Images/MatchAllSpacelikeBranchlikeMixed.png" width="497">
+<img src="Images/MatchAllSpacelikeBranchlikeMixed.png" width="352">
 
 What is the separation between the edges `{v, f, 1}` and `{v, f, 2}`?
 On one hand they are spacelike, because one of their common ancestors is the event `{{v, 1}} -> {{v, 1, 1}, {v, 1, 2}}`.
