@@ -6,12 +6,12 @@ This note introduces [local multiway systems](/README.md#eventselectionfunction)
 singleway and [global multiway](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) systems,
 and explores the possible connections to quantum theory.
 
-By default, [`WolframModel`](README.md#wolframmodel-and-wolframmodelevolutionobject) computes only a single branch of
+By default, [`WolframModel`](/README.md#wolframmodel-and-wolframmodelevolutionobject) computes only a single branch of
 the evolution.
 If there are multiple matches of the rules to the hypergraph, only one of these matches will be turned into an
 actualized event, the other matches will be ignored, and will not appear in the evolution object.
 
-This, however, introduces a dependence on the [evaluation order](README.md#eventorderingfunction), which is not
+This, however, introduces a dependence on the [evaluation order](/README.md#eventorderingfunction), which is not
 desirable as it is similar to choosing a preferred reference frame, which is not consistent with
 [relativity](https://en.wikipedia.org/wiki/Theory_of_relativity#Special_relativity).
 
