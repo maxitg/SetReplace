@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This note introduces [local multiway systems](README.md#eventselectionfunction), examines them in the context of the
+This note introduces [local multiway systems](/README.md#eventselectionfunction), examines them in the context of the
 singleway and [global multiway](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) systems,
 and explores the possible connections to quantum theory.
 
