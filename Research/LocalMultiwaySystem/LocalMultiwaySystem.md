@@ -1,13 +1,42 @@
 # Local Multiway System
 
-## WolframModel
+## Introduction
 
-Multiway branching is not yet implemented in `WolframModel`.
-If two matches are possible such that their sets of inputs overlap, only one of the matches is selected, and the other one is ignored and deleted.
+This note introduces [local multiway systems](README.md#eventselectionfunction), examines them in the context of the
+singleway and [global multiway](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) systems,
+and explores the possible connections to quantum theory.
 
-However, branching is desirable, as it makes it much easier to think about quantum mechanics in these models.
-Also, choosing a single path of evolution introduces arbitrariness to the system.
-Now, a system of rules is insufficient, and one has to specify the event ordering function as well.
+By default, [`WolframModel`](README.md#wolframmodel-and-wolframmodelevolutionobject) computes only a single branch of
+the evolution.
+If there are multiple matches of the rules to the hypergraph, only one of these matches will be turned into an
+actualized event, the other matches will be ignored, and will not appear in the evolution object.
+
+This, however, introduces a dependence on the [evaluation order](README.md#eventorderingfunction), which is not
+desirable as it is similar to choosing a preferred reference frame, which is not consistent with
+[relativity](https://en.wikipedia.org/wiki/Theory_of_relativity#Special_relativity).
+
+There are multiple possible resolutions to this problem.
+One way is to only consider
+[causal invariant](https://resources.wolframcloud.com/FunctionRepository/resources/CausalInvariantQ) rules, i.e., the
+rules with a property, such that the result of the evolution does not depend on the event order.
+This is, however, quite limiting as we will be ignoring the majority of the rules.
+Also, the idea of having multiple possible evolution paths seems relevant to quantum physics.
+
+Another approach is to consider the so-called multiway systems, which evaluate all possible ways to resolve such
+overlaps between matches.
+This is the approach that is discussed in this note.
+
+The original type of the multiway system that was first considered in the
+[Wolfram Physics Project](https://www.wolframphysics.org) is what we will call the
+[*global* multiway system](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem), which will
+be discussed in more detail in the next section.
+Here we propose a new kind of a multiway system, called *local* multiway system.
+The prime difference is that it allows one to consider the branching of only parts of space (subgraphs of the state
+hypergraph) instead of the entire hypergraph all at once.
+
+In the subsequent sections, we will discuss the local multiway system in more detail, the types of relationships
+possible between edges and, more generally, parts of the hypergraph, and provide some ideas on possible connections to
+quantum physics.
 
 ## Global Multiway System
 
