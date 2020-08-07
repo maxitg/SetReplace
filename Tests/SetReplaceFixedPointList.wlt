@@ -40,6 +40,13 @@
         {SetReplaceFixedPointList::invalidRules}
       ],
 
+      (** Options are valid **)
+
+      testUnevaluated[
+        SetReplaceFixedPointList[{1, 1, 1}, {1 -> 2}, # -> 123],
+        {SetReplaceFixedPointList::optx}
+      ] & /@ {"$$$InvalidOption###", "EventSelectionFunction"},
+
       (* Implementation *)
 
       VerificationTest[

@@ -19,12 +19,12 @@ PackageExport["SetReplaceFixedPointList"]
 
 
 SetReplaceFixedPointList::usage = usageString[
-	"SetReplaceFixedPointList[`s`, {\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) \[Rule] ",
-	"\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
-	"\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
-	"\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), \[Ellipsis]}] performs SetReplace repeatedly ",
-	"until no further events can be matched, ",
-	"and returns the list of all intermediate sets."];
+  "SetReplaceFixedPointList[`s`, {\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) \[Rule] ",
+  "\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
+  "\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
+  "\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), \[Ellipsis]}] performs SetReplace repeatedly ",
+  "until no further events can be matched, ",
+  "and returns the list of all intermediate sets."];
 
 
 (* ::Section:: *)
@@ -32,7 +32,7 @@ SetReplaceFixedPointList::usage = usageString[
 
 
 SyntaxInformation[SetReplaceFixedPointList] =
-	{"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
+  {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 
 
 (* ::Section:: *)
@@ -44,25 +44,29 @@ SyntaxInformation[SetReplaceFixedPointList] =
 
 
 SetReplaceFixedPointList[args___] := 0 /;
-	!Developer`CheckArgumentCount[SetReplaceFixedPointList[args], 2, 2] && False
+  !Developer`CheckArgumentCount[SetReplaceFixedPointList[args], 2, 2] && False
 
 
 (* ::Section:: *)
 (*Options*)
 
 
-Options[SetReplaceFixedPointList] := Options[setSubstitutionSystem]
+Options[SetReplaceFixedPointList] = {
+  Method -> Automatic,
+  TimeConstraint -> Infinity,
+  "EventOrderingFunction" -> Automatic};
 
 
 (* ::Section:: *)
 (*Implementation*)
 
 
-SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] := Module[{result},
-	result = Check[
-		setSubstitutionSystem[
-			rules, set, <||>, SetReplaceFixedPointList, False, o],
-		$Failed];
-	If[result === $Aborted, result, result["SetAfterEvent", #] & /@ Range[0, result["EventsCount"]]] /;
-		result =!= $Failed
+SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] /;
+    recognizedOptionsQ[expr, SetReplaceFixedPointList, {o}] := Module[{result},
+  result = Check[
+    setSubstitutionSystem[
+      rules, set, <||>, SetReplaceFixedPointList, False, o],
+    $Failed];
+  If[result === $Aborted, result, result["SetAfterEvent", #] & /@ Range[0, result["EventsCount"]]] /;
+    result =!= $Failed
 ]

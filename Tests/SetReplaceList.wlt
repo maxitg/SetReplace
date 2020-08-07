@@ -18,12 +18,12 @@
 
       testUnevaluated[
         SetReplaceList[{1}],
-        {SetReplaceList::argr}
+        {SetReplaceList::argtu}
       ],
 
       testUnevaluated[
         SetReplaceList[{1}, {2 -> 5, 3 :> 6}, 10, 10],
-        {SetReplaceList::argrx}
+        {SetReplaceList::argt}
       ],
 
       (** Set is a list **)
@@ -46,6 +46,13 @@
         SetReplaceList[{1}, {1 -> 2}, -1],
         {SetReplaceList::nonIntegerIterations}
       ],
+
+      (** Options are valid **)
+
+      testUnevaluated[
+        SetReplaceList[{1, 2, 3}, {2 -> 5, 3 :> 6, 5 :> 9}, # -> 123],
+        {SetReplaceList::optx}
+      ] & /@ {"$$$InvalidOption###", "EventSelectionFunction"},
 
       (* Implementation *)
 

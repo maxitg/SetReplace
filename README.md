@@ -330,7 +330,7 @@ Other properties of the evolution object describe the relationships between edge
 * `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions of this or earlier generations. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](#step-limiters) is used.
 * `"TerminationReason"` shows the reason evaluation was stopped. See the [`"TerminationReason"`](#termination-reason) property for more details.
 * `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example only has one rule. See [Rule Indices for Events](#rule-indices-for-events) for a more interesting case. The first value, `0`, corresponds to the initial event, which is included in the evolution object but is omitted [by default](#includeboundaryevents) when computing [properties](#properties).
-* `"EventInputs"` shows which edge indices from `"AtomLists"` were used in each event. The order corresponds to the input patterns of the rules. The first value, `{}`, again corresponds to the initial event.
+* `"EventInputs"` shows which edge indices from `"AtomLists"` were used in each event. The order corresponds to the input patterns of the rules. The first value, `{}`, again corresponds to the initial event. Note, the same index can appear multiple times in [multiway systems](#eventselectionfunction).
 * `"EventOutputs"` similarly shows which edge indices from `"AtomLists"` were produced by each event. There are no duplicates in these lists because events always generate new edges.
 * `"EventGenerations"` shows how many layers of predecessors a given event has.
 
@@ -753,6 +753,18 @@ Out[] = {18, 19, 29, 34, 35, 36, 37, 39, 40, 42, 43, 44, 45, 49, 50, 51, 52,
   88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101}
 ```
 
+and **`"GenerationEdgeIndices"`** is an analog of [`"Generation"`](#states):
+
+```wl
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
+   {{2, 7, 8}, {3, 9, 10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11,
+     10}, {13, 7}, {14, 9}},
+  {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}},
+  6]["GenerationEdgeIndices", 2]
+Out[] = {10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+  27, 28, 29}
+```
+
 #### Events
 
 **`"AllEventsList"`** (aka `"EventsList"`) and **`"GenerationEventsList"`** both return all replacement events throughout the evolution. The only difference is how the events are arranged. `"AllEventsList"` returns the flat list of all events, whereas `"GenerationEventsList"` splits them into sublists for each generation:
@@ -820,9 +832,9 @@ Out[] = {{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12},
    {}, {}, {}, {}}
 ```
 
-Here 0 refers to the initial state. Note the format is different for creator and destroyer events. That is because each edge has a unique creator event, but can have multiple destroyer events in multiway systems.
+Here 0 refers to the initial state. Note the format is different for creator and destroyer events. That is because each edge has a unique creator event, but can have multiple destroyer events in [multiway systems](#eventselectionfunction).
 
-There is another property, **`"EdgeDestroyerEventIndices"`** (aka `"DestroyerEvents"`), left for compatibility reasons, which has the same format as **`"EdgeCreatorEventIndices"`**.
+There is another property, **`"EdgeDestroyerEventIndices"`** (aka `"DestroyerEvents"`), left for compatibility reasons, which has the same format as **`"EdgeCreatorEventIndices"`**. However, it does not work for [multiway systems](#eventselectionfunction).
 
 ```wl
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
@@ -898,6 +910,17 @@ In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
 Out[] = {{3, 8, 8, 8, 2, 10, 0, 9, 7}, {7, 11, 16, 12, 9}, {9, 18, 28}, {28,
   27}, {55}}
 ```
+
+`"ExpressionsEventsGraph"` is particularly useful for multiway systems, as it allows one to immediately see multiway branching. For example, here the expression-vertex `{2}` has the out-degree of 2, which indicates it was used in two conflicting events, which indicates multiway branching:
+
+```wl
+In[] := WolframModel[{{1}, {1, 2}} -> {{2}}, {{1}, {1, 2}, {2, 3}, {2, 4}},
+  Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
+```
+
+<img src="READMEImages/MultiwayExpressionsEventsGraph.png" width="466">
 
 `"CausalGraph"`, `"LayeredCausalGraph"` and `"ExpressionsEventsGraph"` properties all accept [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) options, as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html). Some options have special behavior for the [`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html) value, i.e., `VertexLabels -> Automatic` in `"ExpressionsEventsGraph"` displays the contents of expressions, which are not the vertex names in that graph (as there can be multiple expressions with the same contents).
 
@@ -1141,7 +1164,7 @@ Objects are automatically converted to the latest version when they are encounte
 
 ### Options
 
-["VertexNamingFunction"](#vertexnamingfunction) | ["IncludePartialGenerations"](#includepartialgenerations) | ["IncludeBoundaryEvents"](#includeboundaryevents) | [Method](#method) | [TimeConstraint](#timeconstraint) | ["EventOrderingFunction"](#eventorderingfunction)
+["VertexNamingFunction"](#vertexnamingfunction) | ["IncludePartialGenerations"](#includepartialgenerations) | ["IncludeBoundaryEvents"](#includeboundaryevents) | [Method](#method) | [TimeConstraint](#timeconstraint) | ["EventOrderingFunction"](#eventorderingfunction) | ["EventSelectionFunction"](#eventselectionfunction)
 
 #### "VertexNamingFunction"
 
@@ -1396,6 +1419,71 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
 ```
 
 <img src="READMEImages/AllEventOrderingFunctionPlots.png" width="746">
+
+#### "EventSelectionFunction"
+
+**`EventSelectionFunction`** allows one to evaluate local multiway systems. Currently, two values are supported, `"GlobalSpacelike"` and `None`.
+
+`"GlobalSpacelike"` is the default, and is the single-way evolution. "Spacelike" refers to relationships between edges, and "global" means each edge is only used once in an event. As a consequence, there are no branchlike pairs of edges.
+
+On the other hand, `None` (aka match-all) event selection function matches everything. It does not disable edges after they were used, so they can be reused repeatedly (each unique match is only used once, though).
+
+For example, consider a system
+
+```wl
+In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {2, 3}, {2, 4}},
+  Infinity]["ExpressionsEventsGraph", VertexLabels -> Automatic]
+```
+
+<img src="READMEImages/GlobalSpacelikeEvolution.png" width="419">
+
+In this example we used the default `"GlobalSpacelike"` selection function, and the evolution terminated after a single event, because the edge `{1, 2}` was used, and it could not be reused to be matched with `{2, 4}`. However, let's look at what `"EventSelectionFunction" -> None` will do:
+
+```wl
+In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {2, 3}, {2, 4}},
+  Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Automatic]
+```
+
+<img src="READMEImages/SpacelikeMatching.png" width="478">
+
+In this case, the edge `{1, 2}` was matched twice, which we can also see by looking at its list of destroyer events:
+
+```wl
+In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}},
+ {{1, 2}, {2, 3}, {2, 4}}, Infinity, "EdgeDestroyerEventsIndices",
+ "EventSelectionFunction" -> None]
+Out[] = {{1, 2}, {1}, {2}, {}, {}}
+```
+
+In the previous example, we matched the same edge twice, but every match's inputs were spacelike with each other. I.e., every edge in the previous input could be generated by choosing a different [`"EventOrderingFunction"`](#eventorderingfunction). However, `"EventSelectionFunction"` also matches edges that are branchlike (i.e., edges from different multiway branches) and timelike (i.e., edges that causally depend on each other).
+
+The edges `{1, 2, 3}` and `{1, 2, 4}` in the next example are branchlike, they can never co-exist in a single `"GlobalSpacelike"` evolution no matter which ["EventOrderingFunction"](#eventorderingfunction) one chooses. The match-all (`"EventSelectionFunction" -> None`) evolution matches them nonetheless.
+
+```wl
+In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
+   {{1, 2, 3}, {1, 2, 4}} -> {{1, 2, 3, 4}}},
+  {{1, 2}, {2, 3}, {2, 4}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
+```
+
+<img src="READMEImages/BranchlikeMatching.png" width="373">
+
+Similarly, it matches timelike edges `{1, 2}` and `{1, 2, 3}` below:
+
+```wl
+In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
+   {{1, 2}, {1, 2, 3}} -> {{1, 2, 3, 4}}},
+  {{1, 2}, {2, 3}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
+```
+
+<img src="READMEImages/TimelikeMatching.png" width="247">
+
+Because of this branchlike and timelike matching, branches in `"EventSelectionFunction" -> None` evolution are not separated but can "interfere" with one another.
 
 ## WolframModelPlot
 
