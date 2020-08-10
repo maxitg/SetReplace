@@ -68,6 +68,11 @@ PackageScope["$rulialGraphVertexIconFrameMargins"]
 PackageScope["$genericLinePlotStyles"]
 PackageScope["$genericGraphEdgeStyle"]
 
+combinedOptionsProperties[plotFunction_][options__] := Sequence[
+  "Options" -> {options},
+  "Function" -> (plotFunction[#, options] &)
+]
+
 $styleNames = KeySort /@ KeySort @ <|
   "EvolutionObject" -> <|"Icon" -> $evolutionObjectIcon|>,
   "SpatialGraph" -> <|
@@ -90,14 +95,16 @@ $styleNames = KeySort /@ KeySort @ <|
     "HighlightStyle" -> $highlightStyle,
     "HyperedgeRendering" -> $hyperedgeRendering,
     "DefaultImageSize" -> $wolframModelPlotImageSize,
-    "Background" -> $spatialGraphBackground
+    "Background" -> $spatialGraphBackground,
+    combinedOptionsProperties[Graph][VertexStyle -> $vertexStyle, EdgeStyle -> $edgeLineStyle]
   |>,
   "CausalGraph" -> <|
     "VertexStyle" -> $causalGraphVertexStyle,
     "InitialVertexStyle" -> $causalGraphInitialVertexStyle,
     "FinalVertexStyle" -> $causalGraphFinalVertexStyle,
     "EdgeStyle" -> $causalGraphEdgeStyle,
-    "Background" -> $causalGraphBackground
+    "Background" -> $causalGraphBackground,
+    combinedOptionsProperties[Graph][VertexStyle -> $causalGraphVertexStyle, EdgeStyle -> $causalGraphEdgeStyle]
   |>,
   "ExpressionsEventsGraph" -> <|
     "EventVertexStyle" -> $causalGraphVertexStyle,
@@ -131,18 +138,21 @@ $styleNames = KeySort /@ KeySort @ <|
 
   "SpatialGraph3D" -> <|
     "VertexStyle" -> $spatialGraph3DVertexStyle,
-    "EdgeLineStyle" -> $spatialGraph3DEdgeStyle
+    "EdgeLineStyle" -> $spatialGraph3DEdgeStyle,
+    combinedOptionsProperties[Graph3D][VertexStyle -> $spatialGraph3DVertexStyle, EdgeStyle -> $spatialGraph3DEdgeStyle]
   |>,
 
   (* MultiwaySystem styles *)
-  
+
   "StatesGraph" -> <|
     "VertexStyle" -> $statesGraphVertexStyle,
-    "EdgeStyle" -> $statesGraphEdgeStyle
+    "EdgeStyle" -> $statesGraphEdgeStyle,
+    combinedOptionsProperties[Graph][VertexStyle -> $statesGraphVertexStyle, EdgeStyle -> $statesGraphEdgeStyle]
   |>,
   "StatesGraph3D" -> <|
     "VertexStyle" -> $statesGraphVertexStyle, (* same as 2D *)
-    "EdgeStyle" -> $statesGraph3DEdgeStyle
+    "EdgeStyle" -> $statesGraph3DEdgeStyle,
+    combinedOptionsProperties[Graph][VertexStyle -> $statesGraphVertexStyle, EdgeStyle -> $statesGraph3DEdgeStyle]
   |>,
   "EvolutionCausalGraph" -> <|
     "StateVertexStyle" -> $statesGraphVertexStyle,
@@ -152,7 +162,8 @@ $styleNames = KeySort /@ KeySort @ <|
   |>,
   "BranchialGraph" -> <|
     "VertexStyle" -> $statesGraphVertexStyle,
-    "EdgeStyle" -> $branchialGraphEdgeStyle
+    "EdgeStyle" -> $branchialGraphEdgeStyle,
+    combinedOptionsProperties[Graph][VertexStyle -> $statesGraphVertexStyle, EdgeStyle -> $branchialGraphEdgeStyle]
   |>,
   "RulialGraph" -> <|
     "VertexStyle" -> $rulialGraphVertexStyle,
@@ -160,16 +171,19 @@ $styleNames = KeySort /@ KeySort @ <|
     "VertexIconFontColor" -> $rulialGraphVertexIconFontColor,
     "VertexIconBackground" -> $rulialGraphVertexIconBackground,
     "VertexIconFrameStyle" -> $rulialGraphVertexIconFrameStyle,
-    "VertexIconFrameMargins" -> $rulialGraphVertexIconFrameMargins
+    "VertexIconFrameMargins" -> $rulialGraphVertexIconFrameMargins,
+    combinedOptionsProperties[Graph][VertexStyle -> $rulialGraphVertexStyle, EdgeStyle -> $rulialGraphEdgeStyle]
   |>,
 
   (* Generic plots *)
 
   "GenericLinePlot" -> <|
-    "PlotStyles" -> $genericLinePlotStyles
+    "PlotStyles" -> $genericLinePlotStyles,
+    "Options" -> {PlotStyle -> $genericLinePlotStyles}
   |>,
   "GenericGraph" -> <|
-    "EdgeStyle" -> $genericGraphEdgeStyle
+    "EdgeStyle" -> $genericGraphEdgeStyle,
+    combinedOptionsProperties[Graph][EdgeStyle -> $genericGraphEdgeStyle]
   |>
 |>;
 
