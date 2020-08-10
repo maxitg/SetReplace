@@ -142,6 +142,15 @@
         MemberQ[
           WolframPhysicsProjectStyleData /@ $WolframPhysicsProjectPlotThemes,
           WolframPhysicsProjectStyleData[]]
+      ],
+
+      VerificationTest[
+        Options[
+          Graph[{1 -> 2, 2 -> 3, 2 -> 4}, WolframPhysicsProjectStyleData["CausalGraph", "Options"]],
+          {VertexStyle, EdgeStyle}],
+        Options[
+          WolframPhysicsProjectStyleData["CausalGraph", "Function"][Graph[{1 -> 2, 2 -> 3, 2 -> 4}]],
+          {VertexStyle, EdgeStyle}]
       ]
     }]
   |>,
