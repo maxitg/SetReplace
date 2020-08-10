@@ -2077,6 +2077,25 @@ In[] := WolframPhysicsProjectStyleData["CausalGraph"]
 
 This function is useful if one needs to produce "fake" example plots using styles consistent with the Wolfram Physics Project.
 
+For graphs composed of only a single type of vertices and edges, there is a short-hand syntax.
+One can get the list of all options that needs to be passed using an `"Options"` property:
+
+```wl
+In[] := WolframPhysicsProjectStyleData["SpatialGraph3D", "Options"]
+```
+
+<img src="READMEImages/SpatialGraph3DOptions.png" width="625">
+
+Alternatively, one can use the `"Function"` property, which would give a function that takes a graph and produces a
+correctly styled graph:
+
+```wl
+In[] := WolframPhysicsProjectStyleData["SpatialGraph3D", "Function"][
+ Graph3D[{1 -> 2, 2 -> 3, 3 -> 1, 3 -> 4, 4 -> 1}]]
+```
+
+<img src="READMEImages/FakeStyledSpatialGraph3D.png" width="478">
+
 ### Build Data
 
 There are two constants containing information about the build. **`$SetReplaceGitSHA`** is a git SHA of the currently-used version of *SetReplace*:
