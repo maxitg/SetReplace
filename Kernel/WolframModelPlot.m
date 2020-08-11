@@ -13,7 +13,7 @@ PackageScope["hypergraphEmbedding"]
 WolframModelPlot::usage = usageString[
   "WolframModelPlot[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph."];
 
-WolframModelPlo3Dt::usage = usageString[
+WolframModelPlot3D::usage = usageString[
   "WolframModelPlot3D[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph in 3D."];
 
 
@@ -261,7 +261,7 @@ correctWolframModelPlotOptionsQ[head_, expr_, edges_, opts_] :=
 correctCoordinateRulesQ[head_, coordinateRules_] :=
   If[!MatchQ[coordinateRules,
       Automatic |
-      {(_ -> {Repeated[_ ? NumericQ, {If[head === WolframModelPlot, 2, 3]}]})...}],
+      {(_ -> {Repeated[_ ? NumericQ, {Evaluate @ If[head === WolframModelPlot, 2, 3]}]})...}],
     Message[head::invalidCoordinates, coordinateRules];
     False,
     True
