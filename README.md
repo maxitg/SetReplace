@@ -931,7 +931,7 @@ Expressions can be related in different ways to one another depending on the cau
 graph.
 
 There are three fundamental cases, the separation between two edges can be:
-* spacelike (i.e., they are produced as multiple outputs of a single event)),
+* spacelike (i.e., they are produced as multiple outputs of a single event),
 * branchlike (they are created as a consequence of multiple events matching to the same edge), or
 * timelike (they are causally related).
 
