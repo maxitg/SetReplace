@@ -350,19 +350,20 @@ Out[] = 109
 Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList",
   "StatesPlotsList", "EventsStatesPlotsList",
   "AllEventsStatesEdgeIndicesList", "AllEventsStatesList",
-  "Generation", "StateEdgeIndicesAfterEvent", "StateAfterEvent",
-  "TotalGenerationsCount", "PartialGenerationsCount",
-  "GenerationsCount", "GenerationComplete", "AllEventsCount",
-  "GenerationEventsCountList", "GenerationEventsList",
-  "FinalDistinctElementsCount", "AllEventsDistinctElementsCount",
-  "VertexCountList", "EdgeCountList", "FinalEdgeCount",
-  "AllEventsEdgesCount", "AllEventsGenerationsList",
-  "ExpressionsEventsGraph", "CausalGraph", "LayeredCausalGraph",
-  "TerminationReason", "AllEventsRuleIndices", "AllEventsList",
-  "EventsStatesList", "EdgeCreatorEventIndices",
+  "GenerationEdgeIndices", "Generation", "StateEdgeIndicesAfterEvent",
+   "StateAfterEvent", "TotalGenerationsCount",
+  "PartialGenerationsCount", "GenerationsCount", "GenerationComplete",
+   "AllEventsCount", "GenerationEventsCountList",
+  "GenerationEventsList", "FinalDistinctElementsCount",
+  "AllEventsDistinctElementsCount", "VertexCountList",
+  "EdgeCountList", "FinalEdgeCount", "AllEventsEdgesCount",
+  "AllEventsGenerationsList", "ExpressionsEventsGraph", "CausalGraph",
+   "LayeredCausalGraph", "TerminationReason", "AllEventsRuleIndices",
+  "AllEventsList", "EventsStatesList", "EdgeCreatorEventIndices",
   "EdgeDestroyerEventsIndices", "EdgeDestroyerEventIndices",
-  "EdgeGenerationsList", "Properties", "Version", "Rules",
-  "CompleteGenerationsCount", "AllEventsEdgesList"}
+  "EdgeGenerationsList", "ExpressionsSeparation", "Properties",
+  "Version", "Rules", "CompleteGenerationsCount",
+  "AllEventsEdgesList"}
 ```
 
 Some properties take additional arguments, which can be supplied after the property name:
@@ -557,7 +558,7 @@ Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, s
 
 ### Properties
 
-[States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout Evolution](#all-edges-throughout-evolution) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules) | [Version](#version)
+[States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout Evolution](#all-edges-throughout-evolution) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Edge Separations](#edge-separations) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules) | [Version](#version)
 
 #### States
 
@@ -923,6 +924,91 @@ In[] := WolframModel[{{1}, {1, 2}} -> {{2}}, {{1}, {1, 2}, {2, 3}, {2, 4}},
 <img src="READMEImages/MultiwayExpressionsEventsGraph.png" width="466">
 
 `"CausalGraph"`, `"LayeredCausalGraph"` and `"ExpressionsEventsGraph"` properties all accept [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) options, as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html). Some options have special behavior for the [`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html) value, i.e., `VertexLabels -> Automatic` in `"ExpressionsEventsGraph"` displays the contents of expressions, which are not the vertex names in that graph (as there can be multiple expressions with the same contents).
+
+#### Edge Separations
+
+Expressions can be related in different ways to one another depending on the causal structure of the expressions-events
+graph.
+
+There are three fundamental cases, the separation between two edges can be:
+* spacelike (i.e., they are produced as multiple outputs of a single event)),
+* branchlike (they are created as a consequence of multiple events matching to the same edge), or
+* timelike (they are causally related).
+
+Here are examples for these three cases:
+
+```wl
+In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
+     "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+    VertexLabels -> Placed[Automatic, After]],
+   FrameStyle -> LightGray] & /@ {{{1, 2}} -> {{2, 3}, {3, 4}},
+  {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}},
+  {{{1, 2}} -> {{2, 3}}, {{2, 3}} -> {{3, 4}}}}
+```
+
+<img src="READMEImages/SeparationComparison.png" width="XXX">
+
+Note that in some cases "spacelike" separation refers to the possibility that both such edges can simultaneously exist
+in a singleway system, it is not always the case.
+For example, in a match-all system two edges (`{4, 5}` and `{5, 6}`) can be spacelike-separated even though they
+causally depend on a pair of branchlike separated edges:
+
+```wl
+In[] := WolframModel[<|
+   "PatternRules" -> {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}},
+     {{2, 3}, {3, 4}} -> {{4, 5}, {5, 6}}}|>, {{1, 2}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
+```
+
+<img src="READMEImages/MatchAllQuantumSpacelikeMatching.png" width="XXX">
+
+Further, branchlike separation takes precedence over spacelike separation, and timelike separation takes precedence over
+both.
+As such, edges `{v, f, 1}` and `{v, f, 2}` here are branchlike separated because one of their common ancestors is an
+expression even though the other one is an event:
+
+```wl
+In[] := WolframModel[<|"PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}},
+     {{v, 1}} -> {{v, 1, 1}, {v, 1, 2}},
+     {{v, 1, 1}, {v, 2}} -> {{v, f, 1}},
+     {{v, 1, 2}, {v, 2}} -> {{v, f, 2}}}|>, {{v, i}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
+ VertexLabels -> Placed[Automatic, After]]
+```
+
+<img src="READMEImages/MatchAllSpacelikeBranchlikeMixed.png" width="XXX">
+
+Specifically, the general algorithm for computing the separation between two edges `A` and `B` in an expressions-events
+graph is:
+1. Compute the past causal cones of both `A` and `B`.
+2. Compute the intersection between the causal cones.
+3. Take all vertices with out-degree zero (the future boundary of the intersection).
+4. If the boundary contains either `A` and `B`, they are timelike separated.
+5. If any vertices on the boundary are expression-vertices, they are branchlike separated.
+6. Otherwise, if all vertices on the boundary are event-vertices, they are spacelike separated.
+
+One can compute that separation using **`"ExpressionsSeparation"`** property.
+It takes two arguments, which are the indices of expressions from [`"AllEventsEdgesList"`](#all-edges-throughout-evolution):
+
+```wl
+In[] := WolframModel[<|"PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}},
+     {{v, 1}} -> {{v, 1, 1}, {v, 1, 2}},
+     {{v, 1, 1}, {v, 2}} -> {{v, f, 1}},
+     {{v, 1, 2}, {v, 2}} -> {{v, f, 2}}}|>, {{v, i}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsSeparation", 6, 7]
+Out[] = "Branchlike"
+```
+
+It is also possible to use negative indices, in which case expressions are counted backwards:
+
+```wl
+In[] := WolframModel[<|
+   "PatternRules" -> {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}},
+     {{2, 3}, {3, 4}} -> {{4, 5}, {5, 6}}}|>, {{1, 2}}, Infinity,
+  "EventSelectionFunction" -> None]["ExpressionsSeparation", -1, -2]
+Out[] = "Spacelike"
+```
 
 #### Rule Indices for Events
 
