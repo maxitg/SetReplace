@@ -38,15 +38,18 @@ In the subsequent sections, we will discuss the local multiway system in more de
 possible between edges and, more generally, parts of the hypergraph, and provide some ideas on possible connections to
 quantum physics.
 
-## Global Multiway System
+## Definition of the System
 
-First, I need to point out that we already have a solution to the problems described above.
-It is the [`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) function, which, from now on, I will call the global multiway system.
+### Global Multiway System
 
-And while it does solve the issues described above, it still has drawbacks.
+The most important thing to understand about the *global* multiway system is that it operates on the entire states of
+the system.
+The most fundamental object there is the states graph, which has states at the vertices, and updating events at the
+edges.
+For each state, all possible updating events are determined, and edges are created leading to new states.
+This process is then recursively repeated.
 
-First, it is essential to understand that unlike the `WolframModel`, the global multiway system operates on the entire states of the system.
-Let's consider an instance of the `MultiwaySystem`.
+Let's consider an instance of the *global* multiway system (implemented in the `MultiwaySystem` resource function).
 Specifically, let's start with a rule that moves a "particle" (a unary edge) alone directed edges in a graph:
 
 ```wl
@@ -65,7 +68,9 @@ In[] := ResourceFunction["MultiwaySystem"][
 
 <img src="Images/BasicGlobalMultiway.png" width="497">
 
-Now, what happens if we split this graph so that the evolution is non-deterministic, and there are two branches a particle can follow?
+Now, what happens if we split the path in this graph into two different branches?
+In this case, the rules will lead to non-deterministic behavior, multiway choices of substitutions are possible and so,
+the system explores all possible choices at once.
 
 ```wl
 In[] := Graph[ResourceFunction["MultiwaySystem"][
@@ -76,21 +81,36 @@ In[] := Graph[ResourceFunction["MultiwaySystem"][
 
 <img src="Images/BranchingGlobalMultiway.png" width="280">
 
-Now the evolution itself splits in two branches, mirroring precisely the input graph.
-(Note, we needed to make the "outgoing branches" in the input graph different length, because otherwise the two final states are isomorphic, and the `MultiwaySystem` identifies them as one.)
+Now the states graph itself splits in two branches, mirroring precisely the input graph.
+
+One important feature of `MultiwaySystem` is that if it encounters multiple states that are isomorphic, it merges them
+into one.
+For example, if instead of the input graph in the example above we use the graph where the branches have the same
+length, the system will combine them, and we would not see the splitting behavior:
+
+```wl
+In[] := Graph[ResourceFunction["MultiwaySystem"][
+  "WolframModel" -> {{{1}, {1, 2}} -> {{1, 2}, {2}}},
+  {{{1}, {1, 2}, {2, 3}, {3, 4}, {2, 5}, {5, 6}}}, 3, "StatesGraph",
+  VertexSize -> 1], GraphLayout -> "LayeredDigraphEmbedding"]
+```
+
+<img src="Images/IsomorphicBranching.png" width="XXX">
+
+This is why our original graph uses branches of different lengths (`{{2, 3}}` and `{{2, 4}, {4, 5}}`).
 
 But what if we start with particles on different branches and let them merge?
 
 ```wl
 In[] := ResourceFunction["MultiwaySystem"][
- "WolframModel" -> {{{1}, {1, 2}} -> {{1, 2}, {2}}}, {{{a1}, {a1, 
-    a2}, {a2, a3}, {a3, m1}, {b1}, {b1, b2}, {b2, m1}, {m1, 
-    m2}}}, 7, "StatesGraph", VertexSize -> {1.6, 0.32}, 
- GraphLayout -> "LayeredDigraphEmbedding", EdgeStyle -> Automatic, 
- GraphHighlight -> {{{1}, {2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5, 
-      6}, {6, 7}} -> {{1}, {2}, {1, 3}, {2, 4}, {3, 5}, {4, 5}, {5, 
-      6}, {7, 1}}, {{1}, {2}, {1, 3}, {2, 4}, {3, 5}, {5, 4}, {4, 
-      6}, {7, 2}} -> {{1}, {2}, {1, 3}, {2, 4}, {3, 4}, {4, 5}, {6, 
+ "WolframModel" -> {{{1}, {1, 2}} -> {{1, 2}, {2}}}, {{{a1}, {a1,
+    a2}, {a2, a3}, {a3, m1}, {b1}, {b1, b2}, {b2, m1}, {m1,
+    m2}}}, 7, "StatesGraph", VertexSize -> {1.6, 0.32},
+ GraphLayout -> "LayeredDigraphEmbedding", EdgeStyle -> Automatic,
+ GraphHighlight -> {{{1}, {2}, {1, 3}, {2, 4}, {3, 5}, {4, 6}, {5,
+      6}, {6, 7}} -> {{1}, {2}, {1, 3}, {2, 4}, {3, 5}, {4, 5}, {5,
+      6}, {7, 1}}, {{1}, {2}, {1, 3}, {2, 4}, {3, 5}, {5, 4}, {4,
+      6}, {7, 2}} -> {{1}, {2}, {1, 3}, {2, 4}, {3, 4}, {4, 5}, {6,
       1}, {7, 2}}}]
 ```
 
@@ -100,35 +120,54 @@ Note that even at the first step, the system branches in two different states.
 However, there is no ambiguity.
 The two events there occur at entirely different places in space.
 Note also, that some events are duplicated.
-For example, the two events highlighted red are the same event, as they both correspond to the particle on a more extended branch moving one step.
+For example, the two events highlighted red are the same event, as they both correspond to the particle on a more
+extended branch moving one step.
 
 So, based on the above, there are two issues with the global multiway system.
 
 First, there is an incredible amount of redundancy.
-In particular, if there is an event that happened somewhere in a far away galaxy, it would mean the entire Universe, including all of the edges here on Earth, duplicates, which seems both strange and unnecessary, and is fundamentally non-local.
+In particular, if there is an event that happened somewhere in a far away galaxy, it would mean the entire Universe
+including all of the edges here on Earth, duplicates, which seems both strange and unnecessary, and is fundamentally
+non-local.
 In other words, there are exponentially more data in the global multiway system that is necessary to describe completely the state of the Universe.
 
-Second, it is hard to distinguish between purely classical space evolving in disconnected regions in parallel (i.e., spacelike events), and multiway branching that happens due to overlapping event inputs (i.e., branchlike events).
+Second, it is hard to distinguish between purely classical space evolving in disconnected regions in parallel (i.e.,
+spacelike events), and multiway branching that happens due to overlapping event inputs (i.e., branchlike events).
 
-In the global multiway system, these look identical, and the only way to distinguish them is to examine their input and output states, which is a highly non-trivial problem, especially given that both of those states are canonicalized.
+In the global multiway system, these look identical, and the only way to distinguish them is to examine their input and
+output states, which is a highly non-trivial problem, especially given that both of those states are canonicalized.
 
-## Local Multiway System
+To illustrate the point, here is an example of a branchlike and a spacelike separated pair of events, respectively:
+
+```wl
+In[] := ResourceFunction["MultiwaySystem"]["WolframModel" -> #1, {#2}, 2,
+   "StatesGraph", VertexSize -> {1.6, 0.32},
+   GraphLayout -> "LayeredDigraphEmbedding",
+   EdgeStyle -> Automatic] & @@@ {{{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
+    {{1, 2, 3}} -> {{1, 3}}},
+   {{1, 2}, {2, 3}, {3, 4}}},
+  {{{{1, 2}} -> {{1, 2, 3}}}, {{1, 2}, {2, 3}}}}
+```
+
+<img src="Images/GlobalMultiwayEventSeparation.png" width="XXX">
+
+### Local Multiway System
 
 Let us then consider a different approach.
 Suppose we have a system with overlapping pairs of rule matches.
 We still want to include all of those events in the multiway system.
 But instead of duplicating the entire state, we will do that locally.
-I.e., we will have multiple branches growing from that pair of events, and we will weave them into a single data structure describing the entire multiway system.
+I.e., we will have multiple branches growing from that pair of events, and we will weave them into a single data
+structure describing the entire multiway system.
 The states themselves will then be reconstructed afterward in post-processing.
-
-### Current "Singleway" System
 
 This approach sounds complicated at first, but it is more straightforward than it appears.
 To understand how it would work, let's think about the `libSetReplace` implementation of `WolframModel`.
 
 #### Datastructure
 
-In that implementation, the datastructure is simply a set of edge structs (called `Expression`s there), and each struct simply has information about events that have created and destroyed the corresponding edge:
+In that implementation, the datastructure is simply a set of edge structs (called `Expression`s there), and each struct
+simply has information about events that have created and destroyed the corresponding edge:
 
 ```c++
 struct SetExpression {
@@ -143,9 +182,12 @@ The collection of these objects is essentially the *only* thing that is returned
 Things like `"StatesList"` and `"CausalGraph"` are reconstructed.
 
 The causal graph, in particular, is the simplest one to reconstruct.
-Indeed, if each event is a vertex, and each `SetExpression` is an edge going from its `creatorEvent` to its `destroyerEvent`, that would immediately give us a causal graph.
+Indeed, if each event is a vertex, and each `SetExpression` is an edge going from its `creatorEvent` to its
+`destroyerEvent`, that would immediately give us a causal graph.
 
-Reconstructing states is a bit more complicated, but it can be done by selecting a foliation of a causal graph, i.e., a subset of events including all of their dependencies, and selecting all edges that were created, but not destroyed by one of those events.
+Reconstructing states is a bit more complicated, but it can be done by selecting a foliation of a causal graph, i.e., a
+subset of events including all of their dependencies, and selecting all edges that were created, but not destroyed by
+one of those events.
 
 #### Index of Matches
 
@@ -153,24 +195,28 @@ In addition to this data structure, we have an index of matches.
 It's a set of all possible matches that can be made to the current state and is updated after each event is applied.
 
 It is initially created at the construction of the system by indexing the initial condition.
-After each event is applied, the outputs of that event are indexed (potentially by matching those outputs with their neighbors).
+After each event is applied, the outputs of that event are indexed (potentially by matching those outputs with their
+neighbors).
 The matches that involve the input edges are deleted from the index.
 
 This deletion causes the system to be singleway, as once an edge is used in an event, it can never be matched again.
 It is also the reason there is only one `destroyerEvent` for each `SetExpression`.
 
-### Match-All Local Multiway System [#335](https://github.com/maxitg/SetReplace/issues/335)
+#### Match-All Local Multiway System
 
 Imagine however that instead of deleting all matches involving the input edges, we will only remove the particular match that was instantiated.
 With only that change, we will proceed to evolve the system precisely the same way we used to.
 
-Note, in this case, we will automatically get a multiway system, in fact, the match-all version of it, as described in [#335](https://github.com/maxitg/SetReplace/issues/335).
-It is called match-all because it will match not only the spacelike sets of edges but also branchlike and even timelike ones.
+Note, in this case, we will automatically get a multiway system, in fact, the
+[match-all](/README.md#eventselectionfunction) version of it.
+It is called match-all because it will match not only the spacelike sets of edges but also branchlike and even timelike
+ones.
 
 #### Evolution
 
 To understand what it means, let's try some examples.
-In the match-all system, even the most trivial rules become extremely complicated quite quickly, so let's use the pattern rules for this one.
+In the match-all system, even the most trivial rules become extremely complicated quite quickly, so let's use the
+pattern rules for this one.
 We will be using the [`"ExpressionsEventsGraph"`](/README.md#causal-graphs) property of the `WolframModel` which will
 allow us to see both expressions (edges) and events on the same graph.
 
@@ -193,16 +239,22 @@ We have obtained two events.
 
 The first event replaced `{1, 2}` with `{2, 3}`.
 That is entirely normal and would happen in a singleway system as well.
-However, the singleway system would terminate immediately after that, as there is only a single edge `{2, 3}` left now, `{1, 2}` has been deleted, and the second rule requires both `{1, 2}` and `{2, 3}` as inputs.
-Another way of saying it is that `{1, 2}` and `{2, 3}` are **timelike** edges, and our singleway `WolframModel` only matches **spacelike** edges.
+However, the singleway system would terminate immediately after that, as there is only a single edge `{2, 3}` left now,
+`{1, 2}` has been deleted, and the second rule requires both `{1, 2}` and `{2, 3}` as inputs.
+Another way of saying it is that `{1, 2}` and `{2, 3}` are **timelike** edges, and our singleway `WolframModel` only
+matches **spacelike** edges.
 
-However, the match-all multiway system will proceed, as both `{1, 2}` and `{2, 3}` are now in the system, and it does not care that they are timelike.
+However, the match-all multiway system will proceed, as both `{1, 2}` and `{2, 3}` are now in the system, and it does
+not care that they are timelike.
 Hence, the second event is instantiated as well, `{{1, 2}, {2, 3}} -> {{1, 2, 3}}`.
-Note that at the end of this evolution, all three edges `{1, 2}`, `{2, 3}` and `{1, 2, 3}` are open for further matching, and the only reason further matching does not occur is because both possible exact matches have already been applied.
+Note that at the end of this evolution, all three edges `{1, 2}`, `{2, 3}` and `{1, 2, 3}` are open for further
+matching, and the only reason further matching does not occur is because both possible exact matches have already been
+applied.
 
-If, however, we add another rule, `{{1, 2}, {1, 2, 3}} -> {{2, 3}}`, the system will keep evolving indefinitely as `{2, 3}` created after applying the new rule is not the same `{2, 3}` as was created by the first rule.
+If, however, we add another rule, `{{1, 2}, {1, 2, 3}} -> {{2, 3}}`, the system will keep evolving indefinitely as
+`{2, 3}` created after applying the new rule is not the same `{2, 3}` as was created by the first rule.
 Therefore it will be matched again by the second rule.
-After that, the second and the third rules will keep "dancing" supplying inputs to one another:
+After that, the second and the third rules will keep "oscillating" supplying inputs to one another:
 
 ```wl
 In[] := WolframModel[<|"PatternRules" -> {{{1, 2}} -> {{2, 3}},
@@ -226,11 +278,14 @@ In[] := WolframModel[<|"PatternRules" -> {{{1, 2}} -> {{2, 3}},
 
 <img src="Images/MatchAllBranchlikeMatching.png" width="225">
 
-Note in the above there are two possibilities to match `{{1, 2}}`, which are incompatible according to the ordinary `WolframModel` and can only be achieved one-at-a-time with different choices of the `"EventOrderingFunction"`.
+Note in the above there are two possibilities to match `{{1, 2}}`, which are incompatible according to the ordinary
+`WolframModel` and can only be achieved one-at-a-time with different choices of the `"EventOrderingFunction"`.
 However, the match-all system can still match them with the third rule.
 
-Further note the obvious feature of the match-all system is that it produces edges and events that would not occur in either the singleway `WolframModel`, nor in the global `MultiwaySystem`.
-In particular, it might allow us to produce branch interference in quantum mechanics with the use of branchlike events, i.e., events which would merge edges from different branches, and hence cause the branches themselves to merge.
+Further note the obvious feature of the match-all system is that it produces edges and events that would not occur in
+either the singleway `WolframModel`, nor in the global `MultiwaySystem`.
+In particular, it might allow us to produce branch interference in quantum mechanics with the use of branchlike events,
+i.e., events which would merge edges from different branches, and hence cause the branches themselves to merge.
 
 #### Reconstruction
 
@@ -246,28 +301,58 @@ struct SetExpression {
 };
 ```
 
-Now, each `SetExpression` would correspond to exactly `destroyerEvents.size()` causal edges, with each one going from the `creatorEvent` to each element of the `destroyerEvents`.
-Perhaps, an even more useful structure would be an "events-edges causal graph", where both events and edges (`SetExpression`s) are represented as (perhaps differently colored) vertices.
+Now, each `SetExpression` would correspond to exactly `destroyerEvents.size()` causal edges, with each one going from
+the `creatorEvent` to each element of the `destroyerEvents`.
+An even more useful structure is an expressions-events graph already used above, where both events and edges
+(`SetExpression`s) are represented as differently colored vertices.
 There is only one edge going into each `SetExpression` vertex (corresponding to its `creatorEvent`).
 And there are `destroyerEvents.size()` edges coming out of each `SetExpression` vertex.
 This will immediately let us see the locations where the true multiway branching occurs.
 
-The reconstruction of space states is more complicated.
+For example, the pair of systems demonstrated above where the separation was hard to distinguish in the global multiway
+system now looks like this:
+
+```wl
+In[] := WolframModel[#1, #2, 2, "EventSelectionFunction" -> None][
+    "ExpressionsEventsGraph",
+    VertexLabels ->
+     Placed[Automatic,
+      After]] & @@@ {{{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
+     {{1, 2, 3}} -> {{1, 3}}},
+    {{1, 2}, {2, 3}, {3, 4}}},
+   {{{1, 2}} -> {{1, 2, 3}}, {{1, 2}, {2, 3}}}} // (Framed[#,
+      FrameStyle -> LightGray] & /@ # &)
+```
+
+<img src="Images/LocalMultiwayEventSeparation.png" width="XXX">
+
+Note that the vertex `{2, 3}` in the first example has the out-degree `2`, which indicates the multiway branching.
+Also note that the events in the second example are completely disconnected as there are no causal connections between
+them.
+In addition, there are only two events instead of four as the local multiway system does not duplicate identical events.
+
+The reconstruction of spatial states is more complicated.
 However, it is still quite straightforward to understand how a local patch of space would look.
 Indeed, what is space?
-Ultimately, it's a collection of edges that are all pairwise spacelike with one another.
+Ultimately, it's a collection of edges that are all pairwise spacelike-separated with one another.
 And indeed, we can create such patches in a match-all system just like in any other system.
 
-However, we need to discuss in more detail what it means exactly for the two events or edges to be spacelike, branchlike, or timelike.
+However, we need to discuss in more detail what it means exactly for the two events or edges to be spacelike,
+branchlike, or timelike.
 
-## Event Separation
+### Event Separation
 
-If we want to have more control over the matching behavior of the local multiway system, and in particular, to be able to reproduce the behavior of the global multiway system, we need a way to detect whether a pair of edges is spacelike, branchlike or timelike.
+If we want to have more control over the matching behavior of the local multiway system, and in particular, to be able
+to reproduce the behavior of the global multiway system, we need a way to detect whether a pair of edges is spacelike,
+branchlike or timelike.
 
-Ultimately, it is a question of whether two edges were produced by branching (i.e., their common ancestor is an edge), by a single event (i.e., their ancestor is a single event which produced multiple output edges), or whether one of the edges causally depends on the other one.
+Ultimately, it is a question of whether two edges were produced by branching (i.e., their common ancestor is an edge),
+by a single event (i.e., their ancestor is a single event which produced multiple output edges), or whether one of the
+edges causally depends on the other one.
 
 And in simple systems, it is quite straightforward to understand what the separation is.
-I.e., in the following three systems, the edges `{2, 3}` and `{3, 4}` are spacelike, branchlike and timelike respectively:
+I.e., in the following three systems, the edges `{2, 3}` and `{3, 4}` are spacelike, branchlike and timelike
+respectively:
 
 ```wl
 In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
@@ -280,11 +365,20 @@ In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
 
 <img src="Images/SeparationComparison.png" width="512">
 
-And this separation is typically not too hard to understand for edges that are immediate neighbors in the causal graph.
+In the first example, a single event produces two edges, `{2, 3}` *and* `{3, 4}`.
+This corresponds to a spacelike separation, as both of these edges can appear simultaneously in a singleway system.
+In the second example, there are two possibilities.
+Either the first, or the second rule can be matched to the initial edge `{1, 2`.
+Hence the edges that are produced as a result of that, `{2, 3}` and `{3, 4}` are branchlike separated.
+Finally, in the third example, the evolution is linear.
+The first event, and the edge `{2, 3}` are the prerequisites for the second event and the edge `{3, 4}`.
+Hence, these edges are timelike separated.
+
+So, if the edges are immediate neighbors in the causal graph as in the examples above, the separation is not hard to
+determine.
 However, what if the edges are farther down in history?
 
 For example, what about the edges `{4, 5}` and `{5, 6}` here?
-Presumably, they are spacelike edges in a space created as a result of quantum effects (similar to how the interference pattern from a double-slit experient displayed on a computer monitor is a perfectly classical state inside a computer, but it was nevertheless caused by quantum effects):
 
 ```wl
 In[] := WolframModel[<|
@@ -295,6 +389,14 @@ In[] := WolframModel[<|
 ```
 
 <img src="Images/MatchAllQuantumSpacelikeMatching.png" width="351">
+
+In this example, the edge `{1, 2}` first branches into two edges `{2, 3}` and `{3, 4}`.
+They are then merged by the third event, which in turn creates two edges, `{4, 5}` and `{5, 6}`.
+
+If one was to interpret that as a physical process, one correspondence could be that the third event is an interaction
+event between two evolution branches in the many-worlds interpretation, perhaps describing a wavefunction collapse.
+In that case, the final edges `{4, 5}` and `{5, 6}` would still be spacelike as they were produced from a single event
+after the branches have already merged.
 
 But what about something like this?
 
@@ -313,13 +415,24 @@ What is the separation between the edges `{v, f, 1}` and `{v, f, 2}`?
 On one hand they are spacelike, because one of their common ancestors is the event `{{v, 1}} -> {{v, 1, 1}, {v, 1, 2}}`.
 But on the other hand, they are branchlike, as they have an edge `{v, 2}` as another common ancestor.
 In other words, these edges are mixed spacelike and branchlike.
-And if we had an event matching both `{v, f, 1}` and `{v, f, 2}` as inputs, it would simultaneously merge different pieces of space, and two different branches.
+And if we had an event matching both `{v, f, 1}` and `{v, f, 2}` as inputs, it would simultaneously merge different
+pieces of space, and two different branches.
 
-It is interesting to consider all possible combinations that could arise in a situation like this.
-And nontriviality here makes it more difficult to define what it means for a pair of edges to be, say, branchlike.
-This will be a subject for future research.
+It seems, however, that the branchial separation should take precedence.
+That is because if we only allow events to match spacelike separated edges, we expect the evolution to be equivalent to
+the global multiway system evolution.
+In this case we have to define the separation above as branchlike, as the two final edges can never simultaneously
+appear in the same singleway system.
 
-## Spacelike-Only Local Multiway System
+Thus, to determine the separation between two edges, `A` and `B`, in an expressions-events graph:
+1. Compute the past causal cones of both `A` and `B`.
+2. Compute the intersection between the causal cones.
+3. Take all vertices with out-degree zero (the future boundary of the intersection).
+4. If the boundary contains either `A` and `B`, they are timelike separated.
+5. If any vertices on the boundary are expression-vertices, they are branchlike separated.
+6. Otherwise, if all vertices on the boundary are event-vertices, they are spacelike separated.
+
+### Spacelike-Only Local Multiway System
 
 However, it is not difficult to understand how to make a purely spacelike multiway system, i.e., a system that would only match pairwise spacelike groups of edges, similar to what the global `MultiwaySystem` does.
 
@@ -370,10 +483,6 @@ Note, however, that this kind of evolution would not give us quantum physics, as
 A more interesting case would be to consider a system of rules where some are purely spacelike (i.e., only operate on pairwise spacelike sets of elements), and some are purely (or impurely) branchlike (i.e., they only operate on branchlike separated edges, but not on spacelike ones).
 
 Investigation of these rules and the study of possible quantum effects in the match-all local multiway system are the subjects for future research.
-
-# Phases and Interference in Multiway Systems
-
-<img src="Images/ComplexInterference.png" width="478">
 
 ## Introduction
 
