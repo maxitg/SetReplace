@@ -2082,7 +2082,7 @@
            {t, t, s, i, s, t, s},
            {t, t, s, s, i, s, t},
            {t, t, t, t, s, i, b},
-           {t, t, t, s, t, b, i}} /. {i -> "Identity", t -> "Timelike", s -> "Spacelike", b -> "Branchlike"}
+           {t, t, t, s, t, b, i}} /. {i -> "Identical", t -> "Timelike", s -> "Spacelike", b -> "Branchlike"}
         ],
 
         VerificationTest[
