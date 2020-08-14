@@ -946,7 +946,7 @@ In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
   {{{1, 2}} -> {{2, 3}}, {{2, 3}} -> {{3, 4}}}}
 ```
 
-<img src="READMEImages/SeparationComparison.png" width="256">
+<img src="READMEImages/SeparationComparison.png" width="512">
 
 Note that in some cases "spacelike" separation refers to the possibility that both such edges can simultaneously exist
 in a singleway system, it is not always the case.
@@ -961,7 +961,7 @@ In[] := WolframModel[<|
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="READMEImages/MatchAllQuantumSpacelikeMatching.png" width="176">
+<img src="READMEImages/MatchAllQuantumSpacelikeMatching.png" width="351">
 
 Further, branchlike separation takes precedence over spacelike separation, and timelike separation takes precedence over
 both.
@@ -977,7 +977,7 @@ In[] := WolframModel[<|"PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}},
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="READMEImages/MatchAllSpacelikeBranchlikeMixed.png" width="176">
+<img src="READMEImages/MatchAllSpacelikeBranchlikeMixed.png" width="352">
 
 Specifically, the general algorithm for computing the separation between two edges `A` and `B` in an expressions-events
 graph is:
