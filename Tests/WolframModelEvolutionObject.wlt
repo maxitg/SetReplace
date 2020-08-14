@@ -131,7 +131,7 @@
           pathGraph17,
           4]["SetAfterEvent", 16],
         WolframModelEvolutionObject[___]["SetAfterEvent", 16],
-        {WolframModelEvolutionObject::stepTooLarge},
+        {WolframModelEvolutionObject::parameterTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -141,7 +141,7 @@
           pathGraph17,
           4]["SetAfterEvent", -17],
         WolframModelEvolutionObject[___]["SetAfterEvent", -17],
-        {WolframModelEvolutionObject::stepTooLarge},
+        {WolframModelEvolutionObject::parameterTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -151,7 +151,7 @@
           pathGraph17,
           4]["SetAfterEvent", 1.2],
         WolframModelEvolutionObject[___]["SetAfterEvent", 1.2],
-        {WolframModelEvolutionObject::stepNotInteger},
+        {WolframModelEvolutionObject::parameterNotInteger},
         SameTest -> MatchQ
       ],
 
@@ -161,7 +161,7 @@
           pathGraph17,
           4]["SetAfterEvent", "good"],
         WolframModelEvolutionObject[___]["SetAfterEvent", "good"],
-        {WolframModelEvolutionObject::stepNotInteger},
+        {WolframModelEvolutionObject::parameterNotInteger},
         SameTest -> MatchQ
       ],
 
@@ -173,7 +173,7 @@
           pathGraph17,
           4]["Generation", 5],
         WolframModelEvolutionObject[___]["Generation", 5],
-        {WolframModelEvolutionObject::stepTooLarge},
+        {WolframModelEvolutionObject::parameterTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -183,7 +183,7 @@
           pathGraph17,
           4]["Generation", -6],
         WolframModelEvolutionObject[___]["Generation", -6],
-        {WolframModelEvolutionObject::stepTooLarge},
+        {WolframModelEvolutionObject::parameterTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -193,7 +193,7 @@
           pathGraph17,
           4]["Generation", 2.3],
         WolframModelEvolutionObject[___]["Generation", 2.3],
-        {WolframModelEvolutionObject::stepNotInteger},
+        {WolframModelEvolutionObject::parameterNotInteger},
         SameTest -> MatchQ
       ],
 
@@ -203,7 +203,7 @@
           pathGraph17,
           4]["GenerationEdgeIndices", 5],
         WolframModelEvolutionObject[___]["GenerationEdgeIndices", 5],
-        {WolframModelEvolutionObject::stepTooLarge},
+        {WolframModelEvolutionObject::parameterTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -433,7 +433,7 @@
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
         evo["GenerationComplete", #],
-        {WolframModelEvolutionObject::stepTooLarge}
+        {WolframModelEvolutionObject::parameterTooLarge}
       ] & /@ {-10, -7}],
 
       VerificationTest[

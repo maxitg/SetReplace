@@ -165,6 +165,7 @@ $propertyArgumentCounts = Join[
     "EdgeDestroyerEventsIndices" -> {0, 0},
     "EdgeDestroyerEventIndices" -> {0, 0},
     "EdgeGenerationsList" -> {0, 0},
+    "ExpressionsSeparation" -> {2, 2},
     "Properties" -> {0, 0}|>,
   Association[# -> {0, 0} & /@ Keys[$accessorProperties]]];
 
@@ -484,20 +485,27 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 (*Convert to positive generation number*)
 
 
-toPositiveStep[total_, requested_Integer, caller_, name_] /; 0 <= requested <= total := requested
+toPositiveStep[min_ : 0, total_, requested_Integer, caller_, name_] /; min <= requested <= total := requested
 
 
-toPositiveStep[total_, requested_Integer, caller_, name_] /; - total - 1 <= requested < 0 := 1 + total + requested
+toPositiveStep[min_ : 0, total_, requested_Integer, caller_, name_] /; - total - 1 + min <= requested < 0 :=
+  1 + total + requested
 
 
-toPositiveStep[total_, requested_Integer, caller_, name_] /; !(- total - 1 <= requested <= total) := (
-  makeMessage[caller, "stepTooLarge", name, requested, total];
+toPositiveStep[min_ : 0, total_, requested_Integer, caller_, name_] /; !(- total - 1 + min <= requested <= total) := (
+  makeMessage[caller, "parameterTooLarge", name, requested, total];
   Throw[$Failed]
 )
 
 
-toPositiveStep[total_, requested : Except[_Integer], caller_, name_] := (
-  makeMessage[caller, "stepNotInteger", name, requested];
+toPositiveStep[min_ : 0, total_, requested_Integer, caller_, name_] := (
+  makeMessage[caller, "parameterTooSmall", name, requested, min];
+  Throw[$Failed]
+)
+
+
+toPositiveStep[min_ : 0, total_, requested : Except[_Integer], caller_, name_] := (
+  makeMessage[caller, "parameterNotInteger", name, requested];
   Throw[$Failed]
 )
 
@@ -1099,6 +1107,30 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
     "EdgeGenerationsList"] := Module[{},
   propertyEvaluate[True, "Initial"][obj, caller, "EventGenerations"][[
     propertyEvaluate[True, "Initial"][obj, caller, "EdgeCreatorEventIndices"] + 1]]
+]
+
+
+(* ::Subsubsection:: *)
+(*ExpressionsSeparation*)
+
+
+propertyEvaluate[True, includeBoundaryEventsPattern][
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    "ExpressionsSeparation", signedExpr1_, signedExpr2_] := Module[{
+      expr1, expr2, expressionsEventsGraph, causalCones, intersection, intersectionBoundary, boundaryExpressions},
+  {expr1, expr2} =
+    toPositiveStep[1, propertyEvaluate[True, None][obj, caller, "ExpressionsCountTotal"], #, caller, "Expression"] & /@
+      {signedExpr1, signedExpr2};
+  expressionsEventsGraph = propertyEvaluate[True, "Initial"][obj, caller, "ExpressionsEventsGraph"];
+  If[expr1 === expr2, Return["Identical"]];
+  causalCones = VertexInComponent[expressionsEventsGraph, {"Expression", #}] & /@ {expr1, expr2};
+  intersection = Intersection @@ causalCones;
+  intersectionBoundary =
+    intersection[[Position[VertexOutDegree[Subgraph[expressionsEventsGraph, intersection]], 0][[All, 1]]]];
+  boundaryExpressions = Cases[intersectionBoundary, {"Expression", expr_} :> expr];
+  If[!FreeQ[boundaryExpressions, expr1 | expr2], Return["Timelike"]];
+  If[Length[boundaryExpressions] =!= 0, "Branchlike", "Spacelike"]
 ]
 
 
