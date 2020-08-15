@@ -56,4 +56,15 @@ TEST(Set, matchAllMultiway) {
   EXPECT_EQ(aSet.expressions(),
             (std::vector<AtomsVector>{{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}, {2}, {4}, {5}, {5}, {6}, {6}}));
 }
+
+TEST(Set, ReplaceOnce) {
+  Matcher::OrderingSpec orderingSpec = {
+      {Matcher::OrderingFunction::SortedExpressionIDs, Matcher::OrderingDirection::Normal},
+      {Matcher::OrderingFunction::ReverseSortedExpressionIDs, Matcher::OrderingDirection::Normal},
+      {Matcher::OrderingFunction::ExpressionIDs, Matcher::OrderingDirection::Normal},
+      {Matcher::OrderingFunction::RuleIndex, Matcher::OrderingDirection::Normal}};
+
+  Set set({{{{-1}}, {{-1, -1}}}}, {{1}}, {}, orderingSpec, 0);
+  EXPECT_EQ(set.replaceOnce(doNotAbort), 1);
+}
 }  // namespace SetReplace
