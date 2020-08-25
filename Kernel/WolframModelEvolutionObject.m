@@ -485,29 +485,21 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 (*Convert to positive generation number*)
 
 
-toPositiveStep[min_ : 0, total_, requested_Integer, caller_, name_] /; min <= requested <= total := requested
-
-
-toPositiveStep[min_ : 0, total_, requested_Integer, caller_, name_] /; - total - 1 + min <= requested < 0 :=
-  1 + total + requested
-
-
-toPositiveStep[min_ : 0, total_, requested_Integer, caller_, name_] /; !(- total - 1 + min <= requested <= total) := (
-  makeMessage[caller, "parameterTooLarge", name, requested, total];
-  Throw[$Failed]
-)
-
-
-toPositiveStep[min_ : 0, total_, requested_Integer, caller_, name_] := (
-  makeMessage[caller, "parameterTooSmall", name, requested, min];
-  Throw[$Failed]
-)
-
-
-toPositiveStep[min_ : 0, total_, requested : Except[_Integer], caller_, name_] := (
-  makeMessage[caller, "parameterNotInteger", name, requested];
-  Throw[$Failed]
-)
+toPositiveStep[min_ : 0, total_, requested_, caller_, name_] := Switch[requested,
+  Except[_Integer],
+    makeMessage[caller, "parameterNotInteger", name, requested];
+    Throw[$Failed],
+  _ ? (# > total || # < - total - 1 + min &),
+    makeMessage[caller, "parameterTooLarge", name, requested, total];
+    Throw[$Failed],
+  _ ? (0 <= # < min &),
+    makeMessage[caller, "parameterTooSmall", name, requested, min];
+    Throw[$Failed],
+  _ ? Negative,
+    1 + total + requested,
+  _,
+    requested
+]
 
 
 (* ::Subsection:: *)

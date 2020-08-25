@@ -558,7 +558,7 @@ Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, s
 
 ### Properties
 
-[States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout Evolution](#all-edges-throughout-evolution) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Edge Separations](#edge-separations) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules) | [Version](#version)
+[States](#states) | [Plots of States](#plots-of-states) | [Plots of Events](#plots-of-events) | [All Edges throughout Evolution](#all-edges-throughout-evolution) | [States as Edge Indices](#states-as-edge-indices) | [Events](#events) | [Events and States](#events-and-states) | [Creator and Destroyer Events](#creator-and-destroyer-events) | [Causal Graphs](#causal-graphs) | [Expression Separations](#expression-separations) | [Rule Indices for Events](#rule-indices-for-events) | [Edge and Event Generations](#edge-and-event-generations) | [Termination Reason](#termination-reason) | [Generation Counts](#generation-counts) | [Event Counts](#event-counts) | [Element Count Lists](#element-count-lists) | [Final Element Counts](#final-element-counts) | [Total Element Counts](#total-element-counts) | [Rules](#rules) | [Version](#version)
 
 #### States
 
@@ -925,22 +925,24 @@ In[] := WolframModel[{{1}, {1, 2}} -> {{2}}, {{1}, {1, 2}, {2, 3}, {2, 4}},
 
 `"CausalGraph"`, `"LayeredCausalGraph"` and `"ExpressionsEventsGraph"` properties all accept [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) options, as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html). Some options have special behavior for the [`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html) value, i.e., `VertexLabels -> Automatic` in `"ExpressionsEventsGraph"` displays the contents of expressions, which are not the vertex names in that graph (as there can be multiple expressions with the same contents).
 
-#### Edge Separations
+#### Expression Separations
 
 Expressions can be related in different ways to one another depending on the causal structure of the expressions-events
 graph.
 
-There are three fundamental cases, the separation between two edges can be:
-* spacelike (i.e., they are produced as multiple outputs of a single event),
-* branchlike (they are created as a consequence of multiple events matching to the same edge), or
-* timelike (they are causally related).
+There are three fundamental cases, the separation between two expressions can be:
+* spacelike -- the expressions were produced (directly or indirectly) by a single event;
+* branchlike -- the expressions were produced (directly or indirectly) by multiple events that matched the same
+expression;
+* timelike -- the expressions are causally related, one produced or was produced by another.
 
-Here are examples for these three cases:
+The expressions `{2, 3}` and `{3, 4}` here are spacelike, branchlike and timelike separated respectively:
 
 ```wl
 In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
      "EventSelectionFunction" -> None]["ExpressionsEventsGraph",
-    VertexLabels -> Placed[Automatic, After]],
+    VertexLabels -> Placed[Automatic, After],
+    GraphHighlight -> Thread[{"Expression", {2, 3}}]],
    FrameStyle -> LightGray] & /@ {{{1, 2}} -> {{2, 3}, {3, 4}},
   {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}},
   {{{1, 2}} -> {{2, 3}}, {{2, 3}} -> {{3, 4}}}}
@@ -948,10 +950,13 @@ In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
 
 <img src="READMEImages/SeparationComparison.png" width="512">
 
-Note that in some cases "spacelike" separation refers to the possibility that both such edges can simultaneously exist
-in a singleway system, it is not always the case.
-For example, in a match-all system two edges (`{4, 5}` and `{5, 6}`) can be spacelike-separated even though they
-causally depend on a pair of branchlike separated edges:
+One might be tempted to assume that spacelike separated expressions can always be 'assembled' to produce a possible
+history for a singleway system.
+For match-all evolution, however, this is not the case.
+Match-all rules can match two branchlike separated expressions, something that is never possible for singleway systems.
+If such events produce spacelike separated results, then we will obtain spacelike separated expressions that can be
+assembled into global states which *do not* correspond to any singleway evolution state.
+See expressions `{4, 5}` and `{5, 6}` in the following picture:
 
 ```wl
 In[] := WolframModel[<|
@@ -965,8 +970,8 @@ In[] := WolframModel[<|
 
 Further, branchlike separation takes precedence over spacelike separation, and timelike separation takes precedence over
 both.
-As such, edges `{v, f, 1}` and `{v, f, 2}` here are branchlike separated because one of their common ancestors is an
-expression even though the other one is an event:
+As such, expressions `{v, f, 1}` and `{v, f, 2}` here are branchlike separated because one of their common ancestors is
+an expression even though the other one is an event:
 
 ```wl
 In[] := WolframModel[<|"PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}},
@@ -979,8 +984,8 @@ In[] := WolframModel[<|"PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}},
 
 <img src="READMEImages/MatchAllSpacelikeBranchlikeMixed.png" width="352">
 
-Specifically, the general algorithm for computing the separation between two edges `A` and `B` in an expressions-events
-graph is:
+Specifically, the general algorithm for computing the separation between two expressions `A` and `B` in an
+expressions-events graph is:
 1. Compute the past causal cones of both `A` and `B`.
 2. Compute the intersection between the causal cones.
 3. Take all vertices with out-degree zero (the future boundary of the intersection).
