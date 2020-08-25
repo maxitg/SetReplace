@@ -57,7 +57,7 @@ TEST(Set, matchAllMultiway) {
             (std::vector<AtomsVector>{{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}, {2}, {4}, {5}, {5}, {6}, {6}}));
 }
 
-TEST(Set, ReplaceOnce) {
+TEST(Set, replaceOnce) {
   Matcher::OrderingSpec orderingSpec = {
       {Matcher::OrderingFunction::SortedExpressionIDs, Matcher::OrderingDirection::Normal},
       {Matcher::OrderingFunction::ReverseSortedExpressionIDs, Matcher::OrderingDirection::Normal},
