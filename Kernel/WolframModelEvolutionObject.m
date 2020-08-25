@@ -432,7 +432,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
     caller_,
     "GenerationComplete",
     generation_ : -1] :=
-  toPositiveStep[
+  toPositiveParameter[
       propertyEvaluate[True, None][obj, caller, "TotalGenerationsCount"], generation, caller, "Generation"] <=
     obj["CompleteGenerationsCount"]
 
@@ -482,10 +482,10 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 
 
 (* ::Subsubsection:: *)
-(*Convert to positive generation number*)
+(*Convert to positive parameter (i.e., generation) number*)
 
 
-toPositiveStep[min_ : 0, total_, requested_, caller_, name_] := Switch[requested,
+toPositiveParameter[min_ : 0, total_, requested_, caller_, name_] := Switch[requested,
   Except[_Integer],
     makeMessage[caller, "parameterNotInteger", name, requested];
     Throw[$Failed],
@@ -528,7 +528,8 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
       caller_,
       "StateEdgeIndicesAfterEvent",
       s_] := With[{
-    positiveEvent = toPositiveStep[propertyEvaluate[True, None][obj, caller, "AllEventsCount"], s, caller, "Event"]},
+    positiveEvent =
+      toPositiveParameter[propertyEvaluate[True, None][obj, caller, "AllEventsCount"], s, caller, "Event"]},
   stateEdgeIndicesAfterEvents[obj, caller, Range[0, positiveEvent]]
 ]
 
@@ -603,7 +604,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
       caller_,
       "GenerationEdgeIndices",
       g_] := Module[{positiveGeneration, eventsUpToGeneration},
-  positiveGeneration = toPositiveStep[
+  positiveGeneration = toPositiveParameter[
     propertyEvaluate[True, None][obj, caller, "TotalGenerationsCount"], g, caller, "Generation"];
   eventsUpToGeneration = First /@ Position[_ ? (# <= positiveGeneration &)] @ data[$eventGenerations] - 1;
   stateEdgeIndicesAfterEvents[obj, caller, eventsUpToGeneration]
@@ -1112,7 +1113,8 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
     "ExpressionsSeparation", signedExpr1_, signedExpr2_] := Module[{
       expr1, expr2, expressionsEventsGraph, causalCones, intersection, intersectionBoundary, boundaryExpressions},
   {expr1, expr2} =
-    toPositiveStep[1, propertyEvaluate[True, None][obj, caller, "ExpressionsCountTotal"], #, caller, "Expression"] & /@
+    toPositiveParameter[
+        1, propertyEvaluate[True, None][obj, caller, "ExpressionsCountTotal"], #, caller, "Expression"] & /@
       {signedExpr1, signedExpr2};
   expressionsEventsGraph = propertyEvaluate[True, "Initial"][obj, caller, "ExpressionsEventsGraph"];
   If[expr1 === expr2, Return["Identical"]];
