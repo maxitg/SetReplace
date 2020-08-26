@@ -54,7 +54,10 @@ class Set::Implementation {
               return causalGraph_.expressionsSeparation(first, second);
             }) {}
 
-  int64_t replaceOnce(const std::function<bool()> shouldAbort) {
+  int64_t replaceOnce(const std::function<bool()> shouldAbort, bool resetStepSpec = false) {
+    if (resetStepSpec) {
+      updateStepSpec(StepSpecification{});
+    }
     terminationReason_ = TerminationReason::NotTerminated;
 
     if (causalGraph_.eventsCount() >= static_cast<size_t>(stepSpec_.maxEvents)) {
@@ -362,7 +365,9 @@ Set::Set(const std::vector<Rule>& rules,
     : implementation_(std::make_shared<Implementation>(
           rules, initialExpressions, eventSelectionFunction, orderingSpec, randomSeed)) {}
 
-int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) { return implementation_->replaceOnce(shouldAbort); }
+int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) {
+  return implementation_->replaceOnce(shouldAbort, true);
+}
 
 int64_t Set::replace(const StepSpecification& stepSpec, const std::function<bool()>& shouldAbort) {
   return implementation_->replace(stepSpec, shouldAbort);
