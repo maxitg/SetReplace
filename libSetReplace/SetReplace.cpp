@@ -43,23 +43,30 @@ std::vector<AtomsVector> getNextSet(const mint& tensorLength, const mint* tensor
   return set;
 }
 
-std::vector<Rule> getRules(WolframLibraryData libData, MTensor rulesTensor) {
-  const mint tensorLength = libData->MTensor_getFlattenedLength(rulesTensor);
-  const mint* tensorData = libData->MTensor_getIntegerData(rulesTensor);
-  mint readIndex = 0;
-  const auto getRulesData = [&tensorData, &tensorLength, &readIndex]() -> mint {
-    return getData(tensorData, tensorLength, readIndex++);
+std::vector<Rule> getRules(WolframLibraryData libData, MTensor rulesTensor, MTensor selectionFunctionsTensor) {
+  const mint rulesTensorLength = libData->MTensor_getFlattenedLength(rulesTensor);
+  const mint* rulesTensorData = libData->MTensor_getIntegerData(rulesTensor);
+  const mint selectionFunctionsTensorLength = libData->MTensor_getFlattenedLength(selectionFunctionsTensor);
+  const mint* selectionFunctionsTensorData = libData->MTensor_getIntegerData(selectionFunctionsTensor);
+  mint rulesReadIndex = 0;
+  const auto getRulesData = [&rulesTensorData, &rulesTensorLength, &rulesReadIndex]() -> mint {
+    return getData(rulesTensorData, rulesTensorLength, rulesReadIndex++);
   };
 
   const mint rulesCount = getRulesData();
+  if (rulesCount != selectionFunctionsTensorLength) {
+    throw LIBRARY_FUNCTION_ERROR;
+  }
   std::vector<Rule> rules;
   rules.reserve(rulesCount);
   for (mint ruleIndex = 0; ruleIndex < rulesCount; ++ruleIndex) {
     if (getRulesData() != 2) {
       throw LIBRARY_FUNCTION_ERROR;
     } else {
-      rules.emplace_back(
-          Rule{getNextSet(tensorLength, tensorData, &readIndex), getNextSet(tensorLength, tensorData, &readIndex)});
+      rules.emplace_back(Rule{getNextSet(rulesTensorLength, rulesTensorData, &rulesReadIndex),
+                              getNextSet(rulesTensorLength, rulesTensorData, &rulesReadIndex),
+                              static_cast<EventSelectionFunction>(
+                                  getData(selectionFunctionsTensorData, selectionFunctionsTensorLength, ruleIndex))});
     }
   }
   return rules;
@@ -198,21 +205,21 @@ MTensor putEvents(const std::vector<Event>& events, WolframLibraryData libData) 
 }
 
 int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, MArgument result) {
-  if (argc != 5) {
+  if (argc != 6) {
     return LIBRARY_FUNCTION_ERROR;
   }
 
   std::vector<Rule> rules;
   std::vector<AtomsVector> initialExpressions;
-  Set::EventSelectionFunction eventSelectionFunction;
+  Set::SystemType eventSelectionFunction;
   Matcher::OrderingSpec orderingSpec;
   unsigned int randomSeed;
   try {
-    rules = getRules(libData, MArgument_getMTensor(argv[0]));
-    initialExpressions = getSet(libData, MArgument_getMTensor(argv[1]));
-    eventSelectionFunction = static_cast<Set::EventSelectionFunction>(MArgument_getInteger(argv[2]));
-    orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[3]));
-    randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[4]));
+    rules = getRules(libData, MArgument_getMTensor(argv[0]), MArgument_getMTensor(argv[1]));
+    initialExpressions = getSet(libData, MArgument_getMTensor(argv[2]));
+    eventSelectionFunction = static_cast<Set::SystemType>(MArgument_getInteger(argv[3]));
+    orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[4]));
+    randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[5]));
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }

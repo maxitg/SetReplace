@@ -134,6 +134,7 @@ class Matcher::Implementation {
   const std::vector<Rule>& rules_;
   AtomsIndex& atomsIndex_;
   const GetAtomsVectorFunc getAtomsVector_;
+  const GetExpressionsSeparationFunc getExpressionsSeparation_;
 
   // Matches are arranged in buckets. Each bucket contains matches that are equivalent in terms of the ordering
   // function, however, buckets themselves are ordered according to that function.
@@ -174,11 +175,13 @@ class Matcher::Implementation {
   Implementation(const std::vector<Rule>& rules,
                  AtomsIndex* atomsIndex,
                  GetAtomsVectorFunc getAtomsVector,
+                 GetExpressionsSeparationFunc getExpressionsSeparation,
                  const OrderingSpec& orderingSpec,
                  const unsigned int randomSeed)
       : rules_(rules),
         atomsIndex_(*atomsIndex),
         getAtomsVector_(std::move(getAtomsVector)),
+        getExpressionsSeparation_(std::move(getExpressionsSeparation)),
         matchQueue_(MatchComparator(orderingSpec)),
         randomGenerator_(randomSeed),
         currentError(None) {
@@ -295,12 +298,14 @@ class Matcher::Implementation {
     const auto& ruleInputExpressions = rules_[ruleID].inputs;
     for (size_t i = 0; i < ruleInputExpressions.size(); ++i) {
       const Match emptyMatch{ruleID, std::vector<ExpressionID>(ruleInputExpressions.size(), -1)};
-      completeMatchesStartingWithInput(emptyMatch, ruleInputExpressions, i, expressionIDs, shouldAbort);
+      completeMatchesStartingWithInput(
+          emptyMatch, ruleInputExpressions, rules_[ruleID].eventSelectionFunction, i, expressionIDs, shouldAbort);
     }
   }
 
   void completeMatchesStartingWithInput(const Match& incompleteMatch,
                                         const std::vector<AtomsVector>& partiallyMatchedInputs,
+                                        const EventSelectionFunction eventSelectionFunction,
                                         const size_t nextInputIdx,
                                         const std::vector<ExpressionID>& potentialExpressionIDs,
                                         const std::function<bool()>& shouldAbort) {
@@ -309,7 +314,8 @@ class Matcher::Implementation {
         return;
       }
       if (isExpressionUnused(incompleteMatch, expressionID)) {
-        attemptMatchExpressionToInput(incompleteMatch, partiallyMatchedInputs, nextInputIdx, expressionID, shouldAbort);
+        attemptMatchExpressionToInput(
+            incompleteMatch, partiallyMatchedInputs, eventSelectionFunction, nextInputIdx, expressionID, shouldAbort);
       }
     }
   }
@@ -333,6 +339,7 @@ class Matcher::Implementation {
 
   void attemptMatchExpressionToInput(const Match& incompleteMatch,
                                      const std::vector<AtomsVector>& partiallyMatchedInputs,
+                                     const EventSelectionFunction eventSelectionFunction,
                                      const size_t nextInputIdx,
                                      const ExpressionID potentialExpressionID,
                                      const std::function<bool()>& shouldAbort) {
@@ -346,13 +353,21 @@ class Matcher::Implementation {
     const auto& expressionAtoms = getAtomsVector_(potentialExpressionID);
 
     // edges (expressions) of different sizes, cannot match
-    if (input.size() != expressionAtoms.size()) return;
+    if (input.size() != expressionAtoms.size()) {
+      return;
+    }
 
     Match newMatch = incompleteMatch;
     newMatch.inputExpressions[nextInputIdx] = potentialExpressionID;
 
     auto newInputs = partiallyMatchedInputs;
-    if (!Matcher::substituteMissingAtomsIfPossible({input}, {expressionAtoms}, &newInputs)) return;
+    if (!Matcher::substituteMissingAtomsIfPossible({input}, {expressionAtoms}, &newInputs)) {
+      return;
+    }
+    if (eventSelectionFunction == EventSelectionFunction::Spacelike &&
+        !isSpacelikeSeparated(potentialExpressionID, newMatch.inputExpressions)) {
+      return;
+    }
 
     if (isMatchComplete(newMatch)) {
       insertMatch(newMatch);
@@ -362,9 +377,22 @@ class Matcher::Implementation {
     const auto nextInputIdxAndCandidateExpressions = nextBestInputAndExpressionsToTry(newMatch, newInputs);
     completeMatchesStartingWithInput(newMatch,
                                      newInputs,
+                                     eventSelectionFunction,
                                      nextInputIdxAndCandidateExpressions.first,
                                      nextInputIdxAndCandidateExpressions.second,
                                      shouldAbort);
+  }
+
+  bool isSpacelikeSeparated(const ExpressionID newExpression, const std::vector<ExpressionID>& previousExpresisons) {
+    for (const auto& previousExpression : previousExpresisons) {
+      if (previousExpression == newExpression || previousExpression < 0) continue;
+      const auto separation = getExpressionsSeparation_(previousExpression, newExpression);
+      if (separation != SeparationType::Spacelike) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   void insertMatch(const Match& newMatch) {
@@ -472,9 +500,11 @@ class Matcher::Implementation {
 Matcher::Matcher(const std::vector<Rule>& rules,
                  AtomsIndex* atomsIndex,
                  const GetAtomsVectorFunc& getAtomsVector,
+                 const GetExpressionsSeparationFunc& getExpressionsSeparation,
                  const OrderingSpec& orderingSpec,
                  const unsigned int randomSeed)
-    : implementation_(std::make_shared<Implementation>(rules, atomsIndex, getAtomsVector, orderingSpec, randomSeed)) {}
+    : implementation_(std::make_shared<Implementation>(
+          rules, atomsIndex, getAtomsVector, getExpressionsSeparation, orderingSpec, randomSeed)) {}
 
 void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
                                              const std::function<bool()>& shouldAbort) {

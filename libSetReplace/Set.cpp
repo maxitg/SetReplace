@@ -17,7 +17,7 @@ class Set::Implementation {
 
   // Determines the limiting conditions for the evaluation.
   StepSpecification stepSpec_ = {0, 0, 0, 0, 0};  // don't evolve unless asked to.
-  const EventSelectionFunction eventSelectionFunction_;
+  const SystemType systemType_;
   TerminationReason terminationReason_ = TerminationReason::NotTerminated;
 
   std::unordered_map<ExpressionID, AtomsVector> expressions_;
@@ -40,16 +40,19 @@ class Set::Implementation {
  public:
   Implementation(const std::vector<Rule>& rules,
                  const std::vector<AtomsVector>& initialExpressions,
-                 const EventSelectionFunction& eventSelectionFunction,
+                 const SystemType& systemType,
                  const Matcher::OrderingSpec& orderingSpec,
                  const unsigned int randomSeed)
       : Implementation(
             rules,
             initialExpressions,
-            eventSelectionFunction,
+            systemType,
             orderingSpec,
             randomSeed,
-            [this](const int64_t& expressionID) -> const AtomsVector& { return expressions_.at(expressionID); }) {}
+            [this](const ExpressionID& expressionID) -> const AtomsVector& { return expressions_.at(expressionID); },
+            [this](const ExpressionID& first, const ExpressionID& second) -> SeparationType {
+              return causalGraph_.expressionsSeparation(first, second);
+            }) {}
 
   int64_t replaceOnce(const std::function<bool()> shouldAbort) {
     terminationReason_ = TerminationReason::NotTerminated;
@@ -101,16 +104,16 @@ class Set::Implementation {
 
     // At this point, we are committed to modifying the set.
 
-    // This goes first, as if the event selection function is invalid, we want to fail before modifying anything else.
-    if (eventSelectionFunction_ == EventSelectionFunction::GlobalSpacelike) {
+    // This goes first, as if the system type is invalid, we want to fail before modifying anything else.
+    if (systemType_ == SystemType::Singleway) {
       matcher_.removeMatchesInvolvingExpressions(match->inputExpressions);
       atomsIndex_.removeExpressions(match->inputExpressions);
       destroyedExpressionsCount_ += match->inputExpressions.size();
       updateAtomDegrees(&atomDegrees_, match->inputExpressions, -1);
-    } else if (eventSelectionFunction_ == EventSelectionFunction::None) {
+    } else if (systemType_ == SystemType::Multiway) {
       matcher_.deleteMatch(match);
     } else {
-      throw Error::InvalidEventSelectionFunction;
+      throw Error::InvalidSystemType;
     }
 
     // Name newly created atoms as well, now all atoms in the output are explicitly named.
@@ -161,15 +164,16 @@ class Set::Implementation {
  private:
   Implementation(std::vector<Rule> rules,
                  const std::vector<AtomsVector>& initialExpressions,
-                 const EventSelectionFunction& eventSelectionFunction,
+                 const SystemType& systemType,
                  const Matcher::OrderingSpec& orderingSpec,
                  const unsigned int randomSeed,
-                 const GetAtomsVectorFunc& getAtomsVector)
-      : rules_(std::move(rules)),
-        eventSelectionFunction_(eventSelectionFunction),
-        causalGraph_(static_cast<int>(initialExpressions.size())),
+                 const GetAtomsVectorFunc& getAtomsVector,
+                 const GetExpressionsSeparationFunc& getExpressionsSeparation)
+      : rules_(rules),
+        systemType_(systemType),
+        causalGraph_(static_cast<int>(initialExpressions.size()), separationTrackingMethod(systemType, rules)),
         atomsIndex_(getAtomsVector),
-        matcher_(rules_, &atomsIndex_, getAtomsVector, orderingSpec, randomSeed) {
+        matcher_(rules_, &atomsIndex_, getAtomsVector, getExpressionsSeparation, orderingSpec, randomSeed) {
     for (const auto& expression : initialExpressions) {
       for (const auto& atom : expression) {
         if (atom <= 0) throw Error::NonPositiveAtoms;
@@ -218,7 +222,7 @@ class Set::Implementation {
     unindexedExpressions_.clear();
   }
 
-  bool isMultiway() const { return eventSelectionFunction_ != EventSelectionFunction::GlobalSpacelike; }
+  bool isMultiway() const { return systemType_ != SystemType::Singleway; }
 
   TerminationReason willExceedAtomLimits(const std::vector<AtomsVector>& explicitRuleInputs,
                                          const std::vector<AtomsVector>& explicitRuleOutputs) const {
@@ -335,11 +339,24 @@ class Set::Implementation {
     }
     return smallestSoFar;
   }
+
+  static CausalGraph::SeparationTrackingMethod separationTrackingMethod(const SystemType systemType,
+                                                                        const std::vector<Rule>& rules) {
+    if (systemType == SystemType::Singleway) {
+      return CausalGraph::SeparationTrackingMethod::None;
+    }
+    for (const auto& rule : rules) {
+      if (rule.eventSelectionFunction != EventSelectionFunction::All) {
+        return CausalGraph::SeparationTrackingMethod::DestroyerChoices;
+      }
+    }
+    return CausalGraph::SeparationTrackingMethod::None;
+  }
 };
 
 Set::Set(const std::vector<Rule>& rules,
          const std::vector<AtomsVector>& initialExpressions,
-         const EventSelectionFunction& eventSelectionFunction,
+         const SystemType& eventSelectionFunction,
          const Matcher::OrderingSpec& orderingSpec,
          unsigned int randomSeed)
     : implementation_(std::make_shared<Implementation>(

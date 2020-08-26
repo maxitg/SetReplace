@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "Expression.hpp"
 #include "IDTypes.hpp"
 
 namespace SetReplace {
@@ -33,9 +34,19 @@ struct Event {
  */
 class CausalGraph {
  public:
+  /** @brief Whether and what kind of separation (timelike, spacelike, branchlike) between expressions should be
+   tracked.
+   @details This tracking is in general expensive, so it should be disabled if not needed. It is however much faster to
+   precompute it during evolution than compute it on demand. Only supported for spacelike systems.
+   */
+  enum class SeparationTrackingMethod {
+    None,             // lookup impossible
+    DestroyerChoices  // O(events * expressions) in memory and time, O(expressions) lookup
+  };
+
   /** @brief Creates a new CausalGraph with a given number of initial expressions.
    */
-  explicit CausalGraph(int initialExpressionsCount);
+  explicit CausalGraph(int initialExpressionsCount, SeparationTrackingMethod separationTrackingMethod);
 
   /** @brief Adds a new event, names its output expressions, and returns their IDs.
    */
@@ -68,6 +79,11 @@ class CausalGraph {
   /** @brief Largest generation of any event.
    */
   Generation largestGeneration() const;
+
+  /** @brief Computes the separation type between expressions (timelike, spacelike or branchlike).
+   @details Fails if SeparationTrackingMethod is disabled.
+   */
+  SeparationType expressionsSeparation(ExpressionID first, ExpressionID second) const;
 
  private:
   class Implementation;
