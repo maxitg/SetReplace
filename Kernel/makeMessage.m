@@ -91,11 +91,15 @@ messageTemplate["pargx"] =
   "`5``6``7``8` argument`9` `10` expected.";
 
 
-messageTemplate["stepTooLarge"] =
+messageTemplate["parameterTooLarge"] =
   "`2` `3` requested out of `4` total.";
 
 
-messageTemplate["stepNotInteger"] =
+messageTemplate["parameterTooSmall"] =
+  "`2` `3` cannot be smaller than `4`.";
+
+
+messageTemplate["parameterNotInteger"] =
   "`2` `3` must be an integer.";
 
 
