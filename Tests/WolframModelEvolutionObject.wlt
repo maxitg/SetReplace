@@ -131,7 +131,7 @@
           pathGraph17,
           4]["SetAfterEvent", 16],
         WolframModelEvolutionObject[___]["SetAfterEvent", 16],
-        {WolframModelEvolutionObject::stepTooLarge},
+        {WolframModelEvolutionObject::parameterTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -141,7 +141,7 @@
           pathGraph17,
           4]["SetAfterEvent", -17],
         WolframModelEvolutionObject[___]["SetAfterEvent", -17],
-        {WolframModelEvolutionObject::stepTooLarge},
+        {WolframModelEvolutionObject::parameterTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -151,7 +151,7 @@
           pathGraph17,
           4]["SetAfterEvent", 1.2],
         WolframModelEvolutionObject[___]["SetAfterEvent", 1.2],
-        {WolframModelEvolutionObject::stepNotInteger},
+        {WolframModelEvolutionObject::parameterNotInteger},
         SameTest -> MatchQ
       ],
 
@@ -161,7 +161,7 @@
           pathGraph17,
           4]["SetAfterEvent", "good"],
         WolframModelEvolutionObject[___]["SetAfterEvent", "good"],
-        {WolframModelEvolutionObject::stepNotInteger},
+        {WolframModelEvolutionObject::parameterNotInteger},
         SameTest -> MatchQ
       ],
 
@@ -173,7 +173,7 @@
           pathGraph17,
           4]["Generation", 5],
         WolframModelEvolutionObject[___]["Generation", 5],
-        {WolframModelEvolutionObject::stepTooLarge},
+        {WolframModelEvolutionObject::parameterTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -183,7 +183,7 @@
           pathGraph17,
           4]["Generation", -6],
         WolframModelEvolutionObject[___]["Generation", -6],
-        {WolframModelEvolutionObject::stepTooLarge},
+        {WolframModelEvolutionObject::parameterTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -193,7 +193,7 @@
           pathGraph17,
           4]["Generation", 2.3],
         WolframModelEvolutionObject[___]["Generation", 2.3],
-        {WolframModelEvolutionObject::stepNotInteger},
+        {WolframModelEvolutionObject::parameterNotInteger},
         SameTest -> MatchQ
       ],
 
@@ -203,7 +203,7 @@
           pathGraph17,
           4]["GenerationEdgeIndices", 5],
         WolframModelEvolutionObject[___]["GenerationEdgeIndices", 5],
-        {WolframModelEvolutionObject::stepTooLarge},
+        {WolframModelEvolutionObject::parameterTooLarge},
         SameTest -> MatchQ
       ],
 
@@ -433,7 +433,7 @@
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
         evo["GenerationComplete", #],
-        {WolframModelEvolutionObject::stepTooLarge}
+        {WolframModelEvolutionObject::parameterTooLarge}
       ] & /@ {-10, -7}],
 
       VerificationTest[
@@ -1869,7 +1869,75 @@
           evolution["EventsStatesList"],
           {WolframModelEvolutionObject::multiwayState}
         ]
-      ]
+      ],
+
+      (* ExpressionsSeparation *)
+
+      With[{
+          mixedSeparationEvolution = WolframModel[
+            <|"PatternRules" -> {
+              {{v, i}} -> {{v, 1}, {v, 2}}, {{v, 1}} -> {{v, 1, 1}, {v, 1, 2}}, {{v, 1, 1}, {v, 2}} -> {{v, f, 1}},
+              {{v, 1, 2}, {v, 2}} -> {{v, f, 2}}}|>,
+            {{v, i}},
+            Infinity,
+            "EventSelectionFunction" -> None]}, {
+        testUnevaluated[
+          mixedSeparationEvolution["ExpressionsSeparation", #1, #2],
+          {WolframModelEvolutionObject::parameterTooLarge}
+        ] & @@@ {{-9, -9}, {-8, -9}, {8, -9}, {1, -8}, {1, 8}},
+
+        testUnevaluated[
+          mixedSeparationEvolution["ExpressionsSeparation", #1, #2],
+          {WolframModelEvolutionObject::parameterTooSmall}
+        ] & @@@ {{0, -9}, {1, 0}},
+
+        testUnevaluated[
+          mixedSeparationEvolution["ExpressionsSeparation", #1, #2],
+          {WolframModelEvolutionObject::parameterNotInteger}
+        ] & @@@ {{"s", 3}, {3, "s"}, {1.2, 3}, {I, 3}},
+
+        VerificationTest[
+          Table[mixedSeparationEvolution["ExpressionsSeparation", m, n], {m, 7}, {n, 7}],
+          {{i, t, t, t, t, t, t},
+           {t, i, s, t, t, t, t},
+           {t, s, i, s, s, t, t},
+           {t, t, s, i, s, t, s},
+           {t, t, s, s, i, s, t},
+           {t, t, t, t, s, i, b},
+           {t, t, t, s, t, b, i}} /. {i -> "Identical", t -> "Timelike", s -> "Spacelike", b -> "Branchlike"}
+        ],
+
+        VerificationTest[
+          Table[mixedSeparationEvolution["ExpressionsSeparation", m, n], {m, 7}, {n, 7}],
+          Table[mixedSeparationEvolution["ExpressionsSeparation", m, n], {m, -7, -1}, {n, -7, -1}]
+        ],
+
+        VerificationTest[
+          WolframModel[{{1, 2}} -> {{2, 3}, {3, 4}}, {{1, 2}}, 1]["ExpressionsSeparation", -2, -1],
+          "Spacelike"
+        ],
+
+        VerificationTest[
+          WolframModel[{{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}}, {{1, 2}}, 1, "EventSelectionFunction" -> None][
+            "ExpressionsSeparation", -2, -1],
+          "Branchlike"
+        ],
+
+        VerificationTest[
+          WolframModel[{{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}}, {{1, 2}}, 2][
+            "ExpressionsSeparation", -2, -1],
+          "Timelike"
+        ],
+
+        VerificationTest[
+          WolframModel[
+            <|"PatternRules" -> {{{1, 2}} -> {{2, 3}}, {{1, 2}} -> {{3, 4}}, {{2, 3}, {3, 4}} -> {{4, 5}, {5, 6}}}|>,
+            {{1, 2}},
+            Infinity,
+            "EventSelectionFunction" -> None]["ExpressionsSeparation", -2, -1],
+          "Spacelike"
+        ]
+      }]
     }]
   |>,
 
