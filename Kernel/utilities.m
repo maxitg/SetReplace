@@ -45,12 +45,8 @@ toNormalEdges[edge_] := UndirectedEdge @@@ Partition[edge, 2, 1, 1]
 
 SetAttributes[mapHold, HoldFirst];
 
-mapHold[expr_, level_List : {1}] := ReleaseHold[Map[Hold, Hold[expr], level + 1]]
-
-mapHold[expr_, level : (_Integer | Infinity)] := mapHold[expr, {1, level}]
+mapHold[expr_, level_ : {1}] := Map[Hold, Unevaluated[expr], level]
 
 SetAttributes[heldPart, HoldFirst];
 
-(* Part 0 (head) will not be held, Association keys not supported. *)
-
-heldPart[expr_, part__] := mapHold[expr, {0, Length[{part}]}][[##]] & @@ Riffle[{part}, 1, {1, -2, 2}]
+heldPart[expr_, part__Integer] := Extract[Unevaluated[expr], {part}, Hold]
