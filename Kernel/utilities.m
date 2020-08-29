@@ -9,6 +9,8 @@ PackageScope["toCanonicalHypergraphForm"]
 PackageScope["vertexList"]
 PackageScope["indexHypergraph"]
 PackageScope["connectedHypergraphQ"]
+PackageScope["mapHold"]
+PackageScope["heldPart"]
 
 fromCounts[association_] := Catenate @ KeyValueMap[ConstantArray] @ association
 
@@ -40,3 +42,15 @@ indexHypergraph[e_] := With[{vertices = vertexList[e]},
 connectedHypergraphQ[edges_] := ConnectedGraphQ[Graph[Catenate[toNormalEdges /@ toCanonicalHypergraphForm[edges]]]]
 
 toNormalEdges[edge_] := UndirectedEdge @@@ Partition[edge, 2, 1, 1]
+
+SetAttributes[mapHold, HoldFirst];
+
+mapHold[expr_, level_List : {1}] := ReleaseHold[Map[Hold, Hold[expr], level + 1]]
+
+mapHold[expr_, level : (_Integer | Infinity)] := mapHold[expr, {1, level}]
+
+SetAttributes[heldPart, HoldFirst];
+
+(* Part 0 (head) will not be held, Association keys not supported. *)
+
+heldPart[expr_, part__] := mapHold[expr, {Length[{part}]}][[part]]
