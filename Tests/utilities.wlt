@@ -304,6 +304,16 @@
       VerificationTest[
         heldPart[{1 + 1, 2 - 2, 0 * 1}, 1 ;; 2],
         {Hold[1 + 1], Hold[2 - 2]}
+      ],
+
+      VerificationTest[
+        heldPart[OddQ[2 + 3], 1],
+        Hold[2 + 3]
+      ],
+
+      VerificationTest[
+        heldPart[OddQ[2 + 3], 1, All],
+        Hold[2] + Hold[3]
       ]
     }
   |>

@@ -53,4 +53,4 @@ SetAttributes[heldPart, HoldFirst];
 
 (* Part 0 (head) will not be held, Association keys not supported. *)
 
-heldPart[expr_, part__] := mapHold[expr, {Length[{part}]}][[part]]
+heldPart[expr_, part__] := mapHold[expr, {0, Length[{part}]}][[##]] & @@ Riffle[{part}, 1, {1, -2, 2}]
