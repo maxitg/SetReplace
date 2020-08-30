@@ -1,90 +1,87 @@
-(* ::Package:: *)
-
-(* ::Title:: *)
-(*setSubstitutionSystem$wl*)
-
-
-(* ::Text:: *)
-(*Implementation of setSubstitutionSystem in Wolfram Language. Works better with larger vertex degrees, but is otherwise much slower.*)
-
-
 Package["SetReplace`"]
-
 
 PackageScope["setSubstitutionSystem$wl"]
 
+(* This is the implementation of setSubstitutionSystem in Wolfram Language. Works better with larger vertex degrees,
+   but is otherwise much slower. Supports arbitrary pattern rules with conditions. Does not support multiway systems. *)
 
-(* ::Section:: *)
-(*Implementation*)
+(* We are going to transform set substitution rules into a list of n! normal rules, where elements of the input subset
+   are arranged in every possible order with blank null sequences in between. *)
 
-
-(* ::Subsection:: *)
-(*toNormalRules*)
-
-
-(* ::Text:: *)
-(*We are going to transform set substitution rules into a list of n! normal rules, where elements of the input subset are arranged in every possible order with blank null sequences in between.*)
-
-
-(* ::Text:: *)
-(*This is for the case of no new vertices being created, so there is no need for a Module in the output*)
-
-
-toNormalRules[input_List :> output_List] := Module[
+allLeftHandSidePermutations[input_Condition :> output_List] := Module[
     {inputLength, inputPermutations, heldOutput},
-  inputLength = Length @ input;
+  inputLength = Length @ input[[1]];
 
-  inputPermutations = Permutations @ input;
+  inputPermutations = Permutations @ input[[1]];
   heldOutput = Thread @ Hold @ output;
 
-  With[{right = heldOutput},
-    # :> right & /@ inputPermutations] /. Hold[expr_] :> expr
+  With[{right = heldOutput, condition = input[[2]]}, (* condition is already held before it's passed here *)
+    # /; condition :> right & /@ inputPermutations] /. Hold[expr_] :> expr
 ] 
 
+(* Now, if there are new vertices that need to be created, we will disassemble the Module remembering which variables
+   it applies to, and then reassemble it for the output. *)
 
-(* ::Text:: *)
-(*Now, if there are new vertices that need to be created, we will disassemble the Module remembering which variables it applies to, and then reassemble it for the output.*)
-
-
-toNormalRules[input_List :> output_Module] := Module[
-    {ruleInputOriginal = input,
-     heldModule = Map[Hold, Hold[output], {2}],
+allLeftHandSidePermutations[input_Condition :> output_Module] := Module[
+    {ruleInputOriginal = input[[1]],
+     ruleCondition = heldPart[input, 2],
+     heldModule = mapHold[output, {0, 1}],
      moduleInputContents},
   moduleInputContents = heldModule[[1, 2]];
   With[{ruleInputFinal = #[[1]],
       moduleArguments = heldModule[[1, 1]],
       moduleOutputContents = (Hold /@ #)[[2]]},
     ruleInputFinal :> Module[moduleArguments, moduleOutputContents]
-  ] & /@ toNormalRules[
-      ruleInputOriginal :> Evaluate @ moduleInputContents /.
+  ] & /@ allLeftHandSidePermutations[
+      ruleInputOriginal /; ruleCondition :> Evaluate @ moduleInputContents /.
         Hold[expr_] :> expr] //.
     Hold[expr_] :> expr
 ]
 
+(* toNormalRules turns set substitution rules into normal Wolfram Language rules for use in, i.e., Replace. *)
 
-(* ::Text:: *)
-(*If there are multiple rules, we just join them*)
+(* If there are multiple rules, we want to turn them into one because we need to maintain a specific
+   (oldest-expressions-first) evolution order. *)
 
+(* The idea is to find the shortest matching sequence from the beginning of the set using Shortest of Alternatives
+   among all rules arranged in all possible orders. *)
+
+(* For example, the two rules
+     {{{a_, b_}} /; True :> Module[{c}, {{a, c}, {c, b}}],
+     {{a_, b_}, {b_, c_}} /; True :> Module[{}, {{a, c}}]}
+   would turn into something like
+     {match : Shortest[(rule1 : PatternSequence[untouched1___, {a_, b_}] /; True) |
+                       (rule2 : PatternSequence[untouched1___, {a_, b_}, untouched2___, {b_, c_}] /; True) |
+                       (rule2 : PatternSequence[untouched1___, {b_, c_}, untouched2___, {a_, b_}] /; True)],
+      untouched3___} :>
+     Catenate[{{untouched1, untouched2, untouched3},
+               Replace[{rule1}, {match} :> Module[{c}, {{a, c}, {c, b}}]],
+               Replace[{rule2}, {match} :> Module[{}, {{a, c}}]]}] *)
+
+(* untouched are the expressions that were not used in this event. Note that the Replace[...] arguments of Catenate
+   effectively choose which rule should be used because all but one of the rule patterns will be empty sequences. *)
 
 toNormalRules[rules_List] := Module[{
     ruleNames, separateNormalRules, longestRuleLength, untouchedNames,
     finalMatchName, input, output},
   ruleNames = Table[Unique["rule", {Temporary}], Length[rules]];
-  separateNormalRules = toNormalRules /@ rules;
-  longestRuleLength = Max[Map[Length, separateNormalRules[[All, All, 1]], {2}]];
+  separateNormalRules = allLeftHandSidePermutations /@ rules;
+  longestRuleLength = Max[Map[Length, separateNormalRules[[All, All, 1, 1]], {2}]];
   untouchedNames = Table[Unique["untouched", {Temporary}], longestRuleLength + 1];
   finalMatchName = Unique["match", {Temporary}];
   input = With[{match = finalMatchName}, List[
     match : Shortest[Alternatives @@ Catenate[Transpose @ PadRight[
       MapIndexed[
         With[{patternName = ruleNames[[#2[[1]]]]},
-          Function[patternContent,
-            Pattern[patternName, patternContent]] /@ #] &,
+          Function[{patternContent, condition},
+            inertCondition[patternName : patternContent, condition] /. inertCondition -> Condition] @@@ #] &,
         Map[
-          PatternSequence @@ If[# == {}, #, Riffle[
-            #,
-            Pattern[#, ___] & /@ untouchedNames,
-            {1, 2 Length[#] - 1, 2}]] &,
+          With[{input = #[[1]], condition = heldPart[#, 2]},
+            PatternSequence @@ If[input == {}, input, Riffle[
+              input,
+              Pattern[#, ___] & /@ untouchedNames,
+              {1, 2 Length[input] - 1, 2}]] /; condition
+          ] &,
           separateNormalRules[[All, All, 1]],
           {2}]],
       Automatic,
@@ -102,15 +99,8 @@ toNormalRules[rules_List] := Module[{
   With[{evaluatedOutput = output}, input :> evaluatedOutput] //. Hold[expr_] :> expr
 ]
 
-
-(* ::Subsection:: *)
-(*setReplace$wl*)
-
-
-(* ::Text:: *)
-(*This function just does the replacements, but it does not keep track of any metadata (generations and events).*)
-(*Returns {finalState, terminationReason}, and sows deleted expressions.*)
-
+(* This function just does the replacements, but it does not keep track of any metadata (generations and events).
+   Returns {finalState, terminationReason}, and sows deleted expressions. *)
 
 setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstraint_] := Module[{
     normalRules, previousResult, eventsCount = 0},
@@ -153,27 +143,44 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
   ]
 ]
 
+(* We need to not only perform the evolution, but also keep track of the metadata such as generation numbers, creator
+   events, etc. The way we do it is by implementing the metadata tracking itself as pattern rules.
+   Each expression becomes the list {id, generation, original expression (atoms)} *)
 
-(* ::Subsection:: *)
-(*addMetadataManagement*)
+(* Then a rule
+     {{a_, b_}, {b_, c_}} /; True :> Module[{d}, {{a, d}, {d, b}}]
+   becomes something like
+     {{id1_, generation1_ ? (#1 < maxGeneration &), inputExpression1 : {a_, b_}},
+      {id2_, generation2_ ? (#1 < maxGeneration &), inputExpression2 : {b_, c_}}} /; True :>
+     Module[{
+         d, newExpressionIDs = Table[getNextExpression[], 2]},
+       {Sow[{ruleID, {id1, id2} -> newExpressionIDs, 1 + Max[0, generation1, generation2]}, $$events]; Nothing,
+        Sow[{id1, generation1, inputExpression1}, $$deletedExpressions];
+        deleteFromVertexIndex[vertexIndex, inputExpression1]; Nothing,
+        Sow[{id2, generation2, inputExpression2}, $$deletedExpressions];
+        deleteFromVertexIndex[vertexIndex, inputExpression2]; Nothing,
+        {newExpressionIDs[[1]],
+         1 + Max[0, generation1, generation2],
+         addToVertexIndex[vertexIndex, {a, d}, maxVertexDegree]},
+        {newExpressionIDs[[2]],
+         1 + Max[0, generation1, generation2],
+         addToVertexIndex[vertexIndex, {d, b}, maxVertexDegree]}}] *)
 
-
-(* ::Text:: *)
-(*This function adds metadata management to the rules. I.e., the rules will not only perform the replacements, but will also keep track of generations, events, etc.*)
-
+(* This function adds metadata management to the rules. I.e., the rules will not only perform the replacements, but will
+   also keep track of generations, events, etc. *)
 
 addMetadataManagement[
-      input_List :> output_Module,
+      input_Condition :> output_Module,
       ruleID_,
       getNextExpression_,
       maxGeneration_,
       maxVertexDegree_,
       vertexIndex_] := Module[{
-    inputIDs = Table[Unique["id", {Temporary}], Length[input]],
-    wholeInputPatternNames = Table[Unique["inputExpression", {Temporary}], Length[input]],
-    inputGenerations = Table[Unique["generation", {Temporary}], Length[input]]},
+    inputIDs = Table[Unique["id", {Temporary}], Length[input[[1]]]],
+    wholeInputPatternNames = Table[Unique["inputExpression", {Temporary}], Length[input[[1]]]],
+    inputGenerations = Table[Unique["generation", {Temporary}], Length[input[[1]]]]},
   With[{
-      heldModule = Map[Hold, Hold[output], {2}]},
+      heldModule = mapHold[output, {0, 1}]},
     With[{
         moduleArguments = Append[
           ReleaseHold @ Map[Hold, heldModule[[1, 1]], {2}],
@@ -207,7 +214,8 @@ addMetadataManagement[
                 HoldAll],
               moduleOutput,
               {2}]],
-          originalInput = input},
+          originalInput = input[[1]],
+          condition = heldPart[input, 2]},
         {Pattern[Evaluate[#[[1]]], Blank[]],
          Pattern[Evaluate[#[[2]]], Blank[]] ? (# < maxGeneration &),
          Pattern[Evaluate[#[[4]]], #[[3]]]} & /@
@@ -215,18 +223,16 @@ addMetadataManagement[
               inputIDs,
               inputGenerations,
               originalInput,
-              wholeInputPatternNames}] :>
+              wholeInputPatternNames}] /; condition :>
           Module[moduleArguments, newModuleContents]]] //.
             Hold[expr_] :> expr]
 ]
 
+$generationMetadataIndex = 2; (* {id, generation, atoms} *)
 
-(* ::Subsection:: *)
-(*smallestMatchGeneration*)
-
-
-$generationMetadataIndex = 2;
-
+(* Determines maximal completed generation by trying to run the rules and checking the generation of the first match
+   obtained. Note, matching is necessary to determine that because it's impossible to determine if the last generation
+   is done otherwise. *)
 
 maxCompleteGeneration[output_, rulesNoMetadata_] := Module[{
     patternToMatch, matches},
@@ -246,14 +252,7 @@ maxCompleteGeneration[output_, rulesNoMetadata_] := Module[{
   ]
 ]
 
-
-(* ::Subsection:: *)
-(*setSubstitutionSystem$wl*)
-
-
-(* ::Text:: *)
-(*This function renames all rule inputs to avoid collisions with outputs from other rules.*)
-
+(* This function renames all rule inputs to avoid collisions with outputs from other rules. *)
 
 renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAtoms},
   SetAttributes[pattern, HoldFirst];
@@ -270,69 +269,61 @@ renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAt
   # /. (((HoldPattern[#1] /. Hold[s_] :> s) -> #2) & @@@ Thread[inputAtoms -> newInputAtoms])
 ] & /@ patternRules]
 
-
-(* ::Text:: *)
-(*This yields unique elements in the expressions upto level 1.*)
-
+(* This yields unique elements in the expressions upto level 1. *)
 
 expressionVertices[expr_] := If[ListQ[expr], Union[expr], Throw[expr, $$nonListExpression]]
 
-
-(* ::Text:: *)
-(*The following is used to keep track of how many times vertices appear in the set.
-  All operations here should evaluate in O(1).*)
-
+(* The following is used to keep track of how many times vertices appear in the set.
+   All operations here should evaluate in O(1). *)
 
 Attributes[$vertexIndex] = {HoldAll};
-
 
 initVertexIndex[$vertexIndex[index_], set_] := (
   index = Merge[Association[Thread[expressionVertices[#] -> 1]] & /@ set, Total];
   set
-);
-initVertexIndex[$noIndex, set_] := set
+)
 
+initVertexIndex[$noIndex, set_] := set
 
 deleteFromVertexIndex[$vertexIndex[index_], expr_] := ((
       index[#] = Lookup[index, Key[#], 0] - 1;
       If[index[#] == 0, KeyDropFrom[index, Key[#]]];) & /@
     expressionVertices[expr];
   expr
-);
-deleteFromVertexIndex[$noIndex, expr_] := expr
+)
 
+deleteFromVertexIndex[$noIndex, expr_] := expr
 
 addToVertexIndex[$vertexIndex[index_], expr_, limit_] := ((
       index[#] = Lookup[index, Key[#], 0] + 1;
       If[index[#] > limit, Throw[#, $$reachedAtomDegreeLimit]]) & /@
     expressionVertices[expr];
   expr
-);
+)
+
 addToVertexIndex[$noIndex, expr_, limit_] := expr
 
-
 vertexCount[$vertexIndex[index_]] := Length[index]
+
 vertexCount[$noIndex] := 0
 
-
-(* ::Text:: *)
-(*This function runs a modified version of the set replace system that also keeps track of metadata such as generations and events. It uses setReplace$wl to evaluate that modified system.*)
-
+(* This function runs a modified version of the set substitution system that also keeps track of metadata such as
+   generations and events. It uses setReplace$wl to evaluate that modified system. *)
 
 setSubstitutionSystem$wl[
-      caller_, rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_] := Module[{
-    setWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, allExpressions,
+      caller_, rules_, init_, stepSpec_, returnOnAbortQ_, timeConstraint_] := Module[{
+    initWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, allExpressions,
     nextExpressionID = 1, expressionsCountsPerVertex, vertexIndex, nextExpression,
     initialEvent, allEvents, generationsCount, maxCompleteGenerationAssumingExceedingStepSpecGenerationsDontExist},
   nextExpression = nextExpressionID++ &;
-  (* {id, creator, destroyer, generation, atoms} *)
-  setWithMetadata = {nextExpression[], 0, #} & /@ set;
+  (* {id, generation, atoms} *)
+  initWithMetadata = {nextExpression[], 0, #} & /@ init;
   renamedRules = renameRuleInputs[toCanonicalRules[rules]];
   If[renamedRules === $Failed, Return[$Failed]];
   vertexIndex = If[MissingQ[stepSpec[$maxFinalVertices]] && MissingQ[stepSpec[$maxFinalVertexDegree]],
     $noIndex,
     $vertexIndex[expressionsCountsPerVertex]];
-  initVertexIndex[vertexIndex, set];
+  initVertexIndex[vertexIndex, init];
 
   rulesWithMetadata = MapIndexed[
     addMetadataManagement[
@@ -345,7 +336,7 @@ setSubstitutionSystem$wl[
     renamedRules];
   outputWithMetadata = Catch[
     Reap[
-      setReplace$wl[setWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint],
+      setReplace$wl[initWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint],
       {$$deletedExpressions, $$events}],
     $$nonListExpression,
     (makeMessage[caller, "nonListExpressions", #];
@@ -356,11 +347,11 @@ setSubstitutionSystem$wl[
       outputWithMetadata[[1, 1]],
       If[outputWithMetadata[[2, 1]] == {}, {}, outputWithMetadata[[2, 1, 1]]]],
     First];
-  initialEvent = {0, {} -> setWithMetadata[[All, 1]], 0};
+  initialEvent = {0, {} -> initWithMetadata[[All, 1]], 0};
   allEvents = Join[{initialEvent}, If[outputWithMetadata[[2, 2]] == {}, {}, outputWithMetadata[[2, 2, 1]]]];
   generationsCount = Max[allEvents[[All, 3]], 0];
-  maxCompleteGenerationAssumingExceedingStepSpecGenerationsDontExist = CheckAbort[
-    maxCompleteGeneration[outputWithMetadata[[1, 1]], renamedRules],
+  maxCompleteGenerationResult = CheckAbort[
+    Min[maxCompleteGeneration[outputWithMetadata[[1, 1]], renamedRules], generationsCount],
     If[returnOnAbortQ,
       Missing["Unknown", $Aborted],
       Return[$Aborted]
@@ -369,9 +360,7 @@ setSubstitutionSystem$wl[
   WolframModelEvolutionObject[<|
     $version -> 2,
     $rules -> rules,
-    $maxCompleteGeneration -> If[MissingQ[maxCompleteGenerationAssumingExceedingStepSpecGenerationsDontExist],
-      maxCompleteGenerationAssumingExceedingStepSpecGenerationsDontExist,
-      Min[maxCompleteGenerationAssumingExceedingStepSpecGenerationsDontExist, generationsCount]],
+    $maxCompleteGeneration -> maxCompleteGenerationResult,
     $terminationReason -> Replace[
       outputWithMetadata[[1, 2]],
       $fixedPoint ->
