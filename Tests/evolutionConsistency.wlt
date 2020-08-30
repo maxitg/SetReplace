@@ -53,7 +53,7 @@
       $features = <|
         "VertexNamingFunction" -> {Automatic, None, All},
         "IncludePartialGenerations" -> {True, False},
-        "EventSelectionFunction" -> {"GlobalSpacelike", None},
+        "EventSelectionFunction" -> {"GlobalSpacelike", "MultiwaySpacelike", None},
         "EventOrderingFunction" -> {Automatic, "NewestEdge", "OldestEdge", "Random",
                                     {"NewestEdge", "RuleIndex"},
                                     {"NewestEdge", "RuleOrdering", "RuleIndex"}},

@@ -27,6 +27,7 @@ $cpp$setCreate = If[$libraryFile =!= $Failed,
     $libraryFile,
     "setCreate",
     {{Integer, 1}, (* rules *)
+      {Integer, 1}, (* event selection functions for rules *)
       {Integer, 1}, (* initial set *)
       Integer, (* event selection function *)
       {Integer, 1}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
@@ -217,10 +218,17 @@ $terminationReasonCodes = <|
 |>;
 
 
-$eventSelectionFunctionCodes = <|
-  $globalSpacelike -> 0,
-  None -> 1
-|>;
+systemTypeCode[eventSelectionFunction_] := Boole[multiwayEventSelectionFunctionQ[eventSelectionFunction]]
+
+
+(* 0 -> All
+   1 -> Spacelike *)
+
+(* GlobalSpacelike is set to All because all concurrently matched expressions are always spacelike in that case,
+   and All is much faster to evaluate. *)
+
+eventSelectionCodes[eventSelectionFunction_, ruleCount_] :=
+  ConstantArray[eventSelectionFunction /. {$globalSpacelike -> 0, None -> 0, $spacelike -> 1}, ruleCount]
 
 
 $orderingFunctionCodes = <|
@@ -256,8 +264,9 @@ setSubstitutionSystem$cpp[
     {K, Length[canonicalRules]}];
   setPtr = $cpp$setCreate[
     encodeNestedLists[List @@@ mappedRules],
+    eventSelectionCodes[eventSelectionFunction, Length[canonicalRules]],
     encodeNestedLists[mappedSet],
-    Replace[eventSelectionFunction, $eventSelectionFunctionCodes],
+    systemTypeCode[eventSelectionFunction],
     Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
     RandomInteger[{0, $maxUInt32}]];
   TimeConstrained[

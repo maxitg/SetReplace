@@ -39,6 +39,7 @@ PackageScope["$forward"]
 PackageScope["$backward"]
 
 PackageScope["$globalSpacelike"]
+PackageScope["$spacelike"]
 
 
 (* ::Text:: *)
@@ -123,7 +124,7 @@ $stepSpecNamesInErrorMessage = <|
 stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
 
 
-multiwayEventSelectionFunctionQ[None] = True
+multiwayEventSelectionFunctionQ[None | $spacelike] = True
 
 
 multiwayEventSelectionFunctionQ[_] = False
@@ -236,7 +237,8 @@ parseEventOrderingFunction[caller_, func_] := (
 
 $eventSelectionFunctions = <|
   "GlobalSpacelike" -> $globalSpacelike,
-  None -> None (* match-all local multiway *)
+  None -> None, (* match-all local multiway *)
+  "MultiwaySpacelike" -> $spacelike (* enumerates all possible "GlobalSpacelike" evolutions *)
 |>;
 
 

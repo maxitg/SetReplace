@@ -1,6 +1,7 @@
 #include "Event.hpp"
 
 #include <algorithm>
+#include <unordered_map>
 
 namespace SetReplace {
 class CausalGraph::Implementation {
@@ -11,8 +12,20 @@ class CausalGraph::Implementation {
   // needed to return the largest generation in O(1)
   Generation largestGeneration_ = 0;
 
+  SeparationTrackingMethod separationTrackingMethod_;
+
+  // Allows one to determine the type of separation between expressions.
+  // Addressed as destroyerChoices[eventID][expressionID] -> eventID.
+  // For each event E, tells one which events need to be chosen as destroyers for each of the expressions in order to
+  // make E possible. If there is no value for a given expression, it means any destroyer can be chosen.
+  std::vector<std::unordered_map<ExpressionID, EventID>> destroyerChoices_;
+
+  // If false, destroyerChoices is meaningless, and not computed.
+  bool isSpacelikeEvolution_ = true;
+
  public:
-  explicit Implementation(const int initialExpressionsCount) {
+  explicit Implementation(const int initialExpressionsCount, const SeparationTrackingMethod separationTrackingMethod)
+      : separationTrackingMethod_(separationTrackingMethod) {
     addEvent(initialConditionRule, {}, initialExpressionsCount);
   }
 
@@ -23,6 +36,7 @@ class CausalGraph::Implementation {
     const Generation generation = newEventGeneration(inputExpressions);
     events_.push_back({ruleID, inputExpressions, newExpressions, generation});
     largestGeneration_ = std::max(largestGeneration_, generation);
+    if (separationTrackingMethod_ == SeparationTrackingMethod::DestroyerChoices) addLastEventDestroyerChoices();
     return newExpressions;
   }
 
@@ -39,6 +53,38 @@ class CausalGraph::Implementation {
   }
 
   Generation largestGeneration() const { return largestGeneration_; }
+
+  SeparationType expressionsSeparation(const ExpressionID first, const ExpressionID second) const {
+    if (!isSpacelikeEvolution_ || separationTrackingMethod_ == SeparationTrackingMethod::None) {
+      // This approach does not work with branchlike or timelike rules.
+      // For example, if a branchlike rule merges two branches and generates multiple expressions, this approach will
+      // not be able to determine that the output expressions are spacelike separated.
+      return SeparationType::Unknown;
+    } else if (first == second) {
+      return SeparationType::Identical;
+    }
+
+    const auto& firstDestroyerChoices = destroyerChoices_.at(expressionIDsToCreatorEvents_.at(first));
+    const auto& secondDestroyerChoices = destroyerChoices_.at(expressionIDsToCreatorEvents_.at(second));
+
+    if (firstDestroyerChoices.count(second) || secondDestroyerChoices.count(first)) {
+      // This implies one expression is required for another one to be possible. So, they are causally related.
+      return SeparationType::Timelike;
+    }
+
+    for (const auto& firstExpressionAndChosenEvent : firstDestroyerChoices) {
+      const auto& expression = firstExpressionAndChosenEvent.first;
+      const auto& chosenEvent = firstExpressionAndChosenEvent.second;
+      if (secondDestroyerChoices.count(expression) && secondDestroyerChoices.at(expression) != chosenEvent) {
+        // Both `first` and `second` expressions require a particular destroyer event to be chosen for `expression`
+        // to exist. However, these destroyer events have to be different (`chosenEvent` and
+        // `secondDestroyerChoices.at(expression)`). So, the expressions are on different multiway branches.
+        return SeparationType::Branchlike;
+      }
+    }
+
+    return SeparationType::Spacelike;
+  }
 
  private:
   std::vector<ExpressionID> createExpressions(const EventID creatorEvent, const int count) {
@@ -64,10 +110,37 @@ class CausalGraph::Implementation {
     }
     return newEventGeneration;
   }
+
+  // append prerequisites of the most recently added event to destroyerChoices_
+  void addLastEventDestroyerChoices() {
+    if (!isSpacelikeEvolution_) return;  // only spacelike evolutions are supported at the moment
+    const auto& lastEvent = events_.back();
+    std::unordered_map<ExpressionID, EventID> newDestroyerChoices;
+
+    // For lastEvent to exist, its direct prerequisites have to exist as well. So, merge the destroyer choices from
+    // creator events of all inputs to the lastEvent.
+    for (const auto& inputExpression : lastEvent.inputExpressions) {
+      // the input expression itself needs to be destroyed by `lastEvent`.
+      newDestroyerChoices[inputExpression] = events_.size() - 1;
+      const auto& inputEvent = expressionIDsToCreatorEvents_.at(inputExpression);
+      for (const auto& inputEventExpressionAndChosenEvent : destroyerChoices_.at(inputEvent)) {
+        const auto& expression = inputEventExpressionAndChosenEvent.first;
+        const auto& chosenEvent = inputEventExpressionAndChosenEvent.second;
+        if (newDestroyerChoices.count(expression) && newDestroyerChoices.at(expression) != chosenEvent) {
+          // the prerequisite events for the `lastEvent` have inconsistent requirements. The lastEvent is not spacelike.
+          isSpacelikeEvolution_ = false;
+          destroyerChoices_.clear();
+          return;
+        }
+        newDestroyerChoices[expression] = chosenEvent;
+      }
+    }
+    destroyerChoices_.emplace_back(newDestroyerChoices);
+  }
 };
 
-CausalGraph::CausalGraph(const int initialExpressionsCount)
-    : implementation_(std::make_shared<Implementation>(initialExpressionsCount)) {}
+CausalGraph::CausalGraph(const int initialExpressionsCount, const SeparationTrackingMethod separationTrackingMethod)
+    : implementation_(std::make_shared<Implementation>(initialExpressionsCount, separationTrackingMethod)) {}
 
 std::vector<ExpressionID> CausalGraph::addEvent(const RuleID ruleID,
                                                 const std::vector<ExpressionID>& inputExpressions,
@@ -88,4 +161,8 @@ Generation CausalGraph::expressionGeneration(const ExpressionID id) const {
 }
 
 Generation CausalGraph::largestGeneration() const { return implementation_->largestGeneration(); }
+
+SeparationType CausalGraph::expressionsSeparation(const ExpressionID first, const ExpressionID second) const {
+  return implementation_->expressionsSeparation(first, second);
+}
 }  // namespace SetReplace
