@@ -16,9 +16,9 @@ Check[
   ];
 
   previousPaclets = PacletFind["SetReplace"];
-  If[previousPaclets =!= {}, 
-  	Print["Uninstalling previous SetReplace at ", First[previousPaclets]["Location"]];
-  	PacletUninstall["SetReplace"];
+  If[previousPaclets =!= {},
+    Print["Uninstalling previous SetReplace at ", First[previousPaclets]["Location"]];
+    PacletUninstall["SetReplace"];
   ];
   
   (* This works in both 12.0 and 12.1. *)
