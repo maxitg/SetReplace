@@ -5,6 +5,8 @@
       Global`multisetFilterRules = SetReplace`PackageScope`multisetFilterRules;
       Global`multisetUnion = SetReplace`PackageScope`multisetUnion;
       Global`connectedHypergraphQ = SetReplace`PackageScope`connectedHypergraphQ;
+      Global`mapHold = SetReplace`PackageScope`mapHold;
+      Global`heldPart = SetReplace`PackageScope`heldPart;
     ),
     "tests" -> {
       (* multisetComplement *)
@@ -223,6 +225,75 @@
       VerificationTest[
         connectedHypergraphQ[{{13, 1, 14}, {13, 2, 16}, {16, 14, 18}, {6, 10, 15}, {1, 13, 15}, {13, 13, 15}}],
         True
+      ],
+
+      (* mapHold *)
+
+      VerificationTest[
+        mapHold[{1 + 1, 2 - 3}],
+        {Hold[1 + 1], Hold[2 - 3]}
+      ],
+
+      VerificationTest[
+        mapHold[f[2 + 4, OddQ[3]]],
+        f[Hold[2 + 4], Hold[OddQ[3]]]
+      ],
+
+      VerificationTest[
+        mapHold[2 + 2, 0],
+        4
+      ],
+
+      VerificationTest[
+        mapHold[{OddQ[1 + 0], EvenQ[0 + 1]}, 2],
+        {Hold[OddQ[Hold[1 + 0]]], Hold[EvenQ[Hold[0 + 1]]]}
+      ],
+
+      VerificationTest[
+        mapHold[{OddQ[1 + (0 * 5)], EvenQ[0 + 1]}, Infinity],
+        {Hold[OddQ[Hold[Hold[1] + Hold[Hold[0] * Hold[5]]]]], Hold[EvenQ[Hold[Hold[0] + Hold[1]]]]}
+      ],
+
+      VerificationTest[
+        mapHold[{(1 + 0) * (0 + 1), 4}, {2}],
+        {Hold[1 + 0] * Hold[0 + 1], 4}
+      ],
+
+      VerificationTest[
+        mapHold[{1 + 3, 2 - 2}, {0}],
+        Hold[{1 + 3, 2 - 2}]
+      ],
+
+      VerificationTest[
+        mapHold[{(1 + 0) * (0 + 1), 4}, {0, 2}],
+        Hold[{Hold[Hold[1 + 0] * Hold[0 + 1]], Hold[4]}]
+      ],
+
+      (* heldPart *)
+
+      VerificationTest[
+        heldPart[{1 + 1, 2 - 2}, 1],
+        Hold[1 + 1]
+      ],
+
+      VerificationTest[
+        heldPart[{1 + 1, 2 - 2}, -1],
+        Hold[2 - 2]
+      ],
+
+      VerificationTest[
+        heldPart[{1 + 1, 2 - 2}, 0],
+        Hold[List]
+      ],
+
+      VerificationTest[
+        heldPart[{{1 * 4, 1}, 2 - 2}, 1, 1],
+        Hold[1 * 4]
+      ],
+
+      VerificationTest[
+        heldPart[OddQ[2 + 3], 1],
+        Hold[2 + 3]
       ]
     }
   |>
