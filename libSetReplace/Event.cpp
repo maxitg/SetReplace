@@ -56,6 +56,9 @@ class CausalGraph::Implementation {
 
   SeparationType expressionsSeparation(const ExpressionID first, const ExpressionID second) const {
     if (!isSpacelikeEvolution_ || separationTrackingMethod_ == SeparationTrackingMethod::None) {
+      // This approach does not work with branchlike or timelike rules.
+      // For example, if a branchlike rule merges two branches and generates multiple expressions, this approach will
+      // not be able to determine that the output expressions are spacelike separated.
       return SeparationType::Unknown;
     } else if (first == second) {
       return SeparationType::Identical;
@@ -65,6 +68,7 @@ class CausalGraph::Implementation {
     const auto& secondDestroyerChoices = destroyerChoices_.at(expressionIDsToCreatorEvents_.at(second));
 
     if (firstDestroyerChoices.count(second) || secondDestroyerChoices.count(first)) {
+      // This implies one expression is required for another one to be possible. So, they are causally related.
       return SeparationType::Timelike;
     }
 
@@ -72,6 +76,9 @@ class CausalGraph::Implementation {
       const auto& expression = firstExpressionAndChosenEvent.first;
       const auto& chosenEvent = firstExpressionAndChosenEvent.second;
       if (secondDestroyerChoices.count(expression) && secondDestroyerChoices.at(expression) != chosenEvent) {
+        // Both `first` and `second` expressions require a particular destroyer event to be chosen for `expression`
+        // to exist. However, these destroyer events have to be different (`chosenEvent` and
+        // `secondDestroyerChoices.at(expression)`). So, the expressions are on different multiway branches.
         return SeparationType::Branchlike;
       }
     }
@@ -104,19 +111,23 @@ class CausalGraph::Implementation {
     return newEventGeneration;
   }
 
+  // append prerequisites of the most recently added event to destroyerChoices_
   void addLastEventDestroyerChoices() {
-    if (!isSpacelikeEvolution_) return;
+    if (!isSpacelikeEvolution_) return;  // only spacelike evolutions are supported at the moment
     const auto& lastEvent = events_.back();
     std::unordered_map<ExpressionID, EventID> newDestroyerChoices;
 
+    // For lastEvent to exist, its direct prerequisites have to exist as well. So, merge the destroyer choices from
+    // creator events of all inputs to the lastEvent.
     for (const auto& inputExpression : lastEvent.inputExpressions) {
+      // the input expression itself needs to be destroyed by `lastEvent`.
       newDestroyerChoices[inputExpression] = events_.size() - 1;
       const auto& inputEvent = expressionIDsToCreatorEvents_.at(inputExpression);
       for (const auto& inputEventExpressionAndChosenEvent : destroyerChoices_.at(inputEvent)) {
         const auto& expression = inputEventExpressionAndChosenEvent.first;
         const auto& chosenEvent = inputEventExpressionAndChosenEvent.second;
-        if (chosenEvent == 0) continue;
         if (newDestroyerChoices.count(expression) && newDestroyerChoices.at(expression) != chosenEvent) {
+          // the prerequisite events for the `lastEvent` have inconsistent requirements. The lastEvent is not spacelike.
           isSpacelikeEvolution_ = false;
           destroyerChoices_.clear();
           return;

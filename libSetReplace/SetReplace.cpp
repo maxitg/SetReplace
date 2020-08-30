@@ -211,13 +211,13 @@ int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, MArg
 
   std::vector<Rule> rules;
   std::vector<AtomsVector> initialExpressions;
-  Set::SystemType eventSelectionFunction;
+  Set::SystemType systemType;
   Matcher::OrderingSpec orderingSpec;
   unsigned int randomSeed;
   try {
     rules = getRules(libData, MArgument_getMTensor(argv[0]), MArgument_getMTensor(argv[1]));
     initialExpressions = getSet(libData, MArgument_getMTensor(argv[2]));
-    eventSelectionFunction = static_cast<Set::SystemType>(MArgument_getInteger(argv[3]));
+    systemType = static_cast<Set::SystemType>(MArgument_getInteger(argv[3]));
     orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[4]));
     randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[5]));
   } catch (...) {
@@ -231,7 +231,7 @@ int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, MArg
     thisSetID = distribution(randomGenerator);
   } while (sets_.count(thisSetID) > 0);
   try {
-    sets_.insert({thisSetID, Set(rules, initialExpressions, eventSelectionFunction, orderingSpec, randomSeed)});
+    sets_.insert({thisSetID, Set(rules, initialExpressions, systemType, orderingSpec, randomSeed)});
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }

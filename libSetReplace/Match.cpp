@@ -383,8 +383,8 @@ class Matcher::Implementation {
                                      shouldAbort);
   }
 
-  bool isSpacelikeSeparated(const ExpressionID newExpression, const std::vector<ExpressionID>& previousExpresisons) {
-    for (const auto& previousExpression : previousExpresisons) {
+  bool isSpacelikeSeparated(const ExpressionID newExpression, const std::vector<ExpressionID>& previousExpressions) {
+    for (const auto& previousExpression : previousExpressions) {
       if (previousExpression == newExpression || previousExpression < 0) continue;
       const auto separation = getExpressionsSeparation_(previousExpression, newExpression);
       if (separation != SeparationType::Spacelike) {
