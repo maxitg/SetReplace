@@ -64,6 +64,7 @@ class Matcher {
   Matcher(const std::vector<Rule>& rules,
           AtomsIndex* atomsIndex,
           const GetAtomsVectorFunc& getAtomsVector,
+          const GetExpressionsSeparationFunc& getExpressionsSeparation,
           const OrderingSpec& orderingSpec,
           unsigned int randomSeed = 0);
 
