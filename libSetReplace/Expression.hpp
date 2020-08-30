@@ -17,6 +17,18 @@ using AtomsVector = std::vector<Atom>;
  */
 using GetAtomsVectorFunc = std::function<const AtomsVector&(const ExpressionID&)>;
 
+/** @brief Type of separation between expressions.
+ */
+enum class SeparationType {
+  Unknown,    // Lookup not possible (i.e., SeparationTrackingMethod is None)
+  Identical,  // The expression IDs requested are the same
+  Timelike,   // One expression causally depends on the another
+  Spacelike,  // Expressions are compatible (created by an event)
+  Branchlike  // Expressions are incompatible (created from the same expression)
+};
+
+using GetExpressionsSeparationFunc = std::function<SeparationType(const ExpressionID&, const ExpressionID&)>;
+
 /** @brief AtomsIndex keeps references to set expressions accessible by atoms, which is useful for matching.
  */
 class AtomsIndex {
