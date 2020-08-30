@@ -238,7 +238,7 @@ parseEventOrderingFunction[caller_, func_] := (
 $eventSelectionFunctions = <|
   "GlobalSpacelike" -> $globalSpacelike,
   None -> None, (* match-all local multiway *)
-  "Spacelike" -> $spacelike (* multiway spacelike system, enumerates all possible "GlobalSpacelike" evolutions *)
+  "MultiwaySpacelike" -> $spacelike (* enumerates all possible "GlobalSpacelike" evolutions *)
 |>;
 
 

@@ -16,7 +16,7 @@
         WolframModel[{1 -> 2, 1 -> 3}, {1}, "EventSelectionFunction" -> selectionFunction, Method -> #1],
         #2
       ] & @@@ {{Automatic, WolframModel::symbNotImplemented}, {"Symbolic", WolframModel::symbOrdering}}] /@
-        {None, "Spacelike"},
+        {None, "MultiwaySpacelike"},
 
       (* multiway branching *)
       VerificationTest[
@@ -26,7 +26,7 @@
                      "AllEventsEdgesList",
                      "EventSelectionFunction" -> #],
         {{1}, {1, 2}, ##2}
-      ] & @@@ {{"GlobalSpacelike"}, {None, {1, 3, 4}}, {"Spacelike", {1, 3, 4}}},
+      ] & @@@ {{"GlobalSpacelike"}, {None, {1, 3, 4}}, {"MultiwaySpacelike", {1, 3, 4}}},
 
       (* branchlike matching *)
       VerificationTest[
@@ -36,7 +36,7 @@
                      "AllEventsEdgesList",
                      "EventSelectionFunction" -> #],
         {{1}, {1, 2}, {1, 3, 4}, ##2}
-      ] & @@@ {{None, {1, 2, 3, 4}}, {"Spacelike"}},
+      ] & @@@ {{None, {1, 2, 3, 4}}, {"MultiwaySpacelike"}},
 
       (* timelike matching *)
       VerificationTest[
@@ -46,7 +46,7 @@
                      "AllEventsEdgesList",
                      "EventSelectionFunction" -> #],
         {{1}, {1, 2}, {1, 2, 3}, ##2}
-      ] & @@@ {{"GlobalSpacelike"}, {None, {1, 2, 2, 3}}, {"Spacelike"}},
+      ] & @@@ {{"GlobalSpacelike"}, {None, {1, 2, 2, 3}}, {"MultiwaySpacelike"}},
 
       (* spacelike matching *)
       VerificationTest[
@@ -56,7 +56,7 @@
                      "AllEventsEdgesList",
                      "EventSelectionFunction" -> #],
         {{1}, {1, 2}, {1, 2, 3}, ##2}
-      ] & @@@ {{"GlobalSpacelike", {1, 2, 3, 4}}, {None, {1, 2, 3, 4}}, {"Spacelike", {1, 2, 3, 4}}},
+      ] & @@@ {{"GlobalSpacelike", {1, 2, 3, 4}}, {None, {1, 2, 3, 4}}, {"MultiwaySpacelike", {1, 2, 3, 4}}},
 
       (* duplicate matching *)
       VerificationTest[
@@ -66,7 +66,7 @@
                      "AllEventsEdgesList",
                      "EventSelectionFunction" -> #],
         {{1}, {1, 2}, ##2}
-      ] & @@@ {{"GlobalSpacelike"}, {None}, {"Spacelike"}},
+      ] & @@@ {{"GlobalSpacelike"}, {None}, {"MultiwaySpacelike"}},
 
       (* no matching invalid patterns *)
       VerificationTest[
@@ -76,7 +76,7 @@
                      "EventsCount",
                      "EventSelectionFunction" -> #],
         0
-      ] & /@ {"GlobalSpacelike", None, "Spacelike"},
+      ] & /@ {"GlobalSpacelike", None, "MultiwaySpacelike"},
 
       (* non-overlapping systems produce the same behavior *)
       Function[{rule, init},
@@ -87,7 +87,7 @@
       ] @@@ {
         {{{1, 2}, {2, 3, 4}} -> {{2, 3}, {3, 4, 5}, {1, 2, 3, 4}}, {{1, 2}, {2, 3, 4}}},
         {{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, Automatic}
-      } & /@ {None, "Spacelike"},
+      } & /@ {None, "MultiwaySpacelike"},
 
       (* mixed spacelike/branchlike edge matching *)
       VerificationTest[
@@ -101,7 +101,7 @@
                      "AllEventsEdgesList",
                      "EventSelectionFunction" -> #],
         {{v, i}, {v, 1}, {v, 2}, {v, 1, 1}, {v, 1, 2}, {v, f, 1}, {v, f, 2}, ##2}
-      ] & @@@ {{None, {f}}, {"Spacelike"}},
+      ] & @@@ {{None, {f}}, {"MultiwaySpacelike"}},
 
       (* singleway spatial merging *)
       VerificationTest[
@@ -124,7 +124,8 @@
         {{a1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1}, {b1, b2}, {b2, m1}, {m1, m2}, {a2}, {b2}, {a3}, {m1}, {m1}, {m2},
          {m2}, ##2}
       ] & @@@ {
-        {None, {m1, m1, m1}, {m1, m1, m1}, {m2, m2, m2}, {m2, m2, m2}}, {"Spacelike", {m1, m1, m1}, {m1, m1, m1}}},
+        {None, {m1, m1, m1}, {m1, m1, m1}, {m2, m2, m2}, {m2, m2, m2}},
+        {"MultiwaySpacelike", {m1, m1, m1}, {m1, m1, m1}}},
 
       (* no singleway branchial merging *)
       VerificationTest[
@@ -146,7 +147,7 @@
                      "EventSelectionFunction" -> #],
         {{o1}, {o1, a1}, {o1, b1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1, b2}, {b2, m1}, {m1, m2}, {a1}, {b1}, {a2}, {b2},
          {a3}, {m1}, {m1}, {m2}, {m2}, ##2}
-      ] & @@@ {{None, {m1, m1, m1}, {m1, m1, m1}, {m2, m2, m2}, {m2, m2, m2}}, {"Spacelike"}}
+      ] & @@@ {{None, {m1, m1, m1}, {m1, m1, m1}, {m2, m2, m2}, {m2, m2, m2}}, {"MultiwaySpacelike"}}
     }
   |>
 |>
