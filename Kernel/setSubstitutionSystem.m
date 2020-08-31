@@ -280,7 +280,7 @@ atomPatternQ[pattern_ ? AtomQ] := True
 
 (* or to patterns referring to one atom at-a-time. *)
 
-atomPatternQ[pattern_Pattern ? (AtomQ[pattern[[1]]] && pattern[[2]] === Blank[] &)] := True
+atomPatternQ[pattern_Pattern ? (AtomQ[#[[1]]] && #[[2]] === Blank[] &)] := True
 
 
 atomPatternQ[_] := False
