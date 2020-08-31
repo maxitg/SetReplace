@@ -273,10 +273,23 @@ SetAttributes[inertCondition, HoldAll];
 simpleRuleQ[rule_] := inertConditionSimpleRuleQ[rule /. Condition -> inertCondition]
 
 
+(* Left-hand side of the rule must refer either to specific atoms, *)
+
+atomPatternQ[pattern_ ? AtomQ] := True
+
+
+(* or to patterns referring to one atom at-a-time. *)
+
+atomPatternQ[pattern_Pattern ? (AtomQ[pattern[[1]]] && pattern[[2]] === Blank[] &)] := True
+
+
+atomPatternQ[_] := False
+
+
 inertConditionSimpleRuleQ[
-    inertCondition[left : {{__ ? (AtomQ[#]
-      || MatchQ[#, _Pattern?(AtomQ[#[[1]]] && #[[2]] === Blank[] &)] &)}..}, True]
-    :> right : Module[{___ ? AtomQ}, {{___ ? AtomQ}...}]] := Module[{p},
+    (* empty expressions/subsets are not supported in the input, conditions are not supported *)
+    inertCondition[left : {{__ ? atomPatternQ}..}, True]
+    :> right : Module[{___ ? AtomQ} (* newly created atoms *), {{___ ? AtomQ}...}]] := Module[{p},
   ConnectedGraphQ @ Graph[
     Flatten[Apply[
         UndirectedEdge,

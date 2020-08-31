@@ -279,25 +279,27 @@ expressionVertices[expr_] := If[ListQ[expr], Union[expr], Throw[expr, $$nonListE
 Attributes[$vertexIndex] = {HoldAll};
 
 initVertexIndex[$vertexIndex[index_], set_] := (
-  index = Merge[Association[Thread[expressionVertices[#] -> 1]] & /@ set, Total];
+  index = Counts[Catenate[expressionVertices /@ set]];
   set
 )
 
 initVertexIndex[$noIndex, set_] := set
 
-deleteFromVertexIndex[$vertexIndex[index_], expr_] := ((
-      index[#] = Lookup[index, Key[#], 0] - 1;
-      If[index[#] == 0, KeyDropFrom[index, Key[#]]];) & /@
-    expressionVertices[expr];
+deleteFromVertexIndex[$vertexIndex[index_], expr_] := (
+  Scan[
+    index[#] = Lookup[index, Key[#], 0] - 1;
+    If[index[#] == 0, index[#] =.]; &,
+    expressionVertices[expr]];
   expr
 )
 
 deleteFromVertexIndex[$noIndex, expr_] := expr
 
-addToVertexIndex[$vertexIndex[index_], expr_, limit_] := ((
-      index[#] = Lookup[index, Key[#], 0] + 1;
-      If[index[#] > limit, Throw[#, $$reachedAtomDegreeLimit]]) & /@
-    expressionVertices[expr];
+addToVertexIndex[$vertexIndex[index_], expr_, limit_] := (
+  Scan[
+    index[#] = Lookup[index, Key[#], 0] + 1;
+    If[index[#] > limit, Throw[#, $$reachedAtomDegreeLimit]]; &,
+    expressionVertices[expr]];
   expr
 )
 
