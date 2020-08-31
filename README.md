@@ -460,6 +460,14 @@ In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
 Out[] = {{1, 2, 5, 3, 6}, {5, 3, 6, 3}, {6, 3, 8}, {8, 9}, {17}}
 ```
 
+One can even add conditions spanning multiple expressions:
+
+```wl
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} /; a > b :> a - b|>,
+ {1, 1, 5, 3, 6}, Infinity, "AllEventsStatesList"]
+Out[] = {{1, 1, 5, 3, 6}, {1, 3, 6, 4}, {6, 4, 2}, {2, 2}}
+```
+
 ### Automatic Initial State
 
 An initial state consisting of an appropriate number of (hyper) self-loops can be automatically produced for anonymous (non-pattern) rules. Here we evolve the system for 0 steps and ask the evolution object for the 0-th generation aka the initial state:

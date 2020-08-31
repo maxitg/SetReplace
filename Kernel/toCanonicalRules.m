@@ -1,78 +1,44 @@
-(* ::Package:: *)
-
-(* ::Title:: *)
-(*toCanonicalRules*)
-
-
-(* ::Text:: *)
-(*Rules can be specified in various ways, in particular, single rule instead of a list, with or without a module, etc. This function is needed to standardize that:*)
-
-
-(* ::ItemNumbered:: *)
-(*Rules should always be specified as a list of rules instead of a single rule.*)
-
-
-(* ::ItemNumbered:: *)
-(*RuleDelayed should be used instead of Rule.*)
-
-
-(* ::ItemNumbered:: *)
-(*Module should be used on the right-hand side of the rule, even if with the empty first argument.*)
-
-
-(* ::ItemNumbered:: *)
-(*Left- and right-hand side of the rules should explicitly be lists, possibly specifying sets of a single element.*)
-
-
 Package["SetReplace`"]
-
 
 PackageScope["toCanonicalRules"]
 
+(* Rules can be specified in various ways, in particular, a single rule instead of a list, with or without a Module,
+   etc. This function is needed to canonicalize that so that the rules are easy to parse:
+  1. Rules should always be specified as a list of rules instead of a single rule.
+  2. RuleDelayed should be used instead of Rule.
+  3. Condition should be used on the left-hand side ({atom1, atom2, ...} /; condition) even if condition === True.
+  4. Module should be used on the right-hand side of the rule, even with the empty first argument.
+  5. Left- and right-hand sides of the rules should explicitly be lists, even if sets only have one element. *)
 
-(* ::Section:: *)
-(*Implementation*)
+(* If there is a single rule, we put it in a list *)
 
-
-(* ::Text:: *)
-(*If there is a single rule, we put it in a list*)
-
-
-toCanonicalRules[rules_List] := toCanonicalRule /@ rules
-
+toCanonicalRules[rules_List] := toCanonicalRule /@ (rules /. Condition -> inertCondition)
 
 toCanonicalRules[rule : Except[_List]] := toCanonicalRules[{rule}]
 
-
-(* ::Text:: *)
-(*Force RuleDelayed*)
-
+(* Force RuleDelayed *)
 
 toCanonicalRule[input_ -> output_] := toCanonicalRule[input :> output]
 
+(* Force Condition *)
 
-(* ::Text:: *)
-(*Force Module*)
+toCanonicalRule[input : Except[_inertCondition] :> output_] := toCanonicalRule[inertCondition[input, True] :> output]
 
+(* Force Module *)
 
-toCanonicalRule[input_ :> output : Except[_Module]] :=
-  toCanonicalRule[input :> Module[{}, output]]
+toCanonicalRule[input_ :> output : Except[_Module]] := toCanonicalRule[input :> Module[{}, output]]
 
+(* If input or output are not lists, we assume it is a single element set, so we put it into a single element list *)
 
-(* ::Text:: *)
-(*If input or output are not lists, we assume it is a single element set, so we put it into a single element list.*)
+SetAttributes[inertCondition, HoldRest];
 
+toCanonicalRule[inertCondition[inputExprs : Except[_List], condition_] :> output_] :=
+  toCanonicalRule[inertCondition[{inputExprs}, condition] :> output]
 
-toCanonicalRule[input_ :> output_] /; !ListQ[input] :=
-  toCanonicalRule[{input} :> output]
+toCanonicalRule[input_ :> Module[newAtoms_List, outputExprs : Except[_List]]] :=
+  toCanonicalRule[input :> Module[newAtoms, {outputExprs}]]
 
+(* After all of that's done, drop toCanonicalRule *)
 
-toCanonicalRule[input_ :> Module[vars_List, expr : Except[_List]]] :=
-  input :> Module[vars, {expr}]
-
-
-(* ::Text:: *)
-(*After all of that's done, drop toCanonicalRule*)
-
-
-toCanonicalRule[input_ :> Module[vars_List, expr_List]] := input :> Module[vars, expr]
+toCanonicalRule[rule : (inertCondition[inputExprs_List, condition_] :> Module[newAtoms_List, outputExprs_List])] :=
+  rule /. inertCondition -> Condition

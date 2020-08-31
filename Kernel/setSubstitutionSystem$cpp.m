@@ -156,13 +156,9 @@ decodeEvents[list_List] := Module[{
 (*Check if we have simple anonymous rules and use C++ library in that case*)
 
 
-ruleAtoms[left_ :> right : Except[_Module]] :=
-  ruleAtoms[left :> Module[{}, right]]
-
-
-ruleAtoms[left_ :> right_Module] := Module[{
+ruleAtoms[left_ :> right_] := Module[{
     leftVertices, patterns, leftAtoms, patternSymbols, createdAtoms, rightAtoms},
-  leftVertices = Union @ Catenate[left];
+  leftVertices = Union @ Catenate[left[[1]]];
   leftAtoms = Select[leftVertices, AtomQ];
   patterns = Complement[leftVertices, leftAtoms];
   patternSymbols = Map[Hold, patterns, {2}][[All, 1]];
@@ -180,14 +176,10 @@ ruleAtoms[left_ :> right_Module] := Module[{
 (*ruleAtomsToIndices*)
 
 
-ruleAtomsToIndices[left_ :> right : Except[_Module], globalIndex_, localIndex_] :=
-  ruleAtomsToIndices[left :> Module[{}, right], globalIndex, localIndex]
-
-
-ruleAtomsToIndices[left_ :> right_Module, globalIndex_, localIndex_] := Module[{
+ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := Module[{
     newLeft, newRight},
   newLeft = Replace[
-    left,
+    left[[1]],
     {x_ ? AtomQ :> globalIndex[Hold[x]],
       x_Pattern :> localIndex[Map[Hold, x, {1}][[1]]]},
     {2}];

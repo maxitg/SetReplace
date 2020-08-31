@@ -45,6 +45,38 @@
           {{{Pattern[Pattern[a, _], _], v2_}} :> {}, {{Pattern[2, _], v1_}} :> Module[{v2}, {v2}]},
           Method -> "Symbolic"],
         {Pattern::patvar}
+      ],
+
+      (** Single expression on the left-hand side **)
+      VerificationTest[
+        WolframModel[
+          <|"PatternRules" -> {0} :> {1, 2}|>, {0}, <|"MaxEvents" -> 2|>, Method -> "Symbolic"]["AllExpressions"],
+        {0, 1, 2}
+      ],
+
+      (** Empty left-hand side **)
+      VerificationTest[
+        WolframModel[<|"PatternRules" -> {} :> {0}|>, {}, <|"MaxEvents" -> 2|>, Method -> "Symbolic"]["AllExpressions"],
+        {0, 0}
+      ],
+
+      (** Conditions **)
+
+      VerificationTest[
+        WolframModel[<|"PatternRules" -> {x_, y_} /; OddQ[x + y] :> {x + y}|>, Range[10], Infinity]["AllExpressions"],
+        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 3, 7, 11, 15, 19}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          <|"PatternRules" -> {x_, y_} /; Mod[x + y, 2] == 0 :> {x + y}|>, Range[10], Infinity]["AllExpressions"],
+        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 4, 6, 12, 14, 14, 18, 28, 46}
+      ],
+
+      VerificationTest[
+        AllTrue[
+          WolframModel[<|"PatternRules" -> {x_, y_} /; x >= 8 :> {x - 8, y + 8}|>, Range[10], 20]["AllExpressions"],
+          Not @* Negative]
       ]
     }
   |>
