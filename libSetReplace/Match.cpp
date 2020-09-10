@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <atomic>
 #include <functional>
+#include <limits>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -158,6 +159,12 @@ class Matcher::Implementation {
   std::mt19937 randomGenerator_;
   MatchPtr nextMatch_;
 
+  const EventIdentification eventIdentification_;
+  // Newly created matches for which the advanced deduplication algorithm has not yet been run.
+  // We sort them by sets they match to, and then by the chosen ordering function,
+  // so that each batch with identical inputs can be processed together, and it's obvious which copy should be retained.
+  std::set<MatchPtr, MatchComparator> newMatches_;
+
   /**
    * This variable is typically monitored in shouldAbort such that other threads can check if they should abort.
    * It is volatile, but not atomic because it is locked before being written to.
@@ -177,6 +184,7 @@ class Matcher::Implementation {
                  GetAtomsVectorFunc getAtomsVector,
                  GetExpressionsSeparationFunc getExpressionsSeparation,
                  const OrderingSpec& orderingSpec,
+                 const EventIdentification& eventIdentification,
                  const unsigned int randomSeed)
       : rules_(rules),
         atomsIndex_(*atomsIndex),
@@ -184,6 +192,8 @@ class Matcher::Implementation {
         getExpressionsSeparation_(std::move(getExpressionsSeparation)),
         matchQueue_(MatchComparator(orderingSpec)),
         randomGenerator_(randomSeed),
+        eventIdentification_(eventIdentification),
+        newMatches_(MatchComparator(newMatchesOrderingSpec(orderingSpec))),
         currentError(None) {
     for (const auto& ordering : orderingSpec) {
       if (ordering.first < OrderingFunction::First || ordering.first >= OrderingFunction::Last) {
@@ -234,6 +244,10 @@ class Matcher::Implementation {
       Error toThrow(currentError);
       currentError = None;
       throw toThrow;
+    }
+
+    if (eventIdentification_ == EventIdentification::SameOutcome) {
+      removeIdenticalMatches(abortRequested);
     }
 
     chooseNextMatch();
@@ -289,6 +303,19 @@ class Matcher::Implementation {
       result.insert(result.end(), exampleAndBucket.second.second.begin(), exampleAndBucket.second.second.end());
     }
     return result;
+  }
+
+  std::vector<AtomsVector> matchInputAtomsVectors(const MatchPtr& match) const {
+    std::vector<AtomsVector> inputExpressions;
+    inputExpressions.reserve(match->inputExpressions.size());
+    for (const auto& expressionID : match->inputExpressions) {
+      inputExpressions.emplace_back(getAtomsVector_(expressionID));
+    }
+    return inputExpressions;
+  }
+
+  std::vector<AtomsVector> matchOutputAtomsVectors(const MatchPtr& match) const {
+    return outputAtomsVectors(rules_.at(match->rule), matchInputAtomsVectors(match));
   }
 
  private:
@@ -361,7 +388,7 @@ class Matcher::Implementation {
     newMatch.inputExpressions[nextInputIdx] = potentialExpressionID;
 
     auto newInputs = partiallyMatchedInputs;
-    if (!Matcher::substituteMissingAtomsIfPossible({input}, {expressionAtoms}, &newInputs)) {
+    if (!substituteMissingAtomsIfPossible({input}, {expressionAtoms}, &newInputs)) {
       return;
     }
     if (eventSelectionFunction == EventSelectionFunction::Spacelike &&
@@ -418,6 +445,10 @@ class Matcher::Implementation {
       for (const auto expression : expressions) {
         expressionToMatches_[expression].insert(matchPtr);
       }
+    }
+
+    if (eventIdentification_ == EventIdentification::SameOutcome) {
+      newMatches_.insert(matchPtr);
     }
   }
 
@@ -495,6 +526,171 @@ class Matcher::Implementation {
     auto distribution = std::uniform_int_distribution<size_t>(0, allPossibleMatches.size() - 1);
     nextMatch_ = allPossibleMatches[distribution(randomGenerator_)];
   }
+
+  static OrderingSpec newMatchesOrderingSpec(OrderingSpec orderingSpec) {
+    // This will ensure newMatches_ are arranged by input set first
+    OrderingSpec newMatchesOrderingSpec = {{OrderingFunction::SortedExpressionIDs, OrderingDirection::Normal}};
+    // After that, the ordering should be the same as in matchQueue_
+    newMatchesOrderingSpec.insert(newMatchesOrderingSpec.end(), orderingSpec.begin(), orderingSpec.end());
+    // ordering spec should be deterministic
+    newMatchesOrderingSpec.push_back({OrderingFunction::ExpressionIDs, OrderingDirection::Normal});
+    newMatchesOrderingSpec.push_back({OrderingFunction::RuleIndex, OrderingDirection::Normal});
+    return newMatchesOrderingSpec;
+  }
+
+  // Look through matches in newMatches_, and delete the duplicates.
+  // The copy remaining must be the smallest according to orderingSpec_
+  void removeIdenticalMatches(const std::function<bool()>& abortRequested) {
+    std::unordered_set<ExpressionID> currentInputsSet;
+    std::vector<MatchPtr> addedSameInputMatches;
+    for (const auto& newMatch : newMatches_) {
+      if (!sameInputSet(newMatch, currentInputsSet)) {
+        // matches are ordered by their input sets, so if it's different, a batch with the new inputs is starting.
+        currentInputsSet.clear();
+        currentInputsSet.insert(newMatch->inputExpressions.begin(), newMatch->inputExpressions.end());
+        addedSameInputMatches.clear();
+      }
+
+      bool matchAppearedBefore = false;
+      for (const auto& addedMatch : addedSameInputMatches) {
+        if (sameOutcomeAssumingSameInputs(newMatch, addedMatch, abortRequested)) {
+          matchAppearedBefore = true;
+        }
+        if (getCurrentError() != None) {
+          return;
+        }
+      }
+      if (matchAppearedBefore) {
+        deleteMatch(newMatch);
+      } else {  // same input set, but a different outcome
+        addedSameInputMatches.push_back(newMatch);
+      }
+    }
+    newMatches_.clear();
+  }
+
+  static bool sameInputSet(const MatchPtr& match, std::unordered_set<ExpressionID> referenceInputExpressions) {
+    if (match->inputExpressions.size() != referenceInputExpressions.size()) return false;
+    for (const auto& input : match->inputExpressions) {
+      if (!referenceInputExpressions.count(input)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool sameOutcomeAssumingSameInputs(const MatchPtr& firstMatch,
+                                     const MatchPtr& secondMatch,
+                                     const std::function<bool()>& abortRequested) const {
+    const auto firstOutputs = matchOutputAtomsVectors(firstMatch);
+    const auto secondOutput = matchOutputAtomsVectors(secondMatch);
+    return isomorphic(firstOutputs, secondOutput, abortRequested);
+  }
+
+  bool isomorphic(const std::vector<AtomsVector>& firstSet,
+                  const std::vector<AtomsVector>& secondSet,
+                  const std::function<bool()>& abortRequested) const {
+    if (firstSet.size() != secondSet.size()) return false;
+    if (firstSet.size() == 0) return true;
+
+    // Matcher does not support disconnected rules, so append the same atom to each expression to ensure connectivity
+    Atom connectingAtom = std::max(std::max(largestAtom(firstSet), largestAtom(secondSet)), static_cast<Atom>(0)) + 1;
+
+    const Rule rule({appendAtom(firstSet, connectingAtom), {}, EventSelectionFunction::All});
+    const std::vector<Rule> rules = {rule};
+    auto connectedSecondSet = appendAtom(secondSet, connectingAtom);
+    instantiatePatternAtoms(&connectedSecondSet);
+    const GetAtomsVectorFunc getAtomsVector =
+        [&connectedSecondSet](const ExpressionID& expressionID) -> const AtomsVector& {
+      return connectedSecondSet.at(expressionID);
+    };
+    const GetExpressionsSeparationFunc getExpressionsSeparation =
+        [](const ExpressionID&, const ExpressionID&) -> SeparationType { return SeparationType::Unknown; };
+
+    AtomsIndex atomsIndex(getAtomsVector);
+    std::vector<ExpressionID> allExpressionIDs(firstSet.size());
+    for (ExpressionID i = 0; i < static_cast<ExpressionID>(firstSet.size()); ++i) {
+      allExpressionIDs.push_back(i);
+    }
+    atomsIndex.addExpressions(allExpressionIDs);
+
+    Matcher matcher(rules, &atomsIndex, getAtomsVector, getExpressionsSeparation, {}, EventIdentification::None);
+    matcher.addMatchesInvolvingExpressions({0}, abortRequested);
+    return !matcher.empty();
+  }
+
+  static Atom largestAtom(std::vector<AtomsVector> set) {
+    Atom result = std::numeric_limits<Atom>::min();
+    for (const auto& expression : set) {
+      result = std::max(result, *std::max_element(expression.begin(), expression.end()));
+    }
+    return result;
+  }
+
+  static std::vector<AtomsVector> appendAtom(const std::vector<AtomsVector>& set, const Atom atom) {
+    auto result = set;
+    for (auto& expression : result) {
+      expression.push_back(atom);
+    }
+    return result;
+  }
+
+  static void instantiatePatternAtoms(std::vector<AtomsVector>* set) {
+    Atom maxAtom = largestAtom(*set);
+    std::unordered_map<Atom, Atom> patternToAtom;
+    for (auto& expression : *set) {
+      for (auto& atom : expression) {
+        if (atom < 0) {
+          if (patternToAtom.count(atom)) {
+            atom = patternToAtom[atom];
+          } else {
+            patternToAtom[atom] = ++maxAtom;
+            atom = patternToAtom[atom];
+          }
+        }
+      }
+    }
+  }
+
+  static std::vector<AtomsVector> outputAtomsVectors(const Rule& rule,
+                                                     const std::vector<AtomsVector>& inputExpressions) {
+    auto explicitRuleOutputs = rule.outputs;
+    substituteMissingAtomsIfPossible(rule.inputs, inputExpressions, &explicitRuleOutputs);
+    return explicitRuleOutputs;
+  }
+
+  static bool substituteMissingAtomsIfPossible(const std::vector<AtomsVector>& inputPatterns,
+                                               const std::vector<AtomsVector>& patternMatches,
+                                               std::vector<AtomsVector>* atomsToReplace = nullptr) {
+    if (inputPatterns.size() != patternMatches.size()) return false;
+
+    std::unordered_map<Atom, Atom> match;
+    for (size_t i = 0; i < inputPatterns.size(); ++i) {
+      const auto& pattern = inputPatterns[i];
+      const auto& patternMatch = patternMatches[i];
+      if (pattern.size() != patternMatch.size()) return false;
+      for (size_t j = 0; j < pattern.size(); ++j) {
+        const auto matchIterator = match.find(pattern[j]);
+        const Atom inputAtom = matchIterator != match.end() ? matchIterator->second : pattern[j];
+        if (inputAtom < 0) {  // pattern
+          match[inputAtom] = patternMatch[j];
+        } else if (inputAtom != patternMatch[j]) {  // explicit atom ID
+          return false;
+        }
+      }
+    }
+    if (atomsToReplace) {
+      for (auto& atomsVectorToReplace : *atomsToReplace) {
+        for (auto& atomToReplace : atomsVectorToReplace) {
+          const auto matchIterator = match.find(atomToReplace);
+          if (matchIterator != match.end()) {
+            atomToReplace = matchIterator->second;
+          }
+        }
+      }
+    }
+    return true;
+  }
 };
 
 Matcher::Matcher(const std::vector<Rule>& rules,
@@ -502,9 +698,11 @@ Matcher::Matcher(const std::vector<Rule>& rules,
                  const GetAtomsVectorFunc& getAtomsVector,
                  const GetExpressionsSeparationFunc& getExpressionsSeparation,
                  const OrderingSpec& orderingSpec,
+                 const EventIdentification& eventIdentification,
                  const unsigned int randomSeed)
     : implementation_(std::make_shared<Implementation>(
-          rules, atomsIndex, getAtomsVector, getExpressionsSeparation, orderingSpec, randomSeed)) {}
+          rules, atomsIndex, getAtomsVector, getExpressionsSeparation, orderingSpec, eventIdentification, randomSeed)) {
+}
 
 void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
                                              const std::function<bool()>& shouldAbort) {
@@ -521,37 +719,14 @@ bool Matcher::empty() const { return implementation_->empty(); }
 
 MatchPtr Matcher::nextMatch() const { return implementation_->nextMatch(); }
 
-bool Matcher::substituteMissingAtomsIfPossible(const std::vector<AtomsVector>& inputPatterns,
-                                               const std::vector<AtomsVector>& patternMatches,
-                                               std::vector<AtomsVector>* atomsToReplace) {
-  if (inputPatterns.size() != patternMatches.size()) return false;
+std::vector<MatchPtr> Matcher::allMatches() const { return implementation_->allMatches(); }
 
-  std::unordered_map<Atom, Atom> match;
-  for (size_t i = 0; i < inputPatterns.size(); ++i) {
-    const auto& pattern = inputPatterns[i];
-    const auto& patternMatch = patternMatches[i];
-    if (pattern.size() != patternMatch.size()) return false;
-    for (size_t j = 0; j < pattern.size(); ++j) {
-      const auto matchIterator = match.find(pattern[j]);
-      const Atom inputAtom = matchIterator != match.end() ? matchIterator->second : pattern[j];
-      if (inputAtom < 0) {  // pattern
-        match[inputAtom] = patternMatch[j];
-      } else if (inputAtom != patternMatch[j]) {  // explicit atom ID
-        return false;
-      }
-    }
-  }
-
-  for (auto& atomsVectorToReplace : *atomsToReplace) {
-    for (auto& atomToReplace : atomsVectorToReplace) {
-      const auto matchIterator = match.find(atomToReplace);
-      if (matchIterator != match.end()) {
-        atomToReplace = matchIterator->second;
-      }
-    }
-  }
-  return true;
+std::vector<AtomsVector> Matcher::matchInputAtomsVectors(const MatchPtr& match) const {
+  return implementation_->matchInputAtomsVectors(match);
 }
 
-std::vector<MatchPtr> Matcher::allMatches() const { return implementation_->allMatches(); }
+std::vector<AtomsVector> Matcher::matchOutputAtomsVectors(const MatchPtr& match) const {
+  return implementation_->matchOutputAtomsVectors(match);
+}
+
 }  // namespace SetReplace

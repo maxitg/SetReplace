@@ -42,12 +42,14 @@ class Set::Implementation {
                  const std::vector<AtomsVector>& initialExpressions,
                  const SystemType& systemType,
                  const Matcher::OrderingSpec& orderingSpec,
+                 const Matcher::EventIdentification& eventIdentification,
                  const unsigned int randomSeed)
       : Implementation(
             rules,
             initialExpressions,
             systemType,
             orderingSpec,
+            eventIdentification,
             randomSeed,
             [this](const ExpressionID& expressionID) -> const AtomsVector& { return expressions_.at(expressionID); },
             [this](const ExpressionID& first, const ExpressionID& second) -> SeparationType {
@@ -80,19 +82,8 @@ class Set::Implementation {
     }
     const MatchPtr match = matcher_.nextMatch();
 
-    const auto& ruleInputs = rules_[match->rule].inputs;
-    std::vector<AtomsVector> inputExpressions;
-    inputExpressions.reserve(match->inputExpressions.size());
-    for (const auto& expressionID : match->inputExpressions) {
-      inputExpressions.emplace_back(expressions_.at(expressionID));
-    }
-
-    auto explicitRuleInputs = ruleInputs;
-    Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, &explicitRuleInputs);
-
-    // Identify output atoms that appear in the input, that still leaves newly created atoms as patterns.
-    auto explicitRuleOutputs = rules_[match->rule].outputs;
-    Matcher::substituteMissingAtomsIfPossible(ruleInputs, inputExpressions, &explicitRuleOutputs);
+    auto explicitRuleInputs = matcher_.matchInputAtomsVectors(match);
+    auto explicitRuleOutputs = matcher_.matchOutputAtomsVectors(match);
 
     // only makes sense to have final state step limits for a singleway system.
     if (!isMultiway()) {
@@ -169,6 +160,7 @@ class Set::Implementation {
                  const std::vector<AtomsVector>& initialExpressions,
                  const SystemType& systemType,
                  const Matcher::OrderingSpec& orderingSpec,
+                 const Matcher::EventIdentification& eventIdentification,
                  const unsigned int randomSeed,
                  const GetAtomsVectorFunc& getAtomsVector,
                  const GetExpressionsSeparationFunc& getExpressionsSeparation)
@@ -176,7 +168,13 @@ class Set::Implementation {
         systemType_(systemType),
         causalGraph_(static_cast<int>(initialExpressions.size()), separationTrackingMethod(systemType, rules)),
         atomsIndex_(getAtomsVector),
-        matcher_(rules_, &atomsIndex_, getAtomsVector, getExpressionsSeparation, orderingSpec, randomSeed) {
+        matcher_(rules_,
+                 &atomsIndex_,
+                 getAtomsVector,
+                 getExpressionsSeparation,
+                 orderingSpec,
+                 eventIdentification,
+                 randomSeed) {
     for (const auto& expression : initialExpressions) {
       for (const auto& atom : expression) {
         if (atom <= 0) throw Error::NonPositiveAtoms;
@@ -361,9 +359,10 @@ Set::Set(const std::vector<Rule>& rules,
          const std::vector<AtomsVector>& initialExpressions,
          const SystemType& eventSelectionFunction,
          const Matcher::OrderingSpec& orderingSpec,
+         const Matcher::EventIdentification& eventIdentification,
          unsigned int randomSeed)
     : implementation_(std::make_shared<Implementation>(
-          rules, initialExpressions, eventSelectionFunction, orderingSpec, randomSeed)) {}
+          rules, initialExpressions, eventSelectionFunction, orderingSpec, eventIdentification, randomSeed)) {}
 
 int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) {
   return implementation_->replaceOnce(shouldAbort, true);

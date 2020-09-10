@@ -58,6 +58,8 @@ class Matcher {
    */
   using OrderingSpec = std::vector<std::pair<OrderingFunction, OrderingDirection>>;
 
+  enum class EventIdentification { None = 0, SameOutcome = 1 };
+
   /** @brief Creates a new matcher object.
    * @details This is an O(1) operation, does not do any matching yet.
    */
@@ -66,6 +68,7 @@ class Matcher {
           const GetAtomsVectorFunc& getAtomsVector,
           const GetExpressionsSeparationFunc& getExpressionsSeparation,
           const OrderingSpec& orderingSpec,
+          const EventIdentification& eventIdentification,
           unsigned int randomSeed = 0);
 
   /** @brief Finds and adds to the index all matches involving specified expressions.
@@ -92,18 +95,17 @@ class Matcher {
    */
   MatchPtr nextMatch() const;
 
-  /** @brief Replaces patterns in atomsToReplace with explicit atoms.
-   * @param inputPatterns patterns corresponding to patternMatches.
-   * @param patternMatches explicit atoms corresponding to patterns in inputPatterns.
-   * @param atomsToReplace patterns, which would be replaced the same way as inputPatterns are matched to
-   * patternMatches.
-   */
-  static bool substituteMissingAtomsIfPossible(const std::vector<AtomsVector>& inputPatterns,
-                                               const std::vector<AtomsVector>& patternMatches,
-                                               std::vector<AtomsVector>* atomsToReplace);
-
   /** @brief Returns the set of expression IDs matched in any match. */
   std::vector<MatchPtr> allMatches() const;
+
+  /** @brief Yields the explicit atom vectors of the input expressions of a particular match.
+   */
+  std::vector<AtomsVector> matchInputAtomsVectors(const MatchPtr& match) const;
+
+  /** @brief Yields the explicit atom vectors of the output expressions of a particular match.
+   * @details Newly created atoms are left as patterns.
+   */
+  std::vector<AtomsVector> matchOutputAtomsVectors(const MatchPtr& match) const;
 
  private:
   class Implementation;

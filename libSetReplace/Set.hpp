@@ -74,12 +74,14 @@ class Set {
    * @param initialExpressions initial condition. It will be lazily indexed before the first replacement.
    * @param systemType whether the system is a multiway or a singleway system..
    * @param orderingSpec in which order to apply events.
+   * @param eventIdentification defines which events should be treated as identical.
    * @param randomSeed the seed to use for selecting matches in random evaluation case.
    */
   Set(const std::vector<Rule>& rules,
       const std::vector<AtomsVector>& initialExpressions,
       const SystemType& systemType,
       const Matcher::OrderingSpec& orderingSpec,
+      const Matcher::EventIdentification& eventIdentification,
       unsigned int randomSeed = 0);
 
   /** @brief Perform a single substitution, create the corresponding event, and output expressions.

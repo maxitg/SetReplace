@@ -13,7 +13,7 @@
 
       (* rule, init, global-spacelike low-level events, global-spacelike symbolic events, match-all events *)
       $systems = {
-        {{{0, 1}} -> {{0, 2}, {2, 1}}, {{0, 1}}},
+        {{{{0, 1}} -> {{0, 2}, {2, 1}}}, {{0, 1}}},
         {{{{1}} -> {{1}}}, {{1}}},
         {{{{1}} -> {{2}}}, {{1}}},
         {{{{1}} -> {{2}, {1, 2}}}, {{1}}},
@@ -26,25 +26,25 @@
         {{{{1}} -> {{2}, {2}, {2}, {1, 2}}}, {{1}}},
         {{{{1}} -> {{2}, {1, 2}}}, {{1}, {1}, {1}}},
         {{{{1, 2}} -> {{1, 3}, {2, 3}}}, {{1, 1}}},
-        {{{0, 1}, {0, 2}, {0, 3}} -> {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}},
+        {{{{0, 1}, {0, 2}, {0, 3}} -> {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}},
          {{0, 1}, {0, 2}, {0, 3}}},
-        {{{0, 1}, {0, 2}, {0, 3}} -> {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}},
+        {{{{0, 1}, {0, 2}, {0, 3}} -> {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}},
          {{0, 0}, {0, 0}, {0, 0}}},
-        {{{0, 1}, {0, 2}, {0, 3}} ->
-           {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}},
+        {{{{0, 1}, {0, 2}, {0, 3}} ->
+            {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}}},
          {{0, 1}, {0, 2}, {0, 3}}},
-        {{{0, 1}, {0, 2}, {0, 3}} ->
-           {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}},
+        {{{{0, 1}, {0, 2}, {0, 3}} ->
+            {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}, {1, 6}, {3, 4}}},
          {{0, 0}, {0, 0}, {0, 0}}},
-        {{{1, 2}, {1, 3}, {1, 4}} -> {{2, 3}, {2, 4}, {3, 3}, {3, 5}, {4, 5}}, {{1, 1}, {1, 1}, {1, 1}}},
-        {{{1, 2, 3}, {4, 5, 6}, {1, 4}, {4, 1}} ->
-           {{2, 7, 8}, {3, 9, 10}, {5, 11, 12}, {6, 13, 14}, {7, 11}, {8, 10}, {9, 13}, {10, 8}, {11, 7}, {12, 14},
-            {13, 9}, {14, 12}},
+        {{{{1, 2}, {1, 3}, {1, 4}} -> {{2, 3}, {2, 4}, {3, 3}, {3, 5}, {4, 5}}}, {{1, 1}, {1, 1}, {1, 1}}},
+        {{{{1, 2, 3}, {4, 5, 6}, {1, 4}, {4, 1}} ->
+            {{2, 7, 8}, {3, 9, 10}, {5, 11, 12}, {6, 13, 14}, {7, 11}, {8, 10}, {9, 13}, {10, 8}, {11, 7}, {12, 14},
+             {13, 9}, {14, 12}}},
          {{1, 2, 3}, {4, 5, 6}, {1, 4}, {2, 5}, {3, 6}, {4, 1}, {5, 2}, {6, 3}}},
-        {{{1, 2, 2}, {3, 4, 2}} -> {{2, 5, 5}, {5, 3, 2}, {5, 4, 6}, {7, 4, 5}}, {{1, 1, 1}, {1, 1, 1}}},
-        {{{1, 1, 2}} -> {{3, 2, 2}, {3, 3, 3}, {3, 3, 4}}, {{1, 1, 1}}},
+        {{{{1, 2, 2}, {3, 4, 2}} -> {{2, 5, 5}, {5, 3, 2}, {5, 4, 6}, {7, 4, 5}}}, {{1, 1, 1}, {1, 1, 1}}},
+        {{{{1, 1, 2}} -> {{3, 2, 2}, {3, 3, 3}, {3, 3, 4}}}, {{1, 1, 1}}},
         {{{{1, 2}, {1, 3}, {1, 4}} -> {{2, 3}, {3, 4}, {4, 5}, {5, 2}, {5, 4}}}, {{1, 1}, {1, 1}, {1, 1}}},
-        {{{1, 2, 1}, {3, 4, 5}} -> {{2, 6, 2}, {5, 7, 6}, {3, 1, 5}}, {{1, 1, 1}, {1, 1, 1}}},
+        {{{{1, 2, 1}, {3, 4, 5}} -> {{2, 6, 2}, {5, 7, 6}, {3, 1, 5}}}, {{1, 1, 1}, {1, 1, 1}}},
         {{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}}, {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}, {{1, 1, 1}}},
         {<|"PatternRules" -> {a_, b_} :> a + b|>, {1, 2, 5, 3, 6}},
         {<|"PatternRules" -> {a_, b_} /; EvenQ[a + b] :> a + b|>, Range[10]}
@@ -57,6 +57,7 @@
         "EventOrderingFunction" -> {Automatic, "NewestEdge", "OldestEdge", "Random",
                                     {"NewestEdge", "RuleIndex"},
                                     {"NewestEdge", "RuleOrdering", "RuleIndex"}},
+        "EventIdentification" -> {None, "SameOutcome"},
         "Seed" -> Range[1534, 1536],
         "StepLimiter" -> {"MaxEvents", "MaxGenerations", "MaxEdges", "MaxVertices", "MaxVertexDegree"},
         "Method" -> {Automatic, "Symbolic"},
@@ -66,6 +67,8 @@
       $featureCombinations = {{"VertexNamingFunction", "EventSelectionFunction"},
                               {"IncludePartialGenerations", "EventSelectionFunction"},
                               {"EventOrderingFunction", "EventSelectionFunction"},
+                              {"EventOrderingFunction", "EventIdentification"},
+                              {"EventSelectionFunction", "EventIdentification"},
                               {"Seed", "EventOrderingFunction"},
                               {"StepLimiter", "EventSelectionFunction"},
                               {"StepLimiter", "Method"},
@@ -99,6 +102,7 @@
                                         "IncludePartialGenerations" -> #IncludePartialGenerations,
                                         "EventSelectionFunction" -> #EventSelectionFunction,
                                         "EventOrderingFunction" -> #EventOrderingFunction,
+                                        "EventIdentification" -> #EventIdentification,
                                         Method -> #Method,
                                         TimeConstraint -> $singleSystemTimeConstraint];
           stepLimitValue = Switch[#StepLimiter,
@@ -135,6 +139,7 @@
                                    "IncludePartialGenerations" -> #IncludePartialGenerations,
                                    "EventSelectionFunction" -> #EventSelectionFunction,
                                    "EventOrderingFunction" -> #EventOrderingFunction,
+                                   "EventIdentification" -> #EventIdentification,
                                    Method -> #Method,
                                    TimeConstraint -> #TimeConstraint]]
         ] & /@ $systemsWithSteps,
@@ -148,6 +153,7 @@
                        "IncludePartialGenerations" -> #IncludePartialGenerations,
                        "EventSelectionFunction" -> #EventSelectionFunction,
                        "EventOrderingFunction" -> #EventOrderingFunction,
+                       "EventIdentification" -> #EventIdentification,
                        Method -> "Symbolic"],
           SeedRandom[#Seed];
           WolframModel[#Rule,
@@ -157,6 +163,7 @@
                        "IncludePartialGenerations" -> #IncludePartialGenerations,
                        "EventSelectionFunction" -> #EventSelectionFunction,
                        "EventOrderingFunction" -> #EventOrderingFunction,
+                       "EventIdentification" -> #EventIdentification,
                        Method -> "LowLevel"]
         ] & /@ $methodComparisonSystems
       }

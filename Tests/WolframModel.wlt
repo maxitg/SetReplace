@@ -1611,7 +1611,8 @@
           {message}
         ]
       ] @@@ Flatten /@ Tuples[{{{"EventOrderingFunction", WolframModel::invalidEventOrdering},
-                               {"EventSelectionFunction", WolframModel::invalidEventSelection}},
+                               {"EventSelectionFunction", WolframModel::invalidParameterValue},
+                               {"EventIdentification", WolframModel::invalidParameterValue}},
                               {"$$$invalid$$$", $$$invalid$$$, 1},
                               {Automatic, "Symbolic"}}],
 
