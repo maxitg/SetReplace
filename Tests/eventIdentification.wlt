@@ -5,7 +5,7 @@
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
     ),
     "tests" -> {
-      (* No identification is the default, many things will break if that is not the case *)
+      (* No identification is the default *)
       VerificationTest[
         Options[WolframModel, "EventIdentification"],
         {"EventIdentification" -> None}
@@ -27,6 +27,7 @@
         WolframModel[{{1, 2}, {1, 3}} -> {{2, 3}}, {{1, 2}, {1, 3}}, 1, "EventSelectionFunction" -> "MultiwaySpacelike"]
       ],
 
+      (* Symmetric case *)
       VerificationTest[
         WolframModel[{{1, 2}, {1, 3}} -> {{2, 3}, {3, 2}},
                      {{1, 2}, {1, 3}},
@@ -70,6 +71,7 @@
                      "EventIdentification" -> "SameOutcome"]["EventsCount"]
       ],
 
+      (* Tests for correct isomorphism *)
       VerificationTest[
         WolframModel[#1,
                      #2,

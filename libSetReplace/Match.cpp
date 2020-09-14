@@ -527,7 +527,7 @@ class Matcher::Implementation {
     nextMatch_ = allPossibleMatches[distribution(randomGenerator_)];
   }
 
-  static OrderingSpec newMatchesOrderingSpec(OrderingSpec orderingSpec) {
+  static OrderingSpec newMatchesOrderingSpec(const OrderingSpec& orderingSpec) {
     // This will ensure newMatches_ are arranged by input set first
     OrderingSpec newMatchesOrderingSpec = {{OrderingFunction::SortedExpressionIDs, OrderingDirection::Normal}};
     // After that, the ordering should be the same as in matchQueue_
@@ -563,16 +563,16 @@ class Matcher::Implementation {
       if (matchAppearedBefore) {
         deleteMatch(newMatch);
       } else {  // same input set, but a different outcome
-        addedSameInputMatches.push_back(newMatch);
+        addedSameInputMatches.emplace_back(newMatch);
       }
     }
     newMatches_.clear();
   }
 
-  static bool sameInputSet(const MatchPtr& match, std::unordered_set<ExpressionID> referenceInputExpressions) {
+  static bool sameInputSet(const MatchPtr& match, const std::unordered_set<ExpressionID>& referenceInputExpressions) {
     if (match->inputExpressions.size() != referenceInputExpressions.size()) return false;
     for (const auto& input : match->inputExpressions) {
-      if (!referenceInputExpressions.count(input)) {
+      if (!referenceInputExpressions.count(input)) {  // note, expression IDs in a match never repeat
         return false;
       }
     }
@@ -587,39 +587,46 @@ class Matcher::Implementation {
     return isomorphic(firstOutputs, secondOutput, abortRequested);
   }
 
-  bool isomorphic(const std::vector<AtomsVector>& firstSet,
+  static bool isomorphic(const std::vector<AtomsVector>& firstSet,
                   const std::vector<AtomsVector>& secondSet,
-                  const std::function<bool()>& abortRequested) const {
+                  const std::function<bool()>& abortRequested) {
     if (firstSet.size() != secondSet.size()) return false;
     if (firstSet.size() == 0) return true;
 
     // Matcher does not support disconnected rules, so append the same atom to each expression to ensure connectivity
-    Atom connectingAtom = std::max(std::max(largestAtom(firstSet), largestAtom(secondSet)), static_cast<Atom>(0)) + 1;
+    const Atom connectingAtom = std::max(std::max(largestAtom(firstSet), largestAtom(secondSet)), static_cast<Atom>(0)) + 1;
 
-    const Rule rule({appendAtom(firstSet, connectingAtom), {}, EventSelectionFunction::All});
-    const std::vector<Rule> rules = {rule};
-    auto connectedSecondSet = appendAtom(secondSet, connectingAtom);
+    // We will use the same set as an input to a rule
+    const std::vector<Rule> rules = {{appendAtomToEveryExpression(firstSet, connectingAtom), {}, EventSelectionFunction::All}};
+
+    // And the second set as an initial condition (with patterns instantiated)
+    // If the two sets are isomorphic, the rule will match. Note, it cannot match to a subset because the number of
+    // expressions is the same, and multiple parts of the rule input cannot match to the same expression.
+    auto connectedSecondSet = appendAtomToEveryExpression(secondSet, connectingAtom);
     instantiatePatternAtoms(&connectedSecondSet);
     const GetAtomsVectorFunc getAtomsVector =
         [&connectedSecondSet](const ExpressionID& expressionID) -> const AtomsVector& {
       return connectedSecondSet.at(expressionID);
     };
+
+    // We don't need this function, but we need to pass something.
     const GetExpressionsSeparationFunc getExpressionsSeparation =
         [](const ExpressionID&, const ExpressionID&) -> SeparationType { return SeparationType::Unknown; };
 
     AtomsIndex atomsIndex(getAtomsVector);
     std::vector<ExpressionID> allExpressionIDs(firstSet.size());
     for (ExpressionID i = 0; i < static_cast<ExpressionID>(firstSet.size()); ++i) {
-      allExpressionIDs.push_back(i);
+      allExpressionIDs.emplace_back(i);
     }
     atomsIndex.addExpressions(allExpressionIDs);
 
     Matcher matcher(rules, &atomsIndex, getAtomsVector, getExpressionsSeparation, {}, EventIdentification::None);
+    // We only need to pass one expression because any expression will need to be included in the match.
     matcher.addMatchesInvolvingExpressions({0}, abortRequested);
     return !matcher.empty();
   }
 
-  static Atom largestAtom(std::vector<AtomsVector> set) {
+  static Atom largestAtom(const std::vector<AtomsVector>& set) {
     Atom result = std::numeric_limits<Atom>::min();
     for (const auto& expression : set) {
       result = std::max(result, *std::max_element(expression.begin(), expression.end()));
@@ -627,10 +634,10 @@ class Matcher::Implementation {
     return result;
   }
 
-  static std::vector<AtomsVector> appendAtom(const std::vector<AtomsVector>& set, const Atom atom) {
+  static std::vector<AtomsVector> appendAtomToEveryExpression(const std::vector<AtomsVector>& set, const Atom atom) {
     auto result = set;
     for (auto& expression : result) {
-      expression.push_back(atom);
+      expression.emplace_back(atom);
     }
     return result;
   }
@@ -641,12 +648,10 @@ class Matcher::Implementation {
     for (auto& expression : *set) {
       for (auto& atom : expression) {
         if (atom < 0) {
-          if (patternToAtom.count(atom)) {
-            atom = patternToAtom[atom];
-          } else {
+          if (!patternToAtom.count(atom)) {
             patternToAtom[atom] = ++maxAtom;
-            atom = patternToAtom[atom];
           }
+          atom = patternToAtom[atom];
         }
       }
     }

@@ -82,8 +82,8 @@ class Set::Implementation {
     }
     const MatchPtr match = matcher_.nextMatch();
 
-    auto explicitRuleInputs = matcher_.matchInputAtomsVectors(match);
-    auto explicitRuleOutputs = matcher_.matchOutputAtomsVectors(match);
+    const auto explicitRuleInputs = matcher_.matchInputAtomsVectors(match);
+    const auto explicitRuleOutputs = matcher_.matchOutputAtomsVectors(match);
 
     // only makes sense to have final state step limits for a singleway system.
     if (!isMultiway()) {
