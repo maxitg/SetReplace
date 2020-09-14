@@ -588,16 +588,18 @@ class Matcher::Implementation {
   }
 
   static bool isomorphic(const std::vector<AtomsVector>& firstSet,
-                  const std::vector<AtomsVector>& secondSet,
-                  const std::function<bool()>& abortRequested) {
+                         const std::vector<AtomsVector>& secondSet,
+                         const std::function<bool()>& abortRequested) {
     if (firstSet.size() != secondSet.size()) return false;
     if (firstSet.size() == 0) return true;
 
     // Matcher does not support disconnected rules, so append the same atom to each expression to ensure connectivity
-    const Atom connectingAtom = std::max(std::max(largestAtom(firstSet), largestAtom(secondSet)), static_cast<Atom>(0)) + 1;
+    const Atom connectingAtom =
+        std::max(std::max(largestAtom(firstSet), largestAtom(secondSet)), static_cast<Atom>(0)) + 1;
 
     // We will use the same set as an input to a rule
-    const std::vector<Rule> rules = {{appendAtomToEveryExpression(firstSet, connectingAtom), {}, EventSelectionFunction::All}};
+    const std::vector<Rule> rules = {
+        {appendAtomToEveryExpression(firstSet, connectingAtom), {}, EventSelectionFunction::All}};
 
     // And the second set as an initial condition (with patterns instantiated)
     // If the two sets are isomorphic, the rule will match. Note, it cannot match to a subset because the number of
