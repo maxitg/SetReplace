@@ -41,7 +41,7 @@ PackageScope["$backward"]
 PackageScope["$globalSpacelike"]
 PackageScope["$spacelike"]
 
-PackageScope["$sameOutcome"]
+PackageScope["$sameInputSetIsomorphicOutputs"]
 
 
 (* ::Text:: *)
@@ -246,7 +246,7 @@ $eventSelectionFunctions = <|
 
 $eventIdentifications = <|
   None -> None,
-  "SameOutcome" -> $sameOutcome
+  "SameInputSetIsomorphicOutputs" -> $sameInputSetIsomorphicOutputs
 |>;
 
 

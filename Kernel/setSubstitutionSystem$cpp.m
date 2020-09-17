@@ -244,7 +244,7 @@ $orderingFunctionCodes = <|
 
 $eventIdentificationCodes = <|
   None -> 0,
-  $sameOutcome -> 1
+  $sameInputSetIsomorphicOutputs -> 1
 |>;
 
 

@@ -1643,7 +1643,7 @@ In[] := WolframModel[{{a, b}, {a, c}} -> {{b, c}, {c, b}}, {{1, 2}, {1, 3}},
 ```wl
 In[] := WolframModel[{{a, b}, {a, c}} -> {{b, c}, {c, b}}, {{1, 2}, {1, 3}},
   "EventSelectionFunction" -> "MultiwaySpacelike",
-  "EventIdentification" -> "SameOutcome"]["ExpressionsEventsGraph",
+  "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["ExpressionsEventsGraph",
  VertexLabels -> Automatic]
 ```
 
@@ -1654,7 +1654,7 @@ The outputs of the rule need not be identical, but should be isomorphic with res
 ```wl
 In[] := WolframModel[{{a, b}, {a, c}} -> {{b, d}, {c, d}}, {{1, 2}, {1, 3}},
   "EventSelectionFunction" -> "MultiwaySpacelike",
-  "EventIdentification" -> "SameOutcome"]["ExpressionsEventsGraph",
+  "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["ExpressionsEventsGraph",
  VertexLabels -> Automatic]
 ```
 

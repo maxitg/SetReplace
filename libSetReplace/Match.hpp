@@ -58,7 +58,7 @@ class Matcher {
    */
   using OrderingSpec = std::vector<std::pair<OrderingFunction, OrderingDirection>>;
 
-  enum class EventIdentification { None = 0, SameOutcome = 1 };
+  enum class EventIdentification { None = 0, SameInputSetIsomorphicOutputs = 1 };
 
   /** @brief Creates a new matcher object.
    * @details This is an O(1) operation, does not do any matching yet.

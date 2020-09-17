@@ -246,7 +246,7 @@ class Matcher::Implementation {
       throw toThrow;
     }
 
-    if (eventIdentification_ == EventIdentification::SameOutcome) {
+    if (eventIdentification_ == EventIdentification::SameInputSetIsomorphicOutputs) {
       removeIdenticalMatches(abortRequested);
     }
 
@@ -447,7 +447,7 @@ class Matcher::Implementation {
       }
     }
 
-    if (eventIdentification_ == EventIdentification::SameOutcome) {
+    if (eventIdentification_ == EventIdentification::SameInputSetIsomorphicOutputs) {
       newMatches_.insert(matchPtr);
     }
   }

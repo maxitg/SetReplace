@@ -13,7 +13,7 @@
 
       (* Identification requires Method -> "LowLevel" *)
       testUnevaluated[
-        WolframModel[{1 -> 2, 1 -> 3}, {1}, "EventIdentification" -> "SameOutcome", Method -> #1],
+        WolframModel[{1 -> 2, 1 -> 3}, {1}, "EventIdentification" -> "SameInputSetIsomorphicOutputs", Method -> #1],
         #2
       ] & @@@ {{Automatic, WolframModel::symbNotImplemented}, {"Symbolic", WolframModel::symbOrdering}},
 
@@ -23,7 +23,7 @@
                      {{1, 2}, {1, 3}},
                      1,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> "SameOutcome"],
+                     "EventIdentification" -> "SameInputSetIsomorphicOutputs"],
         WolframModel[{{1, 2}, {1, 3}} -> {{2, 3}}, {{1, 2}, {1, 3}}, 1, "EventSelectionFunction" -> "MultiwaySpacelike"]
       ],
 
@@ -33,7 +33,7 @@
                      {{1, 2}, {1, 3}},
                      1,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> "SameOutcome"]["EventsList"],
+                     "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["EventsList"],
         {{1, {1, 2} -> {3, 4}}}
       ],
 
@@ -45,14 +45,14 @@
                      "EventSelectionFunction" -> "MultiwaySpacelike",
                      "EventIdentification" -> #1]["EventsCount"],
         #2
-      ] & @@@ {{None, 42}, {"SameOutcome", 7}},
+      ] & @@@ {{None, 42}, {"SameInputSetIsomorphicOutputs", 7}},
 
       VerificationTest[
         WolframModel[{{1, 2}, {2, 1}} -> {{1, 3}, {3, 1}, {3, 2}, {2, 3}},
                      {{1, 2}, {2, 1}},
                      3,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> "SameOutcome"]["FinalState"],
+                     "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["FinalState"],
         {{1, 6}, {6, 1}, {6, 4}, {4, 6}, {4, 7}, {7, 4}, {7, 3}, {3, 7}, {3, 8}, {8, 3}, {8, 5}, {5, 8}, {5, 9}, {9, 5},
          {9, 2}, {2, 9}}
       ],
@@ -68,7 +68,7 @@
                      {{0, 0}, {0, 0}},
                      3,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> "SameOutcome"]["EventsCount"]
+                     "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["EventsCount"]
       ],
 
       (* Tests for correct isomorphism *)
@@ -77,7 +77,7 @@
                      #2,
                      #3,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> "SameOutcome"]["EventsCount"],
+                     "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["EventsCount"],
         #4
       ] & @@@ {
         (* Symmetric case *)
@@ -117,7 +117,8 @@
                                        {{1}, {1}, {1}, {1}},
                                        <|"MaxEvents" -> 1|>,
                                        "EventOrderingFunction" -> {},
-                                       "EventIdentification" -> "SameOutcome"]["AllEventsRuleIndices"]], 1000], 1] < 300
+                                       "EventIdentification" -> "SameInputSetIsomorphicOutputs"][
+                                        "AllEventsRuleIndices"]], 1000], 1] < 300
       ]
     }
   |>

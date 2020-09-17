@@ -57,7 +57,7 @@
         "EventOrderingFunction" -> {Automatic, "NewestEdge", "OldestEdge", "Random",
                                     {"NewestEdge", "RuleIndex"},
                                     {"NewestEdge", "RuleOrdering", "RuleIndex"}},
-        "EventIdentification" -> {None, "SameOutcome"},
+        "EventIdentification" -> {None, "SameInputSetIsomorphicOutputs"},
         "Seed" -> Range[1534, 1536],
         "StepLimiter" -> {"MaxEvents", "MaxGenerations", "MaxEdges", "MaxVertices", "MaxVertexDegree"},
         "Method" -> {Automatic, "Symbolic"},
