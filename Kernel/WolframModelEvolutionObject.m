@@ -846,7 +846,7 @@ rulesList[rules_List] := rules
 (*ExpressionsEventsGraph*)
 
 
-(* ImageSize -> Automatic (which is the default) causes the size of the output to be reset on re-evaluation *)
+(* ImageSize -> Automatic (which is the default) causes the size of the output to be reset on reevaluation *)
 filterGraphProperties[properties_] := FilterRules[properties, Except[ImageSize]]
 
 
@@ -944,7 +944,6 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
   eventsToEvents = Catenate /@ Map[expressionsToDestroyers, eventsToOutputs, {2}];
   causalEdges = Catenate[Thread /@ Normal[eventsToEvents]];
 
-  (* ImageSize -> Automatic (which is the default) causes the size of the output to be reset on re-evaluation *)
   allOptionValues = Flatten[Join[{o}, filterGraphProperties[$propertyOptions[property]]]];
   Graph[
     Keys[eventsToOutputs],
