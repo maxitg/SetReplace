@@ -533,7 +533,7 @@ In the example above, we will then get:
 In[] := Graph[{{1} -> 1, {1} -> 2, 1 -> {1, 2, 3}, {1, 2, 3} -> 3,
   2 -> {1, 2}, 2 -> {1, 3}, 3 -> {1, 2},
   3 -> {1, 3}, {1, 2} -> 4, {1, 2} -> 5, {1, 3} -> 4, {1, 3} -> 5,
-  4 -> {1, 2, 3, 4}, 5 -> {1, 2, 3, 4}},
+  4 -> {1, 2, 3, 4}, 5 -> {1, 3, 2, 4}},
  EdgeStyle ->
   WolframPhysicsProjectStyleData["ExpressionsEventsGraph",
    "EdgeStyle"],
@@ -548,6 +548,15 @@ In[] := Graph[{{1} -> 1, {1} -> 2, 1 -> {1, 2, 3}, {1, 2, 3} -> 3,
 
 <img src="Images/LocalMultiwayIsomorphism.png" width="199">
 
-This approach will be the most compact representation of a multiway system yet.
+Even in this simple example, however, it's not clear exactly how one should identify.
+For example, one can argue that the two expressions at the last layer should be identified.
+Indeed, if considering the evolutions starting all the way from the expression `{1}`, both atoms `2` and `3` are new.
+Therefore, the two possible final states `{{1, 2, 3, 4}}` and `{{1, 3, 2, 4}}` are isomorphic under the renaming
+`{2 -> 3, 3 -> 2}`.
+However, if one was to identify them, one of the events corresponding to rule 4 will be instantiated incorrectly as it
+will match the inputs in the order `{{1, 3}, {1, 2}}` but will name the outputs for the order `{{1, 2}, {1, 3}}`.
+
+But if there is a consistent way to define it, this approach will be the most compact representation of a multiway
+system so far.
 It will allow us to see the internal structure of the global multiway system evolution, which is currently inaccessible.
 The implementation is tracked in [#349](https://github.com/maxitg/SetReplace/issues/349).
