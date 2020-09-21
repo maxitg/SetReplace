@@ -976,7 +976,7 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
     propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "CausalGraph", ##] & @@
       FilterRules[FilterRules[{o}, $causalGraphOptions], Except[$newLayeredCausalGraphOptions]],
     GraphLayout -> Replace[
-      OptionValue[Flatten[Join[{o}, filterGraphProperties[$propertyOptions[property]]]], GraphLayout],
+      OptionValue[Flatten[Join[{o}, $propertyOptions[property]]], GraphLayout],
       Automatic -> {
         "LayeredDigraphEmbedding",
         "VertexLayerPosition" ->
