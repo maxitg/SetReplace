@@ -1,19 +1,19 @@
 <|
-  "eventIdentification" -> <|
+  "eventDeduplication" -> <|
     "init" -> (
       Attributes[Global`testUnevaluated] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
     ),
     "tests" -> {
-      (* No identification is the default *)
+      (* No deduplication is the default *)
       VerificationTest[
-        Options[WolframModel, "EventIdentification"],
-        {"EventIdentification" -> None}
+        Options[WolframModel, "EventDeduplication"],
+        {"EventDeduplication" -> None}
       ],
 
-      (* Identification requires Method -> "LowLevel" *)
+      (* Deduplication requires Method -> "LowLevel" *)
       testUnevaluated[
-        WolframModel[{1 -> 2, 1 -> 3}, {1}, "EventIdentification" -> "SameInputSetIsomorphicOutputs", Method -> #1],
+        WolframModel[{1 -> 2, 1 -> 3}, {1}, "EventDeduplication" -> "SameInputSetIsomorphicOutputs", Method -> #1],
         #2
       ] & @@@ {{Automatic, WolframModel::symbNotImplemented}, {"Symbolic", WolframModel::symbOrdering}},
 
@@ -23,7 +23,7 @@
                      {{1, 2}, {1, 3}},
                      1,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> "SameInputSetIsomorphicOutputs"],
+                     "EventDeduplication" -> "SameInputSetIsomorphicOutputs"],
         WolframModel[{{1, 2}, {1, 3}} -> {{2, 3}}, {{1, 2}, {1, 3}}, 1, "EventSelectionFunction" -> "MultiwaySpacelike"]
       ],
 
@@ -33,7 +33,7 @@
                      {{1, 2}, {1, 3}},
                      1,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["EventsList"],
+                     "EventDeduplication" -> "SameInputSetIsomorphicOutputs"]["EventsList"],
         {{1, {1, 2} -> {3, 4}}}
       ],
 
@@ -43,7 +43,7 @@
                      {{1, 2}, {2, 1}},
                      3,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> #1]["EventsCount"],
+                     "EventDeduplication" -> #1]["EventsCount"],
         #2
       ] & @@@ {{None, 42}, {"SameInputSetIsomorphicOutputs", 7}},
 
@@ -52,7 +52,7 @@
                      {{1, 2}, {2, 1}},
                      3,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["FinalState"],
+                     "EventDeduplication" -> "SameInputSetIsomorphicOutputs"]["FinalState"],
         {{1, 6}, {6, 1}, {6, 4}, {4, 6}, {4, 7}, {7, 4}, {7, 3}, {3, 7}, {3, 8}, {8, 3}, {8, 5}, {5, 8}, {5, 9}, {9, 5},
          {9, 2}, {2, 9}}
       ],
@@ -63,12 +63,12 @@
                      {{0, 0}, {0, 0}},
                      3,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> None]["EventsCount"] >
+                     "EventDeduplication" -> None]["EventsCount"] >
         WolframModel[{{x, y}, {x, z}} -> {{x, y}, {x, w}, {y, w}, {z, w}},
                      {{0, 0}, {0, 0}},
                      3,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["EventsCount"]
+                     "EventDeduplication" -> "SameInputSetIsomorphicOutputs"]["EventsCount"]
       ],
 
       (* Tests for correct isomorphism *)
@@ -77,7 +77,7 @@
                      #2,
                      #3,
                      "EventSelectionFunction" -> "MultiwaySpacelike",
-                     "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["EventsCount"],
+                     "EventDeduplication" -> "SameInputSetIsomorphicOutputs"]["EventsCount"],
         #4
       ] & @@@ {
         (* Symmetric case *)
@@ -117,7 +117,7 @@
                                        {{1}, {1}, {1}, {1}},
                                        <|"MaxEvents" -> 1|>,
                                        "EventOrderingFunction" -> {},
-                                       "EventIdentification" -> "SameInputSetIsomorphicOutputs"][
+                                       "EventDeduplication" -> "SameInputSetIsomorphicOutputs"][
                                         "AllEventsRuleIndices"]], 1000], 1] < 300
       ]
     }

@@ -57,7 +57,7 @@
         "EventOrderingFunction" -> {Automatic, "NewestEdge", "OldestEdge", "Random",
                                     {"NewestEdge", "RuleIndex"},
                                     {"NewestEdge", "RuleOrdering", "RuleIndex"}},
-        "EventIdentification" -> {None, "SameInputSetIsomorphicOutputs"},
+        "EventDeduplication" -> {None, "SameInputSetIsomorphicOutputs"},
         "Seed" -> Range[1534, 1536],
         "StepLimiter" -> {"MaxEvents", "MaxGenerations", "MaxEdges", "MaxVertices", "MaxVertexDegree"},
         "Method" -> {Automatic, "Symbolic"},
@@ -67,8 +67,8 @@
       $featureCombinations = {{"VertexNamingFunction", "EventSelectionFunction"},
                               {"IncludePartialGenerations", "EventSelectionFunction"},
                               {"EventOrderingFunction", "EventSelectionFunction"},
-                              {"EventOrderingFunction", "EventIdentification"},
-                              {"EventSelectionFunction", "EventIdentification"},
+                              {"EventOrderingFunction", "EventDeduplication"},
+                              {"EventSelectionFunction", "EventDeduplication"},
                               {"Seed", "EventOrderingFunction"},
                               {"StepLimiter", "EventSelectionFunction"},
                               {"StepLimiter", "Method"},
@@ -102,7 +102,7 @@
                                         "IncludePartialGenerations" -> #IncludePartialGenerations,
                                         "EventSelectionFunction" -> #EventSelectionFunction,
                                         "EventOrderingFunction" -> #EventOrderingFunction,
-                                        "EventIdentification" -> #EventIdentification,
+                                        "EventDeduplication" -> #EventDeduplication,
                                         Method -> #Method,
                                         TimeConstraint -> $singleSystemTimeConstraint];
           stepLimitValue = Switch[#StepLimiter,
@@ -139,7 +139,7 @@
                                    "IncludePartialGenerations" -> #IncludePartialGenerations,
                                    "EventSelectionFunction" -> #EventSelectionFunction,
                                    "EventOrderingFunction" -> #EventOrderingFunction,
-                                   "EventIdentification" -> #EventIdentification,
+                                   "EventDeduplication" -> #EventDeduplication,
                                    Method -> #Method,
                                    TimeConstraint -> #TimeConstraint]]
         ] & /@ $systemsWithSteps,
@@ -153,7 +153,7 @@
                        "IncludePartialGenerations" -> #IncludePartialGenerations,
                        "EventSelectionFunction" -> #EventSelectionFunction,
                        "EventOrderingFunction" -> #EventOrderingFunction,
-                       "EventIdentification" -> #EventIdentification,
+                       "EventDeduplication" -> #EventDeduplication,
                        Method -> "Symbolic"],
           SeedRandom[#Seed];
           WolframModel[#Rule,
@@ -163,7 +163,7 @@
                        "IncludePartialGenerations" -> #IncludePartialGenerations,
                        "EventSelectionFunction" -> #EventSelectionFunction,
                        "EventOrderingFunction" -> #EventOrderingFunction,
-                       "EventIdentification" -> #EventIdentification,
+                       "EventDeduplication" -> #EventDeduplication,
                        Method -> "LowLevel"]
         ] & /@ $methodComparisonSystems
       }
