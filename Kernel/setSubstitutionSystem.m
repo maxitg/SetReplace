@@ -41,6 +41,8 @@ PackageScope["$backward"]
 PackageScope["$globalSpacelike"]
 PackageScope["$spacelike"]
 
+PackageScope["$sameInputSetIsomorphicOutputs"]
+
 
 (* ::Text:: *)
 (*Termination reason values*)
@@ -232,7 +234,7 @@ parseEventOrderingFunction[caller_, func_] := (
 
 
 (* ::Subsection:: *)
-(*EventSelectionFunction is valid*)
+(*String-valued parameter is valid*)
 
 
 $eventSelectionFunctions = <|
@@ -242,15 +244,20 @@ $eventSelectionFunctions = <|
 |>;
 
 
-parseEventSelectionFunction[caller_, func_ /; MemberQ[Keys[$eventSelectionFunctions], func]] :=
-  $eventSelectionFunctions[func]
+$eventDeduplications = <|
+  None -> None,
+  "SameInputSetIsomorphicOutputs" -> $sameInputSetIsomorphicOutputs
+|>;
 
 
-General::invalidEventSelection = "EventSelectionFunction `1` should be one of `2`.";
+parseParameterValue[caller_, name_, value_, association_] /; MemberQ[Keys[association], value] := association[value]
 
 
-parseEventSelectionFunction[caller_, func_] := (
-  Message[caller::invalidEventSelection, func, Keys[$eventSelectionFunctions]];
+General::invalidParameterValue = "`1` `2` should be one of `3`.";
+
+
+parseParameterValue[caller_, name_, value_, association_] := (
+  Message[caller::invalidParameterValue, name, value, Keys[association]];
   $Failed
 )
 
@@ -315,17 +322,19 @@ Options[setSubstitutionSystem] = {
   Method -> Automatic,
   TimeConstraint -> Infinity,
   "EventOrderingFunction" -> Automatic,
-  "EventSelectionFunction" -> "GlobalSpacelike"};
+  "EventSelectionFunction" -> "GlobalSpacelike",
+  "EventDeduplication" -> None
+};
 
 
 (* ::Text:: *)
 (*Switching code between WL and C++ implementations*)
 
 
-General::symbOrdering = "Custom event ordering and selection functions are not supported for symbolic method.";
+General::symbOrdering = "Custom event ordering, selection and deduplication are not supported for symbolic method.";
 
 General::symbNotImplemented =
-  "Custom event ordering and selection functions are only available for local rules, " <>
+  "Custom event ordering, selection and deduplication are only available for local rules, " <>
   "and only for sets of lists (hypergraphs).";
 
 
@@ -339,12 +348,18 @@ setSubstitutionSystem[
     method = OptionValue[Method],
     timeConstraint = OptionValue[TimeConstraint],
     eventOrderingFunction = parseEventOrderingFunction[caller, OptionValue["EventOrderingFunction"]],
-    eventSelectionFunction = parseEventSelectionFunction[caller, OptionValue["EventSelectionFunction"]],
+    eventSelectionFunction = parseParameterValue[
+      caller, "EventSelectionFunction", OptionValue["EventSelectionFunction"], $eventSelectionFunctions],
+    eventDeduplication = parseParameterValue[
+      caller, "EventDeduplication", OptionValue["EventDeduplication"], $eventDeduplications],
+    symbolicEvaluationSupportedQ = OptionValue["EventOrderingFunction"] === Automatic &&
+                                   OptionValue["EventSelectionFunction"] === "GlobalSpacelike" &&
+                                   OptionValue["EventDeduplication"] === None,
     canonicalRules,
     failedQ = False},
-  If[eventOrderingFunction === $Failed || eventSelectionFunction === $Failed, Return[$Failed]];
-  If[(OptionValue["EventOrderingFunction"] =!= Automatic ||
-      OptionValue["EventSelectionFunction"] =!= "GlobalSpacelike") && method === "Symbolic",
+  If[eventOrderingFunction === $Failed || eventSelectionFunction === $Failed || eventDeduplication === $Failed,
+    Return[$Failed]];
+  If[!symbolicEvaluationSupportedQ && method === "Symbolic",
     Message[caller::symbOrdering];
     Return[$Failed]];
   If[(timeConstraint > 0) =!= True, Return[$Failed]];
@@ -355,7 +370,8 @@ setSubstitutionSystem[
     If[$cppSetReplaceAvailable,
       Return[
         setSubstitutionSystem$cpp[
-          rules, set, stepSpec, returnOnAbortQ, timeConstraint, eventOrderingFunction, eventSelectionFunction]]]];
+          rules, set, stepSpec, returnOnAbortQ, timeConstraint, eventOrderingFunction, eventSelectionFunction,
+          eventDeduplication]]]];
   If[MatchQ[method, $cppMethod],
     failedQ = True;
     If[!$cppSetReplaceAvailable,
@@ -363,8 +379,7 @@ setSubstitutionSystem[
       makeMessage[caller, "lowLevelNotImplemented"]]];
   If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
     $Failed,
-    If[OptionValue["EventOrderingFunction"] =!= Automatic ||
-        OptionValue["EventSelectionFunction"] =!= "GlobalSpacelike",
+    If[!symbolicEvaluationSupportedQ,
       Message[caller::symbNotImplemented];
       Return[$Failed]];
     setSubstitutionSystem$wl[caller, rules, set, stepSpec, returnOnAbortQ, timeConstraint]]

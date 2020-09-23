@@ -31,6 +31,7 @@ $cpp$setCreate = If[$libraryFile =!= $Failed,
       {Integer, 1}, (* initial set *)
       Integer, (* event selection function *)
       {Integer, 1}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
+      Integer, (* event deduplication *)
       Integer}, (* random seed *)
     Integer], (* set ptr *)
   $Failed];
@@ -241,8 +242,15 @@ $orderingFunctionCodes = <|
 |>;
 
 
+$eventDeduplicationCodes = <|
+  None -> 0,
+  $sameInputSetIsomorphicOutputs -> 1
+|>;
+
+
 setSubstitutionSystem$cpp[
-        rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_, eventSelectionFunction_] /;
+        rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_, eventSelectionFunction_,
+        eventDeduplication_] /;
       $cppSetReplaceAvailable := Module[{
     canonicalRules,
     setAtoms, atomsInRules, globalAtoms, globalIndex,
@@ -268,6 +276,7 @@ setSubstitutionSystem$cpp[
     encodeNestedLists[mappedSet],
     systemTypeCode[eventSelectionFunction],
     Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
+    Replace[eventDeduplication, $eventDeduplicationCodes],
     RandomInteger[{0, $maxUInt32}]];
   TimeConstrained[
     CheckAbort[
@@ -281,8 +290,9 @@ setSubstitutionSystem$cpp[
     If[!returnOnAbortQ, Return[$Aborted], terminationReason = $timeConstraint]];
   numericAtomLists = decodeAtomLists[$cpp$setExpressions[setPtr]];
   events = decodeEvents[$cpp$setEvents[setPtr]];
-  maxCompleteGeneration =
-    Replace[$cpp$maxCompleteGeneration[setPtr], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]];
+  maxCompleteGeneration = CheckAbort[
+    Replace[$cpp$maxCompleteGeneration[setPtr], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]],
+    If[!returnOnAbortQ, Abort[], terminationReason = $Aborted; Missing["Unknown", $Aborted]]];
   terminationReason = Replace[$terminationReasonCodes[$cpp$terminationReason[setPtr]], {
     $Aborted -> terminationReason,
     $notTerminated -> $timeConstraint}];
