@@ -527,12 +527,14 @@ class Matcher::Implementation {
     nextMatch_ = allPossibleMatches[distribution(randomGenerator_)];
   }
 
+  // Ordering spec that is used in newMatches_ set.
   static OrderingSpec newMatchesOrderingSpec(const OrderingSpec& orderingSpec) {
-    // This will ensure newMatches_ are arranged by input set first
+    // newMatches_ is used for deduplication so its contents should be arranged by the input set
     OrderingSpec newMatchesOrderingSpec = {{OrderingFunction::SortedExpressionIDs, OrderingDirection::Normal}};
-    // After that, the ordering should be the same as in matchQueue_
+    // We expect the smallest match (according to the user specified spec) to be selected as a canonical
+    // one, so we then sort by the user specification
     newMatchesOrderingSpec.insert(newMatchesOrderingSpec.end(), orderingSpec.begin(), orderingSpec.end());
-    // ordering spec should be deterministic
+    // Finally, we need to ensure the sorting is deterministic
     newMatchesOrderingSpec.push_back({OrderingFunction::ExpressionIDs, OrderingDirection::Normal});
     newMatchesOrderingSpec.push_back({OrderingFunction::RuleIndex, OrderingDirection::Normal});
     return newMatchesOrderingSpec;
@@ -569,6 +571,7 @@ class Matcher::Implementation {
     newMatches_.clear();
   }
 
+  // Checks if the input expression IDs in match are the same as referenceInputExpressions
   static bool sameInputSet(const MatchPtr& match, const std::unordered_set<ExpressionID>& referenceInputExpressions) {
     if (match->inputExpressions.size() != referenceInputExpressions.size()) return false;
     for (const auto& input : match->inputExpressions) {
@@ -579,6 +582,7 @@ class Matcher::Implementation {
     return true;
   }
 
+  // Checks that the outputs created by the two matches are isomorphic
   bool sameOutcomeAssumingSameInputs(const MatchPtr& firstMatch,
                                      const MatchPtr& secondMatch,
                                      const std::function<bool()>& abortRequested) const {
@@ -587,6 +591,11 @@ class Matcher::Implementation {
     return isomorphic(firstOutputs, secondOutput, abortRequested);
   }
 
+  // Uses Matcher itself to determine if two sets are isomorphic.
+  // Isomorphism in this case refers to a renaming of *pattern* (negative) atoms in one of the sets to
+  // make it identical to the other one. Positive atoms are not attempted to be renamed.
+  // Thus, for example, {{-1, -2}, {-2, -3}} is isomorphic to {{-3, -4}, {-5, -3}},
+  // but {{1, -2}, {-2, 3}} is not isomorphic to {{3, -2}, {-2, 1}}.
   static bool isomorphic(const std::vector<AtomsVector>& firstSet,
                          const std::vector<AtomsVector>& secondSet,
                          const std::function<bool()>& abortRequested) {
@@ -628,6 +637,7 @@ class Matcher::Implementation {
     return !matcher.empty();
   }
 
+  // Finds the largest atom in a set of expressions
   static Atom largestAtom(const std::vector<AtomsVector>& set) {
     Atom result = std::numeric_limits<Atom>::min();
     for (const auto& expression : set) {
@@ -636,6 +646,7 @@ class Matcher::Implementation {
     return result;
   }
 
+  // Appends the same specified atom to every expression in the given set
   static std::vector<AtomsVector> appendAtomToEveryExpression(const std::vector<AtomsVector>& set, const Atom atom) {
     auto result = set;
     for (auto& expression : result) {
@@ -644,6 +655,7 @@ class Matcher::Implementation {
     return result;
   }
 
+  // Selects names and renames all pattern (negative) atoms in a given set
   static void instantiatePatternAtoms(std::vector<AtomsVector>* set) {
     Atom maxAtom = largestAtom(*set);
     std::unordered_map<Atom, Atom> patternToAtom;
@@ -659,6 +671,8 @@ class Matcher::Implementation {
     }
   }
 
+  // Returns the result of applying a rule to a set of input expressions.
+  // New atoms are not named and are left as patterns.
   static std::vector<AtomsVector> outputAtomsVectors(const Rule& rule,
                                                      const std::vector<AtomsVector>& inputExpressions) {
     auto explicitRuleOutputs = rule.outputs;
@@ -666,15 +680,17 @@ class Matcher::Implementation {
     return explicitRuleOutputs;
   }
 
-  static bool substituteMissingAtomsIfPossible(const std::vector<AtomsVector>& inputPatterns,
-                                               const std::vector<AtomsVector>& patternMatches,
-                                               std::vector<AtomsVector>* atomsToReplace = nullptr) {
-    if (inputPatterns.size() != patternMatches.size()) return false;
+  // Infers atom names by comparing referenceExpressions and referencePattern, and then replaces the infered atoms in
+  // place of patterns in expressionsToInstantiate.
+  static bool substituteMissingAtomsIfPossible(const std::vector<AtomsVector>& referencePattern,
+                                               const std::vector<AtomsVector>& referenceExpressions,
+                                               std::vector<AtomsVector>* expressionsToInstantiate = nullptr) {
+    if (referencePattern.size() != referenceExpressions.size()) return false;
 
     std::unordered_map<Atom, Atom> match;
-    for (size_t i = 0; i < inputPatterns.size(); ++i) {
-      const auto& pattern = inputPatterns[i];
-      const auto& patternMatch = patternMatches[i];
+    for (size_t i = 0; i < referencePattern.size(); ++i) {
+      const auto& pattern = referencePattern[i];
+      const auto& patternMatch = referenceExpressions[i];
       if (pattern.size() != patternMatch.size()) return false;
       for (size_t j = 0; j < pattern.size(); ++j) {
         const auto matchIterator = match.find(pattern[j]);
@@ -686,8 +702,8 @@ class Matcher::Implementation {
         }
       }
     }
-    if (atomsToReplace) {
-      for (auto& atomsVectorToReplace : *atomsToReplace) {
+    if (expressionsToInstantiate) {
+      for (auto& atomsVectorToReplace : *expressionsToInstantiate) {
         for (auto& atomToReplace : atomsVectorToReplace) {
           const auto matchIterator = match.find(atomToReplace);
           if (matchIterator != match.end()) {
