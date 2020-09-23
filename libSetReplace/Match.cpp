@@ -724,8 +724,7 @@ Matcher::Matcher(const std::vector<Rule>& rules,
                  const EventDeduplication& eventDeduplication,
                  const unsigned int randomSeed)
     : implementation_(std::make_shared<Implementation>(
-          rules, atomsIndex, getAtomsVector, getExpressionsSeparation, orderingSpec, eventDeduplication, randomSeed)) {
-}
+          rules, atomsIndex, getAtomsVector, getExpressionsSeparation, orderingSpec, eventDeduplication, randomSeed)) {}
 
 void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
                                              const std::function<bool()>& shouldAbort) {

@@ -233,8 +233,7 @@ int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, MArg
     thisSetID = distribution(randomGenerator);
   } while (sets_.count(thisSetID) > 0);
   try {
-    sets_.insert(
-        {thisSetID, Set(rules, initialExpressions, systemType, orderingSpec, eventDeduplication, randomSeed)});
+    sets_.insert({thisSetID, Set(rules, initialExpressions, systemType, orderingSpec, eventDeduplication, randomSeed)});
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
