@@ -492,8 +492,8 @@ We can even consider hybrid systems where some of the rules are spacelike and so
 The progress of that direction is tracked in [#345](https://github.com/maxitg/SetReplace/issues/345) and
 [#346](https://github.com/maxitg/SetReplace/issues/346).
 
-Another direction to consider is the identification of expressions.
-Global `MultiwaySystem` canonicalizes and identifies every state it encounters, thus, for example, the final state
+Another direction to consider is the deduplication of expressions.
+Global `MultiwaySystem` canonicalizes and deduplicates every state it encounters, thus, for example, the final state
 `{1, 2, 3, 4}` here only appears once:
 
 ```wl
@@ -522,12 +522,19 @@ In[] := WolframModel[{{{1}} -> {{1, 2, 3}},
 
 It would be interesting to introduce isomorphism testing to the local multiway system, as it will allow for a much
 better understanding of how branches combine at the local level.
-This isomorphism testing can be done by considering every pair of sub-evolutions starting from the same inputs.
-Suppose their outputs are identical up to the renaming of new atoms.
-In that case, we can identify the resulting expressions so that the two branches end at the same set of expressions,
-even if the intermediate steps are different.
+This isomorphism testing can be done by starting with a subset of spacelike separated expressions.
+We can then consider a pair of singleway evolutions starting from these expressions (events in them will be subsets of
+the entire multiway evolution).
+Let's then consider the final states of these spacelike evolutions.
+Suppose they are identical up to the renaming of new atoms.
+In that case, we can deduplicate the resulting expressions so that the two branches corresponding to singleway
+evolutions end at the same set of expressions, even if the intermediate steps are different.
 
-In the example above, we will then get:
+In the example above, we can consider two evolutions starting from `{{1}}`, and ending at `{{1, 4}, {1, 5}` and
+`{{1, 2}, {1, 3}}` respectively.
+Note that if we rename `{4 -> 2, 5 -> 3}`, the final states become identical.
+Hence, we can deduplicate them, merging future evolutions (since they now start from the same set of expressions).
+We then get:
 
 ```wl
 In[] := Graph[{{1} -> 1, {1} -> 2, 1 -> {1, 2, 3}, {1, 2, 3} -> 3,
@@ -548,13 +555,13 @@ In[] := Graph[{{1} -> 1, {1} -> 2, 1 -> {1, 2, 3}, {1, 2, 3} -> 3,
 
 <img src="Images/LocalMultiwayIsomorphism.png" width="199">
 
-Even in this simple example, however, it's not clear exactly how one should identify.
-For example, one can argue that the two expressions at the last layer should be identified.
-Indeed, if considering the evolutions starting all the way from the expression `{1}`, both atoms `2` and `3` are new.
-Therefore, the two possible final states `{{1, 2, 3, 4}}` and `{{1, 3, 2, 4}}` are isomorphic under the renaming
-`{2 -> 3, 3 -> 2}`.
-However, if one was to identify them, one of the events corresponding to rule 4 will be instantiated incorrectly as it
-will match the inputs in the order `{{1, 3}, {1, 2}}` but will name the outputs for the order `{{1, 2}, {1, 3}}`.
+However, looking at even this simple example, we can determine that the algorithm described above is not quite right.
+E.g., consider the last two expressions, `{1, 2, 3, 4}` and `{1, 3, 2, 4}`.
+On the one hand, if we start all the way from `{{1}}` and consider two possible evolutions ending with `{{1, 2, 3, 4}}`
+and `{{1, 3, 2, 4}}`, they should be deduplicated as they are the same up to the renaming `2 <-> 3`.
+However, if one was to deduplicate them, one of the events corresponding to rule 4 will be incorrectly instantiated as
+it will match the inputs in the order `{{1, 3}, {1, 2}}` but will name the outputs as if they were matched in the order
+`{{1, 2}, {1, 3}}`.
 
 But if there is a consistent way to define it, this approach will be the most compact representation of a multiway
 system so far.
