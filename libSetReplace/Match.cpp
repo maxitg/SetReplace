@@ -159,7 +159,7 @@ class Matcher::Implementation {
   std::mt19937 randomGenerator_;
   MatchPtr nextMatch_;
 
-  const EventIdentification eventIdentification_;
+  const EventDeduplication eventDeduplication_;
   // Newly created matches for which the advanced deduplication algorithm has not yet been run.
   // We sort them by sets they match to, and then by the chosen ordering function,
   // so that each batch with identical inputs can be processed together, and it's obvious which copy should be retained.
@@ -184,7 +184,7 @@ class Matcher::Implementation {
                  GetAtomsVectorFunc getAtomsVector,
                  GetExpressionsSeparationFunc getExpressionsSeparation,
                  const OrderingSpec& orderingSpec,
-                 const EventIdentification& eventIdentification,
+                 const EventDeduplication& eventDeduplication,
                  const unsigned int randomSeed)
       : rules_(rules),
         atomsIndex_(*atomsIndex),
@@ -192,7 +192,7 @@ class Matcher::Implementation {
         getExpressionsSeparation_(std::move(getExpressionsSeparation)),
         matchQueue_(MatchComparator(orderingSpec)),
         randomGenerator_(randomSeed),
-        eventIdentification_(eventIdentification),
+        eventDeduplication_(eventDeduplication),
         newMatches_(MatchComparator(newMatchesOrderingSpec(orderingSpec))),
         currentError(None) {
     for (const auto& ordering : orderingSpec) {
@@ -246,7 +246,7 @@ class Matcher::Implementation {
       throw toThrow;
     }
 
-    if (eventIdentification_ == EventIdentification::SameInputSetIsomorphicOutputs) {
+    if (eventDeduplication_ == EventDeduplication::SameInputSetIsomorphicOutputs) {
       removeIdenticalMatches(abortRequested);
     }
 
@@ -447,7 +447,7 @@ class Matcher::Implementation {
       }
     }
 
-    if (eventIdentification_ == EventIdentification::SameInputSetIsomorphicOutputs) {
+    if (eventDeduplication_ == EventDeduplication::SameInputSetIsomorphicOutputs) {
       newMatches_.insert(matchPtr);
     }
   }
@@ -622,7 +622,7 @@ class Matcher::Implementation {
     }
     atomsIndex.addExpressions(allExpressionIDs);
 
-    Matcher matcher(rules, &atomsIndex, getAtomsVector, getExpressionsSeparation, {}, EventIdentification::None);
+    Matcher matcher(rules, &atomsIndex, getAtomsVector, getExpressionsSeparation, {}, EventDeduplication::None);
     // We only need to pass one expression because any expression will need to be included in the match.
     matcher.addMatchesInvolvingExpressions({0}, abortRequested);
     return !matcher.empty();
@@ -705,10 +705,10 @@ Matcher::Matcher(const std::vector<Rule>& rules,
                  const GetAtomsVectorFunc& getAtomsVector,
                  const GetExpressionsSeparationFunc& getExpressionsSeparation,
                  const OrderingSpec& orderingSpec,
-                 const EventIdentification& eventIdentification,
+                 const EventDeduplication& eventDeduplication,
                  const unsigned int randomSeed)
     : implementation_(std::make_shared<Implementation>(
-          rules, atomsIndex, getAtomsVector, getExpressionsSeparation, orderingSpec, eventIdentification, randomSeed)) {
+          rules, atomsIndex, getAtomsVector, getExpressionsSeparation, orderingSpec, eventDeduplication, randomSeed)) {
 }
 
 void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,

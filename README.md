@@ -1263,7 +1263,7 @@ Objects are automatically converted to the latest version when they are encounte
 
 ### Options
 
-["VertexNamingFunction"](#vertexnamingfunction) | ["IncludePartialGenerations"](#includepartialgenerations) | ["IncludeBoundaryEvents"](#includeboundaryevents) | [Method](#method) | [TimeConstraint](#timeconstraint) | ["EventOrderingFunction"](#eventorderingfunction) | ["EventSelectionFunction"](#eventselectionfunction) | ["EventIdentification"](#eventidentification)
+["VertexNamingFunction"](#vertexnamingfunction) | ["IncludePartialGenerations"](#includepartialgenerations) | ["IncludeBoundaryEvents"](#includeboundaryevents) | [Method](#method) | [TimeConstraint](#timeconstraint) | ["EventOrderingFunction"](#eventorderingfunction) | ["EventSelectionFunction"](#eventselectionfunction) | ["EventDeduplication"](#eventdeduplication)
 
 #### "VertexNamingFunction"
 
@@ -1611,7 +1611,7 @@ In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
 Because of this branchlike and timelike matching, branches in `"EventSelectionFunction" -> None` evolution are not
 separated but can "interfere" with one another.
 
-#### "EventIdentification"
+#### "EventDeduplication"
 
 Some rules can match the same set of inputs in different ways.
 For example, consider the rule `{{a, b}, {a, c}} -> {{b, c}}` starting with an initial condition `{{1, 2}, {1, 3}}`.
@@ -1638,12 +1638,12 @@ In[] := WolframModel[{{a, b}, {a, c}} -> {{b, c}, {c, b}}, {{1, 2}, {1, 3}},
 
 <img src="READMEImages/TwoMatchOrdersSameOutcome.png" width="478">
 
-**`EventIdentification`** option can be used in a case like this to combine these two identical events into one:
+**`EventDeduplication`** option can be used in a case like this to combine these two identical events into one:
 
 ```wl
 In[] := WolframModel[{{a, b}, {a, c}} -> {{b, c}, {c, b}}, {{1, 2}, {1, 3}},
   "EventSelectionFunction" -> "MultiwaySpacelike",
-  "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["ExpressionsEventsGraph",
+  "EventDeduplication" -> "SameInputSetIsomorphicOutputs"]["ExpressionsEventsGraph",
  VertexLabels -> Automatic]
 ```
 
@@ -1654,7 +1654,7 @@ The outputs of the rule need not be identical, but should be isomorphic with res
 ```wl
 In[] := WolframModel[{{a, b}, {a, c}} -> {{b, d}, {c, d}}, {{1, 2}, {1, 3}},
   "EventSelectionFunction" -> "MultiwaySpacelike",
-  "EventIdentification" -> "SameInputSetIsomorphicOutputs"]["ExpressionsEventsGraph",
+  "EventDeduplication" -> "SameInputSetIsomorphicOutputs"]["ExpressionsEventsGraph",
  VertexLabels -> Automatic]
 ```
 

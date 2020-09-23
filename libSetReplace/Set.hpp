@@ -81,7 +81,7 @@ class Set {
       const std::vector<AtomsVector>& initialExpressions,
       const SystemType& systemType,
       const Matcher::OrderingSpec& orderingSpec,
-      const Matcher::EventIdentification& eventIdentification,
+      const Matcher::EventDeduplication& eventIdentification,
       unsigned int randomSeed = 0);
 
   /** @brief Perform a single substitution, create the corresponding event, and output expressions.

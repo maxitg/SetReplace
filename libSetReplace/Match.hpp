@@ -58,7 +58,7 @@ class Matcher {
    */
   using OrderingSpec = std::vector<std::pair<OrderingFunction, OrderingDirection>>;
 
-  enum class EventIdentification { None = 0, SameInputSetIsomorphicOutputs = 1 };
+  enum class EventDeduplication { None = 0, SameInputSetIsomorphicOutputs = 1 };
 
   /** @brief Creates a new matcher object.
    * @details This is an O(1) operation, does not do any matching yet.
@@ -68,7 +68,7 @@ class Matcher {
           const GetAtomsVectorFunc& getAtomsVector,
           const GetExpressionsSeparationFunc& getExpressionsSeparation,
           const OrderingSpec& orderingSpec,
-          const EventIdentification& eventIdentification,
+          const EventDeduplication& eventDeduplication,
           unsigned int randomSeed = 0);
 
   /** @brief Finds and adds to the index all matches involving specified expressions.

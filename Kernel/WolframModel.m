@@ -226,7 +226,7 @@ expr : WolframModel[
           TimeConstraint -> overridenOptionValue[TimeConstraint],
           "EventOrderingFunction" -> overridenOptionValue["EventOrderingFunction"],
           "EventSelectionFunction" -> overridenOptionValue["EventSelectionFunction"],
-          "EventIdentification" -> overridenOptionValue["EventIdentification"]],
+          "EventDeduplication" -> overridenOptionValue["EventDeduplication"]],
         $Failed],
       $Failed];
     If[evolution === $Aborted, Return[$Aborted]];

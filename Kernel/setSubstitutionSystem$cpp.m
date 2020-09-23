@@ -31,7 +31,7 @@ $cpp$setCreate = If[$libraryFile =!= $Failed,
       {Integer, 1}, (* initial set *)
       Integer, (* event selection function *)
       {Integer, 1}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
-      Integer, (* event identification *)
+      Integer, (* event deduplication *)
       Integer}, (* random seed *)
     Integer], (* set ptr *)
   $Failed];
@@ -242,7 +242,7 @@ $orderingFunctionCodes = <|
 |>;
 
 
-$eventIdentificationCodes = <|
+$eventDeduplicationCodes = <|
   None -> 0,
   $sameInputSetIsomorphicOutputs -> 1
 |>;
@@ -250,7 +250,7 @@ $eventIdentificationCodes = <|
 
 setSubstitutionSystem$cpp[
         rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_, eventSelectionFunction_,
-        eventIdentification_] /;
+        eventDeduplication_] /;
       $cppSetReplaceAvailable := Module[{
     canonicalRules,
     setAtoms, atomsInRules, globalAtoms, globalIndex,
@@ -276,7 +276,7 @@ setSubstitutionSystem$cpp[
     encodeNestedLists[mappedSet],
     systemTypeCode[eventSelectionFunction],
     Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
-    Replace[eventIdentification, $eventIdentificationCodes],
+    Replace[eventDeduplication, $eventDeduplicationCodes],
     RandomInteger[{0, $maxUInt32}]];
   TimeConstrained[
     CheckAbort[

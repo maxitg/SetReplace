@@ -42,14 +42,14 @@ class Set::Implementation {
                  const std::vector<AtomsVector>& initialExpressions,
                  const SystemType& systemType,
                  const Matcher::OrderingSpec& orderingSpec,
-                 const Matcher::EventIdentification& eventIdentification,
+                 const Matcher::EventDeduplication& eventDeduplication,
                  const unsigned int randomSeed)
       : Implementation(
             rules,
             initialExpressions,
             systemType,
             orderingSpec,
-            eventIdentification,
+            eventDeduplication,
             randomSeed,
             [this](const ExpressionID& expressionID) -> const AtomsVector& { return expressions_.at(expressionID); },
             [this](const ExpressionID& first, const ExpressionID& second) -> SeparationType {
@@ -160,7 +160,7 @@ class Set::Implementation {
                  const std::vector<AtomsVector>& initialExpressions,
                  const SystemType& systemType,
                  const Matcher::OrderingSpec& orderingSpec,
-                 const Matcher::EventIdentification& eventIdentification,
+                 const Matcher::EventDeduplication& eventDeduplication,
                  const unsigned int randomSeed,
                  const GetAtomsVectorFunc& getAtomsVector,
                  const GetExpressionsSeparationFunc& getExpressionsSeparation)
@@ -173,7 +173,7 @@ class Set::Implementation {
                  getAtomsVector,
                  getExpressionsSeparation,
                  orderingSpec,
-                 eventIdentification,
+                 eventDeduplication,
                  randomSeed) {
     for (const auto& expression : initialExpressions) {
       for (const auto& atom : expression) {
@@ -359,10 +359,10 @@ Set::Set(const std::vector<Rule>& rules,
          const std::vector<AtomsVector>& initialExpressions,
          const SystemType& eventSelectionFunction,
          const Matcher::OrderingSpec& orderingSpec,
-         const Matcher::EventIdentification& eventIdentification,
+         const Matcher::EventDeduplication& eventDeduplication,
          unsigned int randomSeed)
     : implementation_(std::make_shared<Implementation>(
-          rules, initialExpressions, eventSelectionFunction, orderingSpec, eventIdentification, randomSeed)) {}
+          rules, initialExpressions, eventSelectionFunction, orderingSpec, eventDeduplication, randomSeed)) {}
 
 int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) {
   return implementation_->replaceOnce(shouldAbort, true);
