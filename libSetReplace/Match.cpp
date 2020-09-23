@@ -594,8 +594,8 @@ class Matcher::Implementation {
     if (firstSet.size() == 0) return true;
 
     // Matcher does not support disconnected rules, so append the same atom to each expression to ensure connectivity
-    const Atom connectingAtom =
-        std::max(std::max(largestAtom(firstSet), largestAtom(secondSet)), static_cast<Atom>(0)) + 1;
+    // The atom here is just an arbitrary large number
+    constexpr Atom connectingAtom = 943106676560858694;
 
     // We will use the same set as an input to a rule
     const std::vector<Rule> rules = {
