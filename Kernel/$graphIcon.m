@@ -1,22 +1,9 @@
-(* ::Package:: *)
-
-(* ::Title:: *)
-(*$graphIcon*)
-
-
-(* ::Text:: *)
-(*This is an icon that is used for objects such as Graph if one sets GraphLayout -> None. Extracted from boxes of that object.*)
-
-
 Package["SetReplace`"]
-
 
 PackageScope["$graphIcon"]
 
-
-(* ::Section:: *)
-(*Implementation*)
-
+(* This is an icon that is used for objects such as Graph if one sets GraphLayout -> None.
+   Extracted from boxes of that object. *)
 
 $graphIcon = Graphics[
   GraphicsComplexBox[
