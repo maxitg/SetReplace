@@ -161,9 +161,9 @@ The states themselves will then be reconstructed afterward in post-processing.
 This approach sounds complicated at first, but it is more straightforward than it appears.
 To understand how it would work, let's think first about how one would implement a singleway Wolfram model evolution.
 
-### Datastructure
+### Data Structure
 
-In our implementation, the datastructure is simply a set of expressions, and each expression has information about
+In our implementation, the data structure is simply a set of expressions, and each expression has information about
 events that have created and destroyed it:
 
 ```wl
