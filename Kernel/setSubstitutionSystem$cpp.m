@@ -1,26 +1,13 @@
-(* ::Package:: *)
-
-(* ::Title:: *)
-(*setSubstitutionSystem$cpp*)
-
-
-(* ::Text:: *)
-(*Interface to the C++ implementation of setSubstitutionSystem.*)
-
-
 Package["SetReplace`"]
-
 
 PackageScope["$cppSetReplaceAvailable"]
 PackageScope["setSubstitutionSystem$cpp"]
 
+(* Interface to the C++ implementation of setSubstitutionSystem. *)
 
-(* ::Section:: *)
-(*Load libSetReplace*)
-
+(* Load libSetReplace *)
 
 $libraryFile = FindLibrary["libSetReplace"];
-
 
 $cpp$setCreate = If[$libraryFile =!= $Failed,
   LibraryFunctionLoad[
@@ -36,7 +23,6 @@ $cpp$setCreate = If[$libraryFile =!= $Failed,
     Integer], (* set ptr *)
   $Failed];
 
-
 $cpp$setDelete = If[$libraryFile =!= $Failed,
   LibraryFunctionLoad[
     $libraryFile,
@@ -44,7 +30,6 @@ $cpp$setDelete = If[$libraryFile =!= $Failed,
     {Integer}, (* set ptr *)
     "Void"],
   $Failed];
-
 
 $cpp$setReplace = If[$libraryFile =!= $Failed,
   LibraryFunctionLoad[
@@ -55,7 +40,6 @@ $cpp$setReplace = If[$libraryFile =!= $Failed,
     "Void"],
   $Failed];
 
-
 $cpp$setExpressions = If[$libraryFile =!= $Failed,
   LibraryFunctionLoad[
     $libraryFile,
@@ -63,7 +47,6 @@ $cpp$setExpressions = If[$libraryFile =!= $Failed,
     {Integer}, (* set ptr *)
     {Integer, 1}], (* expressions *)
   $Failed];
-
 
 $cpp$setEvents = If[$libraryFile =!= $Failed,
   LibraryFunctionLoad[
@@ -73,7 +56,6 @@ $cpp$setEvents = If[$libraryFile =!= $Failed,
     {Integer, 1}], (* expressions *)
   $Failed];
 
-
 $cpp$maxCompleteGeneration = If[$libraryFile =!= $Failed,
   LibraryFunctionLoad[
     $libraryFile,
@@ -81,7 +63,6 @@ $cpp$maxCompleteGeneration = If[$libraryFile =!= $Failed,
     {Integer}, (* set ptr *)
     Integer], (* generation *)
   $Failed];
-
 
 $cpp$terminationReason = If[$libraryFile =!= $Failed,
   LibraryFunctionLoad[
@@ -91,36 +72,15 @@ $cpp$terminationReason = If[$libraryFile =!= $Failed,
     Integer], (* reason *)
   $Failed];
 
-
-(* ::Section:: *)
-(*Implementation*)
-
-
-(* ::Subsection:: *)
-(*Encoding*)
-
-
-(* ::Text:: *)
-(*The following code turns a nested list into a single list, prepending sizes of each sublist. I.e., {{a}, {b, c, d}}
-  becomes {2, 1, a, 3, b, c, d}, where the first 2 is the length of the entire list, and 1 and 3 are the lengths of
-  sublists.*)
-
-
-(* ::Text:: *)
-(*This format is used to pass both rules and set data into libSetReplace over LibraryLink*)
-
+(* The following code turns a nested list into a single list, prepending sizes of each sublist. I.e., {{a}, {b, c, d}}
+   becomes {2, 1, a, 3, b, c, d}, where the first 2 is the length of the entire list, and 1 and 3 are the lengths of
+   sublists. *)
+(* This format is used to pass both rules and set data into libSetReplace over LibraryLink *)
 
 encodeNestedLists[list_List] :=
     {list} //. {{l___, List[args___], r___} :> {l, Length[{args}], args, r}}
 
-
-(* ::Subsection:: *)
-(*Decoding*)
-
-
-(* ::Text:: *)
-(*This is the reverse, used to decode set data (a list of expressions) from libSetReplace*)
-
+(* This is the reverse, used to decode set data (a list of expressions) from libSetReplace *)
 
 decodeAtomLists[list_List] := Module[{count, atomPointers, atomRanges, atomLists},
   count = list[[1]];
@@ -129,10 +89,7 @@ decodeAtomLists[list_List] := Module[{count, atomPointers, atomRanges, atomLists
   list[[#[[1]] ;; #[[2]] - 1]] & /@ atomRanges
 ]
 
-
-(* ::Text:: *)
-(*Similar function for the events*)
-
+(* Similar function for the events *)
 
 decodeEvents[list_List] := Module[{
     count = list[[1]],
@@ -148,14 +105,7 @@ decodeEvents[list_List] := Module[{
     $eventGenerations -> Most[generations]|>
 ]
 
-
-(* ::Subsection:: *)
-(*ruleAtoms*)
-
-
-(* ::Text:: *)
-(*Check if we have simple anonymous rules and use C++ library in that case*)
-
+(* Check if we have simple anonymous rules and use C++ library in that case *)
 
 ruleAtoms[left_ :> right_] := Module[{
     leftVertices, patterns, leftAtoms, patternSymbols, createdAtoms, rightAtoms},
@@ -172,11 +122,6 @@ ruleAtoms[left_ :> right_] := Module[{
     Union @ Join[patternSymbols, createdAtoms]}
 ]
 
-
-(* ::Subsection:: *)
-(*ruleAtomsToIndices*)
-
-
 ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := Module[{
     newLeft, newRight},
   newLeft = Replace[
@@ -191,21 +136,10 @@ ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := Module[{
   newLeft -> newRight
 ]
 
-
-(* ::Subsection:: *)
-(*$cppSetReplaceAvailable*)
-
-
 $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
-
-
-(* ::Subsection:: *)
-(*setSubstitutionSystem$cpp*)
-
 
 $maxInt64 = 2^63 - 1;
 $maxUInt32 = 2^32 - 1;
-
 
 $terminationReasonCodes = <|
   0 -> $notTerminated,
@@ -218,9 +152,7 @@ $terminationReasonCodes = <|
   7 -> $Aborted
 |>;
 
-
 systemTypeCode[eventSelectionFunction_] := Boole[multiwayEventSelectionFunctionQ[eventSelectionFunction]]
-
 
 (* 0 -> All
    1 -> Spacelike *)
@@ -231,7 +163,6 @@ systemTypeCode[eventSelectionFunction_] := Boole[multiwayEventSelectionFunctionQ
 eventSelectionCodes[eventSelectionFunction_, ruleCount_] :=
   ConstantArray[eventSelectionFunction /. {$globalSpacelike -> 0, None -> 0, $spacelike -> 1}, ruleCount]
 
-
 $orderingFunctionCodes = <|
   $sortedExpressionIDs -> 0,
   $reverseSortedExpressionIDs -> 1,
@@ -241,12 +172,10 @@ $orderingFunctionCodes = <|
   $backward -> 1
 |>;
 
-
 $eventDeduplicationCodes = <|
   None -> 0,
   $sameInputSetIsomorphicOutputs -> 1
 |>;
-
 
 setSubstitutionSystem$cpp[
         rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_, eventSelectionFunction_,

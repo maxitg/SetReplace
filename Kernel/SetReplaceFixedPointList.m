@@ -1,22 +1,8 @@
-(* ::Package:: *)
-
-(* ::Title:: *)
-(*SetReplaceFixedPointList*)
-
-
-(* ::Text:: *)
-(*Same as SetReplaceFixedPoint, but returns all intermediate steps.*)
-
-
 Package["SetReplace`"]
-
 
 PackageExport["SetReplaceFixedPointList"]
 
-
-(* ::Section:: *)
-(*Documentation*)
-
+(* Same as SetReplaceFixedPoint, but returns all intermediate steps. *)
 
 SetReplaceFixedPointList::usage = usageString[
   "SetReplaceFixedPointList[`s`, {\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) \[Rule] ",
@@ -26,40 +12,16 @@ SetReplaceFixedPointList::usage = usageString[
   "until no further events can be matched, ",
   "and returns the list of all intermediate sets."];
 
-
-(* ::Section:: *)
-(*Syntax Information*)
-
-
 SyntaxInformation[SetReplaceFixedPointList] =
   {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 
-
-(* ::Section:: *)
-(*Argument Checks*)
-
-
-(* ::Subsection:: *)
-(*Argument count*)
-
-
 SetReplaceFixedPointList[args___] := 0 /;
   !Developer`CheckArgumentCount[SetReplaceFixedPointList[args], 2, 2] && False
-
-
-(* ::Section:: *)
-(*Options*)
-
 
 Options[SetReplaceFixedPointList] = {
   Method -> Automatic,
   TimeConstraint -> Infinity,
   "EventOrderingFunction" -> Automatic};
-
-
-(* ::Section:: *)
-(*Implementation*)
-
 
 SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] /;
     recognizedOptionsQ[expr, SetReplaceFixedPointList, {o}] := Module[{result},
