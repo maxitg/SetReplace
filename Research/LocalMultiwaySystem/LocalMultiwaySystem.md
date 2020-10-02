@@ -42,7 +42,8 @@ The most fundamental object is the states graph, which has states at the vertice
 All possible updating events are determined for each state, and edges leading to new states are created.
 This process is then repeated for the new states.
 
-Let's consider an instance of the *global* multiway system (implemented in the `MultiwaySystem` resource function).
+Let's consider an instance of the *global* multiway system (implemented in the
+[`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) resource function).
 Specifically, let's start with a rule that moves a "particle" (a unary expression) along directed edges in a graph:
 
 ```wl
@@ -66,26 +67,27 @@ In this case, the rules will lead to non-deterministic behavior, multiple choice
 system explores all possible choices at once.
 
 ```wl
-In[] := Graph[ResourceFunction["MultiwaySystem"][
-  "WolframModel" -> {{{1}, {1, 2}} -> {{1, 2}, {2}}}, {{{1}, {1, 
-     2}, {2, 3}, {2, 4}, {4, 5}}}, 4, "StatesGraph", VertexSize -> 1],
-  GraphLayout -> "LayeredDigraphEmbedding"]
+In[] := ResourceFunction["MultiwaySystem"][
+ "WolframModel" -> {{{1}, {1, 2}} -> {{1, 2}, {2}}}, {{{1}, {1,
+    2}, {2, 3}, {2, 4}, {4, 5}}}, 4, "StatesGraph", VertexSize -> 1,
+ GraphLayout -> "LayeredDigraphEmbedding"]
 ```
 
 <img src="Images/BranchingGlobalMultiway.png" width="280">
 
 Now the states graph itself splits into two branches, mirroring precisely the input graph.
 
-One important feature of `MultiwaySystem` is that if it encounters multiple states that are isomorphic, it merges them
-into one.
+One important feature of
+[`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) is that if it
+encounters multiple states that are isomorphic, it merges them into one.
 For example, if instead of the input graph in the example above we use the graph where the branches have the same
 length, the system will combine them, and we would not see the splitting behavior:
 
 ```wl
-In[] := Graph[ResourceFunction["MultiwaySystem"][
-  "WolframModel" -> {{{1}, {1, 2}} -> {{1, 2}, {2}}},
-  {{{1}, {1, 2}, {2, 3}, {3, 4}, {2, 5}, {5, 6}}}, 3, "StatesGraph",
-  VertexSize -> 1], GraphLayout -> "LayeredDigraphEmbedding"]
+In[] := ResourceFunction["MultiwaySystem"][
+ "WolframModel" -> {{{1}, {1, 2}} -> {{1, 2}, {2}}}, {{{1}, {1,
+    2}, {2, 3}, {3, 4}, {2, 5}, {5, 6}}}, 3, "StatesGraph",
+ VertexSize -> 1, GraphLayout -> "LayeredDigraphEmbedding"]
 ```
 
 <img src="Images/IsomorphicBranching.png" width="356">
@@ -171,7 +173,7 @@ events that have created and destroyed it:
 ```
 
 The collection of these objects is essentially the *only* thing that needs to be returned from the evolution code.
-Things like `"StatesList"` and `"CausalGraph"` can be reconstructed.
+Things like [`"StatesList"`](/README.md#states) and [`"CausalGraph"`](README.md#causal-graphs) can be reconstructed.
 
 The causal graph, in particular, is the simplest one to reconstruct.
 Indeed, if each event is a vertex, and each expression is an edge going from its `#CreatorEvent` to its
@@ -212,8 +214,9 @@ timelike ones.
 To understand what it means, let's try some examples.
 Even the most trivial rules become too complicated in the match-all system quite quickly, so let's use the pattern rules
 with globally named atoms here.
-We will be using the [`"ExpressionsEventsGraph"`](/README.md#causal-graphs) property of the `WolframModel`, which will
-allow us to see both expressions and events on the same graph.
+We will be using the [`"ExpressionsEventsGraph"`](/README.md#causal-graphs) property of the
+[`WolframModel`](/README.md#wolframmodel-and-wolframmodelevolutionobject), which will allow us to see both expressions
+and events on the same graph.
 
 Let's then take a look at the following system:
 
@@ -236,8 +239,8 @@ The first event replaced `{1, 2}` with `{2, 3}`.
 That is entirely normal and would happen in a singleway system as well.
 However, the singleway system would terminate immediately after that, as there is only a single expression `{2, 3}` left
 now, `{1, 2}` has been deleted, and the second rule requires both `{1, 2}` and `{2, 3}` as inputs.
-In other words, `{1, 2}` and `{2, 3}` are **timelike** expressions, and our singleway `WolframModel` only matches
-**spacelike** expressions.
+In other words, `{1, 2}` and `{2, 3}` are **timelike** expressions, and our singleway
+[`WolframModel`](/README.md#wolframmodel-and-wolframmodelevolutionobject) only matches **spacelike** expressions.
 
 However, the match-all multiway system will proceed, as both `{1, 2}` and `{2, 3}` are now in the system, and it does
 not care that they are timelike.
@@ -274,11 +277,13 @@ In[] := WolframModel[<|"PatternRules" -> {{{1, 2}} -> {{2, 3}},
 <img src="Images/MatchAllBranchlikeMatching.png" width="225">
 
 Note in the above there are two possibilities to match `{{1, 2}}`, which are incompatible according to the ordinary
-`WolframModel` and can only be achieved one-at-a-time with different choices of the `"EventOrderingFunction"`.
+[`WolframModel`](/README.md#wolframmodel-and-wolframmodelevolutionobject) and can only be achieved one-at-a-time with
+different choices of the [`"EventOrderingFunction"`](/README.md#eventorderingfunction).
 However, the match-all system can still match the two outputs with the third rule.
 
 Further note the obvious feature of the match-all system that it produces expressions and events that would occur in
-neither the singleway `WolframModel` nor the global `MultiwaySystem`.
+neither the singleway [`WolframModel`](/README.md#wolframmodel-and-wolframmodelevolutionobject) nor the global
+[`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem).
 As such, it is a form of "interference" between branches and might allow branches to merge and interact.
 
 ### Reconstruction
@@ -426,16 +431,18 @@ Thus, to determine the separation between two expressions, `A` and `B`, in an ex
 
 Now that we understand how to precisely define separations between expressions, we can make a spacelike-only multiway
 system, i.e., a system that would only match pairwise spacelike groups of expressions, similar to what the global
-`MultiwaySystem` does.
+[`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) does.
 
 Indeed, all we need for that case is a verification that an event we are about to instantiate does not merge branches.
 
 The only modification we need to do compared to the match-all system is that we only add matches to the index with only
 pairwise spacelike separated expressions as inputs.
-The expressions we will get then will be exactly the same as in the global `MultiwaySystem`.
+The expressions we will get then will be exactly the same as in the global
+[`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem).
 
 It is interesting now to consider the same example of two particles starting on two different branches that [caused lots
-of redundancy](#global-multiway-system) in the global `MultiwaySystem`.
+of redundancy](#global-multiway-system) in the global
+[`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem).
 
 As a reminder, the system evaluates the propagation of two "particles" along a directed graph:
 
@@ -493,8 +500,8 @@ The progress of that direction is tracked in [#345](https://github.com/maxitg/Se
 [#346](https://github.com/maxitg/SetReplace/issues/346).
 
 Another direction to consider is the deduplication of expressions.
-Global `MultiwaySystem` canonicalizes and deduplicates every state it encounters, thus, for example, the final state
-`{1, 2, 3, 4}` here only appears once:
+Global [`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) canonicalizes
+and deduplicates every state it encounters, thus, for example, the final state `{1, 2, 3, 4}` here only appears once:
 
 ```wl
 In[] := ResourceFunction["MultiwaySystem"][
