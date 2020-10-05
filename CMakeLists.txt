@@ -6,6 +6,7 @@ message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 
 option(SET_REPLACE_WITH_MATHEMATICA "Add the library definition for Wolfram LibraryLink" OFF)
 option(SET_REPLACE_BUILD_TESTING "Enable cpp testing." OFF)
+option(SET_REPLACE_PROFILE "Enable profile options")
 include(GNUInstallDirs) # Define CMAKE_INSTALL_xxx: LIBDIR, INCLUDEDIR
 set(SetReplace_export_file "${PROJECT_BINARY_DIR}/SetReplaceTargets.cmake")
 
@@ -40,6 +41,11 @@ else()
       CACHE STRING ${_set_replace_extra_compile_options_docstring})
   endif()
 endif()
+
+if(SET_REPLACE_PROFILE)
+  set(SET_REPLACE_PROFILE_OPTIONS "-O0")
+endif()
+
 message(STATUS "SET_REPLACE_BUILD_TESTING: ${SET_REPLACE_BUILD_TESTING}")
 message(STATUS "SET_REPLACE_WITH_MATHEMATICA: ${SET_REPLACE_WITH_MATHEMATICA}")
 message(STATUS "SET_REPLACE_EXTRA_COMPILE_OPTIONS: ${SET_REPLACE_EXTRA_COMPILE_OPTIONS}")
@@ -69,7 +75,7 @@ target_include_directories(SetReplace PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libSetReplace>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
-target_compile_options(SetReplace PRIVATE ${SET_REPLACE_EXTRA_COMPILE_OPTIONS})
+target_compile_options(SetReplace PRIVATE ${SET_REPLACE_EXTRA_COMPILE_OPTIONS} ${SET_REPLACE_PROFILE_OPTIONS})
 
 set(SET_REPLACE_LIBRARIES SetReplace)
 
