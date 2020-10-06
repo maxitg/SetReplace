@@ -11,8 +11,6 @@ PackageScope["indexHypergraph"]
 PackageScope["connectedHypergraphQ"]
 PackageScope["mapHold"]
 PackageScope["heldPart"]
-PackageScope["Subhypergraph"]
-PackageScope["weakSubhypergraph"]
 
 fromCounts[association_] := Catenate @ KeyValueMap[ConstantArray] @ association
 
@@ -52,7 +50,3 @@ mapHold[expr_, level_ : {1}] := Map[Hold, Unevaluated[expr], level]
 SetAttributes[heldPart, HoldFirst];
 
 heldPart[expr_, part__Integer] := Extract[Unevaluated[expr], {part}, Hold]
-
-Subhypergraph[h_, vertices_List] := Select[h, SubsetQ[vertices, #] &]
-
-weakSubhypergraph[h_, vertices_List] := Select[h, ContainsAny[#, vertices] &]
