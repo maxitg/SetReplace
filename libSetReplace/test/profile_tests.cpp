@@ -254,7 +254,7 @@ TEST(Set, profileCAEmulator) {
                                                  {2, 2}};
 
   Set set(rules, initialExpressions, Set::SystemType::Singleway, orderingSpec, Matcher::EventDeduplication::None);
-  EXPECT_EQ(set.replace(Set::StepSpecification{500}, doNotAbort), 500);
+  EXPECT_EQ(set.replace(Set::StepSpecification{250}, doNotAbort), 250);
 }
 
 }  // namespace SetReplace
