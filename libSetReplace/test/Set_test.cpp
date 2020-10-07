@@ -1,8 +1,8 @@
 #include "Set.hpp"
 
-#include <vector>
-
 #include <gtest/gtest.h>
+
+#include <vector>
 
 #include "Match.hpp"
 #include "Rule.hpp"
