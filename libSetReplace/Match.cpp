@@ -283,14 +283,15 @@ class Matcher::Implementation {
       if (expressionToMatches_[expression].empty()) expressionToMatches_.erase(expression);
     }
 
-    auto& bucket = matchQueue_[matchPtr];
+    const auto bucketIt = matchQueue_.find(matchPtr);
+    auto& bucket = bucketIt->second;
     const auto bucketIndex = bucket.first.at(matchPtr);
     // O(1) order-non-preserving deletion from a vector
     std::swap(bucket.second[bucketIndex], bucket.second[bucket.second.size() - 1]);
     bucket.first[bucket.second[bucketIndex]] = bucketIndex;
     bucket.first.erase(bucket.second[bucket.second.size() - 1]);
     bucket.second.pop_back();
-    if (bucket.first.empty()) matchQueue_.erase(matchPtr);
+    if (bucket.first.empty()) matchQueue_.erase(bucketIt);
   }
 
   bool empty() const { return matchQueue_.empty(); }
@@ -432,10 +433,7 @@ class Matcher::Implementation {
       return;
     }
 
-    auto bucketIt = matchQueue_.find(matchPtr);  // works because comparison is smart
-    if (bucketIt == matchQueue_.end()) {
-      bucketIt = matchQueue_.insert({matchPtr, {{}, {}}}).first;
-    }
+    const auto bucketIt = matchQueue_.emplace(matchPtr, Bucket()).first;  // works because comparison is smart
     auto& bucket = bucketIt->second;
     if (!bucket.first.count(matchPtr)) {  // works because hashing is smart
       bucket.second.push_back(matchPtr);
