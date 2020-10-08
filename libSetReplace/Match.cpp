@@ -389,7 +389,7 @@ class Matcher::Implementation {
     newMatch.inputExpressions[nextInputIdx] = potentialExpressionID;
 
     auto newInputs = partiallyMatchedInputs;
-    if (!substituteMissingAtomsIfPossible({input}, {expressionAtoms}, &newInputs)) {
+    if (!substituteMissingAtomsIfPossible(input, expressionAtoms, &newInputs)) {
       return;
     }
     if (eventSelectionFunction == EventSelectionFunction::Spacelike &&
@@ -687,19 +687,39 @@ class Matcher::Implementation {
 
     std::unordered_map<Atom, Atom> match;
     for (size_t i = 0; i < referencePattern.size(); ++i) {
-      const auto& pattern = referencePattern[i];
-      const auto& patternMatch = referenceExpressions[i];
-      if (pattern.size() != patternMatch.size()) return false;
-      for (size_t j = 0; j < pattern.size(); ++j) {
-        const auto matchIterator = match.find(pattern[j]);
-        const Atom inputAtom = matchIterator != match.end() ? matchIterator->second : pattern[j];
-        if (inputAtom < 0) {  // pattern
-          match[inputAtom] = patternMatch[j];
-        } else if (inputAtom != patternMatch[j]) {  // explicit atom ID
-          return false;
-        }
+      if (!substituteMissingAtomsIfPossible(referencePattern[i], referenceExpressions[i], match)) return false;
+    }
+    instantiateExpressions(expressionsToInstantiate, match);
+    return true;
+  }
+
+  static bool substituteMissingAtomsIfPossible(const AtomsVector& pattern,
+                                               const AtomsVector& patternMatch,
+                                               std::vector<AtomsVector>* expressionsToInstantiate = nullptr) {
+    std::unordered_map<Atom, Atom> match;
+    if (!substituteMissingAtomsIfPossible(pattern, patternMatch, match)) return false;
+    instantiateExpressions(expressionsToInstantiate, match);
+    return true;
+  }
+
+  static bool substituteMissingAtomsIfPossible(const AtomsVector& pattern,
+                                               const AtomsVector& patternMatch,
+                                               std::unordered_map<Atom, Atom>& match) {
+    if (pattern.size() != patternMatch.size()) return false;
+    for (size_t j = 0; j < pattern.size(); ++j) {
+      const auto matchIterator = match.find(pattern[j]);
+      const Atom inputAtom = matchIterator != match.end() ? matchIterator->second : pattern[j];
+      if (inputAtom < 0) {  // pattern
+        match[inputAtom] = patternMatch[j];
+      } else if (inputAtom != patternMatch[j]) {  // explicit atom ID
+        return false;
       }
     }
+    return true;
+  }
+
+  static void instantiateExpressions(std::vector<AtomsVector>* expressionsToInstantiate,
+                                     const std::unordered_map<Atom, Atom>& match) {
     if (expressionsToInstantiate) {
       for (auto& atomsVectorToReplace : *expressionsToInstantiate) {
         for (auto& atomToReplace : atomsVectorToReplace) {
@@ -710,7 +730,6 @@ class Matcher::Implementation {
         }
       }
     }
-    return true;
   }
 };
 
