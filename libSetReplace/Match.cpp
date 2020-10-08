@@ -687,7 +687,7 @@ class Matcher::Implementation {
 
     std::unordered_map<Atom, Atom> match;
     for (size_t i = 0; i < referencePattern.size(); ++i) {
-      if (!substituteMissingAtomsIfPossible(referencePattern[i], referenceExpressions[i], match)) return false;
+      if (!substituteMissingAtomsIfPossible(referencePattern[i], referenceExpressions[i], &match)) return false;
     }
     instantiateExpressions(expressionsToInstantiate, match);
     return true;
@@ -697,14 +697,15 @@ class Matcher::Implementation {
                                                const AtomsVector& patternMatch,
                                                std::vector<AtomsVector>* expressionsToInstantiate = nullptr) {
     std::unordered_map<Atom, Atom> match;
-    if (!substituteMissingAtomsIfPossible(pattern, patternMatch, match)) return false;
+    if (!substituteMissingAtomsIfPossible(pattern, patternMatch, &match)) return false;
     instantiateExpressions(expressionsToInstantiate, match);
     return true;
   }
 
   static bool substituteMissingAtomsIfPossible(const AtomsVector& pattern,
                                                const AtomsVector& patternMatch,
-                                               std::unordered_map<Atom, Atom>& match) {
+                                               std::unordered_map<Atom, Atom>* matchMap) {
+    auto& match = *matchMap;
     if (pattern.size() != patternMatch.size()) return false;
     for (size_t j = 0; j < pattern.size(); ++j) {
       const auto matchIterator = match.find(pattern[j]);
