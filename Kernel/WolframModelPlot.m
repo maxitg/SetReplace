@@ -467,9 +467,7 @@ addConvexPolygons["Ordered"][edge : {_, _.}, subgraphsShapes_] := edge -> subgra
 
 addConvexPolygons[edgeType_][edge_, subgraphsShapes_] := Module[{points, region, convexPolygons, polygon},
   points = Flatten[#, 2] & @ (subgraphsShapes /. {Line[pts_] :> {pts}, Point[pts_] :> {{pts}}});
-  region = ConvexHullMesh[Map[# + RandomReal[1.*^-10] &, points, {2}]];
-  convexPolygons = Polygon /@ Table[MeshCoordinates[region][[polygon]], {polygon, MeshCells[region, 2][[All, 1]]}];
-  edge -> Join[subgraphsShapes, convexPolygons]
+  edge -> If[Length[points] > 2, Append[subgraphsShapes, convexHullPolygon[points]], subgraphsShapes]
 ]
 
 (** Drawing **)
