@@ -14,8 +14,8 @@ $successQ = True;
 (* Get test files *)
 
 $testFiles = If[Length @ $ScriptCommandLine >= 2,
-  FileNameJoin[{".", "Tests", # <> ".wlt"}] & /@ $ScriptCommandLine[[2 ;; ]],
-  FileNames[FileNameJoin[{".", "Tests", "*.wlt"}]]
+  FileNameJoin[{AbsoluteFileName["."], "Tests", # <> ".wlt"}] & /@ $ScriptCommandLine[[2 ;; ]],
+  FileNames[FileNameJoin[{AbsoluteFileName["."], "Tests", "*.wlt"}]]
 ];
 
 If[!FileExistsQ[#],
