@@ -57,7 +57,7 @@
       (** Wrong second argument **)
       testUnevaluated[
         Subhypergraph[{{1, 1, 2}, {2, 3}, {2, 3, 4}}, 1],
-        {Subhypergraph::invl}
+        {Subhypergraph::invalidList}
       ],
 
       (* Subhypergraph / operator form *)
@@ -83,16 +83,21 @@
         {Subhypergraph::argx}
       ],
 
-      (** Wrong first argument **)
+      (** Wrong zeroth argument **)
       testUnevaluated[
-        Subhypergraph[1][{2, 3, 4}],
-        {Subhypergraph::invalidHypergraph}
+        Subhypergraph[1][{{1, 2}, {2, 3, 4}}],
+        {Subhypergraph::invalidList}
       ],
 
-      (** Wrong second argument **)
-      VerificationTest[
-        Subhypergraph[1][{{1, 2}, {2, 3, 4}}],
-        {}
+      testUnevaluated[
+        Subhypergraph[1][{2, 3, 4}],
+        {Subhypergraph::invalidList}
+      ],
+
+      (** Wrong first argument **)
+      testUnevaluated[
+        Subhypergraph[{1}][{1, 2}],
+        {Subhypergraph::invalidHypergraph}
       ],
 
       (* WeakSubhypergraph / normal form *)
@@ -147,7 +152,7 @@
       (** Wrong second argument **)
       testUnevaluated[
         WeakSubhypergraph[{{1, 1, 2}, {2, 3}, {2, 3, 4}}, 1],
-        {WeakSubhypergraph::invl}
+        {WeakSubhypergraph::invalidList}
       ],
 
       (* WeakSubhypergraph / operator form *)
@@ -173,16 +178,21 @@
         {WeakSubhypergraph::argx}
       ],
 
-      (** Wrong first argument **)
+      (** Wrong zeroth argument **)
       testUnevaluated[
-        WeakSubhypergraph[1][{2, 3, 4}],
-        {WeakSubhypergraph::invalidHypergraph}
+        WeakSubhypergraph[1][{{1, 2}, {2, 3, 4}}],
+        {WeakSubhypergraph::invalidList}
       ],
 
-      (** Wrong second argument **)
-      VerificationTest[
-        WeakSubhypergraph[1][{{1, 2}, {2, 3, 4}}],
-        {}
+      testUnevaluated[
+        WeakSubhypergraph[1][{2, 3, 4}],
+        {WeakSubhypergraph::invalidList}
+      ],
+
+      (** Wrong first argument **)
+      testUnevaluated[
+        WeakSubhypergraph[{1}][{1, 2}],
+        {WeakSubhypergraph::invalidHypergraph}
       ]
     }
   |>
