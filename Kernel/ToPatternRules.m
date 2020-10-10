@@ -42,7 +42,7 @@ toPatternRules[rule : _Rule, caller_] := Module[
   newVertexNames =
     ToHeldExpression /@ StringTemplate["v``"] /@ Range @ Length @ symbols;
   vertexPatterns = Pattern[#, Blank[]] & /@ newVertexNames;
-  newLeft = (rule[[1]] /. Thread[symbols -> vertexPatterns]);
+  newLeft = (rule[[1]] /. FilterRules[Thread[symbols -> vertexPatterns], leftSymbols]);
   {leftVertices, rightVertices} =
     {leftSymbols, rightSymbols} /. Thread[symbols -> newVertexNames];
   rightOnlyVertices = Complement[rightVertices, leftVertices];
