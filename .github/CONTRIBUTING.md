@@ -1,3 +1,5 @@
+[![Discord](https://img.shields.io/discord/761616685173309481?logo=Discord)](https://discord.setreplace.org)
+
 First, thanks for contributing! :thumbsup:
 
 These are the guidelines designed to make the development smooth, efficient, and fun for all of us. But remember, we are the ones who write them, and *anybody* is welcome to propose changes. Just open a pull request.
