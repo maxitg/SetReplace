@@ -1,5 +1,4 @@
-![Discord](https://img.shields.io/discord/761616685173309481?logo=Discord)
-![CircleCI](https://img.shields.io/circleci/build/github/maxitg/SetReplace/master?logo=CircleCI)
+[![Discord](https://img.shields.io/discord/761616685173309481?logo=Discord)](https://discord.setreplace.org)
 
 [Wolfram Models as Set Substitution Systems](#wolfram-models-as-set-substitution-systems) | [Getting Started](#getting-started) | [Symbols and Functions](#symbols-and-functions) | [Physics](#physics) | [Acknowledgements](#acknowledgements)
 
