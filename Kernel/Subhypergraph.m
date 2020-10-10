@@ -1,5 +1,3 @@
-(* ::Package:: *)
-
 (* Subhypergraph *)
 (* Subhypergraph is an utility function that selects hyperedges that only contain vertices from the requested list. *)
 
