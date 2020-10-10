@@ -283,14 +283,15 @@ class Matcher::Implementation {
       if (expressionToMatches_[expression].empty()) expressionToMatches_.erase(expression);
     }
 
-    auto& bucket = matchQueue_[matchPtr];
+    const auto bucketIt = matchQueue_.find(matchPtr);
+    auto& bucket = bucketIt->second;
     const auto bucketIndex = bucket.first.at(matchPtr);
     // O(1) order-non-preserving deletion from a vector
     std::swap(bucket.second[bucketIndex], bucket.second[bucket.second.size() - 1]);
     bucket.first[bucket.second[bucketIndex]] = bucketIndex;
     bucket.first.erase(bucket.second[bucket.second.size() - 1]);
     bucket.second.pop_back();
-    if (bucket.first.empty()) matchQueue_.erase(matchPtr);
+    if (bucket.first.empty()) matchQueue_.erase(bucketIt);
   }
 
   bool empty() const { return matchQueue_.empty(); }
@@ -388,7 +389,7 @@ class Matcher::Implementation {
     newMatch.inputExpressions[nextInputIdx] = potentialExpressionID;
 
     auto newInputs = partiallyMatchedInputs;
-    if (!substituteMissingAtomsIfPossible({input}, {expressionAtoms}, &newInputs)) {
+    if (!substituteMissingAtomsIfPossible(input, expressionAtoms, &newInputs)) {
       return;
     }
     if (eventSelectionFunction == EventSelectionFunction::Spacelike &&
@@ -432,10 +433,7 @@ class Matcher::Implementation {
       return;
     }
 
-    auto bucketIt = matchQueue_.find(matchPtr);  // works because comparison is smart
-    if (bucketIt == matchQueue_.end()) {
-      bucketIt = matchQueue_.insert({matchPtr, {{}, {}}}).first;
-    }
+    const auto bucketIt = matchQueue_.emplace(matchPtr, Bucket()).first;  // works because comparison is smart
     auto& bucket = bucketIt->second;
     if (!bucket.first.count(matchPtr)) {  // works because hashing is smart
       bucket.second.push_back(matchPtr);
@@ -689,19 +687,40 @@ class Matcher::Implementation {
 
     std::unordered_map<Atom, Atom> match;
     for (size_t i = 0; i < referencePattern.size(); ++i) {
-      const auto& pattern = referencePattern[i];
-      const auto& patternMatch = referenceExpressions[i];
-      if (pattern.size() != patternMatch.size()) return false;
-      for (size_t j = 0; j < pattern.size(); ++j) {
-        const auto matchIterator = match.find(pattern[j]);
-        const Atom inputAtom = matchIterator != match.end() ? matchIterator->second : pattern[j];
-        if (inputAtom < 0) {  // pattern
-          match[inputAtom] = patternMatch[j];
-        } else if (inputAtom != patternMatch[j]) {  // explicit atom ID
-          return false;
-        }
+      if (!substituteMissingAtomsIfPossible(referencePattern[i], referenceExpressions[i], &match)) return false;
+    }
+    instantiateExpressions(expressionsToInstantiate, match);
+    return true;
+  }
+
+  static bool substituteMissingAtomsIfPossible(const AtomsVector& pattern,
+                                               const AtomsVector& patternMatch,
+                                               std::vector<AtomsVector>* expressionsToInstantiate = nullptr) {
+    std::unordered_map<Atom, Atom> match;
+    if (!substituteMissingAtomsIfPossible(pattern, patternMatch, &match)) return false;
+    instantiateExpressions(expressionsToInstantiate, match);
+    return true;
+  }
+
+  static bool substituteMissingAtomsIfPossible(const AtomsVector& pattern,
+                                               const AtomsVector& patternMatch,
+                                               std::unordered_map<Atom, Atom>* matchMap) {
+    auto& match = *matchMap;
+    if (pattern.size() != patternMatch.size()) return false;
+    for (size_t j = 0; j < pattern.size(); ++j) {
+      const auto matchIterator = match.find(pattern[j]);
+      const Atom inputAtom = matchIterator != match.end() ? matchIterator->second : pattern[j];
+      if (inputAtom < 0) {  // pattern
+        match[inputAtom] = patternMatch[j];
+      } else if (inputAtom != patternMatch[j]) {  // explicit atom ID
+        return false;
       }
     }
+    return true;
+  }
+
+  static void instantiateExpressions(std::vector<AtomsVector>* expressionsToInstantiate,
+                                     const std::unordered_map<Atom, Atom>& match) {
     if (expressionsToInstantiate) {
       for (auto& atomsVectorToReplace : *expressionsToInstantiate) {
         for (auto& atomToReplace : atomsVectorToReplace) {
@@ -712,7 +731,6 @@ class Matcher::Implementation {
         }
       }
     }
-    return true;
   }
 };
 
