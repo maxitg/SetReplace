@@ -4,7 +4,7 @@ $successQ = True;
 
 (* If any messages are produced, fail with non-zero exit code. *)
 Check[
-  $repoRoot = DirectoryName[$InputFileName];
+  $repoRoot = AbsoluteFileName[DirectoryName[$InputFileName]];
   $latestPacletFiles = MaximalBy[
     FileNames[FileNameJoin[{$repoRoot, "SetReplace-*.paclet"}]], FileInformation[#, "LastModificationDate"] &];
   
