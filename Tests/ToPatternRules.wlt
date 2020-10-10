@@ -131,10 +131,15 @@
         ToPatternRules[{{x, y}, {x, z}} -> {{x, y}, {x, w}, {y, w}, {z, w}}]
       ],
 
-      (** Replace the LHS with the appropriate patterns #149 **)
+      (** Replace symbols with the appropriate patterns #149 **)
       VerificationTest[
         ToPatternRules[{{1, 2}, {2, 3}, {3, 1}} -> {{{1, 4}, {1, 4}}}],
         {{v1_, v2_}, {v2_, v3_}, {v3_, v1_}} :> Module[{v4}, {{v4, v4}}]
+      ],
+
+      VerificationTest[
+        ToPatternRules[{} -> {{{1, 2}}, {1, 2}}],
+        {} :> Module[{v1, v2, v3}, {{v3}, {v1, v2}}]
       ]
     }
   |>
