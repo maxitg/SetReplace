@@ -282,7 +282,7 @@ Then, after building, you can run the tests using the binaries in `libSetReplace
 
 #### Using SetReplace in third-party CMake projects
 
-If a third party project wants to use `SetReplace`, it is enough to write in their `CMakeLists.txt`:
+If a third-party project wants to use `SetReplace`, it is enough to write in their `CMakeLists.txt`:
 
 ```
 add_library(foo ...)
