@@ -125,7 +125,7 @@ A short-hand syntax is available as well, specifically, `./performanceTest.wls o
 
 The tool will checkout other branches while testing, so don't use git/modify any files while it's running. Results depend on the other activity happening on the machine, so do not perform any CPU-intensive tasks while running tests to avoid introducing bias to the results.
 
-As an example, test an optimization done to `libSetReplace` by [@aokellermann](https://github.com/aokellermann):
+As an example, test an optimization done to *libSetReplace* by [@aokellermann](https://github.com/aokellermann):
 
 ```
 > ./performanceTest.wls db6f15c7b4ae1be98be5ced0c188859e2f9eef29 8910175fe9be3847f96a1cf3c877a3b54a64823d
@@ -238,13 +238,13 @@ The main dispatch function of *SetReplace* is the package-scope [`setSubstitutio
 
 [`setSubstitutionSystem$wl`](/Kernel/setSubstitutionSystem$wl.m) is the pure Wolfram Language implementation, which is more general (it supports arbitrary pattern rules and disconnected rules), but less efficient.
 
-[`setSubstitutionSystem$cpp`](/Kernel/setSubstitutionSystem$cpp.m) on the other hand is the LibraryLink interface to [libSetReplace](#libsetreplace), which is the C++ implementation of Wolfram models.
+[`setSubstitutionSystem$cpp`](/Kernel/setSubstitutionSystem$cpp.m) on the other hand is the LibraryLink interface to [*libSetReplace*](#libsetreplace), which is the C++ implementation of Wolfram models.
 
 If you'd like to implement a small utility useful throughout the package (but not accessible externally), put it in [utilities.m](/Kernel/utilities.m).
 
 ### libSetReplace
 
-libSetReplace is the C++ library that implements the `"LowLevel"` method of [`WolframModel`](/Kernel/WolframModel.m). It lives in [`libSetReplace`](/libSetReplace) directory, and there is also the [Xcode project](/SetReplace.xcodeproj) for it. [`SetReplace.cpp`](/libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](/libSetReplace/SetReplace.hpp) implement the interface with Wolfram Language code.
+*libSetReplace* is the C++ library that implements the `"LowLevel"` method of [`WolframModel`](/Kernel/WolframModel.m). It lives in [`libSetReplace`](/libSetReplace) directory, and there is also the [Xcode project](/SetReplace.xcodeproj) for it. [`SetReplace.cpp`](/libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](/libSetReplace/SetReplace.hpp) implement the interface with Wolfram Language code.
 
 The C++ implementation keeps an index of all possible rule matches and updates it after every replacement. The reindexing algorithm looks only at the local region of the graph close to the rewrite site. Thus time complexity is linear with the number of events and does not depend on the graph size as long as vertex degrees are small. The downside is that it has exponential complexity (both in time and memory) in the vertex degrees because an exponential number of matches might exist in that case. Currently, it also does not work for non-local rules (i.e., rule inputs that do not form a connected hypergraph) and rules that are not hypergraph rules (i.e., pattern rules that have non-trivial nesting or conditions).
 
@@ -252,7 +252,7 @@ Every time the `"LowLevel"` implementation of [`WolframModel`](/Kernel/WolframMo
 
 #### Compile C++ library with CMake
 
-The libSetReplace library can be used outside of Wolfram Language. It provides a CMake project for easy interaction with the C++ ecosystem.
+The *libSetReplace* library can be used outside of Wolfram Language. It provides a CMake project for easy interaction with the C++ ecosystem.
 To compile the core library using CMake:
 
 ```bash
@@ -267,12 +267,12 @@ Options available for CMake:
 Enable cpp testing using googletest, which is downloaded at build time.
 
 - `SET_REPLACE_WITH_MATHEMATICA`:
-Generates the target `SetReplaceMathematica` that provides an interface for using *SetReplace* in Wolfram Language.
+Generates the target `SetReplaceMathematica` that provides an interface for using *libSetReplace* in Wolfram Language.
 
 - `SET_REPLACE_ENABLE_ALLWARNINGS`:
 For developers and contributors. Useful for continuous integration. Add compile options to the targets enabling extra warnings and treating warnings as errors.
 
-For example, to build libSetReplace with tests, replace the second line in the above with
+For example, to build *libSetReplace* with tests, replace the second line in the above with
 
 ```bash
 cmake .. -DSET_REPLACE_BUILD_TESTING=ON
