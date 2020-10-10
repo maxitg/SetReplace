@@ -48,7 +48,7 @@ toPatternRules[rule : _Rule, caller_] := Module[
   rightOnlyVertices = Complement[rightVertices, leftVertices];
   With[
       {moduleVariables = rightOnlyVertices,
-      moduleExpression = rule[[2]] /. Thread[symbols -> newVertexNames]},
+      moduleExpression = Replace[rule[[2]], Thread[symbols -> newVertexNames], {0, 2}]},
     If[moduleVariables =!= {},
       newLeft :> Module[moduleVariables, moduleExpression],
       newLeft :> moduleExpression
