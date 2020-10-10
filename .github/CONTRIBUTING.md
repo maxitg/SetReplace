@@ -28,6 +28,8 @@ To report a weed, follow these steps:
 5. Click "Submit new issue".
 6. Your issue is now on the list, and a developer will look at it if/when they have a chance. But if it does not get any attention, the best you can do is to [fix it yourself](#code).
 
+Also, please understand that mistakes happen and are unavoidable. We never blame people for unintentional mistakes in this project. Instead, we improve our development process to minimize the probability of mistakes in the future.
+
 ## Feature suggestions
 
 If you have an idea to improve an existing function, add a property to `WolframModel`, or add a new function that does not currently exist, you can suggest it by creating a feature request. There are no guarantees, but someone might implement it if they like the idea. You are welcome to suggest research ideas as long as they are directly related to the models implemented in *SetReplace*.
