@@ -269,21 +269,18 @@ Enable cpp testing using googletest, which is downloaded at build time.
 - `SET_REPLACE_WITH_MATHEMATICA`:
 Generates the target `SetReplaceMathematica` that provides an interface for using *SetReplace* in Wolfram Language.
 
-- `SET_REPLACE_PROFILE`:
-Enables profiling options.
-
 - `SET_REPLACE_ENABLE_ALLWARNINGS`:
 For developers and contributors. Useful for continuous integration. Add compile options to the targets enabling extra warnings and treating warnings as errors.
 
-For example, to build libSetReplace with tests and profiling options, replace the second line in the above with
+For example, to build libSetReplace with tests, replace the second line in the above with
 
 ```bash
-cmake .. -DSET_REPLACE_BUILD_TESTING=ON -DSET_REPLACE_PROFILE=ON
+cmake .. -DSET_REPLACE_BUILD_TESTING=ON
 ```
 
 Then, after building, you can run the tests using the binaries in `libSetReplace/test/`.
 
-#### Using SetReplace in ThirdParty CMake projects
+#### Using SetReplace in third-party CMake projects
 
 If a third party project wants to use `SetReplace`, it is enough to write in their `CMakeLists.txt`:
 
