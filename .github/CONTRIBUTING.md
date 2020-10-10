@@ -167,6 +167,8 @@ git push -u origin pr/123
 
 The CI will automatically run and will be linked to the existing pull request.
 
+After you receive a review and work on the changes, please reply to the reviewer on Reviewable so that they know when to look at your changes.
+
 Last but not least, [be respectful](https://help.github.com/en/github/site-policy/github-community-guidelines), and give constructive criticism. Don't just say something is bad, say how to improve it.
 
 ### Merging
