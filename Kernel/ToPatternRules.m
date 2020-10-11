@@ -42,6 +42,8 @@ toPatternRules[rule : _Rule, caller_] := Module[
   newVertexNames =
     ToHeldExpression /@ StringTemplate["v``"] /@ Range @ Length @ symbols;
   vertexPatterns = Pattern[#, Blank[]] & /@ newVertexNames;
+  (* In Replace expressions at deeper levels are matched first, unlike ReplaceAll.
+     Compare: {ReplaceAll[##], Replace[##, {0, 2}]} &[{{1}, {{1}}}, {1 -> "v1", {1} -> "v2"}] *)
   newLeft = Replace[rule[[1]], Thread[symbols -> vertexPatterns], {0, 2}];
   {leftVertices, rightVertices} =
     Replace[{leftSymbols, rightSymbols}, Thread[symbols -> newVertexNames], {1, 2}];
