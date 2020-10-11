@@ -66,7 +66,8 @@ TEST(Set, replaceOnce) {
       {Matcher::OrderingFunction::ExpressionIDs, Matcher::OrderingDirection::Normal},
       {Matcher::OrderingFunction::RuleIndex, Matcher::OrderingDirection::Normal}};
 
-  Set set({{{{-1}}, {{-1, -1}}}}, {{1}}, Set::SystemType::Singleway, orderingSpec, Matcher::EventDeduplication::None, 0);
+  Set set(
+      {{{{-1}}, {{-1, -1}}}}, {{1}}, Set::SystemType::Singleway, orderingSpec, Matcher::EventDeduplication::None, 0);
   EXPECT_EQ(set.replaceOnce(doNotAbort), 1);
 }
 }  // namespace SetReplace
