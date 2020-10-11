@@ -154,7 +154,7 @@ $eventOrderingFunctions = <|
   "RuleIndex" -> {$ruleIndex, $forward},
   "ReverseRuleIndex" -> {$ruleIndex, $backward},
   "Random" -> Nothing, (* Random is done automatically in C++ if no more sorting is available *)
-  "Any" -> {$any, $forward}
+  "Any" -> {$any, $forward} (* OrderingDirection here doesn't do anything *)
 |>;
 
 (* This applies only to C++ due to #158, WL code uses similar order but does not apply "LeastRecentEdge" correctly. *)
