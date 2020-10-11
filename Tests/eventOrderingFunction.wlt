@@ -216,7 +216,8 @@
 
       (* When "Any" is used the match is indeterminate, so just make sure it works. *)
       VerificationTest[
-        WolframModel[{{1}} -> {{}}, Automatic, "EventOrderingFunction" -> "Any"]["FinalState"] == {{}}
+        WolframModel[{{1}} -> {{}}, Automatic, "EventOrderingFunction" -> "Any"]["FinalState"],
+        {{}}
       ]
     }
   |>

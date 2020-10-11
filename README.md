@@ -1500,7 +1500,8 @@ Possible sorting criteria are:
 * `"ReverseRuleIndex"`: similar to `"RuleIndex"`, but reversed as the name suggests.
 
 * `"Random"`: selects a single match uniformly at random. It is possible to do that efficiently because the C++ implementation of `WolframModel` (the only one that supports `"EventOrderingFunction"`) keeps track of all possible matches at any point during the evolution. `"Random"` is guaranteed to select a single match, so the remaining sorting criteria are ignored. It can also be omitted because the random event is always chosen if provided sorting criteria are insufficient. The seeding can be controlled with [`SeedRandom`](https://reference.wolfram.com/language/ref/SeedRandom.html). However, the result does depend on your platform (Mac/Linux/Windows) and the specific build (version) of *SetReplace*.
-* `"Any"`: the chosen match is undefined.
+
+* `"Any"`: the chosen match is undefined. It can select any match, leading to nondeterministic and undefined evolution order. In some cases, it has better performance than "Random".
 
 As a neat example, here is the output of all individual sorting criteria (default sorting criteria are appended to disambiguate):
 
@@ -1518,7 +1519,7 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
   "ReverseRuleOrdering", "RuleIndex", "ReverseRuleIndex", "Random", "Any"}
 ```
 
-<img src="READMEImages/AllEventOrderingFunctionPlots.png" width="827">
+<img src="READMEImages/AllEventOrderingFunctionPlots.png" width="1209">
 
 #### "EventSelectionFunction"
 
