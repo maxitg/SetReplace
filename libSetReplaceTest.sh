@@ -21,14 +21,14 @@ then
 fi
 
 exitStatus=0
-firstTest=1
+isFirstTest=1
 for testBinary in $testBinaries
 do
-  if [ $firstTest -eq 0 ]
+  if [ $isFirstTest -eq 0 ]
   then
     echo
   fi
-  firstTest=0
+  isFirstTest=0
   echo "$(basename $testBinary)..."
   if ! eval $testBinary
   then
