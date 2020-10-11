@@ -45,7 +45,8 @@ class Matcher {
     ReverseSortedExpressionIDs = 1,
     ExpressionIDs = 2,
     RuleIndex = 3,
-    Last = 4
+    Any = 4,
+    Last = 5
   };
 
   /** @brief Whether to sort in normal or reverse order.

@@ -212,7 +212,13 @@
           (SeedRandom[1655]; WolframModel[rule, init, maxGenerations, "EventOrderingFunction" -> "Random"]) =!=
           (SeedRandom[1656]; WolframModel[rule, init, maxGenerations, "EventOrderingFunction" -> "Random"])
         ]
-      }]
+      }],
+
+      (* When "Any" is used the match is indeterminate, so just make sure it works. *)
+      VerificationTest[
+        WolframModel[{{1}} -> {{}}, Automatic, "EventOrderingFunction" -> "Any"]["FinalState"],
+        {{}}
+      ]
     }
   |>
 |>

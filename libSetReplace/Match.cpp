@@ -136,6 +136,7 @@ class Matcher::Implementation {
   AtomsIndex& atomsIndex_;
   const GetAtomsVectorFunc getAtomsVector_;
   const GetExpressionsSeparationFunc getExpressionsSeparation_;
+  const OrderingSpec orderingSpec_;
 
   // Matches are arranged in buckets. Each bucket contains matches that are equivalent in terms of the ordering
   // function, however, buckets themselves are ordered according to that function.
@@ -190,6 +191,7 @@ class Matcher::Implementation {
         atomsIndex_(*atomsIndex),
         getAtomsVector_(std::move(getAtomsVector)),
         getExpressionsSeparation_(std::move(getExpressionsSeparation)),
+        orderingSpec_(orderingSpec),
         matchQueue_(MatchComparator(orderingSpec)),
         randomGenerator_(randomSeed),
         eventDeduplication_(eventDeduplication),
@@ -517,12 +519,18 @@ class Matcher::Implementation {
     }
   }
 
+  bool matchAny() { return !orderingSpec_.empty() && orderingSpec_.back().first == OrderingFunction::Any; }
+
   // This should be called every time matches are updated.
   void chooseNextMatch() {
     if (empty()) return;
     const auto& allPossibleMatches = matchQueue_.begin()->second.second;
-    auto distribution = std::uniform_int_distribution<size_t>(0, allPossibleMatches.size() - 1);
-    nextMatch_ = allPossibleMatches[distribution(randomGenerator_)];
+    if (matchAny()) {
+      nextMatch_ = allPossibleMatches.front();
+    } else {
+      auto distribution = std::uniform_int_distribution<size_t>(0, allPossibleMatches.size() - 1);
+      nextMatch_ = allPossibleMatches[distribution(randomGenerator_)];
+    }
   }
 
   // Ordering spec that is used in newMatches_ set.
