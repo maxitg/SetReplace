@@ -58,13 +58,7 @@ jobs:
 
       - run:
           name: Test
-          command: |
-            for testBinary in $(find build/libSetReplace/test -type f -executable -print)
-            do
-              echo
-              echo "$(basename $testBinary)..."
-              eval $testBinary
-            done
+          command: ./libSetReplaceTest.sh
 
 workflows:
   version: 2
