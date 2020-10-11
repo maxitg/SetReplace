@@ -389,7 +389,7 @@ following exceptions:
     * `const std::string& string;`
 * If splitting function arguments into multiple lines, each argument should go on a separate line.
 * License, authors, and file descriptions should not be put at the top of files.
-* Doxygen is used for documentation.
+* Doxygen format is used for documentation.
 * We use `.cpp` and `.hpp` extensions for source files.
 
 We use [`clang-format`](https://clang.llvm.org/docs/ClangFormat.html) for formatting and
