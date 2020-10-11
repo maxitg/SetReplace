@@ -59,7 +59,7 @@ jobs:
       - run:
           name: Test
           command: |
-            for testBinary in $(find libSetReplace/test -type f -executable -print)
+            for testBinary in $(find build/libSetReplace/test -type f -executable -print)
             do
               echo
               echo "$(basename $testBinary)..."
