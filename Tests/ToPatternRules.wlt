@@ -150,6 +150,26 @@
       VerificationTest[
         ToPatternRules[{{{1, 2}}, {1, 2}, 2} -> {{1, 2}, 1, 2, {{1, 2}}, {1, 3}}],
         {{v3_}, {v1_, v2_}, v2_} :> Module[{v4}, {{v1, v2}, v1, v2, {v3}, {v1, v4}}]
+      ],
+
+      VerificationTest[
+        ToPatternRules[{1, 2} -> {{{1, 2}}}],
+        {v1_, v2_} :> Module[{v3}, {{v3}}]
+      ],
+
+      VerificationTest[
+        ToPatternRules[{{1, 2}} -> {{{1, 2}}}],
+        {{v1_, v2_}} :> Module[{v3}, {{v3}}]
+      ],
+
+      VerificationTest[
+        ToPatternRules[{{{1, 2}}} -> {1, 2}],
+        {{v1_}} :> Module[{v2, v3}, {v2, v3}]
+      ],
+
+      VerificationTest[
+        ToPatternRules[{{{1, 2}}} -> {{1, 2}}],
+        {{v1_}} :> Module[{v2, v3}, {{v2, v3}}]
       ]
     }
   |>
