@@ -168,6 +168,7 @@ $orderingFunctionCodes = <|
   $reverseSortedExpressionIDs -> 1,
   $expressionIDs -> 2,
   $ruleIndex -> 3,
+  $any -> 4,
   $forward -> 0,
   $backward -> 1
 |>;

@@ -146,6 +146,8 @@ class Matcher::Implementation {
   // We use MatchPtr instead of Match to save memory, however, they are hashed and sorted according to their
   // dereferenced values in the corresponding classes above.
 
+  OrderingSpec orderingSpec_;
+
   // We cannot directly select a random element from an unordered_map, which is why we use a vector here.
   using Bucket = std::pair<std::unordered_map<MatchPtr, size_t, MatchHasher, MatchEquality>, std::vector<MatchPtr>>;
   std::map<MatchPtr, Bucket, MatchComparator> matchQueue_;
@@ -190,6 +192,7 @@ class Matcher::Implementation {
         atomsIndex_(*atomsIndex),
         getAtomsVector_(std::move(getAtomsVector)),
         getExpressionsSeparation_(std::move(getExpressionsSeparation)),
+        orderingSpec_(orderingSpec),
         matchQueue_(MatchComparator(orderingSpec)),
         randomGenerator_(randomSeed),
         eventDeduplication_(eventDeduplication),
@@ -517,12 +520,18 @@ class Matcher::Implementation {
     }
   }
 
+  bool matchAny() { return !orderingSpec_.empty() && orderingSpec_.back().first == OrderingFunction::Any; }
+
   // This should be called every time matches are updated.
   void chooseNextMatch() {
     if (empty()) return;
     const auto& allPossibleMatches = matchQueue_.begin()->second.second;
-    auto distribution = std::uniform_int_distribution<size_t>(0, allPossibleMatches.size() - 1);
-    nextMatch_ = allPossibleMatches[distribution(randomGenerator_)];
+    if (allPossibleMatches.size() == 1 || matchAny()) {
+      nextMatch_ = allPossibleMatches.front();
+    } else {
+      auto distribution = std::uniform_int_distribution<size_t>(0, allPossibleMatches.size() - 1);
+      nextMatch_ = allPossibleMatches[distribution(randomGenerator_)];
+    }
   }
 
   // Ordering spec that is used in newMatches_ set.
