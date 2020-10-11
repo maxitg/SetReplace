@@ -526,7 +526,7 @@ class Matcher::Implementation {
   void chooseNextMatch() {
     if (empty()) return;
     const auto& allPossibleMatches = matchQueue_.begin()->second.second;
-    if (allPossibleMatches.size() == 1 || matchAny()) {
+    if (matchAny()) {
       nextMatch_ = allPossibleMatches.front();
     } else {
       auto distribution = std::uniform_int_distribution<size_t>(0, allPossibleMatches.size() - 1);
