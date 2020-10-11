@@ -68,6 +68,6 @@ TEST(Set, replaceOnce) {
 
   Set set(
       {{{{-1}}, {{-1, -1}}}}, {{1}}, Set::SystemType::Singleway, orderingSpec, Matcher::EventDeduplication::None, 0);
-  EXPECT_EQ(set.replaceOnce(doNotAbort), 1);
+  EXPECT_EQ(set.replaceOnce(doNotAbort), 2);
 }
 }  // namespace SetReplace
