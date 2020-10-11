@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  wolfram-language:
     docker:
       - image: maxitg/set-replace:ci
         auth:
@@ -9,10 +9,6 @@ jobs:
 
     steps:
       - checkout
-
-      - run:
-          name: Lint
-          command: ./lint.sh
 
       - run:
           name: Build
@@ -27,5 +23,52 @@ jobs:
           command: ./install.wls
 
       - run:
+          name: Build libSetReplace with LibraryLink
+          command: |
+            mkdir build
+            cd build
+            cmake .. -DSET_REPLACE_BUILD_TESTING=OFF \
+                     -DSET_REPLACE_WITH_MATHEMATICA=ON \
+                     -DSET_REPLACE_ENABLE_ALLWARNINGS=ON
+            cmake --build .
+
+      - run:
           name: Test
           command: ./.circleci/test.sh
+  cpp:
+    docker:
+      - image: maxitg/set-replace-cpp-ci
+
+    steps:
+      - checkout
+
+      - run:
+          name: Lint
+          command: ./lint.sh
+
+      - run:
+          name: Build
+          command: |
+            mkdir build
+            cd build
+            cmake .. -DSET_REPLACE_BUILD_TESTING=ON \
+                     -DSET_REPLACE_WITH_MATHEMATICA=OFF \
+                     -DSET_REPLACE_ENABLE_ALLWARNINGS=ON
+            cmake --build .
+
+      - run:
+          name: Test
+          command: |
+            for testBinary in $(find libSetReplace/test -type f -executable -print)
+            do
+              echo
+              echo "$(basename $testBinary)..."
+              eval $testBinary
+            done
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - wolfram-language
+      - cpp
