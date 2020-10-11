@@ -45,8 +45,8 @@ It is helpful to add [labels](https://github.com/maxitg/SetReplace/labels) to yo
 First, assign one of the *type* labels to your pull request:
 * `feature`: new functionality, or change in existing functionality.
 * `weed`: fixes something that was not working.
-* `test`: adds new tests for the functionality that already exists.
-* `documentation`: adds or changes documentation for the functionality that already exists.
+* `test`: adds new tests for existing functionality.
+* `documentation`: adds or changes documentation for existing functionality.
 * `optimization`: does not change functionality but makes code faster.
 * `convenience`: makes the syntax more convenient without significantly changing functionality.
 * `design`: changes the visual design (styles, colors, icons, etc.) without affecting functionality.
@@ -57,6 +57,7 @@ Then, assign one of the *component* labels:
 * `evolution`: modifies code for running the evolution of the model.
 * `analysis`: adds or changes evolution analysis tools, e.g., `WolframModelEvolutionObject` properties.
 * `visualization`: has to do with visualization code, such as `WolframModelPlot`.
+* `physics`: explores a connection with known physics. Would typically only be used with some `research` notes.
 * `utilities`: implements a tool that does not fit in the above categories (e.g., [`Subhypergraph`](https://github.com/maxitg/SetReplace/pull/431)).
 * `infrastructure`: implements changes to the development process, e.g., build scripts, CI, testing utilities, etc.
 
