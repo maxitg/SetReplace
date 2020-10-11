@@ -6,7 +6,7 @@
 
 ## Set Substitution Systems
 
-**SetReplace** is a [Wolfram Language](https://www.wolfram.com/language/) package for manipulating set substitution systems. To understand what a set substitution system does consider an unordered set of elements:
+*SetReplace* is a [Wolfram Language](https://www.wolfram.com/language/) package for manipulating set substitution systems. To understand what a set substitution system does consider an unordered set of elements:
 
 ```wl
 {1, 2, 5, 3, 6}
@@ -18,7 +18,7 @@ We can set up an operation on this set which would take any of the two elements 
 {a_, b_} :> {a + b}
 ```
 
-In **SetReplace**, this can be expressed as the following (the new element `1 + 2 -> 3` is put at the end)
+In *SetReplace*, this can be expressed as the following (the new element `1 + 2 -> 3` is put at the end)
 
 ```wl
 In[] := SetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> {a + b}]
@@ -96,7 +96,7 @@ Exploring the hypergraph models of this variety is the primary purpose of this p
 
 ## Dependencies
 
-You only need three things to use **SetReplace**:
+You only need three things to use *SetReplace*:
 
 * Windows, macOS 10.12+, or Linux.
 * [Wolfram Language 12.1+](https://www.wolfram.com/language/) including [WolframScript](https://www.wolfram.com/wolframscript/). A free version is available as [Wolfram Engine](https://www.wolfram.com/engine/).
@@ -1503,7 +1503,7 @@ Possible sorting criteria are:
 
 * `"ReverseRuleIndex"`: similar to `"RuleIndex"`, but reversed as the name suggests.
 
-* `"Random"`: selects a single match uniformly at random. It is possible to do that efficiently because the C++ implementation of `WolframModel` (the only one that supports `"EventOrderingFunction"`) keeps track of all possible matches at any point during the evolution. `"Random"` is guaranteed to select a single match, so the remaining sorting criteria are ignored. It can also be omitted because the random event is always chosen if provided sorting criteria are insufficient. The seeding can be controlled with [`SeedRandom`](https://reference.wolfram.com/language/ref/SeedRandom.html). However, the result does depend on your platform (Mac/Linux/Windows) and the specific build (version) of **SetReplace**.
+* `"Random"`: selects a single match uniformly at random. It is possible to do that efficiently because the C++ implementation of `WolframModel` (the only one that supports `"EventOrderingFunction"`) keeps track of all possible matches at any point during the evolution. `"Random"` is guaranteed to select a single match, so the remaining sorting criteria are ignored. It can also be omitted because the random event is always chosen if provided sorting criteria are insufficient. The seeding can be controlled with [`SeedRandom`](https://reference.wolfram.com/language/ref/SeedRandom.html). However, the result does depend on your platform (Mac/Linux/Windows) and the specific build (version) of *SetReplace*.
 
 As a neat example, here is the output of all individual sorting criteria (default sorting criteria are appended to disambiguate):
 
@@ -2017,7 +2017,22 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
 
 ## Utility Functions
 
-[WolframModelRuleValue](#wolframmodelrulevalue) | [GeneralizedGridGraph](#generalizedgridgraph) | [HypergraphAutomorphismGroup](#hypergraphautomorphismgroup) | [HypergraphUnifications](#hypergraphunifications) | [WolframPhysicsProjectStyleData](#wolframphysicsprojectstyledata) | [Build Data](#build-data)
+[Subhypergraph](#subhypergraph) | [WolframModelRuleValue](#wolframmodelrulevalue) | [GeneralizedGridGraph](#generalizedgridgraph) | [HypergraphAutomorphismGroup](#hypergraphautomorphismgroup) | [HypergraphUnifications](#hypergraphunifications) | [WolframPhysicsProjectStyleData](#wolframphysicsprojectstyledata) | [Build Data](#build-data)
+
+### Subhypergraph
+
+**`Subhypergraph`** is a small utility function that selects hyperedges that only contain vertices from the requested list.
+
+```wl
+In[]:= Subhypergraph[{{1, 1, 1}, {1, 2}, {2, 3, 3}, {2, 3, 4}}, {2, 3, 4}]
+Out[]= {{2, 3, 3}, {2, 3, 4}}
+```
+**`WeakSubhypergraph`** is the weak version of the previous function, where hyperedges are selected if they contain any vertex from the requested list.
+
+```wl
+In[]:= WeakSubhypergraph[{{1, 1}, {2, 3}, {3, 4, 4}}, {1, 3}]
+Out[]= {{1, 1}, {2, 3}, {3, 4, 4}}
+```
 
 ### WolframModelRuleValue
 
@@ -2236,7 +2251,7 @@ In[] := HypergraphUnificationsPlot[{{1, 2, 3}, {4, 5, 6}, {1, 4}},
 
 ### WolframPhysicsProjectStyleData
 
-**`WolframPhysicsProjectStyleData`** allows one to lookup styles used in various **SetReplace** functions and properties such as [`WolframModelPlot`](#wolframmodelplot) and [`"CausalGraph"`](#causal-graphs).
+**`WolframPhysicsProjectStyleData`** allows one to lookup styles used in various *SetReplace* functions and properties such as [`WolframModelPlot`](#wolframmodelplot) and [`"CausalGraph"`](#causal-graphs).
 
 For example, here is the default style used to draw polygons in [`WolframModelPlot`](#wolframmodelplot):
 
