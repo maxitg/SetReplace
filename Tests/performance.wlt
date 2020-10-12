@@ -30,7 +30,7 @@
               rule,
               1000]],
             List,
-            TimeConstraint -> 1,
+            TimeConstraint -> 10,
             MemoryConstraint -> 5*^6
           ],
   
