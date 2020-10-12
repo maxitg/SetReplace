@@ -257,12 +257,12 @@ $layeredCausalGraphOptions =
   Join[FilterRules[$causalGraphOptions, Except[$newLayeredCausalGraphOptions]], $newLayeredCausalGraphOptions];
 
 $newExpressionsEventsGraphOptions = {VertexLabels -> None};
-$expressionsEventrsGraphOptions = Join[
+$expressionsEventsGraphOptions = Join[
   FilterRules[$layeredCausalGraphOptions, Except[$newExpressionsEventsGraphOptions]],
   $newExpressionsEventsGraphOptions];
 
 $propertyOptions = <|
-  "ExpressionsEventsGraph" -> $expressionsEventrsGraphOptions,
+  "ExpressionsEventsGraph" -> $expressionsEventsGraphOptions,
   "CausalGraph" -> $causalGraphOptions,
   "LayeredCausalGraph" -> $layeredCausalGraphOptions,
   "StatesPlotsList" -> Options[WolframModelPlot],
