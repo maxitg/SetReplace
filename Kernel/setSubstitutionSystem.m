@@ -24,6 +24,7 @@ PackageScope["$sortedExpressionIDs"]
 PackageScope["$reverseSortedExpressionIDs"]
 PackageScope["$expressionIDs"]
 PackageScope["$ruleIndex"]
+PackageScope["$any"]
 PackageScope["$forward"]
 PackageScope["$backward"]
 
@@ -152,7 +153,8 @@ $eventOrderingFunctions = <|
   "ReverseRuleOrdering" -> {$expressionIDs, $backward},
   "RuleIndex" -> {$ruleIndex, $forward},
   "ReverseRuleIndex" -> {$ruleIndex, $backward},
-  "Random" -> Nothing (* Random is done automatically in C++ if no more sorting is available *)
+  "Random" -> Nothing, (* Random is done automatically in C++ if no more sorting is available *)
+  "Any" -> {$any, $forward} (* OrderingDirection here doesn't do anything *)
 |>;
 
 (* This applies only to C++ due to #158, WL code uses similar order but does not apply "LeastRecentEdge" correctly. *)
@@ -165,6 +167,10 @@ parseEventOrderingFunction[caller_, s_String] := parseEventOrderingFunction[call
 parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
     !FreeQ[func, "Random"] :=
   parseEventOrderingFunction[caller, func[[1 ;; FirstPosition[func, "Random"][[1]] - 1]]]
+
+parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+    !FreeQ[func, "Any"] && FirstPosition[func, "Any"][[1]] != Length[func] :=
+    parseEventOrderingFunction[caller, func[[1 ;; FirstPosition[func, "Any"][[1]]]]]
 
 parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
     FreeQ[func, "Random"] :=
