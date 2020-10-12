@@ -14,7 +14,13 @@ $successQ = True;
 (* Get test files *)
 
 $testFiles = If[Length @ $ScriptCommandLine >= 2,
-  FileNameJoin[{AbsoluteFileName["."], "Tests", # <> ".wlt"}] & /@ $ScriptCommandLine[[2 ;; ]],
+  Replace[$ScriptCommandLine[[2 ;; ]], {
+    args : {"-e", ___} :> Select[
+      FileNames[FileNameJoin[{AbsoluteFileName["."], "Tests", "*.wlt"}]],
+      !MatchQ[FileBaseName @ #, Alternatives @@ Rest[args]] &
+    ],
+    args_List :> (FileNameJoin[{AbsoluteFileName["."], "Tests", # <> ".wlt"}] & /@ args)}
+  ],
   FileNames[FileNameJoin[{AbsoluteFileName["."], "Tests", "*.wlt"}]]
 ];
 
