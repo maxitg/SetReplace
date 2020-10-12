@@ -1,6 +1,7 @@
 <|
   "$SetReplaceGitSHA" -> <|
     "tests" -> {
+      (* these two tests will fail if the build is not clean, i.e., there will be an "*" at the end of the output *)
       VerificationTest[
         StringLength @ $SetReplaceGitSHA,
         40
