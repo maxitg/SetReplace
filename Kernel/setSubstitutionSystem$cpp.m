@@ -77,8 +77,8 @@ $cpp$terminationReason = If[$libraryFile =!= $Failed,
    sublists. *)
 (* This format is used to pass both rules and set data into libSetReplace over LibraryLink *)
 
-encodeNestedLists[list_List] :=
-    {list} //. {{l___, List[args___], r___} :> {l, Length[{args}], args, r}}
+encodeNestedLists[list_List] := Flatten @ {Length @ list, encodeNestedLists /@ list}
+encodeNestedLists[arg_] := arg
 
 (* This is the reverse, used to decode set data (a list of expressions) from libSetReplace *)
 
