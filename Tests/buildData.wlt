@@ -1,7 +1,9 @@
 <|
   "$SetReplaceGitSHA" -> <|
     "tests" -> {
-      (* these two tests will fail if the build is not clean, i.e., there will be an "*" at the end of the output *)
+      (* These two tests will fail if the paclet was built from a dirty repo, i.e. there were uncommitted changes.
+         The output will have an "*" at the end in this case. *)
+
       VerificationTest[
         StringLength @ $SetReplaceGitSHA,
         40
