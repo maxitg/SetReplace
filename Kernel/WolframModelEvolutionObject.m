@@ -727,7 +727,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
           v : {"Event", idx_} :> v ->
             If[Length[rules] > 1, placementFunction["Rule " <> ToString[eventRuleIDs[[idx]]]], None],
           v : {"Expression", idx_} :> v -> placementFunction[ToString[allExpressions[[idx]]]]}, {1}],
-        "Index" -> Placed["Name", Automatic, Last]}]
+        "Index" -> Placed["Name", Automatic, Last]}],
     GraphLayout -> Replace[
       OptionValue[allOptionValues, GraphLayout],
       Automatic :> {
