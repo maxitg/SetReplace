@@ -720,13 +720,14 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     EdgeStyle -> Replace[
       OptionValue[allOptionValues, EdgeStyle], Automatic :> style[$lightTheme][$causalGraphEdgeStyle]],
     VertexLabels -> Replace[
-      OptionValue[allOptionValues, VertexLabels],
-      automaticVertexLabelsPattern :> Replace[graphVertices, {
-        v : {"Event", 0} :> v -> placementFunction["Initial event"],
-        v : {"Event", Infinity} :> v -> placementFunction["Final event"],
-        v : {"Event", idx_} :> v ->
-          If[Length[rules] > 1, placementFunction["Rule " <> ToString[eventRuleIDs[[idx]]]], None],
-        v : {"Expression", idx_} :> v -> placementFunction[ToString[allExpressions[[idx]]]]}, {1}]],
+      OptionValue[allOptionValues, VertexLabels], {
+        automaticVertexLabelsPattern :> Replace[graphVertices, {
+          v : {"Event", 0} :> v -> placementFunction["Initial event"],
+          v : {"Event", Infinity} :> v -> placementFunction["Final event"],
+          v : {"Event", idx_} :> v ->
+            If[Length[rules] > 1, placementFunction["Rule " <> ToString[eventRuleIDs[[idx]]]], None],
+          v : {"Expression", idx_} :> v -> placementFunction[ToString[allExpressions[[idx]]]]}, {1}],
+        "Index" -> Placed["Name", Automatic, Last]}]
     GraphLayout -> Replace[
       OptionValue[allOptionValues, GraphLayout],
       Automatic :> {
