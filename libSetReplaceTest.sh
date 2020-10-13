@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [ $(uname) = "Darwin" ]
 then
   testBinaries=$(find build/libSetReplace/test -type f -perm +111 -print)
