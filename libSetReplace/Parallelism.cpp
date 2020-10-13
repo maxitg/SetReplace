@@ -8,9 +8,10 @@
 namespace SetReplace::Parallelism {
 namespace {
 struct ParallelismBase {
-  explicit ParallelismBase(unsigned numHardwareThreads) : numHardwareThreads_(numHardwareThreads), threadsInUse_(0) {}
+  explicit ParallelismBase(unsigned numHardwareThreads) noexcept
+      : numHardwareThreads_(numHardwareThreads), threadsInUse_(0) {}
 
-  const unsigned numHardwareThreads_;
+  unsigned numHardwareThreads_;
   unsigned threadsInUse_;
   std::mutex reservationMutex_;
 };
@@ -19,9 +20,9 @@ template <HardwareType>
 class Parallelism;
 
 template <>
-class Parallelism<HardwareType::STDCPU> : ParallelismBase {
+class Parallelism<HardwareType::StdCpu> : private ParallelismBase {
  public:
-  Parallelism() : ParallelismBase(std::thread::hardware_concurrency()) {}
+  Parallelism() noexcept : ParallelismBase(std::thread::hardware_concurrency()) {}
 
   [[nodiscard]] bool isAvailable() const { return numHardwareThreads_ >= 2; }
 
@@ -29,7 +30,8 @@ class Parallelism<HardwareType::STDCPU> : ParallelismBase {
 
   [[nodiscard]] int64_t acquireThreads(const int64_t& requestedNumThreads) {
     std::lock_guard lock(reservationMutex_);
-    const auto numThreadsToReserve = std::min(requestedNumThreads, numThreadsAvailable());
+    auto numThreadsToReserve = std::min(requestedNumThreads, numThreadsAvailable());
+    if (numThreadsToReserve <= 1) numThreadsToReserve = 0;
     threadsInUse_ += numThreadsToReserve;
     return numThreadsToReserve;
   }
@@ -38,24 +40,26 @@ class Parallelism<HardwareType::STDCPU> : ParallelismBase {
     std::lock_guard lock(reservationMutex_);
     threadsInUse_ -= numThreadsToReturn;
   }
+
+  void overrideNumHardwareThreads(const int64_t& numThreads) { numHardwareThreads_ = numThreads; }
 };
 
-Parallelism<HardwareType::STDCPU> cpuParallelism;
+Parallelism<HardwareType::StdCpu> cpuParallelism;
 
 /** @brief Reserves at most requestedNumThreads of the given hardware type and returns the number of threads
  * successfully reserved.
  */
 int64_t acquireThreads(const HardwareType& type, const int64_t& requestedNumThreads) {
-  if (requestedNumThreads <= 0) return 0;
-  if (type == HardwareType::STDCPU) return cpuParallelism.acquireThreads(requestedNumThreads);
+  if (requestedNumThreads <= 1) return 0;
+  if (type == HardwareType::StdCpu) return cpuParallelism.acquireThreads(requestedNumThreads);
   throw std::runtime_error("Invalid Parallelism::Type");
 }
 
 /** @brief Releases ownership of numThreadsToReturn of the given hardware type.
  */
 void releaseThreads(const HardwareType& type, const int64_t& numThreadsToReturn) {
-  if (numThreadsToReturn <= 0) return;
-  if (type == HardwareType::STDCPU) return cpuParallelism.releaseThreads(numThreadsToReturn);
+  if (numThreadsToReturn <= 1) return;
+  if (type == HardwareType::StdCpu) return cpuParallelism.releaseThreads(numThreadsToReturn);
   throw std::runtime_error("Invalid Parallelism::Type");
 }
 }  // namespace
@@ -80,7 +84,14 @@ ThreadAcquisitionToken::ThreadAcquisitionToken(const HardwareType& type, const i
 int64_t ThreadAcquisitionToken::numThreads() const noexcept { return implementation_->numThreads(); }
 
 bool isAvailable(const HardwareType& type) {
-  if (type == HardwareType::STDCPU) return cpuParallelism.isAvailable();
+  if (type == HardwareType::StdCpu) return cpuParallelism.isAvailable();
   throw std::runtime_error("Invalid Parallelism::Type");
 }
+
+namespace Testing {
+void overrideNumHardwareThreads(const HardwareType& type, const int64_t& numThreads) {
+  if (type == HardwareType::StdCpu) cpuParallelism.overrideNumHardwareThreads(numThreads);
+  else throw std::runtime_error("Invalid Parallelism::Type");
+}
+}  // namespace Test
 }  // namespace SetReplace::Parallelism

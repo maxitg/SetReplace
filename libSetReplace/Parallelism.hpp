@@ -10,7 +10,7 @@ namespace SetReplace::Parallelism {
 enum class HardwareType {
   /** @brief The main CPU (accessible through <thread> standard header).
    */
-  STDCPU
+  StdCpu
 };
 
 /** @brief RAII thread acquisition manager.
@@ -30,15 +30,21 @@ class ThreadAcquisitionToken {
   std::shared_ptr<Implementation> implementation_;
 };
 
+using ThreadAcquisitionTokenPtr = std::shared_ptr<const ThreadAcquisitionToken>;
+
 /** @brief Returns a RAII token for reserving the given number of threads for the given hardware type.
  */
-inline std::shared_ptr<ThreadAcquisitionToken> acquire(const HardwareType& type, const int64_t& requestedNumThreads) {
-  return std::make_shared<ThreadAcquisitionToken>(type, requestedNumThreads);
+inline ThreadAcquisitionTokenPtr acquire(const HardwareType& type, const int64_t& requestedNumThreads) {
+  return std::make_shared<ThreadAcquisitionTokenPtr::element_type>(type, requestedNumThreads);
 }
 
 /** @brief Returns whether the hardware type can be parallelized.
  */
 bool isAvailable(const HardwareType& type);
+
+namespace Testing {
+void overrideNumHardwareThreads(const HardwareType& type, const int64_t& numThreads);
+}
 }  // namespace SetReplace::Parallelism
 
 #endif  // LIBSETREPLACE_PARALLELISM_HPP_
