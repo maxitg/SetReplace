@@ -15,11 +15,11 @@ struct ParallelismBase {
   std::mutex reservationMutex_;
 };
 
-template <Type>
+template <HardwareType>
 class Parallelism;
 
 template <>
-class Parallelism<Type::CPU> : ParallelismBase {
+class Parallelism<HardwareType::STDCPU> : ParallelismBase {
  public:
   Parallelism() : ParallelismBase(std::thread::hardware_concurrency()) {}
 
@@ -27,34 +27,34 @@ class Parallelism<Type::CPU> : ParallelismBase {
 
   [[nodiscard]] int64_t numThreadsAvailable() const { return isAvailable() ? numHardwareThreads_ - threadsInUse_ : 0; }
 
-  [[nodiscard]] int64_t reserveThreads(const int64_t& requestedNumThreads) {
+  [[nodiscard]] int64_t acquireThreads(const int64_t& requestedNumThreads) {
     std::lock_guard lock(reservationMutex_);
     const auto numThreadsToReserve = std::min(requestedNumThreads, numThreadsAvailable());
     threadsInUse_ += numThreadsToReserve;
     return numThreadsToReserve;
   }
 
-  void returnThreads(const int64_t& numThreadsToReturn) {
+  void releaseThreads(const int64_t& numThreadsToReturn) {
     std::lock_guard lock(reservationMutex_);
     threadsInUse_ -= numThreadsToReturn;
   }
 };
 
-Parallelism<Type::CPU> cpuParallelism;
+Parallelism<HardwareType::STDCPU> cpuParallelism;
 }  // namespace
 
-bool isAvailable(const Type& type) {
-  if (type == Type::CPU) return cpuParallelism.isAvailable();
+bool isAvailable(const HardwareType& type) {
+  if (type == HardwareType::STDCPU) return cpuParallelism.isAvailable();
   throw std::runtime_error("Invalid Parallelism::Type");
 }
 
-int64_t reserveThreads(const Type& type, const int64_t& requestedNumThreads) {
-  if (type == Type::CPU) return cpuParallelism.reserveThreads(requestedNumThreads);
+int64_t acquireThreads(const HardwareType& type, const int64_t& requestedNumThreads) {
+  if (type == HardwareType::STDCPU) return cpuParallelism.acquireThreads(requestedNumThreads);
   throw std::runtime_error("Invalid Parallelism::Type");
 }
 
-void returnThreads(const Type& type, const int64_t& numThreadsToReturn) {
-  if (type == Type::CPU) return cpuParallelism.returnThreads(numThreadsToReturn);
+void releaseThreads(const HardwareType& type, const int64_t& numThreadsToReturn) {
+  if (type == HardwareType::STDCPU) return cpuParallelism.releaseThreads(numThreadsToReturn);
   throw std::runtime_error("Invalid Parallelism::Type");
 }
 }  // namespace SetReplace::Parallelism

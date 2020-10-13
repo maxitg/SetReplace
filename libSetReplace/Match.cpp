@@ -217,7 +217,7 @@ class Matcher::Implementation {
 
     // Only create threads if there is more than one rule
     const auto numThreadsToUse =
-        rules_.size() > 1 ? Parallelism::reserveThreads(Parallelism::Type::CPU, rules_.size()) : 0;
+        rules_.size() > 1 ? Parallelism::acquireThreads(Parallelism::HardwareType::STDCPU, rules_.size()) : 0;
 
     auto addMatchesForRuleRange = [=](uint64_t start) {
       for (uint64_t i = start; i < static_cast<uint64_t>(rules_.size()); i += numThreadsToUse) {
@@ -234,7 +234,7 @@ class Matcher::Implementation {
       for (auto& thread : threads) {
         thread.join();
       }
-      Parallelism::returnThreads(Parallelism::Type::CPU, numThreadsToUse);
+      Parallelism::releaseThreads(Parallelism::HardwareType::STDCPU, numThreadsToUse);
     } else {
       // Single-threaded path
       for (size_t i = 0; i < rules_.size(); ++i) {
