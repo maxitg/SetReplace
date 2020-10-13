@@ -215,33 +215,33 @@ class Matcher::Implementation {
       return getCurrentError() != None || abortRequested();
     };
 
-    // Only create threads if there is more than one rule
-    const uint64_t numThreadsToUse =
-        rules_.size() > 1 ? Parallelism::acquireThreads(Parallelism::HardwareType::STDCPU, rules_.size()) : 0;
+    {
+      // Only create threads if there is more than one rule
+      const auto token = Parallelism::acquire(Parallelism::HardwareType::STDCPU, rules_.size());
+      const uint64_t numThreadsToUse = rules_.size() > 1 ? token->numThreads() : 0;
 
-    auto addMatchesForRuleRange = [=](uint64_t start) {
-      for (uint64_t i = start; i < static_cast<uint64_t>(rules_.size()); i += numThreadsToUse) {
-        addMatchesForRule(expressionIDs, i, shouldAbort);
-      }
-    };
+      auto addMatchesForRuleRange = [=](uint64_t start) {
+        for (uint64_t i = start; i < static_cast<uint64_t>(rules_.size()); i += numThreadsToUse) {
+          addMatchesForRule(expressionIDs, i, shouldAbort);
+        }
+      };
 
-    if (numThreadsToUse > 0) {
-      // Multi-threaded path
-      std::vector<std::thread> threads(numThreadsToUse);
-      for (uint64_t i = 0; i < numThreadsToUse; ++i) {
-        threads[i] = std::thread(addMatchesForRuleRange, i);
-      }
-      for (auto& thread : threads) {
-        thread.join();
-      }
-      Parallelism::releaseThreads(Parallelism::HardwareType::STDCPU, numThreadsToUse);
-    } else {
-      // Single-threaded path
-      for (size_t i = 0; i < rules_.size(); ++i) {
-        addMatchesForRule(expressionIDs, i, shouldAbort);
+      if (numThreadsToUse > 0) {
+        // Multi-threaded path
+        std::vector<std::thread> threads(numThreadsToUse);
+        for (uint64_t i = 0; i < numThreadsToUse; ++i) {
+          threads[i] = std::thread(addMatchesForRuleRange, i);
+        }
+        for (auto& thread : threads) {
+          thread.join();
+        }
+      } else {
+        // Single-threaded path
+        for (size_t i = 0; i < rules_.size(); ++i) {
+          addMatchesForRule(expressionIDs, i, shouldAbort);
+        }
       }
     }
-
     if (currentError != None) {
       // Reset currentError before throwing
       Error toThrow(currentError);

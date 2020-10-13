@@ -2,6 +2,7 @@
 #define LIBSETREPLACE_PARALLELISM_HPP_
 
 #include <cstdint>
+#include <memory>
 
 namespace SetReplace::Parallelism {
 /** @brief The type of hardware that can be parallelized.
@@ -12,18 +13,24 @@ enum class HardwareType {
   STDCPU
 };
 
+class ThreadAcquisitionToken {
+ public:
+  ThreadAcquisitionToken(const HardwareType& type, const int64_t& requestedNumThreads);
+
+  [[nodiscard]] int64_t numThreads() const noexcept;
+
+ private:
+  class Implementation;
+  std::shared_ptr<Implementation> implementation_;
+};
+
+inline std::shared_ptr<ThreadAcquisitionToken> acquire(const HardwareType& type, const int64_t& requestedNumThreads) {
+  return std::make_shared<ThreadAcquisitionToken>(type, requestedNumThreads);
+}
+
 /** @brief Returns whether the hardware type can be parallelized.
  */
 bool isAvailable(const HardwareType& type);
-
-/** @brief Reserves at most requestedNumThreads of the given hardware type and returns the number of threads
- * successfully reserved.
- */
-int64_t acquireThreads(const HardwareType& type, const int64_t& requestedNumThreads);
-
-/** @brief Releases ownership of numThreadsToReturn of the given hardware type.
- */
-void releaseThreads(const HardwareType& type, const int64_t& numThreadsToReturn);
 }  // namespace SetReplace::Parallelism
 
 #endif  // LIBSETREPLACE_PARALLELISM_HPP_
