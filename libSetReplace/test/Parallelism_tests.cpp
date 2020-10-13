@@ -10,6 +10,7 @@ namespace SetReplace::Parallelism {
 
 constexpr HardwareType cpu = HardwareType::StdCpu;
 
+// Tests whether CPU parallelism is reported as unavailable in the correct cases.
 TEST(Parallelism, CpuUnavailable) {
   for (const auto& hardwareThreads : {0, 1}) {
     Testing::overrideNumHardwareThreads(cpu, hardwareThreads);
@@ -18,6 +19,7 @@ TEST(Parallelism, CpuUnavailable) {
   }
 }
 
+// Tests whether CPU parallelism is reported as available in the correct cases, and that all threads can be acquired.
 TEST(Parallelism, CpuAvailable) {
   for (const auto& n : {2, 4, 6, 8, 12, 16, 24, 32, 64, 128}) {
     Testing::overrideNumHardwareThreads(cpu, n);
@@ -28,6 +30,7 @@ TEST(Parallelism, CpuAvailable) {
   }
 }
 
+// Tests whether basic acquire/release mechanism works correctly (numerically).
 TEST(Parallelism, CpuAcquireReleaseCorrectness) {
   for (const int& n : {2, 3, 4, 6, 8, 12, 16, 21, 24, 32, 64, 79, 128}) {
     Testing::overrideNumHardwareThreads(cpu, n);
@@ -57,6 +60,7 @@ TEST(Parallelism, CpuAcquireReleaseCorrectness) {
   }
 }
 
+// Ensures there are no race conditions in thread acquisition.
 TEST(Parallelism, CpuThreadSafety) {
   int n = 10000;
   Testing::overrideNumHardwareThreads(cpu, n);
@@ -76,7 +80,7 @@ TEST(Parallelism, CpuThreadSafety) {
 
   for (const auto& token : tokens) EXPECT_EQ(token->numThreads(), 2);
 
-  // if there is a race condition, this will will still be threads left to reserve
+  // if there is a race condition, there will still be threads left to reserve
   EXPECT_EQ(acquire(cpu, 2)->numThreads(), 0);
 }
 
