@@ -91,7 +91,8 @@ bool isAvailable(const HardwareType& type) {
 namespace Testing {
 void overrideNumHardwareThreads(const HardwareType& type, const int64_t& numThreads) {
   if (type == HardwareType::StdCpu) cpuParallelism.overrideNumHardwareThreads(numThreads);
-  else throw std::runtime_error("Invalid Parallelism::Type");
+  else
+    throw std::runtime_error("Invalid Parallelism::Type");
 }
-}  // namespace Test
+}  // namespace Testing
 }  // namespace SetReplace::Parallelism
