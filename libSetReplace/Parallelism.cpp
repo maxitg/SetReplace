@@ -1,5 +1,6 @@
 #include "Parallelism.hpp"
 
+#include <algorithm>
 #include <mutex>
 #include <stdexcept>
 #include <thread>
