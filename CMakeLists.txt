@@ -51,12 +51,14 @@ set(libSetReplace_headers
     Expression.hpp
     Match.hpp
     Set.hpp
+    Parallelism.hpp
     )
 set(libSetReplace_sources
     Event.cpp
     Expression.cpp
     Match.cpp
     Set.cpp
+    Parallelism.cpp
     )
 if(SET_REPLACE_WITH_MATHEMATICA)
   list(APPEND libSetReplace_headers SetReplace.hpp)

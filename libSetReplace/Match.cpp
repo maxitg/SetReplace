@@ -16,6 +16,8 @@
 #include <utility>
 #include <vector>
 
+#include "Parallelism.hpp"
+
 namespace SetReplace {
 class MatchComparator {
  private:
@@ -213,11 +215,9 @@ class Matcher::Implementation {
       return getCurrentError() != None || abortRequested();
     };
 
-    // Only create threads if there is more than one rule and hardware has more than one thread
-    const uint64_t numHardwareThreads = std::thread::hardware_concurrency();  // returns 0 if unknown
-    const uint64_t numThreadsToUse = rules_.size() > 1 && numHardwareThreads > 1
-                                         ? std::min(static_cast<uint64_t>(rules_.size()), numHardwareThreads)
-                                         : 0;
+    // Only create threads if there is more than one rule
+    const auto numThreadsToUse =
+        rules_.size() > 1 ? Parallelism::reserveThreads(Parallelism::Type::CPU, rules_.size()) : 0;
 
     auto addMatchesForRuleRange = [=](uint64_t start) {
       for (uint64_t i = start; i < static_cast<uint64_t>(rules_.size()); i += numThreadsToUse) {
@@ -234,6 +234,7 @@ class Matcher::Implementation {
       for (auto& thread : threads) {
         thread.join();
       }
+      Parallelism::returnThreads(Parallelism::Type::CPU, numThreadsToUse);
     } else {
       // Single-threaded path
       for (size_t i = 0; i < rules_.size(); ++i) {
