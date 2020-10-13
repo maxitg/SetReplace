@@ -2,7 +2,7 @@ version: 2
 jobs:
   wolfram-language:
     docker:
-      - image: maxitg/set-replace:ci
+      - image: maxitg/set-replace-wl-ci:12.1.1
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
