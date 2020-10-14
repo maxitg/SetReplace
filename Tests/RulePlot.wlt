@@ -89,7 +89,7 @@
       (** malformed WolframModelEvolutionObject **)
 
       testUnevaluated[
-        RulePlot[WolframModelEvolutionObject[],
+        RulePlot[WolframModelEvolutionObject[]],
         {WolframModelEvolutionObject::argx}
       ],
 
