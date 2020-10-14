@@ -24,6 +24,13 @@
 
       (** Argument checks **)
 
+      (** Leaking internal symbols when implicit "Generations" called with more than 1 argument (#160)  **)
+
+      testUnevaluated[
+        WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}][1, 2],
+        {WolframModelEvolutionObject::invalidNargs}
+      ],
+
       (* Corrupt object *)
 
       testUnevaluated[
