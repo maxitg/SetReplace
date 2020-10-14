@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["WolframModelEvolutionObject"]
 
 (* This is an object that is returned by WolframModel. It allows one to query the set at different generations and
@@ -58,8 +60,7 @@ SyntaxInformation[WolframModelEvolutionObject] = {"ArgumentsPattern" -> {___}};
 WolframModelEvolutionObject /:
     MakeBoxes[
       evo : WolframModelEvolutionObject[data_ ? evolutionDataQ],
-      format_] := Module[
-  {generationsCount, maxCompleteGeneration, generationsDisplay, eventsCount, terminationReason, rules, initialSet},
+      format_] := ModuleScope[
   generationsCount = evo["TotalGenerationsCount"];
   maxCompleteGeneration = Replace[evo["CompleteGenerationsCount"], _ ? MissingQ -> "?"];
   generationsDisplay = If[generationsCount === maxCompleteGeneration,
@@ -185,9 +186,7 @@ propertyEvaluate[_, boundary : Except[includeBoundaryEventsPattern]][evolution_,
   Throw[$Failed]
 )
 
-deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := Module[{
-    maxCompleteGeneration, eventIndicesToKeep, newEventOutputs, expressionIndicesToKeep,
-    oldToNewExpressionIndices},
+deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := ModuleScope[
   maxCompleteGeneration = data[$maxCompleteGeneration];
   eventIndicesToKeep = Position[data[$eventGenerations], _ ? (# <= maxCompleteGeneration &)][[All, 1]];
   newEventOutputs = data[$eventOutputs][[eventIndicesToKeep]];
@@ -399,8 +398,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 
 (* StateEdgeIndicesAfterEvents (not a property yet) *)
 
-stateEdgeIndicesAfterEvents[WolframModelEvolutionObject[data_], caller_, events_] := Module[{
-    createdExpressions, destroyedExpressions},
+stateEdgeIndicesAfterEvents[WolframModelEvolutionObject[data_], caller_, events_] := ModuleScope[
   createdExpressions = Catenate[data[$eventOutputs][[events + 1]]];
   destroyedExpressions = Catenate[data[$eventInputs][[events + 1]]];
   If[DuplicateFreeQ[destroyedExpressions],
@@ -477,7 +475,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
       obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
       caller_,
       "GenerationEdgeIndices",
-      g_] := Module[{positiveGeneration, eventsUpToGeneration},
+      g_] := ModuleScope[
   positiveGeneration = toPositiveParameter[
     propertyEvaluate[True, None][obj, caller, "TotalGenerationsCount"], g, caller, "Generation"];
   eventsUpToGeneration = First /@ Position[_ ? (# <= positiveGeneration &)] @ data[$eventGenerations] - 1;
@@ -537,8 +535,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
       caller_,
       property : "EventsStatesPlotsList",
-      o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]] == {})] := Module[{
-    events, stateIndices, destroyedOnlyIndices, createdOnlyIndices, destroyedAndCreatedIndices, allEdges},
+      o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]] == {})] := ModuleScope[
   events = propertyEvaluate[True, boundary][obj, caller, "AllEventsList"][[All, 2]];
   stateIndices = FoldList[
     Function[{currentState, newEvent}, Module[{alreadyDeletedExpressions},
@@ -647,8 +644,7 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
 (* Event/expression causal relations, used by both expressions-events and causal graphs *)
 (* Returns {<|event -> {output expression, ...}, ...|>, <|expression -> {destroyer event, ...}|> *)
 
-eventsExpressionsRelations[obj_, caller_, boundary_] := Module[{
-    eventIndices, events, eventsToOutputs, expressionDestroyers, expressionsToDestroyers},
+eventsExpressionsRelations[obj_, caller_, boundary_] := ModuleScope[
   eventIndices = If[MatchQ[boundary, "Initial" | All], Prepend[0], Identity] @
     If[MatchQ[boundary, All | "Final"], Append[Infinity], Identity] @
       Range[Length[obj[[1]][$eventRuleIDs]] - 1];
@@ -675,10 +671,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       caller_,
       property : "ExpressionsEventsGraph",
       o : OptionsPattern[]] /;
-        (Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) := Module[{
-    eventsToOutputs, expressionsToDestroyers, labeledEvents, labeledOutputs, labeledExpressions, labeledDestroyers,
-    graphVertices, allOptionValues, vertexLabelsOptionValue, automaticVertexLabelsPattern, rules, eventRuleIDs,
-    allExpressions, placementFunction},
+        (Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) := ModuleScope[
   {eventsToOutputs, expressionsToDestroyers} = eventsExpressionsRelations[obj, caller, boundary];
   {labeledEvents, labeledOutputs, labeledExpressions, labeledDestroyers} =
     Function[{list, label, level}, Map[{label, #} &, list, level]] @@@ {
@@ -751,8 +744,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       caller_,
       property : "CausalGraph",
       o : OptionsPattern[]] /;
-        (Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) := Module[{
-    eventsToOutputs, expressionsToDestroyers, eventsToEvents, causalEdges, allOptionValues},
+        (Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) := ModuleScope[
   {eventsToOutputs, expressionsToDestroyers} = eventsExpressionsRelations[obj, caller, boundary];
   eventsToEvents = Catenate /@ Map[expressionsToDestroyers, eventsToOutputs, {2}];
   causalEdges = Catenate[Thread /@ Normal[eventsToEvents]];
@@ -844,7 +836,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
     caller_,
-    "EdgeCreatorEventIndices"] := Module[{events, eventOutputs},
+    "EdgeCreatorEventIndices"] := ModuleScope[
   events = propertyEvaluate[True, "Initial"][obj, caller, "AllEventsList"];
   eventOutputs = events[[All, 2, 2]];
   Sort[Catenate[Thread /@ Thread[eventOutputs -> Range[Length[events]] - 1]]][[All, 2]]
@@ -855,7 +847,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
     caller_,
-    "EdgeDestroyerEventsIndices"] := Module[{events, eventInputs, edgeToDestroyerRules, resultWithInfinities},
+    "EdgeDestroyerEventsIndices"] := ModuleScope[
   events = propertyEvaluate[True, "Final"][obj, caller, "AllEventsList"];
   eventInputs = events[[All, 2, 1]];
   edgeToDestroyerRules = Sort[Catenate[Thread /@ Thread[eventInputs -> Append[Range[Length[events] - 1], Infinity]]]];
@@ -875,7 +867,7 @@ eventListToSingleEvent[caller_, {_, __}, expression_] := (
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
     caller_,
-    "EdgeDestroyerEventIndices"] := Module[{eventLists},
+    "EdgeDestroyerEventIndices"] := ModuleScope[
   eventLists = propertyEvaluate[True, "Final"][obj, caller, "EdgeDestroyerEventsIndices"];
   MapIndexed[eventListToSingleEvent[caller, #, #2[[1]]] &, eventLists]
 ]
@@ -885,18 +877,17 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
 propertyEvaluate[True, includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
-    "EdgeGenerationsList"] := Module[{},
+    "EdgeGenerationsList"] := (
   propertyEvaluate[True, "Initial"][obj, caller, "EventGenerations"][[
     propertyEvaluate[True, "Initial"][obj, caller, "EdgeCreatorEventIndices"] + 1]]
-]
+)
 
 (* ExpressionsSeparation *)
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
-    "ExpressionsSeparation", signedExpr1_, signedExpr2_] := Module[{
-      expr1, expr2, expressionsEventsGraph, causalCones, intersection, intersectionBoundary, boundaryExpressions},
+    "ExpressionsSeparation", signedExpr1_, signedExpr2_] := ModuleScope[
   {expr1, expr2} =
     toPositiveParameter[
         1, propertyEvaluate[True, None][obj, caller, "ExpressionsCountTotal"], #, caller, "Expression"] & /@
@@ -922,7 +913,7 @@ $masterOptions = {
 WolframModelEvolutionObject[
     data_ ? evolutionDataQ][
     property__ ? (Not[MatchQ[#, OptionsPattern[]]] &),
-    opts : OptionsPattern[]] := Module[{result},
+    opts : OptionsPattern[]] := ModuleScope[
   result = Catch[
     (propertyEvaluate @@
         (OptionValue[Join[{opts}, $masterOptions], #] & /@ {"IncludePartialGenerations", "IncludeBoundaryEvents"}))[
@@ -966,7 +957,7 @@ evolutionDataQ[___] := False
 WolframModelEvolutionObject::migrationInputOrdering =
   "Migrating the evolution object from version 1. The ordering of event inputs may be incorrect.";
 
-migrateEvolutionObjectData[data_, 1, 2] := Module[{eventsToInputs, eventsToOutputs, eventInputs, eventOutputs},
+migrateEvolutionObjectData[data_, 1, 2] := ModuleScope[
   Message[WolframModelEvolutionObject::migrationInputOrdering];
   {eventsToInputs, eventsToOutputs} =
     GroupBy[Thread[data[#] -> Range[Length[data[#]]]], First][[All, All, 2]] & /@ {$destroyerEvents, $creatorEvents};
