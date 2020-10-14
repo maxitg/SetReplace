@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageScope["$cppSetReplaceAvailable"]
 PackageScope["setSubstitutionSystem$cpp"]
 
@@ -82,7 +84,7 @@ encodeNestedLists[arg_] := arg
 
 (* This is the reverse, used to decode set data (a list of expressions) from libSetReplace *)
 
-decodeAtomLists[list_List] := Module[{count, atomPointers, atomRanges, atomLists},
+decodeAtomLists[list_List] := ModuleScope[
   count = list[[1]];
   atomPointers = list[[2 ;; (count + 1) + 1]];
   atomRanges = Partition[atomPointers, 2, 1];
@@ -91,10 +93,8 @@ decodeAtomLists[list_List] := Module[{count, atomPointers, atomRanges, atomLists
 
 (* Similar function for the events *)
 
-decodeEvents[list_List] := Module[{
-    count = list[[1]],
-    ruleIDs, inputPointers, outputPointers, generations,
-    inputRanges, inputLists, outputRanges, outputLists},
+decodeEvents[list_List] := ModuleScope[
+  count = list[[1]];
   {ruleIDs, inputPointers, outputPointers, generations} =
     Transpose[Partition[list[[2 ;; 4 (count + 1) + 1]], 4]];
   {inputRanges, outputRanges} = Partition[#, 2, 1] & /@ {inputPointers, outputPointers};
@@ -107,8 +107,7 @@ decodeEvents[list_List] := Module[{
 
 (* Check if we have simple anonymous rules and use C++ library in that case *)
 
-ruleAtoms[left_ :> right_] := Module[{
-    leftVertices, patterns, leftAtoms, patternSymbols, createdAtoms, rightAtoms},
+ruleAtoms[left_ :> right_] := ModuleScope[
   leftVertices = Union @ Catenate[left[[1]]];
   leftAtoms = Select[leftVertices, AtomQ];
   patterns = Complement[leftVertices, leftAtoms];
@@ -122,8 +121,7 @@ ruleAtoms[left_ :> right_] := Module[{
     Union @ Join[patternSymbols, createdAtoms]}
 ]
 
-ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := Module[{
-    newLeft, newRight},
+ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := ModuleScope[
   newLeft = Replace[
     left[[1]],
     {x_ ? AtomQ :> globalIndex[Hold[x]],
@@ -181,11 +179,7 @@ $eventDeduplicationCodes = <|
 setSubstitutionSystem$cpp[
         rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_, eventSelectionFunction_,
         eventDeduplication_] /;
-      $cppSetReplaceAvailable := Module[{
-    canonicalRules,
-    setAtoms, atomsInRules, globalAtoms, globalIndex,
-    mappedSet, localIndices, mappedRules, setPtr, numericAtomLists, events, maxCompleteGeneration, terminationReason,
-    resultAtoms, inversePartialGlobalMap, inverseGlobalMap},
+      $cppSetReplaceAvailable := ModuleScope[
   canonicalRules = toCanonicalRules[rules];
   setAtoms = Hold /@ Union[Catenate[set]];
   atomsInRules = ruleAtoms /@ canonicalRules;
