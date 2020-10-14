@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["WolframModelRuleValue"]
 PackageExport["$WolframModelRuleProperties"]
 
@@ -23,7 +25,8 @@ With[{properties = $WolframModelRuleProperties},
 
 (* Implementation *)
 
-WolframModelRuleValue[args___] := Module[{result = Catch[wolframModelRuleValue[args]]},
+WolframModelRuleValue[args___] := ModuleScope[
+  result = Catch[wolframModelRuleValue[args]];
   result /; result =!= $Failed
 ]
 
