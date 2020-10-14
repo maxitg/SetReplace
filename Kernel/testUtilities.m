@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageScope["testUnevaluated"]
 PackageScope["testSymbolLeak"]
 PackageScope["checkGraphics"]
@@ -21,7 +23,7 @@ testUnevaluated[testHead_, input_, messages_, opts___] :=
 Attributes[testSymbolLeak] = {HoldAll};
 testSymbolLeak[testHead_, expr_, opts___] :=
   testHead[
-    Module[{Global`before, Global`after},
+    ModuleScope[
       expr; (* symbols might get created at the first run due to initialization *)
       Global`before = Length[Names["*`*"]];
       expr;
@@ -34,7 +36,7 @@ testSymbolLeak[testHead_, expr_, opts___] :=
 
 (* UsingFrontEnd is necessary while running from wolframscript *)
 (* Flashes a new frontend window momentarily, but that is ok, because this function is mostly for use in the CI *)
-frontEndErrors[expr_] := UsingFrontEnd @ Module[{notebook, result},
+frontEndErrors[expr_] := UsingFrontEnd @ ModuleScope[
   notebook = CreateDocument[ExpressionCell[expr]];
   SelectionMove[notebook, All, Notebook];
   result = MathLink`CallFrontEnd[FrontEnd`GetErrorsInSelectionPacket[notebook]];

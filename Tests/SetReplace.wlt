@@ -168,7 +168,7 @@
       ],
 
       VerificationTest[
-        Module[{extraEdge},
+        ModuleScope[
            extraEdge =
              SetReplace[{{0, 1}}, {{a_, b_}} :> Module[{$0}, {{a, $0}, {$0, b}}]];
            SetReplace[extraEdge, {{a_, b_}, {b_, c_}} :> {{a, c}}]

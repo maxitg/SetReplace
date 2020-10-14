@@ -9,6 +9,8 @@ CloseKernels[];
 LaunchKernels[];
 ParallelEvaluate[<< SetReplace`];
 
+Needs["GeneralUtilities`"];
+
 $successQ = True;
 
 (* Get test files *)

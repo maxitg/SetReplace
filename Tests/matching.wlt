@@ -32,8 +32,7 @@
       );
 
       (* Here we generate random graphs and try replacing them to nothing *)
-      randomSameGraphMatchTests[edgeCount_, edgeLength_, graphCount_, method_] := Module[{
-          tests},
+      randomSameGraphMatchTests[edgeCount_, edgeLength_, graphCount_, method_] := ModuleScope[
         tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
         Map[
           With[{set1 = #[[1]], set2 = #[[2]]},
@@ -45,8 +44,7 @@
 
       (* Here we generate pairs of different graphs, and check they are not being matched *)
       randomDistinctGraphMatchTests[
-            edgeCount_, edgeLength_, graphCount_, method_] := Module[{
-          tests},
+            edgeCount_, edgeLength_, graphCount_, method_] := ModuleScope[
         tests = Select[!IsomorphicGraphQ @@ (graphFromHyperedges /@ #) &]
           @ Partition[
             Select[SimpleGraphQ @* graphFromHyperedges]
@@ -64,8 +62,7 @@
       (* Here we make initial condition degenerate, and check it still matches, i.e.,
          {{0, 0}} should still match {{0, 1}} *)
       randomDegenerateGraphMatchTests[
-            edgeCount_, edgeLength_, graphCount_, method_] := Module[{
-          tests},
+            edgeCount_, edgeLength_, graphCount_, method_] := ModuleScope[
         tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
       Map[
           With[{set1 = #[[1]], identifiedVertex1 = #[[2]], identifiedVertex2 = #[[3]], set2 = #[[4]]},
