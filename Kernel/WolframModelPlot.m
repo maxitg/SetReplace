@@ -12,8 +12,6 @@ PackageScope["hypergraphEmbedding"]
 WolframModelPlot::usage = usageString[
   "WolframModelPlot[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph."];
 
-SyntaxInformation[WolframModelPlot] = {"ArgumentsPattern" -> {_, _., OptionsPattern[]}};
-
 $plotStyleAutomatic = <|
   $vertexPoint -> style[$lightTheme][$vertexStyle],
   $edgeLine -> style[$lightTheme][$edgeLineStyle],
@@ -40,6 +38,10 @@ $newOptions = {
 $defaultGraphicsOptions = FilterRules[Options[Graphics], Except[$newOptions]];
 
 Options[WolframModelPlot] = Join[$newOptions, $defaultGraphicsOptions];
+
+SyntaxInformation[WolframModelPlot] = {
+  "ArgumentsPattern" -> {_, _., OptionsPattern[]},
+  "OptionNames" -> Options[WolframModelPlot][[All, 1]]};
 
 $edgeTypes = {"Ordered", "Cyclic"};
 $defaultEdgeType = "Ordered";
