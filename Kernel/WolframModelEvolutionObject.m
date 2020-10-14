@@ -247,6 +247,19 @@ propertyEvaluate[___][
   Throw[$Failed]
 )
 
+General::invalidNargs = "`1` is called with `2` arguments. " <>
+  "Either 1 argument is expected for implicit \"Generation\", or a property " <>
+  "name is expected as the first argument.";
+
+propertyEvaluate[___][
+    WolframModelEvolutionObject[data_ ? evolutionDataQ],
+    caller_,
+    g_Integer,
+    args__] := (
+  Message[caller::invalidNargs, HoldForm[WolframModelEvolutionObject[data][g, args]], Length @ {g, args}];
+  Throw[$Failed]
+)
+
 (* Check options *)
 
 $newCausalGraphOptions = {Background -> Automatic, VertexStyle -> Automatic, EdgeStyle -> Automatic};
