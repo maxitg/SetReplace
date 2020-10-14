@@ -118,7 +118,7 @@ differenceString[meanAround_] := With[{
   If[5 * magnitude[[2]] < Abs[magnitude[[1]]], If[magnitude[[1]] > 0, $greenColor, $redColor], $whiteColor] <>
   FirstCase[
     MakeBoxes[magnitude, StandardForm],
-    TemplateBox[{value_, error_}, "Around"] :> value <> " \[PlusMinus] " <> error <> " %"] <>
+    TemplateBox[{value_, error_}, "Around", ___] :> value <> " \[PlusMinus] " <> error <> " %"] <>
   $endColor
 ]
 

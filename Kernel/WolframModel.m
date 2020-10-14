@@ -138,7 +138,7 @@ expr : WolframModel[
       initSpec_ ? wolframModelInitSpecQ,
       stepsSpec : _ ? wolframModelStepsSpecQ : 1,
       property : _ ? wolframModelPropertyQ : "EvolutionObject",
-      o : OptionsPattern[] /; recognizedOptionsQ[expr, WolframModel, {o}]] :=
+      o : OptionsPattern[]] /; recognizedOptionsQ[expr, WolframModel, {o}] :=
   ModuleScope[
     patternRules = fromRulesSpec[rulesSpec];
     initialSet = Catch[fromInitSpec[rulesSpec, initSpec]];
