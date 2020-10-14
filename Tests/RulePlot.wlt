@@ -299,6 +299,12 @@
         RulePlot::elementwiseStyle
       ] & /@ {VertexStyle, EdgeStyle, "EdgePolygonStyle"},
 
+      (** WolframModelEvolutionObject (#230) **)
+      VerificationTest[
+        RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}]],
+        RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}]]
+      ],
+
       VerificationTest[
         FirstCase[
           checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexSize -> 0.213],

@@ -6,6 +6,7 @@ PackageExport["WolframModelEvolutionObject"]
    different steps. *)
 
 PackageScope["propertyEvaluate"]
+PackageScope["evolutionDataQ"]
 
 PackageScope["$propertiesParameterless"]
 PackageScope["$newParameterlessProperties"]
