@@ -86,6 +86,18 @@
         graphicsQ[RulePlot[WolframModel[{{{1}} -> {{2}}, {{1}} -> {{2}}}]]]
       ],
 
+      (** malformed WolframModelEvolutionObject **)
+
+      testUnevaluated[
+        RulePlot[WolframModelEvolutionObject[],
+        {WolframModelEvolutionObject::argx}
+      ],
+
+      testUnevaluated[
+        RulePlot[WolframModelEvolutionObject[<|"Version" -> 2|>]],
+        {WolframModelEvolutionObject::corrupt}
+      ],
+
       (* Options *)
 
       (** EdgeType **)
