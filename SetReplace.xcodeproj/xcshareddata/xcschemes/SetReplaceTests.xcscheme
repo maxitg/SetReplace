@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "69CAF8672257B062006F9C60"
-               BuildableName = "libSetReplace.dylib"
-               BlueprintName = "SetReplace"
+               BlueprintIdentifier = "6914D38F2532AEB500B2B197"
+               BuildableName = "SetReplaceTests"
+               BlueprintName = "SetReplaceTests"
                ReferencedContainer = "container:SetReplace.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -27,15 +27,6 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "69CAF8672257B062006F9C60"
-            BuildableName = "libSetReplace.dylib"
-            BlueprintName = "SetReplace"
-            ReferencedContainer = "container:SetReplace.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
       <Testables>
       </Testables>
    </TestAction>
@@ -53,18 +44,12 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "69CAF8672257B062006F9C60"
-            BuildableName = "libSetReplace.dylib"
-            BlueprintName = "SetReplace"
+            BlueprintIdentifier = "6914D38F2532AEB500B2B197"
+            BuildableName = "SetReplaceTests"
+            BlueprintName = "SetReplaceTests"
             ReferencedContainer = "container:SetReplace.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <CommandLineArguments>
-         <CommandLineArgument
-            argument = "input.txt 1 output.txt"
-            isEnabled = "YES">
-         </CommandLineArgument>
-      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -76,9 +61,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "69CAF8672257B062006F9C60"
-            BuildableName = "libSetReplace.dylib"
-            BlueprintName = "SetReplace"
+            BlueprintIdentifier = "6914D38F2532AEB500B2B197"
+            BuildableName = "SetReplaceTests"
+            BlueprintName = "SetReplaceTests"
             ReferencedContainer = "container:SetReplace.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
