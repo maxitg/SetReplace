@@ -86,7 +86,9 @@ class Set::Implementation {
     const auto explicitRuleOutputs = matcher_.matchOutputAtomsVectors(match);
 
     // only makes sense to have final state step limits for a singleway system.
-    if (!isMultiway()) {
+    if (!isMultiway() &&
+        (stepSpec_.maxFinalAtomDegree != stepLimitDisabled || stepSpec_.maxFinalAtoms != stepLimitDisabled ||
+         stepSpec_.maxFinalExpressions != stepLimitDisabled)) {
       for (const auto function : {&Implementation::willExceedAtomLimits, &Implementation::willExceedExpressionsLimit}) {
         const auto willExceedAtomLimitsStatus = (this->*function)(explicitRuleInputs, explicitRuleOutputs);
         if (willExceedAtomLimitsStatus != TerminationReason::NotTerminated) {
