@@ -52,15 +52,14 @@ Parallelism<HardwareType::StdCpu> cpuParallelism;
 int64_t acquireThreads(const HardwareType& type, const int64_t& requestedNumThreads) {
   if (requestedNumThreads <= 1) return 0;
   if (type == HardwareType::StdCpu) return cpuParallelism.acquireThreads(requestedNumThreads);
-  throw std::runtime_error("Invalid Parallelism::Type");
+  throw std::runtime_error("Invalid Parallelism::HardwareType");
 }
 
 /** @brief Releases ownership of numThreadsToReturn of the given hardware type.
  */
 void releaseThreads(const HardwareType& type, const int64_t& numThreadsToReturn) {
-  if (numThreadsToReturn <= 1) return;
   if (type == HardwareType::StdCpu) return cpuParallelism.releaseThreads(numThreadsToReturn);
-  throw std::runtime_error("Invalid Parallelism::Type");
+  throw std::runtime_error("Invalid Parallelism::HardwareType");
 }
 }  // namespace
 
@@ -85,14 +84,16 @@ int64_t ThreadAcquisitionToken::numThreads() const noexcept { return implementat
 
 bool isAvailable(const HardwareType& type) {
   if (type == HardwareType::StdCpu) return cpuParallelism.isAvailable();
-  throw std::runtime_error("Invalid Parallelism::Type");
+  throw std::runtime_error("Invalid Parallelism::HardwareType");
 }
 
 namespace Testing {
 void overrideNumHardwareThreads(const HardwareType& type, const int64_t& numThreads) {
-  if (type == HardwareType::StdCpu) cpuParallelism.overrideNumHardwareThreads(numThreads);
-  else
-    throw std::runtime_error("Invalid Parallelism::Type");
+  if (type == HardwareType::StdCpu) {
+    cpuParallelism.overrideNumHardwareThreads(numThreads);
+  } else {
+    throw std::runtime_error("Invalid Parallelism::HardwareType");
+  }
 }
 }  // namespace Testing
 }  // namespace SetReplace::Parallelism

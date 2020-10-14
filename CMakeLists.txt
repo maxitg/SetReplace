@@ -107,6 +107,8 @@ export( TARGETS ${SET_REPLACE_LIBRARIES}
   APPEND FILE ${SetReplace_export_file})
 
 if(SET_REPLACE_BUILD_TESTING)
+  target_compile_definitions(SetReplace PUBLIC LIBSETREPLACE_BUILD_TESTING)
+
   enable_testing()
   set(INSTALL_GTEST OFF)
   set(CMAKE_POLICY_DEFAULT_CMP0077 NEW) # Propagate INSTALL_GTEST=OFF to subproject

@@ -42,9 +42,11 @@ inline ThreadAcquisitionTokenPtr acquire(const HardwareType& type, const int64_t
  */
 bool isAvailable(const HardwareType& type);
 
+#ifdef LIBSETREPLACE_BUILD_TESTING
 namespace Testing {
 void overrideNumHardwareThreads(const HardwareType& type, const int64_t& numThreads);
 }
+#endif
 }  // namespace SetReplace::Parallelism
 
 #endif  // LIBSETREPLACE_PARALLELISM_HPP_

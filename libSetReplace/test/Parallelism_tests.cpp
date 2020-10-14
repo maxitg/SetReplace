@@ -44,7 +44,7 @@ TEST(Parallelism, CpuAcquireReleaseCorrectness) {
         newThreadsRemaining = threadsRemaining / div;
         int reserved = threadsRemaining - newThreadsRemaining;
 
-        if (reserved <= 1) {
+        if (reserved >= 1) {
           auto token = acquire(cpu, reserved);
           EXPECT_EQ(token->numThreads(), reserved >= 2 ? reserved : 0);
           tokens.emplace_front(std::move(token));
@@ -62,18 +62,18 @@ TEST(Parallelism, CpuAcquireReleaseCorrectness) {
 
 // Ensures there are no race conditions in thread acquisition.
 TEST(Parallelism, CpuThreadSafety) {
-  int n = 10000;
+  constexpr int n = 10000;
   Testing::overrideNumHardwareThreads(cpu, n);
   std::vector<ThreadAcquisitionTokenPtr> tokens(n / 2);
   std::vector<std::thread> threads(n / 2);
 
-  const auto lambda = [&tokens](int i) {
+  const auto acquireTwoThreads = [&tokens](int i) {
     // pile up
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     tokens[i] = acquire(cpu, 2);
   };
   for (int i = 0; i < n / 2; ++i) {
-    threads[i] = std::thread(lambda, i);
+    threads[i] = std::thread(acquireTwoThreads, i);
   }
 
   for (auto& thread : threads) thread.join();
