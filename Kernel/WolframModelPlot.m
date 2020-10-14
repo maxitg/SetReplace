@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["HypergraphPlot"]
 PackageExport["WolframModelPlot"]
 
@@ -83,7 +85,8 @@ General::multigraphElementwiseStyle =
 
 (* Evaluation *)
 
-func : WolframModelPlot[args___] := Module[{result = wolframModelPlot$parse[args]},
+func : WolframModelPlot[args___] := ModuleScope[
+  result = wolframModelPlot$parse[args];
   result /; result =!= $Failed
 ]
 
@@ -115,8 +118,7 @@ wolframModelPlot$parse[
 
 parseHighlight[_, _, {}, _] := ConstantArray[Automatic, 3]
 
-parseHighlight[vertices_, edges_, highlightList_, highlightStyle_] := Module[{
-    highlightCounts, vertexHighlightFlags, edgeHighlightFlags},
+parseHighlight[vertices_, edges_, highlightList_, highlightStyle_] := ModuleScope[
   highlightCounts = Counts[highlightList];
   {vertexHighlightFlags, edgeHighlightFlags} = Map[
     With[{highlightedQ = If[MissingQ[highlightCounts[#]], False, highlightCounts[#]-- > 0]},
@@ -136,9 +138,7 @@ parseHighlight[vertices_, edges_, highlightList_, highlightStyle_] := Module[{
 
 wolframModelPlot$parse[
       edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
-        correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] := Module[{
-    optionValue, vertices, highlightedVertexStyles, highlightedEdgeLineStyles, highlightedEdgePointStyles,
-    highlightedEdgePolygonStyles, styles},
+        correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] := ModuleScope[
   optionValue[opt_] := OptionValue[WolframModelPlot, {o}, opt];
   vertices = vertexList[edges];
   (* these are either single styles or lists, one style for each element *)
@@ -294,7 +294,7 @@ wolframModelPlot[
     arrowheadLength_,
     maxImageSize_,
     background_,
-    graphicsOptions_] := Catch[Module[{embedding, graphics, imageSizeScaleFactor},
+    graphicsOptions_] := Catch[Module[{embedding, graphics, imageSizeScaleFactor, numericArrowheadLength},
   embedding = hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @ edges;
   numericArrowheadLength = Replace[
     arrowheadLength,
@@ -339,8 +339,7 @@ hypergraphEmbedding[
       edgeLayoutEdgeType_,
       hyperedgeRendering : "Subgraphs",
       coordinateRules_][
-      edges_] := Module[{
-    vertices, vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges},
+      edges_] := ModuleScope[
   vertices = vertexList[edges];
   {vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges} =
     toNormalEdges[edges, #] & /@ {vertexLayoutEdgeType, edgeLayoutEdgeType};
@@ -361,8 +360,7 @@ toNormalEdges[edges_, "Ordered"] := toNormalEdges[edges, 2, 1]
 
 toNormalEdges[edges_, "Cyclic"] := toNormalEdges[edges, 2, 1, 1]
 
-graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := Module[{
-    relevantCoordinateRules, vertexCoordinateRules, unscaledEmbedding},
+graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := ModuleScope[
   relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
   unscaledEmbedding = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
     graphEmbedding[vertices, edgeEmbeddingEdges, layout, relevantCoordinateRules],
@@ -379,7 +377,7 @@ vertexEmbedding[vertices_, edges_, layout_, coordinateRules_] :=
   graphEmbedding[vertices, edges, layout, coordinateRules][[1]]
 
 edgeEmbedding[vertices_, edges_, "SpringElectricalEmbedding", vertexCoordinates_] /;
-    SimpleGraphQ[Graph[UndirectedEdge @@@ edges]] := Module[{coordinates},
+    SimpleGraphQ[Graph[UndirectedEdge @@@ edges]] := ModuleScope[
   coordinates = Association[vertexCoordinates];
   Thread[edges -> List @@@ Map[coordinates, edges, {2}]]
 ]
@@ -400,9 +398,7 @@ graphEmbedding[vertices_, edges_, layout_, coordinateRules_] := Replace[
   {1}
 ]
 
-normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := Module[{
-    vertexEmbedding, indexedHyperedges, normalEdgeToIndexedHyperedge, normalEdgeToLinePoints, lineSegments,
-    indexedHyperedgesToLineSegments, indexedEdgeEmbedding, indexedSingleVertexEdges, indexedSingleVertexEdgeEmbedding},
+normalToHypergraphEmbedding[edges_, normalEdges_, normalEmbedding_] := ModuleScope[
   vertexEmbedding = Sort[#[[1]] -> {Point[#[[2]]]} & /@ normalEmbedding[[1]]];
 
   indexedHyperedges = MapIndexed[{#, #2[[1]]} &, edges];
@@ -437,7 +433,7 @@ rescaleEmbedding[unscaledEmbedding_, {}] := rescaleEmbedding[unscaledEmbedding, 
 lineLength[pts_] := Total[EuclideanDistance @@@ Partition[pts, 2, 1]]
 
 $selfLoopsScale = 0.7;
-edgeScale[{vertexEmbedding_, edgeEmbedding : Except[{}]}] := Module[{selfLoops},
+edgeScale[{vertexEmbedding_, edgeEmbedding : Except[{}]}] := ModuleScope[
   selfLoops = Select[#[[1, 1]] == #[[1, 2]] &][edgeEmbedding][[All, 2]];
   Mean[lineLength /@ N /@ If[selfLoops =!= {}, $selfLoopsScale * selfLoops, edgeEmbedding[[All, 2]]]]
 ]
@@ -456,8 +452,7 @@ rescaleEmbedding[embedding_, center_, factor_] := Map[
 
 (*** SpringElectricalPolygons ***)
 
-hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinates_][edges_] := Module[{
-    embeddingWithNoRegions, vertexEmbedding, edgeEmbedding},
+hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinates_][edges_] := ModuleScope[
   embeddingWithNoRegions =
     hypergraphEmbedding["Cyclic", edgeType, "Subgraphs", vertexCoordinates][edges];
   vertexEmbedding = embeddingWithNoRegions[[1]];
@@ -467,7 +462,7 @@ hypergraphEmbedding[edgeType_, hyperedgeRendering : "Polygons", vertexCoordinate
 
 addConvexPolygons["Ordered"][edge : {_, _.}, subgraphsShapes_] := edge -> subgraphsShapes
 
-addConvexPolygons[edgeType_][edge_, subgraphsShapes_] := Module[{points, region, convexPolygons, polygon},
+addConvexPolygons[edgeType_][edge_, subgraphsShapes_] := ModuleScope[
   points = Flatten[#, 2] & @ (subgraphsShapes /. {Line[pts_] :> {pts}, Point[pts_] :> {{pts}}});
   edge -> If[Length[points] > 2, Append[subgraphsShapes, convexHullPolygon[points]], subgraphsShapes]
 ]
@@ -480,8 +475,7 @@ applyStyle[style : Except[_List], shapes_] := With[{trimmedShapes = DeleteCases[
 
 applyStyle[style_List, shapes_] := Replace[DeleteCases[Transpose[{style, shapes}], {_, {}}], {} -> Nothing]
 
-vertexLabelsGraphics[embedding_, vertexSize_, vertexLabels_] := Module[{
-    pointsToVertices, edges, vertexCoordinatesDiagonal, graphPlotVertexSize},
+vertexLabelsGraphics[embedding_, vertexSize_, vertexLabels_] := ModuleScope[
   pointsToVertices =
     Association[Reverse /@ Catenate[Function[{v, pts}, v -> # & /@ Cases[pts, _Point]] @@@ embedding[[1]]]];
   edges =
@@ -506,7 +500,7 @@ drawEmbedding[
       vertexLabels_,
       vertexSize_,
       arrowheadLength_][
-      embedding_] := Module[{singleVertexEdgeCounts, getSingleVertexEdgeRadius},
+      embedding_] := ModuleScope[
   singleVertexEdgeCounts = <||>;
   getSingleVertexEdgeRadius[coords_] := (
     singleVertexEdgeCounts[coords] = Lookup[singleVertexEdgeCounts, Key[coords], vertexSize] + vertexSize

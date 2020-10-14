@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["HypergraphUnificationsPlot"]
 
 (* Documentation *)
@@ -14,7 +16,8 @@ Options[HypergraphUnificationsPlot] := Options[WolframModelPlot];
 
 (* Implementation *)
 
-HypergraphUnificationsPlot[args___] := Module[{result = Catch[hypergraphUnificationsPlot[args]]},
+HypergraphUnificationsPlot[args___] := ModuleScope[
+  result = Catch[hypergraphUnificationsPlot[args]];
   result /; result =!= $Failed
 ]
 
@@ -26,8 +29,7 @@ $color2 = Blue;
 
 HypergraphUnificationsPlot::emptyEdge = "Empty edges are not supported.";
 
-hypergraphUnificationsPlot[e1_, e2_, opts : OptionsPattern[]] := Module[{
-    unifications, automaticVertexLabelsList, vertexLabels, edgeStyle},
+hypergraphUnificationsPlot[e1_, e2_, opts : OptionsPattern[]] := ModuleScope[
   If[Length[Cases[Join[e1, e2], {}]] > 0,
     Message[HypergraphUnificationsPlot::emptyEdge];
     Throw[$Failed];
@@ -49,7 +51,7 @@ hypergraphUnificationsPlot[e1_, e2_, opts : OptionsPattern[]] := Module[{
     {unifications[[All, 1]], unifications[[All, 2]], unifications[[All, 3]], automaticVertexLabelsList}]
 ]
 
-unificationVertexLabels[e1_, e2_][unification_, edgeMapping1_, edgeMapping2_] := Module[{labels1, labels2},
+unificationVertexLabels[e1_, e2_][unification_, edgeMapping1_, edgeMapping2_] := ModuleScope[
   {labels1, labels2} =
     Merge[Reverse /@ Union[Catenate[Thread /@ Thread[#1[[Keys[#2]]] -> unification[[Values[#2]]]]]], Identity] & @@@
       {{e1, edgeMapping1}, {e2, edgeMapping2}};

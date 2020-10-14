@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["$SetReplaceMethods"]
 
 (* This is a main function of the package. This function calls either C++ or Wolfram Language implementation, and can
@@ -259,19 +261,18 @@ setSubstitutionSystem[
       caller_,
       returnOnAbortQ_,
       o : OptionsPattern[]] /;
-        stepSpecQ[caller, set, stepSpec, OptionValue[setSubstitutionSystem, {o}, "EventSelectionFunction"]] := Module[{
-    method = OptionValue[Method],
-    timeConstraint = OptionValue[TimeConstraint],
-    eventOrderingFunction = parseEventOrderingFunction[caller, OptionValue["EventOrderingFunction"]],
-    eventSelectionFunction = parseParameterValue[
-      caller, "EventSelectionFunction", OptionValue["EventSelectionFunction"], $eventSelectionFunctions],
-    eventDeduplication = parseParameterValue[
-      caller, "EventDeduplication", OptionValue["EventDeduplication"], $eventDeduplications],
-    symbolicEvaluationSupportedQ = OptionValue["EventOrderingFunction"] === Automatic &&
+        stepSpecQ[caller, set, stepSpec, OptionValue[setSubstitutionSystem, {o}, "EventSelectionFunction"]] := ModuleScope[
+  method = OptionValue[Method];
+  timeConstraint = OptionValue[TimeConstraint];
+  eventOrderingFunction = parseEventOrderingFunction[caller, OptionValue["EventOrderingFunction"]];
+  eventSelectionFunction = parseParameterValue[
+    caller, "EventSelectionFunction", OptionValue["EventSelectionFunction"], $eventSelectionFunctions];
+  eventDeduplication = parseParameterValue[
+    caller, "EventDeduplication", OptionValue["EventDeduplication"], $eventDeduplications];
+  symbolicEvaluationSupportedQ = OptionValue["EventOrderingFunction"] === Automatic &&
                                    OptionValue["EventSelectionFunction"] === "GlobalSpacelike" &&
-                                   OptionValue["EventDeduplication"] === None,
-    canonicalRules,
-    failedQ = False},
+                                   OptionValue["EventDeduplication"] === None;
+  failedQ = False;
   If[eventOrderingFunction === $Failed || eventSelectionFunction === $Failed || eventDeduplication === $Failed,
     Return[$Failed]];
   If[!symbolicEvaluationSupportedQ && method === "Symbolic",

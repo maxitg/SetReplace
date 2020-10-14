@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["SetReplaceAll"]
 
 (* The idea for SetReplaceAll is to keep performing SetReplace on the graph until no replacement can be done without
@@ -29,7 +31,7 @@ Options[SetReplaceAll] = {
 expr : SetReplaceAll[
     set_, rules_, generations : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
       recognizedOptionsQ[expr, SetReplaceAll, {o}] :=
-  Module[{result},
+  ModuleScope[
     result = Check[
       setSubstitutionSystem[
         rules, set, <|$maxGenerationsLocal -> generations|>, SetReplaceAll, False, o],

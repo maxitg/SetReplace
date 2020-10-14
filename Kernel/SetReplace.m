@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["SetReplace"]
 
 (* This function behaves similarly to StringReplace. The implementation is done with WolframModel, which is a more
@@ -37,7 +39,7 @@ Options[SetReplace] = {
 
 expr : SetReplace[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
     recognizedOptionsQ[expr, SetReplace, {o}] :=
-  Module[{result},
+  ModuleScope[
     result = Check[
       setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplace, False, o],
       $Failed];
