@@ -227,7 +227,7 @@ class Set::Implementation {
 
   TerminationReason willExceedAtomLimits(const std::vector<AtomsVector>& explicitRuleInputs,
                                          const std::vector<AtomsVector>& explicitRuleOutputs) const {
-    if (stepSpec_.maxFinalAtoms == stepLimitDisabled || stepSpec_.maxFinalAtomDegree == stepLimitDisabled) {
+    if (stepSpec_.maxFinalAtoms == stepLimitDisabled && stepSpec_.maxFinalAtomDegree == stepLimitDisabled) {
       return TerminationReason::NotTerminated;
     }
 
