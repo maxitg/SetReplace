@@ -137,7 +137,7 @@ expr : WolframModel[
       initSpec_ ? wolframModelInitSpecQ,
       stepsSpec : _ ? wolframModelStepsSpecQ : 1,
       property : _ ? wolframModelPropertyQ : "EvolutionObject",
-      o : OptionsPattern[]] /; recognizedOptionsQ[expr, WolframModel, {o}]:=
+      o : OptionsPattern[]] /; recognizedOptionsQ[expr, WolframModel, {o}] :=
   Module[{
       patternRules, initialSet, steps, terminationReasonOverride, optionsOverride, abortBehavior, overridenOptionValue,
       evolution, modifiedEvolution, propertyEvaluateWithOptions, result},
