@@ -8,6 +8,7 @@ PackageExport["WolframModelEvolutionObject"]
    different steps. *)
 
 PackageScope["propertyEvaluate"]
+PackageScope["evolutionDataQ"]
 
 PackageScope["$propertiesParameterless"]
 PackageScope["$newParameterlessProperties"]
@@ -243,6 +244,22 @@ propertyEvaluate[___][
         Not[MissingQ[argumentsCountRange]] &&
         Not[argumentsCountRange[[1]] <= Length[{args}] <= argumentsCountRange[[2]]]] := (
   makePargxMessage[s, caller, Length[{args}], $propertyArgumentCounts[s]];
+  Throw[$Failed]
+)
+
+WolframModelEvolutionObject::invalidNargs = "`1` is called with `2` arguments. " <>
+  "Either 1 argument is expected for implicit \"Generation\", or a property " <>
+  "name is expected as the first argument.";
+
+propertyEvaluate[___][
+    WolframModelEvolutionObject[data_ ? evolutionDataQ],
+    caller_,
+    g_Integer,
+    args__] := (
+  Message[
+    WolframModelEvolutionObject::invalidNargs,
+    HoldForm[WolframModelEvolutionObject[data][g, args]],
+    Length @ {g, args}];
   Throw[$Failed]
 )
 

@@ -62,6 +62,16 @@ WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`Ch
     result /; result =!= $Failed
   ]
 
+(* Evolution object *)
+
+WolframModelEvolutionObject /: RulePlot[evo : WolframModelEvolutionObject[data_ ? evolutionDataQ], opts___] :=
+  Module[{result},
+    result = rulePlot$parse[{evo["Rules"]}, {opts}];
+    If[Head[result] === rulePlot$parse,
+      result = $Failed];
+    result /; result =!= $Failed
+  ]
+
 (* Arguments parsing *)
 
 rulePlot$parse[{
