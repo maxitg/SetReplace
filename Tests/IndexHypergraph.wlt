@@ -1,5 +1,5 @@
 <|
-  "Subhypergraph" -> <|
+  "IndexHypergraph" -> <|
     "init" -> (
       Attributes[Global`testUnevaluated] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
@@ -17,7 +17,7 @@
       ],
 
       VerificationTest[
-        Subhypergraph[{}, {1}],
+        IndexHypergraph[{}, {1}],
         {}
       ],
 
