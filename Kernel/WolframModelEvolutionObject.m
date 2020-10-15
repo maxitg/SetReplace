@@ -6,6 +6,7 @@ PackageExport["WolframModelEvolutionObject"]
    different steps. *)
 
 PackageScope["propertyEvaluate"]
+PackageScope["evolutionDataQ"]
 
 PackageScope["$propertiesParameterless"]
 PackageScope["$newParameterlessProperties"]
@@ -247,6 +248,22 @@ propertyEvaluate[___][
   Throw[$Failed]
 )
 
+WolframModelEvolutionObject::invalidNargs = "`1` is called with `2` arguments. " <>
+  "Either 1 argument is expected for implicit \"Generation\", or a property " <>
+  "name is expected as the first argument.";
+
+propertyEvaluate[___][
+    WolframModelEvolutionObject[data_ ? evolutionDataQ],
+    caller_,
+    g_Integer,
+    args__] := (
+  Message[
+    WolframModelEvolutionObject::invalidNargs,
+    HoldForm[WolframModelEvolutionObject[data][g, args]],
+    Length @ {g, args}];
+  Throw[$Failed]
+)
+
 (* Check options *)
 
 $newCausalGraphOptions = {Background -> Automatic, VertexStyle -> Automatic, EdgeStyle -> Automatic};
@@ -257,12 +274,12 @@ $layeredCausalGraphOptions =
   Join[FilterRules[$causalGraphOptions, Except[$newLayeredCausalGraphOptions]], $newLayeredCausalGraphOptions];
 
 $newExpressionsEventsGraphOptions = {VertexLabels -> None};
-$expressionsEventrsGraphOptions = Join[
+$expressionsEventsGraphOptions = Join[
   FilterRules[$layeredCausalGraphOptions, Except[$newExpressionsEventsGraphOptions]],
   $newExpressionsEventsGraphOptions];
 
 $propertyOptions = <|
-  "ExpressionsEventsGraph" -> $expressionsEventrsGraphOptions,
+  "ExpressionsEventsGraph" -> $expressionsEventsGraphOptions,
   "CausalGraph" -> $causalGraphOptions,
   "LayeredCausalGraph" -> $layeredCausalGraphOptions,
   "StatesPlotsList" -> Options[WolframModelPlot],
@@ -720,13 +737,14 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     EdgeStyle -> Replace[
       OptionValue[allOptionValues, EdgeStyle], Automatic :> style[$lightTheme][$causalGraphEdgeStyle]],
     VertexLabels -> Replace[
-      OptionValue[allOptionValues, VertexLabels],
-      automaticVertexLabelsPattern :> Replace[graphVertices, {
-        v : {"Event", 0} :> v -> placementFunction["Initial event"],
-        v : {"Event", Infinity} :> v -> placementFunction["Final event"],
-        v : {"Event", idx_} :> v ->
-          If[Length[rules] > 1, placementFunction["Rule " <> ToString[eventRuleIDs[[idx]]]], None],
-        v : {"Expression", idx_} :> v -> placementFunction[ToString[allExpressions[[idx]]]]}, {1}]],
+      OptionValue[allOptionValues, VertexLabels], {
+        automaticVertexLabelsPattern :> Replace[graphVertices, {
+          v : {"Event", 0} :> v -> placementFunction["Initial event"],
+          v : {"Event", Infinity} :> v -> placementFunction["Final event"],
+          v : {"Event", idx_} :> v ->
+            If[Length[rules] > 1, placementFunction["Rule " <> ToString[eventRuleIDs[[idx]]]], None],
+          v : {"Expression", idx_} :> v -> placementFunction[ToString[allExpressions[[idx]]]]}, {1}],
+        "Index" -> Placed["Name", Automatic, Last]}],
     GraphLayout -> Replace[
       OptionValue[allOptionValues, GraphLayout],
       Automatic :> {

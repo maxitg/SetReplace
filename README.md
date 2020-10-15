@@ -1,3 +1,5 @@
+[![Discord](https://img.shields.io/discord/761616685173309481?logo=Discord)](https://discord.setreplace.org)
+
 [Wolfram Models as Set Substitution Systems](#wolfram-models-as-set-substitution-systems) | [Getting Started](#getting-started) | [Symbols and Functions](#symbols-and-functions) | [Physics](#physics) | [Acknowledgements](#acknowledgements)
 
 # Wolfram Models as Set Substitution Systems
@@ -124,6 +126,8 @@ A less frequently updated version is available through the Wolfram public paclet
 Keep in mind that this is an active research project. While we try to keep the main functionality backward compatible, it might change in the future as we adjust our models and find better ways of analysis. Keep that in mind when building on top of *SetReplace*, and keep track of [git SHAs](#build-data) as you go.
 
 *SetReplace* is an open-source project, and everyone is welcome to contribute. Read our [contributing guidelines](/.github/CONTRIBUTING.md) to get started.
+
+We have a [Discord server](https://discord.setreplace.org). If you would like to contribute but have questions or don't know where to start, this is the perfect place! In addition to helping new contributors, we discuss feature and research ideas. So, if you are interested, please join!
 
 # Symbols and Functions
 
@@ -931,7 +935,14 @@ In[] := WolframModel[{{1}, {1, 2}} -> {{2}}, {{1}, {1, 2}, {2, 3}, {2, 4}},
 
 <img src="READMEImages/MultiwayExpressionsEventsGraph.png" width="466">
 
-`"CausalGraph"`, `"LayeredCausalGraph"` and `"ExpressionsEventsGraph"` properties all accept [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) options, as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html). Some options have special behavior for the [`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html) value, i.e., `VertexLabels -> Automatic` in `"ExpressionsEventsGraph"` displays the contents of expressions, which are not the vertex names in that graph (as there can be multiple expressions with the same contents).
+`"CausalGraph"`, `"LayeredCausalGraph"` and `"ExpressionsEventsGraph"` properties all accept [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) options, as was demonstrated above with [`VertexLabels`](https://reference.wolfram.com/language/ref/VertexLabels.html). Some options have special behavior for the [`Automatic`](https://reference.wolfram.com/language/ref/Automatic.html) value, i.e., `VertexLabels -> Automatic` in `"ExpressionsEventsGraph"` displays the contents of expressions, which are not the vertex names in that graph (as there can be multiple expressions with the same contents). `VertexLabels -> "Index"`, on the other hand, displays the vertex indices of both expressions and events in the graph:
+
+```wl
+In[] := WolframModel[{{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}},
+  {{0, 0}, {0, 0}}, 2]["ExpressionsEventsGraph", VertexLabels -> "Index"]
+```
+
+<img src="READMEImages/MultiwayExpressionsEventsGraphIndex.png" width="478">
 
 #### Expression Separations
 
@@ -1501,6 +1512,8 @@ Possible sorting criteria are:
 
 * `"Random"`: selects a single match uniformly at random. It is possible to do that efficiently because the C++ implementation of `WolframModel` (the only one that supports `"EventOrderingFunction"`) keeps track of all possible matches at any point during the evolution. `"Random"` is guaranteed to select a single match, so the remaining sorting criteria are ignored. It can also be omitted because the random event is always chosen if provided sorting criteria are insufficient. The seeding can be controlled with [`SeedRandom`](https://reference.wolfram.com/language/ref/SeedRandom.html). However, the result does depend on your platform (Mac/Linux/Windows) and the specific build (version) of *SetReplace*.
 
+* `"Any"`: the chosen match is undefined. It can select any match, leading to nondeterministic and undefined evolution order. In some cases, it has better performance than "Random".
+
 As a neat example, here is the output of all individual sorting criteria (default sorting criteria are appended to disambiguate):
 
 ```wl
@@ -1514,10 +1527,10 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
    PlotLabel -> #] & /@
  {"OldestEdge", "LeastOldEdge",
   "LeastRecentEdge", "NewestEdge", "RuleOrdering",
-  "ReverseRuleOrdering", "RuleIndex", "ReverseRuleIndex", "Random"}
+  "ReverseRuleOrdering", "RuleIndex", "ReverseRuleIndex", "Random", "Any"}
 ```
 
-<img src="READMEImages/AllEventOrderingFunctionPlots.png" width="746">
+<img src="READMEImages/AllEventOrderingFunctionPlots.png" width="1209">
 
 #### "EventSelectionFunction"
 
