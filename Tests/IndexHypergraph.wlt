@@ -17,11 +17,6 @@
       ],
 
       VerificationTest[
-        IndexHypergraph[{}, {1}],
-        {}
-      ],
-
-      VerificationTest[
         IndexHypergraph[{Range[5]}, -10],
         {{-10, -9, -8, -7, -6}}
       ],
