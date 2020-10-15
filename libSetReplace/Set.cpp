@@ -227,6 +227,10 @@ class Set::Implementation {
 
   TerminationReason willExceedAtomLimits(const std::vector<AtomsVector>& explicitRuleInputs,
                                          const std::vector<AtomsVector>& explicitRuleOutputs) const {
+    if (stepSpec_.maxFinalAtoms == stepLimitDisabled && stepSpec_.maxFinalAtomDegree == stepLimitDisabled) {
+      return TerminationReason::NotTerminated;
+    }
+
     const int64_t currentAtomsCount = static_cast<int64_t>(atomDegrees_.size());
 
     std::unordered_map<Atom, int64_t> atomDegreeDeltas;
@@ -274,6 +278,10 @@ class Set::Implementation {
 
   TerminationReason willExceedExpressionsLimit(const std::vector<AtomsVector>& explicitRuleInputs,
                                                const std::vector<AtomsVector>& explicitRuleOutputs) const {
+    if (stepSpec_.maxFinalExpressions == stepLimitDisabled) {
+      return TerminationReason::NotTerminated;
+    }
+
     const int64_t currentExpressionsCount = causalGraph_.expressionsCount() - destroyedExpressionsCount_;
     const int64_t newExpressionsCount = currentExpressionsCount - static_cast<int64_t>(explicitRuleInputs.size()) +
                                         static_cast<int64_t>(explicitRuleOutputs.size());
