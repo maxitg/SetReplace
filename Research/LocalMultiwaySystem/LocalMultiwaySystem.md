@@ -134,7 +134,7 @@ In the global multiway system, these look identical.
 The only way to distinguish them is to examine their input and output states, which is a highly nontrivial problem,
 especially given that both states are canonicalized.
 
-To illustrate the point, here is an example of a branchlike and a spacelike separated pair of events, respectively:
+To illustrate the point, here is an example of a branchlike- and a spacelike-separated pair of events, respectively:
 
 ```wl
 In[] := ResourceFunction["MultiwaySystem"]["WolframModel" -> #1, {#2}, 2,
@@ -153,7 +153,7 @@ In[] := ResourceFunction["MultiwaySystem"]["WolframModel" -> #1, {#2}, 2,
 Let us then consider a different approach.
 Suppose we have a system with overlapping pairs of rule matches.
 We still want to include all of those events in the multiway system.
-But instead of duplicating the entire state, we will do that locally, i.e., we will have multiple branches growing from
+But instead of duplicating the entire state, we will do that locally; i.e., we will have multiple branches growing from
 that pair of events, and we will weave them into a single data structure describing the entire multiway system.
 The states themselves will then be reconstructed afterward in post-processing.
 
@@ -372,7 +372,7 @@ Hence, these expressions are timelike separated.
 
 So, if the expressions are immediate neighbors in the causal graph, as in the examples above, the separation is not hard
 to determine.
-However, what if the expressions are further down in history?
+However, what if the expressions are further back in history?
 
 For example, what about the expressions `{4, 5}` and `{5, 6}` here?
 
@@ -481,7 +481,7 @@ In[] := WolframModel[{{1}, {1, 2}} -> {{1, 2}, {2}},
 <img src="Images/LocalMultiwayParticleSpringElectrical.png" width="766">
 
 If we look closely at the events near the merge points, we can see that some redundancy remains.
-However, it is no longer due to the spacelike separated events, but rather due to the "background" expressions being
+However, it is no longer due to the spacelike-separated events, but rather due to the "background" expressions being
 rewritten during evolution.
 And as a result, if a particle follows another particle on the same "track", the expressions it's going through are
 different (even though they involve the same vertices), hence the duplication.
@@ -563,7 +563,7 @@ In[] := Graph[{{1} -> 1, {1} -> 2, 1 -> {1, 2, 3}, {1, 2, 3} -> 3,
 
 <img src="Images/LocalMultiwayIsomorphism.png" width="199">
 
-However, looking at even this simple example, we can determine that the algorithm described above is not quite right,
+However, looking at even this simple example, we can determine that the algorithm described above is not quite right;
 e.g., consider the last two expressions, `{1, 2, 3, 4}` and `{1, 3, 2, 4}`.
 On the one hand, if we start all the way from `{{1}}` and consider two possible evolutions ending with `{{1, 2, 3, 4}}`
 and `{{1, 3, 2, 4}}`, they should be deduplicated, as they are the same up to the renaming `2 <-> 3`.
