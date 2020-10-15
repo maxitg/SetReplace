@@ -334,11 +334,11 @@ If you want to implement performance tests, leave considerable leeway for the pe
 
 ### Documentation
 
-The *SetReplace* documentation is contained in three places: [README.md](/README.md), [CONTRIBUTING.md](/.github/CONTRIBUTING.md) (this file), and the code comments.
+The *SetReplace* documentation is contained in three places: [README.md](../README.md), [CONTRIBUTING.md](/.github/CONTRIBUTING.md) (this file), and the code comments.
 
 Some things to note are:
-* Large [README](/README.md) sections should include navigation bars in the beginning.
-* All references to functions should be links, either to [the Wolfram Language documentation](https://reference.wolfram.com/language/) or to the corresponding section in [README](/README.md).
+* Large [README](../README.md) sections should include navigation bars in the beginning.
+* All references to functions should be links, either to [the Wolfram Language documentation](https://reference.wolfram.com/language/) or to the corresponding section in [README](../README.md).
 * The comments in the Wolfram Language code are encouraged, and the C++ code is documented using [Doxygen](http://www.doxygen.nl).
 
 ### Scripts
@@ -465,10 +465,10 @@ code.
 #### Markdown
 We are using GitHub-flavored Markdown for documentation and research notes.
 
-Images (e.g., of output cells) should be made by selecting the relevant cells in the Front End, copying them as bitmaps, and saving them as .png files to [READMEImages](/READMEImages) (in the documentation) or to the Images directory of the corresponding research note. They should then be inserted using the code similar to this:
+Images (e.g., of output cells) should be made by selecting the relevant cells in the Front End, copying them as bitmaps, and saving them as .png files to [Documentation/Images](../Documentation/Images) (in the documentation) or to the Images directory of the corresponding research note. They should then be inserted using the code similar to this:
 
   ```html
-  <img src="READMEImages/image.png" width="xxx">
+  <img src="Documentation/Images/image.png" width="xxx">
   ```
 
   where the `width` should be computed as
