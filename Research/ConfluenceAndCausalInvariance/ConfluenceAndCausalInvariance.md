@@ -41,8 +41,7 @@ Assuming the evolution always starts from a single initial state, we can then de
 > A Wolfram model evolution is called *confluent* if any pair of partial singleway evolutions can be continued in such
 > a way as to reach isomorphic final states.
 
-In what follows, we will demonstrate that causal invariance is *not* equivalent to confluence, then neither of them
-implies another, and that the two statements made above are false:
+In what follows, we will demonstrate that causal invariance is *not* equivalent to confluence, neither of them implies the other, and the two statements made above are false:
 
 > When causal invariance exists, every branch in the multiway system must eventually merge.
 
