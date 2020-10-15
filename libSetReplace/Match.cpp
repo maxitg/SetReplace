@@ -218,7 +218,7 @@ class Matcher::Implementation {
     {
       // Only create threads if there is more than one rule
       const auto token = Parallelism::acquire(Parallelism::HardwareType::StdCpu, rules_.size());
-      const uint64_t numThreadsToUse = rules_.size() > 1 ? token->numThreads() : 0;
+      const uint64_t& numThreadsToUse = token->numThreads();
 
       auto addMatchesForRuleRange = [=](uint64_t start) {
         for (uint64_t i = start; i < static_cast<uint64_t>(rules_.size()); i += numThreadsToUse) {
