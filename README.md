@@ -49,7 +49,7 @@ In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
-<img src="READMEImages/BasicHypergraphPlot.png" width="478">
+<img src="Documentation/Images/BasicHypergraphPlot.png" width="478">
 
 We can then have a rule which would pick a subset of these hyperedges related through common vertices (much like a join query) and replace them with something else:
 
@@ -67,7 +67,7 @@ In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
-<img src="READMEImages/EvolutionResult1Step.png" width="478">
+<img src="Documentation/Images/EvolutionResult1Step.png" width="478">
 
 After 10 steps, we get a more complicated structure:
 
@@ -78,7 +78,7 @@ In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
-<img src="READMEImages/EvolutionResult10Steps.png" width="478">
+<img src="Documentation/Images/EvolutionResult10Steps.png" width="478">
 
 And after 100 steps, it gets even more elaborate:
 
@@ -88,9 +88,52 @@ In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 100]]
 ```
 
-<img src="READMEImages/EvolutionResult100Steps.png" width="478">
+<img src="Documentation/Images/EvolutionResult100Steps.png" width="478">
 
 Exploring the hypergraph models of this variety is the primary purpose of this package.
+
+# Getting Started
+
+## Dependencies
+
+You only need three things to use *SetReplace*:
+
+* Windows, macOS 10.12+, or Linux.
+* [Wolfram Language 12.1+](https://www.wolfram.com/language/) including [WolframScript](https://www.wolfram.com/wolframscript/). A free version is available as [Wolfram Engine](https://www.wolfram.com/engine/).
+* A C++17 compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in WolframScript are [here](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
+
+## Build Instructions
+
+To build:
+
+1. `cd` to the root directory of the repository.
+2. Run `./build.wls` to create the paclet file. If you see an error message about c++17, make sure the C++ compiler you are using is up-to-date. If your default system compiler does not support c++17, you can choose a different one with environmental variables. The following, for instance, typically works on a Mac:
+
+    ```bash
+    COMPILER=CCompilerDriver\`ClangCompiler\`ClangCompiler COMPILER_INSTALLATION=/usr/bin ./build.wls
+    ```
+
+    Here `ClangCompiler` can be replaced with one of ``<< CCompilerDriver`; "Compiler" /. CCompilerDriver`CCompilers[Full]``, and `COMPILER_INSTALLATION` is a directory in which the compiler binary can be found.
+
+3. Run `./install.wls` to install the paclet into your Wolfram system.
+4. Evaluate `PacletDataRebuild[]` in all running Wolfram kernels.
+5. Evaluate ``<< SetReplace` `` every time before using the package.
+
+A less frequently updated version is available through the Wolfram public paclet server and can be installed with `PacletInstall["SetReplace"]`.
+
+## Contributing
+
+Keep in mind that this is an active research project. While we try to keep the main functionality backward compatible, it might change in the future as we adjust our models and find better ways of analysis. Keep that in mind when building on top of *SetReplace*, and keep track of [git SHAs](Documentation/SymbolsAndFunctions/UtilityFunctions/BuildData.md) as you go.
+
+*SetReplace* is an open-source project, and everyone is welcome to contribute. Read our [contributing guidelines](.github/CONTRIBUTING.md) to get started.
+
+We have a [Discord server](https://discord.setreplace.org). If you would like to contribute but have questions or don't know where to start, this is the perfect place! In addition to helping new contributors, we discuss feature and research ideas. So, if you are interested, please join!
+
+# Symbols and Functions
+
+## Table of Contents
+
+[SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace*.md) | [ToPatternRules](Documentation/SymbolsAndFunctions/ToPatternRules.md) | [WolframModel and WolframModelEvolutionObject](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) | [WolframModelPlot](Documentation/SymbolsAndFunctions/WolframModelPlot.md) | [RulePlot of WolframModel](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
 
 # Physics
 
@@ -102,4 +145,4 @@ You can find many more details about our physics results in *Stephen Wolfram*'s 
 
 # Acknowledgements
 
-In additional to commit authors and reviewers, *Stephen Wolfram* has contributed to the API design of most functions, and *Jeremy Davis* has contributed to the visual style of [`WolframModelPlot`](#wolframmodelplot), [`RulePlot`](#ruleplot-of-wolframmodel) and [`"CausalGraph"`](#causal-graphs).
+In additional to commit authors and reviewers, *Stephen Wolfram* has contributed to the API design of most functions, and *Jeremy Davis* has contributed to the visual style of [`WolframModelPlot`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelPlot.md), [`RulePlot`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/RulePlotOfWolframModel.md) and [`"CausalGraph"`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).

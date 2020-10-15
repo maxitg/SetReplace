@@ -1,13 +1,13 @@
 ## RulePlot of WolframModel
 
-**`RulePlot`** can be used to get a [`WolframModelPlot`](WolframModelPlot.md#wolframmodelplot)-based visual representation of hypergraph substitution rules:
+**`RulePlot`** can be used to get a [`WolframModelPlot`](WolframModelPlot.md)-based visual representation of hypergraph substitution rules:
 
 ```wl
 In[] := RulePlot[WolframModel[{{1, 2}, {1, 2}} ->
    {{3, 2}, {3, 2}, {2, 1}, {1, 3}}]]
 ```
 
-<img src="DocsImages/RulePlot.png" width="429">
+<img src="../Images/RulePlot.png" width="429">
 
 The shared elements between rule sides (vertices `1` and `2` in the example above) are put at the same positions in the `RulePlot` and highlighted in a darker shade of blue. Shared edges are highlighted as well:
 
@@ -15,7 +15,7 @@ The shared elements between rule sides (vertices `1` and `2` in the example abov
 In[] := RulePlot[WolframModel[{{1, 2, 3}} -> {{1, 2, 3}, {3, 4, 5}}]]
 ```
 
-<img src="DocsImages/RulePlotWithSharedEdges.png" width="429">
+<img src="../Images/RulePlotWithSharedEdges.png" width="429">
 
 Multiple rules can be plotted:
 
@@ -25,7 +25,7 @@ In[] := RulePlot[WolframModel[{{{1, 1, 2}} ->
    {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}]]
 ```
 
-<img src="DocsImages/MultipleRulesPlot.png" width="808">
+<img src="../Images/MultipleRulesPlot.png" width="808">
 
 Sometimes an incorrectly scaled layout might be produced due to the issue discussed above in [`VertexCoordinateRules`](WolframModelPlot.md#vertexcoordinaterules):
 
@@ -34,7 +34,7 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
    {{2, 2}, {2, 2}, {2, 5}, {3, 2}}]]
 ```
 
-<img src="DocsImages/IncorrectlyScaledRulePlot.png" width="429">
+<img src="../Images/IncorrectlyScaledRulePlot.png" width="429">
 
 `VertexCoordinateRules` can be used in that case to specify the layout manually:
 
@@ -45,9 +45,9 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
    4 -> {-1, 0}, 5 -> {2, 1}}]
 ```
 
-<img src="DocsImages/RulePlotWithCustomCoordinates.png" width="429">
+<img src="../Images/RulePlotWithCustomCoordinates.png" width="429">
 
-Some of the [`WolframModelPlot`](WolframModelPlot.md#wolframmodelplot) options are supported, specifically [`GraphHighlightStyle`](WolframModelPlot.md#graphhighlight-and-graphhighlightstyle), [`"HyperedgeRendering"`](WolframModelPlot.md#hyperedgerendering), [`VertexCoordinateRules`](WolframModelPlot.md#vertexcoordinaterules), [`VertexLabels`](WolframModelPlot.md#vertexlabels), [`VertexSize`, `"ArrowheadLength"`](WolframModelPlot.md#vertexsize-and-arrowheadlength), and [style options](WolframModelPlot.md#style-options). `"EdgeType"` is supported as an option instead of [the second argument](WolframModelPlot.md#edge-type) like in [`WolframModelPlot`](WolframModelPlot.md#wolframmodelplot).
+Some of the [`WolframModelPlot`](WolframModelPlot.md) options are supported, specifically [`GraphHighlightStyle`](WolframModelPlot.md#graphhighlight-and-graphhighlightstyle), [`"HyperedgeRendering"`](WolframModelPlot.md#hyperedgerendering), [`VertexCoordinateRules`](WolframModelPlot.md#vertexcoordinaterules), [`VertexLabels`](WolframModelPlot.md#vertexlabels), [`VertexSize`, `"ArrowheadLength"`](WolframModelPlot.md#vertexsize-and-arrowheadlength), and [style options](WolframModelPlot.md#style-options). `"EdgeType"` is supported as an option instead of [the second argument](WolframModelPlot.md#edge-type) like in [`WolframModelPlot`](WolframModelPlot.md).
 
 There are also two additional `RulePlot`-specific style options. **`Spacings`** controls the amount of empty space between the rule parts and the frame (or the space where the frame would be if it's not shown):
 
@@ -56,7 +56,7 @@ In[] := RulePlot[WolframModel[{{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
    {{1, 2}, {1, 2}} -> {{1, 3}, {3, 2}}}], Spacings -> 0.03]
 ```
 
-<img src="DocsImages/RulePlotWithSmallSpacings.png" width="747">
+<img src="../Images/RulePlotWithSmallSpacings.png" width="747">
 
 **`"RulePartsAspectRatio"`** is used to control the aspect ratio of rule sides. As an example, it can be used to force rule parts to be square:
 
@@ -65,4 +65,4 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
  "RulePartsAspectRatio" -> 1]
 ```
 
-<img src="DocsImages/SquareRulePlot.png" width="429">
+<img src="../Images/SquareRulePlot.png" width="429">
