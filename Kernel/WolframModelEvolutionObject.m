@@ -555,7 +555,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]] == {})] := ModuleScope[
   events = propertyEvaluate[True, boundary][obj, caller, "AllEventsList"][[All, 2]];
   stateIndices = FoldList[
-    Function[{currentState, newEvent}, ModuleScope[
+    Function[{currentState, newEvent}, Module[{alreadyDeletedExpressions},
       alreadyDeletedExpressions = Complement[newEvent[[1]], currentState];
       If[alreadyDeletedExpressions =!= {},
         makeMessage[caller, "multiwayState", alreadyDeletedExpressions[[1]]];

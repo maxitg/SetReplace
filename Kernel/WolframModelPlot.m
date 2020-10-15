@@ -139,6 +139,7 @@ parseHighlight[vertices_, edges_, highlightList_, highlightStyle_] := ModuleScop
 wolframModelPlot$parse[
       edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
         correctWolframModelPlotOptionsQ[WolframModelPlot, Defer[WolframModelPlot[edges, o]], edges, {o}] := ModuleScope[
+  ScopeVariable[optionValue];
   optionValue[opt_] := OptionValue[WolframModelPlot, {o}, opt];
   vertices = vertexList[edges];
   (* these are either single styles or lists, one style for each element *)
@@ -502,6 +503,7 @@ drawEmbedding[
       arrowheadLength_][
       embedding_] := ModuleScope[
   singleVertexEdgeCounts = <||>;
+  ScopeVariable[getSingleVertexEdgeRadius];
   getSingleVertexEdgeRadius[coords_] := (
     singleVertexEdgeCounts[coords] = Lookup[singleVertexEdgeCounts, Key[coords], vertexSize] + vertexSize
   );

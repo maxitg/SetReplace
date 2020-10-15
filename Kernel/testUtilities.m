@@ -23,7 +23,7 @@ testUnevaluated[testHead_, input_, messages_, opts___] :=
 Attributes[testSymbolLeak] = {HoldAll};
 testSymbolLeak[testHead_, expr_, opts___] :=
   testHead[
-    ModuleScope[
+    Module[{Global`before, Global`after},
       expr; (* symbols might get created at the first run due to initialization *)
       Global`before = Length[Names["*`*"]];
       expr;

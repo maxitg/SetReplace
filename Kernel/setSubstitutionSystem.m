@@ -270,8 +270,8 @@ setSubstitutionSystem[
   eventDeduplication = parseParameterValue[
     caller, "EventDeduplication", OptionValue["EventDeduplication"], $eventDeduplications];
   symbolicEvaluationSupportedQ = OptionValue["EventOrderingFunction"] === Automatic &&
-                                   OptionValue["EventSelectionFunction"] === "GlobalSpacelike" &&
-                                   OptionValue["EventDeduplication"] === None;
+                                 OptionValue["EventSelectionFunction"] === "GlobalSpacelike" &&
+                                 OptionValue["EventDeduplication"] === None;
   failedQ = False;
   If[eventOrderingFunction === $Failed || eventSelectionFunction === $Failed || eventDeduplication === $Failed,
     Return[$Failed]];
