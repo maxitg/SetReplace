@@ -7,10 +7,10 @@ PackageScope["multisetComplement"]
 PackageScope["multisetFilterRules"]
 PackageScope["toCanonicalHypergraphForm"]
 PackageScope["vertexList"]
-PackageScope["indexHypergraph"]
 PackageScope["connectedHypergraphQ"]
 PackageScope["mapHold"]
 PackageScope["heldPart"]
+PackageScope["hypergraphQ"]
 
 fromCounts[association_] := Catenate @ KeyValueMap[ConstantArray] @ association
 
@@ -33,11 +33,9 @@ toCanonicalEdgeForm[edge : Except[_List]] := {edge}
 
 toCanonicalEdgeForm[edge_List] := edge
 
-vertexList[edges_] := Sort[Union[Catenate[toCanonicalHypergraphForm[edges]]]]
+vertexList[canonicalHypergraph_ ? hypergraphQ] := Sort @ Union @ Catenate @ canonicalHypergraph
 
-indexHypergraph[e_] := With[{vertices = vertexList[e]},
-  Replace[toCanonicalHypergraphForm[e], Thread[vertices -> Range[Length[vertices]]], {2}]
-]
+vertexList[edges_] := vertexList[toCanonicalHypergraphForm @ edges]
 
 connectedHypergraphQ[edges_] := ConnectedGraphQ[Graph[Catenate[toNormalEdges /@ toCanonicalHypergraphForm[edges]]]]
 
@@ -50,3 +48,11 @@ mapHold[expr_, level_ : {1}] := Map[Hold, Unevaluated[expr], level]
 SetAttributes[heldPart, HoldFirst];
 
 heldPart[expr_, part__Integer] := Extract[Unevaluated[expr], {part}, Hold]
+
+hypergraphQ = MatchQ[#, {___List}] &;
+
+General::invalidHypergraph =
+  "The argument at position `1` in `2` is not a valid hypergraph.";
+
+General::invalidList =
+  "The argument at position `1` in `2` is not a list.";
