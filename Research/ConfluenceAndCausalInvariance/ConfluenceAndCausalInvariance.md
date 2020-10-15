@@ -36,7 +36,7 @@ Note, the definition above is only meaningful for terminating systems (i.e., the
 [`"FixedPoint"`](https://github.com/maxitg/SetReplace/blob/master/README.md#termination-reason), a state during the
 evolution where no more matches can be made to its expressions).
 
-In turn, assuming the evolution always starts from a single initial state, we will define confluence as:
+Assuming the evolution always starts from a single initial state, we can then define confluence as:
 
 > A Wolfram model evolution is called *confluent* if any pair of partial singleway evolutions can be continued in such
 > a way as to reach isomorphic final states.
@@ -48,7 +48,7 @@ implies another, and that the two statements made above are false:
 
 > In a terminating system, causal invariance implies that whatever path is taken, the "answer" will always be the same.
 
-We will not make any comments about the physics claims made above in this note.
+We will not make any comments in this note about the physics claims made above.
 
 ## Confluence !=> Causal Invariance
 
@@ -63,7 +63,7 @@ confluentRule = {{{1, 2, 3, 4, 5}} -> {{1, 2, 3, 4}},
 confluentInit = {{1, 2, 3, 4, 5}};
 ```
 
-The system is confluent as any partial evolution, if continued, will always terminate at the final state `{{1}}`:
+The system is confluent, as any partial evolution, if continued, will always terminate at the final state `{{1}}`:
 
 ```wl
 In[] := ResourceFunction["MultiwaySystem"][
@@ -73,7 +73,7 @@ In[] := ResourceFunction["MultiwaySystem"][
 <img src="Images/ConfluentStatesGraph.png" width="274">
 
 However, it is not causal invariant.
-We can generate two non-isomorphic causal graphs by using different event ordering functions which contradicts the
+We can generate two non-isomorphic causal graphs by using different event ordering functions, which contradicts the
 definition above:
 
 ```wl
@@ -140,7 +140,7 @@ It would be interesting to enumerate ([#57](https://github.com/maxitg/SetReplace
 determine how many of them exhibit one of these properties but not the other.
 
 To do that, we will, of course, need to implement the tests for both confluence
-([#59](https://github.com/maxitg/SetReplace/issues/59), [#477](https://github.com/maxitg/SetReplace/issues/349)) and
+([#59](https://github.com/maxitg/SetReplace/issues/59), [#477](https://github.com/maxitg/SetReplace/issues/477)) and
 causal invariance in *SetReplace*.
 
 It will also be interesting to investigate other similar properties.
