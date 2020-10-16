@@ -131,9 +131,42 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
 
 # Symbols and Functions
 
-## Table of Contents
-
-[SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace*.md) | [ToPatternRules](Documentation/SymbolsAndFunctions/ToPatternRules.md) | [WolframModel and WolframModelEvolutionObject](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) | [WolframModelPlot](Documentation/SymbolsAndFunctions/WolframModelPlot.md) | [RulePlot of WolframModel](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
+- [SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace*.md)
+- [ToPatternRules](Documentation/SymbolsAndFunctions/ToPatternRules.md)
+- [WolframModel and WolframModelEvolutionObject](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
+  - Properties
+    - ["AllEdgesThroughoutEvolution"](Properties/AllEdgesThroughoutEvolution.md)
+    - [Causal Graphs](Properties/CausalGraphs.md)
+    - [Creator And Destroyer Events](Properties/CreatorAndDestroyerEvents.md)
+    - [Edge And Event Generations](Properties/EdgeAndEventGenerations.md)
+    - [ElementCountLists](Properties/ElementCountLists.md)
+    - [Event Counts](Properties/EventCounts.md)
+    - [Events](Properties/Events.md)
+    - [Events And States](Properties/EventsAndStates.md)
+    - [Expression Separations](Properties/ExpressionSeparations.md)
+    - [Final Element Counts](Properties/FinalElementCounts.md)
+    - [Generation Counts](Properties/GenerationCounts.md)
+    - [Plots Of Events](Properties/PlotsOfEvents.md)
+    - [Plots Of States](Properties/PlotsOfStates.md)
+    - [RuleIndices For Events](Properties/RuleIndicesForEvents.md)
+    - [Rules](Properties/Rules.md) | [States](Properties/States.md)
+    - [States As Edge Indices](Properties/StatesAsEdgeIndices.md)
+    - [Termination Reason](Properties/TerminationReason.md)
+    - [Total Element Counts](Properties/TotalElementCounts.md)
+    - [Version](Properties/Version.md) 
+  - Options
+    - ["VertexNamingFunction"](Options/VertexNamingFunction)
+    - ["IncludePartialGenerations"](Options/IncludePartialGenerations.md)
+    - ["IncludeBoundaryEvents"](Options/IncludeBoundaryEvents.md)
+    - ["EventOrderingFunction"](Options/EventOrderingFunction.md)
+    - ["EventSelectionFunction"](Options/EventSelectionFunction.md)
+    - ["EventDeduplication"](Options/EventDeduplication.md)
+    - ["IncludeBoundaryEvents"](Options/IncludeBoundaryEvents.md)
+    - ["IncludePartialGenerations"](Options/IncludePartialGenerations.md)
+    - [Method](Options/Method.md)
+    - [TimeConstraint](Options/TimeConstraint.md)
+- [WolframModelPlot](Documentation/SymbolsAndFunctions/WolframModelPlot.md)
+- [RulePlot of WolframModel](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
 
 # Physics
 
@@ -145,4 +178,4 @@ You can find many more details about our physics results in *Stephen Wolfram*'s 
 
 # Acknowledgements
 
-In additional to commit authors and reviewers, *Stephen Wolfram* has contributed to the API design of most functions, and *Jeremy Davis* has contributed to the visual style of [`WolframModelPlot`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelPlot.md), [`RulePlot`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/RulePlotOfWolframModel.md) and [`"CausalGraph"`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).
+In additional to commit authors and reviewers, *Stephen Wolfram* has contributed to the API design of most functions, and *Jeremy Davis* has contributed to the visual style of [`WolframModelPlot`](Documentation/SymbolsAndFunctions/WolframModelPlot.md), [`RulePlot`](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md) and [`"CausalGraph"`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).

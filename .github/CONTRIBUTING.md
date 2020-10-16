@@ -88,7 +88,7 @@ The unit tests are particularly important if you are implementing a weed fix, as
 
 If sharing variables among multiple tests, use [`With`](https://reference.wolfram.com/language/ref/With.html) instead of [`Module`](https://reference.wolfram.com/language/ref/Module.html) or global assignment, because otherwise, variables will not appear resolved in the command line error message if the test fails (which makes it harder to weed whack). Also, try to avoid large inputs and outputs for the tests, if at all possible (by, for example, replacing `VerificationTest[large1[], large2[]]` with `VerificationTest[large1[] === large2[]]`).
 
-You should also modify the [README](/README.md) documentation if you are implementing new functionality, or causing any outputs there to change.
+You should also modify the [README](../README.md) or the corresponding files in the Documentation directory if you are implementing new functionality, or causing any outputs there to change.
 
 **Never put notebooks (.nb files) in the repository**, as they, even though text files, are not human readable, cannot be reviewed line-by-line, and are guaranteed to cause conflicts, which would be almost impossible to resolve.
 
@@ -202,11 +202,11 @@ Further, public symbols must include [`SyntaxInformation`](https://reference.wol
 
 Functions must handle invalid inputs correctly. For example, if you try to evaluate
 
-<img src="/READMEImages/ArgumentChecks.png" width="469">
+<img src="../Documentation/Images/ArgumentChecks.png" width="469">
 
 you would get a helpful error message. If we did not do any checks here, we would instead have the code go haywire:
 
-<img src="/READMEImages/NoArgumentChecks.png" width="582">
+<img src="../Documentation/Images/NoArgumentChecks.png" width="582">
 
 and the function would not even terminate, which is confusing and hostile to the user.
 
@@ -334,7 +334,7 @@ If you want to implement performance tests, leave considerable leeway for the pe
 
 ### Documentation
 
-The *SetReplace* documentation is contained in three places: [README.md](../README.md), [CONTRIBUTING.md](/.github/CONTRIBUTING.md) (this file), and the code comments.
+The *SetReplace* documentation is contained in three places: [README.md](../README.md), [CONTRIBUTING.md](CONTRIBUTING.md) (this file), and the code comments.
 
 Some things to note are:
 * Large [README](../README.md) sections should include navigation bars in the beginning.
@@ -474,7 +474,7 @@ Images (e.g., of output cells) should be made by selecting the relevant cells in
   where the `width` should be computed as
 
   ```wl
-  Round[0.6 First @ Import["$RepoRoot/READMEImages/image.png", "ImageSize"]]
+  Round[0.6 First @ Import["$RepoRoot/Documentation/Images/image.png", "ImageSize"]]
   ```
 
 # Research

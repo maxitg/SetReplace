@@ -29,8 +29,8 @@ A less frequently updated version is available through the Wolfram public paclet
 
 ## Contributing
 
-Keep in mind that this is an active research project. While we try to keep the main functionality backward compatible, it might change in the future as we adjust our models and find better ways of analysis. Keep that in mind when building on top of *SetReplace*, and keep track of [git SHAs](../SymbolsAndFunctions/UtilityFunctions/BuildData.md) as you go.
+Keep in mind that this is an active research project. While we try to keep the main functionality backward compatible, it might change in the future as we adjust our models and find better ways of analysis. Keep that in mind when building on top of *SetReplace*, and keep track of [git SHAs](SymbolsAndFunctions/UtilityFunctions/BuildData.md) as you go.
 
-*SetReplace* is an open-source project, and everyone is welcome to contribute. Read our [contributing guidelines](../../.github/CONTRIBUTING.md) to get started.
+*SetReplace* is an open-source project, and everyone is welcome to contribute. Read our [contributing guidelines](../.github/CONTRIBUTING.md) to get started.
 
 We have a [Discord server](https://discord.setreplace.org). If you would like to contribute but have questions or don't know where to start, this is the perfect place! In addition to helping new contributors, we discuss feature and research ideas. So, if you are interested, please join!

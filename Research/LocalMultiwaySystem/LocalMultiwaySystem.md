@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This note introduces [local multiway systems](../../Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventSelectionFunction) and examines them in the context of the
+This note introduces [local multiway systems](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventSelectionFunction.md) and examines them in the context of the
 singleway and [global multiway](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) systems.
 
 By default, [`WolframModel`](../../Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) computes only a single branch of
