@@ -2037,7 +2037,7 @@ In[]:= IndexHypergraph[{{x, y, z}, {w, y}, {z, {x}, {{y}}}}]
 Out[]= {{2, 3, 4}, {1, 3}, {4, 5, 6}}
 ```
 
-Replace the vertices with indices starting from -10:
+Replace the vertices with integers starting from -10:
 
 ```wl
 In[]:= IndexHypergraph[{{x, y, z}, {w, y}, {z, {x}, {{y}}}}, -10]

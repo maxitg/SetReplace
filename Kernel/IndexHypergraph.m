@@ -19,8 +19,8 @@ IndexHypergraph[args___] := 0 /;
   !Developer`CheckArgumentCount[IndexHypergraph[args], 1, 2] && False
 
 (* main *)
-expr : IndexHypergraph[hgraph_, r : _ : 1] := ModuleScope[
-  res = Catch[indexHypergraph[HoldForm @ expr, hgraph, r]];
+expr : IndexHypergraph[hgraph_, start : _ : 1] := ModuleScope[
+  res = Catch[indexHypergraph[HoldForm @ expr, hgraph, start]];
   res /; res =!= $Failed
 ]
 
@@ -36,6 +36,6 @@ indexHypergraph[expr_, hgraph_ ? (Not @* hypergraphQ), ___] :=
   (Message[IndexHypergraph::invalidHypergraph, 1, HoldForm @ expr];
   Throw[$Failed])
 
-indexHypergraph[expr_, _ , r_] :=
+indexHypergraph[expr_, _ , _] :=
   (Message[IndexHypergraph::int, expr, 2];
   Throw[$Failed])
