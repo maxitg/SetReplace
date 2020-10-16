@@ -49,9 +49,6 @@ expr : WeakSubhypergraph[args0___][args1___] := With[{res = Catch[weakSubhypergr
   res /; res =!= $Failed
 ]
 
-(* Helper *)
-hypergraphQ = MatchQ[#, {___List}] &;
-
 (* Normal form *)
 subhypergraph[_, h_ ? hypergraphQ, vertices_List] := Select[h, SubsetQ[vertices, #] &]
 
@@ -60,8 +57,6 @@ weakSubhypergraph[_, h_ ? hypergraphQ, vertices_List] := Select[h, ContainsAny[#
 (* Incorrect arguments messages *)
 
 (** hypergraph **)
-General::invalidHypergraph =
-  "The argument at position `1` in `2` is not a valid hypergraph.";
 
 subhypergraph[expr_, h_ ? (Not @* hypergraphQ), _] :=
   (Message[Subhypergraph::invalidHypergraph, 1, HoldForm @ expr];
@@ -72,15 +67,13 @@ weakSubhypergraph[expr_, h_ ? (Not @* hypergraphQ), _] :=
   Throw[$Failed])
 
 (** vertices **)
-General::invalidList =
-  "The argument at position `1` in `2` is not a list.";
 
 subhypergraph[expr_, _ , v : Except[_List]] :=
-  (Message[Subhypergraph::invalidList, 2, expr];
+  (Message[Subhypergraph::invl, 2];
   Throw[$Failed])
 
 weakSubhypergraph[expr_, _ , v : Except[_List]] :=
-  (Message[WeakSubhypergraph::invalidList, 2, expr];
+  (Message[WeakSubhypergraph::invl, 2];
   Throw[$Failed])
 
 (* operator form *)
@@ -92,11 +85,11 @@ weakSubhypergraph[_][vertices_List][h_ ? hypergraphQ] := weakSubhypergraph[None,
 
 (** vertices **)
 subhypergraph[expr_][Except[_List]][_] :=
-  (Message[Subhypergraph::invalidList, {0, 1}, expr];
+  (Message[Subhypergraph::invl, {0, 1}];
   Throw[$Failed])
 
 weakSubhypergraph[expr_][Except[_List]][_] :=
-  (Message[WeakSubhypergraph::invalidList, {0, 1}, expr];
+  (Message[WeakSubhypergraph::invl, {0, 1}];
   Throw[$Failed])
 
 (** hypergraph **)
