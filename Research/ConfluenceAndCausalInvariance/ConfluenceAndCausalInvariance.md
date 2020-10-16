@@ -32,14 +32,14 @@ We can summarize the statements above with the following definitions:
 > [event ordering functions](https://github.com/maxitg/SetReplace/blob/master/README.md#eventorderingfunction) are
 > isomorphic.
 
-Note, the definition above is only meaningful for terminating systems (i.e., the systems which always reach a
+Note that the definition above is only meaningful for terminating systems (i.e., the systems which always reach a
 [`"FixedPoint"`](https://github.com/maxitg/SetReplace/blob/master/README.md#termination-reason), a state during the
 evolution where no more matches can be made to its expressions).
 
-Assuming the evolution always starts from a single initial state, we can then define confluence as:
+We can then define confluence as:
 
-> A Wolfram model evolution is called *confluent* if any pair of partial singleway evolutions can be continued in such
-> a way as to reach isomorphic final states.
+> A Wolfram model evolution is called *confluent* if any pair of partial singleway evolutions starting from a particular
+> state can be continued in such a way as to reach isomorphic final states.
 
 In what follows, we will demonstrate that causal invariance is *not* equivalent to confluence, neither of them implies the other, and the two statements made above are false:
 
@@ -93,7 +93,8 @@ causalInvariantRule = {{{1}} -> {{1, 1}}, {{1}} -> {{1, 2}}};
 causalInvariantInit = {{1}};
 ```
 
-The system is causal invariant because there are only two evolutions possible (using the first or the second rule):
+To see that it's causal invariant, first note that there are only two singleway evolutions possible.
+Each of them contains just a single event which is created using either the first or the second rule:
 
 ```wl
 In[] := WolframModel[causalInvariantRule, causalInvariantInit, Infinity, "EventOrderingFunction" -> #][
@@ -103,7 +104,8 @@ In[] := WolframModel[causalInvariantRule, causalInvariantInit, Infinity, "EventO
 
 <img src="Images/CausalInvariantEvolutions.png" width="175">
 
-and these evolutions yield isomorphic causal graphs (which are just graphs with a single vertex and no edges):
+These evolutions yield isomorphic causal graphs, which are composed of a single vertex with no edges, implying that this
+system is causal invariant by definition:
 
 ```wl
 In[] := IsomorphicGraphQ @@ Echo @ (
@@ -138,9 +140,8 @@ satisfy both of these conditions.
 It would be interesting to enumerate ([#57](https://github.com/maxitg/SetReplace/issues/57)) simple rules and
 determine how many of them exhibit one of these properties but not the other.
 
-To do that, we will, of course, need to implement the tests for both confluence
-([#59](https://github.com/maxitg/SetReplace/issues/59), [#477](https://github.com/maxitg/SetReplace/issues/477)) and
-causal invariance in *SetReplace*.
+To do that, we need to implement tests for both confluence ([#59](https://github.com/maxitg/SetReplace/issues/59),
+[#477](https://github.com/maxitg/SetReplace/issues/477)) and causal invariance in *SetReplace*.
 
 It will also be interesting to investigate other similar properties.
 For example, one can investigate a stronger version of confluence:
