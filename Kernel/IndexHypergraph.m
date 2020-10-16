@@ -25,9 +25,9 @@ expr : IndexHypergraph[hgraph_, r : _ : 1] := ModuleScope[
 ]
 
 (* Normal form *)
-indexHypergraph[_, hgraph_ ? hypergraphQ, r : _Integer?IntegerQ] := ModuleScope[
+indexHypergraph[_, hgraph_ ? hypergraphQ, start : _Integer ? IntegerQ] := ModuleScope[
   vertices = vertexList @ hgraph;
-  vertexIndices = Range[0, Length[vertices] - 1] + r;
+  vertexIndices = Range[0, Length[vertices] - 1] + start;
   Replace[hgraph, Thread[vertices -> vertexIndices], {2}]
 ]
 

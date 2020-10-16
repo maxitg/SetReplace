@@ -12,6 +12,11 @@
       ],
 
       VerificationTest[
+        IndexHypergraph[{{}}],
+        {{}}
+      ],
+
+      VerificationTest[
         IndexHypergraph[{{{1}}}],
         {{1}}
       ],
@@ -24,6 +29,11 @@
       VerificationTest[
         IndexHypergraph[{{x, y, z}, {y, z}, {y, y, x, z}}, 2],
         {{2, 3, 4}, {3, 4}, {3, 3, 2, 4}}
+      ],
+
+      VerificationTest[
+        IndexHypergraph[{Range[10, 6, -1], Range[-5, -1]}],
+        {{10, 9, 8, 7, 6}, {1, 2, 3, 4, 5}}
       ],
 
       (* unevaluated *)

@@ -53,6 +53,3 @@ hypergraphQ = MatchQ[#, {___List}] &;
 
 General::invalidHypergraph =
   "The argument at position `1` in `2` is not a valid hypergraph.";
-
-General::invalidList =
-  "The argument at position `1` in `2` is not a list.";

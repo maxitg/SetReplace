@@ -69,11 +69,11 @@ weakSubhypergraph[expr_, h_ ? (Not @* hypergraphQ), _] :=
 (** vertices **)
 
 subhypergraph[expr_, _ , v : Except[_List]] :=
-  (Message[Subhypergraph::invalidList, 2, expr];
+  (Message[Subhypergraph::invl, 2];
   Throw[$Failed])
 
 weakSubhypergraph[expr_, _ , v : Except[_List]] :=
-  (Message[WeakSubhypergraph::invalidList, 2, expr];
+  (Message[WeakSubhypergraph::invl, 2];
   Throw[$Failed])
 
 (* operator form *)
@@ -85,11 +85,11 @@ weakSubhypergraph[_][vertices_List][h_ ? hypergraphQ] := weakSubhypergraph[None,
 
 (** vertices **)
 subhypergraph[expr_][Except[_List]][_] :=
-  (Message[Subhypergraph::invalidList, {0, 1}, expr];
+  (Message[Subhypergraph::invl, {0, 1}];
   Throw[$Failed])
 
 weakSubhypergraph[expr_][Except[_List]][_] :=
-  (Message[WeakSubhypergraph::invalidList, {0, 1}, expr];
+  (Message[WeakSubhypergraph::invl, {0, 1}];
   Throw[$Failed])
 
 (** hypergraph **)
