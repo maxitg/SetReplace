@@ -133,6 +133,14 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
 
 - [SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace*.md)
 - [ToPatternRules](Documentation/SymbolsAndFunctions/ToPatternRules.md)
+- Utility Functions
+  - [BuildData](Documentation/SymbolsAndFunctions/UtilityFunctions/BuildData.md)
+  - [Generalized Grid Graph](Documentation/SymbolsAndFunctions/UtilityFunctions/GeneralizedGridGraph.md)
+  - [Hypergraph Automorphism Group](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphAutomorphismGroup.md)
+  - [Hypergraph Unifications](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphUnifications.md)
+  - [Subhypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/Subhypergraph.md)
+  - [Wolfram Model Rule Value](Documentation/SymbolsAndFunctions/UtilityFunctions/WolframModelRuleValue.md)
+  - [Wolfram Physics Project Style Data](Documentation/SymbolsAndFunctions/UtilityFunctions/WolframPhysicsProjectStyleData.md)
 - [WolframModel and WolframModelEvolutionObject](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
   - Properties
     - ["AllEdgesThroughoutEvolution"](Properties/AllEdgesThroughoutEvolution.md)
