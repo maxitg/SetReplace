@@ -275,10 +275,12 @@ setSubstitutionSystem[
                                  OptionValue["EventDeduplication"] === None;
   failedQ = False;
   If[eventOrderingFunction === $Failed || eventSelectionFunction === $Failed || eventDeduplication === $Failed,
-    Return[$Failed]];
+    Return[$Failed]
+  ];
   If[!symbolicEvaluationSupportedQ && method === "Symbolic",
     Message[caller::symbOrdering];
-    Return[$Failed]];
+    Return[$Failed]
+  ];
   If[(timeConstraint > 0) =!= True, Return[$Failed]];
   canonicalRules = toCanonicalRules[rules];
   If[MatchQ[method, Automatic | $cppMethod]
@@ -288,16 +290,22 @@ setSubstitutionSystem[
       Return[
         setSubstitutionSystem$cpp[
           rules, set, stepSpec, returnOnAbortQ, timeConstraint, eventOrderingFunction, eventSelectionFunction,
-          eventDeduplication]]]];
+          eventDeduplication]]
+    ]
+  ];
   If[MatchQ[method, $cppMethod],
     failedQ = True;
     If[!$cppSetReplaceAvailable,
       makeMessage[caller, "noLowLevel"],
-      makeMessage[caller, "lowLevelNotImplemented"]]];
+      makeMessage[caller, "lowLevelNotImplemented"]
+    ]
+  ];
   If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
     $Failed,
     If[!symbolicEvaluationSupportedQ,
       Message[caller::symbNotImplemented];
-      Return[$Failed]];
-    setSubstitutionSystem$wl[caller, rules, set, stepSpec, returnOnAbortQ, timeConstraint]]
+      Return[$Failed]
+    ];
+    setSubstitutionSystem$wl[caller, rules, set, stepSpec, returnOnAbortQ, timeConstraint]
+  ]
 ]
