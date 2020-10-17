@@ -57,7 +57,7 @@
       (** Wrong second argument **)
       testUnevaluated[
         Subhypergraph[{{1, 1, 2}, {2, 3}, {2, 3, 4}}, 1],
-        {Subhypergraph::invalidList}
+        {Subhypergraph::invl}
       ],
 
       (* Subhypergraph / operator form *)
@@ -86,12 +86,12 @@
       (** Wrong zeroth argument **)
       testUnevaluated[
         Subhypergraph[1][{{1, 2}, {2, 3, 4}}],
-        {Subhypergraph::invalidList}
+        {Subhypergraph::invl}
       ],
 
       testUnevaluated[
         Subhypergraph[1][{2, 3, 4}],
-        {Subhypergraph::invalidList}
+        {Subhypergraph::invl}
       ],
 
       (** Wrong first argument **)
@@ -152,7 +152,7 @@
       (** Wrong second argument **)
       testUnevaluated[
         WeakSubhypergraph[{{1, 1, 2}, {2, 3}, {2, 3, 4}}, 1],
-        {WeakSubhypergraph::invalidList}
+        {WeakSubhypergraph::invl}
       ],
 
       (* WeakSubhypergraph / operator form *)
@@ -181,12 +181,12 @@
       (** Wrong zeroth argument **)
       testUnevaluated[
         WeakSubhypergraph[1][{{1, 2}, {2, 3, 4}}],
-        {WeakSubhypergraph::invalidList}
+        {WeakSubhypergraph::invl}
       ],
 
       testUnevaluated[
         WeakSubhypergraph[1][{2, 3, 4}],
-        {WeakSubhypergraph::invalidList}
+        {WeakSubhypergraph::invl}
       ],
 
       (** Wrong first argument **)
