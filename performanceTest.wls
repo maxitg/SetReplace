@@ -1,5 +1,7 @@
 #!/usr/bin/env wolframscript
 
+Needs["GeneralUtilities`"];
+
 Get["scripts/buildInit.wl"];
 << SetReplace`;
 
@@ -70,7 +72,7 @@ If[!IntegerQ[$measurementsCount] || $measurementsCount < 2,
 Attributes[meanAroundTiming] = {HoldAll};
 meanAroundTiming[expr_] := MeanAround @ Table[First @ AbsoluteTiming[expr], $measurementsCount]
 
-runTests[repo_, sha_, tests_] := Module[{result, kernel},
+runTests[repo_, sha_, tests_] := ModuleScope[
   Print["Testing ", sha];
   GitCheckoutReference[repo, sha];
   Run["./build.wls"];
