@@ -261,7 +261,8 @@ setSubstitutionSystem[
       caller_,
       returnOnAbortQ_,
       o : OptionsPattern[]] /;
-        stepSpecQ[caller, set, stepSpec, OptionValue[setSubstitutionSystem, {o}, "EventSelectionFunction"]] := ModuleScope[
+        stepSpecQ[
+          caller, set, stepSpec, OptionValue[setSubstitutionSystem, {o}, "EventSelectionFunction"]] := ModuleScope[
   method = OptionValue[Method];
   timeConstraint = OptionValue[TimeConstraint];
   eventOrderingFunction = parseEventOrderingFunction[caller, OptionValue["EventOrderingFunction"]];
