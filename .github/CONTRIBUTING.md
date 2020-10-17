@@ -215,7 +215,8 @@ One way to implement such argument checking is to make special `valid*Q` functio
 A better approach is to setup the function to catch exceptions, i.e.,
 
 ```wl
-MakeUniverse[args___] := Module[{result = Catch[makeUniverse[args]]},
+MakeUniverse[args___] := ModuleScope[
+  result = Catch[makeUniverse[args]];
   result /; result =!= $Failed
 ]
 ```
@@ -364,6 +365,13 @@ In addition to that, here are some more-or-less established rules:
   ]
   ```
 
+  ```wl
+  If[MatchQ[hypergraph, {__List}],
+    Sort @ Union @ Catenate @ hypergraph,
+    Throw @ $Failed
+  ]
+  ```
+
 * However, close the brackets of ordinary functions on the same line as the last argument:
 
   ```wl
@@ -371,11 +379,57 @@ In addition to that, here are some more-or-less established rules:
     longArgument1, longArgument2, longArgument3]
   ```
 
-* The function arguments should either all go on the same line, or should each be put on a separate line (except for special cases where a large quantity of short arguments is used).
+* The function arguments should either all go on the same line, or should each be put on a separate line (except for special cases where a large quantity of short arguments is used):
+
+  ```wl
+  wolframModelPlot[
+      edges_,
+      edgeType_,
+      styles_,
+      hyperedgeRendering_,
+      vertexCoordinates_,
+      vertexLabels_,
+      vertexSize_,
+      arrowheadLength_,
+      maxImageSize_,
+      background_,
+      graphicsOptions_] := Catch[
+        ...
+      ]
+  ```
+
 * Avoid using [`Flatten`](https://reference.wolfram.com/language/ref/Flatten.html) and [`ReplaceAll`](https://reference.wolfram.com/language/ref/ReplaceAll.html) without explicit level arguments. That is because it is very easy to accidentally assume that the user's input is not a [`List`](https://reference.wolfram.com/language/ref/List.html) (e.g., a vertex name), even though it can be, in which case you would [`Flatten`](https://reference.wolfram.com/language/ref/Flatten.html) too much, and cause a weed. It is preferred to use [`Catenate`](https://reference.wolfram.com/language/ref/Catenate.html) and [`Replace`](https://reference.wolfram.com/language/ref/Replace.html) instead of these functions.
 * Similar issue could happen with [`Thread`](https://reference.wolfram.com/language/ref/Thread.html), especially when used to thread a single element over multiple. For example, it is easy to assume naively that `Thread[x -> {1, 2, 3}]` would always yield `{x -> 1, x -> 2, x -> 3}`. Except, sometimes it might be called as `With[{x = {4, 5, 6}}, Thread[x -> {1, 2, 3}]]`.
-* Use uppercase camel for public symbols, lowercase camel for internal (including PackageScope) symbols.
+* Use uppercase camel for public symbols, lowercase camel for internal (including PackageScope) symbols:
+
+  ```wl
+  PackageExport["WolframModelEvolutionObject"]
+
+  PackageScope["propertyEvaluate"]
+  ```
+
 * Start global constants with `$`, whether internal or public, and tags (such as used in [`Throw`](https://reference.wolfram.com/language/ref/Throw.html) or [`Sow`](https://reference.wolfram.com/language/ref/Sow.html), or as generic enum labels) with `$$`. Global pure functions (defined as [`OwnValues`](https://reference.wolfram.com/language/ref/OwnValues.html)) should still be treated as ordinary (e.g., [`DownValues`](https://reference.wolfram.com/language/ref/DownValues.html)) functions and not start with `$`, unless they are public, in which case they should start with `$` and end with the word `Function`.
+* Use the macros `ModuleScope` and `Scope` (defined in "GeneralUtilities\`") instead of `Module` and `Block` (respectively) when defining functions of the form `f[x__] := (Module|Block)[...]`. The main benefit of using them is that there is no need to specify a list of local variables (i.e. `{localVar1, localVar2, ...}`) at the begining, as these will be localized whenever the macro detects the presence of `=` and `:=` in its body (See `?Scope` and [#460](https://github.com/maxitg/SetReplace/pull/460) for more information). For example:
+
+  ```wl
+  decodeAtomLists[list_List] := ModuleScope[
+    count = list[[1]];
+    atomPointers = list[[2 ;; (count + 1) + 1]];
+    atomRanges = Partition[atomPointers, 2, 1];
+    list[[#[[1]] ;; #[[2]] - 1]] & /@ atomRanges
+  ]
+  ```
+  is expanded to:
+
+  ```wl
+  decodeAtomLists[list_List] := Module[{count, atomPointers, atomRanges}
+    count = list[[1]];
+    atomPointers = list[[2 ;; (count + 1) + 1]];
+    atomRanges = Partition[atomPointers, 2, 1];
+    list[[#[[1]] ;; #[[2]] - 1]] & /@ atomRanges
+  ]
+  ```
+
 
 #### C++
 The code should follow [Google C++ Style](https://google.github.io/styleguide/cppguide.html) guidelines, save for the
