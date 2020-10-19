@@ -1,4 +1,6 @@
-#### Plots of Events
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md#properties) >
+
+# Plots of Events
 
 The plotting function corresponding to [`"AllEventsStatesList"`](States.md) is more interesting than the other ones. **`"EventsStatesPlotsList"`** plots not only the states, but also the events that produced them:
 

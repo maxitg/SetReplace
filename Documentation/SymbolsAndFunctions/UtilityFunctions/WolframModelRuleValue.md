@@ -1,4 +1,6 @@
-### WolframModelRuleValue
+###### [Symbols and Functions](/README.md#symbols-and-functions) > Utility Functions >
+
+# WolframModelRuleValue
 
 [Transformation Count](#transformation-count) | [Arity](#arity) | [Node Counts](#node-counts) | [Connectedness](#connectedness)
 
@@ -43,7 +45,7 @@ In[] := WolframModelRuleValue[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
     12}}, "TraditionalSignature"]
 ```
 
-<img src="../../Images/TraditionalSignature.png" width="139">
+<img src="/Documentation/Images/TraditionalSignature.png" width="139">
 
 In this example, there are 2 binary and 2 ternary edges in the input, and 8 binary and 4 ternary edges in the output. The more machine-readable form of this can be obtained with **`Signature`** property:
 

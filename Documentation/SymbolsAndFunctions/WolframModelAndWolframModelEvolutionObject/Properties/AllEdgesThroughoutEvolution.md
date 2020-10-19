@@ -1,4 +1,6 @@
-#### All Edges throughout Evolution
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md#properties) >
+
+# All Edges throughout Evolution
 
 **`"AllEventsEdgesList"`** (aka `"AllExpressions"`) returns the list of edges throughout evolution. This is distinct from a catenated [`"StateList"`](States.md), as the edge does not appear twice if it moved from one generation to the next without being involved in an event.
 

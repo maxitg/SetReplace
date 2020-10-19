@@ -1,4 +1,6 @@
-### Subhypergraph
+###### [Symbols and Functions](/README.md#symbols-and-functions) > Utility Functions >
+
+# Subhypergraph
 
 **`Subhypergraph`** is a small utility function that selects hyperedges that only contain vertices from the requested list.
 

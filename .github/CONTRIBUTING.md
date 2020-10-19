@@ -202,11 +202,11 @@ Further, public symbols must include [`SyntaxInformation`](https://reference.wol
 
 Functions must handle invalid inputs correctly. For example, if you try to evaluate
 
-<img src="../Documentation/Images/ArgumentChecks.png" width="469">
+<img src="/Documentation/Images/ArgumentChecks.png" width="469">
 
 you would get a helpful error message. If we did not do any checks here, we would instead have the code go haywire:
 
-<img src="../Documentation/Images/NoArgumentChecks.png" width="582">
+<img src="/Documentation/Images/NoArgumentChecks.png" width="582">
 
 and the function would not even terminate, which is confusing and hostile to the user.
 

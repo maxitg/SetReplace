@@ -1,4 +1,6 @@
-#### States as Edge Indices
+###### [Symbols and Functions](README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md) >
+
+# States as Edge Indices
 
 **`"AllEventsStatesEdgeIndicesList"`** is similar to [`"AllEventsStatesList"`](States.md), except instead of actual edges the list it returns contains the indices of edges from [`"AllEventsEdgesList"`](AllEdgesThroughoutEvolution.md):
 

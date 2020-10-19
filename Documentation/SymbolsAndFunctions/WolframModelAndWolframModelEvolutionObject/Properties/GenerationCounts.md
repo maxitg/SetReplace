@@ -1,4 +1,6 @@
-#### Generation Counts
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md#properties) >
+
+# Generation Counts
 
 **`"TotalGenerationsCount"`** returns the largest generation of any edge during the evolution:
 
