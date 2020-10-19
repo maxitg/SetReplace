@@ -1,4 +1,6 @@
-#### Element Count Lists
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md#properties) >
+
+# Element Count Lists
 
 **`"VertexCountList"`** and **`"EdgeCountList"`** return counts of vertices and edges respectively in each state of [`"StatesList"`](States.md). They are useful to see how quickly a particular system grows:
 

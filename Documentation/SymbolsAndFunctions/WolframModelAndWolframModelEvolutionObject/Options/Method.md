@@ -1,4 +1,6 @@
-#### Method
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Options](../WolframModelAndWolframModelEvolutionObject.md#options) >
+
+# Method
 
 There are two implementations (**`Method`** s) available: one written in Wolfram Language (`Method -> "Symbolic"`), one in C++ (`Method -> "LowLevel"`).
 
@@ -19,7 +21,7 @@ In[] := AbsoluteTiming[
   {{0}}, <|"MaxEvents" -> 30|>, Method -> "LowLevel"]]
 ```
 
-<img src="../../../Images/SlowLowLevelTiming.png" width="609">
+<img src="/Documentation/Images/SlowLowLevelTiming.png" width="609">
 
 takes almost 10 seconds in C++ implementation, and less than 1/10th of a second in the Wolfram Language implementation:
 
@@ -29,7 +31,7 @@ In[] := AbsoluteTiming[
   {{0}}, <|"MaxEvents" -> 30|>, Method -> "Symbolic"]]
 ```
 
-<img src="../../../Images/FastSymbolicTiming.png" width="617">
+<img src="/Documentation/Images/FastSymbolicTiming.png" width="617">
 
 Wolfram Language implementation should be used if:
 

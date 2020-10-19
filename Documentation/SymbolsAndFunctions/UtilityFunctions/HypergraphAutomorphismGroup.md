@@ -1,4 +1,6 @@
-### HypergraphAutomorphismGroup
+###### [Symbols and Functions](/README.md#symbols-and-functions) > Utility Functions >
+
+# HypergraphAutomorphismGroup
 
 **`HypergraphAutomorphismGroup`** does the same thing as [`GraphAutomorphismGroup`](https://reference.wolfram.com/language/ref/GraphAutomorphismGroup.html), but for ordered hypergraphs:
 
@@ -17,7 +19,7 @@ In[] := GroupOrder[
       8, 5}, {5, 9, 1}}]]
 ```
 
-<img src="../../Images/SymmetricHypergraphPlot.png" width="451">
+<img src="/Documentation/Images/SymmetricHypergraphPlot.png" width="451">
 
 ```wl
 Out[] = 24

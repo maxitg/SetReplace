@@ -1,4 +1,6 @@
-#### Rules
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md#properties) >
+
+# Rules
 
 **`"Rules"`** just stores the rules in the same way they were entered as an input to `WolframModel`:
 

@@ -1,10 +1,12 @@
-#### Termination Reason
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md#properties) >
 
-**`"TerminationReason"`** shows why the evaluation of the model was stopped. It's particularly useful if multiple [stopping conditions](../StepLimiters.md) are specified.
+# Termination Reason
+
+**`"TerminationReason"`** shows why the evaluation of the model was stopped. It's particularly useful if multiple [stopping conditions](../WolframModelAndWolframModelEvolutionObject.md#wolframmodel-step-limiters) are specified.
 
 All possible values are:
 
-* `"MaxEvents"`, `"MaxGenerations"`, `"MaxVertices"`, `"MaxVertexDegree"` and `"MaxEdges"` correspond directly to [step limiters](../StepLimiters.md).
+* `"MaxEvents"`, `"MaxGenerations"`, `"MaxVertices"`, `"MaxVertexDegree"` and `"MaxEdges"` correspond directly to [step limiters](../WolframModelAndWolframModelEvolutionObject.md#wolframmodel-step-limiters).
 * `"FixedPoint"` means there were no more matches possible to rule inputs.
 * `"TimeConstraint"` could occur if a [`"TimeConstraint"`](../Options/TimeConstraint.md) option is used.
 * `"Aborted"` would occur if the evaluation was manually interrupted (i.e., by pressing ⌘. on a Mac). In that case, a partially computed evolution object is returned.

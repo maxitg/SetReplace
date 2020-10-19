@@ -1,6 +1,6 @@
-## WolframModel and WolframModelEvolutionObject
+# WolframModel and WolframModelEvolutionObject
 
-[Rule Specification](RuleSpecification.md) | [Automatic Initial State](AutomaticInitialState.md) | [Step Limiters](StepLimiters.md)| ["VertexNamingFunction"](Options/VertexNamingFunction) | ["IncludePartialGenerations"](Options/IncludePartialGenerations.md) | ["IncludeBoundaryEvents"](Options/IncludeBoundaryEvents.md) | ["EventOrderingFunction"](Options/EventOrderingFunction.md) | ["EventSelectionFunction"](Options/EventSelectionFunction.md) | ["EventDeduplication"](Options/EventDeduplication.md) | ["IncludeBoundaryEvents"](Options/IncludeBoundaryEvents.md) | ["IncludePartialGenerations"](Options/IncludePartialGenerations.md) | [Method](Options/Method.md) | [TimeConstraint](Options/TimeConstraint.md) | ["AllEdgesThroughoutEvolution"](Properties/AllEdgesThroughoutEvolution.md) | [Causal Graphs](Properties/CausalGraphs.md) | [Creator And Destroyer Events](Properties/CreatorAndDestroyerEvents.md) | [Edge And Event Generations](Properties/EdgeAndEventGenerations.md) | [ElementCountLists](Properties/ElementCountLists.md) | [Event Counts](Properties/EventCounts.md) | [Events](Properties/Events.md) | [Events And States](Properties/EventsAndStates.md) | [Expression Separations](Properties/ExpressionSeparations.md) | [Final Element Counts](Properties/FinalElementCounts.md) | [Generation Counts](Properties/GenerationCounts.md) | [Plots Of Events](Properties/PlotsOfEvents.md) | [Plots Of States](Properties/PlotsOfStates.md) | [RuleIndices For Events](Properties/RuleIndicesForEvents.md) | [Rules](Properties/Rules.md) | [States](Properties/States.md) | [States As Edge Indices](Properties/StatesAsEdgeIndices.md) | [Termination Reason](Properties/TerminationReason.md) | [Total Element Counts](Properties/TotalElementCounts.md) | [Version](Properties/Version.md) 
+[Rule Specification](#rule-specification) | [Automatic Initial State](#automatic-initial-state) | [Step Limiters](#wolframmodel-step-limiters) | [Properties](#properties) | [Options](#options)
 
 **`WolframModel`** is the primary function of the package. It provides tools for the generation and analysis of set substitution systems. It can compute many different properties of the evolution and has many different options, which we describe in the corresponding subsections.
 
@@ -82,7 +82,7 @@ Other properties of the evolution object describe the relationships between edge
 
 * `"Version"` is the data format of the evolution object. This description is for version 2, which is the first version to support multiway systems. Version 1 does not have the `"Version"` key. The objects of older versions are automatically migrated when they are evaluated.
 * `"Rules"` is an exact copy of the corresponding `WolframModel` argument.
-* `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions of this or earlier generations. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](StepLimiters.md) is used.
+* `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions of this or earlier generations. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](#wolframmodel-step-limiters) is used.
 * `"TerminationReason"` shows the reason evaluation was stopped. See the [`"TerminationReason"`](Properties/TerminationReason.md) property for more details.
 * `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example only has one rule. See [Rule Indices for Events](Properties/RuleIndicesForEvents.md) for a more interesting case. The first value, `0`, corresponds to the initial event, which is included in the evolution object but is omitted [by default](Options/IncludeBoundaryEvents.md) when computing properties.
 * `"EventInputs"` shows which edge indices from `"AtomLists"` were used in each event. The order corresponds to the input patterns of the rules. The first value, `{}`, again corresponds to the initial event. Note, the same index can appear multiple times in [multiway systems](Options/EventSelectionFunction.md).
@@ -183,3 +183,174 @@ In[] = WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
 Out[] = {{3, 4, 6, 8, 12, 18, 24, 36, 54, 76, 112},
  {7, 8, 10, 12, 16, 22, 28, 40, 58, 80, 116}}
 ```
+
+### Rule Specification
+
+#### Multiple Rules
+
+Multiple rules can simply be specified as a list of rules:
+
+```wl
+In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}},
+  {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}, {{1, 1, 1}}, 4]
+```
+
+<img src="READMEImages/EvolutionObjectFromMultipleRules.png" width="488">
+
+To see which rules were used for each replacement:
+
+<img src="READMEImages/AllEventsRuleIndicesOfEvolutionObject.png" width="708">
+
+```wl
+Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
+```
+
+#### Pattern Rules
+
+Pattern rules (i.e., the kind of rules used in the [`SetReplace`](../SetReplace*.md) function) can be specified as well. As an example, previously described call to [`SetReplaceList`](../SetReplace*.md) can be reproduced as
+
+```wl
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
+ {1, 2, 5, 3, 6}, Infinity, "AllEventsStatesList"]
+Out[] = {{1, 2, 5, 3, 6}, {5, 3, 6, 3}, {6, 3, 8}, {8, 9}, {17}}
+```
+
+One can even add conditions spanning multiple expressions:
+
+```wl
+In[] := WolframModel[<|"PatternRules" -> {a_, b_} /; a > b :> a - b|>,
+ {1, 1, 5, 3, 6}, Infinity, "AllEventsStatesList"]
+Out[] = {{1, 1, 5, 3, 6}, {1, 3, 6, 4}, {6, 4, 2}, {2, 2}}
+```
+
+### Automatic Initial State
+
+An initial state consisting of an appropriate number of (hyper) self-loops can be automatically produced for anonymous (non-pattern) rules. Here we evolve the system for 0 steps and ask the evolution object for the 0-th generation aka the initial state:
+
+```wl
+In[] := WolframModel[{{1, 2}, {1, 2}} -> {{3, 2}, {3, 2}, {2, 1}, {1, 3}},
+  Automatic, 0][0]
+Out[] = {{1, 1}, {1, 1}}
+```
+
+That even works for multiple rules in which case the loops are chosen in such a way that any of the rules can match:
+
+```wl
+In[] := WolframModel[{{{1, 2}, {1, 2}} ->
+    {{3, 2}, {3, 2}, {2, 1, 3}, {2, 3}},
+   {{2, 1, 3}, {2, 3}} -> {{2, 1}, {1, 3}}}, Automatic, 0][0]
+Out[] = {{1, 1}, {1, 1}, {1, 1, 1}}
+```
+
+Note that because different patterns can be matched to the same symbol, this initial state is guaranteed to match the rules at least once (no guarantees after that).
+
+### WolframModel Step Limiters
+
+The standard numeric argument to `WolframModel` specifies the number of generations:
+
+```wl
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
+  {{7, 1, 8}, {9, 3, 10}, {11, 4, 12}, {13, 6, 14}, {7, 13}, {13,
+    7}, {8, 10}, {10, 8}, {9, 11}, {11, 9}, {12, 14}, {14, 12}},
+ {{1, 2, 3}, {4, 5, 6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6,
+   3}}, 6, "FinalStatePlot"]
+```
+
+<img src="../../Images/MaxGenerationsFinalStatePlot.png" width="478">
+
+Alternatively, an [`Association`](https://reference.wolfram.com/language/ref/Association.html) can be used to specify a more elaborate limiting condition:
+
+```wl
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
+  {{7, 1, 8}, {9, 3, 10}, {11, 4, 12}, {13, 6, 14}, {7, 13}, {13,
+    7}, {8, 10}, {10, 8}, {9, 11}, {11, 9}, {12, 14}, {14, 12}},
+ {{1, 2, 3}, {4, 5, 6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6,
+   3}},
+ <|"MaxVertices" -> 300, "MaxEvents" -> 200|>, "FinalStatePlot"]
+```
+
+<img src="../../Images/MaxVerticesFinalStatePlot.png" width="478">
+
+Note that the final state here is "less symmetric" because its last generation is incomplete (more on that [later](../UtilityFunctions/HypergraphAutomorphismGroup)). Such incomplete generations can be automatically trimmed by setting [`"IncludePartialGenerations" -> False`](Options/IncludePartialGenerations.md).
+
+One can also see the presence of an incomplete generation by looking at the evolution object (note `5...6` which means 5 generations are complete, and 1 is not). Expanding the object's information, one can also see that in this particular case the evolution was terminated because `"MaxVertices"` (not `"MaxEvents"`) condition was reached:
+
+```wl
+In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
+  {{7, 1, 8}, {9, 3, 10}, {11, 4, 12}, {13, 6, 14}, {7, 13}, {13,
+    7}, {8, 10}, {10, 8}, {9, 11}, {11, 9}, {12, 14}, {14, 12}},
+ {{1, 2, 3}, {4, 5, 6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6,
+   3}},
+ <|"MaxVertices" -> 300, "MaxEvents" -> 200|>]
+```
+
+<img src="../../Images/MaxVerticesEvolutionObject.png" width="753">
+
+All possible keys in that association are:
+
+* `"MaxEvents"`: limit the number of individual replacements (in the [`SetReplace`](../SetReplace*.md) function meaning).
+* `"MaxGenerations"`: limit the number of generations (steps in [`SetReplaceAll`](../SetReplace*.md) meaning), same as specifying steps directly as a number in `WolframModel`.
+* `"MaxVertices"`: limit the number of vertices in the *final* state only (the total count throughout evolution might be larger). This limit stops evolution if the next event, if applied, would put the state over the limit. Note once such an event is encountered, the evolution stops immediately even if other matches exist that would not put the vertex count over the limit.
+* `"MaxVertexDegree"`: limit the number of final state edges in which any particular vertex is involved. Works in a similar way to `"MaxVertices"`.
+* `"MaxEdges"`: limit the number of edges (set elements) in the final state. Works similarly to `"MaxVertices"`.
+
+Any combination of these can be used, in which case the earliest triggered condition stops the evolution.
+
+Note also that `"MaxGenerations"` works differently from the other limiters, as the matching algorithm would not even attempt to match edges with generations over the limit. Therefore unlike, i.e., `"MaxVertices"`, which would terminate the evolution immediately once the limit-violating event is attempted, `"MaxGenerations"` would keep "filling in" events for as long as possible until no further matches within allowed generations are possible.
+
+It is also possible to set the step count to `Automatic`, in which case `WolframModel` tries to automatically pick a number of steps that showcases the evolution without taking too long. It stops the evolution sooner if the state grows quickly:
+
+```wl
+In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
+    3}},
+ {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, Automatic]
+```
+
+<img src="../../Images/AutomaticStepsGrowing.png" width="491">
+
+But evolves the rule much longer if it does not grow:
+
+```wl
+In[] := WolframModel[<|"PatternRules" -> {{a_, b_}} :> {{a + b, a - b}}|>,
+ {{1, 1}}, Automatic]
+```
+
+<img src="../../Images/AutomaticStepsNotGrowing.png" width="565">
+
+Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, setting `TimeConstraint -> 5` (it still returns values for all properties even if terminated due to time constraint), and `"IncludePartialGenerations" -> False`, but it may be adjusted in future updates.
+
+### Properties
+
+- Properties
+  - [All Edges Throughout Evolution](Properties/AllEdgesThroughoutEvolution.md)
+  - [Causal Graphs](Properties/CausalGraphs.md)
+  - [Creator And Destroyer Events](Properties/CreatorAndDestroyerEvents.md)
+  - [Edge And Event Generations](Properties/EdgeAndEventGenerations.md)
+  - [Element Count Lists](Properties/ElementCountLists.md)
+  - [Event Counts](Properties/EventCounts.md)
+  - [Events](Properties/Events.md)
+  - [Events And States](Properties/EventsAndStates.md)
+  - [Expression Separations](Properties/ExpressionSeparations.md)
+  - [Final Element Counts](Properties/FinalElementCounts.md)
+  - [Generation Counts](Properties/GenerationCounts.md)
+  - [Plots Of Events](Properties/PlotsOfEvents.md)
+  - [Plots Of States](Properties/PlotsOfStates.md)
+  - [Rule Indices For Events](Properties/RuleIndicesForEvents.md)
+  - [Rules](Properties/Rules.md)
+  - [States](Properties/States.md)
+  - [States As Edge Indices](Properties/StatesAsEdgeIndices.md)
+  - [Termination Reason](Properties/TerminationReason.md)
+  - [Total Element Counts](Properties/TotalElementCounts.md)
+  - [Version](Properties/Version.md) 
+
+### Options
+
+- Options
+  - ["VertexNamingFunction"](Options/VertexNamingFunction.md)
+  - ["IncludePartialGenerations"](Options/IncludePartialGenerations.md)
+  - ["IncludeBoundaryEvents"](Options/IncludeBoundaryEvents.md)
+  - ["EventOrderingFunction"](Options/EventOrderingFunction.md)
+  - ["EventSelectionFunction"](Options/EventSelectionFunction.md)
+  - ["EventDeduplication"](Options/EventDeduplication.md)
+  - [Method](Options/Method.md)
+  - [Time Constraint](Options/TimeConstraint.md)

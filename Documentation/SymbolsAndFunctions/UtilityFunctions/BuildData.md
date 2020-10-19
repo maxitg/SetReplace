@@ -1,4 +1,6 @@
-### Build Data
+###### [Symbols and Functions](/README.md#symbols-and-functions) > Utility Functions >
+
+# Build Data
 
 There are two constants containing information about the build. **`$SetReplaceGitSHA`** is a git SHA of the currently-used version of *SetReplace*:
 
@@ -15,6 +17,6 @@ If the build directory were not clean, it would have "\*" at the end.
 In[] := $SetReplaceBuildTime
 ```
 
-<img src="../../Images/BuildTime.png" width="277">
+<img src="/Documentation/Images/BuildTime.png" width="277">
 
 These constants are particularly useful for reporting issues with the code.

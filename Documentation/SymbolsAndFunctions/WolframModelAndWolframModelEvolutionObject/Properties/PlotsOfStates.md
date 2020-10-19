@@ -1,4 +1,6 @@
-#### Plots of States
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md#properties) >
+
+# Plots of States
 
 Instead of explicitly calling [`WolframModelPlot`](../../WolframModelPlot.md), one can use short-hand properties **`"FinalStatePlot"`** and **`"StatesPlotsList"`**:
 

@@ -1,4 +1,6 @@
-#### Expression Separations
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md#properties) >
+
+# Expression Separations
 
 Expressions can be related in different ways to one another depending on the causal structure of the expressions-events
 graph.

@@ -1,4 +1,6 @@
-#### "EventSelectionFunction"
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Options](../WolframModelAndWolframModelEvolutionObject.md#options) >
+
+# "EventSelectionFunction"
 
 **`EventSelectionFunction`** allows one to evaluate multiway systems.
 Currently, three values are supported, `"GlobalSpacelike"`, `"MultiwaySpacelike"` and `None`.
@@ -23,7 +25,7 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {2, 3}, {2, 4}},
   Infinity]["ExpressionsEventsGraph", VertexLabels -> Automatic]
 ```
 
-<img src="../../../Images/GlobalSpacelikeEvolution.png" width="419">
+<img src="/Documentation/Images/GlobalSpacelikeEvolution.png" width="419">
 
 In this example we used the default `"GlobalSpacelike"` selection function, and the evolution terminated after a single
 event, because the expression `{1, 2}` was used, and it could not be reused to be matched with `{2, 4}`.
@@ -36,7 +38,7 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {2, 3}, {2, 4}},
  VertexLabels -> Automatic]
 ```
 
-<img src="../../../Images/SpacelikeMatching.png" width="478">
+<img src="/Documentation/Images/SpacelikeMatching.png" width="478">
 
 In this case, the expression `{1, 2}` was matched twice, which we can also see by looking at its list of destroyer
 events:
@@ -60,7 +62,7 @@ In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="../../../Images/NoBranchlikeMatching.png" width="478">
+<img src="/Documentation/Images/NoBranchlikeMatching.png" width="478">
 
 However, `"EventSelectionFunction" -> None` also matches expressions that are branchlike and timelike.
 So, further evolution will be generated in the previous example:
@@ -73,7 +75,7 @@ In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="../../../Images/BranchlikeMatching.png" width="373">
+<img src="/Documentation/Images/BranchlikeMatching.png" width="373">
 
 Similarly, it matches timelike expressions `{1, 2}` and `{1, 2, 3}` below:
 
@@ -85,7 +87,7 @@ In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="../../../Images/TimelikeMatching.png" width="247">
+<img src="/Documentation/Images/TimelikeMatching.png" width="247">
 
 Because of this branchlike and timelike matching, branches in `"EventSelectionFunction" -> None` evolution are not
 separated but can "interfere" with one another.

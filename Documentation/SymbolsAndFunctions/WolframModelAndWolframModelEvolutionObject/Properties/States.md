@@ -1,4 +1,6 @@
-#### States
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md#properties) >
+
+# States
 
 These are the properties used to extract states at a particular moment in the evolution. They always return lists, but in the examples below, we plot them for clarity.
 

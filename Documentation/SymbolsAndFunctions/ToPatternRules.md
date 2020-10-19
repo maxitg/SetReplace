@@ -1,4 +1,6 @@
-## ToPatternRules
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) >
+
+# ToPatternRules
 
 **`ToPatternRules`** is a convenience function used to quickly enter rules such as the one mentioned previously:
 

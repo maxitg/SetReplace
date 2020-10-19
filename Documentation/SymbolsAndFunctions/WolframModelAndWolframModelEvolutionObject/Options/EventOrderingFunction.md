@@ -1,4 +1,6 @@
-#### "EventOrderingFunction"
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Options](../WolframModelAndWolframModelEvolutionObject.md#options) >
+
+# "EventOrderingFunction"
 
 In many `WolframModel` systems multiple matches are possible at any given step. As an example, two possible replacements are possible in the system below from the initial condition:
 
@@ -7,7 +9,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
  {{1, 2}, {2, 2}}, <|"MaxEvents" -> 1|>, "EventsStatesPlotsList"]
 ```
 
-<img src="../../../Images/NonoverlappingEvolutionWithAutomaticOrdering.png" width="513">
+<img src="/Documentation/Images/NonoverlappingEvolutionWithAutomaticOrdering.png" width="513">
 
 ```wl
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
@@ -15,7 +17,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
  "EventOrderingFunction" -> "NewestEdge"]
 ```
 
-<img src="../../../Images/NonoverlappingEvolutionWithNewestEdgeOrdering.png" width="513">
+<img src="/Documentation/Images/NonoverlappingEvolutionWithNewestEdgeOrdering.png" width="513">
 
 In this particular so-called non-overlapping system, the order of replacements does not matter. Regardless of order, the same final state (up to renaming of vertices) is produced for the same fixed number of generations. This will always be the case if there is only a single edge on the left-hand side of the rule:
 
@@ -25,7 +27,7 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
    "EventOrderingFunction" -> #] & /@ {Automatic, "Random"}
 ```
 
-<img src="../../../Images/NonoverlappingRandomEvolutionComparison.png" width="513">
+<img src="/Documentation/Images/NonoverlappingRandomEvolutionComparison.png" width="513">
 
 For some systems, however, the order of replacements does matter, and non-equivalent final states would be produced for different orders even if a fixed number of generations is requested:
 
@@ -34,7 +36,7 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3, 4}},
  {{1, 2}, {2, 3}, {3, 4}, {4, 1}}, 5, "FinalStatePlot"]
 ```
 
-<img src="../../../Images/OverlappingEvolutionAutomaticOrdering.png" width="478">
+<img src="/Documentation/Images/OverlappingEvolutionAutomaticOrdering.png" width="478">
 
 ```wl
 In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3, 4}},
@@ -42,7 +44,7 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3, 4}},
  "EventOrderingFunction" -> "RuleOrdering"]
 ```
 
-<img src="../../../Images/OverlappingEvolutionRuleOrderingOrdering.png" width="478">
+<img src="/Documentation/Images/OverlappingEvolutionRuleOrderingOrdering.png" width="478">
 
 In a case like that, it is important to be able to specify the desired evolution order, which is the purpose of the **`"EventOrderingFunction"`** option. `"EventOrderingFunction"` is specified as a list of sorting criteria such as the default `{"LeastRecentEdge", "RuleOrdering", "RuleIndex"}`. Note that most individual sorting criteria are insufficient to distinguish between all available matches. If multiple matches remain after exhausting all sorting criteria, one is chosen uniformly at random (which is why `{}` works as a shorthand for `"Random"`).
 
@@ -109,4 +111,4 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
   "ReverseRuleOrdering", "RuleIndex", "ReverseRuleIndex", "Random", "Any"}
 ```
 
-<img src="../../../Images/AllEventOrderingFunctionPlots.png" width="1209">
+<img src="/Documentation/Images/AllEventOrderingFunctionPlots.png" width="1209">

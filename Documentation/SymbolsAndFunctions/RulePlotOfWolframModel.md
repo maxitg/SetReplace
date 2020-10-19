@@ -1,4 +1,6 @@
-## RulePlot of WolframModel
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) >
+
+# RulePlot of WolframModel
 
 **`RulePlot`** can be used to get a [`WolframModelPlot`](WolframModelPlot.md)-based visual representation of hypergraph substitution rules:
 
