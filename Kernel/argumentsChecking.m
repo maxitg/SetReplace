@@ -1,12 +1,14 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageScope["supportedOptionQ"]
 PackageScope["knownOptionsQ"]
 
 General::invalidFiniteOption =
   "Value `2` of option `1` should be one of `3`.";
 
-supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := Module[{value, supportedQ},
+supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := ModuleScope[
   value = OptionValue[func, {opts}, optionToCheck];
   supportedQ = MemberQ[validValues, value];
   If[!supportedQ,

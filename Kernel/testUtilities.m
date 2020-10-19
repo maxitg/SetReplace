@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageScope["testUnevaluated"]
 PackageScope["testSymbolLeak"]
 PackageScope["checkGraphics"]

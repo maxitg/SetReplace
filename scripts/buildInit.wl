@@ -1,5 +1,6 @@
 Needs["CCompilerDriver`"];
 Needs["PacletManager`"];
+Needs["GeneralUtilities`"];
 
 $internalBuildQ = AntProperty["build_target"] === "internal";
 
@@ -64,7 +65,7 @@ copyWLSourceToBuildDirectory[] /; !$internalBuildQ := With[{
 
 fileStringReplace[file_, rules_] := Export[file, StringReplace[Import[file, "Text"], rules], "Text"]
 
-renameContext[Automatic, version_] := Module[{context},
+renameContext[Automatic, version_] := ModuleScope[
   context = Replace[
     If[$internalBuildQ, AntProperty["context"], tryEnvironment["CONTEXT", "SetReplace"]],
     "Version" -> "SetReplace$" <> StringReplace[version, "." -> "$"]] <> "`";
@@ -82,8 +83,7 @@ renameContext[newContext_] := fileStringReplace[#, "SetReplace`" -> newContext] 
 $baseVersionPacletMessage = "Will create paclet with the base version number.";
 updateVersion::noGitLink = "Could not find GitLink. " <> $baseVersionPacletMessage;
 
-updateVersion[] /; Names["GitLink`*"] =!= {} := Module[{
-    versionInformation, gitRepo, minorVersionNumber, versionString, pacletInfoFilename, pacletInfo},
+updateVersion[] /; Names["GitLink`*"] =!= {} := ModuleScope[
   Check[
     versionInformation = Import[FileNameJoin[{$repoRoot, "scripts", "version.wl"}]];
     gitRepo = GitOpen[$repoRoot];
@@ -104,7 +104,7 @@ updateVersion[] /; Names["GitLink`*"] =!= {} := Module[{
 
 updateVersion[] /; Names["GitLink`*"] === {} := Message[updateVersion::noGitLink];
 
-gitSHA[] /; Names["GitLink`*"] =!= {} := Module[{gitRepo, sha, cleanQ},
+gitSHA[] /; Names["GitLink`*"] =!= {} := ModuleScope[
   gitRepo = GitOpen[$repoRoot];
   sha = GitSHA[gitRepo, gitRepo["HEAD"]];
   cleanQ = AllTrue[# === {} &]@GitStatus[gitRepo];
@@ -127,7 +127,7 @@ addModifiedContextFlag[fileName_] := FileNameJoin[Append[
   Most[FileNameSplit[fileName]],
   StringJoin[StringRiffle[Most[StringSplit[Last[FileNameSplit[fileName]], "."]], "."], "-C.paclet"]]]
 
-packPaclet[context_] := Module[{pacletFileName},
+packPaclet[context_] := ModuleScope[
   If[$internalBuildQ,
     Print["$Version: ", $Version];
     Print["$InstallationDirectory: ", $InstallationDirectory];

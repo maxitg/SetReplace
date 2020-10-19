@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["ToPatternRules"]
 
 (* Anonymous rules make it easier to specify rules, especially when they involve creation of new vertices (objects).
@@ -33,9 +35,7 @@ toPatternRules[rules_, caller_] := 0 /;
 (* We are going to find all non-lists in the rules, map them to symbols, and then replace original rules with these
    symbols using patterns and modules accordingly. *)
 
-toPatternRules[rule : _Rule, caller_] := Module[
-    {leftSymbols, rightSymbols, symbols, newVertexNames, vertexPatterns,
-     newLeft, leftVertices, rightVertices, rightOnlyVertices},
+toPatternRules[rule : _Rule, caller_] := ModuleScope[
   {leftSymbols, rightSymbols} =
     Union[Cases[#, _ ? AtomQ, {0, 1}], Cases[#, _, {2}]] & /@ List @@ rule;
   symbols = DeleteDuplicates @ Join[leftSymbols, rightSymbols];
@@ -61,7 +61,7 @@ toPatternRules[rule : _Rule, caller_] := Module[
 toPatternRules[rules : {___Rule}, caller_] :=
   toPatternRules[#, caller] & /@ rules
 
-ToPatternRules[rules_] := Module[{result},
+ToPatternRules[rules_] := ModuleScope[
   result = Check[toPatternRules[rules, ToPatternRules], $Failed];
   result /; result =!= $Failed
 ]

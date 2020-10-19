@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["HypergraphAutomorphismGroup"]
 
 (* Documentation *)
@@ -14,7 +16,8 @@ HypergraphAutomorphismGroup::invalidHypergraph =
 
 (* Implementation *)
 
-HypergraphAutomorphismGroup[args___] := Module[{result = Catch[hypergraphAutomorphismGroup[args]]},
+HypergraphAutomorphismGroup[args___] := ModuleScope[
+  result = Catch[hypergraphAutomorphismGroup[args]];
   result /; result =!= $Failed
 ]
 
@@ -28,8 +31,8 @@ hypergraphAutomorphismGroup[e : {{Except[_List]...}...}] := With[{
   removeAuxiliaryElements[GraphAutomorphismGroup[binaryGraph], binaryGraph, e]
 ]
 
-toStructurePreservingBinaryEdges[hyperedge_] := Module[{
-    edgeVertices = Table[edge[Unique[v, {Temporary}]], Length[hyperedge]]},
+toStructurePreservingBinaryEdges[hyperedge_] := ModuleScope[
+  edgeVertices = Table[edge[Unique[v, {Temporary}]], Length[hyperedge]];
   Join[
     EdgeList[PathGraph[edgeVertices, DirectedEdges -> True]],
     Thread[DirectedEdge[edgeVertices, hyperedge]]]
@@ -42,8 +45,7 @@ toStructurePreservingBinaryEdges[hyperedge_] := Module[{
     and deleted), generators affecting both (which will be trimmed), and generators of original vertices only
     (which will be preserved).*)
 
-removeAuxiliaryElements[group_, graph_, hypergraph_] := Module[{
-    trueVertexIndices, binaryGraphIndexToVertex, vertexToHypergraphIndex},
+removeAuxiliaryElements[group_, graph_, hypergraph_] := ModuleScope[
   trueVertexIndices = Position[VertexList[graph], Except[_edge], {1}, Heads -> False][[All, 1]];
   binaryGraphIndexToVertex = Thread[trueVertexIndices -> VertexList[graph][[trueVertexIndices]]];
   vertexToHypergraphIndex = Thread[vertexList[hypergraph] -> Range[Length[binaryGraphIndexToVertex]]];

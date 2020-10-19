@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["HypergraphUnifications"]
 
 (* Documentation *)
@@ -16,7 +18,8 @@ HypergraphUnifications::edgeNotList = "Hypergraph edge `` should be a List.";
 
 (* Implementation *)
 
-HypergraphUnifications[args___] := Module[{result = Catch[hypergraphUnifications[args]]},
+HypergraphUnifications[args___] := ModuleScope[
+  result = Catch[hypergraphUnifications[args]];
   result /; result =!= $Failed
 ]
 

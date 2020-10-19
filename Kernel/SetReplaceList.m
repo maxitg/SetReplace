@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["SetReplaceList"]
 
 (* Same as SetReplace, but returns all intermediate steps in a List. *)
@@ -23,7 +25,7 @@ Options[SetReplaceList] = {
 
 SetReplaceList[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
     recognizedOptionsQ[expr, SetReplaceList, {o}] :=
-  Module[{result},
+  ModuleScope[
     result = Check[
       setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplaceList, False, o],
       $Failed];
