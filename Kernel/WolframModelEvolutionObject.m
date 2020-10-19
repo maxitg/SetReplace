@@ -97,6 +97,7 @@ $propertyArgumentCounts = Join[
     "StatesList" -> {0, 0},
     "StatesPlotsList" -> {0, Infinity},
     "EventsStatesPlotsList" -> {0, Infinity},
+    "EvolutionVideo" -> {0, Infinity},
     "AllEventsStatesEdgeIndicesList" -> {0, 0},
     "AllEventsStatesList" -> {0, 0},
     "GenerationEdgeIndices" -> {1, 1},
@@ -280,7 +281,8 @@ $propertyOptions = <|
   "LayeredCausalGraph" -> $layeredCausalGraphOptions,
   "StatesPlotsList" -> Options[HypergraphPlot],
   "EventsStatesPlotsList" -> Options[HypergraphPlot],
-  "FinalStatePlot" -> Options[HypergraphPlot]
+  "FinalStatePlot" -> Options[HypergraphPlot],
+  "EvolutionVideo" -> Options[HypergraphPlot]
 |>;
 
 (* Prevent {}, {{}}, {{}, {}}, etc. being treated as options *)
@@ -594,6 +596,15 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       HypergraphPlot::invalidEdges],
     Throw[$Failed]]
 ]
+
+(* EvolutionVideo *)
+
+propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    property : "EvolutionVideo",
+    o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]] == {})] :=
+  evolutionVideo[obj, caller, boundary, o]
 
 (* FinalDistinctElementsCount *)
 
