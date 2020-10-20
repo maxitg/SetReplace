@@ -33,30 +33,34 @@ $automaticMethod = "DistanceMatrix";
 $validMethods = {"DistanceMatrix", "Structure"};
 
 (* error messages *)
-HypergraphToGraph::bdmtd = "Value of option Method -> `1` is not" <>
-  StringJoin[Flatten @ Replace[ToString[#, InputForm] & /@, {a___, b_} :> {Riffle[{a}, ", "], " or ", b}]] <> ".";
+HypergraphToGraph::bdmtd = StringJoin[{
+  "Value of option Method -> `1` is not",
+  Replace[ToString[#, InputForm] & /@ $validMethods, {a___, b_} :> {Riffle[{a}, ", "], " or ", b}],
+  "."}];
 
 (* internal *)
 hypergraphToGraph[_, hgraph_ ? hypergraphQ, opts : OptionsPattern[]] := ModuleScope[
-  method = OptionValue[Method];
+  method = OptionValue[HypergraphToGraph, {opts}, Method];
   If[method =!= Automatic && !MemberQ[$validMethods, method],
     Message[hypergraphToGraph::bdmtd, method];
     Throw[$Failed],
     method = Replace[method, Automatic -> $automaticMethod]
   ];
+  toGraph[method, hgraph, opts]
 ]
 
 (** Distance matrix preserving **)
 toGraph["DistanceMatrix", hgraph_, opts : OptionsPattern[]] :=
   Graph[
+    {},
     Flatten[
       Table[
         DirectedEdge[edge[[j]], edge[[i]]],
         {edge, hgraph},
-        {i, Length @ hgraph},
+        {i, Length @ edge},
         {j, i - 1}],
       2],
-    FilterRules[{opts}, Graph]]
+    FilterRules[{opts}, Options @ Graph]]
 
 (** Structure preserving **)
 
