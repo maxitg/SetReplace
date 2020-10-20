@@ -20,13 +20,19 @@
       ],
 
       testUnevaluated[
-        HypergraphToGraph[{{1}}, "DistancePreserving", Automatic],
+        HypergraphToGraph[{{1}}, "DirectedDistancePreserving", Automatic],
         {HypergraphToGraph::argrx}
+      ],
+
+      (** invalid options **)
+      testUnevaluated[
+        HypergraphToGraph[{{1}}, "StructurePreserving", "invalid" -> "option"],
+        {HypergraphToGraph::optx}
       ],
 
       (** invalid hypergraph **)
       testUnevaluated[
-        HypergraphToGraph[{1, {2}}, "DistancePreserving"],
+        HypergraphToGraph[{1, {2}}, "DirectedDistancePreserving"],
         {HypergraphToGraph::invalidHypergraph}
       ],
 
@@ -36,47 +42,76 @@
         {HypergraphToGraph::invalidMethod}
       ],
 
-      (* "DistancePreserving" *)
+      (* "DirectedDistancePreserving" *)
       VerificationTest[
-        HypergraphToGraph[{}, "DistancePreserving"],
+        HypergraphToGraph[{}, "DirectedDistancePreserving"],
         Graph[{}, {}]
       ],
 
       VerificationTest[
-        HypergraphToGraph[{{}}, "DistancePreserving"],
+        HypergraphToGraph[{{}}, "DirectedDistancePreserving"],
         Graph[{}, {}]
       ],
 
       VerificationTest[
-        HypergraphToGraph[{{1}}, "DistancePreserving"],
+        HypergraphToGraph[{{1}}, "DirectedDistancePreserving"],
         Graph[{1}, {}]
       ],
 
       VerificationTest[
-        HypergraphToGraph[{Range[4]}, "DistancePreserving"],
-        Graph[
-          {1, 2, 3, 4},
-          {
-            DirectedEdge[1, 2],
-            DirectedEdge[1, 3],
-            DirectedEdge[2, 3],
-            DirectedEdge[1, 4],
-            DirectedEdge[2, 4],
-            DirectedEdge[3, 4]}]
+        HypergraphToGraph[{{1, 1}}, "DirectedDistancePreserving"],
+        Graph[{1}, {DirectedEdge[1, 1]}]
       ],
 
       VerificationTest[
-        HypergraphToGraph[{{1, {3}, 2}, {2, 1, {3}}, {1, 1}, {2}}, "DistancePreserving"],
-        Graph[
-          {1, 2, {3}},
-          {
-            DirectedEdge[1, {3}],
-            DirectedEdge[1, 2],
-            DirectedEdge[{3}, 2],
-            DirectedEdge[2, 1],
-            DirectedEdge[2, {3}],
-            DirectedEdge[1, {3}],
-            DirectedEdge[1, 1]}]
+        HypergraphToGraph[{{1, 1, 1}}, "DirectedDistancePreserving"],
+        Graph[{1}, {DirectedEdge[1, 1], DirectedEdge[1, 1], DirectedEdge[1, 1]}]
+      ],
+
+      VerificationTest[
+        HypergraphToGraph[{{1, 2, 1}}, "DirectedDistancePreserving"],
+        Graph[{1}, {DirectedEdge[1, 1], DirectedEdge[1, 2], DirectedEdge[2, 1]}]
+      ],
+
+      VerificationTest[
+        HypergraphToGraph[{Range[4]}, "DirectedDistancePreserving"],
+        Graph[{1, 2, 3, 4}, {{{1, 2}, {1, 3}, {1, 4}, {2, 3}, {2, 4}, {3, 4}}, Null}]
+      ],
+
+      VerificationTest[
+        HypergraphToGraph[{{1, {3}, 2}, {2, 1, {3}}, {1, 1}, {2}}, "DirectedDistancePreserving"],
+        Graph[{1, 2, {3}}, {{{1, 1}, {1, 2}, {1, 3}, {1, 3}, {2, 1}, {2, 3}, {3, 2}}, Null}]
+      ],
+
+      (* "UndirectedDistancePreserving" *)
+      VerificationTest[
+        HypergraphToGraph[{}, "UndirectedDistancePreserving"],
+        Graph[{}, {}]
+      ],
+
+      VerificationTest[
+        HypergraphToGraph[{{}}, "UndirectedDistancePreserving"],
+        Graph[{}, {}]
+      ],
+
+      VerificationTest[
+        HypergraphToGraph[{{1}}, "UndirectedDistancePreserving"],
+        Graph[{1}, {}]
+      ],
+
+      VerificationTest[
+        HypergraphToGraph[{{1, 1}}, "UndirectedDistancePreserving"],
+        Graph[{1}, {UndirectedEdge[1, 1]}]
+      ],
+
+      VerificationTest[
+        HypergraphToGraph[{{1, 1, 1}}, "UndirectedDistancePreserving"],
+        Graph[{1}, {UndirectedEdge[1, 1], UndirectedEdge[1, 1], UndirectedEdge[1, 1]}]
+      ],
+
+      VerificationTest[
+        HypergraphToGraph[{{1, 2, 1}}, "UndirectedDistancePreserving"],
+        Graph[{1}, {UndirectedEdge[1, 1], UndirectedEdge[1, 2], UndirectedEdge[2, 1]}]
       ]
     }
   |>
