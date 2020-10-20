@@ -11,7 +11,7 @@
       (** argument count **)
       testUnevaluated[
         HypergraphToGraph[],
-        {HypergraphToGraph::argx}
+        {HypergraphToGraph::argrx}
       ],
 
       testUnevaluated[
@@ -21,7 +21,7 @@
 
       testUnevaluated[
         HypergraphToGraph[{{1}}, "DistancePreserving", Automatic],
-        {HypergraphToGraph::argx}
+        {HypergraphToGraph::argrx}
       ],
 
       (** invalid hypergraph **)
@@ -48,7 +48,7 @@
       ],
 
       VerificationTest[
-        HypergraphToGraph[{{{1}}}, "DistancePreserving"],
+        HypergraphToGraph[{{1}}, "DistancePreserving"],
         Graph[{1}, {}]
       ],
 
