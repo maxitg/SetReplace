@@ -14,7 +14,7 @@ Options[HypergraphToGraph] = Join[{}, Options @ Graph];
 (* SyntaxInformation *)
 SyntaxInformation[HypergraphToGraph] = {
   "ArgumentsPattern" -> {_, _, OptionsPattern[]},
-  "OptionNames" -> Options[HypergraphToGraph][All, 1]};
+  "OptionNames" -> Options[HypergraphToGraph][[All, 1]]};
 
 (* Argument count *)
 HypergraphToGraph[args___] := 0 /;
