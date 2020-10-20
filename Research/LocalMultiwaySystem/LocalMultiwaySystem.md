@@ -538,7 +538,7 @@ Suppose they are identical up to the renaming of new atoms.
 In that case, we can deduplicate the resulting expressions so that the two branches corresponding to singleway
 evolutions end at the same set of expressions, even if the intermediate steps are different.
 
-In the example above, we can consider two evolutions starting from `{{1}}` and ending at `{{1, 4}, {1, 5}` and
+In the example above, we can consider two evolutions starting from `{{1}}` and ending at `{{1, 4}, {1, 5}}` and
 `{{1, 2}, {1, 3}}`, respectively.
 Note that if we rename `{4 -> 2, 5 -> 3}`, the final states become identical.
 Hence, we can deduplicate them, merging future evolutions (since they now start from the same set of expressions).
