@@ -55,25 +55,26 @@ graphJoin[graphs : {__Graph}, opts___] := With[{
 ]
 
 (* Distance preserving *)
-toDistancePreserving[{directness_, hyperedge_}, opts___] :=
-  Graph[hyperedge, directness @@@ Subsets[hyperedge, {2}], opts]
+toDistancePreserving[{directedness_, hyperedge_}, opts___] :=
+  Graph[hyperedge, directedness @@@ Subsets[hyperedge, {2}], opts]
 
-hypergraphToGraph[_, hgraph_ ? hypergraphQ, "DirectedDistancePreserving", opts : OptionsPattern[]] :=
-  With[{hyperedgeGraphs = toDistancePreserving[{DirectedEdge, #}, opts] & /@ hgraph},
-    graphJoin[hyperedgeGraphs, opts]
-  ]
-
-hypergraphToGraph[_, hgraph_ ? hypergraphQ, "UndirectedDistancePreserving", opts : OptionsPattern[]] :=
-  With[{hyperedgeGraphs = toDistancePreserving[{UndirectedEdge, #}, opts] & /@ hgraph},
-    graphJoin[hyperedgeGraphs, opts]
+hypergraphToGraph[
+    _,
+    hgraph_ ? hypergraphQ,
+    method : "DirectedDistancePreserving" | "UndirectedDistancePreserving",
+    opts : OptionsPattern[]] :=
+  With[{directedness = Switch[method, "DirectedDistancePreserving", DirectedEdge, _, UndirectedEdge]},
+    graphJoin[
+      toDistancePreserving[{directedness, #}, opts] & /@ hgraph
+      opts]
   ]
 
 (* Structure preserving *)
 toStructurePreserving[{hyperedgeIndex_, hyperedge_}, opts___] := ModuleScope[
   hyperedgeVertices = Table[
-    "Hyperedge"[hyperedgeIndex, vertexPositionIndex],
+    {"Hyperedge", hyperedgeIndex, vertexPositionIndex},
     {vertexPositionIndex, Length @ hyperedge}];
-  vertexVertices = "Vertex" /@ hyperedge;
+  vertexVertices = {"Vertex", #} & /@ hyperedge;
   Graph[
     hyperedgeVertices,
     Join[
@@ -88,8 +89,8 @@ hypergraphToGraph[_, hgraph_ ? hypergraphQ, "StructurePreserving", opts : Option
     graphJoin[
       hyperedgeGraphs,
       opts,
-      VertexStyle -> {"Hyperedge"[__] -> LightBlue},
-      EdgeStyle -> {DirectedEdge["Hyperedge"[__], "Hyperedge"[__]] -> Dashed}]
+      VertexStyle -> {{"Hyperedge", _, _} -> LightBlue},
+      EdgeStyle -> {DirectedEdge[{"Hyperedge", _, _}, {"Hyperedge", _, _}] -> Dashed}]
   ]
 
 (* Incorrect arguments messages *)
