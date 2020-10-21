@@ -65,7 +65,7 @@ hypergraphToGraph[
     opts : OptionsPattern[]] :=
   With[{directedness = Switch[method, "DirectedDistancePreserving", DirectedEdge, _, UndirectedEdge]},
     graphJoin[
-      toDistancePreserving[{directedness, #}, opts] & /@ hgraph
+      toDistancePreserving[{directedness, #}, opts] & /@ hgraph,
       opts]
   ]
 
