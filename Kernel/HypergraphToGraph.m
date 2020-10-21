@@ -80,14 +80,13 @@ hypergraphToGraph[_, hgraph_ ? hypergraphQ, "StructurePreserving", opts : Option
     annotationRules = Replace[
       DeleteCases[AnnotationValue[#, AnnotationRules] & /@ hyperedgeGraphs, $Failed],
       {list : {__List} :> (AnnotationRules -> Catenate[list]), _ -> Sequence[]}];
-    result = graphJoin[hyperedgeGraphs];
-    auxVerticesPattern = Alternatives @@ Complement[VertexList @ result, vertexList @ hgraph];
-    Graph[
-      result,
+    hgraphVertexPatt = Alternatives @@ (vertexList @ hgraph);
+    graphJoin[
+      hyperedgeGraphs,
       annotationRules,
       opts,
-      VertexStyle -> {auxVerticesPattern -> LightBlue},
-      EdgeStyle -> {DirectedEdge[auxVerticesPattern, auxVerticesPattern] -> Dashed}]
+      VertexStyle -> {Except[hgraphVertexPatt] -> LightBlue},
+      EdgeStyle -> {DirectedEdge[Except[hgraphVertexPatt], Except[hgraphVertexPatt]] -> Dashed}]
   ]
 
 (* Undirected distance preserving:
