@@ -1,3 +1,5 @@
+###### [Symbols and Functions](/README.md#symbols-and-functions) >
+
 # WolframModel and WolframModelEvolutionObject
 
 [Rule Specification](#rule-specification) | [Automatic Initial State](#automatic-initial-state) | [Step Limiters](#wolframmodel-step-limiters) | [Properties](#properties) | [Options](#options)
@@ -18,7 +20,7 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
  {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 10]
 ```
 
-<img src="../../Images/EvolutionObject10Steps.png" width="493">
+<img src="/Documentation/Images/EvolutionObject10Steps.png" width="493">
 
 Note that this call is different from the [`SetReplace`](../SetReplace*.md) function in a variety of ways:
 
@@ -35,11 +37,11 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
  {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 3]
 ```
 
-<img src="../../Images/EvolutionObject3Steps.png" width="487">
+<img src="/Documentation/Images/EvolutionObject3Steps.png" width="487">
 
 One can easily see its internal structure in its [`InputForm`](https://reference.wolfram.com/language/ref/InputForm.html):
 
-<img src="../../Images/InputFormOfEvolutionObject.png" width="594">
+<img src="/Documentation/Images/InputFormOfEvolutionObject.png" width="594">
 
 ```wl
 Out[] = WolframModelEvolutionObject[<|
@@ -65,7 +67,7 @@ In this particular example, it begins with `{1, 2, 3}`, `{2, 4, 5}` and `{4, 6, 
 
 `"AtomLists"` contains edges from all steps and is by itself insufficient to determine to which step a particular edge belongs. For example, `{5, 8, 1}` only appears in the result after a single step and `{7, 9, 8}` after two steps. Here we use [`"StatesList"`](Properties/States.md) property to demonstrate that:
 
-<img src="../../Images/StatesListOfEvolutionObject.png" width="613">
+<img src="/Documentation/Images/StatesListOfEvolutionObject.png" width="613">
 
 ```wl
 Out[] = {{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
@@ -91,7 +93,7 @@ Other properties of the evolution object describe the relationships between edge
 
 A specific property can be requested from an evolution object by supplying it as an argument to the object itself:
 
-<img src="../../Images/EventsCountOfEvolutionObject.png" width="629">
+<img src="/Documentation/Images/EventsCountOfEvolutionObject.png" width="629">
 
 ```wl
 Out[] = 109
@@ -99,7 +101,7 @@ Out[] = 109
 
 Properties section describes and gives examples for each available property. The full list of them can also be obtained with the `"Properties"` property:
 
-<img src="../../Images/PropertiesOfEvolutionObject.png" width="619">
+<img src="/Documentation/Images/PropertiesOfEvolutionObject.png" width="619">
 
 ```wl
 Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList",
@@ -123,7 +125,7 @@ Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList",
 
 Some properties take additional arguments, which can be supplied after the property name:
 
-<img src="../../Images/StateAfterEventOfEvolutionObject.png" width="691">
+<img src="/Documentation/Images/StateAfterEventOfEvolutionObject.png" width="691">
 
 ```wl
 Out[] = {{8, 1, 3}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}, {2, 13, 11}, {13, 7,
@@ -132,7 +134,7 @@ Out[] = {{8, 1, 3}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}, {2, 13, 11}, {13, 7,
 
 A particular generation can be extracted simply by its number (including, i.e., -1 for the final state):
 
-<img src="../../Images/GenerationOfEvolutionObject.png" width="516">
+<img src="/Documentation/Images/GenerationOfEvolutionObject.png" width="516">
 
 ```wl
 Out[] = {{6, 7, 2}, {8, 1, 3}, {4, 11, 7}, {11, 6, 9}, {6, 4, 8}, {5, 12,
@@ -184,9 +186,9 @@ Out[] = {{3, 4, 6, 8, 12, 18, 24, 36, 54, 76, 112},
  {7, 8, 10, 12, 16, 22, 28, 40, 58, 80, 116}}
 ```
 
-### Rule Specification
+## Rule Specification
 
-#### Multiple Rules
+### Multiple Rules
 
 Multiple rules can simply be specified as a list of rules:
 
@@ -205,7 +207,7 @@ To see which rules were used for each replacement:
 Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
 ```
 
-#### Pattern Rules
+### Pattern Rules
 
 Pattern rules (i.e., the kind of rules used in the [`SetReplace`](../SetReplace*.md) function) can be specified as well. As an example, previously described call to [`SetReplaceList`](../SetReplace*.md) can be reproduced as
 
@@ -223,7 +225,7 @@ In[] := WolframModel[<|"PatternRules" -> {a_, b_} /; a > b :> a - b|>,
 Out[] = {{1, 1, 5, 3, 6}, {1, 3, 6, 4}, {6, 4, 2}, {2, 2}}
 ```
 
-### Automatic Initial State
+## Automatic Initial State
 
 An initial state consisting of an appropriate number of (hyper) self-loops can be automatically produced for anonymous (non-pattern) rules. Here we evolve the system for 0 steps and ask the evolution object for the 0-th generation aka the initial state:
 
@@ -244,7 +246,7 @@ Out[] = {{1, 1}, {1, 1}, {1, 1, 1}}
 
 Note that because different patterns can be matched to the same symbol, this initial state is guaranteed to match the rules at least once (no guarantees after that).
 
-### WolframModel Step Limiters
+## Step Limiters
 
 The standard numeric argument to `WolframModel` specifies the number of generations:
 
@@ -256,7 +258,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
    3}}, 6, "FinalStatePlot"]
 ```
 
-<img src="../../Images/MaxGenerationsFinalStatePlot.png" width="478">
+<img src="/Documentation/Images/MaxGenerationsFinalStatePlot.png" width="478">
 
 Alternatively, an [`Association`](https://reference.wolfram.com/language/ref/Association.html) can be used to specify a more elaborate limiting condition:
 
@@ -269,9 +271,9 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
  <|"MaxVertices" -> 300, "MaxEvents" -> 200|>, "FinalStatePlot"]
 ```
 
-<img src="../../Images/MaxVerticesFinalStatePlot.png" width="478">
+<img src="/Documentation/Images/MaxVerticesFinalStatePlot.png" width="478">
 
-Note that the final state here is "less symmetric" because its last generation is incomplete (more on that [later](../UtilityFunctions/HypergraphAutomorphismGroup)). Such incomplete generations can be automatically trimmed by setting [`"IncludePartialGenerations" -> False`](Options/IncludePartialGenerations.md).
+Note that the final state here is "less symmetric" because its last generation is incomplete (more on that [later](../UtilityFunctions/HypergraphAutomorphismGroup.md)). Such incomplete generations can be automatically trimmed by setting [`"IncludePartialGenerations" -> False`](Options/IncludePartialGenerations.md).
 
 One can also see the presence of an incomplete generation by looking at the evolution object (note `5...6` which means 5 generations are complete, and 1 is not). Expanding the object's information, one can also see that in this particular case the evolution was terminated because `"MaxVertices"` (not `"MaxEvents"`) condition was reached:
 
@@ -284,7 +286,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
  <|"MaxVertices" -> 300, "MaxEvents" -> 200|>]
 ```
 
-<img src="../../Images/MaxVerticesEvolutionObject.png" width="753">
+<img src="/Documentation/Images/MaxVerticesEvolutionObject.png" width="753">
 
 All possible keys in that association are:
 
@@ -306,7 +308,7 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
  {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, Automatic]
 ```
 
-<img src="../../Images/AutomaticStepsGrowing.png" width="491">
+<img src="/Documentation/Images/AutomaticStepsGrowing.png" width="491">
 
 But evolves the rule much longer if it does not grow:
 
@@ -315,42 +317,40 @@ In[] := WolframModel[<|"PatternRules" -> {{a_, b_}} :> {{a + b, a - b}}|>,
  {{1, 1}}, Automatic]
 ```
 
-<img src="../../Images/AutomaticStepsNotGrowing.png" width="565">
+<img src="/Documentation/Images/AutomaticStepsNotGrowing.png" width="565">
 
 Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, setting `TimeConstraint -> 5` (it still returns values for all properties even if terminated due to time constraint), and `"IncludePartialGenerations" -> False`, but it may be adjusted in future updates.
 
-### Properties
+## Properties
 
-- Properties
-  - [All Edges Throughout Evolution](Properties/AllEdgesThroughoutEvolution.md)
-  - [Causal Graphs](Properties/CausalGraphs.md)
-  - [Creator And Destroyer Events](Properties/CreatorAndDestroyerEvents.md)
-  - [Edge And Event Generations](Properties/EdgeAndEventGenerations.md)
-  - [Element Count Lists](Properties/ElementCountLists.md)
-  - [Event Counts](Properties/EventCounts.md)
-  - [Events](Properties/Events.md)
-  - [Events And States](Properties/EventsAndStates.md)
-  - [Expression Separations](Properties/ExpressionSeparations.md)
-  - [Final Element Counts](Properties/FinalElementCounts.md)
-  - [Generation Counts](Properties/GenerationCounts.md)
-  - [Plots Of Events](Properties/PlotsOfEvents.md)
-  - [Plots Of States](Properties/PlotsOfStates.md)
-  - [Rule Indices For Events](Properties/RuleIndicesForEvents.md)
-  - [Rules](Properties/Rules.md)
-  - [States](Properties/States.md)
-  - [States As Edge Indices](Properties/StatesAsEdgeIndices.md)
-  - [Termination Reason](Properties/TerminationReason.md)
-  - [Total Element Counts](Properties/TotalElementCounts.md)
-  - [Version](Properties/Version.md) 
+- [All Edges throughout Evolution](Properties/AllEdgesThroughoutEvolution.md)
+- [Causal Graphs](Properties/CausalGraphs.md)
+- [Creator and Destroyer Events](Properties/CreatorAndDestroyerEvents.md)
+- [Edge and Event Generations](Properties/EdgeAndEventGenerations.md)
+- [Element Count Lists](Properties/ElementCountLists.md)
+- [Event Counts](Properties/EventCounts.md)
+- [Events](Properties/Events.md)
+- [Events and States](Properties/EventsAndStates.md)
+- [Expression Separations](Properties/ExpressionSeparations.md)
+- [Final Element Counts](Properties/FinalElementCounts.md)
+- [Generation Counts](Properties/GenerationCounts.md)
+- [Plots of Events](Properties/PlotsOfEvents.md)
+- [Plots of States](Properties/PlotsOfStates.md)
+- [Rule Indices for Events](Properties/RuleIndicesForEvents.md)
+- [Rules](Properties/Rules.md)
+- [States](Properties/States.md)
+- [States as Edge Indices](Properties/StatesAsEdgeIndices.md)
+- [Termination Reason](Properties/TerminationReason.md)
+- [Total Element Counts](Properties/TotalElementCounts.md)
+- [Version](Properties/Version.md) 
 
-### Options
+## Options
 
-- Options
-  - ["VertexNamingFunction"](Options/VertexNamingFunction.md)
-  - ["IncludePartialGenerations"](Options/IncludePartialGenerations.md)
-  - ["IncludeBoundaryEvents"](Options/IncludeBoundaryEvents.md)
-  - ["EventOrderingFunction"](Options/EventOrderingFunction.md)
-  - ["EventSelectionFunction"](Options/EventSelectionFunction.md)
-  - ["EventDeduplication"](Options/EventDeduplication.md)
-  - [Method](Options/Method.md)
-  - [Time Constraint](Options/TimeConstraint.md)
+- ["VertexNamingFunction"](Options/VertexNamingFunction.md)
+- ["IncludePartialGenerations"](Options/IncludePartialGenerations.md)
+- ["IncludeBoundaryEvents"](Options/IncludeBoundaryEvents.md)
+- ["EventOrderingFunction"](Options/EventOrderingFunction.md)
+- ["EventSelectionFunction"](Options/EventSelectionFunction.md)
+- ["EventDeduplication"](Options/EventDeduplication.md)
+- [Method](Options/Method.md)
+- [Time Constraint](Options/TimeConstraint.md)

@@ -13,7 +13,7 @@ Out[] = {"ConnectedInput", "ConnectedInputOutputUnion", "ConnectedOutput",
   "TraditionalSignature", "TransformationCount"}
 ```
 
-#### Transformation Count
+## Transformation Count
 
 **`TransformationCount`** is a very simple property that returns the number of rules in the system:
 
@@ -24,7 +24,7 @@ In[] := WolframModelRuleValue[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2,
 Out[] = 2
 ```
 
-#### Arity
+## Arity
 
 Arity is the length of an edge. The maximum length of any edge in the rules can be determined with **`MaximumArity`**:
 
@@ -57,7 +57,7 @@ In[] := WolframModelRuleValue[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
 Out[] = {{2, 2}, {2, 3}} -> {{8, 2}, {4, 3}}
 ```
 
-#### Node Counts
+## Node Counts
 
 One can count the vertices involved in the left- and right-hand sides of the rule with **`"NodeCounts"`**. For example, this rule has 5 vertices in the input, and 6 in the output:
 
@@ -78,7 +78,7 @@ Out[] = {{0, 1}, {1, 0}}
 
 Keep in mind that rule dropping a vertex does not imply this vertex would be deleted from the state, as there may be other edges containing this vertex.
 
-#### Connectedness
+## Connectedness
 
 There are three types of rule connectedness.
 

@@ -1,4 +1,4 @@
-###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) >
+###### [Symbols and Functions](/README.md#symbols-and-functions) >
 
 # SetReplace*
 

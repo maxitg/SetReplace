@@ -5,7 +5,7 @@
 This note introduces [local multiway systems](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventSelectionFunction.md) and examines them in the context of the
 singleway and [global multiway](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) systems.
 
-By default, [`WolframModel`](../../Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) computes only a single branch of
+By default, [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) computes only a single branch of
 the evolution.
 If there are multiple matches of the rules to the hypergraph, only one of these matches will be turned into an
 actualized event, and the other matches will be ignored.

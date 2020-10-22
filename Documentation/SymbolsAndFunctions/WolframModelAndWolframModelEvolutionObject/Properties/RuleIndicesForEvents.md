@@ -26,4 +26,4 @@ In[] := With[{
         2 -> White}, {1}]], VertexSize -> Medium]]]
 ```
 
-<img src="../../../Images/ColoredCausalGraph.png" width="478">
+<img src="/Documentation/Images/ColoredCausalGraph.png" width="478">

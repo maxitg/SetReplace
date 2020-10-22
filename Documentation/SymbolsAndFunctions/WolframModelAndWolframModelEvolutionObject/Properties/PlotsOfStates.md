@@ -11,7 +11,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "FinalStatePlot"]
 ```
 
-<img src="../../../Images/FinalStatePlot.png" width="478">
+<img src="/Documentation/Images/FinalStatePlot.png" width="478">
 
 ```wl
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
@@ -20,7 +20,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "StatesPlotsList"]
 ```
 
-<img src="../../../Images/StatesListPlot.png" width="746">
+<img src="/Documentation/Images/StatesListPlot.png" width="746">
 
 These properties take the same options as [`WolframModelPlot`](../../WolframModelPlot.md) (but one has to specify them in a call to the evolution object, not `WolframModel`):
 
@@ -32,4 +32,4 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   VertexLabels -> Automatic]
 ```
 
-<img src="../../../Images/FinalStatePlotWithVertexLabels.png" width="478">
+<img src="/Documentation/Images/FinalStatePlotWithVertexLabels.png" width="478">
