@@ -12,6 +12,6 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  3, "EventsStatesPlotsList"]
 ```
 
-<img src="../../../Images/EventsStatesPlotsList.png" width="746">
+<img src="/Documentation/Images/EventsStatesPlotsList.png" width="746">
 
 Here the dotted gray edges are the ones about to be deleted, whereas the red ones have just been created.

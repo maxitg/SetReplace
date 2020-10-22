@@ -29,4 +29,4 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 ⌘.
 ```
 
-<img src="../../../Images/AbortedEvolutionObject.png" width="760">
+<img src="/Documentation/Images/AbortedEvolutionObject.png" width="760">

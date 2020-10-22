@@ -23,7 +23,7 @@ In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
   {{{1, 2}} -> {{2, 3}}, {{2, 3}} -> {{3, 4}}}}
 ```
 
-<img src="../../../Images/SeparationComparison.png" width="512">
+<img src="/Documentation/Images/SeparationComparison.png" width="512">
 
 One might be tempted to assume that spacelike separated expressions can always be 'assembled' to produce a possible
 history for a singleway system.
@@ -41,7 +41,7 @@ In[] := WolframModel[<|
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="../../../Images/MatchAllQuantumSpacelikeMatching.png" width="351">
+<img src="/Documentation/Images/MatchAllQuantumSpacelikeMatching.png" width="351">
 
 Further, branchlike separation takes precedence over spacelike separation, and timelike separation takes precedence over
 both.
@@ -57,7 +57,7 @@ In[] := WolframModel[<|"PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}},
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="../../../Images/MatchAllSpacelikeBranchlikeMixed.png" width="352">
+<img src="/Documentation/Images/MatchAllSpacelikeBranchlikeMixed.png" width="352">
 
 Specifically, the general algorithm for computing the separation between two expressions `A` and `B` in an
 expressions-events graph is:

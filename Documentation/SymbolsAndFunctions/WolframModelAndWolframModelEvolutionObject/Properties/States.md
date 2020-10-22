@@ -13,7 +13,7 @@ In[] := WolframModelPlot @ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "FinalState"]
 ```
 
-<img src="../../../Images/FinalStatePlot.png" width="478">
+<img src="/Documentation/Images/FinalStatePlot.png" width="478">
 
 **`"StatesList"`** yields the list of states at each generation:
 
@@ -24,7 +24,7 @@ In[] := WolframModelPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "StatesList"]
 ```
 
-<img src="../../../Images/StatesListPlot.png" width="746">
+<img src="/Documentation/Images/StatesListPlot.png" width="746">
 
 This is identical to using the **`"Generation"`** property mapped over all generations:
 
@@ -36,7 +36,7 @@ In[] := WolframModelPlot /@ (WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
      "Generation", #] &) /@ Range[0, 6]
 ```
 
-<img src="../../../Images/StatesListPlot.png" width="746">
+<img src="/Documentation/Images/StatesListPlot.png" width="746">
 
 In fact, the `"Generation"` property can be omitted and the index of the generation can be used directly:
 
@@ -47,7 +47,7 @@ In[] := WolframModelPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
    {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6] /@ Range[0, 6]
 ```
 
-<img src="../../../Images/StatesListPlot.png" width="746">
+<img src="/Documentation/Images/StatesListPlot.png" width="746">
 
 `"StatesList"` shows a compressed version of the evolution. To see how the state changes with each applied replacement, use **`"AllEventsStatesList"`**:
 
@@ -59,7 +59,7 @@ In[] := WolframModelPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   "AllEventsStatesList"]
 ```
 
-<img src="../../../Images/AllEventsStatesListPlot.png" width="746">
+<img src="/Documentation/Images/AllEventsStatesListPlot.png" width="746">
 
 Finally, to see a state after a specific event, use **`"StateAfterEvent"`** (aka `"SetAfterEvent"`):
 
@@ -71,6 +71,6 @@ In[] := WolframModelPlot @ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   "StateAfterEvent", 42]
 ```
 
-<img src="../../../Images/StateAfterEventPlot.png" width="478">
+<img src="/Documentation/Images/StateAfterEventPlot.png" width="478">
 
 `"StateAfterEvent"` is equivalent to taking a corresponding part in `"AllEventsStatesList"`, but it is much faster to compute than the entire list.

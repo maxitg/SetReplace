@@ -28,7 +28,7 @@ In[] := With[{
     g_ :> ColorData["Rainbow"][g/5], {2}]}]]
 ```
 
-<img src="../../../Images/GenerationColoredStatePlots.png" width="746">
+<img src="/Documentation/Images/GenerationColoredStatePlots.png" width="746">
 
 Event and expression generations correspond to layers in [`"LayeredCausalGraph"`](CausalGraphs.md) and [`"ExpressionsEventsGraph"`](CausalGraphs.md):
 
@@ -45,4 +45,4 @@ In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
  {{1, 1}, {1, 1}, {1, 1}}, 5, "LayeredCausalGraph"]
 ```
 
-<img src="../../../Images/HypergraphModelLayeredCausalGraph.png" width="218">
+<img src="/Documentation/Images/HypergraphModelLayeredCausalGraph.png" width="218">

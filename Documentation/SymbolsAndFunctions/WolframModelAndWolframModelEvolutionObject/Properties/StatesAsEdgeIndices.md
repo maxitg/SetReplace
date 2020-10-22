@@ -1,4 +1,4 @@
-###### [Symbols and Functions](README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md) >
+###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Properties](../WolframModelAndWolframModelEvolutionObject.md#properties) >
 
 # States as Edge Indices
 
@@ -27,7 +27,7 @@ In[] := WolframModelPlot /@ With[{
    evolution["AllEventsStatesEdgeIndicesList"]]
 ```
 
-<img src="../../../Images/AllEventsStatesListPlot.png" width="746">
+<img src="/Documentation/Images/AllEventsStatesListPlot.png" width="746">
 
 However, this representation is useful if one needs to distinguish between identical edges.
 
