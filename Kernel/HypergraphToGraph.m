@@ -73,13 +73,13 @@ hypergraphToGraph[
 toStructurePreserving[{hyperedgeIndex_, hyperedge_}, opts___] := ModuleScope[
   hyperedgeVertices = Table[
     {"Hyperedge", hyperedgeIndex, vertexPositionIndex},
-    {vertexPositionIndex, Length @ hyperedge}];
+    {vertexPositionIndex, 0, Length @ hyperedge}];
   vertexVertices = {"Vertex", #} & /@ hyperedge;
   Graph[
     hyperedgeVertices,
     Join[
       DirectedEdge @@@ Partition[hyperedgeVertices, 2, 1],
-      Thread[DirectedEdge[hyperedgeVertices, vertexVertices]]],
+      Thread[DirectedEdge[Rest @ hyperedgeVertices, vertexVertices]]],
     opts]
 ]
 
@@ -88,9 +88,11 @@ hypergraphToGraph[_, hgraph_ ? hypergraphQ, "StructurePreserving", opts : Option
       hyperedgeGraphs = MapIndexed[toStructurePreserving[{#2[[1]], #1}, opts] &, hgraph]},
     graphJoin[
       hyperedgeGraphs,
-      opts,
-      VertexStyle -> {{"Hyperedge", _, _} -> LightBlue},
-      EdgeStyle -> {DirectedEdge[{"Hyperedge", _, _}, {"Hyperedge", _, _}] -> Dashed}]
+      VertexStyle -> Replace[OptionValue[Graph, {opts}, VertexStyle],
+        Automatic -> style[$lightTheme][$structurePreservingVertexStyle]],
+      EdgeStyle -> Replace[OptionValue[Graph, {opts}, EdgeStyle],
+        Automatic -> style[$lightTheme][$structurePreservingEdgeStyle]],
+      opts]
   ]
 
 (* Incorrect arguments messages *)

@@ -67,6 +67,8 @@ PackageScope["$rulialGraphVertexIconFrameStyle"]
 PackageScope["$rulialGraphVertexIconFrameMargins"]
 PackageScope["$genericLinePlotStyles"]
 PackageScope["$genericGraphEdgeStyle"]
+PackageScope["$structurePreservingVertexStyle"]
+PackageScope["$structurePreservingEdgeStyle"]
 
 combinedOptionsProperties[plotFunction_][options__] := Sequence[
   "Options" -> {options},
@@ -291,5 +293,9 @@ style[$lightTheme] = <|
     Hue[0.995, 0.989, 0.824], Hue[0.991, 0.400, 0.900]},
 
   (* Generic graph *)
-  $genericGraphEdgeStyle -> Directive[Hue[0.62, 0.3, 0.45], Opacity[0.7], AbsoluteThickness[1.5]]
+  $genericGraphEdgeStyle -> Directive[Hue[0.62, 0.3, 0.45], Opacity[0.7], AbsoluteThickness[1.5]],
+
+  (* HypergraphToGraph Structure Preserving *)
+  $structurePreservingVertexStyle -> {{"Hyperedge", _, _} -> LightBlue},
+  $structurePreservingEdgeStyle -> {DirectedEdge[{"Hyperedge", _, _}, {"Hyperedge", _, _}] -> Dashed}
 |>;
