@@ -167,13 +167,14 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
 - [WolframModelPlot](Documentation/SymbolsAndFunctions/WolframModelPlot.md)
 - [RulePlot of WolframModel](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
 - Utility Functions
-  - [Build Data](Documentation/SymbolsAndFunctions/UtilityFunctions/BuildData.md)
+  - [IndexHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/IndexHypergraph.md)
+  - [Subhypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/Subhypergraph.md)
+  - [WolframModelRuleValue](Documentation/SymbolsAndFunctions/UtilityFunctions/WolframModelRuleValue.md)
   - [GeneralizedGridGraph](Documentation/SymbolsAndFunctions/UtilityFunctions/GeneralizedGridGraph.md)
   - [HypergraphAutomorphismGroup](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphAutomorphismGroup.md)
   - [HypergraphUnifications](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphUnifications.md)
-  - [Subhypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/Subhypergraph.md)
-  - [WolframModelRuleValue](Documentation/SymbolsAndFunctions/UtilityFunctions/WolframModelRuleValue.md)
   - [WolframPhysicsProjectStyleData](Documentation/SymbolsAndFunctions/UtilityFunctions/WolframPhysicsProjectStyleData.md)
+  - [Build Data](Documentation/SymbolsAndFunctions/UtilityFunctions/BuildData.md)
 
 # Physics
 
