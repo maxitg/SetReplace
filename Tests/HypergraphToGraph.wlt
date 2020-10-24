@@ -3,6 +3,8 @@
     "init" -> (
       Attributes[Global`testUnevaluated] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+
+      getVertexEdgeList[graph_?GraphQ] := Through[{VertexList, EdgeList} @ graph];
     ),
     "tests" -> {
 
@@ -131,32 +133,39 @@
       ],
 
       VerificationTest[
-        HypergraphToGraph[{{}}, "StructurePreserving"],
-        Graph[{}, {}]
+        getVertexEdgeList @ HypergraphToGraph[{{}}, "StructurePreserving"],
+        getVertexEdgeList @ Graph[{{"Hyperedge", 1, 0}}, {}]
       ],
 
       VerificationTest[
-        HypergraphToGraph[{{1}}, "StructurePreserving", VertexStyle -> Automatic, EdgeStyle -> Automatic],
-        Graph[
-          {{"Vertex", 1}, {"Hyperedge", 1, 1}},
-          {{"Hyperedge", 1, 1} -> {"Vertex", 1}}]
+        getVertexEdgeList @ HypergraphToGraph[{{1}}, "StructurePreserving"],
+        getVertexEdgeList @ Graph[
+          {{"Vertex", 1}, {"Hyperedge", 1, 0}, {"Hyperedge", 1, 1}},
+          {{"Hyperedge", 1, 0} -> {"Hyperedge", 1, 1}, {"Hyperedge", 1, 1} -> {"Vertex", 1}}]
       ],
 
       VerificationTest[
-        HypergraphToGraph[{{1, 1}}, "StructurePreserving", VertexStyle -> Automatic, EdgeStyle -> Automatic],
-        Graph[
-          {{"Vertex", 1}, {"Hyperedge", 1, 1}, {"Hyperedge", 1, 2}},
+        getVertexEdgeList @ HypergraphToGraph[{{1, 1}}, "StructurePreserving"],
+        getVertexEdgeList @ Graph[
+          {{"Vertex", 1}, {"Hyperedge", 1, 0}, {"Hyperedge", 1, 1}, {"Hyperedge", 1, 2}},
           {
+            {"Hyperedge", 1, 0} -> {"Hyperedge", 1, 1},
             {"Hyperedge", 1, 1} -> {"Vertex", 1},
             {"Hyperedge", 1, 1} -> {"Hyperedge", 1, 2},
             {"Hyperedge", 1, 2} -> {"Vertex", 1}}]
       ],
 
       VerificationTest[
-        HypergraphToGraph[{{1, 1, 1}}, "StructurePreserving", VertexStyle -> Automatic, EdgeStyle -> Automatic],
-        Graph[
-          {{"Vertex", 1}, {"Hyperedge", 1, 1}, {"Hyperedge", 1, 2}, {"Hyperedge", 1, 3}},
+        getVertexEdgeList @ HypergraphToGraph[{{1, 1, 1}}, "StructurePreserving"],
+        getVertexEdgeList @ Graph[
           {
+            {"Vertex", 1},
+            {"Hyperedge", 1, 0}, 
+            {"Hyperedge", 1, 1},
+            {"Hyperedge", 1, 2},
+            {"Hyperedge", 1, 3}},
+          {
+            {"Hyperedge", 1, 0} -> {"Hyperedge", 1, 1},
             {"Hyperedge", 1, 1} -> {"Vertex", 1},
             {"Hyperedge", 1, 1} -> {"Hyperedge", 1, 2},
             {"Hyperedge", 1, 2} -> {"Vertex", 1},
@@ -165,15 +174,66 @@
       ],
 
       VerificationTest[
-        HypergraphToGraph[{{1, 2, 1}}, "StructurePreserving", VertexStyle -> Automatic, EdgeStyle -> Automatic],
-        Graph[
-          {{"Vertex", 1}, {"Vertex", 2}, {"Hyperedge", 1, 1}, {"Hyperedge", 1, 2}, {"Hyperedge", 1, 3}},
+        getVertexEdgeList @ HypergraphToGraph[{{1, 2, 1}}, "StructurePreserving"],
+        getVertexEdgeList @ Graph[
           {
+            {"Vertex", 1},
+            {"Vertex", 2},
+            {"Hyperedge", 1, 0},
+            {"Hyperedge", 1, 1},
+            {"Hyperedge", 1, 2},
+            {"Hyperedge", 1, 3}},
+          {
+            {"Hyperedge", 1, 0} -> {"Hyperedge", 1, 1},
             {"Hyperedge", 1, 1} -> {"Vertex", 1},
             {"Hyperedge", 1, 1} -> {"Hyperedge", 1, 2},
             {"Hyperedge", 1, 2} -> {"Vertex", 2},
             {"Hyperedge", 1, 2} -> {"Hyperedge", 1, 3},
             {"Hyperedge", 1, 3} -> {"Vertex", 1}}]
+      ],
+
+      VerificationTest[
+        getVertexEdgeList @ HypergraphToGraph[{{x, x, y, z}, {z, w}}, "StructurePreserving"],
+        getVertexEdgeList @ Graph[
+          {
+            {"Vertex", w},
+            {"Vertex", x},
+            {"Vertex", y},
+            {"Vertex", z},
+            {"Hyperedge", 1, 0},
+            {"Hyperedge", 1, 1},
+            {"Hyperedge", 1, 2},
+            {"Hyperedge", 1, 3},
+            {"Hyperedge", 1, 4},
+            {"Hyperedge", 2, 0},
+            {"Hyperedge", 2, 1},
+            {"Hyperedge", 2, 2}},
+          {
+            {"Hyperedge", 1, 0} -> {"Hyperedge", 1, 1},
+            {"Hyperedge", 1, 1} -> {"Vertex", x},
+            {"Hyperedge", 1, 1} -> {"Hyperedge", 1, 2},
+            {"Hyperedge", 1, 2} -> {"Vertex", x},
+            {"Hyperedge", 1, 2} -> {"Hyperedge", 1, 3},
+            {"Hyperedge", 1, 3} -> {"Vertex", y},
+            {"Hyperedge", 1, 3} -> {"Hyperedge", 1, 4},
+            {"Hyperedge", 1, 4} -> {"Vertex", z},
+            {"Hyperedge", 2, 0} -> {"Hyperedge", 2, 1},
+            {"Hyperedge", 2, 1} -> {"Vertex", z},
+            {"Hyperedge", 2, 1} -> {"Hyperedge", 2, 2},
+            {"Hyperedge", 2, 2} -> {"Vertex", w}}]
+      ],
+
+      (* test style*)
+      With[{graph = HypergraphToGraph[{{x, x, y, z}, {z, w}}, "StructurePreserving"]},
+        VerificationTest[
+          !MatchQ[
+            AnnotationValue[{graph, VertexList[graph, {"Hyperedge", _, _}]}, VertexStyle],
+            {__Automatic}] &&
+          !MatchQ[
+            AnnotationValue[{graph, VertexList[graph, {"Hyperedge", _, _}]}, EdgeStyle],
+            {__Automatic}],
+          True
+        ]
       ]
     }
   |>
