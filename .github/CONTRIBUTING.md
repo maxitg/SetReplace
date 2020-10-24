@@ -337,8 +337,8 @@ If you want to implement performance tests, leave considerable leeway for the pe
 The *SetReplace* documentation is contained in three places: [README.md](/README.md), [CONTRIBUTING.md](CONTRIBUTING.md) (this file), and the code comments.
 
 Some things to note are:
-* Large [README](/README.md) sections should include navigation bars in the beginning.
-* All references to functions should be links, either to [the Wolfram Language documentation](https://reference.wolfram.com/language/) or to the corresponding section in [README](/README.md).
+* Large [README](README.md) sections should include navigation bars in the beginning.
+* All references to functions should be links, either to [the Wolfram Language documentation](https://reference.wolfram.com/language/) or to the corresponding section in [README](README.md).
 * The comments in the Wolfram Language code are encouraged, and the C++ code is documented using [Doxygen](http://www.doxygen.nl).
 
 ### Scripts
