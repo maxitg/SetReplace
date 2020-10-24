@@ -2026,7 +2026,35 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
 
 ## Utility Functions
 
-[IndexHypergraph](#indexhypergraph) | [Subhypergraph](#subhypergraph) | [WolframModelRuleValue](#wolframmodelrulevalue) | [GeneralizedGridGraph](#generalizedgridgraph) | [HypergraphAutomorphismGroup](#hypergraphautomorphismgroup) | [HypergraphUnifications](#hypergraphunifications) | [WolframPhysicsProjectStyleData](#wolframphysicsprojectstyledata) | [Build Data](#build-data)
+[HypergraphToGraph](#hypergraphtograph) | [IndexHypergraph](#indexhypergraph) | [Subhypergraph](#subhypergraph) | [WolframModelRuleValue](#wolframmodelrulevalue) | [GeneralizedGridGraph](#generalizedgridgraph) | [HypergraphAutomorphismGroup](#hypergraphautomorphismgroup) | [HypergraphUnifications](#hypergraphunifications) | [WolframPhysicsProjectStyleData](#wolframphysicsprojectstyledata) | [Build Data](#build-data)
+
+### HypergraphToGraph
+
+**`HypergraphToGraph`** converts a hypergraph to a `Graph` object. There are (currently) 3 ways to perform this transformation:
+
+#### **"DirectedDistancePreserving"**
+
+Convert a hypergraph to a directed graph with the same distance matrix:
+
+```wl
+In[]:= HypergraphToGraph[{{x, x, y, z}, {z, w}}, "DirectedDistancePreserving", VertexLabels -> Automatic, GraphLayout -> "SpringElectricalEmbedding"]
+```
+
+#### **"UndirectedDistancePreserving"**
+
+Convert a hypergraph to an undirected graph with the same distance matrix, that is, each hyperedge is mapped to a complete subgraph:
+
+```wl
+In[]:= HypergraphToGraph[{{x, x, y, z}, {z, w}}, "UndirectedDistancePreserving", VertexLabels -> Automatic, GraphLayout -> "SpringElectricalEmbedding"]
+```
+
+#### **"StructurePreserving"**
+
+Convert a hypergraph to a graph by preserving its structure:
+
+```wl
+In[]:= HypergraphToGraph[{{x, x, y, z}, {z, w}}, "StructurePreserving", VertexLabels -> Automatic]
+```
 
 ### IndexHypergraph
 
