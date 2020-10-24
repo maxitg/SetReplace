@@ -1,4 +1,4 @@
-###### [Symbols and Functions](/README.md#symbols-and-functions) > 
+###### [Symbols and Functions](/README.md#symbols-and-functions) >
 
 # ToPatternRules
 

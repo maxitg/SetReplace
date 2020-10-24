@@ -2,7 +2,7 @@
 
 # WolframModel and WolframModelEvolutionObject
 
-[Rule Specification](#rule-specification) | [Automatic Initial State](#automatic-initial-state) | [Step Limiters](#wolframmodel-step-limiters) | [Properties](#properties) | [Options](#options)
+[Rule Specification](#rule-specification) | [Automatic Initial State](#automatic-initial-state) | [Step Limiters](#step-limiters) | [Properties](#properties) | [Options](#options)
 
 **`WolframModel`** is the primary function of the package. It provides tools for the generation and analysis of set substitution systems. It can compute many different properties of the evolution and has many different options, which we describe in the corresponding subsections.
 
@@ -323,25 +323,25 @@ Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, s
 
 ## Properties
 
+- [States](Properties/States.md)
+- [Plots of States](Properties/PlotsOfStates.md)
+- [Plots of Events](Properties/PlotsOfEvents.md)
 - [All Edges throughout Evolution](Properties/AllEdgesThroughoutEvolution.md)
-- [Causal Graphs](Properties/CausalGraphs.md)
-- [Creator and Destroyer Events](Properties/CreatorAndDestroyerEvents.md)
-- [Edge and Event Generations](Properties/EdgeAndEventGenerations.md)
-- [Element Count Lists](Properties/ElementCountLists.md)
-- [Event Counts](Properties/EventCounts.md)
+- [States as Edge Indices](Properties/StatesAsEdgeIndices.md)
 - [Events](Properties/Events.md)
 - [Events and States](Properties/EventsAndStates.md)
+- [Creator and Destroyer Events](Properties/CreatorAndDestroyerEvents.md)
+- [Causal Graphs](Properties/CausalGraphs.md)
 - [Expression Separations](Properties/ExpressionSeparations.md)
-- [Final Element Counts](Properties/FinalElementCounts.md)
-- [Generation Counts](Properties/GenerationCounts.md)
-- [Plots of Events](Properties/PlotsOfEvents.md)
-- [Plots of States](Properties/PlotsOfStates.md)
 - [Rule Indices for Events](Properties/RuleIndicesForEvents.md)
-- [Rules](Properties/Rules.md)
-- [States](Properties/States.md)
-- [States as Edge Indices](Properties/StatesAsEdgeIndices.md)
+- [Edge and Event Generations](Properties/EdgeAndEventGenerations.md)
 - [Termination Reason](Properties/TerminationReason.md)
+- [Generation Counts](Properties/GenerationCounts.md)
+- [Event Counts](Properties/EventCounts.md)
+- [Element Count Lists](Properties/ElementCountLists.md)
+- [Final Element Counts](Properties/FinalElementCounts.md)
 - [Total Element Counts](Properties/TotalElementCounts.md)
+- [Rules](Properties/Rules.md)
 - [Version](Properties/Version.md) 
 
 ## Options
