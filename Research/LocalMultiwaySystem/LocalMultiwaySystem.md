@@ -236,9 +236,9 @@ We have obtained two events.
 The first event replaced `{1, 2}` with `{2, 3}`.
 That is entirely normal and would happen in a singleway system as well.
 However, the singleway system would terminate immediately after that, as there is only a single expression `{2, 3}` left
-now, `{1, 2}` has been deleted, and the second rule requires both `{1, 2}` and `{2, 3}` as inputs.
-In other words, `{1, 2}` and `{2, 3}` are **timelike** expressions, and our singleway
-[`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) only matches **spacelike** expressions.
+now, `{1, 2}` has been deleted and the second rule requires both `{1, 2}` and `{2, 3}` as inputs.
+In other words, `{1, 2}` and `{2, 3}` are *timelike* expressions, and our singleway
+[`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) only matches *spacelike* expressions.
 
 However, the match-all multiway system will proceed, as both `{1, 2}` and `{2, 3}` are now in the system, and it does
 not care that they are timelike.
