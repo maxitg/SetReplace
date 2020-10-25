@@ -203,8 +203,7 @@ However, imagine that instead of deleting all matches involving the input expres
 instantiated match.
 With only that change, we will evolve the system precisely the same way we used to.
 
-Note, in this case, we will automatically get a multiway system.
-In fact, the [match-all](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventSelectionFunction.md) version of it.
+Note, in this case, we will automatically get a multiway system&mdash;in fact, the [match-all](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventSelectionFunction.md) version of it.
 It is called match-all because it will match not only the spacelike sets of expressions but also branchlike and even
 timelike ones.
 
@@ -276,12 +275,12 @@ In[] := WolframModel[<|"PatternRules" -> {{{1, 2}} -> {{2, 3}},
 <img src="Images/MatchAllBranchlikeMatching.png" width="225">
 
 Note in the above there are two possibilities to match `{{1, 2}}`, which are incompatible according to the ordinary
-[`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) and can only be achieved one-at-a-time with
+[`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) and can only be achieved one at a time with
 different choices of the [`"EventOrderingFunction"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventOrderingFunction.md).
 However, the match-all system can still match the two outputs with the third rule.
 
-Further note the obvious feature of the match-all system that it produces expressions and events that would occur in
-neither the singleway [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) nor the global
+Further note the obvious feature of the match-all system: it produces expressions and events that would occur in neither
+the singleway [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) nor the global
 [`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem).
 As such, it is a form of "interference" between branches and might allow branches to merge and interact.
 
