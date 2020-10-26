@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["SetReplaceFixedPoint"]
 
 (* Same as SetReplace, but automatically stops replacing when the set no longer changes. *)
@@ -25,7 +27,7 @@ Options[SetReplaceFixedPoint] = {
   "EventOrderingFunction" -> Automatic};
 
 SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] /;
-    recognizedOptionsQ[expr, SetReplaceFixedPoint, {o}] := Module[{result},
+    recognizedOptionsQ[expr, SetReplaceFixedPoint, {o}] := ModuleScope[
   result = Check[
     setSubstitutionSystem[
       rules, set, <||>, SetReplaceFixedPoint, False, o],

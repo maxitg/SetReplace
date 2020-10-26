@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageScope["setSubstitutionSystem$wl"]
 
 (* This is the implementation of setSubstitutionSystem in Wolfram Language. Works better with larger vertex degrees,
@@ -8,8 +10,7 @@ PackageScope["setSubstitutionSystem$wl"]
 (* We are going to transform set substitution rules into a list of n! normal rules, where elements of the input subset
    are arranged in every possible order with blank null sequences in between. *)
 
-allLeftHandSidePermutations[input_Condition :> output_List] := Module[
-    {inputLength, inputPermutations, heldOutput},
+allLeftHandSidePermutations[input_Condition :> output_List] := ModuleScope[
   inputLength = Length @ input[[1]];
 
   inputPermutations = Permutations @ input[[1]];
@@ -22,11 +23,10 @@ allLeftHandSidePermutations[input_Condition :> output_List] := Module[
 (* Now, if there are new vertices that need to be created, we will disassemble the Module remembering which variables
    it applies to, and then reassemble it for the output. *)
 
-allLeftHandSidePermutations[input_Condition :> output_Module] := Module[
-    {ruleInputOriginal = input[[1]],
-     ruleCondition = heldPart[input, 2],
-     heldModule = mapHold[output, {0, 1}],
-     moduleInputContents},
+allLeftHandSidePermutations[input_Condition :> output_Module] := ModuleScope[
+  ruleInputOriginal = input[[1]];
+  ruleCondition = heldPart[input, 2];
+  heldModule = mapHold[output, {0, 1}];
   moduleInputContents = heldModule[[1, 2]];
   With[{ruleInputFinal = #[[1]],
       moduleArguments = heldModule[[1, 1]],
@@ -61,9 +61,7 @@ allLeftHandSidePermutations[input_Condition :> output_Module] := Module[
 (* untouched are the expressions that were not used in this event. Note that the Replace[...] arguments of Catenate
    effectively choose which rule should be used because all but one of the rule patterns will be empty sequences. *)
 
-toNormalRules[rules_List] := Module[{
-    ruleNames, separateNormalRules, longestRuleLength, untouchedNames,
-    finalMatchName, input, output},
+toNormalRules[rules_List] := ModuleScope[
   ruleNames = Table[Unique["rule", {Temporary}], Length[rules]];
   separateNormalRules = allLeftHandSidePermutations /@ rules;
   longestRuleLength = Max[Map[Length, separateNormalRules[[All, All, 1, 1]], {2}]];
@@ -102,8 +100,8 @@ toNormalRules[rules_List] := Module[{
 (* This function just does the replacements, but it does not keep track of any metadata (generations and events).
    Returns {finalState, terminationReason}, and sows deleted expressions. *)
 
-setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstraint_] := Module[{
-    normalRules, previousResult, eventsCount = 0},
+setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstraint_] := ModuleScope[
+  eventsCount = 0;
   normalRules = toNormalRules @ rules;
   previousResult = set;
   Catch[
@@ -175,10 +173,10 @@ addMetadataManagement[
       getNextExpression_,
       maxGeneration_,
       maxVertexDegree_,
-      vertexIndex_] := Module[{
-    inputIDs = Table[Unique["id", {Temporary}], Length[input[[1]]]],
-    wholeInputPatternNames = Table[Unique["inputExpression", {Temporary}], Length[input[[1]]]],
-    inputGenerations = Table[Unique["generation", {Temporary}], Length[input[[1]]]]},
+      vertexIndex_] := ModuleScope[
+  inputIDs = Table[Unique["id", {Temporary}], Length[input[[1]]]];
+  wholeInputPatternNames = Table[Unique["inputExpression", {Temporary}], Length[input[[1]]]];
+  inputGenerations = Table[Unique["generation", {Temporary}], Length[input[[1]]]];
   With[{
       heldModule = mapHold[output, {0, 1}]},
     With[{
@@ -234,8 +232,7 @@ $generationMetadataIndex = 2; (* {id, generation, atoms} *)
    obtained. Note, matching is necessary to determine that because it's impossible to determine if the last generation
    is done otherwise. *)
 
-maxCompleteGeneration[output_, rulesNoMetadata_] := Module[{
-    patternToMatch, matches},
+maxCompleteGeneration[output_, rulesNoMetadata_] := ModuleScope[
   patternToMatch = toNormalRules[
     addMetadataManagement[#, Infinity, Infinity &, Infinity, Infinity, $noIndex] & /@ rulesNoMetadata];
   matches = Reap[
@@ -313,10 +310,8 @@ vertexCount[$noIndex] := 0
    generations and events. It uses setReplace$wl to evaluate that modified system. *)
 
 setSubstitutionSystem$wl[
-      caller_, rules_, init_, stepSpec_, returnOnAbortQ_, timeConstraint_] := Module[{
-    initWithMetadata, renamedRules, rulesWithMetadata, outputWithMetadata, allExpressions,
-    nextExpressionID = 1, expressionsCountsPerVertex, vertexIndex, nextExpression,
-    initialEvent, allEvents, generationsCount, maxCompleteGenerationAssumingExceedingStepSpecGenerationsDontExist},
+      caller_, rules_, init_, stepSpec_, returnOnAbortQ_, timeConstraint_] := ModuleScope[
+  nextExpressionID = 1;
   nextExpression = nextExpressionID++ &;
   (* {id, generation, atoms} *)
   initWithMetadata = {nextExpression[], 0, #} & /@ init;

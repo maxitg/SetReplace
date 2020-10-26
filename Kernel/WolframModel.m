@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["WolframModel"]
 PackageExport["$WolframModelProperties"]
 
@@ -92,8 +94,7 @@ $vertexNamingFunctions = {Automatic, None, All};
 renameNodes[evolution_, _, None] := evolution
 
 renameNodesExceptExisting[
-    evolution_, patternRulesQ_, existing_List] := Module[{
-      evolutionAtoms, existingAtoms, atomsToName, newNames},
+    evolution_, patternRulesQ_, existing_List] := ModuleScope[
   {evolutionAtoms, existingAtoms} = (DeleteDuplicates @ Catenate[If[ListQ[#], #, {#}] & /@ #]) & /@
     {evolution[[1]][$atomLists], existing};
   atomsToName = DeleteCases[evolutionAtoms, Alternatives @@ existingAtoms];
@@ -138,9 +139,7 @@ expr : WolframModel[
       stepsSpec : _ ? wolframModelStepsSpecQ : 1,
       property : _ ? wolframModelPropertyQ : "EvolutionObject",
       o : OptionsPattern[]] /; recognizedOptionsQ[expr, WolframModel, {o}] :=
-  Module[{
-      patternRules, initialSet, steps, terminationReasonOverride, optionsOverride, abortBehavior, overridenOptionValue,
-      evolution, modifiedEvolution, propertyEvaluateWithOptions, result},
+  ModuleScope[
     patternRules = fromRulesSpec[rulesSpec];
     initialSet = Catch[fromInitSpec[rulesSpec, initSpec]];
     {steps, terminationReasonOverride, optionsOverride, abortBehavior} =
@@ -202,7 +201,7 @@ expr : WolframModel[rulesSpec_ ? wolframModelRulesSpecQ, o : OptionsPattern[]] :
 WolframModel[
     rulesSpec_ ? wolframModelRulesSpecQ,
     o : OptionsPattern[] /; Quiet[recognizedOptionsQ[None, WolframModel, {o}]]][
-    initSpec_ ? wolframModelInitSpecQ] := Module[{result},
+    initSpec_ ? wolframModelInitSpecQ] := ModuleScope[
   result = Check[WolframModel[rulesSpec, initSpec, 1, "FinalState", o], $Failed];
   result /; result =!= $Failed]
 

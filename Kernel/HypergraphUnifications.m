@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["HypergraphUnifications"]
 
 (* Documentation *)
@@ -16,7 +18,8 @@ HypergraphUnifications::edgeNotList = "Hypergraph edge `` should be a List.";
 
 (* Implementation *)
 
-HypergraphUnifications[args___] := Module[{result = Catch[hypergraphUnifications[args]]},
+HypergraphUnifications[args___] := ModuleScope[
+  result = Catch[hypergraphUnifications[args]];
   result /; result =!= $Failed
 ]
 
@@ -92,7 +95,7 @@ vertexIdentificationRules[match_] :=
 findUnion[e1_, e2_, edgeMatch_, vertexMatch_] := With[{
     uniqueE1Edges = Complement[Range[Length[e1]], Keys[edgeMatch]],
     uniqueE2Edges = Complement[Range[Length[e2]], Values[edgeMatch]]}, {
-  indexHypergraph[Replace[
+  IndexHypergraph[Replace[
     Join[e1[[uniqueE1Edges]], e2[[uniqueE2Edges]], e1[[Keys[edgeMatch]]]],
     vertexIdentificationRules[vertexMatch],
     {2}]],

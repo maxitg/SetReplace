@@ -28,7 +28,7 @@ The original type of the multiway system that was first considered in the
 [Wolfram Physics Project](https://www.wolframphysics.org) is what we will call the
 [*global* multiway system](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem), which will
 be discussed in more detail in the next section.
-Here we propose a new kind of a multiway system, called a *local* multiway system.
+Here we propose a new kind of multiway system, called a *local* multiway system.
 The prime difference is that it allows one to consider the branching of only parts of space (subgraphs of the state
 hypergraph) instead of the entire hypergraph all at once.
 
@@ -81,7 +81,7 @@ One important feature of
 [`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) is that if it
 encounters multiple states that are isomorphic, it merges them into one.
 For example, if instead of the input graph in the example above we use the graph where the branches have the same
-length, the system will combine them, and we would not see the splitting behavior:
+length, the system will combine them, and we will not see the splitting behavior:
 
 ```wl
 In[] := ResourceFunction["MultiwaySystem"][
@@ -339,7 +339,7 @@ or timelike.
 
 Suppose we want to have more control over the local multiway system's matching behavior and reproduce the global
 multiway system's evolution.
-In that case, we need a way to detect whether a pair of expressions is
+In that case, we need a way to detect whether a pair of expressions is:
 
 * Spacelike &mdash; the expressions were produced (directly or indirectly) by a single event
 * Branchlike &mdash; the expressions were made (directly or indirectly) by multiple events that matched the same
@@ -422,7 +422,7 @@ Thus, to determine the separation between two expressions, `A` and `B`, in an ex
 1. Compute the past causal cones of both `A` and `B`.
 2. Compute the intersection between the causal cones.
 3. Consider all vertices with out-degree zero (the future boundary of the intersection):
-  * If the boundary contains either `A` and `B`, they are timelike separated
+  * If the boundary contains either `A` or `B`, they are timelike separated
   * If any vertices on the boundary are expression-vertices, they are branchlike separated
   * Otherwise, all vertices on the boundary are event-vertices, and they are spacelike separated
 
@@ -538,7 +538,7 @@ Suppose they are identical up to the renaming of new atoms.
 In that case, we can deduplicate the resulting expressions so that the two branches corresponding to singleway
 evolutions end at the same set of expressions, even if the intermediate steps are different.
 
-In the example above, we can consider two evolutions starting from `{{1}}` and ending at `{{1, 4}, {1, 5}` and
+In the example above, we can consider two evolutions starting from `{{1}}` and ending at `{{1, 4}, {1, 5}}` and
 `{{1, 2}, {1, 3}}`, respectively.
 Note that if we rename `{4 -> 2, 5 -> 3}`, the final states become identical.
 Hence, we can deduplicate them, merging future evolutions (since they now start from the same set of expressions).

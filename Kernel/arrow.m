@@ -1,8 +1,10 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageScope["arrow"]
 
-arrow[shape_, arrowheadLength_, vertexSize_][pts_] := Module[{ptsStartToArrowEnd, ptsStartToLineEnd},
+arrow[shape_, arrowheadLength_, vertexSize_][pts_] := ModuleScope[
   ptsStartToArrowEnd = lineTake[pts, vertexSize ;; - vertexSize];
   ptsStartToLineEnd = lineTake[ptsStartToArrowEnd, 0 ;; - arrowheadLength];
   {

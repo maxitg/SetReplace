@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["GeneralizedGridGraph"]
 
 (* Documentation *)
@@ -31,7 +33,8 @@ GeneralizedGridGraph::invalidDimSpec = "Dimension specification `` is invalid.";
 
 (* Implementation *)
 
-GeneralizedGridGraph[args___] := Module[{result = Catch[generalizedGridGraph[args]]},
+GeneralizedGridGraph[args___] := ModuleScope[
+  result = Catch[generalizedGridGraph[args]];
   result /; result =!= $Failed
 ]
 
@@ -69,8 +72,7 @@ toExplicitDimSpec[originalSpec_, _ -> _List] := (
   Throw[$Failed];
 )
 
-generalizedGridGraphExplicit[dimSpecs_, opts___] := Module[{
-    edgeStyle, vertexNamingFunction, edges, directionalEdgeStyle},
+generalizedGridGraphExplicit[dimSpecs_, opts___] := ModuleScope[
   {edgeStyle, vertexNamingFunction} = OptionValue[GeneralizedGridGraph, {opts}, {EdgeStyle, "VertexNamingFunction"}];
   edges = singleDimensionEdges[dimSpecs, #] & /@ Range[Length[dimSpecs]];
   directionalEdgeStyle = EdgeStyle -> If[

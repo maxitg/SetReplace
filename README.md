@@ -2026,17 +2026,33 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
 
 ## Utility Functions
 
-[Subhypergraph](#subhypergraph) | [WolframModelRuleValue](#wolframmodelrulevalue) | [GeneralizedGridGraph](#generalizedgridgraph) | [HypergraphAutomorphismGroup](#hypergraphautomorphismgroup) | [HypergraphUnifications](#hypergraphunifications) | [WolframPhysicsProjectStyleData](#wolframphysicsprojectstyledata) | [Build Data](#build-data)
+[IndexHypergraph](#indexhypergraph) | [Subhypergraph](#subhypergraph) | [WolframModelRuleValue](#wolframmodelrulevalue) | [GeneralizedGridGraph](#generalizedgridgraph) | [HypergraphAutomorphismGroup](#hypergraphautomorphismgroup) | [HypergraphUnifications](#hypergraphunifications) | [WolframPhysicsProjectStyleData](#wolframphysicsprojectstyledata) | [Build Data](#build-data)
+
+### IndexHypergraph
+
+**`IndexHypergraph`** replaces the vertices of the hypergraph by its vertex indices:
+
+```wl
+In[]:= IndexHypergraph[{{x, y, z}, {w, y}, {z, {x}, {{y}}}}]
+Out[]= {{2, 3, 4}, {1, 3}, {4, 5, 6}}
+```
+
+Replace the vertices with integers starting from -10:
+
+```wl
+In[]:= IndexHypergraph[{{x, y, z}, {w, y}, {z, {x}, {{y}}}}, -10]
+Out[]= {{-9, -8, -7}, {-10, -8}, {-7, -6, -5}}
+```
 
 ### Subhypergraph
 
-**`Subhypergraph`** is a small utility function that selects hyperedges that only contain vertices from the requested list.
+**`Subhypergraph`** is a small utility function that selects hyperedges that only contain vertices from the requested list:
 
 ```wl
 In[]:= Subhypergraph[{{1, 1, 1}, {1, 2}, {2, 3, 3}, {2, 3, 4}}, {2, 3, 4}]
 Out[]= {{2, 3, 3}, {2, 3, 4}}
 ```
-**`WeakSubhypergraph`** is the weak version of the previous function, where hyperedges are selected if they contain any vertex from the requested list.
+**`WeakSubhypergraph`** is the weak version of the previous function, where hyperedges are selected if they contain any vertex from the requested list:
 
 ```wl
 In[]:= WeakSubhypergraph[{{1, 1}, {2, 3}, {3, 4, 4}}, {1, 3}]
