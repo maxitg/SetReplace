@@ -186,6 +186,14 @@ $styleNames = KeySort /@ KeySort @ <|
   "GenericGraph" -> <|
     "EdgeStyle" -> $genericGraphEdgeStyle,
     combinedOptionsProperties[Graph][EdgeStyle -> $genericGraphEdgeStyle]
+  |>,
+
+  "HypergraphStructurePreservingGraph" -> <|
+    "VertexStyle" -> $structurePreservingVertexStyle,
+    "EdgeStyle" -> $structurePreservingEdgeStyle,
+    combinedOptionsProperties[Graph][
+      VertexStyle -> $structurePreservingVertexStyle,
+      EdgeStyle -> $structurePreservingEdgeStyle]
   |>
 |>;
 

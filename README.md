@@ -2037,7 +2037,11 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
 Convert a hypergraph to a directed graph with the same distance matrix:
 
 ```wl
-In[]:= HypergraphToGraph[{{x, x, y, z}, {z, w}}, "DirectedDistancePreserving", VertexLabels -> Automatic, GraphLayout -> "SpringElectricalEmbedding"]
+In[]:= HypergraphToGraph[
+  {{x, x, y, z}, {z, w}},
+  "DirectedDistancePreserving",
+  VertexLabels -> Automatic,
+  GraphLayout -> "SpringElectricalEmbedding"]
 ```
 
 <img src="READMEImages/HypergraphToGraphDirectedDistancePreserving.png" width="478">
@@ -2047,7 +2051,11 @@ In[]:= HypergraphToGraph[{{x, x, y, z}, {z, w}}, "DirectedDistancePreserving", V
 Convert a hypergraph to an undirected graph with the same distance matrix, that is, each hyperedge is mapped to a complete subgraph:
 
 ```wl
-In[]:= HypergraphToGraph[{{x, x, y, z}, {z, w}}, "UndirectedDistancePreserving", VertexLabels -> Automatic, GraphLayout -> "SpringElectricalEmbedding"]
+In[]:= HypergraphToGraph[
+  {{x, x, y, z}, {z, w}},
+  "UndirectedDistancePreserving",
+  VertexLabels -> Automatic,
+  GraphLayout -> "SpringElectricalEmbedding"]
 ```
 
 <img src="READMEImages/HypergraphToGraphUndirectedDistancePreserving.png" width="478">
@@ -2057,10 +2065,13 @@ In[]:= HypergraphToGraph[{{x, x, y, z}, {z, w}}, "UndirectedDistancePreserving",
 Convert a hypergraph to a graph by preserving its structure:
 
 ```wl
-In[]:= HypergraphToGraph[{{x, x, y, z}, {z, w}}, "StructurePreserving", VertexLabels -> Automatic]
+In[]:= HypergraphToGraph[
+  {{x, x, y, z}, {z, w}},
+  "StructurePreserving",
+  VertexLabels -> Automatic]
 ```
 
-<img src="READMEImages/HypergraphToGraphStructurePreserving.png" width="319">
+<img src="READMEImages/HypergraphToGraphStructurePreserving.png" width="352">
 
 It is important to mention that this conversion does not lose any information, and it is possible to unambiguously retrieve the original hypergraph from the resulting [`Graph`](https://reference.wolfram.com/language/ref/Graph.html):
 
