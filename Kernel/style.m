@@ -190,10 +190,7 @@ $styleNames = KeySort /@ KeySort @ <|
 
   "HypergraphStructurePreservingGraph" -> <|
     "VertexStyle" -> $structurePreservingVertexStyle,
-    "EdgeStyle" -> $structurePreservingEdgeStyle,
-    combinedOptionsProperties[Graph][
-      VertexStyle -> $structurePreservingVertexStyle,
-      EdgeStyle -> $structurePreservingEdgeStyle]
+    "EdgeStyle" -> $structurePreservingEdgeStyle
   |>
 |>;
 
@@ -304,6 +301,6 @@ style[$lightTheme] = <|
   $genericGraphEdgeStyle -> Directive[Hue[0.62, 0.3, 0.45], Opacity[0.7], AbsoluteThickness[1.5]],
 
   (* HypergraphToGraph Structure Preserving *)
-  $structurePreservingVertexStyle -> {{"Hyperedge", _, _} -> LightBlue},
-  $structurePreservingEdgeStyle -> {DirectedEdge[{"Hyperedge", _, _}, {"Hyperedge", _, _}] -> Dashed}
+  $structurePreservingVertexStyle -> LightBlue,
+  $structurePreservingEdgeStyle -> Dashed
 |>;
