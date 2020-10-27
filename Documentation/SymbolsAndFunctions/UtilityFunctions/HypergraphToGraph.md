@@ -16,7 +16,7 @@ In[]:= HypergraphToGraph[
   GraphLayout -> "SpringElectricalEmbedding"]
 ```
 
-<img src="../../Images/HypergraphToGraphDirectedDistancePreserving.png" width="478">
+<img src="/Documentation/Images/HypergraphToGraphDirectedDistancePreserving.png" width="478">
 
 ## **"UndirectedDistancePreserving"**
 
