@@ -16,7 +16,7 @@ In[]:= HypergraphToGraph[
   GraphLayout -> "SpringElectricalEmbedding"]
 ```
 
-<img src="/Documentation/Images/HypergraphToGraphDirectedDistancePreserving.png" width="478">
+<img src="../../Images/HypergraphToGraphDirectedDistancePreserving.png" width="478">
 
 ## **"UndirectedDistancePreserving"**
 
@@ -34,7 +34,7 @@ In[]:= HypergraphToGraph[
 
 ## **"StructurePreserving"**
 
-Convert a hypergraph to a graph by preserving its structure:
+Convert a hypergraph to a graph by preserving its structure. This is achieved by a one-to-one correspondance between vertices and hyperedges in the hypergraph and 2 different kind of vertices - `{"Hyperedge", hyperedgeIndex_, vertexIndex_}` and `{"Vertex", vertexName_}` - in the graph:
 
 ```wl
 In[]:= HypergraphToGraph[
