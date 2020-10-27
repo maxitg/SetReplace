@@ -27,7 +27,7 @@ Note that this call is different from the [`SetReplace`](../SetReplace*.md) func
 * The order of arguments is switched, the rule goes first.
 * The rule is specified in the "anonymous" form ([`ToPatternRules`](../ToPatternRules.md) is done implicitly).
 * The number of steps here is the number of generations, which is equivalent to steps of [`SetReplaceAll`](../SetReplace*.md). Here each edge can have at most 10 generations of predecessors.
-* The output is not a final state, but a **`WolframModelEvolutionObject`** containing the entire evolution (similar to [`SetReplaceList`](../SetReplace*.md) but with additional information about the relationships between edges and the events that produced them. From the information field on that object, one can see that the evolution was done for 10 generations (i.e., the evolution did not terminate early), and 109 replacements (aka events) were made in total. More properties can be computed from an evolution object.
+* The output is not a final state, but a **`WolframModelEvolutionObject`** containing the entire evolution (similar to [`SetReplaceList`](../SetReplace*.md) but with additional information about the relationships between edges and the events that produced them. From the information field on that object, one can see that the evolution was done for 10 generations (i.e., the evolution did not terminate early), and 109 replacements (aka events) were made in total. More [properties](#properties) can be computed from an evolution object.
 
 To see the information an evolution object contains, let's make one with a smaller number of generations:
 
@@ -84,9 +84,9 @@ Other properties of the evolution object describe the relationships between edge
 
 * `"Version"` is the data format of the evolution object. This description is for version 2, which is the first version to support multiway systems. Version 1 does not have the `"Version"` key. The objects of older versions are automatically migrated when they are evaluated.
 * `"Rules"` is an exact copy of the corresponding `WolframModel` argument.
-* `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions of this or earlier generations. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](#wolframmodel-step-limiters) is used.
+* `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions of this or earlier generations. In this particular case, it is the same as the largest generation of any edge, but it might be different if a more elaborate [step specification](#step-limiters) is used.
 * `"TerminationReason"` shows the reason evaluation was stopped. See the [`"TerminationReason"`](Properties/TerminationReason.md) property for more details.
-* `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example only has one rule. See [Rule Indices for Events](Properties/RuleIndicesForEvents.md) for a more interesting case. The first value, `0`, corresponds to the initial event, which is included in the evolution object but is omitted [by default](Options/IncludeBoundaryEvents.md) when computing properties.
+* `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example only has one rule. See [Rule Indices for Events](Properties/RuleIndicesForEvents.md) for a more interesting case. The first value, `0`, corresponds to the initial event, which is included in the evolution object but is omitted [by default](Options/IncludeBoundaryEvents.md) when computing [properties](#properties).
 * `"EventInputs"` shows which edge indices from `"AtomLists"` were used in each event. The order corresponds to the input patterns of the rules. The first value, `{}`, again corresponds to the initial event. Note, the same index can appear multiple times in [multiway systems](Options/EventSelectionFunction.md).
 * `"EventOutputs"` similarly shows which edge indices from `"AtomLists"` were produced by each event. There are no duplicates in these lists because events always generate new edges.
 * `"EventGenerations"` shows how many layers of predecessors a given event has.
@@ -99,7 +99,7 @@ A specific property can be requested from an evolution object by supplying it as
 Out[] = 109
 ```
 
-Properties section describes and gives examples for each available property. The full list of them can also be obtained with the `"Properties"` property:
+[Properties](#properties) section describes and gives examples for each available property. The full list of them can also be obtained with the `"Properties"` property:
 
 <img src="/Documentation/Images/PropertiesOfEvolutionObject.png" width="619">
 
