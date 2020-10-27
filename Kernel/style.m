@@ -67,8 +67,8 @@ PackageScope["$rulialGraphVertexIconFrameStyle"]
 PackageScope["$rulialGraphVertexIconFrameMargins"]
 PackageScope["$genericLinePlotStyles"]
 PackageScope["$genericGraphEdgeStyle"]
-PackageScope["$structurePreservingVertexStyle"]
-PackageScope["$structurePreservingEdgeStyle"]
+PackageScope["$structurePreservingHyperedgeVertexStyle"]
+PackageScope["$structurePreservingHyperedgeToHyperedgeEdgeStyle"]
 
 combinedOptionsProperties[plotFunction_][options__] := Sequence[
   "Options" -> {options},
@@ -189,8 +189,8 @@ $styleNames = KeySort /@ KeySort @ <|
   |>,
 
   "HypergraphStructurePreservingGraph" -> <|
-    "VertexStyle" -> $structurePreservingVertexStyle,
-    "EdgeStyle" -> $structurePreservingEdgeStyle
+    "HyperedgeVertexStyle" -> $structurePreservingHyperedgeVertexStyle,
+    "HyperedgeToHyperedgeEdgeStyle" -> $structurePreservingHyperedgeToHyperedgeEdgeStyle
   |>
 |>;
 
@@ -301,6 +301,6 @@ style[$lightTheme] = <|
   $genericGraphEdgeStyle -> Directive[Hue[0.62, 0.3, 0.45], Opacity[0.7], AbsoluteThickness[1.5]],
 
   (* HypergraphToGraph Structure Preserving *)
-  $structurePreservingVertexStyle -> LightBlue,
-  $structurePreservingEdgeStyle -> Dashed
+  $structurePreservingHyperedgeVertexStyle -> LightBlue,
+  $structurePreservingHyperedgeToHyperedgeEdgeStyle -> Dashed
 |>;

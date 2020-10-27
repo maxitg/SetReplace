@@ -91,11 +91,11 @@ hypergraphToGraph[_, hgraph_ ? hypergraphQ, "StructurePreserving", opts : Option
     graphJoin[
       hyperedgeGraphs,
       VertexStyle -> Replace[OptionValue[Graph, {opts}, VertexStyle],
-        Automatic -> {{"Hyperedge", _, _} -> style[$lightTheme][$structurePreservingVertexStyle]}],
+        Automatic -> {{"Hyperedge", _, _} -> style[$lightTheme][$structurePreservingHyperedgeVertexStyle]}],
       EdgeStyle -> Replace[OptionValue[Graph, {opts}, EdgeStyle],
         Automatic -> {Rule[
           DirectedEdge[{"Hyperedge", _, _}, {"Hyperedge", _, _}],
-          style[$lightTheme][$structurePreservingEdgeStyle]]}],
+          style[$lightTheme][$structurePreservingHyperedgeToHyperedgeEdgeStyle]]}],
       opts]
   ]
 
