@@ -1,0 +1,58 @@
+###### [Symbols and Functions](/README.md#symbols-and-functions) > Utility Functions >
+
+# HypergraphToGraph
+
+**`HypergraphToGraph`** converts a hypergraph to a [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) object. There are (currently) 3 ways to perform this transformation:
+
+## **"DirectedDistancePreserving"**
+
+Convert a hypergraph to a directed graph with the same distance matrix:
+
+```wl
+In[]:= HypergraphToGraph[
+  {{x, x, y, z}, {z, w}},
+  "DirectedDistancePreserving",
+  VertexLabels -> Automatic,
+  GraphLayout -> "SpringElectricalEmbedding"]
+```
+
+<img src="/Documentation/Images/HypergraphToGraphDirectedDistancePreserving.png" width="478">
+
+## **"UndirectedDistancePreserving"**
+
+Convert a hypergraph to an undirected graph with the same distance matrix, that is, each hyperedge is mapped to a complete subgraph:
+
+```wl
+In[]:= HypergraphToGraph[
+  {{x, x, y, z}, {z, w}},
+  "UndirectedDistancePreserving",
+  VertexLabels -> Automatic,
+  GraphLayout -> "SpringElectricalEmbedding"]
+```
+
+<img src="/Documentation/Images/HypergraphToGraphUndirectedDistancePreserving.png" width="478">
+
+## **"StructurePreserving"**
+
+Convert a hypergraph to a graph by preserving its structure:
+
+```wl
+In[]:= HypergraphToGraph[
+  {{x, x, y, z}, {z, w}},
+  "StructurePreserving",
+  VertexLabels -> Automatic]
+```
+
+<img src="/Documentation/Images/HypergraphToGraphStructurePreserving.png" width="352">
+
+It is important to mention that this conversion does not lose any information, and it is possible to unambiguously retrieve the original hypergraph from the resulting [`Graph`](https://reference.wolfram.com/language/ref/Graph.html):
+
+```wl
+fromStructurePreserving[graph_Graph] := Values @ KeySort @ Join[
+  GroupBy[Sort @ EdgeList[graph, DirectedEdge[_, {"Vertex", _}]], #[[1, 2]] & -> (#[[2, 2]] &)],
+  AssociationMap[{} &, VertexList[graph, {"Hyperedge", _, 0}][[All, 2]]]]
+
+In[]:= {{x, x, y, z}, {}, {z, w}} === fromStructurePreserving @ HypergraphToGraph[
+  {{x, x, y, z}, {}, {z, w}}, "StructurePreserving"]
+Out[]= True
+```
