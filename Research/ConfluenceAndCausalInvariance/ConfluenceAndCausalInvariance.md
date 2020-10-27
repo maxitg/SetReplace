@@ -28,14 +28,14 @@ the theory of rewriting systems:
 We can summarize the statements above with the following definitions:
 
 > A Wolfram model evolution is called *causal invariant* if and only if the
-> [causal graphs](https://github.com/maxitg/SetReplace/blob/master/README.md#causal-graphs) for singleway evolutions
-> with any possible
-> [event ordering functions](https://github.com/maxitg/SetReplace/blob/master/README.md#eventorderingfunction) are
-> isomorphic.
+> [causal graphs](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
+> for singleway evolutions with any possible
+> [event ordering functions](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventOrderingFunction.md)
+> are isomorphic.
 
 Note that the definition above is only meaningful for terminating systems (i.e., the systems which always reach a
-[`"FixedPoint"`](https://github.com/maxitg/SetReplace/blob/master/README.md#termination-reason), a state during the
-evolution where no more matches can be made to its expressions).
+[`"FixedPoint"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TerminationReason.md),
+a state during the evolution where no more matches can be made to its expressions).
 
 We can then define confluence as:
 
@@ -54,7 +54,7 @@ We will not make any comments in this note about the physics claims made above.
 Before we get to specific examples, it's essential to understand the fundamental difference between these two
 properties.
 *Causal invariance* has to do with symmetries between evolution branches of
-[expressions-events graphs](https://github.com/maxitg/SetReplace/blob/master/README.md#causal-graphs).
+[expressions-events graphs](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).
 It requires that, even though the branches operate on different expressions, they have the same causal structure:
 
 <!--
@@ -243,9 +243,8 @@ Out[] = False
 ## Future Research
 
 It would be interesting to investigate the systems exhibiting these properties in different combinations.
-For example, systems that don't exhibit
-[multiway branching](https://github.com/maxitg/SetReplace/blob/confluenceAndCausalInvariance/Research/LocalMultiwaySystem/LocalMultiwaySystem.md)
-at all do satisfy both of these conditions.
+For example, systems that don't exhibit [multiway branching](/Research/LocalMultiwaySystem/LocalMultiwaySystem.md) at
+all do satisfy both of these conditions.
 It might be possible to generalize this to include more classes of systems.
 We could also enumerate ([#57](https://github.com/maxitg/SetReplace/issues/57)) simple rules and determine how many of
 them exhibit just one of these properties, both, or neither.
