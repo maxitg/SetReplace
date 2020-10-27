@@ -56,7 +56,7 @@ In[] := WolframModelPlot[{{{1, 2, 3}},
 
 <img src="/Documentation/Images/MultiplePlots.png" width="698">
 
-Many [`WolframModel`](WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) properties, such as [`"FinalStatePlot"`](/WolframModelAndWolframModelEvolutionObject/Properties/PlotsOfStates.md) and [`"EventStatesPlotsList"`](/WolframModelAndWolframModelEvolutionObject/Properties/PlotsOfEvents.md), use `WolframModelPlot` to produce output. They accept the same set of options, as enumerated below.
+Many [`WolframModel`](WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) properties, such as [`"FinalStatePlot"`](WolframModelAndWolframModelEvolutionObject/Properties/PlotsOfStates.md) and [`"EventStatesPlotsList"`](WolframModelAndWolframModelEvolutionObject/Properties/PlotsOfEvents.md), use `WolframModelPlot` to produce output. They accept the same set of options, as enumerated below.
 
 ## Edge Type
 

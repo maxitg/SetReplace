@@ -197,11 +197,11 @@ In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}},
   {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}, {{1, 1, 1}}, 4]
 ```
 
-<img src="READMEImages/EvolutionObjectFromMultipleRules.png" width="488">
+<img src="/Documentation/Images/EvolutionObjectFromMultipleRules.png" width="488">
 
 To see which rules were used for each replacement:
 
-<img src="READMEImages/AllEventsRuleIndicesOfEvolutionObject.png" width="708">
+<img src="/Documentation/Images/AllEventsRuleIndicesOfEvolutionObject.png" width="708">
 
 ```wl
 Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
