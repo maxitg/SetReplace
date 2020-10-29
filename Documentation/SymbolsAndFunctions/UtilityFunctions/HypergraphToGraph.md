@@ -6,7 +6,7 @@
 
 ## **"DirectedDistancePreserving"**
 
-Convert a hypergraph to a directed graph with the same distance matrix:
+Converts a hypergraph to a directed graph with the same distance matrix, where distance between two vertices `v1` and `v2` in a hypergraph is defined as the minimum length of a path which connects `v1` and `v2` (i.e. 1 if both vertices belong to the same hyperedge):
 
 ```wl
 In[]:= HypergraphToGraph[
