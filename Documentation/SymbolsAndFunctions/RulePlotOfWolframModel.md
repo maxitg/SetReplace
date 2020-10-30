@@ -2,7 +2,7 @@
 
 # RulePlot of WolframModel
 
-**`RulePlot`** can be used to get a [`WolframModelPlot`](WolframModelPlot.md)-based visual representation of hypergraph substitution rules:
+[**`RulePlot`**](https://reference.wolfram.com/language/ref/RulePlot.html) can be used to get a [`WolframModelPlot`](WolframModelPlot.md)-based visual representation of hypergraph substitution rules:
 
 ```wl
 In[] := RulePlot[WolframModel[{{1, 2}, {1, 2}} ->
@@ -28,6 +28,12 @@ In[] := RulePlot[WolframModel[{{{1, 1, 2}} ->
 ```
 
 <img src="/Documentation/Images/MultipleRulesPlot.png" width="808">
+
+Passing a [`WolframModelEvolutionObject`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) plots its [`"Rules"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/Rules.md) property:
+
+<img src="/Documentation/Images/RulePlotWolframModelEvolutionObjectInput.png" width="575">
+
+<img src="/Documentation/Images/RulePlot.png" width="429">
 
 Sometimes an incorrectly scaled layout might be produced due to the issue discussed above in [`VertexCoordinateRules`](WolframModelPlot.md#vertexcoordinaterules):
 
