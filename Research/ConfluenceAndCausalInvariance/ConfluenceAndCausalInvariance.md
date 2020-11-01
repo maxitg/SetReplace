@@ -167,7 +167,7 @@ Out[] = False
 Therefore, confluence *does not imply* causal invariance.
 
 Note that the `"CausalInvariantQ"` property of
-[`"MultiwaySystem"`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) checks for
+[`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) checks for
 confluence despite its name:
 
 ```wl
