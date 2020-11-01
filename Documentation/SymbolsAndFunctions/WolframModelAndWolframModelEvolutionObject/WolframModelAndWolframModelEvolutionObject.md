@@ -333,6 +333,7 @@ Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, s
 - [Creator and Destroyer Events](Properties/CreatorAndDestroyerEvents.md)
 - [Causal Graphs](Properties/CausalGraphs.md)
 - [Expression Separations](Properties/ExpressionSeparations.md)
+- [MultiwayQ](Properties/MultiwayQ.md)
 - [Rule Indices for Events](Properties/RuleIndicesForEvents.md)
 - [Edge and Event Generations](Properties/EdgeAndEventGenerations.md)
 - [Termination Reason](Properties/TerminationReason.md)

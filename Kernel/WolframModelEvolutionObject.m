@@ -134,6 +134,7 @@ $propertyArgumentCounts = Join[
     "EdgeDestroyerEventIndices" -> {0, 0},
     "EdgeGenerationsList" -> {0, 0},
     "ExpressionsSeparation" -> {2, 2},
+    "MultiwayQ" -> {0, 0},
     "Properties" -> {0, 0}|>,
   Association[# -> {0, 0} & /@ Keys[$accessorProperties]]];
 
@@ -918,6 +919,13 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
   boundaryExpressions = Cases[intersectionBoundary, {"Expression", expr_} :> expr];
   If[!FreeQ[boundaryExpressions, expr1 | expr2], Return["Timelike"]];
   If[Length[boundaryExpressions] =!= 0, "Branchlike", "Spacelike"]
+]
+
+propertyEvaluate[True, includeBoundaryEventsPattern][
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    "MultiwayQ"] := ModuleScope[
+  Max[Length /@ propertyEvaluate[True, None][obj, caller, "EdgeDestroyerEventsIndices"]] > 1
 ]
 
 (* Public properties call *)

@@ -1945,6 +1945,27 @@
             Infinity,
             "EventSelectionFunction" -> None]["ExpressionsSeparation", -2, -1],
           "Spacelike"
+        ],
+
+        (* MultiwayQ *)
+
+        VerificationTest[
+          WolframModel[{{1}} -> {{1}}, {{1}}, 0]["MultiwayQ"],
+          False
+        ],
+
+        VerificationTest[
+          WolframModel[{{1, 2}, {2, 3}} -> {{1, 2}, {2, 3}, {3, 4}}, {{1, 2}, {2, 3}, {3, 4}}, 1]["MultiwayQ"],
+          False
+        ],
+
+        VerificationTest[
+          WolframModel[{{1, 2}, {2, 3}} -> {{1, 2}, {2, 3}, {3, 4}},
+                       {{1, 2}, {2, 3}, {3, 4}},
+                       1,
+                       "EventSelectionFunction" -> "MultiwaySpacelike"][
+                       "MultiwayQ"],
+          True
         ]
       }]
     }]

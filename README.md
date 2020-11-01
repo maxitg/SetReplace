@@ -145,6 +145,7 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
     - [Creator and Destroyer Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CreatorAndDestroyerEvents.md)
     - [Causal Graphs](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
     - [Expression Separations](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/ExpressionSeparations.md)
+    - [MultiwayQ](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md)
     - [Rule Indices for Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/RuleIndicesForEvents.md)
     - [Edge and Event Generations](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EdgeAndEventGenerations.md)
     - [Termination Reason](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TerminationReason.md)
