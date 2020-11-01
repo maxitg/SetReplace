@@ -6,11 +6,11 @@ PackageScope["evolutionVideo"]
 
 $initialStateDurationSec = 1;
 $stateDurationScalingFunction = 1 / Sqrt[#] &;
-$finalStateDurationSec = 2;
+$finalStateDurationSec = 5;
 $arrowheadLength = 0.15;
 $frameRate = 60;
 $newAtomPlacementStandardDeviation = 0.01;
-$minElectricalDistance = 0.2; (* the force at smaller distances is the same as for this distance *)
+$minElectricalDistance = 0.3; (* the force at smaller distances is the same as for this distance *)
 $springStrength = 100;
 $electricalStrength = 100;
 $frictionStrength = 10;
