@@ -1880,6 +1880,22 @@
         ]
       ],
 
+
+      (* FeaturesExtractor *)
+      With[
+        {featuresSmallGraph = 
+        WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 1]["FeaturesExtractor"],
+        featuresMediumGraph = 
+        WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 8]["FeaturesExtractor"]
+        },
+
+        {
+        VerificationTest[And @@ NumberQ /@ featuresSmallGraph],
+        VerificationTest[And @@ NumberQ /@ featuresMediumGraph]
+        }
+
+      ]
+
       (* ExpressionsSeparation *)
 
       With[{
