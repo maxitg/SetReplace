@@ -5,8 +5,10 @@
 There are claims made in the [Wolfram Physics Project](https://www.wolframphysics.org) about the equivalence of
 confluence and causal invariance.
 For example, consider
-[the glossary](http://web.archive.org/web/20201010194129/https://www.wolframphysics.org/glossary/#CausalInvariance) on
-the [Wolfram Physics website](https://www.wolframphysics.org):
+[the glossary](https://www.wolframphysics.org/glossary/#CausalInvariance) on the
+[Wolfram Physics website](https://www.wolframphysics.org), which,
+[as of 10/30/2020](http://web.archive.org/web/20201030155847/https://www.wolframphysics.org/glossary/#CausalInvariance),
+says:
 
 > Causal Invariance: A property of multiway graphs whereby all possible paths yield the isomorphic causal graphs.
 > When causal invariance exists, every branch in the multiway system must eventually merge.
