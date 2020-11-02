@@ -6,8 +6,6 @@ PackageExport["RasterizeAsOutput"]
 PackageExport["RasterizeAsInput"]
 PackageExport["RasterizeAsInputOutputPair"]
 
-ClearAll[RasterizeAsOutput, RasterizeAsInput, RasterizeAsInputOutputPair]
-
 SetRelatedSymbolGroup[RasterizeAsOutput, RasterizeAsInput, RasterizeAsInputOutputPair]
 
 cellToExportPacket[cell_] := ExportPacket[cell,
