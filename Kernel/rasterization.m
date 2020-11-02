@@ -45,6 +45,8 @@ RasterizeAsOutput[expr$] creates an Image of expr$, formatted graphically as an 
 * The Image is produced at high DPI, suitable for Retina displays.
 "
 
+SyntaxInformation[RasterizeAsOutput] = {"ArgumentsPattern" -> {_}};
+
 RasterizeAsOutput[expr_] := assembleWithLabel[$outputCellLabel, fastRasterize[expr, "Output"]];
 
 SetUsage @ "
@@ -53,6 +55,8 @@ RasterizeAsInput[expr$] creates an Image of expr$, formatted textually as an \"I
 * RasterizeAsInput uses PrettyForm to automatically format the given input code.
 * The Image is produced at high DPI, suitable for Retina displays.
 "
+
+SyntaxInformation[RasterizeAsInput] = {"ArgumentsPattern" -> {_}};
 
 SetAttributes[{RasterizeAsInput, RasterizeAsInputOutputPair}, HoldFirst];
 RasterizeAsInput[expr_] := assembleWithLabel[$inputCellLabel, fastRasterize[Unevaluated @ expr, "Input"]];
@@ -70,5 +74,7 @@ and the corresponding resulting output expression.
 * RasterAsOutput[expr$] is used to create the Image of the result.
 * The Image is produced at high DPI, suitable for Retina displays.
 "
+
+SyntaxInformation[RasterizeAsInputOutputPair] = {"ArgumentsPattern" -> {_}};
 
 RasterizeAsInputOutputPair[expr_] := imageColumn[{RasterizeAsInput[expr], RasterizeAsOutput[expr]}];
