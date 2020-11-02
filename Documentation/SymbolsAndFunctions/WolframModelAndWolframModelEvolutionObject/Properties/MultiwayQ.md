@@ -22,8 +22,8 @@ Note that even if [`"EventSelectionFunction"`](/Documentation/WolframModelAndWol
 
 
 ```wl
-In[] := EchoFunction[#["ExpressionsEventsGraph"] &][
-  WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 2, "EventSelectionFunction" -> "MultiwaySpacelike"]]["MultiwayQ"]
+In[] := EchoFunction[#["ExpressionsEventsGraph"] &][WolframModel[
+  {{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 2, "EventSelectionFunction" -> "MultiwaySpacelike"]]["MultiwayQ"]
 ```
 
 <img src="/Documentation/Images/SinglewayExpressionsEventsGraphEchoed.png" width="415">
