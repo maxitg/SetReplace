@@ -119,8 +119,8 @@ gitSHA[] /; Names["GitLink`*"] === {} := (
 )
 
 updateBuildData[] := With[{
-    buildDataFile = File[FileNameJoin[{$buildDirectory, "Kernel", "buildData.m"}]]},
-  FileTemplateApply[buildDataFile, buildDataFile];
+    buildDataFile = File[FileNameJoin[{$buildDirectory, "Kernel", "buildData.m.template"}]]},
+  FileTemplateApply[buildDataFile, File @ StringTrim[First @ buildDataFile, ".template"]];
 ]
 
 addModifiedContextFlag[fileName_] := FileNameJoin[Append[
