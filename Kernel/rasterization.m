@@ -8,15 +8,17 @@ PackageExport["RasterizeAsInputOutputPair"]
 
 SetRelatedSymbolGroup[RasterizeAsOutput, RasterizeAsInput, RasterizeAsInputOutputPair]
 
-cellToExportPacket[cell_] := ExportPacket[cell,
+rasterizeCell[cell_] := bitmapToImage @ MathLink`CallFrontEnd @ ExportPacket[cell,
   "BitmapPacket", ColorSpace -> RGBColor, "AlphaChannel" -> False,
-  "DataCompression" -> True, ImageResolution -> 144
+  "DataCompression" -> True, ImageResolution -> 144 (* 144, being 2x72, is the resolution for Retina displays *)
 ];
 
 bitmapToImage[System`ConvertersDump`Bitmap[rawString_, {width_, height_, depth_}, ___]] := Scope[
   bytes = NumericArray[Developer`RawUncompress @ rawString, "Byte"];
   Internal`ArrayReshapeTo[bytes, {height, width, depth}];
-  Image[Image`ReverseNumericArray[bytes, False], Interleaving -> True, Magnification -> 0.5]
+  (* we use magnification of 1/2 to compensate for the double-resolution of retina display,
+  ensuring the image *displays* at the normal size in the front end *)
+  Image[Image`ReverseNumericArray[bytes, False], Interleaving -> True, Magnification -> 1/2]
 ]
 
 toCell[expr_, type_, isize_] := Cell[
@@ -26,10 +28,8 @@ toCell[expr_, type_, isize_] := Cell[
   GraphicsBoxOptions -> {ImageSize -> isize}, Graphics3DBoxOptions -> {ImageSize -> isize}
 ];
 
-rasterizeCell[cell_Cell] := 
-	bitmapToImage @ MathLink`CallFrontEnd @ cellToExportPacket @ cell;
-
-fastRasterize[expr_, type_:"Output", size_:Medium] := rasterizeCell @ toCell[Unevaluated @ expr, type, size];
+rasterizeExpr[expr_, type_:"Output"] := 
+  rasterizeCell @ toCell[Unevaluated @ expr, type, Small];
 
 cellLabelToImage[text_] := With[{img = rasterizeCell @ Cell[text, "CellLabel", "CellLabelExpired"]}, 
 	ImagePad[img, {{80 - ImageDimensions[img][[1]], 15}, {0, 10}}, White]];
@@ -37,7 +37,8 @@ cellLabelToImage[text_] := With[{img = rasterizeCell @ Cell[text, "CellLabel", "
 $outputCellLabel := $outputCellLabel = cellLabelToImage["Out[\:f759\:f363]="];
 $inputCellLabel := $inputCellLabel = cellLabelToImage["In[\:f759\:f363]:="];
 
-assembleWithLabel[label_, cell_] := ImageAssemble[{{label, cell}}, "Fit", Background -> White];
+assembleWithLabel[label_, cell_] := 
+  ImageAssemble[{{label, cell}}, "Fit", Background -> White, Magnification -> 1/2];
 
 SetUsage @ "
 RasterizeAsOutput[expr$] creates an Image of expr$, formatted graphically as an \"Output\" cell.
@@ -47,7 +48,8 @@ RasterizeAsOutput[expr$] creates an Image of expr$, formatted graphically as an 
 
 SyntaxInformation[RasterizeAsOutput] = {"ArgumentsPattern" -> {_}};
 
-RasterizeAsOutput[expr_] := assembleWithLabel[$outputCellLabel, fastRasterize[expr, "Output"]];
+RasterizeAsOutput[expr_] := 
+  assembleWithLabel[$outputCellLabel, rasterizeExpr[expr, "Output"]];
 
 SetUsage @ "
 RasterizeAsInput[expr$] creates an Image of expr$, formatted textually as an \"Input\" cell.
@@ -59,11 +61,12 @@ RasterizeAsInput[expr$] creates an Image of expr$, formatted textually as an \"I
 SyntaxInformation[RasterizeAsInput] = {"ArgumentsPattern" -> {_}};
 
 SetAttributes[{RasterizeAsInput, RasterizeAsInputOutputPair}, HoldFirst];
-RasterizeAsInput[expr_] := assembleWithLabel[$inputCellLabel, fastRasterize[Unevaluated @ expr, "Input"]];
+RasterizeAsInput[expr_] := 
+  assembleWithLabel[$inputCellLabel, rasterizeExpr[Unevaluated @ expr, "Input"]];
 
-imageColumn[images_] := With[
+imageColumn[images_, opts___Rule] := With[
   {width = Max[First /@ ImageDimensions /@ images]}, 
-  ImageAssemble[{ImageCrop[#, {width, Full}, Left, Padding -> White]}& /@ images]
+  ImageAssemble[{ImageCrop[#, {width, Full}, Left, Padding -> White]}& /@ images, opts]
 ];
 
 SetUsage @ "
@@ -77,4 +80,5 @@ and the corresponding resulting output expression.
 
 SyntaxInformation[RasterizeAsInputOutputPair] = {"ArgumentsPattern" -> {_}};
 
-RasterizeAsInputOutputPair[expr_] := imageColumn[{RasterizeAsInput[expr], RasterizeAsOutput[expr]}];
+RasterizeAsInputOutputPair[expr_] := 
+  imageColumn[{RasterizeAsInput[expr], RasterizeAsOutput[expr]}, Magnification -> 1/2];
