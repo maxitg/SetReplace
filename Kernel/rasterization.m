@@ -73,8 +73,8 @@ SetUsage @ "
 RasterizeAsInputOutputPair[expr$] creates an Image of expr$ formatted as both an input, \
 and the corresponding resulting output expression.
 * RasterizeAsInputOutputPair Holds expr$, preventing it from evaluating.
-* RasterAsInput[expr$] is used to create the Image of the input.
-* RasterAsOutput[expr$] is used to create the Image of the result.
+* RasterizeAsInput[expr$] is used to create the Image of the input.
+* RasterizeAsOutput[expr$] is used to create the Image of the result.
 * The Image is produced at high DPI, suitable for Retina displays.
 "
 
