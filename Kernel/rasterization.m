@@ -51,13 +51,13 @@ RasterizeCell[cell_Cell] := Scope[
   ];
   Switch[
     cellType @ cell,
-    "Input", image = assembleWithLabel[$inputCellLabel, image],
-    "Output", image = assembleWithLabel[$outputCellLabel, image]
+    "Input",  image = imageRow[{$inputCellLabel, image}, Top],
+    "Output", image = imageRow[{$outputCellLabel, image}, Center]
   ];
   image
 ];
 
-RasterizeCell[cells:{___Cell}] := imageColumn[Map[RasterizeCell, cells], Magnification -> 1/2];
+RasterizeCell[cells:{___Cell}] := imageColumn @ Map[RasterizeCell, cells];
 
 bitmapToImage[System`ConvertersDump`Bitmap[rawString_, {width_, height_, depth_}, ___]] := Scope[
   bytes = NumericArray[Developer`RawUncompress @ rawString, "Byte"];
@@ -67,7 +67,7 @@ bitmapToImage[System`ConvertersDump`Bitmap[rawString_, {width_, height_, depth_}
   Image[Image`ReverseNumericArray[bytes, False], Interleaving -> True, Magnification -> 1/2]
 ]
 
-toCell[expr_, type_, isize_] := Cell[
+toCell[expr_, type_] := Cell[
   BoxData[
       If[type === "Input",
         MakeFormattedCodeBoxes @ expr,
@@ -75,12 +75,11 @@ toCell[expr_, type_, isize_] := Cell[
       ]
   ],
   type, ShowCellBracket -> False, Background -> Automatic, CellMargins -> 0,
-  CellFrameMargins -> 0, CellContext -> "Global`",
-  GraphicsBoxOptions -> {ImageSize -> isize}, Graphics3DBoxOptions -> {ImageSize -> isize}
+  CellFrameMargins -> 0, CellContext -> "Global`"
 ];
 
 rasterizeExpr[expr_, type_:"Output"] :=
-  RasterizeCell @ toCell[Unevaluated @ expr, type, Small];
+  RasterizeCell @ toCell[Unevaluated @ expr, type, Medium];
 
 cellLabelToImage[text_] := With[
   {img = RasterizeCell @ Cell[text, "CellLabel", "CellLabelExpired"]},
@@ -88,9 +87,6 @@ cellLabelToImage[text_] := With[
 
 $outputCellLabel := $outputCellLabel = cellLabelToImage["Out[\:f759\:f363]="];
 $inputCellLabel := $inputCellLabel = cellLabelToImage["In[\:f759\:f363]:="];
-
-assembleWithLabel[label_, cell_] :=
-  ImageAssemble[{{label, cell}}, "Fit", Background -> White, Magnification -> 1/2];
 
 SetUsage @ "
 RasterizeAsOutput[expr$] creates an Image of expr$, formatted graphically as an \"Output\" cell.
@@ -100,7 +96,7 @@ RasterizeAsOutput[expr$] creates an Image of expr$, formatted graphically as an 
 
 SyntaxInformation[RasterizeAsOutput] = {"ArgumentsPattern" -> {_}};
 
-RasterizeAsOutput[expr_] := RasterizeCell @ toCell[Unevaluated @ expr, "Output", Small]
+RasterizeAsOutput[expr_] := RasterizeCell @ toCell[Unevaluated @ expr, "Output"]
 
 SetUsage @ "
 RasterizeAsInput[expr$] creates an Image of expr$, formatted textually as an \"Input\" cell.
@@ -113,11 +109,22 @@ SyntaxInformation[RasterizeAsInput] = {"ArgumentsPattern" -> {_}};
 
 SetAttributes[{RasterizeAsInput, RasterizeAsInputOutputPair}, HoldFirst];
 
-RasterizeAsInput[expr_] := RasterizeCell @ toCell[Unevaluated @ expr, "Input", Small]
+RasterizeAsInput[expr_] := RasterizeCell @ toCell[Unevaluated @ expr, "Input"]
 
-imageColumn[images_, opts___Rule] := With[
+imageColumn[images_, alignment_:Left, spacing_:20] := With[
   {width = Max[First /@ ImageDimensions /@ images]},
-  ImageAssemble[{ImageCrop[#, {width, Full}, Left, Padding -> White]} & /@ images, opts]
+  ImageAssemble[
+    {ImageCrop[#, {width, Full}, alignment, Padding -> White]} & /@ images,
+    Spacings -> spacing, Background -> White, Magnification -> 1/2
+  ]
+];
+
+imageRow[images_, alignment_, spacing_:0] := With[
+  {height = Max[Last /@ ImageDimensions /@ images]},
+  ImageAssemble[
+    {ImageCrop[#, {Full, height}, alignment, Padding -> White] & /@ images},
+    Spacings -> spacing, Background -> White, Magnification -> 1/2
+  ]
 ];
 
 SetUsage @ "
@@ -132,19 +139,15 @@ and the corresponding resulting output expression.
 SyntaxInformation[RasterizeAsInputOutputPair] = {"ArgumentsPattern" -> {_}};
 
 RasterizeAsInputOutputPair[expr_] :=
-  imageColumn[{RasterizeAsInput[expr], RasterizeAsOutput[expr]}, Magnification -> 1/2];
+  imageColumn @ {RasterizeAsInput[expr], RasterizeAsOutput[expr]};
 
 cellType[Cell[_, type_, ___]] := type;
 cellType[_] := None;
 
-cellLabelID[Cell[___, CellLabel -> str_String, ___]] := First[StringCases[str, "[" ~~ d:DigitCharacter.. ~~ "]" :> FromDigits[d]], None];
-cellLabelID[_] := None;
-
 SetUsage @ "
 RasterizePreviousCell[] will read the previous cell(s) from the current notebook \
 and attempt to rasterize them.
-* An input/output pair with matching labels (e.g. In[5] and Out[5]) will be rasterized together, \
-similar to RasterizeAsInputOutputPair.
+* An input cell followed by an output cell will be rasterized together, similar to RasterizeAsInputOutputPair.
 * Otherwise, the immediately preceding cell will be rasterized on its own.
 * Use ExportImageForEmbedding['name$', RasterizePreviousCell[]] to save the previous cell(s) in an
 image and copy a markdown-compatible <img> tag to the clipboard that displays this image.
@@ -154,7 +157,7 @@ RasterizePreviousCell[] := Scope[
 	prev1 = PreviousCell[]; prev2 = PreviousCell @ prev1;
 	prev1 = NotebookRead[prev1]; prev2 = NotebookRead[prev2];
 	If[Head[prev1] =!= Cell, Return[$Failed]];
-	If[cellType[prev1] === "Output" && cellType[prev2] === "Input" && cellLabelID[prev1] === cellLabelID[prev2],
+	If[cellType[prev1] === "Output" && cellType[prev2] === "Input",
 		RasterizeCell[{prev2, prev1}],
 		RasterizeCell[prev1]
 	]
