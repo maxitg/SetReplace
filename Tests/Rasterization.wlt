@@ -43,25 +43,26 @@
       ],
 
       (* test the rasterization functions actually produce an Image *)
-      VerificationTest[ImageQ[RasterizeAsInput[Graphics[{}]]]],
-      VerificationTest[ImageQ[RasterizeAsOutput[Graphics[{}]]]],
-      VerificationTest[ImageQ[RasterizeAsInputOutputPair[Graphics[{}]]]],
+      VerificationTest[ImageQ[RasterizeExpression[Graphics[{}]]]],
+      VerificationTest[ImageQ[RasterizeExpressionAsInput[Graphics[{}]]]],
+      VerificationTest[ImageQ[RasterizeExpressionAsOutput[Graphics[{}]]]],
+      VerificationTest[ImageQ[RasterizeExpressionAsInputOutputPair[Graphics[{}]]]],
 
       (* test that RasterizeAsInput doesn't evaluate its argument *)
       VerificationTest[
         $z = 0;
-        RasterizeAsInput[$z++];
+        RasterizeExpressionAsInput[$z++];
         $z == 0
       ],
 
       (* test image size *)
       VerificationTest[
-        ImageDimensions[RasterizeAsOutput[Graphics[{}, ImageSize -> {200, 200}]]] == {495, 400}
+        ImageDimensions[RasterizeExpressionAsOutput[Graphics[{}, ImageSize -> {200, 200}]]] == {495, 400}
       ],
 
       (* test for grayscale *)
       VerificationTest[
-        Equal @@ Transpose @ Flatten[ImageData[RasterizeAsOutput[""]], 1]
+        Equal @@ Transpose @ Flatten[ImageData[RasterizeExpressionAsOutput[""]], 1]
       ],
 
      (* test that ExportImageForEmbedding produces a markdown string result *)

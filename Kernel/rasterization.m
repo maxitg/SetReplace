@@ -4,9 +4,10 @@ PackageImport["GeneralUtilities`"]
 
 PackageExport["MakeFormattedCodeBoxes"]
 PackageExport["RasterizeCell"]
-PackageExport["RasterizeAsOutput"]
-PackageExport["RasterizeAsInput"]
-PackageExport["RasterizeAsInputOutputPair"]
+PackageExport["RasterizeExpression"]
+PackageExport["RasterizeExpressionAsOutput"]
+PackageExport["RasterizeExpressionAsInput"]
+PackageExport["RasterizeExpressionAsInputOutputPair"]
 PackageExport["RasterizePreviousCell"]
 PackageExport["ExportImageForEmbedding"]
 
@@ -31,7 +32,7 @@ MakeFormattedCodeBoxes[expr_, n_:60] := Block[
   they are assumed to be on the user's context path *)
 ];
 
-SetRelatedSymbolGroup[RasterizeCell, RasterizeAsOutput, RasterizeAsInput, RasterizeAsInputOutputPair, RasterizePreviousCell, ExportImageForEmbedding]
+SetRelatedSymbolGroup[RasterizeCell, RasterizeExpression, RasterizeExpressionAsOutput, RasterizeExpressionAsInput, RasterizeExpressionAsInputOutputPair, RasterizePreviousCell, ExportImageForEmbedding]
 
 SyntaxInformation[RasterizeCell] = {"ArgumentsPattern" -> {_}};
 
@@ -49,10 +50,12 @@ RasterizeCell[cell_Cell] := Scope[
     "BitmapPacket", ColorSpace -> RGBColor, "AlphaChannel" -> False,
     "DataCompression" -> True, ImageResolution -> 144 (* 144, being 2x72, is the resolution for Retina displays *)
   ];
-  Switch[
-    cellType @ cell,
-    "Input",  image = imageRow[{$inputCellLabel, image}, Top],
-    "Output", image = imageRow[{$outputCellLabel, image}, Center]
+  If[!MemberQ[cell, ShowCellLabel -> False], 
+    Switch[
+      cellType @ cell,
+      "Input",  image = imageRow[{$inputCellLabel, image}, Top],
+      "Output", image = imageRow[{$outputCellLabel, image}, Center]
+    ]
   ];
   image
 ];
@@ -78,9 +81,6 @@ toCell[expr_, type_] := Cell[
   CellFrameMargins -> 0, CellContext -> "Global`"
 ];
 
-rasterizeExpr[expr_, type_:"Output"] :=
-  RasterizeCell @ toCell[Unevaluated @ expr, type, Medium];
-
 cellLabelToImage[text_] := With[
   {img = RasterizeCell @ Cell[text, "CellLabel", "CellLabelExpired"]},
   ImagePad[img, {{80 - ImageDimensions[img][[1]], 15}, {0, 10}}, White]];
@@ -89,27 +89,39 @@ $outputCellLabel := $outputCellLabel = cellLabelToImage["Out[\:f759\:f363]="];
 $inputCellLabel := $inputCellLabel = cellLabelToImage["In[\:f759\:f363]:="];
 
 SetUsage @ "
-RasterizeAsOutput[expr$] creates an Image of expr$, formatted graphically as an \"Output\" cell.
+RasterizeExpression[expr$] creates an Image of expr$, formatted graphically.
+* Graphics[$$], Graph[$$], etc. objects within expr$ are rendered in StandardForm.
+* The Image is produced at high DPI, suitable for Retina displays.
+* Unlike RasterizeExpressionAsOutput, the result does not include an In[] or Out[] label.
+"
+
+SyntaxInformation[RasterizeExpression] = {"ArgumentsPattern" -> {_}};
+
+RasterizeExpression[expr_] := 
+  RasterizeCell @ Append[ShowCellLabel -> False] @ toCell[Unevaluated @ expr, "Output"]
+
+SetUsage @ "
+RasterizeExpressionAsOutput[expr$] creates an Image of expr$, formatted graphically as an \"Output\" cell.
 * Graphics[$$], Graph[$$], etc. objects within expr$ are rendered in StandardForm.
 * The Image is produced at high DPI, suitable for Retina displays.
 "
 
-SyntaxInformation[RasterizeAsOutput] = {"ArgumentsPattern" -> {_}};
+SyntaxInformation[RasterizeExpressionAsOutput] = {"ArgumentsPattern" -> {_}};
 
-RasterizeAsOutput[expr_] := RasterizeCell @ toCell[Unevaluated @ expr, "Output"]
+RasterizeExpressionAsOutput[expr_] := RasterizeCell @ toCell[Unevaluated @ expr, "Output"]
 
 SetUsage @ "
-RasterizeAsInput[expr$] creates an Image of expr$, formatted textually as an \"Input\" cell.
-* RasterizeAsInput Holds expr$, preventing it from evaluating.
-* RasterizeAsInput uses PrettyForm to automatically format the given input code.
+RasterizeExpressionAsInput[expr$] creates an Image of expr$, formatted textually as an \"Input\" cell.
+* RasterizeExpressionAsInput Holds expr$, preventing it from evaluating.
+* RasterizeExpressionAsInput uses PrettyForm to automatically format the given input code.
 * The Image is produced at high DPI, suitable for Retina displays.
 "
 
-SyntaxInformation[RasterizeAsInput] = {"ArgumentsPattern" -> {_}};
+SyntaxInformation[RasterizeExpressionAsInput] = {"ArgumentsPattern" -> {_}};
 
-SetAttributes[{RasterizeAsInput, RasterizeAsInputOutputPair}, HoldFirst];
+SetAttributes[{RasterizeExpressionAsInput, RasterizeExpressionAsInputOutputPair}, HoldFirst];
 
-RasterizeAsInput[expr_] := RasterizeCell @ toCell[Unevaluated @ expr, "Input"]
+RasterizeExpressionAsInput[expr_] := RasterizeCell @ toCell[Unevaluated @ expr, "Input"]
 
 imageColumn[images_, alignment_:Left, spacing_:20] := With[
   {width = Max[First /@ ImageDimensions /@ images]},
@@ -128,18 +140,18 @@ imageRow[images_, alignment_, spacing_:0] := With[
 ];
 
 SetUsage @ "
-RasterizeAsInputOutputPair[expr$] creates an Image of expr$ formatted as both an input, \
+RasterizeExpressionAsInputOutputPair[expr$] creates an Image of expr$ formatted as both an input, \
 and the corresponding resulting output expression.
-* RasterizeAsInputOutputPair Holds expr$, preventing it from evaluating.
-* RasterizeAsInput[expr$] is used to create the Image of the input.
-* RasterizeAsOutput[expr$] is used to create the Image of the result.
+* RasterizeExpressionAsInputOutputPair Holds expr$, preventing it from evaluating.
+* RasterizeExpressionAsInput[expr$] is used to create the Image of the input.
+* RasterizeExpressionAsOutput[expr$] is used to create the Image of the result.
 * The Image is produced at high DPI, suitable for Retina displays.
 "
 
-SyntaxInformation[RasterizeAsInputOutputPair] = {"ArgumentsPattern" -> {_}};
+SyntaxInformation[RasterizeExpressionAsInputOutputPair] = {"ArgumentsPattern" -> {_}};
 
-RasterizeAsInputOutputPair[expr_] :=
-  imageColumn @ {RasterizeAsInput[expr], RasterizeAsOutput[expr]};
+RasterizeExpressionAsInputOutputPair[expr_] :=
+  imageColumn @ {RasterizeExpressionAsInput[expr], RasterizeExpressionAsOutput[expr]};
 
 cellType[Cell[_, type_, ___]] := type;
 cellType[_] := None;
@@ -147,7 +159,7 @@ cellType[_] := None;
 SetUsage @ "
 RasterizePreviousCell[] will read the previous cell(s) from the current notebook \
 and attempt to rasterize them.
-* An input cell followed by an output cell will be rasterized together, similar to RasterizeAsInputOutputPair.
+* An input cell followed by an output cell will be rasterized together, similar to RasterizeExpressionAsInputOutputPair.
 * Otherwise, the immediately preceding cell will be rasterized on its own.
 * Use ExportImageForEmbedding['name$', RasterizePreviousCell[]] to save the previous cell(s) in an
 image and copy a markdown-compatible <img> tag to the clipboard that displays this image.
@@ -168,7 +180,7 @@ ExportImageForEmbedding['name$', image$] saves image$ to the correct location in
 the documentation directory under the 'name$.png', and returns an HTML <img> tag that can
 be pasted directly into a markdown file that includes the image.
 * The 'name$' should be a CamelCased, descriptive string, not including a file extension.
-* The image$ should be an Image[$$] produced by e.g. RasterizeAsOutput or RasterizeAsInputOutputPair.
+* The image$ should be an Image[$$] produced by e.g. RasterizeExpressionAsOutput or RasterizeExpressionAsInputOutputPair.
 * The resulting markdown is an absolute path, based on the root of the repository. It will \
 correctly render on e.g. GitHub but may not render in e.g. VSCode.
 * The resulting markdown is placed on the system clipboard, ready to be pasted into a file.
