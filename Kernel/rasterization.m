@@ -174,7 +174,7 @@ correctly render on e.g. GitHub but may not render in e.g. VSCode.
 * The resulting markdown is placed on the system clipboard, ready to be pasted into a file.
 "
 
-SyntaxInformation[ExportImageForEmbedding] = {"ArgumentsPattern" -> {_String, _Image}};
+SyntaxInformation[ExportImageForEmbedding] = {"ArgumentsPattern" -> {_, _}};
 
 ExportImageForEmbedding::nodot = "The name \"``\" should not contain a file extension, since one will be added automatically.";
 ExportImageForEmbedding::notcap = "The name \"``\" should start with a capital letter and not contain any spaces.";
