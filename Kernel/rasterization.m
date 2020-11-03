@@ -5,8 +5,9 @@ PackageImport["GeneralUtilities`"]
 PackageExport["RasterizeAsOutput"]
 PackageExport["RasterizeAsInput"]
 PackageExport["RasterizeAsInputOutputPair"]
+PackageExport["ExportImageForEmbedding"]
 
-SetRelatedSymbolGroup[RasterizeAsOutput, RasterizeAsInput, RasterizeAsInputOutputPair]
+SetRelatedSymbolGroup[RasterizeAsOutput, RasterizeAsInput, RasterizeAsInputOutputPair, ExportImageForEmbedding]
 
 rasterizeCell[cell_] := bitmapToImage @ MathLink`CallFrontEnd @ ExportPacket[cell,
   "BitmapPacket", ColorSpace -> RGBColor, "AlphaChannel" -> False,
@@ -82,3 +83,37 @@ SyntaxInformation[RasterizeAsInputOutputPair] = {"ArgumentsPattern" -> {_}};
 
 RasterizeAsInputOutputPair[expr_] := 
   imageColumn[{RasterizeAsInput[expr], RasterizeAsOutput[expr]}, Magnification -> 1/2];
+
+SetUsage @ "
+ExportImageForEmbedding['name$', image$] saves image$ to the correct location in \
+the documentation directory under the 'name$.png', and returns an HTML <img> tag that can
+be pasted directly into a markdown file that includes the image.
+* The 'name$' should be a CamelCased, descriptive string, not including a file extension.
+* The image$ should be an Image[$$] produced by e.g. RasterizeAsOutput or RasterizeAsInputOutputPair.
+* The resulting markdown is an absolute path, based on the root of the repository. It will \
+correctly render on e.g. GitHub but may not render in e.g. VSCode.
+* The resulting markdown is placed on the system clipboard, ready to be pasted into a file.
+"
+
+SyntaxInformation[ExportImageForEmbedding] = {"ArgumentsPattern" -> {_String, _Image}};
+
+ExportImageForEmbedding::nodot = "The name \"``\" should not contain a file extension, since one will be added automatically.";
+ExportImageForEmbedding::notcap = "The name \"``\" should start with a capital letter and not contain any spaces.";
+ExportImageForEmbedding::noexport = "The image could not be exported.";
+
+$ImagesDirectory = FileNameJoin[{FileNameDrop[$InputFileName, -2], "Documentation", "Images"}];
+$ImageMarkdownTemplate = StringTemplate["<img src=\"/Documentation/Images/``\" width=\"``\">"];
+
+ExportImageForEmbedding[name_String, image_Image, opts:OptionsPattern[]] := Scope[
+  If[StringContainsQ[name, "."], ReturnFailed["nodot", name]];
+  If[name === "" || !UpperCaseQ[StringTake[name, 1]] || StringContainsQ[name, " "], ReturnFailed["notcap", name]];
+  filename = name <> ".png";
+  path = FileNameJoin[{$ImagesDirectory, filename}];
+  result = Export[path, image, opts, CompressionLevel -> 1.0];
+  If[!StringQ[result], ReturnFailed["noexport"]];
+  width = First @ ImageDimensions[image];
+  markdown = $ImageMarkdownTemplate[filename, width / 2.];
+  If[$Notebooks, CopyToClipboard[markdown]];
+  markdown
+]
+  
