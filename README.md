@@ -131,7 +131,7 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
 
 # Symbols and Functions
 
-- [SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace*.md)
+- [SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace.md)
 - [ToPatternRules](Documentation/SymbolsAndFunctions/ToPatternRules.md)
 - [WolframModel and WolframModelEvolutionObject](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
   - Properties
@@ -169,6 +169,7 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
 - [RulePlot of WolframModel](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
 - Utility Functions
   - [IndexHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/IndexHypergraph.md)
+  - [IsomorphicHypergraphQ](Documentation/SymbolsAndFunctions/UtilityFunctions/IsomorphicHypergraphQ.md)
   - [HypergraphToGraph](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md)
   - [RandomHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/RandomHypergraph.md)
   - [Subhypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/Subhypergraph.md)
