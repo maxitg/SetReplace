@@ -16,6 +16,13 @@
       VerificationTest[ImageQ[RasterizeAsOutput[Graphics[{}]]]],
       VerificationTest[ImageQ[RasterizeAsInputOutputPair[Graphics[{}]]]],
 
+      (* test that RasterizeAsInput doesn't evaluate its argument *)
+      VerificationTest[
+        $z = 0;
+        RasterizeAsInput[$z++];
+        $z == 0
+      ],
+
       (* test image size *)
       VerificationTest[
         ImageDimensions[RasterizeAsOutput[Graphics[{}, ImageSize -> {200, 200}]]] == {495, 400}
