@@ -5,7 +5,7 @@ ClearAll @@ (# <> "*" & /@ Contexts["SetReplace`*"]);
 SetReplace`$SetReplaceBaseDirectory = FileNameDrop[$InputFileName, -2];
 
 Block[
-  {GeneralUtilities`Control`PackagePrivate`$DesugaringRules = {	
+  {GeneralUtilities`Control`PackagePrivate`$DesugaringRules = {
       HoldPattern[$Unreachable] :> Unreachable[$LHSHead],
 	    HoldPattern[ReturnFailed[msg_String, args___]] :> ReturnFailed[MessageName[$LHSHead, msg], args],
 	    HoldPattern[ReturnFailure[msg_String, args___]] :> ReturnFailure[MessageName[$LHSHead, msg], args]
