@@ -24,7 +24,7 @@ SetAttributes[MakeFormattedCodeBoxes, HoldFirst];
 MakeFormattedCodeBoxes[expr_, n_:60] := Block[
   {GeneralUtilities`Formatting`PackagePrivate`$prettyFormWidth = n,
    GeneralUtilities`PackageScope`$enableReflow = False},
-	MakeFormattedBoxes[expr] /. symbol_String /;
+  MakeFormattedBoxes[expr] /. symbol_String /;
     StringMatchQ[symbol, ("GeneralUtilities`" | "SetReplace`") ~~ Except["`"]..] :>
       StringExtract[symbol, "`" -> 2]
   (* MakeFormattedBoxes fully qualifies all symbols, we strip off these two since
@@ -83,7 +83,7 @@ rasterizeExpr[expr_, type_:"Output"] :=
 
 cellLabelToImage[text_] := With[
   {img = RasterizeCell @ Cell[text, "CellLabel", "CellLabelExpired"]},
-	ImagePad[img, {{80 - ImageDimensions[img][[1]], 15}, {0, 10}}, White]];
+  ImagePad[img, {{80 - ImageDimensions[img][[1]], 15}, {0, 10}}, White]];
 
 $outputCellLabel := $outputCellLabel = cellLabelToImage["Out[\:f759\:f363]="];
 $inputCellLabel := $inputCellLabel = cellLabelToImage["In[\:f759\:f363]:="];
@@ -154,13 +154,13 @@ image and copy a markdown-compatible <img> tag to the clipboard that displays th
 "
 
 RasterizePreviousCell[] := Scope[
-	prev1 = PreviousCell[]; prev2 = PreviousCell @ prev1;
-	prev1 = NotebookRead[prev1]; prev2 = NotebookRead[prev2];
-	If[Head[prev1] =!= Cell, Return[$Failed]];
-	If[cellType[prev1] === "Output" && cellType[prev2] === "Input",
-		RasterizeCell[{prev2, prev1}],
-		RasterizeCell[prev1]
-	]
+  prev1 = PreviousCell[]; prev2 = PreviousCell @ prev1;
+  prev1 = NotebookRead[prev1]; prev2 = NotebookRead[prev2];
+  If[Head[prev1] =!= Cell, Return[$Failed]];
+  If[cellType[prev1] === "Output" && cellType[prev2] === "Input",
+    RasterizeCell[{prev2, prev1}],
+    RasterizeCell[prev1]
+  ]
 ];
 
 SetUsage @ "
