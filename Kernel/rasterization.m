@@ -6,6 +6,28 @@ PackageExport["RasterizeAsOutput"]
 PackageExport["RasterizeAsInput"]
 PackageExport["RasterizeAsInputOutputPair"]
 PackageExport["ExportImageForEmbedding"]
+PackageExport["MakeFormattedCodeBoxes"]
+
+SetUsage @ "
+MakeFormattedCodeBoxes[expr$] generates boxes representing expr$ as 'nicely formatted code'.
+MakeFormattedCodeBoxes[expr$, width$] imposes a particular character limit for line breaking.
+* MakeFormattedCodeBoxes will fully qualify all symbols apart from those in System`, GeneralUtilities`, and SetReplace`.
+* MakeFormattedCodeBoxes is HoldFirst, so it will not evaluate the code it is given to format.
+"
+
+SyntaxInformation[MakeFormattedCodeBoxes] = {"ArgumentsPattern" -> {_, _.}};
+
+SetAttributes[MakeFormattedCodeBoxes, HoldFirst];
+
+MakeFormattedCodeBoxes[expr_, n_:60] := Block[
+  {GeneralUtilities`Formatting`PackagePrivate`$prettyFormWidth = n,
+   GeneralUtilities`PackageScope`$enableReflow = False},
+	MakeFormattedBoxes[expr] /. symbol_String /;
+    StringMatchQ[symbol, ("GeneralUtilities`" | "SetReplace`") ~~ Except["`"]..] :>
+      StringExtract[symbol, "`" -> 2]
+  (* MakeFormattedBoxes fully qualifies all symbols, we strip off these two since
+  they are assumed to be on the user's context path *)
+];
 
 SetRelatedSymbolGroup[RasterizeAsOutput, RasterizeAsInput, RasterizeAsInputOutputPair, ExportImageForEmbedding]
 
@@ -23,7 +45,12 @@ bitmapToImage[System`ConvertersDump`Bitmap[rawString_, {width_, height_, depth_}
 ]
 
 toCell[expr_, type_, isize_] := Cell[
-  BoxData[If[type === "Input", PrettyFormBoxes @ expr, ToBoxes[Unevaluated @ expr]]],
+  BoxData[
+      If[type === "Input",
+        MakeFormattedCodeBoxes @ expr,
+        ToBoxes @ Unevaluated @ expr
+      ]
+  ],
   type, ShowCellBracket -> False, Background -> Automatic, CellMargins -> 0,
   CellFrameMargins -> 0, CellContext -> "Global`",
   GraphicsBoxOptions -> {ImageSize -> isize}, Graphics3DBoxOptions -> {ImageSize -> isize}
