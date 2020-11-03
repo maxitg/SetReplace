@@ -11,7 +11,38 @@
     |>,
     "tests" -> {
 
-      (* test it actually produces an image *)
+      (* test that MakeFormattedCodeBoxes works on two simple cases *)
+      VerificationTest[
+        MakeFormattedCodeBoxes[Evaluate @ Range[5]] === RowBox[{"{", RowBox[{"1", ",", " ", "2", ",", " ", "3", ",", " ", "4", ",", " ", "5"}], "}"}]
+      ],
+
+      VerificationTest[
+        MakeFormattedCodeBoxes["hello \"world\""] === "\"hello \\\"world\\\"\""
+      ],
+
+      (* test it respects the character limit *)
+      VerificationTest[
+        MakeFormattedCodeBoxes[Evaluate@Range[5], 10] === RowBox[{"{",RowBox[{"\n","\t","1",",","\n","\t","2",",","\n","\t","3",",","\n","\t","4",",","\n","\t","5","\n",""}],"}"}]
+      ],
+
+      (* test it doesn't evaluate its contents *)
+      VerificationTest[
+        $z = 0;
+        MakeFormattedCodeBoxes[$z++];
+        $z == 0
+      ],
+
+      (* test it fully qualifies (most) symbols *)
+      VerificationTest[
+	      MakeFormattedCodeBoxes[Foo`Bar`Baz] === "Foo`Bar`Baz"
+      ],
+
+      (* test it doesn't fully qualify SetReplace` context *)
+      VerificationTest[
+	      MakeFormattedCodeBoxes[MakeFormattedCodeBoxes] === "MakeFormattedCodeBoxes"
+      ],
+
+      (* test the rasterization functions actually produce an Image *)
       VerificationTest[ImageQ[RasterizeAsInput[Graphics[{}]]]],
       VerificationTest[ImageQ[RasterizeAsOutput[Graphics[{}]]]],
       VerificationTest[ImageQ[RasterizeAsInputOutputPair[Graphics[{}]]]],
