@@ -25,7 +25,7 @@ bitmapToImage[System`ConvertersDump`Bitmap[rawString_, {width_, height_, depth_}
 toCell[expr_, type_, isize_] := Cell[
   BoxData[If[type === "Input", PrettyFormBoxes @ expr, ToBoxes[Unevaluated @ expr]]],
   type, ShowCellBracket -> False, Background -> Automatic, CellMargins -> 0,
-  CellFrameMargins -> 0, CellContext -> "Global`", 
+  CellFrameMargins -> 0, CellContext -> "Global`",
   GraphicsBoxOptions -> {ImageSize -> isize}, Graphics3DBoxOptions -> {ImageSize -> isize}
 ];
 
@@ -67,7 +67,7 @@ RasterizeAsInput[expr_] :=
 
 imageColumn[images_, opts___Rule] := With[
   {width = Max[First /@ ImageDimensions /@ images]}, 
-  ImageAssemble[{ImageCrop[#, {width, Full}, Left, Padding -> White]}& /@ images, opts]
+  ImageAssemble[{ImageCrop[#, {width, Full}, Left, Padding -> White]} & /@ images, opts]
 ];
 
 SetUsage @ "
@@ -116,4 +116,3 @@ ExportImageForEmbedding[name_String, image_Image, opts:OptionsPattern[]] := Scop
   If[$Notebooks, CopyToClipboard[markdown]];
   markdown
 ]
-  
