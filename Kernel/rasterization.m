@@ -101,7 +101,7 @@ ExportImageForEmbedding::nodot = "The name \"``\" should not contain a file exte
 ExportImageForEmbedding::notcap = "The name \"``\" should start with a capital letter and not contain any spaces.";
 ExportImageForEmbedding::noexport = "The image could not be exported.";
 
-$ImagesDirectory = FileNameJoin[{FileNameDrop[$InputFileName, -2], "Documentation", "Images"}];
+$ImagesDirectory = FileNameJoin[{$SetReplaceBaseDirectory, "Documentation", "Images"}];
 $ImageMarkdownTemplate = StringTemplate["<img src=\"/Documentation/Images/``\" width=\"``\">"];
 
 ExportImageForEmbedding[name_String, image_Image, opts:OptionsPattern[]] := Scope[

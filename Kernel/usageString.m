@@ -13,3 +13,6 @@ argString[arg_] :=
 
 usageString[str__] :=
   (StringTemplate[StringJoin[{str}]] /. {TemplateSlot[s_] :> argString[s]})[]
+
+PackageExport["$SetReplaceBaseDirectory"]
+(* this is actually set in Kernel/init.m, but needs to be exported from somewhere *)
