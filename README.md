@@ -131,7 +131,7 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
 
 # Symbols and Functions
 
-- [SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace*.md)
+- [SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace.md)
 - [ToPatternRules](Documentation/SymbolsAndFunctions/ToPatternRules.md)
 - [WolframModel and WolframModelEvolutionObject](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
   - Properties
