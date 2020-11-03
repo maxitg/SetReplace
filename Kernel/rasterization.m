@@ -29,16 +29,16 @@ toCell[expr_, type_, isize_] := Cell[
   GraphicsBoxOptions -> {ImageSize -> isize}, Graphics3DBoxOptions -> {ImageSize -> isize}
 ];
 
-rasterizeExpr[expr_, type_:"Output"] := 
+rasterizeExpr[expr_, type_:"Output"] :=
   rasterizeCell @ toCell[Unevaluated @ expr, type, Small];
 
 cellLabelToImage[text_] := With[{img = rasterizeCell @ Cell[text, "CellLabel", "CellLabelExpired"]}, 
 	ImagePad[img, {{80 - ImageDimensions[img][[1]], 15}, {0, 10}}, White]];
-	
+
 $outputCellLabel := $outputCellLabel = cellLabelToImage["Out[\:f759\:f363]="];
 $inputCellLabel := $inputCellLabel = cellLabelToImage["In[\:f759\:f363]:="];
 
-assembleWithLabel[label_, cell_] := 
+assembleWithLabel[label_, cell_] :=
   ImageAssemble[{{label, cell}}, "Fit", Background -> White, Magnification -> 1/2];
 
 SetUsage @ "
@@ -62,11 +62,11 @@ RasterizeAsInput[expr$] creates an Image of expr$, formatted textually as an \"I
 SyntaxInformation[RasterizeAsInput] = {"ArgumentsPattern" -> {_}};
 
 SetAttributes[{RasterizeAsInput, RasterizeAsInputOutputPair}, HoldFirst];
-RasterizeAsInput[expr_] := 
+RasterizeAsInput[expr_] :=
   assembleWithLabel[$inputCellLabel, rasterizeExpr[Unevaluated @ expr, "Input"]];
 
 imageColumn[images_, opts___Rule] := With[
-  {width = Max[First /@ ImageDimensions /@ images]}, 
+  {width = Max[First /@ ImageDimensions /@ images]},
   ImageAssemble[{ImageCrop[#, {width, Full}, Left, Padding -> White]} & /@ images, opts]
 ];
 
