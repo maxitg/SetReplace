@@ -465,17 +465,19 @@ code.
 #### Markdown
 We are using GitHub-flavored Markdown for documentation and research notes.
 
-Images (e.g., of output cells) should be made by selecting the relevant cells in the Front End, copying them as bitmaps, and saving them as .png files to [Documentation/Images](/Documentation/Images) (in the documentation) or to the Images directory of the corresponding research note. They should then be inserted using the code similar to this:
+Images of input and/or output cells can be easily produced using Mathematica by running the command 
+`RasterizePreviousCell[]` in the cell that follows the output you want to capture. These images should be saved 
+to [Documentation/Images](/Documentation/Images) as PNG files. This can be done totally automatically using 
+the function `ExportImageForEmbedding["name", image]`, where "name" should be a CamelCaseDescriptiveName that 
+describes the content and intent of the image. The following code captures the previous cell and saves it in one go:
 
-  ```html
-  <img src="/Documentation/Images/image.png" width="xxx">
-  ```
+```wl
+ExportImageForEmbedding["AGoodNameGoesHere", RasterizePreviousCell[]]
+```
 
-  where the `width` should be computed as
-
-  ```wl
-  Round[0.6 First @ Import["$RepoRoot/Documentation/Images/image.png", "ImageSize"]]
-  ```
+This function will return markdown-compatible code that you can paste straight into the relevant readme or research
+note. In fact, the function will copy this code straight into your clipboard so that you can simply paste it into
+the markdown file. If you wish to capture an output without the Out[] tag, and without the corresponding input cell, you can use `RasterizeExpression[output]` in place of `RasterizePreviousCell[]`.
 
 # Research
 
