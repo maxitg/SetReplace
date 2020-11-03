@@ -49,7 +49,7 @@ RasterizeAsOutput[expr$] creates an Image of expr$, formatted graphically as an 
 
 SyntaxInformation[RasterizeAsOutput] = {"ArgumentsPattern" -> {_}};
 
-RasterizeAsOutput[expr_] := 
+RasterizeAsOutput[expr_] :=
   assembleWithLabel[$outputCellLabel, rasterizeExpr[expr, "Output"]];
 
 SetUsage @ "
@@ -81,7 +81,7 @@ and the corresponding resulting output expression.
 
 SyntaxInformation[RasterizeAsInputOutputPair] = {"ArgumentsPattern" -> {_}};
 
-RasterizeAsInputOutputPair[expr_] := 
+RasterizeAsInputOutputPair[expr_] :=
   imageColumn[{RasterizeAsInput[expr], RasterizeAsOutput[expr]}, Magnification -> 1/2];
 
 SetUsage @ "
