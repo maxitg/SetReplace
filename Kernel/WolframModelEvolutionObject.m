@@ -1,5 +1,3 @@
-(* ::Package:: *)
-
 Package["SetReplace`"]
 
 PackageImport["GeneralUtilities`"]
@@ -135,7 +133,7 @@ $propertyArgumentCounts = Join[
     "EdgeDestroyerEventsIndices" -> {0, 0},
     "EdgeDestroyerEventIndices" -> {0, 0},
     "EdgeGenerationsList" -> {0, 0},
-    "FeaturesExtractor" -> {0, 0},
+    "FeatureVector" -> {0, 0},
     "ExpressionsSeparation" -> {2, 2},
     "Properties" -> {0, 0}|>,
   Association[# -> {0, 0} & /@ Keys[$accessorProperties]]];
@@ -902,24 +900,24 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
     propertyEvaluate[True, "Initial"][obj, caller, "EdgeCreatorEventIndices"] + 1]]
 )
 
-(* FeaturesExtractor *)
+(* FeatureVector *)
 
-simpleLabeledGraphExtractor[g_Graph]:=
-<|
-"VertexCount"-> VertexCount[g],
-"EdgeCount"->EdgeCount[g],
-"VertexConnectivity"->VertexConnectivity[g],
-"VertexDegreesQuantiles"->Quantile[VertexDegree[g],{0,0.25,0.50,0.75,1}]
+quantileVertexDegree[g_Graph] := Quantile[VertexDegree[g], {0, 0.25, 0.50, 0.75, 1}]
+quantileVertexDegree[g_Graph] /; VertexCount[g] == 0 := {0, 0, 0, 0, 0} (* Edge case for empty graphs*)
+
+causalGraphFeatureAssociation[g_Graph] := <|
+    "VertexCount" -> VertexCount[g],
+    "EdgeCount" -> EdgeCount[g],
+    "VertexConnectivity" -> VertexConnectivity[UndirectedGraph[g]],
+    "VertexDegreesQuantiles" -> quantileVertexDegree[g]
 |>
 
-simpleGraphExtractor[g_Graph]:=Flatten@Values[simpleLabeledGraphExtractor[g]]
+causalGraphFeatureVector[g_Graph] := Flatten @ Values[causalGraphFeatureAssociation[g]]
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
-    "FeaturesExtractor"] := 
-  simpleGraphExtractor[propertyEvaluate[True, None][obj, caller, "CausalGraph"]]
-
+    "FeatureVector"] := causalGraphFeatureVector[propertyEvaluate[True, includeBoundaryEventsPattern][obj, caller, "CausalGraph"]]
 
 (* ExpressionsSeparation *)
 
