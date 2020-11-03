@@ -186,21 +186,44 @@ correctly render on e.g. GitHub but may not render in e.g. VSCode.
 * The resulting markdown is placed on the system clipboard, ready to be pasted into a file.
 "
 
-SyntaxInformation[ExportImageForEmbedding] = {"ArgumentsPattern" -> {_, _}};
+SyntaxInformation[ExportImageForEmbedding] = {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 
 ExportImageForEmbedding::nodot = "The name \"``\" should not contain a file extension, since one will be added automatically.";
 ExportImageForEmbedding::notcap = "The name \"``\" should start with a capital letter and not contain any spaces.";
 ExportImageForEmbedding::noexport = "The image could not be exported.";
+ExportImageForEmbedding::paclet = "You have apparently loaded an installed, pacletized version of SetReplace (located at ``).
+This means that ExportImageForEmbedding does not know where your development directory is, and hence where to save images.
+Either load SetReplace directly from the Git repo, using e.g. Get[\"~/git/SetReplace/Kernel/init.m\"], or provide the directory \
+of your checkout of the Git repository manually using the \"DevelopmentDirectory\" option.";
+ExportImageForEmbedding::baddevdir = "The provided development directory `` does not exist or is not a string."
+ExportImageForEmbedding::noimgpath = "The directory in which to save images was expected to exist at \"``\", but was not found.";
 
-$ImagesDirectory = FileNameJoin[{$SetReplaceBaseDirectory, "Documentation", "Images"}];
 $ImageMarkdownTemplate = StringTemplate["<img src=\"/Documentation/Images/``\" width=\"``\">"];
+
+Options[ExportImageForEmbedding] = {
+  "DevelopmentDirectory" -> Automatic,
+  CompressionLevel -> 1.0,
+  "ColorMapLength" -> Automatic
+}
 
 ExportImageForEmbedding[name_String, image_Image, opts:OptionsPattern[]] := Scope[
   If[StringContainsQ[name, "."], ReturnFailed["nodot", name]];
   If[name === "" || !UpperCaseQ[StringTake[name, 1]] || StringContainsQ[name, " "], ReturnFailed["notcap", name]];
   filename = name <> ".png";
-  path = FileNameJoin[{$ImagesDirectory, filename}];
-  result = Export[path, image, opts, CompressionLevel -> 1.0];
+  UnpackOptions[developmentDirectory, compressionLevel, colorMapLength];
+  SetAutomatic[developmentDirectory, $SetReplaceBaseDirectory];
+  If[!StringQ[developmentDirectory] || !DirectoryQ[developmentDirectory],
+    ReturnFailed["baddevdir", developmentDirectory]
+  ];
+  imagesDirectory = FileNameJoin[{developmentDirectory, "Documentation", "Images"}];
+  If[!DirectoryQ[imagesDirectory],
+    If[StringStartsQ[developmentDirectory, {$UserBasePacletsDirectory, $BasePacletsDirectory}],
+      ReturnFailed["paclet", $SetReplaceBaseDirectory],
+      ReturnFailed["noimgpath", imagesDirectory]
+    ]
+  ];
+  path = FileNameJoin[{imagesDirectory, filename}];
+  result = Export[path, image, CompressionLevel -> compressionLevel, "ColorMapLength" -> colorMapLength];
   If[!StringQ[result], ReturnFailed["noexport"]];
   width = First @ ImageDimensions[image];
   markdown = $ImageMarkdownTemplate[filename, width / 2.];
