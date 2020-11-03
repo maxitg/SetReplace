@@ -914,10 +914,10 @@ causalGraphFeatureAssociation[g_Graph] := <|
 
 causalGraphFeatureVector[g_Graph] := Flatten @ Values[causalGraphFeatureAssociation[g]]
 
-propertyEvaluate[True, includeBoundaryEventsPattern][
+propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
-    "FeatureVector"] := causalGraphFeatureVector[propertyEvaluate[True, includeBoundaryEventsPattern][obj, caller, "CausalGraph"]]
+    "FeatureVector"] := causalGraphFeatureVector[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]]
 
 (* ExpressionsSeparation *)
 
