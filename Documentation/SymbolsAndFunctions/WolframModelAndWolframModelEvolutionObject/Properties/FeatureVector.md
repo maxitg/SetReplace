@@ -21,3 +21,34 @@ The list of properties is:
 
 
 This property is useful for applying machine learning to Wolfram Models explorations.
+
+
+
+## Example
+
+```wl
+In[] := possibileInitsBi = 
+  Flatten[Table[{{i, j}, {z, k}}, {i, {0, 1, 2, 3}}, {j, {0, 1, 2, 
+      3}}, {z, {0, 1, 2, 3}}, {k, {0, 1, 2, 3}}], 3];
+
+plots = WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, 
+        w}}, #, 6, "FinalStatePlot"] & /@ possibileInitsBi;
+
+causalGraph = 
+  WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, 
+        w}}, #, 6, "CausalGraph"] & /@ possibileInitsBi;
+
+feats = WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, 
+       w}}, #, 6, "FeatureVector"] & /@ possibileInitsBi;
+
+
+FeatureSpacePlot[feats -> plots, LabelingFunction -> Tooltip]
+
+FeatureSpacePlot[feats -> causalGraph, LabelingFunction -> Tooltip]
+```
+```wl
+Out[] = - Graphics -
+```
+
+
+
