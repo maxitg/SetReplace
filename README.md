@@ -131,7 +131,7 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
 
 # Symbols and Functions
 
-- [SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace*.md)
+- [SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace.md)
 - [ToPatternRules](Documentation/SymbolsAndFunctions/ToPatternRules.md)
 - [WolframModel and WolframModelEvolutionObject](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
   - Properties
@@ -145,6 +145,7 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
     - [Creator and Destroyer Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CreatorAndDestroyerEvents.md)
     - [Causal Graphs](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
     - [Expression Separations](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/ExpressionSeparations.md)
+    - [MultiwayQ](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md)
     - [Rule Indices for Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/RuleIndicesForEvents.md)
     - [Edge and Event Generations](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EdgeAndEventGenerations.md)
     - [Termination Reason](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TerminationReason.md)
@@ -170,6 +171,7 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
 - Utility Functions
   - [IndexHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/IndexHypergraph.md)
   - [HypergraphToGraph](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md)
+  - [IsomorphicHypergraphQ](Documentation/SymbolsAndFunctions/UtilityFunctions/IsomorphicHypergraphQ.md)
   - [Subhypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/Subhypergraph.md)
   - [WolframModelRuleValue](Documentation/SymbolsAndFunctions/UtilityFunctions/WolframModelRuleValue.md)
   - [GeneralizedGridGraph](Documentation/SymbolsAndFunctions/UtilityFunctions/GeneralizedGridGraph.md)

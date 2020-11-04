@@ -22,12 +22,12 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
 
 <img src="/Documentation/Images/EvolutionObject10Steps.png" width="493">
 
-Note that this call is different from the [`SetReplace`](../SetReplace*.md) function in a variety of ways:
+Note that this call is different from the [`SetReplace`](../SetReplace.md) function in a variety of ways:
 
 * The order of arguments is switched, the rule goes first.
 * The rule is specified in the "anonymous" form ([`ToPatternRules`](../ToPatternRules.md) is done implicitly).
-* The number of steps here is the number of generations, which is equivalent to steps of [`SetReplaceAll`](../SetReplace*.md). Here each edge can have at most 10 generations of predecessors.
-* The output is not a final state, but a **`WolframModelEvolutionObject`** containing the entire evolution (similar to [`SetReplaceList`](../SetReplace*.md) but with additional information about the relationships between edges and the events that produced them. From the information field on that object, one can see that the evolution was done for 10 generations (i.e., the evolution did not terminate early), and 109 replacements (aka events) were made in total. More [properties](#properties) can be computed from an evolution object.
+* The number of steps here is the number of generations, which is equivalent to steps of [`SetReplaceAll`](../SetReplace.md). Here each edge can have at most 10 generations of predecessors.
+* The output is not a final state, but a **`WolframModelEvolutionObject`** containing the entire evolution (similar to [`SetReplaceList`](../SetReplace.md) but with additional information about the relationships between edges and the events that produced them. From the information field on that object, one can see that the evolution was done for 10 generations (i.e., the evolution did not terminate early), and 109 replacements (aka events) were made in total. More [properties](#properties) can be computed from an evolution object.
 
 To see the information an evolution object contains, let's make one with a smaller number of generations:
 
@@ -209,7 +209,7 @@ Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
 
 ### Pattern Rules
 
-Pattern rules (i.e., the kind of rules used in the [`SetReplace`](../SetReplace*.md) function) can be specified as well. As an example, previously described call to [`SetReplaceList`](../SetReplace*.md) can be reproduced as
+Pattern rules (i.e., the kind of rules used in the [`SetReplace`](../SetReplace.md) function) can be specified as well. As an example, previously described call to [`SetReplaceList`](../SetReplace.md) can be reproduced as
 
 ```wl
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
@@ -290,8 +290,8 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
 
 All possible keys in that association are:
 
-* `"MaxEvents"`: limit the number of individual replacements (in the [`SetReplace`](../SetReplace*.md) function meaning).
-* `"MaxGenerations"`: limit the number of generations (steps in [`SetReplaceAll`](../SetReplace*.md) meaning), same as specifying steps directly as a number in `WolframModel`.
+* `"MaxEvents"`: limit the number of individual replacements (in the [`SetReplace`](../SetReplace.md) function meaning).
+* `"MaxGenerations"`: limit the number of generations (steps in [`SetReplaceAll`](../SetReplace.md) meaning), same as specifying steps directly as a number in `WolframModel`.
 * `"MaxVertices"`: limit the number of vertices in the *final* state only (the total count throughout evolution might be larger). This limit stops evolution if the next event, if applied, would put the state over the limit. Note once such an event is encountered, the evolution stops immediately even if other matches exist that would not put the vertex count over the limit.
 * `"MaxVertexDegree"`: limit the number of final state edges in which any particular vertex is involved. Works in a similar way to `"MaxVertices"`.
 * `"MaxEdges"`: limit the number of edges (set elements) in the final state. Works similarly to `"MaxVertices"`.
@@ -333,6 +333,7 @@ Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, s
 - [Creator and Destroyer Events](Properties/CreatorAndDestroyerEvents.md)
 - [Causal Graphs](Properties/CausalGraphs.md)
 - [Expression Separations](Properties/ExpressionSeparations.md)
+- [MultiwayQ](Properties/MultiwayQ.md)
 - [Rule Indices for Events](Properties/RuleIndicesForEvents.md)
 - [Edge and Event Generations](Properties/EdgeAndEventGenerations.md)
 - [Termination Reason](Properties/TerminationReason.md)
