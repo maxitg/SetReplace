@@ -13,3 +13,4 @@ Build/
 # Built paclets
 
 *.paclet
+.builtLibSetReplaceHash
