@@ -17,12 +17,7 @@ The list of properties is:
 - [`VertexConnectivity`](https://reference.wolfram.com/language/ref/VertexConnectivity.html): the smallest number of vertices whose deletion from `g` disconnects `g`. This is computed on the undirected version of the causal graph.
 - VertexDegreesQuantiles: The quantiles 0, 0.25, 0.50, 0.75, 1 of the [vertex degrees](https://reference.wolfram.com/language/ref/VertexDegree.html) distribution
 
-
-
-
 This property is useful for applying machine learning to Wolfram Models explorations.
-
-
 
 ## Example
 
@@ -35,6 +30,3 @@ FeatureSpacePlot[#["FeatureVector"] -> #[
 ```
 
 <img src="/Documentation/Images/FeatureVector-FeatureSpacePlot.png" width=478>
-
-
-
