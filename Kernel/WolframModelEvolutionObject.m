@@ -903,14 +903,14 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 
 (* FeatureVector *)
 
-quantileVertexDegree[g_Graph] := Quantile[VertexDegree[g], {0, 0.25, 0.50, 0.75, 1}]
-quantileVertexDegree[g_Graph] /; VertexCount[g] == 0 := {0, 0, 0, 0, 0} (* Edge case for empty graphs*)
+vertexDegreeQuantiles[g_Graph] := Quantile[VertexDegree[g], {0, 0.25, 0.50, 0.75, 1}]
+vertexDegreeQuantiles[g_Graph] /; VertexCount[g] == 0 := {0, 0, 0, 0, 0} (* Edge case for empty graphs *)
 
 causalGraphFeatureAssociation[g_Graph] := <|
     "VertexCount" -> VertexCount[g],
     "EdgeCount" -> EdgeCount[g],
     "VertexConnectivity" -> VertexConnectivity[UndirectedGraph[g]],
-    "VertexDegreesQuantiles" -> quantileVertexDegree[g]
+    "VertexDegreesQuantiles" -> vertexDegreeQuantiles[g]
 |>
 
 causalGraphFeatureVector[g_Graph] := Flatten @ Values[causalGraphFeatureAssociation[g]]
