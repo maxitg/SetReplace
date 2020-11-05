@@ -1882,8 +1882,7 @@
 
 
       (* FeatureVector *)
-      With[{
-        featuresEmptyGraph = 
+      With[{featuresEmptyGraph = 
             WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 0]["FeatureVector"],
         featuresSmallGraph = 
             WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 1]["FeatureVector"],
