@@ -175,57 +175,53 @@ RasterizePreviousCell[] := Scope[
 ];
 
 SetUsage @ "
-ExportImageForEmbedding['name$', image$] saves image$ to the correct location in \
-the documentation directory under the 'name$.png', and returns an HTML <img> tag that can
-be pasted directly into a markdown file that includes the image.
-* The 'name$' should be a CamelCased, descriptive string, not including a file extension.
-* The image$ should be an Image[$$] produced by e.g. RasterizeExpressionAsOutput or RasterizeExpressionAsInputOutputPair.
-* The resulting markdown is an absolute path, based on the root of the repository. It will \
+ExportImageForEmbedding['path$', image$] saves image$ to file 'path$', and returns an HTML <img> tag that can
+be pasted directly into a markdown file that includes the image. 
+* 'path$' should be the absolute path to a CamelCased file name ending in .png.
+* The image$ should be an Image[$$] produced by RasterizePreviousCell or the like.
+* The resulting markdown will contain an absolute path relative to the root of the repository. It will \
 correctly render on e.g. GitHub but may not render in e.g. VSCode.
-* The resulting markdown is placed on the system clipboard, ready to be pasted into a file.
+* A path relative to the repository root can be provided if SetReplace was loaded from the repository rather than an installed paclet.
 "
 
 SyntaxInformation[ExportImageForEmbedding] = {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 
-ExportImageForEmbedding::nodot = "The name \"``\" should not contain a file extension, since one will be added automatically.";
-ExportImageForEmbedding::notcap = "The name \"``\" should start with a capital letter and not contain any spaces.";
+ExportImageForEmbedding::noparentdir = "The parent directory \"``\" does not appear to exist.";
+ExportImageForEmbedding::badfilename = "The name \"``\" should start with a capital letter, not contain any spaces, and end with '.png'.";
 ExportImageForEmbedding::noexport = "The image could not be exported.";
-ExportImageForEmbedding::paclet = "You have apparently loaded an installed, pacletized version of SetReplace (located at ``).
-This means that ExportImageForEmbedding does not know where your development directory is, and hence where to save images.
-Either load SetReplace directly from the Git repo, using e.g. Get[\"~/git/SetReplace/Kernel/init.m\"], or provide the directory \
-of your checkout of the Git repository manually using the \"DevelopmentDirectory\" option.";
-ExportImageForEmbedding::baddevdir = "The provided development directory `` does not exist or is not a string."
-ExportImageForEmbedding::noimgpath = "The directory in which to save images was expected to exist at \"``\", but was not found.";
+ExportImageForEmbedding::paclet = "You have specified a relative path (``), but are using an installed, pacletized version of SetReplace (located at ``).
+This means that ExportImageForEmbedding does not know where your development repo, and hence needs to be given a full path.";
 
-$ImageMarkdownTemplate = StringTemplate["<img src=\"/Documentation/Images/``\" width=\"``\">"];
+$imageMarkdownTemplate = StringTemplate["<img src=\"``\" width=\"``\">"];
 
 Options[ExportImageForEmbedding] = {
-  "DevelopmentDirectory" -> Automatic,
   CompressionLevel -> 1.0,
+  Magnification -> 0.6,
   "ColorMapLength" -> Automatic
 }
 
-ExportImageForEmbedding[name_String, image_Image, opts:OptionsPattern[]] := Scope[
-  If[StringContainsQ[name, "."], ReturnFailed["nodot", name]];
-  If[name === "" || !UpperCaseQ[StringTake[name, 1]] || StringContainsQ[name, " "], ReturnFailed["notcap", name]];
-  filename = name <> ".png";
-  UnpackOptions[developmentDirectory, compressionLevel, colorMapLength];
-  SetAutomatic[developmentDirectory, $SetReplaceBaseDirectory];
-  If[!StringQ[developmentDirectory] || !DirectoryQ[developmentDirectory],
-    ReturnFailed["baddevdir", developmentDirectory]
+ExportImageForEmbedding[path_String, image_Image, OptionsPattern[]] := Scope[
+  name = FileNameTake[path];
+  If[name === "" || !UpperCaseQ[StringTake[name, 1]] || StringContainsQ[name, " "] || !StringEndsQ[name, ".png", IgnoreCase -> True], 
+    ReturnFailed["badfilename", name]];
+  If[StringContainsQ[path, "~"], path = ExpandFileName[path]];
+  relativePathQ = StringStartsQ[path, LetterCharacter] && !($OperatingSystem == "Windows" && StringStartsQ[path, LetterCharacter ~~ ":\\"]);
+  If[relativePathQ, 
+    If[StringStartsQ[$SetReplaceBaseDirectory, {$UserBasePacletsDirectory, $BasePacletsDirectory}],
+      ReturnFailed["paclet", $SetReplaceBaseDirectory]];
+    If[StringFreeQ[path, $PathnameSeparator], 
+      path = FileNameJoin[{"Documentation", "Images", path}]];
+    path = FileNameJoin[{$SetReplaceBaseDirectory, path}];
   ];
-  imagesDirectory = FileNameJoin[{developmentDirectory, "Documentation", "Images"}];
-  If[!DirectoryQ[imagesDirectory],
-    If[StringStartsQ[developmentDirectory, {$UserBasePacletsDirectory, $BasePacletsDirectory}],
-      ReturnFailed["paclet", $SetReplaceBaseDirectory],
-      ReturnFailed["noimgpath", imagesDirectory]
-    ]
-  ];
-  path = FileNameJoin[{imagesDirectory, filename}];
+  parentDir = FileNameDrop[path];
+  If[!DirectoryQ[parentDir], ReturnFailed["noparentdir", parentDir]];
+  UnpackOptions[compressionLevel, magnification, colorMapLength];
   result = Export[path, image, CompressionLevel -> compressionLevel, "ColorMapLength" -> colorMapLength];
   If[!StringQ[result], ReturnFailed["noexport"]];
   width = First @ ImageDimensions[image];
-  markdown = $ImageMarkdownTemplate[filename, width / 2.];
-  If[$Notebooks, CopyToClipboard[markdown]];
-  markdown
+  relativePath = StringDrop[path, StringLength[findGitPath[parentDir]]];
+  $imageMarkdownTemplate[relativePath, width * magnification]
 ]
+
+findGitPath[path_] :=
+  NestWhile[FileNameDrop, path, # =!= "" && !FileExistsQ[FileNameJoin[{#, ".git"}]]&]
