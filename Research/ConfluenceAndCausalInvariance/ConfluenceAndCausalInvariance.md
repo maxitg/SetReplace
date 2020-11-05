@@ -5,47 +5,46 @@
 There are claims made in the [Wolfram Physics Project](https://www.wolframphysics.org) about the equivalence of
 confluence and causal invariance.
 For example, consider
-[the glossary](https://www.wolframphysics.org/glossary/#CausalInvariance) on the
-[Wolfram Physics website](https://www.wolframphysics.org), which,
+[the glossary](https://www.wolframphysics.org/glossary/#CausalInvariance) on the project's website, which,
 [as of 10/30/2020](http://web.archive.org/web/20201030155847/https://www.wolframphysics.org/glossary/#CausalInvariance),
 says:
 
-> Causal Invariance: A property of multiway graphs whereby all possible paths yield the isomorphic causal graphs.
+> **Causal Invariance**: A property of multiway graphs whereby all possible paths yield the isomorphic causal graphs.
 > When causal invariance exists, every branch in the multiway system must eventually merge.
 > Causal invariance is a core property associated with relativistic invariance, quantum objectivity, etc.
 > In the theory of term rewriting, a closely related property is confluence.
 > In a terminating system, causal invariance implies that whatever path is taken, the "answer" will always be the same.
 
-> Confluence: A simplified form of causal invariance considered in term rewriting systems such as ones that reach fixed
-> points.
+> **Confluence**: A simplified form of causal invariance considered in term rewriting systems such as ones that reach
+> fixed points.
 
-The glossary does not define confluence, so we are going to use the
+However, the glossary does not explicitly define confluence, so we are going to use the
 [standard definition](https://en.wikipedia.org/wiki/Confluence_%28abstract_rewriting%29#General_case_and_theory) from
 the theory of rewriting systems:
 
-> A state `a` is deemed confluent if, for all pairs of states `b`, `c` that can be reached from `a`, there exists a
-> state `d` that can be reached from both `b` and `c`.
+> A state *a* is deemed **confluent** if, for all pairs of states *b*, *c* that can be reached from *a*, there exists a
+> state *d* that can be reached from both *b* and *c*.
 > If every state in the system is confluent, the system itself is confluent.
 
 We can summarize the statements above with the following definitions:
 
-> A Wolfram model evolution is called *causal invariant* if and only if the
+> A Wolfram model evolution is called **causal invariant** if and only if the
 > [causal graphs](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
 > for singleway evolutions with any possible
 > [event ordering functions](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventOrderingFunction.md)
 > are isomorphic.
 
-Note that the definition above is only meaningful for terminating systems (i.e., the systems which always reach a
+Note that the definition above is only meaningful for terminating systems (i.e., the systems that always reach a
 [`"FixedPoint"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TerminationReason.md),
 a state during the evolution where no more matches can be made to its expressions).
 
 We can then define confluence as:
 
-> A Wolfram model evolution is called *confluent* if and only if any pair of partial singleway evolutions starting from
-> a particular state can be continued in such a way as to reach isomorphic final states.
+> A Wolfram model evolution is called **confluent** if and only if any pair of partial singleway evolutions starting
+> from a particular state can be continued in such a way as to reach isomorphic final states.
 
 In what follows, we will demonstrate that causal invariance is *not* equivalent to confluence, neither of them implies
-the other, and the two statements made above are false:
+the other and the two statements made above are false:
 
 > When causal invariance exists, every branch in the multiway system must eventually merge.
 
@@ -194,7 +193,7 @@ In[] := WolframModel[
 
 <img src="Images/CausalInvariantMultiwaySystem.png" width="405">
 
-These two events correspond to two different singleway evolutions terminating at states `{{1}, {1}}` and `{{1}, {2}}`
+These two events correspond to two different singleway evolutions terminating at states `{{1}, {1}}` and `{{1}, {2}}`,
 respectively:
 
 ```wl
@@ -232,9 +231,9 @@ In[] := ResourceFunction["MultiwaySystem"][
 
 Therefore, causal invariance *does not imply* confluence.
 
-Note that `"CausalInvariantQ"` of
-[`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) returns `False` in
-this case:
+Note that the `"CausalInvariantQ"` property of
+[`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) returns
+[`False`](https://reference.wolfram.com/language/ref/False.html) in this case:
 
 ```wl
 In[] := ResourceFunction["MultiwaySystem"][
@@ -249,7 +248,7 @@ For example, systems that don't exhibit [multiway branching](/Research/LocalMult
 all do satisfy both of these conditions.
 It might be possible to generalize this to include more classes of systems.
 We could also enumerate ([#57](https://github.com/maxitg/SetReplace/issues/57)) simple rules and determine how many of
-them exhibit just one of these properties, both, or neither.
+them exhibit just one of these properties, both or neither.
 
 To do that, we need to implement tests for both confluence ([#59](https://github.com/maxitg/SetReplace/issues/59),
 [#477](https://github.com/maxitg/SetReplace/issues/477)) and causal invariance
@@ -263,4 +262,4 @@ For example, one can investigate a stronger version of confluence:
 1. Consider any infinite singleway evolution of a system.
 2. Consider another finite partial singleway evolution.
 3. If any such finite evolution can be continued in such a way as to reach one of the states from the infinite
-evolution, we define the system as *"super"confluent* ([#478](https://github.com/maxitg/SetReplace/issues/478)).
+evolution, we define the system as *"super"-confluent* ([#478](https://github.com/maxitg/SetReplace/issues/478)).
