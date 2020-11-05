@@ -45,7 +45,7 @@ We can then define confluence as:
 > from a particular state can be continued in such a way as to reach isomorphic final states.
 
 In what follows, we will demonstrate that causal invariance is *not* equivalent to confluence, neither of them implies
-the other and the two statements made above are false:
+the other, and the two statements made above are false:
 
 > When causal invariance exists, every branch in the multiway system must eventually merge.
 
