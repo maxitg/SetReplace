@@ -54,13 +54,32 @@ buildLibSetReplace[] := With[{
   ];
 ];
 
-deleteBuildDirectory[] /; !$internalBuildQ :=
-  If[FileExistsQ[$buildDirectory], DeleteDirectory[$buildDirectory, DeleteContents -> True]];
+libSetReplaceSourceHash[] := ModuleScope[
+  sourceFiles = Join[
+    FileNames[__ ~~ "." ~~ _ ~~ "pp", FileNameJoin[{$repoRoot, "libSetReplace"}]], (* C++ sources except for tests *)
+    FileNameJoin[{$repoRoot, #}] & /@ {"scripts/buildInit.wl", "build.wls"}]; (* compilation options might change *)
+  fileHashes = FileHash[#, "SHA", "HexString"] & /@ sourceFiles;
+  Hash[{sourceFiles, fileHashes}, "SHA", "HexString"]
+]
+
+$builtLibSetReplaceHashFilename = FileNameJoin[{AbsoluteFileName[$repoRoot], ".builtLibSetReplaceHash"}];
+
+saveBuiltLibSetReplaceHash[hash_String] := Export[$builtLibSetReplaceHashFilename, hash, "Text"]
+
+builtLibSetReplaceHash[] := If[FileExistsQ[$builtLibSetReplaceHashFilename],
+  Import[$builtLibSetReplaceHashFilename, "Text"],
+  Hash[{{}, {}}, "SHA", "HexString"]
+]
 
 copyWLSourceToBuildDirectory[] /; !$internalBuildQ := With[{
     files = Append[Import[FileNameJoin[{$repoRoot, "Kernel"}]], FileNameJoin[{"..", "PacletInfo.m"}]]},
-  If[!FileExistsQ[#], CreateDirectory[#]] & /@ {$buildDirectory, FileNameJoin[{$buildDirectory, "Kernel"}]};
-  CopyFile[FileNameJoin[{$repoRoot, "Kernel", #}], FileNameJoin[{$buildDirectory, "Kernel", #}]] & /@ files;
+  If[!FileExistsQ[$buildDirectory], CreateDirectory[$buildDirectory]];
+  $buildKernelDirectory = FileNameJoin[{$buildDirectory, "Kernel"}];
+  If[FileExistsQ[$buildKernelDirectory], DeleteDirectory[$buildKernelDirectory, DeleteContents -> True]];
+  CreateDirectory[$buildKernelDirectory];
+  CopyFile[FileNameJoin[{$repoRoot, "Kernel", #}],
+           FileNameJoin[{$buildDirectory, "Kernel", #}],
+           OverwriteTarget -> True] & /@ files;
 ];
 
 fileStringReplace[file_, rules_] := Export[file, StringReplace[Import[file, "Text"], rules], "Text"]
