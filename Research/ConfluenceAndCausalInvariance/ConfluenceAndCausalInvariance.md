@@ -4,6 +4,7 @@
 
 There are claims made in the [Wolfram Physics Project](https://www.wolframphysics.org) about the equivalence of
 confluence and causal invariance.
+This note demonstrates that some of these claims are not correct.
 For example, consider
 [the glossary](https://www.wolframphysics.org/glossary/#CausalInvariance) on the project's website, which,
 [as of 10/30/2020](http://web.archive.org/web/20201030155847/https://www.wolframphysics.org/glossary/#CausalInvariance),
