@@ -9,6 +9,7 @@ Check[
 $success = True;
 
 Check[
+  Print["Temporary build directory is ", $buildDirectory];
   $builtLibSetReplaceHash = builtLibSetReplaceHash[];
   $libSetReplaceSourceHash = libSetReplaceSourceHash[];
   If[$builtLibSetReplaceHash =!= $libSetReplaceSourceHash,
@@ -27,7 +28,7 @@ Check[
   $context = renameContext[Automatic, $version];
   updateBuildData[];
   packPaclet[$context];,
-
+  Print["Message occurred during build."];
   Exit[1];
 ];
 

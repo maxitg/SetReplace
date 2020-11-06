@@ -2,6 +2,8 @@ Needs["CCompilerDriver`"];
 Needs["PacletManager`"];
 Needs["GeneralUtilities`"];
 
+$setReplaceTemporaryDirectory = FileNameJoin[{$TemporaryDirectory, "SetReplace"}];
+
 $internalBuildQ = AntProperty["build_target"] === "internal";
 
 If[PacletFind["GitLink", "Internal" -> All] === {},
@@ -14,7 +16,8 @@ Needs["GitLink`"];
 $repoRoot = FileNameJoin[{DirectoryName[$InputFileName], ".."}];
 $buildDirectory = If[$internalBuildQ,
   FileNameJoin[{AntProperty["files_directory"], AntProperty["component"]}],
-  FileNameJoin[{$repoRoot, "Build"}]];
+  FileNameJoin[{$setReplaceTemporaryDirectory, "Build"}]
+];
 
 tryEnvironment[var_, default_] := If[# === $Failed, default, #] & @ Environment[var];
 
@@ -62,7 +65,7 @@ libSetReplaceSourceHash[] := ModuleScope[
   Hash[{sourceFiles, fileHashes}, "SHA", "HexString"]
 ]
 
-$builtLibSetReplaceHashFilename = FileNameJoin[{AbsoluteFileName[$repoRoot], ".builtLibSetReplaceHash"}];
+$builtLibSetReplaceHashFilename = FileNameJoin[{$setReplaceTemporaryDirectory, "builtLibSetReplaceHash"}];
 
 saveBuiltLibSetReplaceHash[hash_String] := Export[$builtLibSetReplaceHashFilename, hash, "Text"]
 
