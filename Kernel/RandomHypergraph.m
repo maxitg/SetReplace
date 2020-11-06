@@ -44,16 +44,16 @@ $signaturePattern = {_Integer ? NonNegative, _Integer ? NonNegative};
 In[]:= RandomHypergraph[8]
 Out[]= {{4, 4, 3}, {2, 7}, {5, 6}, {8}}
 *)
-randomHypergraph[call_, col_Integer ? Positive, n : (_Integer ? Positive | Automatic)] :=
-  With[{max = Replace[n, Automatic -> col]},
-    RandomInteger[{1, max}, #] & /@ DeleteCases[randomPartition @ col, 0]
+randomHypergraph[caller_, complexity_Integer ? Positive, n : (_Integer ? Positive | Automatic)] :=
+  With[{max = Replace[n, Automatic -> complexity]},
+    RandomInteger[{1, max}, #] & /@ DeleteCases[randomPartition @ complexity, 0]
   ]
 
 (*
 In[]:= RandomHypergraph[{{5, 2}, {4, 3}}, 10]
 Out[]= {{1, 2}, {2, 9}, {6, 1}, {3, 3}, {10, 10}, {1, 8, 8}, {5, 7, 9}, {5, 7, 6}, {5, 3, 3}}
 *)
-randomHypergraph[call_, sig : {$signaturePattern ..}, n : (_Integer ? Positive | Automatic)] :=
+randomHypergraph[caller_, sig : {$signaturePattern ..}, n : (_Integer ? Positive | Automatic)] :=
   ModuleScope[
     If[n === Automatic,
       (* Maximum possible number of atoms *)
@@ -67,14 +67,14 @@ randomHypergraph[call_, sig : {$signaturePattern ..}, n : (_Integer ? Positive |
 In[]:= RandomHypergraph[{5, 2}, 10]
 Out[]= {{5, 4}, {7, 8}, {7, 6}, {7, 1}, {4, 9}}
 *)
-randomHypergraph[call_, sig : $signaturePattern, n_] :=
-  randomHypergraph[call, {sig}, n]
+randomHypergraph[caller_, sig : $signaturePattern, n_] :=
+  randomHypergraph[caller, {sig}, n]
 
 (* Incorrect arguments messages *)
-randomHypergraph[call_, sig : Except[$signaturePattern | {$signaturePattern ..} | _Integer ? Positive], _] :=
-  (Message[RandomHypergraph::invalidSig, call, 1];
+randomHypergraph[caller_, sig : Except[$signaturePattern | {$signaturePattern ..} | _Integer ? Positive], _] :=
+  (Message[RandomHypergraph::invalidSig, caller, 1];
   Throw[$Failed])
 
-randomHypergraph[call_, sig_, max_] :=
-  (Message[RandomHypergraph::intpa, call, 2];
+randomHypergraph[caller_, sig_, max_] :=
+  (Message[RandomHypergraph::intpa, caller, 2];
   Throw[$Failed])

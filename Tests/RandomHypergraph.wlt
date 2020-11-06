@@ -3,6 +3,11 @@
     "init" -> (
       Attributes[Global`testUnevaluated] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+
+      distinctHypergraphQ[hypergraphs_] := Length[Tally[Map[Sort, hypergraphs, {1, 2}]]] > 1;
+      validVertexRangeQ[range_, hypergraph_] := SubsetQ[range, Flatten @ hypergraph];
+
+      seed = 123;
     ),
     "tests" -> {
 
@@ -57,70 +62,125 @@
       ],
 
       (* "Complexity" *)
-      With[{
-          random1 = Table[RandomHypergraph[8], 100],
-          random2 = Table[RandomHypergraph[8, 20], 100]},
-        {
-          (* The hyperedge arities for each hypergraph should total 8 *)
-          VerificationTest[AllTrue[random1, Total[Length /@ #] === 8 &], True],
-          VerificationTest[AllTrue[random2, Total[Length /@ #] === 8 &], True],
+      VerificationTest[
+        SeedRandom[123];
+        AllTrue[
+          Table[RandomHypergraph[8], 100],
+          Total[Length /@ #] === 8 &],
+        True
+      ],
+      VerificationTest[
+        SeedRandom[123];
+        AllTrue[
+          Table[RandomHypergraph[8, 20], 100],
+          Total[Length /@ #] === 8 &],
+        True
+      ],
 
-          (* All generated hypergraphs should not be the same *)
-          VerificationTest[Length[Tally[Map[Sort, random1, {1, 2}]]] > 1, True],
-          VerificationTest[Length[Tally[Map[Sort, random2, {1, 2}]]] > 1, True],
+      (** All generated hypergraphs should not be the same **)
+      VerificationTest[
+        SeedRandom[123];
+        distinctHypergraphQ @ Table[RandomHypergraph[8], 100],
+        True
+      ],
+      VerificationTest[
+        SeedRandom[123];
+        distinctHypergraphQ @ Table[RandomHypergraph[8, 20], 100],
+        True
+      ],
 
-          (* All vertices must be in the correct range *)
-          VerificationTest[SubsetQ[Range[1, 8], Flatten @ random1], True],
-          VerificationTest[SubsetQ[Range[1, 20], Flatten @ random2], True]
-          }
+      (** Verify all vertices are in the correct range **)
+      VerificationTest[
+        SeedRandom[123];
+        validVertexRangeQ[Range[1, 8], Table[RandomHypergraph[8], 100]],
+        True
+      ],
+      VerificationTest[
+        SeedRandom[123];
+        validVertexRangeQ[Range[1, 20], Table[RandomHypergraph[8, 20], 100]],
+        True
       ],
 
       (* Signature *)
-      With[{
-          random1 = Table[RandomHypergraph[{5, 2}], 100],
-          random2 = Table[RandomHypergraph[{5, 2}, 20], 100]},
-        {
-          (* Hypergraph signature *)
-          VerificationTest[AllTrue[random1, MatchQ[#, {Repeated[{_, _}, {5}]}] &], True],
-          VerificationTest[AllTrue[random2, MatchQ[#, {Repeated[{_, _}, {5}]}] &], True],
+      (*** Hypergraph signature **)
+      VerificationTest[
+        SeedRandom[124];
+        AllTrue[
+          Table[RandomHypergraph[{5, 2}], 100],
+          MatchQ[#, {Repeated[{_, _}, {5}]}] &],
+        True
+      ],
+      VerificationTest[
+        SeedRandom[124];
+        AllTrue[
+          Table[RandomHypergraph[{5, 2}, 20], 100],
+          MatchQ[#, {Repeated[{_, _}, {5}]}] &],
+        True
+      ],
 
-          (* All generated hypergraphs should not be the same *)
-          VerificationTest[Length[Tally[Map[Sort, random1, {1, 2}]]] > 1, True],
-          VerificationTest[Length[Tally[Map[Sort, random2, {1, 2}]]] > 1, True],
+      (** All generated hypergraphs should not be the same **)
+      VerificationTest[
+        SeedRandom[124];
+        distinctHypergraphQ @ Table[RandomHypergraph[{5, 2}], 100],
+        True
+      ],
+      VerificationTest[
+        SeedRandom[124];
+        distinctHypergraphQ @ Table[RandomHypergraph[{5, 2}, 20], 100],
+        True
+      ],
 
-          (* Verify all vertices are in the correct range *)
-          VerificationTest[SubsetQ[Range[1, 10], Flatten @ random1], True],
-          VerificationTest[SubsetQ[Range[1, 20], Flatten @ random2], True]
-          }
+      (** Verify all vertices are in the correct range **)
+      VerificationTest[
+        SeedRandom[124];
+        validVertexRangeQ[Range[1, 10], Table[RandomHypergraph[{5, 2}], 100]],
+        True
+      ],
+      VerificationTest[
+        SeedRandom[124];
+        validVertexRangeQ[Range[1, 20], Table[RandomHypergraph[{5, 2}, 20], 100]],
+        True
       ],
 
       (* Signature(s) *)
-      With[{
-          random1 = Table[RandomHypergraph[{{5, 2}, {2, 3}}], 100],
-          random2 = Table[RandomHypergraph[{{5, 2}, {2, 3}}, 20], 100]},
-        {
-          (* Hypergraph signature *)
-          VerificationTest[
-            AllTrue[
-              SortBy[random1, Length],
-              MatchQ[#, {Repeated[{_, _}, {5}], Repeated[{_, _, _}, {2}]}] &],
-            True
-          ],
-          VerificationTest[
-            AllTrue[
-              SortBy[random2, Length],
-              MatchQ[#, {Repeated[{_, _}, {5}], Repeated[{_, _, _}, {2}]}] &],
-            True
-          ],
+      (*** Hypergraph signature **)
+      VerificationTest[
+        SeedRandom[125];
+        AllTrue[
+          Table[RandomHypergraph[{{5, 2}, {2, 3}}], 100],
+          MatchQ[#, {Repeated[{_, _}, {5}], Repeated[{_, _, _}, {2}]}] &],
+        True
+      ],
+      VerificationTest[
+        SeedRandom[125];
+        AllTrue[
+          Table[RandomHypergraph[{{5, 2}, {2, 3}}, 20], 100],
+          MatchQ[#, {Repeated[{_, _}, {5}], Repeated[{_, _, _}, {2}]}] &],
+        True
+      ],
 
-          (* All generated hypergraphs should not be the same *)
-          VerificationTest[Length[Tally[Map[Sort, random1, {1, 2}]]] > 1, True],
-          VerificationTest[Length[Tally[Map[Sort, random2, {1, 2}]]] > 1, True],
+      (** All generated hypergraphs should not be the same **)
+      VerificationTest[
+        SeedRandom[125];
+        distinctHypergraphQ @ Table[RandomHypergraph[{{5, 2}, {2, 3}}], 100],
+        True
+      ],
+      VerificationTest[
+        SeedRandom[125];
+        distinctHypergraphQ @ Table[RandomHypergraph[{{5, 2}, {2, 3}}, 20], 100],
+        True
+      ],
 
-          (* Verify all vertices are in the correct range *)
-          VerificationTest[SubsetQ[Range[1, 16], Flatten @ random1], True],
-          VerificationTest[SubsetQ[Range[1, 20], Flatten @ random2], True]
-          }
+      (** Verify all vertices are in the correct range **)
+      VerificationTest[
+        SeedRandom[125];
+        validVertexRangeQ[Range[1, 16], Table[RandomHypergraph[{{5, 2}, {2, 3}}], 100]],
+        True
+      ],
+      VerificationTest[
+        SeedRandom[125];
+        validVertexRangeQ[Range[1, 20], Table[RandomHypergraph[{{5, 2}, {2, 3}}, 20], 100]],
+        True
       ]
     }
   |>
