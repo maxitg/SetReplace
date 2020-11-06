@@ -27,4 +27,4 @@ In[] := FeatureSpacePlot[#["FeatureVector"] -> #[
          z}, {x, w}, {y, w}, {z, w}}, #, 6] &) /@ inits]
 ```
 
-<img src="/Documentation/Images/FeatureVector-FeatureSpacePlot.png" width=478>
+<img src="/Documentation/Images/FeatureVectorFeatureSpacePlot.png" width=478>
