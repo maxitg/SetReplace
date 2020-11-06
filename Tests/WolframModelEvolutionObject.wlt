@@ -1882,20 +1882,20 @@
 
 
       (* FeatureVector *)
-      With[{featuresEmptyGraph = 
-            WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 0]["FeatureVector"],
-        featuresSmallGraph = 
-            WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 1]["FeatureVector"],
-        featuresMediumGraph = 
-            WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 8]["FeatureVector"]
-        },
-
-        {
-            VerificationTest[And @@ NumberQ /@ featuresEmptyGraph],
-            VerificationTest[And @@ NumberQ /@ featuresSmallGraph],
-            VerificationTest[And @@ NumberQ /@ featuresMediumGraph]
-        }
-      ],
+      With[{
+          featuresEmptyGraph = 
+              WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 0],
+          featuresMultiwaySpacelike = 
+              WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 3, "EventSelectionFunction" -> "MultiwaySpacelike"],
+          featuresSmallGraph = 
+              WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 3],
+          featuresMediumGraph = 
+              WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 8]}, {
+            VerificationTest[And @@ NumberQ /@ featuresEmptyGraph["FeatureVector"]],
+            VerificationTest[And @@ NumberQ /@ featuresMultiwaySpacelike["FeatureVector"]],
+            VerificationTest[And @@ NumberQ /@ featuresSmallGraph["FeatureVector"]],
+            VerificationTest[And @@ NumberQ /@ featuresMediumGraph["FeatureVector"]]
+        }],
 
       (* ExpressionsSeparation *)
 
