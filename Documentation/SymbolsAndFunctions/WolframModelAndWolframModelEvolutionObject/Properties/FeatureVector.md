@@ -10,10 +10,10 @@ Out[] = {22, 42, 0, 2, 2, 2, 6, 6}
 ```
 
 The list of properties is:
-- [`EventsCount`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EventCounts.md): Also equal to the number of vertex in the causal graph.
-- [`ExpressionsCountTotal`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TotalElementCounts.md): the total number of expressions (except for expressions in the initial and final states). Equivalent to the number of edges in the causal graph.
+- [`EventsCount`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EventCounts.md): Also equal to the number of vertices in the causal graph.
+- [`ExpressionsCountTotal`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TotalElementCounts.md): The total number of expressions (except for expressions in the initial and final states). Equivalent to the number of edges in the causal graph.
 - [`VertexConnectivity`](https://reference.wolfram.com/language/ref/VertexConnectivity.html): The smallest number of vertices whose deletion from `g` disconnects `g`. This is computed on the undirected version of the causal graph.
-- [`VertexDegrees`](https://reference.wolfram.com/language/ref/VertexDegree.html) Quantiles: The quantiles 0, 0.25, 0.50, 0.75, 1 of the [vertices degrees](https://reference.wolfram.com/language/ref/VertexDegree.html) distribution.
+- [`VertexDegree`](https://reference.wolfram.com/language/ref/VertexDegree.html) Quantiles: The quantiles 0, 0.25, 0.50, 0.75, 1 of the vertex degrees distribution.
 
 This property is useful for applying machine learning to Wolfram Models explorations.
 
