@@ -24,13 +24,13 @@ SetReplace::alienlibsetreplace = "LibraryResources directory not present in ``, 
 
 $libraryFile = findLibraryIn[$parentDirectory];
 If[FailureQ[$libraryFile],
-	$libraryFile = findLibraryIn[$buildDirectory];
-	If[FailureQ[$libraryFile],
-		Message[SetReplace::nolibsetreplace, $expectedLibName];
-	,
-		(* for developers *)
-		Message[SetReplace::alienlibsetreplace, $parentDirectory, $expectedLibName, $buildDirectory];
-	];
+  $libraryFile = findLibraryIn[$buildDirectory];
+  If[FailureQ[$libraryFile],
+    Message[SetReplace::nolibsetreplace, $expectedLibName];
+  ,
+    (* for developers *)
+    Message[SetReplace::alienlibsetreplace, $parentDirectory, $expectedLibName, $buildDirectory];
+  ];
 ];
 
 $cpp$setCreate = If[$libraryFile =!= $Failed,
