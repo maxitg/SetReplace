@@ -9,7 +9,29 @@ PackageScope["setSubstitutionSystem$cpp"]
 
 (* Load libSetReplace *)
 
-$libraryFile = FindLibrary["libSetReplace"];
+$expectedLibName = "libSetReplace." <> System`Dump`LibraryExtension[];
+
+findLibraryIn[basePath_] := Scope[
+  libraryPath = FileNameJoin[{basePath, "LibraryResources", $SystemID, $expectedLibName}];
+  If[FileExistsQ[libraryPath], libraryPath, $Failed]
+];
+
+$parentDirectory = FileNameDrop[$InputFileName, -2];
+$buildDirectory = FileNameJoin[{$parentDirectory, "Build"}];
+
+SetReplace::nolibsetreplace = "Could not locate ``, some functionality will not be available.";
+SetReplace::alienlibsetreplace = "LibraryResources directory not present in ``, falling back on `` found in temporary build directory at ``.";
+
+$libraryFile = findLibraryIn[$parentDirectory];
+If[FailureQ[$libraryFile],
+  $libraryFile = findLibraryIn[$buildDirectory];
+  If[FailureQ[$libraryFile],
+    Message[SetReplace::nolibsetreplace, $expectedLibName];
+  ,
+    (* for developers *)
+    Message[SetReplace::alienlibsetreplace, $parentDirectory, $expectedLibName, $buildDirectory];
+  ];
+];
 
 $cpp$setCreate = If[$libraryFile =!= $Failed,
   LibraryFunctionLoad[
