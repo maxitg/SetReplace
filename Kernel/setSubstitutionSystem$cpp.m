@@ -12,9 +12,8 @@ PackageScope["setSubstitutionSystem$cpp"]
 $expectedLibName = "libSetReplace." <> System`Dump`LibraryExtension[];
 
 findLibraryIn[basePath_] := Scope[
-	libraryResources = FileNameJoin[{basePath, "LibraryResources"}];
-	libraries = FileNames[$expectedLibName, libraryResources, 2];
-	First[libraries, $Failed]
+	libraryPath = FileNameJoin[{basePath, "LibraryResources", $SystemID, $expectedLibName}];
+	If[FileExistsQ[libraryPath], libraryPath, $Failed]
 ];
 
 $parentDirectory = FileNameDrop[$InputFileName, -2];
