@@ -1884,9 +1884,9 @@
       (* FeatureVector *)
 
       With[{evolutionObjects =
-            WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@ 
+          WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@
             {{0}, {3, "EventSelectionFunction" -> "MultiwaySpacelike"}, {3}, {8}}},
-          VerificationTest[And @@ NumberQ /@ #["FeatureVector"]] & /@ evolutionObjects
+        VerificationTest[And @@ NumberQ /@ #["FeatureVector"]] & /@ evolutionObjects
       ],
 
       (* ExpressionsSeparation *)
