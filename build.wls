@@ -1,8 +1,7 @@
 #!/usr/bin/env wolframscript
 
 Check[
-  Get[FileNameJoin[{DirectoryName[$InputFileName], "scripts", "buildInit.wl"}]];
-  deleteBuildDirectory[];,
+  Get[FileNameJoin[{DirectoryName[$InputFileName], "scripts", "buildInit.wl"}]];,
 
   Exit[1];
 ];
@@ -10,7 +9,15 @@ Check[
 $success = True;
 
 Check[
-  buildLibSetReplace[];,
+  Print["Temporary build directory is ", $buildDirectory];
+  $builtLibSetReplaceHash = builtLibSetReplaceHash[];
+  $libSetReplaceSourceHash = libSetReplaceSourceHash[];
+  If[$builtLibSetReplaceHash =!= $libSetReplaceSourceHash,
+    buildLibSetReplace[];
+    saveBuiltLibSetReplaceHash[$libSetReplaceSourceHash];,
+
+    Print["Using cached libSetReplace: ", $builtLibSetReplaceHash];
+  ],
 
   $success = False;
 ];
@@ -20,9 +27,8 @@ Check[
   $version = updateVersion[];
   $context = renameContext[Automatic, $version];
   updateBuildData[];
-  packPaclet[$context];
-  deleteBuildDirectory[];,
-
+  packPaclet[$context];,
+  Print["Message occurred during build."];
   Exit[1];
 ];
 
