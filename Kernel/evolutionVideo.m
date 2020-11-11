@@ -4,9 +4,11 @@ PackageImport["GeneralUtilities`"]
 
 PackageScope["evolutionVideo"]
 
+(* TODO: use a timescale that will appropriately scale all parameters automatically *)
+
 $initialStateDurationSec = 1;
 $stateDurationScalingFunction = 1 / Sqrt[#] &;
-$finalStateDurationSec = 5;
+$finalStateDurationSec = 5; (* TODO: change to auto-determine stabilization *)
 $arrowheadLength = 0.15;
 $frameRate = 60;
 $newAtomPlacementStandardDeviation = 0.01;
