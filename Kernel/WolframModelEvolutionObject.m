@@ -133,6 +133,7 @@ $propertyArgumentCounts = Join[
     "EdgeDestroyerEventsIndices" -> {0, 0},
     "EdgeDestroyerEventIndices" -> {0, 0},
     "EdgeGenerationsList" -> {0, 0},
+    "FeatureVector" -> {0, 0},
     "ExpressionsSeparation" -> {2, 2},
     "MultiwayQ" -> {0, 0},
     "Properties" -> {0, 0}|>,
@@ -899,6 +900,25 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
   propertyEvaluate[True, "Initial"][obj, caller, "EventGenerations"][[
     propertyEvaluate[True, "Initial"][obj, caller, "EdgeCreatorEventIndices"] + 1]]
 )
+
+(* FeatureVector *)
+
+vertexDegreeQuantiles[g_Graph] := Quantile[VertexDegree[g], {0, 0.25, 0.50, 0.75, 1}]
+vertexDegreeQuantiles[g_Graph] /; VertexCount[g] == 0 := {0, 0, 0, 0, 0} (* Edge case for empty graphs *)
+
+causalGraphFeatureAssociation[g_Graph] := <|
+    "VertexCount" -> VertexCount[g],
+    "EdgeCount" -> EdgeCount[g],
+    "VertexConnectivity" -> VertexConnectivity[UndirectedGraph[g]],
+    "VertexDegreesQuantiles" -> vertexDegreeQuantiles[g]
+|>
+
+causalGraphFeatureVector[g_Graph] := Flatten @ Values[causalGraphFeatureAssociation[g]]
+
+propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    "FeatureVector"] := causalGraphFeatureVector[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]]
 
 (* ExpressionsSeparation *)
 

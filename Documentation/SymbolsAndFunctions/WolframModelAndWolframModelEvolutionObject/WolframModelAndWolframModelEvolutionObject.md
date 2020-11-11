@@ -119,7 +119,7 @@ Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList",
   "AllEventsList", "EventsStatesList", "EdgeCreatorEventIndices",
   "EdgeDestroyerEventsIndices", "EdgeDestroyerEventIndices",
   "EdgeGenerationsList", "ExpressionsSeparation", "Properties",
-  "Version", "Rules", "CompleteGenerationsCount",
+  "Version", "Rules", "CompleteGenerationsCount", "FeatureVector",
   "AllEventsEdgesList"}
 ```
 
@@ -171,7 +171,7 @@ Out[] = {"AllEventsCount", "AllEventsDistinctElementsCount",
   "GenerationComplete", "GenerationEventsCountList",
   "GenerationEventsList", "GenerationsCount", "LayeredCausalGraph",
   "MaxCompleteGeneration", "PartialGenerationsCount", "StatesList",
-  "StatesPlotsList", "TerminationReason", "TotalGenerationsCount",
+  "StatesPlotsList", "TerminationReason", "TotalGenerationsCount", "FeatureVector",
   "UpdatedStatesList", "Version", "VertexCountList"}
 ```
 
@@ -343,6 +343,7 @@ Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, s
 - [Final Element Counts](Properties/FinalElementCounts.md)
 - [Total Element Counts](Properties/TotalElementCounts.md)
 - [Rules](Properties/Rules.md)
+- [Feature Vector](Properties/FeatureVector.md)
 - [Version](Properties/Version.md) 
 
 ## Options
