@@ -11,8 +11,8 @@ $stateDurationScalingFunction = 1 / Sqrt[#] &;
 $finalStateDurationSec = 5; (* TODO: change to auto-determine stabilization *)
 $arrowheadLength = 0.15;
 $frameRate = 60;
-$newAtomPlacementStandardDeviation = 0.01;
-$minElectricalDistance = 0.3; (* the force at smaller distances is the same as for this distance *)
+$newAtomPlacementStandardDeviation = 0.1;
+$minElectricalDistance = 0.001; (* the force at smaller distances is the same as for this distance *)
 $springStrength = 100;
 $electricalStrength = 100;
 $frictionStrength = 10;
@@ -20,7 +20,7 @@ $plotRangePadding = 0.05;
 
 Options[evolutionVideo] = Join[
   FilterRules[Options[WolframModelPlot], Except[{"HyperedgeRendering", VertexCoordinateRules, "ArrowheadLength"}]],
-  "ArrowheadLength" -> $arrowheadLength];
+  {"ArrowheadLength" -> $arrowheadLength}];
 
 getEventTimes[obj_, boundary_] := ModuleScope[
   statesCount = obj["EventsCount", "IncludeBoundaryEvents" -> boundary] + 1;
@@ -46,80 +46,61 @@ initConditionsForStateAnimation[
   Join[KeyTake[previousValues, currentStateVertices], createdVertexValues]
 ]
 
-(* ModuleScope breaks derivatives (' and Derivative[...]) *)
-forceEquations[coordinate_, time_][vertexPairs_, func_] := Module[{directedVertexPairs, equationParts},
-  directedVertexPairs = Join[#, Reverse /@ #] & @ vertexPairs;
-  equationParts = Catenate[Function[{vertices},
-      Thread[coordinate[vertices[[1]]][#]''[time] & /@ {1, 2} ->
-             func[coordinate[vertices[[1]]][#][time] & /@ {1, 2}, coordinate[vertices[[2]]][#][time] & /@ {1, 2}]]] /@
-    directedVertexPairs];
-  Merge[equationParts, Total]
+diagonalMatrix[{}] := {}
+diagonalMatrix[arg_] := DiagonalMatrix[arg]
+
+springConnectivityMatrix[state_] := ModuleScope[
+  dimensions = ConstantArray[Length[vertexList[state]], 2];
+  fixedDimensionSparseArray = (SparseArray[#, dimensions] &);
+  (# - fixedDimensionSparseArray @ diagonalMatrix[Total /@ #]) & @
+    fixedDimensionSparseArray @ Normal @ Counts @ (Join[#, Reverse /@ #] &) @ DeleteCases[{v_, v_}] @
+      Catenate[If[Length[#] > 2, Partition[#, 2, 1, 1], Partition[#, 2, 1]] & /@ IndexHypergraph @ state]
 ]
 
-springEquationsForState[coordinate_, time_][springStrength_, state_] :=
-  forceEquations[coordinate, time][
-    (* every part of every hyperedge *)
-    Catenate[Partition[#, 2, 1, If[Length[#] > 2, -1, {1, -1}]] & /@ state],
-    - springStrength (#1 - #2) &]
+electricalForceUnscaledFunction = Compile[{{targetCoordinates, _Real, 1}, {x, _Real, 1}, {y, _Real, 1}},
+  Total /@ (Outer[# - #2 &, targetCoordinates, targetCoordinates] *
+    (1 / ((Outer[# - #2 &, x, x]^2 + Outer[# - #2 &, y, y]^2)^(3/2) + $minElectricalDistance)))
+]
 
-(* TODO: the force below is not scaled correctly at small distances *)
+electricalForceUnscaled[targetCoordinates_List, x_List, y_List] :=
+  electricalForceUnscaledFunction[targetCoordinates, x, y]
 
-electricalEquationsForState[coordinate_, time_][electricalStrength_, state_] :=
-  forceEquations[coordinate, time][
-    (* all pairs *)
-    Subsets[vertexList[state], {2}],
-    electricalStrength (#1 - #2) / Max[EuclideanDistance[#1, #2], $minElectricalDistance]^3 &]
+springElectricalEquationsForState[x_, y_, vx_, vy_, t_][
+    springStrength_, electricalStrength_, frictionStrength_, springMatrix_] := Catenate[{
+  #2'[t] == springStrength * springMatrix . #1[t]
+          + electricalStrength * electricalForceUnscaled[#1[t], x[t], y[t]]
+          - frictionStrength * #2[t],
+  #1'[t] == #2[t]
+} & @@@ {{x, vx}, {y, vy}}]
 
-frictionEquationsForState[coordinate_, time_][frictionStrength_, state_] :=
-  Function[{vertex},
-      Thread[coordinate[vertex][#]''[time] & /@ {1, 2} ->
-             (- frictionStrength coordinate[vertex][#]'[time] & /@ {1, 2})]] /@ vertexList[state]
-
-springElectricalEquationsForState[coordinate_, time_][
-    springStrength_, electricalStrength_, frictionStrength_, state_] := KeyValueMap[Equal, Merge[
-  {springEquationsForState[coordinate, time][springStrength, state],
-   electricalEquationsForState[coordinate, time][electricalStrength, state],
-   frictionEquationsForState[coordinate, time][frictionStrength, state]},
-  Total]]
-
-initialConditionEquations[coordinate_, time_][initialCoordinates_, initialVelocities_, initialTime_] :=
-  Catenate[Function[{vertex}, Thread[Catenate @ {
-      coordinate[vertex][#][initialTime] == initialCoordinates[vertex][[#]] & /@ {1, 2},
-      coordinate[vertex][#]'[initialTime] == initialVelocities[vertex][[#]] & /@ {1, 2}}]] /@
-    Keys[initialCoordinates]]
-
-vertexTrajectoryVariables[coordinate_, time_][state_] :=
-  Catenate[Function[{vertex}, coordinate[vertex][#] & /@ {1, 2}] /@ vertexList[state]]
+initialConditionEquations[x_, y_, vx_, vy_][initialCoordinates_, initialVelocities_, initialTime_] := Catenate[{
+  #1[initialTime] == Values[initialCoordinates][[All, #3]],
+  #2[initialTime] == Values[initialVelocities][[All, #3]]
+} & @@@ {{x, vx, 1}, {y, vy, 2}}]
 
 frameCoordinatesForState[
       frameRate_, springStrength_, electricalStrength_, frictionStrength_][
       {previousCoordinates_, previousVelocities_},
-      {state_, inputVertices_, createdVertices_, {startTime_, endTime_}}] := Module[{
-    initialCoordinates, initialVelocities, coordinate, time, equationsForDynamics, equationsForInit, variables,
-    trajectories, frameTimes, vertices, coordinateLists, finalCoordinates, finalVelocities},
+      {state_, inputVertices_, createdVertices_, {startTime_, endTime_}}] := ModuleScope[
   {initialCoordinates, initialVelocities} =
     initConditionsForStateAnimation[vertexList[state], #, inputVertices, createdVertices] & /@
       {previousCoordinates, previousVelocities};
-  equationsForDynamics = springElectricalEquationsForState[
-    coordinate, time][springStrength, electricalStrength, frictionStrength, state];
-  equationsForInit = initialConditionEquations[coordinate, time][initialCoordinates, initialVelocities, startTime];
-  variables = vertexTrajectoryVariables[coordinate, time][state];
+  ScopeVariable[x, y, vx, vy, t];
+  equationsForDynamics = springElectricalEquationsForState[x, y, vx, vy, t][
+    springStrength, electricalStrength, frictionStrength, springConnectivityMatrix[state]];
+  equationsForInit = initialConditionEquations[x, y, vx, vy][initialCoordinates, initialVelocities, startTime];
+  variables = {x, y, vx, vy};
   trajectories =
-    Association @ First @ NDSolve[{equationsForDynamics, equationsForInit},
-                                  variables,
-                                  {time, startTime, endTime},
-                                  Method -> {"EquationSimplification" -> "Solve"}];
+    Association @ First @ NDSolve[
+      Join[equationsForDynamics, equationsForInit], variables, {t, startTime, endTime}, AccuracyGoal -> 0.1];
   frameTimes = Range[Ceiling[startTime, 1 / frameRate], Floor[endTime, 1 / frameRate], 1 / frameRate];
   vertices = Keys[initialCoordinates];
-  coordinateLists = Function[{time},
-      Association[Function[{vertex}, vertex -> (trajectories[coordinate[vertex][#]][time] & /@ {1, 2})] /@ vertices]] /@
-    frameTimes;
+  coordinateLists =
+    Association[Thread[vertices -> #]] & /@ Transpose[trajectories[#] /@ frameTimes & /@ {x, y}, {3, 1, 2}];
 
   (* TODO: These two can be combined into one. *)
-  finalCoordinates = Association[
-    Function[{vertex}, vertex -> (trajectories[coordinate[vertex][#]][Last[frameTimes]] & /@ {1, 2})] /@ vertices];
-  finalVelocities = Association[
-    Function[{vertex}, vertex -> (trajectories[coordinate[vertex][#]]'[Last[frameTimes]] & /@ {1, 2})] /@ vertices];
+  finalCoordinates = Association[Thread[vertices -> #]] & @ Transpose[trajectories[#][endTime] & /@ {x, y}];
+  finalVelocities = Association[Thread[vertices -> #]] & @ Transpose[trajectories[#][endTime] & /@ {vx, vy}];
   {coordinateLists (* output *), {finalCoordinates, finalVelocities} (* init for the next step *)}
 ]
 
