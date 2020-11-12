@@ -247,7 +247,7 @@ Out[] = False
 It would be interesting to investigate the systems exhibiting these properties in different combinations.
 For example, systems that don't exhibit [multiway branching](/Research/LocalMultiwaySystem/LocalMultiwaySystem.md) at
 all do satisfy both of these conditions.
-One can also consider systems in which causal graph isomorphism is equivalent to states isomorphism by construction,
+One can also consider systems in which causal graphs isomorphism is equivalent to states isomorphism by construction,
 for example, [classical sequential growth models of causal sets](https://arxiv.org/abs/gr-qc/9904062).
 It might be possible to generalize this to include more classes of systems.
 We could also enumerate ([#57](https://github.com/maxitg/SetReplace/issues/57)) simple rules and determine how many of
