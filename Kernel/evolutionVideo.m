@@ -57,6 +57,8 @@ springConnectivityMatrix[state_] := ModuleScope[
       Catenate[If[Length[#] > 2, Partition[#, 2, 1, 1], Partition[#, 2, 1]] & /@ IndexHypergraph @ state]
 ]
 
+(* TODO: Talk to Rob Knap *)
+
 electricalForceUnscaledFunction = Compile[{{targetCoordinates, _Real, 1}, {x, _Real, 1}, {y, _Real, 1}},
   Total /@ (Outer[# - #2 &, targetCoordinates, targetCoordinates] *
     (1 / ((Outer[# - #2 &, x, x]^2 + Outer[# - #2 &, y, y]^2)^(3/2) + $minElectricalDistance)))
