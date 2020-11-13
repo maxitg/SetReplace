@@ -12,7 +12,7 @@ Out[] = <| "CausalGraphVertexCount" -> 22, "CausalGraphEdgeCount" -> 42,
  "StructurePreservingFinalStateVertexCount" -> 115, 
  "StructurePreservingFinalStateEdgeCount" -> 138, 
  "StructurePreservingFinalStateVertexConnectivity" -> 2, 
- "StructurePreservingFinalStateVertexDegreesQuantiles" -> {2, 2, 2, 2,8} |>
+ "StructurePreservingFinalStateVertexDegreesQuantiles" -> {2, 2, 2, 2, 8} |>
 ```
 
 The list of properties computed for each graph `g` is:
