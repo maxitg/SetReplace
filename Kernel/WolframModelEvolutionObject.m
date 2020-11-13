@@ -942,6 +942,13 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
         propertyEvaluate[True, boundary][obj, caller, "FinalState"]
     |>
 
+propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    "FeatureAssociation"] /; propertyEvaluate[True, boundary][obj, caller, "MultiwayQ"] := nestedToSingleAssociation @ <|
+      "CausalGraph" -> graphFeatureAssociation[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]]
+    |> (* If it is a Multiway do not compute things relevant to the FinalState *)
+
 (* FeatureVector *)
 
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
