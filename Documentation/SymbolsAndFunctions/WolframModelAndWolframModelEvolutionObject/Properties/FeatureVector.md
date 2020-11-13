@@ -11,6 +11,8 @@ Out[] = {22, 42, 1, 2, 2, 2, 6, 6, 115, 138, 2, 2, 2, 2, 2, 8}
 
 For the list of properties see [`FeatureAssociation`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FeatureAssociation.md)
 
+This property is useful for applying machine learning to Wolfram Models explorations.
+
 ## Example
 
 ```wl
