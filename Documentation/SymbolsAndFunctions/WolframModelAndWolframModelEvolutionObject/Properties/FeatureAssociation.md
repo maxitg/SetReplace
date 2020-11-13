@@ -2,7 +2,7 @@
 
 # FeatureAssociation
 
-**`"FeatureAssociation"`** computes some features of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) evolution and returns an association whose keys describe each feature computed. For now, it computes properties associated with the [`CausalGraph`](LINK) and with the graph version of the [`FinalState`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md) as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md) using the [`StructurePreserving`] transformation:
+**`"FeatureAssociation"`** computes some features about the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) evolution and returns an association whose keys describe each feature computed. For now, it computes properties associated with the [`CausalGraph`](LINK) and with the graph version of the [`FinalState`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md) as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md) using the `"StructurePreserving"` transformation:
 
 ```wl
 In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 5]["FeatureAssociation"]
@@ -35,7 +35,7 @@ In[] := FeatureSpacePlot[#["FeatureAssociation"] -> #[
 
 <img src="/Documentation/Images/FeatureAssociationFeatureSpacePlot.png" width=720>
 
-For [`MultiwaySystems`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md) it only computes property associated with the [`CausalGraph`]
+For [`MultiwaySystems`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md) it only computes features associated with the `"CausalGraph"`
 
 ## Example
 
