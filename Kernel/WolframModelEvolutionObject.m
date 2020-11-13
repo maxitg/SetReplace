@@ -128,6 +128,7 @@ $propertyArgumentCounts = Join[
     "EdgeDestroyerEventsIndices" -> {0, 0},
     "EdgeDestroyerEventIndices" -> {0, 0},
     "EdgeGenerationsList" -> {0, 0},
+    "FeatureAssociation" -> {0, 0},
     "FeatureVector" -> {0, 0},
     "ExpressionsSeparation" -> {2, 2},
     "MultiwayQ" -> {0, 0},
@@ -918,24 +919,35 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
     propertyEvaluate[True, "Initial"][obj, caller, "EdgeCreatorEventIndices"] + 1]]
 );
 
-(* FeatureVector *)
+(* FeatureAssociation *)
 
-vertexDegreeQuantiles[g_Graph] := Quantile[VertexDegree[g], {0, 0.25, 0.50, 0.75, 1}];
-vertexDegreeQuantiles[g_Graph] /; VertexCount[g] == 0 := {0, 0, 0, 0, 0}; (* Edge case for empty graphs *)
+nestedToSingleAssociation[ass_] := Merge[Function[parentKey, KeyMap[StringJoin[parentKey, #] &, ass[parentKey]]] /@ Keys[ass], Mean]
 
-causalGraphFeatureAssociation[g_Graph] := <|
+vertexDegreeQuantiles[g_Graph] := Quantile[VertexDegree[g], {0, 0.25, 0.50, 0.75, 1}]
+vertexDegreeQuantiles[g_Graph] /; VertexCount[g] == 0 := {0, 0, 0, 0, 0} (* Edge case for empty graphs *)
+
+graphFeatureAssociation[g_Graph] := <|
     "VertexCount" -> VertexCount[g],
     "EdgeCount" -> EdgeCount[g],
     "VertexConnectivity" -> VertexConnectivity[UndirectedGraph[g]],
     "VertexDegreesQuantiles" -> vertexDegreeQuantiles[g]
 |>;
 
-causalGraphFeatureVector[g_Graph] := Flatten @ Values[causalGraphFeatureAssociation[g]];
+propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    "FeatureAssociation"] := nestedToSingleAssociation @ <|
+      "CausalGraph" -> graphFeatureAssociation[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]],
+      "StructurePreservingFinalState" -> graphFeatureAssociation @ HypergraphToGraph[#, "StructurePreserving"] & @
+        propertyEvaluate[True, boundary][obj, caller, "FinalState"]
+    |>
+
+(* FeatureVector *)
 
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
-    "FeatureVector"] := causalGraphFeatureVector[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]];
+    "FeatureVector"] := Flatten @ Values @ propertyEvaluate[True, boundary][obj, caller, "FeatureAssociation"]
 
 (* ExpressionsSeparation *)
 
