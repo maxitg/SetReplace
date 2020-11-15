@@ -1939,10 +1939,10 @@
             #["FeatureAssociation"]
           ] & /@ evolutionObjects,
           (* FinalState features for Multyway return missings *)
-          VerificationTest[ And @@ MissingQ/@Flatten@Values@evolutionObjects[[2]]["FeatureAssociation", "StructurePreservingFinalState"] ]
+          VerificationTest[ And @@ MissingQ/@Flatten@Values@evolutionObjects[[2]]["FeatureAssociation", "StructurePreservingFinalState"] ],
           (* Error Messages check *)
           testUnevaluated[evolutionObjects[[2]]["FeatureAssociation", 3], {WolframModelEvolutionObject::invalidFeatureSpec}],
-          testUnevaluated[evolutionObjects[[3]]["FeatureAssociation", "EasterEgg"], {WolframModelEvolutionObject::unknownFeatureGroup}],
+          testUnevaluated[evolutionObjects[[3]]["FeatureAssociation", "EasterEgg"], {WolframModelEvolutionObject::unknownFeatureGroup}]
         }
       ],
 
