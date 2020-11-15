@@ -128,8 +128,8 @@ $propertyArgumentCounts = Join[
     "EdgeDestroyerEventsIndices" -> {0, 0},
     "EdgeDestroyerEventIndices" -> {0, 0},
     "EdgeGenerationsList" -> {0, 0},
-    "FeatureAssociation" -> {0, 0},
-    "FeatureVector" -> {0, 0},
+    "FeatureAssociation" -> {0, 1},
+    "FeatureVector" -> {0, 1},
     "ExpressionsSeparation" -> {2, 2},
     "MultiwayQ" -> {0, 0},
     "Properties" -> {0, 0}|>,
@@ -933,28 +933,34 @@ graphFeatureAssociation[g_Graph] := <|
     "VertexDegreesQuantiles" -> vertexDegreeQuantiles[g]
 |>;
 
-propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
-    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
-    caller_,
-    "FeatureAssociation"] := nestedToSingleAssociation @ <|
-      "CausalGraph" -> graphFeatureAssociation[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]],
-      "StructurePreservingFinalState" -> graphFeatureAssociation @ HypergraphToGraph[#, "StructurePreserving"] & @
-        propertyEvaluate[True, boundary][obj, caller, "FinalState"]
-    |>
+General::invalidFeatureSpec = "Feature specification `1` should be one of `2`, a list of them, or All.";
+General::unknownFeatureGroup = "Feature group `1` should be one of `2`";
+
+fromFeaturesSpec[caller_, All] := {"CausalGraph", "StructurePreservingFinalState"}
+fromFeaturesSpec[caller_, featuresSpecs_List] := featuresSpecs
+fromFeaturesSpec[caller_, featuresSpecs_String] := {featuresSpecs}
+fromFeaturesSpec[caller_, wrongInput_] := (Message[caller::invalidFeatureSpec, wrongInput, fromFeaturesSpec[caller, All]]; Throw[$Failed])
 
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
-    "FeatureAssociation"] /; propertyEvaluate[True, boundary][obj, caller, "MultiwayQ"] := nestedToSingleAssociation @ <|
-      "CausalGraph" -> graphFeatureAssociation[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]]
-    |> (* If it is a Multiway do not compute things relevant to the FinalState *)
+    "FeatureAssociation", featuresSpecs_ : All] := With[{featureList = fromFeaturesSpec[caller, featuresSpecs]},
+  nestedToSingleAssociation @ AssociationThread[featureList -> Replace[featureList, {
+    "CausalGraph" -> graphFeatureAssociation[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]],
+    "StructurePreservingFinalState" -> If[!propertyEvaluate[True, boundary][obj, caller, "MultiwayQ"],
+      graphFeatureAssociation @ HypergraphToGraph[#, "StructurePreserving"] & @
+        propertyEvaluate[True, boundary][obj, caller, "FinalState"],  
+      Replace[graphFeatureAssociation[Graph[{1 -> 2}]], {_ ? NumberQ -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}]}, Infinity]],
+    other_ :> (Message[caller::unknownFeatureGroup, other, fromFeaturesSpec[caller, All]]; Throw[$Failed])
+  }, {1}]]
+]
 
 (* FeatureVector *)
 
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
-    "FeatureVector"] := Flatten @ Values @ propertyEvaluate[True, boundary][obj, caller, "FeatureAssociation"]
+    "FeatureVector", featuresSpecs_ : All] := Flatten @ Values @ propertyEvaluate[True, boundary][obj, caller, "FeatureAssociation", featuresSpecs]
 
 (* ExpressionsSeparation *)
 
