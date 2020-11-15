@@ -1882,10 +1882,15 @@
 
       (* FeatureAssociation *)
 
-      With[{evolutionObjects =
-          WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@
-            {{0}, {3, "EventSelectionFunction" -> "MultiwaySpacelike"}, {3}, {8}}},
-        VerificationTest[And @@ StringQ /@ Keys[#["FeatureAssociation"]]] & /@ evolutionObjects
+      With[{evolutionObjects = 
+          WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@ 
+            {{0}, {3, "EventSelectionFunction" -> "MultiwaySpacelike"}, {3}, {8}}}, 
+        {
+          VerificationTest[And @@ StringQ /@ Keys[#["FeatureAssociation"]]] & /@ evolutionObjects, 
+          VerificationTest[SameQ @@ (Replace[#, _?(NumberQ[#] || MissingQ[#] &) -> 1, Infinity] &[#["FeatureAssociation"]] & /@ evolutionObjects)],
+          testUnevaluated[evolutionObjects[[2]]["FeatureAssociation", 3], {WolframModelEvolutionObject::invalidFeatureSpec}],
+          testUnevaluated[evolutionObjects[[3]]["FeatureAssociation", "EasterEgg"], {WolframModelEvolutionObject::unknownFeatureGroup}]
+        }
       ],
 
       (* FeatureVector *)
@@ -1893,7 +1898,7 @@
       With[{evolutionObjects =
           WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@
             {{0}, {3, "EventSelectionFunction" -> "MultiwaySpacelike"}, {3}, {8}}},
-        VerificationTest[And @@ NumberQ /@ #["FeatureVector"]] & /@ evolutionObjects
+        VerificationTest[And @@ (NumberQ [#] || MissingQ[#] &) /@ #["FeatureVector"]] & /@ evolutionObjects
       ],
 
       (* ExpressionsSeparation *)
