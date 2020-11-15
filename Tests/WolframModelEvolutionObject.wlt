@@ -1923,8 +1923,26 @@
         {
           VerificationTest[And @@ StringQ /@ Keys[#["FeatureAssociation"]]] & /@ evolutionObjects, 
           VerificationTest[SameQ @@ (Replace[#, _?(NumberQ[#] || MissingQ[#] &) -> 1, Infinity] &[#["FeatureAssociation"]] & /@ evolutionObjects)],
+          (* String spec *)
+          VerificationTest[
+            #["FeatureAssociation", "CausalGraph"], 
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "CausalGraph" ~~ __] & ]
+          ] & /@ evolutionObjects,
+          (* List spec *)
+          VerificationTest[
+            #["FeatureAssociation", {"StructurePreservingFinalState"}], 
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "StructurePreservingFinalState" ~~ __] & ]
+          ] & /@ evolutionObjects,
+          (* All spec *)
+          VerificationTest[
+            #["FeatureAssociation", All],
+            #["FeatureAssociation"]
+          ] & /@ evolutionObjects,
+          (* FinalState features for Multyway return missings *)
+          VerificationTest[ And @@ MissingQ/@Flatten@Values@evolutionObjects[[2]]["FeatureAssociation", "StructurePreservingFinalState"] ]
+          (* Error Messages check *)
           testUnevaluated[evolutionObjects[[2]]["FeatureAssociation", 3], {WolframModelEvolutionObject::invalidFeatureSpec}],
-          testUnevaluated[evolutionObjects[[3]]["FeatureAssociation", "EasterEgg"], {WolframModelEvolutionObject::unknownFeatureGroup}]
+          testUnevaluated[evolutionObjects[[3]]["FeatureAssociation", "EasterEgg"], {WolframModelEvolutionObject::unknownFeatureGroup}],
         }
       ],
 
