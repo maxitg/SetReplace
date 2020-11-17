@@ -2,7 +2,7 @@
 
 # FeatureAssociation
 
-**`"FeatureAssociation"`** computes some features about the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) evolution and returns an association whose keys describe each feature computed. For now, it computes properties associated with some feature groups:
+**`"FeatureAssociation"`** computes some features about the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) evolution and returns an association whose keys describe each feature computed. For now, it computes properties associated with these feature groups:
 - `"CausalGraph"`: [`CausalGraph`](LINK)
 - `"StructurePreservingFinalState"`: The graph version of the [`FinalState`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md) as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md) using the `"StructurePreserving"` transformation
 

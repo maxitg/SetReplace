@@ -1882,7 +1882,7 @@
 
       (* FeatureAssociation *)
 
-      With[{evolutionObjects = 
+      With[{evolutionObjects := 
           WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@ 
             {{0}, {3, "EventSelectionFunction" -> "MultiwaySpacelike"}, {3}, {8}}}, 
         {
