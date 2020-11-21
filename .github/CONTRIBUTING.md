@@ -104,7 +104,7 @@ It is essential to keep your pull requests as small as possible (definitely unde
 
 ### Automated tests
 
-To run the tests, `cd` to the repository root, and run `./build.wls && ./install.wls && ./test.wls` from the command line. If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
+To run the tests, `cd` to the repository root, and run `./test.wls` from the command line. If your libSetReplace is out of date (for example, if you changed some .cpp files but you did not either `Get` SetReplace or run `./build.wls`), then `./test.wls` will automatically rebuild libSetReplace for you before running the tests. If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
 
 We have a CI that automatically runs tests for all commits on all branches (kudos to [Circle CI](https://circleci.com) for providing free resources for this project). You need collaborator access to run the CI. If you don't have such access yet, the reviewer will run it for you.
 

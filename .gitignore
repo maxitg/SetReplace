@@ -22,11 +22,14 @@ xcuserdata/
 
 .DS_Store
 
-# Build directory
+# In-place build artifacts
 
-Build/
+LibraryResources/
 
 # Built paclets
 
-*.paclet
-.builtLibSetReplaceHash
+BuiltPaclets/
+
+# Test results
+
+exit_status.txt

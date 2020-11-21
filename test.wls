@@ -3,11 +3,40 @@
 (* Disable messages about outdated cloud. *)
 Off[CloudConnect::clver];
 
-<< SetReplace`;
-(* Launch kernels preemptively to avoid "Launching kernels..." interrupting test log *)
-CloseKernels[];
-LaunchKernels[];
-ParallelEvaluate[<< SetReplace`];
+$redColor = "\033[0;31m";
+$greenColor = "\033[0;32m";
+$orangeColor = "\033[0;33m";
+$yellowColor = "\033[1;33m";
+$endColor = "\033[0m";
+
+$commandLineArgs = Rest[$ScriptCommandLine];
+tryPopFlag[longFlag_String, shortFlag_String] := If[
+  MemberQ[$commandLineArgs, longFlag | shortFlag], 
+  $commandLineArgs = DeleteCases[$commandLineArgs, longFlag | shortFlag];
+  True
+,
+  False
+];
+
+If[tryPopFlag["--load-installed-paclet", "-lip"],
+  $localSetReplaceEntryPoint = "SetReplace`";
+,
+  $localSetReplaceEntryPoint = FileNameJoin[{FileNameDrop[$InputFileName], "Kernel", "init.m"}];
+];
+
+Print["Loading SetReplace from ", $yellowColor, FindFile[$localSetReplaceEntryPoint], $endColor];
+Get[$localSetReplaceEntryPoint];
+
+(* make it possible to disable parallelization, which for very short tests saves quite a lot of time. *)
+If[tryPopFlag["--disable-parallelization", "-dp"],
+  $allowParallelization = False;
+,
+  $allowParallelization = True;
+  (* Launch kernels preemptively to avoid "Launching kernels..." interrupting test log *)
+  CloseKernels[];
+  LaunchKernels[];
+  With[{entryPoint = $localSetReplaceEntryPoint}, ParallelEvaluate[Get[entryPoint]]];
+];
 
 Needs["GeneralUtilities`"];
 
@@ -15,8 +44,8 @@ $successQ = True;
 
 (* Get test files *)
 
-$testFiles = If[Length @ $ScriptCommandLine >= 2,
-  Replace[$ScriptCommandLine[[2 ;; ]], {
+$testFiles = If[Length @ $commandLineArgs >= 1,
+  Replace[$commandLineArgs, {
     args : {"-e", ___} :> Select[
       FileNames[FileNameJoin[{AbsoluteFileName["."], "Tests", "*.wlt"}]],
       !MatchQ[FileBaseName @ #, Alternatives @@ Rest[args]] &
@@ -32,9 +61,22 @@ If[!FileExistsQ[#],
 
 (* Read tests *)
 
+printFileLineError[FileLine[file_, line_] -> error_] := Print[file <> ":" <> IntegerString[line] <> "\t" <> error];
+
+importAsHeldExpression[file_] := Module[{exprs},
+  exprs = ToExpression[Import[file, "Text"], InputForm, Hold];
+  If[!$allowParallelization, exprs = exprs /. HoldPattern[ParallelMap] -> Map];
+  If[FailureQ[exprs], 
+    WriteString["stdout", $redColor <> "There were syntax errors in \"" <> file <> "\"" <> $endColor <> "\n"];
+    Scan[printFileLineError, FindSyntaxErrors[file]]; 
+    Exit[1]
+  ];
+  exprs
+];
+
 $testGroups = Join @@ (
   KeyMap[ReleaseHold, #] & /@
-    ReleaseHold @ Map[Hold, ToExpression[Import[#, "Text"], InputForm, Hold], {5}] & /@ $testFiles);
+    ReleaseHold @ Map[Hold, importAsHeldExpression[#], {5}] & /@ $testFiles);
 
 Attributes[test] = Attributes[constrainedTest] = {HoldAll};
 
@@ -54,18 +96,27 @@ removeHoldFormFromInputString[input_String] := StringReplace[
 ];
 
 $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
-    testList, testResults, testReport, options, parallelQ, runInit, failedTests},
+    testList, testResults, testReport, options, parallelQ, requiresFrontEnd, probablyRequiresFrontEnd, runInit, failedTests},
   (* Notify the user which test group we are running *)
   WriteString["stdout",
     testGroupName,
     StringJoin[ConstantArray[" ", Max[40 - StringLength[testGroupName], 1]]]];
 
+  probablyRequiresFrontEnd = !FreeQ[testGroup, 
+    SetReplace`PackageScope`checkGraphics | SetReplace`PackageScope`graphicsQ | UsingFrontEnd];
+
   (* Read options *)
   options = Association[ReleaseHold[Lookup[testGroup, "options", <||>]]];
-  parallelQ = Lookup[options, "Parallel", True];
+  parallelQ = $allowParallelization && Lookup[options, "Parallel", True];
+  requiresFrontEnd = Lookup[options, "RequiresFrontEnd", probablyRequiresFrontEnd];
+
+  (* if a frontend is required, better to start it once than again and again in each
+  test *)
+  If[requiresFrontEnd, UsingFrontEnd, Identity][
 
   (* Run init, changing VerificationTest to test in all definitions *)
   runInit[] := ReleaseHold[testGroup["init"] /. VerificationTest -> constrainedTest];
+  runCleanup[] := ReleaseHold[testGroup["cleanup"] /. VerificationTest -> constrainedTest];
   runInit[];
   If[parallelQ, ParallelEvaluate[runInit[]]];
 
@@ -74,13 +125,12 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
 
   (* Run tests in parallel *)
   testResults = If[parallelQ, ParallelMap, Map][# /. test -> VerificationTest &, testList];
-  testReport = TestReport[testResults];
 
-  $redColor = "\033[0;31m";
-  $greenColor = "\033[0;32m";
-  $orangeColor = "\033[0;33m";
-  $yellowColor = "\033[1;33m";
-  $endColor = "\033[0m";
+  runCleanup[];
+
+  ];
+
+  testReport = TestReport[testResults];
 
   (* Print the summery (green if ok, red if failed) *)
   WriteString["stdout", If[testReport["AllTestsSucceeded"],

@@ -104,22 +104,58 @@ You only need three things to use *SetReplace*:
 
 ## Build Instructions
 
-To build:
+### Two Workflows
 
-1. `cd` to the root directory of the repository.
-2. Run `./build.wls` to create the paclet file. If you see an error message about c++17, make sure the C++ compiler you are using is up-to-date. If your default system compiler does not support c++17, you can choose a different one with environmental variables. The following, for instance, typically works on a Mac:
+If you primarily wish to modify or contribute to SetReplace, it is easy to load the SetReplace package from repository root (which we'll call "working with SetReplace **in-place**").
+
+If you wish mainly to *use* SetReplace, you may prefer to create a *paclet* and *install* it (which we'l call "working with SetReplace as a **paclet**").
+
+We recommend using the **in-place** workflow for development, and the **paclet** workflow when you are done developing and want to do some physics!
+
+### In-place workflow (recommended)
+
+To use the **in-place** workflow, you need to do nothing more than call `Get["~/git/SetReplace/Kernel/init.m"]` or equivalent. Building the library will be done for you, if necessary.
+
+The first time you load SetReplace this way, it will *automatically* build the libSetReplace C++ library for you. If you later modify the C++ code and call `Get[...]` again, the library will be automatically rebuilt, and hot-loaded into your current Mathematica session (you do not need to Quit). Moreover, versions of the library will be cached based on the hash of the C++ code, making it easy to switch quickly between several library versions (say, in different Git branches).
+
+If you wish to invoke the build process *directly*, you run the following on the command line:
+
+```
+cd ~/git/SetReplace
+./build.wls
+```
+
+Remember that you can run the test suite anytime you want, by running:
+
+```
+cd ~/git/SetReplace
+./test.wls
+```
+
+### Paclet workflow
+
+To use the **palet** workflow, just run the following on the command line:
+
+```
+cd ~/git/SetReplace
+./install.wls
+```
+
+This will automatically build libSetReplace and create a ".paclet" file, which will be placed into the "BuiltPaclets" subdirectory of the repository root. This paclet will then be installed, replacing any existing version of the paclet you may have.
+
+Note that you may need to install GitLink if you wish the paclet version number to match the official scheme. Instructions will be provided via a message if this is the case.
+
+A less frequently updated version is available through the Wolfram public paclet server and can be installed with `PacletInstall["SetReplace"]`.
+
+### C++ 17
+
+If you see an error message about c++17, make sure the C++ compiler you are using is up-to-date. If your default system compiler does not support c++17, you can choose a different one with environmental variables. The following, for instance, typically works on a Mac:
 
     ```bash
     COMPILER=CCompilerDriver\`ClangCompiler\`ClangCompiler COMPILER_INSTALLATION=/usr/bin ./build.wls
     ```
 
     Here `ClangCompiler` can be replaced with one of ``<< CCompilerDriver`; "Compiler" /. CCompilerDriver`CCompilers[Full]``, and `COMPILER_INSTALLATION` is a directory in which the compiler binary can be found.
-
-3. Run `./install.wls` to install the paclet into your Wolfram system.
-4. Evaluate `PacletDataRebuild[]` in all running Wolfram kernels.
-5. Evaluate ``<< SetReplace` `` every time before using the package.
-
-A less frequently updated version is available through the Wolfram public paclet server and can be installed with `PacletInstall["SetReplace"]`.
 
 ## Contributing
 
