@@ -7,6 +7,7 @@ Check[
   Exit[1];
 ];
 
+InstallGitLink[];
 paclet = ConsoleCreateSetReplacePaclet[];
 
 If[!StringQ[paclet],

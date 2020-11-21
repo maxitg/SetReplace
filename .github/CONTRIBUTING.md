@@ -78,6 +78,52 @@ In the sections below, we describe our [development process](#development-proces
 
 Each change to the code must fundamentally pass through 5 steps, more or less in that order: [writing code](#writing-code), [opening a pull request](#opening-a-pull-request), passing [automated tests](#automated-tests), passing [code review](#code-review), and [merging the PR](#merging).
 
+### Building in-place
+
+The main workflow we recommend is what we are calling an "in-place build". This largely happens automatically when you load the SetReplace package by calling `Get["~/git/SetReplace/Kernel/init.m"]` or equivalent. If the C++ library has not already been built, it will automatically be built for you, and the resulting libraries placed in the `LibraryResources` subdirectory of the repository root.
+
+If you later modify the C++ code and call `Get[...]` again, the library will be automatically rebuilt, and hot-loaded into your current Mathematica session (you do not need to Quit). Moreover, builds of the library will be cached based on the hash of the C++ code, making it easy to switch quickly between several library versions (say, in different Git branches).
+
+If you wish to invoke the library build process *directly*, you run the following on the command line:
+
+```
+cd ~/git/SetReplace
+./build.wls
+```
+
+Remember that you can run the test suite anytime you want, by running:
+
+```
+cd ~/git/SetReplace
+./test.wls
+```
+
+Doing so will automatically rebuild the library, if necessary.
+
+### Build Paclets
+
+You may occasionally want to build and install a paclet from the current state of the repository. This will package together all the Wolfram Language source code, along with the library, and various metadata, into a single ".paclet" file, which has a automatically computed version number associated with it.
+
+To simply build the paclet, without installing it, just run:
+
+```
+cd ~/git/SetReplace
+./pack.wls
+```
+
+This will automatically build the library if needed and produce a paclet file, placing it in the `BuiltPaclets` directory.
+
+If you wish to also install the paclet you've built, you can run the following (instead of the step above, not in addition to it):
+
+```
+cd ~/git/SetReplace
+./install.wls
+```
+
+The paclet will be installed in your system, replacing any existing version of the paclet you may have. This will allow you to load the paclet in future by running simply ``Get["SetReplace`"] ``.
+
+A less frequently updated version is available through the Wolfram public paclet server and can be installed with `PacletInstall["SetReplace"]`.
+
 ### Writing code
 
 In addition to the code itself, each pull request should include unit tests and documentation.
