@@ -7,40 +7,33 @@
       ];
     ),
     "tests" -> {
+      exports = Lookup[Package`PackageInformation["SetReplace`"], "PackageExports"];
+
       (* All public symbols have usage message *)
 
+      hasNoSymbolUsageQ = Function[symbol, 
+        Not @ StringQ @ MessageName[symbol, "usage"], HoldFirst];
       VerificationTest[
-        AllTrue[
-          ReleaseHold[{Function[symbol, MessageName[symbol, "usage"], HoldFirst] /@
-            ("PackageExports" /. Package`PackageInformation["SetReplace`"])}],
-          StringQ]
+        Select[exports, hasNoSymbolUsageQ], HoldComplete[]
       ],
 
       (* All public symbols have syntax information *)
 
+      hasNoSyntaxInformationQ = Function[symbol, Not[
+          StringStartsQ[SymbolName @ Unevaluated @ symbol, "$"] || 
+          SyntaxInformation[Unevaluated @ symbol] =!= {}], HoldFirst];
       VerificationTest[
-        AllTrue[
-          ReleaseHold[{Function[
-              symbol,
-              {SymbolName[Unevaluated[symbol]], SyntaxInformation[symbol]},
-              HoldFirst] /@
-            ("PackageExports" /. Package`PackageInformation["SetReplace`"])}],
-          If[StringStartsQ[#[[1]], "$"], #[[2]] === {}, #[[2]] =!= {}] &]
+        Select[exports, hasNoSyntaxInformationQ], HoldComplete[]
       ],
 
       (* Test coverage: all public symbols appear in unit tests *)
-
-      With[{testsDirectory = $testsDirectory}, VerificationTest[
-        AllTrue[
-          ReleaseHold[{Function[
-              symbol,
-              SymbolName[Unevaluated[symbol]],
-              HoldFirst] /@
-            ("PackageExports" /. Package`PackageInformation["SetReplace`"])}],
-          StringContainsQ[StringJoin[Import[
-            FileNameJoin[Append[FileNameSplit @ testsDirectory, "*.wlt"]],
-            "Text"]], #] &]
-      ]]
+      allSource = StringJoin[FileString /@ FileNames["*.wlt", $testsDirectory]];
+      doesNotAppearInSourceQ = Function[symbol, 
+        !StringContainsQ[allSource, SymbolName @ Unevaluated @ symbol],
+        HoldFirst];
+      VerificationTest[
+        Select[exports, doesNotAppearInSourceQ], HoldComplete[]
+      ]
     },
     "options" -> {
       "Parallel" -> False

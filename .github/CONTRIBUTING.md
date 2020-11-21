@@ -104,7 +104,7 @@ It is essential to keep your pull requests as small as possible (definitely unde
 
 ### Automated tests
 
-To run the tests, `cd` to the repository root, and run `./build.wls && ./test.wls` from the command line. If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
+To run the tests, `cd` to the repository root, and run `./test.wls` from the command line. Note that `./test.wls` will automatically rebuild libSetReplace for you before running the tests if your libSetReplace is out of date (for example, if you changed some C++ files but you did not either `Get` SetReplace or run `./build.wls`). If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
 
 The `test.wls` script accepts various arguments. Running `./test.wls testfile`, where `testfile` is the name (without trailing `.wlt`) of a test file under the `Tests` directory, will limit the test run to only that file. With the `--load-installed-paclet` (or `-lip`) flag, the script will load the *installed paclet* instead of the local codebase. With the `--disable-parallelization` (or `-dp`) flag, you can disable the use of parallel sub-kernels to perform tests. Using parallel sub-kernels will accelerate running the entire test suite, so it is the default behavior, but if you are running only a single test file with a small number of tests, the startup time of the sub-kernels can outweight any speedup they give, and so `--disable-parallelization` will improve performance.
 

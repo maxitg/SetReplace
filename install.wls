@@ -1,37 +1,35 @@
 #!/usr/bin/env wolframscript
 
-$successQ = True;
-
-(* If any messages are produced, fail with non-zero exit code. *)
 Check[
-  $repoRoot = AbsoluteFileName[DirectoryName[$InputFileName]];
-  $latestPacletFiles = MaximalBy[
-    FileNames[FileNameJoin[{$repoRoot, "SetReplace-*.paclet"}]], FileInformation[#, "LastModificationDate"] &];
-  
-  If[Length[$latestPacletFiles] == 0,
-    Print[
-      "No paclet files SetReplace-*.paclet were found. ",
-      "Run ./build.wls."];
-    Exit[1];
-  ];
-
-  previousPaclets = PacletFind["SetReplace"];
-  If[previousPaclets =!= {},
-    Print["Uninstalling previous SetReplace at ", First[previousPaclets]["Location"]];
-    PacletUninstall["SetReplace"];
-  ];
-  
-  (* This works in both 12.0 and 12.1. *)
-  pacletObjectQ[p_] := PacletObjectQ[p] || Head[p] === PacletManager`Paclet;
-
-  installedPaclet = PacletInstall[First[$latestPacletFiles], "IgnoreVersion" -> True];
-  If[pacletObjectQ[installedPaclet],
-    Print["Installed to ", installedPaclet["Location"]];
-    Print["Restart running kernels to complete installation."],
-    Print["Install failed."];
-    $successQ = False];,
-
-  $successQ = False;
+  Get[FileNameJoin[{DirectoryName[$InputFileName], "DevUtils", "init.m"}]];
+,
+  Print["Message occurred during loading of DevUtils. Build failed."];
+  Exit[1];
 ];
 
-Exit[If[$successQ, 0, 1]]
+paclet = ConsoleCreateSetReplacePaclet[];
+
+If[!StringQ[paclet],
+  Print["Could not create paclet, so cannot install it."];
+  Exit[1]
+];
+
+previousPaclets = PacletFind["SetReplace"];
+If[previousPaclets =!= {},
+  Print["Uninstalling previous SetReplace at ", First[previousPaclets]["Location"]];
+  If[FailureQ[PacletUninstall["SetReplace"]],
+    Print["Could not uninstall old paclet"];
+    Exit[1];
+  ];
+];
+
+Print["Installing paclet at ", paclet];
+installedPaclet = PacletInstall[paclet];
+If[FailureQ[installedPaclet],
+  Print["Could not install new paclet."];
+  Exit[1];
+];
+
+Print["Paclet installed to ", installedPaclet["Location"]];
+
+Exit[0];
