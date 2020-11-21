@@ -90,7 +90,7 @@ If sharing variables among multiple tests, use [`With`](https://reference.wolfra
 
 You should also modify the [README](/README.md) or the corresponding files in the Documentation directory if you are implementing new functionality, or causing any outputs there to change.
 
-**Never put notebooks (.nb files) in the repository**, as they, even though text files, are not human readable, cannot be reviewed line-by-line, and are guaranteed to cause conflicts, which would be almost impossible to resolve.
+**Never put notebooks (.nb files) in the repository**, as they, even though text files, are not human readable, cannot be reviewed line-by-line, and are guaranteed to cause conflicts, which would be almost impossible to resolve. In fact, `.nb` files are listed in the `.gitignore` file precisely so that you cannot accidentally add them.
 
 ### Opening a pull request
 
