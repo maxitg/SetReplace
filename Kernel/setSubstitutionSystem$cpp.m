@@ -21,7 +21,7 @@ SetReplace::nolibsetreplace = "libSetReplace (``) could not be found, some funct
 
 $libraryFile = $SetReplaceLibraryPath;
 
-If[$libraryFile === $Failed || !FileExistsQ[$libraryFile],
+If[!StringQ[$libraryFile] || !FileExistsQ[$libraryFile],
   Message[SetReplace::nolibsetreplace, $libraryFile];
   $libraryFile = $Failed;
 ];

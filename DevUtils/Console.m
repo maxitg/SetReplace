@@ -9,7 +9,7 @@ ConsoleBuildLibSetReplace[opts___] := ModuleScope @ Check[
 
   Off[General::stop];
 
-  result = BuildLibSetReplace[opts, "PrintBeforeBuild" -> True];
+  result = BuildLibSetReplace[opts, "PreBuildCallback" -> "Print"];
 
   If[FailureQ[result],
     Print["Build failed."];

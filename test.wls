@@ -11,7 +11,7 @@ $endColor = "\033[0m";
 
 $commandLineArgs = Rest[$ScriptCommandLine];
 tryPopFlag[longFlag_String, shortFlag_String] := If[
-  MemberQ[$commandLineArgs, longFlag | shortFlag], 
+  MemberQ[$commandLineArgs, longFlag | shortFlag],
   $commandLineArgs = DeleteCases[$commandLineArgs, longFlag | shortFlag];
   True
 ,

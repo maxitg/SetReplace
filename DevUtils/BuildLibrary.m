@@ -15,7 +15,7 @@ Options[BuildLibSetReplace] = {
   "CompilerInstallation" -> Automatic,
   "WorkingDirectory" -> Automatic,
   "LoggingFunction" -> None,
-  "PrintBeforeBuild" -> False,
+  "PreBuildCallback" -> None,
   "Caching" -> True
 };
 
@@ -29,7 +29,7 @@ on completion, or $Failed if the library could not be built.
 location can be overriden with the 'LibrarySourceDirectory' option.
 * The meaning of 'current repo' for the above two options is set by the 'RootDirectory' option, which \
 defaults to the root of the repo containing the DevUtils package.
-* Additional metadata is written to 'LibraryTargetDirectory' in a file called 'buildData.json'.
+* Additional metadata is written to 'LibraryTargetDirectory' in a file called 'libSetReplaceBuildInfo.json'.
 * The library file name includes a hash based on the library and build utility sources.
 * If the library target directory fills up with more than 128 files, the least recently generated files \
 will be automatically deleted.
@@ -37,7 +37,9 @@ will be automatically deleted.
 metadata is still written to a json file in the 'LibraryTargetDirectory'.
 * Various compiler options can be specified with 'Compiler', 'CompilerInstallation', 'WorkingDirectory', \
 and 'LoggingFunction'.
-* Setting 'PrintBeforeBuild' to True will enable a simple message, but only when a build is actually needed.
+* Setting 'PreBuildCallback' to a function will call this function prior to build happening, but only \
+if a build is actually required. This is useful for printing a message in this case. This function is \
+given the keys containing relevant build information.
 * Setting 'Caching' to False can be used to prevent the caching mechanism from being applied.
 "
 
@@ -50,14 +52,14 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
   UnpackOptions[
     rootDirectory, librarySourceDirectory, libraryTargetDirectory,
     systemID, compiler, compilerInstallation, workingDirectory, loggingFunction,
-    printBeforeBuild, caching
+    preBuildCallback, caching
   ];
 
   SetAutomatic[librarySourceDirectory, FileNameJoin[{rootDirectory, "libSetReplace"}]];
   SetAutomatic[libraryTargetDirectory, FileNameJoin[{rootDirectory, "LibraryResources", systemID}]];
 
   (* path processing *)
-  buildDataPath = FileNameJoin[{libraryTargetDirectory, "buildData.json"}];
+  buildDataPath = FileNameJoin[{libraryTargetDirectory, "libSetReplaceBuildInfo.json"}];
   librarySourceDirectory = AbsoluteFileName[librarySourceDirectory];
   If[FailureQ[librarySourceDirectory], ReturnFailed["badsourcedir", librarySourceDirectory]];
 
@@ -77,7 +79,6 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
     "LibraryPath" -> libraryPath,
     "LibraryFileName" -> libraryFileName,
     "LibraryBuildTime" -> DateList[FileDate[libraryPath], TimeZone -> "UTC"],
-    "LibraryGitSHA" -> Replace[GitSHAWithDirtyStar @ FileNameDrop @ librarySourceDirectory, _Missing -> Null],
     "LibrarySourceHash" -> Hash[sourceHashes]
   ];
 
@@ -85,7 +86,8 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
   only write the JSON file *)
   If[caching && FileExistsQ[libraryPath] && FileExistsQ[buildDataPath],
     buildData = readBuildData[buildDataPath];
-    (* the JSON file might already be correct, so check this to avoid calling GitSHAWithDirtyStar *)
+
+    (* the JSON file might already be correct, in which case don't write to at all *)
     If[buildData["LibraryFileName"] === libraryFileName,
       PrependTo[buildData, "LibraryPath" -> libraryPath];
     ,
@@ -99,7 +101,13 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
   (* prevent too many libraries from building up in the cache *)
   If[caching, flushLibrariesIfFull[libraryTargetDirectory]];
 
-  If[printBeforeBuild, Print["Building libSetReplace from sources in ", librarySourceDirectory]];
+  (* if user gave a callback, call it now with relevant info *)
+  If[preBuildCallback =!= None,
+    If[preBuildCallback === "Print", preBuildCallback = $printPreBuildCallback];
+    preBuildCallback[<|
+      "LibrarySourceDirectory" -> librarySourceDirectory,
+      "LibraryFileName" -> libraryFileName|>]];
+
   fileNames = FileNames["*.cpp", librarySourceDirectory];
   libraryPath = wrappedCreateLibrary[
       fileNames,
@@ -116,13 +124,16 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
       "WorkingDirectory" -> workingDirectory
   ];
   If[!StringQ[libraryPath],
-    ReturnFailed["compfail", librarySourceDirectory];
+    Message[BuildLibSetReplace::compfail, librarySourceDirectory];
+    ReturnFailed[];
   ];
   buildData = calculateBuildData[];
   writeBuildData[buildDataPath, buildData];
   buildData["FromCache"] = False;
   buildData
 ];
+
+$printPreBuildCallback = Function[Print["Building libSetReplace from sources in ", #LibrarySourceDirectory]];
 
 readBuildData[jsonFile_] :=
   Developer`ReadRawJSONFile[jsonFile];

@@ -36,14 +36,21 @@ CreateSetReplacePaclet[OptionsPattern[]] := ModuleScope[
   If[$GitLinkAvailableQ,
     minorVersionNumber = CalculateMinorVersionNumber[rootDirectory, masterBranch];
     pacletInfoFile = createUpdatedPacletInfo[rootDirectory, minorVersionNumber];
+    gitSHA = GitSHAWithDirtyStar[rootDirectory];
   ,
     Message[CreateSetReplacePaclet::nogitlink];
-    pacletInfoFile = FileNameJoin[{rootDirectory, "PacletInfo.m"}]
+    pacletInfoFile = FileNameJoin[{rootDirectory, "PacletInfo.m"}];
+    gitSHA = Missing["GitLinkNotAvailable"];
   ];
+
+  buildInfo = <|"GitSHA" -> gitSHA, "BuildTime" -> Round[DateList[TimeZone -> "UTC"]]|>;
+  tempBuildInfoFile = FileNameJoin[{$TemporaryDirectory, "PacletBuildInfo.json"}];
+  Developer`WriteRawJSONFile[tempBuildInfoFile, buildInfo];
+
   fileTree = Flatten @ List[
     FileNameJoin[{rootDirectory, "Kernel"}],
     FileNameJoin[{rootDirectory, "LibraryResources"}],
-    {pacletInfoFile}
+    {pacletInfoFile, tempBuildInfoFile}
   ];
   pacletFileName = CreatePacletArchive[fileTree, outputDirectory];
   If[StringQ[pacletFileName],
@@ -57,8 +64,9 @@ createUpdatedPacletInfo[rootDirectory_, minorVersionNumber_] := ModuleScope[
   pacletInfo = Association @@ Import[pacletInfoFilename];
   versionString = pacletInfo[Version] <> "." <> ToString[minorVersionNumber];
   tempFilename = FileNameJoin[{$TemporaryDirectory, "PacletInfo.m"}];
+  AppendTo[pacletInfo, Version -> versionString];
   Block[{$ContextPath = {"System`", "PacletManager`"}},
-    Export[tempFilename, PacletManager`Paclet @@ Normal[Append[pacletInfo, Version -> versionString]]]
+    Export[tempFilename, PacletManager`Paclet @@ Normal[pacletInfo]]
   ];
   tempFilename
 ];
