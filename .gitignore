@@ -1,3 +1,19 @@
+# Mathematica notebooks
+
+*.nb
+
+# Sublime text
+
+*.sublime-workspace
+
+# VS Code
+
+*.code-workspace
+
+# Files specifically requesting to be ignored
+
+ignoreme.*
+
 # Xcode
 
 xcuserdata/
