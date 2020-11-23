@@ -2,7 +2,7 @@ Unprotect["SetReplace`*"];
 
 ClearAll @@ (# <> "*" & /@ Contexts["SetReplace`*"]);
 
-(* Make sure that we don't effect $ContextPath by getting GU, and that we are isolated from
+(* Make sure that we don't affect $ContextPath by getting GU, and that we are isolated from
 any user contexts *)
 BeginPackage["SetReplace`"];
 
