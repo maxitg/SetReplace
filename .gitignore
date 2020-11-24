@@ -30,3 +30,6 @@ Build/
 
 *.paclet
 .builtLibSetReplaceHash
+
+# Test results
+exit_status.txt
