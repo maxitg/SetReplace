@@ -3,6 +3,8 @@
 
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["Subhypergraph"]
 PackageExport["WeakSubhypergraph"]
 
