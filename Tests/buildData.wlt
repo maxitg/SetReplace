@@ -1,4 +1,12 @@
 <|
+  "$SetReplaceRootDirectory" -> <|
+    "tests" -> {
+      VerificationTest[
+        FileExistsQ @ $SetReplaceRootDirectory
+      ]
+    }
+  |>,
+
   "$SetReplaceGitSHA" -> <|
     "tests" -> {
       (* These two tests will fail if the paclet was built from a dirty repo, i.e. there were uncommitted changes.
