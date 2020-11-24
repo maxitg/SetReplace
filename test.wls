@@ -26,13 +26,25 @@ If[tryPopFlag["--load-installed-paclet", "-lip"],
 ];
 
 Print["Loading SetReplace from ", $yellowColor, FindFile[$localSetReplaceEntryPoint], $endColor];
-Get[$localSetReplaceEntryPoint];
+Check[
+  Get[$localSetReplaceEntryPoint];
+,
+  Print[$redColor, "Messages occurred during loading of SetReplace, aborting tests.", $endColor];
+  Exit[1];
+];
 
 (* make it possible to disable parallelization, which for very short tests saves quite a lot of time. *)
 If[tryPopFlag["--disable-parallelization", "-dp"],
   $allowParallelization = False;
 ,
   $allowParallelization = True;
+
+  (* This hack fixes a bug in Mathematica 12.1.1: if any messages or Prints occur in a subkernel, unformatted
+  KernelObject is printed, obscuring any relevant information. It has been reported upstream. *)
+  LaunchKernels; (* trigger autoload *)
+  Unprotect[System`KernelObject];
+  System`KernelObject /: StringForm["From `1`:", ko_KernelObject] := $orangeColor <> "From subkernel:" <> $endColor;
+
   (* Launch kernels preemptively to avoid "Launching kernels..." interrupting test log *)
   CloseKernels[];
   LaunchKernels[];
@@ -67,9 +79,9 @@ printFileLineError[FileLine[file_, line_] -> error_] := Print[file <> ":" <> Int
 importAsHeldExpression[file_] := Module[{exprs},
   exprs = ToExpression[Import[file, "Text"], InputForm, Hold];
   If[!$allowParallelization, exprs = exprs /. HoldPattern[ParallelMap] -> Map];
-  If[FailureQ[exprs], 
+  If[FailureQ[exprs],
     WriteString["stdout", $redColor <> "There were syntax errors in \"" <> file <> "\"" <> $endColor <> "\n"];
-    Scan[printFileLineError, FindSyntaxErrors[file]]; 
+    Scan[printFileLineError, Take[FindSyntaxErrors[file], UpTo[10]]];
     Exit[1]
   ];
   exprs
@@ -97,13 +109,14 @@ removeHoldFormFromInputString[input_String] := StringReplace[
 ];
 
 $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
-    testList, testResults, testReport, options, parallelQ, requiresFrontEnd, probablyRequiresFrontEnd, runInit, failedTests},
+    testList, testResults, testReport, options, parallelQ, runInit, failedTests,
+    requiresFrontEnd, probablyRequiresFrontEnd, bodyWrapper},
   (* Notify the user which test group we are running *)
   WriteString["stdout",
     testGroupName,
     StringJoin[ConstantArray[" ", Max[40 - StringLength[testGroupName], 1]]]];
 
-  probablyRequiresFrontEnd = !FreeQ[testGroup, 
+  probablyRequiresFrontEnd = !FreeQ[testGroup,
     SetReplace`PackageScope`checkGraphics | SetReplace`PackageScope`graphicsQ | UsingFrontEnd];
 
   (* Read options *)
@@ -111,23 +124,23 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
   parallelQ = $allowParallelization && Lookup[options, "Parallel", True];
   requiresFrontEnd = Lookup[options, "RequiresFrontEnd", probablyRequiresFrontEnd];
 
-  (* if a frontend is required, better to start it once than again and again in each
-  test *)
-  If[requiresFrontEnd, UsingFrontEnd, Identity][
+  (* if a frontend is required, better to start it once than again and again in each test *)
+  bodyWrapper = If[requiresFrontEnd, UsingFrontEnd, Identity];
+  bodyWrapper[
 
-  (* Run init, changing VerificationTest to test in all definitions *)
-  runInit[] := ReleaseHold[testGroup["init"] /. VerificationTest -> constrainedTest];
-  runCleanup[] := ReleaseHold[testGroup["cleanup"] /. VerificationTest -> constrainedTest];
-  runInit[];
-  If[parallelQ, ParallelEvaluate[runInit[]]];
+    (* Run init, changing VerificationTest to test in all definitions *)
+    runInit[] := ReleaseHold[testGroup["init"] /. VerificationTest -> constrainedTest];
+    runCleanup[] := ReleaseHold[testGroup["cleanup"] /. VerificationTest -> constrainedTest];
+    runInit[];
+    If[parallelQ, ParallelEvaluate[runInit[]]];
 
-  (* Make a list of tests, but don't run them yet *)
-  testList = Flatten[ReleaseHold[testGroup["tests"] /. VerificationTest -> constrainedTest]];
+    (* Make a list of tests, but don't run them yet *)
+    testList = Flatten[ReleaseHold[testGroup["tests"] /. VerificationTest -> constrainedTest]];
 
-  (* Run tests in parallel *)
-  testResults = If[parallelQ, ParallelMap, Map][# /. test -> VerificationTest &, testList];
+    (* Run tests in parallel *)
+    testResults = If[parallelQ, ParallelMap, Map][# /. test -> VerificationTest &, testList];
 
-  runCleanup[];
+    runCleanup[];
 
   ];
 
