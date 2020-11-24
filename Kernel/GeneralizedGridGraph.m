@@ -6,19 +6,13 @@ PackageExport["GeneralizedGridGraph"]
 
 (* Documentation *)
 
-GeneralizedGridGraph::usage = usageString[
-  "GeneralizedGridGraph[{\*SubscriptBox[`n`, `1`], \*SubscriptBox[`n`, `2`], `...`, \*SubscriptBox[`n`, `k`]}] ",
-  "gives the k-dimensional grid graph with \*SubscriptBox[`n`, `1`] \[Times] \*SubscriptBox[`n`, `2`] \[Times] `...` ",
-  "\[Times] \*SubscriptBox[`n`, `k`] vertices.\n",
-
-  "GeneralizedGridGraph[{`...`, \*SubscriptBox[`n`, `k`] -> \"Circular\", `...`}] makes the grid wrap around ",
-  "in k-th dimension.\n",
-
-  "GeneralizedGridGraph[{`...`, \*SubscriptBox[`n`, `k`] -> \"Directed\", `...`}] makes the edges directed ",
-  "in k-th dimension.\n",
-
-  "GeneralizedGridGraph[{`...`, \*SubscriptBox[`n`, `k`] -> {\"Circular\", \"Directed\"}, `...`}] makes the grid both ",
-  "circular and directed."];
+SetUsage @ "
+GeneralizedGridGraph[{n$1, n$2, $$, n$k}] gives the k-dimensional grid graph with n$1 \[Times] n$2 \[Times] $$ n$k \
+ vertices.
+GeneralizedGridGraph[{$$, n$k -> 'Circular', $$}] makes the grid wrap around in k-th dimension.
+GeneralizedGridGraph[{$$, n$k -> 'Directed', $$}] makes the edges directed in k-th dimension.
+GeneralizedGridGraph[{$$, n$k -> {'Circular', 'Directed'}, $$}] makes the grid both circular and directed.
+"
 
 Options[GeneralizedGridGraph] = Join[Options[Graph], {"VertexNamingFunction" -> Automatic}];
 

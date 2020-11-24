@@ -13,8 +13,9 @@ PackageExport["ToPatternRules"]
 PackageScope["anonymousRulesQ"]
 PackageScope["toPatternRules"]
 
-ToPatternRules::usage = usageString[
-  "ToPatternRules[`r`] converts a list of anonymous rules `r` to explicit pattern rules."];
+SetUsage @ "
+ToPatternRules[r$] converts a list of anonymous rules r$ to explicit pattern rules.
+"
 
 SyntaxInformation[ToPatternRules] = {"ArgumentsPattern" -> {_}};
 

@@ -11,8 +11,9 @@ PackageScope["hypergraphEmbedding"]
 
 (* Documentation *)
 
-WolframModelPlot::usage = usageString[
-  "WolframModelPlot[`s`, `opts`] plots a list of vertex lists `s` as a hypergraph."];
+SetUsage @ "
+WolframModelPlot[s$, opts$] plots a list of vertex lists s$ as a hypergraph.
+"
 
 $plotStyleAutomatic = <|
   $vertexPoint -> style[$lightTheme][$vertexStyle],
@@ -51,7 +52,7 @@ $graphLayout = "SpringElectricalEmbedding";
 $hyperedgeRenderings = {"Subgraphs", "Polygons"};
 
 (* for compatibility reasons, we don't care for messages and unevaluated code to preserve HypergraphPlot *)
-HypergraphPlot::usage = usageString["HypergraphPlot is deprecated. Use WolframModelPlot."];
+SetUsage[HypergraphPlot, "HypergraphPlot is deprecated. Use WolframModelPlot."];
 SyntaxInformation[HypergraphPlot] = SyntaxInformation[WolframModelPlot];
 Options[HypergraphPlot] = Options[WolframModelPlot];
 HypergraphPlot = WolframModelPlot;

@@ -5,9 +5,10 @@ PackageImport["GeneralUtilities`"]
 PackageExport["IsomorphicHypergraphQ"]
 
 (* Documentation *)
-IsomorphicHypergraphQ::usage = usageString[
-  "IsomorphicHypergraphQ[`h1`, `h2`] ",
-  "yields True if the hypergraphs `h1` and `h2` are isomorphic, and False otherwise."];
+
+SetUsage @ "
+IsomorphicHypergraphQ[h$1, h$2] yields True if the hypergraphs h$1 and h$2 are isomorphic, and False otherwise.
+"
 
 (* SyntaxInformation *)
 SyntaxInformation[IsomorphicHypergraphQ] =

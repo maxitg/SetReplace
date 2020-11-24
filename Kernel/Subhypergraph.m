@@ -7,15 +7,16 @@ PackageExport["Subhypergraph"]
 PackageExport["WeakSubhypergraph"]
 
 (* Documentation *)
-Subhypergraph::usage = usageString[
-  "Subhypergraph[`h`, `vertices`] selects hyperedges from `h` that are subsets of `vertices`.",
-  "\n",
-  "Subhypergraph[`vertices`] represents the operator form for a hypergraph."];
 
-WeakSubhypergraph::usage = usageString[
-  "WeakSubhypergraph[`h`, `vertices`] selects any hyperedge from `h` whose elements are contained in `vertices`.",
-  "\n",
-  "WeakSubhypergraph[`vertices`] represents the operator form for a hypergraph."];
+SetUsage @ "
+Subhypergraph[hg$, vertices$] selects hyperedges from hg$ that are subsets of vertices$.
+Subhypergraph[vertices$] represents the operator form for a hypergraph.
+"
+
+SetUsage @ "
+WeakSubhypergraph[hg$, vertices$] selects any hyperedge from hg$ whose elements are contained in vertices$.
+WeakSubhypergraph[vertices$] represents the operator form for a hypergraph.
+"
 
 (* SyntaxInformation *)
 SyntaxInformation[Subhypergraph] =

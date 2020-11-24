@@ -45,9 +45,9 @@ $maxFinalExpressions = "MaxFinalExpressions";
 $fixedPoint = "FixedPoint";
 $timeConstraint = "TimeConstraint";
 
-$SetReplaceMethods::usage = usageString[
-  "$SetReplaceMethods gives the list of available values for Method option of ",
-  "SetReplace and related functions."];
+SetUsage @ "
+$SetReplaceMethods gives the list of available values for Method option of SetReplace and related functions.
+"
 
 (* Argument Checks *)
 
