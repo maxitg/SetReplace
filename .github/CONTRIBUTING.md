@@ -90,7 +90,7 @@ If sharing variables among multiple tests, use [`With`](https://reference.wolfra
 
 You should also modify the [README](/README.md) or the corresponding files in the Documentation directory if you are implementing new functionality, or causing any outputs there to change.
 
-**Never put notebooks (.nb files) in the repository**, as they, even though text files, are not human readable, cannot be reviewed line-by-line, and are guaranteed to cause conflicts, which would be almost impossible to resolve.
+**Never put notebooks (.nb files) in the repository**, as they, even though text files, are not human readable, cannot be reviewed line-by-line, and are guaranteed to cause conflicts, which would be almost impossible to resolve. In fact, `.nb` files are listed in the `.gitignore` file precisely so that you cannot accidentally add them.
 
 ### Opening a pull request
 
@@ -104,7 +104,9 @@ It is essential to keep your pull requests as small as possible (definitely unde
 
 ### Automated tests
 
-To run the tests, `cd` to the repository root, and run `./build.wls && ./install.wls && ./test.wls` from the command line. If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
+To run the tests, `cd` to the repository root, and run `./build.wls && ./test.wls` from the command line. If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
+
+The `test.wls` script accepts various arguments. Running `./test.wls testfile`, where `testfile` is the name (without trailing `.wlt`) of a test file under the `Tests` directory, will limit the test run to only that file. With the `--load-installed-paclet` (or `-lip`) flag, the script will load the *installed paclet* instead of the local codebase. With the `--disable-parallelization` (or `-dp`) flag, you can disable the use of parallel sub-kernels to perform tests. Using parallel sub-kernels will accelerate running the entire test suite, so it is the default behavior, but if you are running only a single test file with a small number of tests, the startup time of the sub-kernels can outweight any speedup they give, and so `--disable-parallelization` will improve performance.
 
 We have a CI that automatically runs tests for all commits on all branches (kudos to [Circle CI](https://circleci.com) for providing free resources for this project). You need collaborator access to run the CI. If you don't have such access yet, the reviewer will run it for you.
 
