@@ -523,6 +523,24 @@ Images (e.g., of output cells) should be made by selecting the relevant cells in
   Round[0.6 First @ Import["$RepoRoot/Documentation/Images/image.png", "ImageSize"]]
   ```
 
+#### Markdown automation
+
+The above process can be somewhat automated from within a notebook by using the `ExportPreviousInputOutputToMarkdown` function in the ``DevUtils` `` support package. To use this workflow, first load DevUtils by running the following (where you should substitute the actual location of your SetReplace repository):
+
+```wl
+Get["~/git/SetReplace/DevUtils/Kernel.init"];
+```
+
+Next, find the input/output cell pair that you wish to include in your markdown. Then, create a new input cell *after* pair, containing the following code, and run it:
+
+```wl
+ExportPreviousInputOutputToMarkdown["Documentation/Images/NameOfTargetFile.png"]
+```
+
+This will rasterize the previous *output* cell, save the resulting image to the given location within the repository, and produce a snippet of markdown code that contains the right image tag, as well as a code block that contains the textual form of the preceeding *input* cell. If the *input* cell contains non-textual boxes, it cannot be represented as text and will be included in the image of the output cell instead. You can copy-paste this markdown code into the appropriate markdown file.
+
+The relative directory "Documentation/Images/" will be automatically used if you do not specify a directory for the image file.
+
 # Research
 
 We have recently started publishing research notes directly in *SetReplace*. These research notes should go to the [Research](/Research) directory.
