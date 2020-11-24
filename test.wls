@@ -77,12 +77,17 @@ If[!FileExistsQ[#],
 printFileLineError[FileLine[file_, line_] -> error_] := Print[file <> ":" <> IntegerString[line] <> "\t" <> error];
 
 importAsHeldExpression[file_] := Module[{exprs},
-  exprs = ToExpression[Import[file, "Text"], InputForm, Hold];
+  exprs = Quiet @ ToExpression[Import[file, "Text"], InputForm, Hold];
   If[!$allowParallelization, exprs = exprs /. HoldPattern[ParallelMap] -> Map];
   If[FailureQ[exprs],
-    WriteString["stdout", $redColor <> "There were syntax errors in \"" <> file <> "\"" <> $endColor <> "\n"];
-    Scan[printFileLineError, Take[FindSyntaxErrors[file], UpTo[10]]];
-    Exit[1]
+    WriteString["stdout", $redColor <> "There were syntax errors in \"" <> file <> "\"" <> $endColor, ":"];
+    (* this will cause a message that will print out the syntax error as Get would, but without evaluating any expressions. 
+    The Options override is because apparently someone changed Get in the kernel and forget to change FullGet, so it is 
+    missing an option! *)
+    Unprotect[Language`FullGet];
+    Options[Language`FullGet] = Options[Get];
+    Language`FullGet[file, Null, HoldComplete];
+    Exit[1];
   ];
   exprs
 ];
@@ -127,7 +132,6 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
   (* if a frontend is required, better to start it once than again and again in each test *)
   bodyWrapper = If[requiresFrontEnd, UsingFrontEnd, Identity];
   bodyWrapper[
-
     (* Run init, changing VerificationTest to test in all definitions *)
     runInit[] := ReleaseHold[testGroup["init"] /. VerificationTest -> constrainedTest];
     runCleanup[] := ReleaseHold[testGroup["cleanup"] /. VerificationTest -> constrainedTest];
@@ -141,7 +145,6 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
     testResults = If[parallelQ, ParallelMap, Map][# /. test -> VerificationTest &, testList];
 
     runCleanup[];
-
   ];
 
   testReport = TestReport[testResults];
