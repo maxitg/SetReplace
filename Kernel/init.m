@@ -23,7 +23,7 @@ Block[
     HoldPattern[ReturnFailed[msg_String, args___]] :> ReturnFailed[MessageName[$LHSHead, msg], args],
     HoldPattern[ReturnFailure[msg_String, args___]] :> ReturnFailure[MessageName[$LHSHead, msg], args]
   }},
-  Get[FileNameJoin[{$SetReplaceRootDirectory, "Kernel", "usageString.m"}]];
+  Get[FileNameJoin[{$SetReplaceRootDirectory, "Kernel", "utilities.m"}]];
 ];
 
 End[];
