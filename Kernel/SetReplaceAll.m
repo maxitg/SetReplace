@@ -9,12 +9,11 @@ PackageExport["SetReplaceAll"]
    Note, it's not doing replacement until all edges are touched at least once. That may not always be possible. We just
    don't want to touch edges twice in a single step. *)
 
-SetReplaceAll::usage = usageString[
-  "SetReplaceAll[`s`, `r`] performs SetReplace[`s`, `r`] as many times as it takes ",
-  "until no replacement can be done without touching the same edge twice.",
-  "\n",
-  "SetReplaceAll[`s`, `r`, `n`] performes the same operation `n` times, i.e., any ",
-  "edge will at most be replaced `n` times."];
+SetUsage @ "
+SetReplaceAll[s$, r$] performs SetReplace[s$, r$] as many times as it takes until no \
+replacement can be done without touching the same edge twice.
+SetReplaceAll[s$, r$, n$] performes the same operation n$ times, i.e., any edge will at most be replaced n$ times.
+"
 
 SyntaxInformation[SetReplaceAll] = {"ArgumentsPattern" -> {_, _, _., OptionsPattern[]}};
 

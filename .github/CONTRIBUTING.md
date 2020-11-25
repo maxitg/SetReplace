@@ -198,7 +198,7 @@ Each file should start with a ``Package["SetReplace`"]`` line, followed by lines
 
 Note these declarations are macros, not Wolfram Language code, so you have to put each one of them on a separate line, and you cannot use them with Wolfram Language code, like mapping them over a [`List`](https://reference.wolfram.com/language/ref/List.html).
 
-Your public symbols should also include a `usage` message, which should be created with a [`usageString`](/Kernel/usageString.m) function. Each argument, number, and ellipsis should be [enclosed in backticks](https://github.com/maxitg/SetReplace/blob/6b9df76dc7fa3c08ac8803b90d625ce454f51f0c/Kernel/GeneralizedGridGraph.m#L7), which would automatically convert it to the correct style.
+Your public symbols should also include a `usage` message, which should be created with the [`SetUsage`](https://github.com/maxitg/SetReplace/blob/7f89c5103cae6a7c1d21b967973811fdeacfd63b/Kernel/GeneralizedGridGraph.m#L9) function. For more information, see ``?GeneralUtilities`SetUsage``.
 
 Further, public symbols must include [`SyntaxInformation`](https://reference.wolfram.com/language/ref/SyntaxInformation.html), see [an example](https://github.com/maxitg/SetReplace/blob/6b9df76dc7fa3c08ac8803b90d625ce454f51f0c/Kernel/WolframModel.m#L23) for `WolframModel`.
 

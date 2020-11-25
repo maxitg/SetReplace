@@ -5,8 +5,10 @@ PackageImport["GeneralUtilities`"]
 PackageExport["HypergraphToGraph"]
 
 (* Documentation *)
-HypergraphToGraph::usage = usageString[
-  "HypergraphToGraph[`hg`, `method`] uses `method` to convert a hypergraph `hg` to a Graph."];
+
+SetUsage @ "
+HypergraphToGraph[hg$, method$] uses method$ to convert a hypergraph hg$ to a Graph.
+"
 
 (* Options *)
 Options[HypergraphToGraph] = Options[Graph];

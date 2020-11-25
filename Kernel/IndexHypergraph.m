@@ -5,10 +5,11 @@ PackageImport["GeneralUtilities`"]
 PackageExport["IndexHypergraph"]
 
 (* Documentation *)
-IndexHypergraph::usage = usageString[
-  "IndexHypergraph[`h`] replaces the vertices of the hypergraph `h` by its vertex indices.",
-  "\n",
-  "IndexHypergraph[`h`, `r`] replaces the vertices with integers `r`, `r + 1`, \[Ellipsis]."];
+
+SetUsage @ "
+IndexHypergraph[hg$] replaces the vertices of the hypergraph hg$ by its vertex indices.
+IndexHypergraph[hg$, r$] replaces the vertices with integers r$, r$ + 1, $$.
+"
 
 (* SyntaxInformation *)
 SyntaxInformation[IndexHypergraph] =

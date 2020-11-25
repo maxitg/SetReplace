@@ -1,15 +1,18 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["WolframPhysicsProjectStyleData"]
 
 (* Documentation *)
 
-WolframPhysicsProjectStyleData::usage = usageString[
-  "WolframPhysicsProjectStyleData[] yields an association describing default styles used in Wolfram Physics Project.\n",
-  "WolframPhysicsProjectStyleData[`theme`] gives styles for a particular `theme`.\n",
-  "WolframPhysicsProjectStyleData[`t`] gives styles for a particular plot type `t`.\n",
-  "WolframPhysicsProjectStyleData[`t`, `e`] gives a value for a particular style element `e` of plot type `t`.\n",
-  "WolframPhysicsProjectStyleData[`theme`, `t`, `e`] gives a value for an element `e` of plot type `t` for `theme`."];
+SetUsage @ "
+WolframPhysicsProjectStyleData[] yields an association describing default styles used in Wolfram Physics Project.
+WolframPhysicsProjectStyleData[theme$] gives styles for a particular theme$.
+WolframPhysicsProjectStyleData[t$] gives styles for a particular plot type t$.
+WolframPhysicsProjectStyleData[t$, e$] gives a value for a particular style element e$ of plot type t$.
+WolframPhysicsProjectStyleData[theme$, t$, e$] gives a value for an element e$ of plot type t$ for $theme$.
+"
 
 SyntaxInformation[WolframPhysicsProjectStyleData] = {"ArgumentsPattern" -> {_., _., _.}};
 

@@ -6,8 +6,9 @@ PackageExport["HypergraphAutomorphismGroup"]
 
 (* Documentation *)
 
-HypergraphAutomorphismGroup::usage = usageString[
-  "HypergraphAutomorphismGroup[`e`] gives the authomorphism group of a list of hyperedges `e`."];
+SetUsage @ "
+HypergraphAutomorphismGroup[e$] gives the authomorphism group of a list of hyperedges e$.
+"
 
 SyntaxInformation[HypergraphAutomorphismGroup] = {"ArgumentsPattern" -> {_}};
 

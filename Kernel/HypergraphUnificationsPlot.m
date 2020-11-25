@@ -6,9 +6,10 @@ PackageExport["HypergraphUnificationsPlot"]
 
 (* Documentation *)
 
-HypergraphUnificationsPlot::usage = usageString[
-  "HypergraphUnificationsPlot[`e1`, `e2`] yields a list of plots of all ",
-  "hypergraphs containing both `e1` and `e2` as rule input matches."];
+SetUsage @ "
+HypergraphUnificationsPlot[e$1, e$2] yields a list of plots of all hypergraphs \
+containing both e$1 and e$2 as rule input matches.
+"
 
 SyntaxInformation[HypergraphUnificationsPlot] = {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 

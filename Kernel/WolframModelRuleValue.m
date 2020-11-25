@@ -7,12 +7,14 @@ PackageExport["$WolframModelRuleProperties"]
 
 (* Documentation *)
 
-WolframModelRuleValue::usage = usageString[
-  "WolframModelRuleValue[`r`, `p`] yields a value for property `p` of Wolfram model rule `r`.\n",
-  "WolframModelRuleValue[`r`] yields values of all available properties."];
+SetUsage @ "
+WolframModelRuleValue[r$, p$] yields a value for property p$ of Wolfram model rule r$.
+WolframModelRuleValue[r$] yields values of all available properties.
+"
 
-$WolframModelRuleProperties::usage = usageString[
-  "$WolframModelRuleProperties gives the list of all available rule properties."];
+SetUsage @ "
+$WolframModelRuleProperties gives the list of all available rule properties.
+"
 
 SyntaxInformation[WolframModelRuleValue] = {"ArgumentsPattern" -> {_, _.}};
 

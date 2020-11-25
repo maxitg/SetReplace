@@ -9,18 +9,16 @@ PackageExport["$WolframModelProperties"]
 
 PackageScope["wolframModelRulesSpecQ"]
 
-WolframModel::usage = usageString[
-  "WolframModel[`rules`, `init`, `t`] generates an object representing the ",
-  "evolution of the Wolfram Model with the specified rules from the initial ",
-  "condition `init` for `t` generations.",
-  "\n",
-  "WolframModel[`rules`, `init`, `t`, `prop`] gives the property `prop` ",
-  "of the evolution.",
-  "\n",
-  "WolframModel[`rules`] represents the operator form for a Wolfram Model."];
+SetUsage @ "
+WolframModel[rules$, init$, t$] generates an object representing the evolution of the Wolfram Model \
+with the specified rules from the initial condition init$ for t$ generations.
+WolframModel[rules$, init$, t$, prop$] gives the property prop$ of the evolution.
+WolframModel[rules$] represents the operator form for a Wolfram Model.
+"
 
-$WolframModelProperties::usage = usageString[
-  "$WolframModelProperties gives the list of available properties of WolframModel."];
+SetUsage @ "
+$WolframModelProperties gives the list of available properties of WolframModel.
+"
 
 SyntaxInformation[WolframModel] =
   {"ArgumentsPattern" -> {_, _ ..., OptionsPattern[]}};

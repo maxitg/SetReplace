@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["$WolframPhysicsProjectPlotThemes"]
 
 PackageScope["style"]
@@ -196,9 +198,9 @@ $styleNames = KeySort /@ KeySort @ <|
 
 $lightTheme = "Light";
 
-$WolframPhysicsProjectPlotThemes::usage = usageString[
-  "$WolframPhysicsProjectPlotThemes gives the list of plot themes available for the Wolfram Physics Project."
-];
+SetUsage @ "
+$WolframPhysicsProjectPlotThemes gives the list of plot themes available for the Wolfram Physics Project.
+"
 
 $WolframPhysicsProjectPlotThemes = {$lightTheme};
 
