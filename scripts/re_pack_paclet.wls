@@ -18,8 +18,8 @@ $buildDir = FileNameJoin[{AntProperty["files_directory"], AntProperty["component
 $outputDir = AntProperty["output_directory"];
 
 $opts = {
-  "RootDirectory" -> $buildDir,
   "RepositoryDirectory" -> $repoDir,
+  "LibraryDirectory" -> $buildDir,
   "MasterBranch" -> "origin/master",
   "OutputDirectory" -> $outputDir
 };

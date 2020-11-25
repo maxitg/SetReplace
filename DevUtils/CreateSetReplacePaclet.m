@@ -5,8 +5,9 @@ PackageImport["GeneralUtilities`"]
 PackageExport["CreateSetReplacePaclet"]
 
 Options[CreateSetReplacePaclet] = {
-  "RootDirectory" :> $SetReplaceRoot,
-  "RepositoryDirectory" -> Automatic,
+  "RepositoryDirectory" :> $SetReplaceRoot, (* for Git SHAs etc *)
+  "SourceDirectory" -> Automatic, (* for WL sources *)
+  "LibraryDirectory" -> Automatic, (* for libSetReplace *)
   "MasterBranch" -> "master", (* for calculating the minor version *)
   "OutputDirectory" -> Automatic
 };
@@ -19,26 +20,31 @@ SetUsage @ "
 CreateSetReplacePaclet[] creates a PacletObject containing the local source and last built library.
 * Note that CreateSetReplacePaclet[] does *not* call BuildLibSetReplace[], unlike the command line scripts.
 * The PacletObject represents a .paclet file created on disk.
-* The default location of the .paclet file is within the BuiltPaclets subdirectory of the current repo, \
-but can be overriden with the 'OutputDirectory' option.
-* The source for the PacletObject is given by the contents of the 'Kernel' and 'LibraryResources' directories \
-of the current repo, but can be overridden with the 'RootDirectory' option.
+* 'RepositoryDirectory' defaults to the repository containing DevUtils, but can be set to another directory.
+* 'RepositoryDirectory' must be a Git repo, and will be used to obtain the Git SHA hash and minor version number.
+* The default location of the .paclet file is within the BuiltPaclets subdirectory of the 'RepositoryDirectory', \
+but that can be overriden with the 'OutputDirectory' option.
+* The Wolfram Language sources for the paclet are taken from the Kernel subdirectory of 'SourceDirectory'.
+* The built libSetReplace libraries are taken from the LibraryResources subdirectory of 'LibraryDirectory'.
+* 'SourceDirectory' and 'LibraryDirectory' default to the value of 'RepositoryDirectory'.
 * The minor version is derived from the number of commits between the last checkpoint and the 'master' branch,
-which can be overriden with the 'MasterBranch' option. The checkpoint is defined in `scripts/version.wl`.
+which can be overriden with the 'MasterBranch' option. The checkpoint is defined in `scripts/version.wl`. The \
+git repo is assumed to live at 'RepositoryDirectory'.
 "
 
 CreateSetReplacePaclet[OptionsPattern[]] := ModuleScope[
-  UnpackOptions[rootDirectory, repositoryDirectory, masterBranch, outputDirectory];
-  SetAutomatic[outputDirectory, FileNameJoin[{rootDirectory, "BuiltPaclets"}]];
-  SetAutomatic[repositoryDirectory, rootDirectory];
+  UnpackOptions[sourceDirectory, libraryDirectory, repositoryDirectory, masterBranch, outputDirectory];
+  SetAutomatic[outputDirectory, FileNameJoin[{repositoryDirectory, "BuiltPaclets"}]];
+  SetAutomatic[libraryDirectory, repositoryDirectory];
+  SetAutomatic[sourceDirectory, repositoryDirectory];
   EnsureDirectory[outputDirectory];
   If[$GitLinkAvailableQ,
     minorVersionNumber = CalculateMinorVersionNumber[repositoryDirectory, masterBranch];
-    pacletInfoFile = createUpdatedPacletInfo[rootDirectory, minorVersionNumber];
+    pacletInfoFile = createUpdatedPacletInfo[FileNameJoin[{sourceDirectory, "PacletInfo.m"}], minorVersionNumber];
     gitSHA = GitSHAWithDirtyStar[repositoryDirectory];
   ,
     Message[CreateSetReplacePaclet::nogitlink];
-    pacletInfoFile = FileNameJoin[{rootDirectory, "PacletInfo.m"}];
+    pacletInfoFile = FileNameJoin[{sourceDirectory, "PacletInfo.m"}];
     gitSHA = Missing["GitLinkNotAvailable"];
   ];
 
@@ -47,8 +53,8 @@ CreateSetReplacePaclet[OptionsPattern[]] := ModuleScope[
   Developer`WriteRawJSONFile[tempBuildInfoFile, buildInfo];
 
   fileTree = {
-    FileNameJoin[{rootDirectory, "Kernel"}],
-    FileNameJoin[{rootDirectory, "LibraryResources"}],
+    FileNameJoin[{sourceDirectory, "Kernel"}],
+    FileNameJoin[{libraryDirectory, "LibraryResources"}],
     pacletInfoFile, tempBuildInfoFile
   };
 
@@ -62,12 +68,11 @@ CreateSetReplacePaclet[OptionsPattern[]] := ModuleScope[
       PacletObject[File[pacletFileName]],
       <|"Location" -> pacletFileName|>
     ],
-    ReturnFailed["packfailed", rootDirectory, outputDirectory]
+    ReturnFailed["packfailed", sourceDirectory, outputDirectory]
   ]
 ];
 
-createUpdatedPacletInfo[rootDirectory_, minorVersionNumber_] := ModuleScope[
-  pacletInfoFilename = FileNameJoin[{rootDirectory, "PacletInfo.m"}];
+createUpdatedPacletInfo[pacletInfoFilename_, minorVersionNumber_] := ModuleScope[
   pacletInfo = Association @@ Import[pacletInfoFilename];
   versionString = pacletInfo[Version] <> "." <> ToString[minorVersionNumber];
   tempFilename = FileNameJoin[{$DevUtilsTemporaryDirectory, "PacletInfo.m"}];

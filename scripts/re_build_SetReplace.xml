@@ -10,18 +10,6 @@
   <import file='${env.RE_ANTLIBRARY_HOME}/ant-lib.xml' />
 
   <!--
-    Component (platform-independent)
-  -->
-  <target name='Component.SetReplace.execute' extensionOf='Component.execute'>
-    <copy todir='${files_directory}/${component}'>
-      <fileset dir='.' >
-        <include name='Kernel/**' />
-        <include name='PacletInfo.m' />
-      </fileset>
-    </copy>
-  </target>
-
-  <!--
     Native libraries
   -->
   <target name='NativeLibrary.SetReplace.init.custom' extensionOf='NativeLibrary.init.custom'>

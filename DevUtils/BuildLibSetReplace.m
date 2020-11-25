@@ -5,7 +5,7 @@ PackageImport["GeneralUtilities`"]
 PackageExport["BuildLibSetReplace"]
 
 Options[BuildLibSetReplace] = {
-  "RootDirectory" :> $SetReplaceRoot,
+  "RepositoryDirectory" :> $SetReplaceRoot,
   "LibrarySourceDirectory" -> Automatic,
   "LibraryTargetDirectory" -> Automatic,
   "SystemID" -> $SystemID,
@@ -25,7 +25,7 @@ on completion, or $Failed if the library could not be built.
 'LibraryTargetDirectory' option.
 * By default, the sources are obtained from the 'libSetReplace' subdirectory of the current repo, but this \
 location can be overriden with the 'LibrarySourceDirectory' option.
-* The meaning of 'current repo' for the above two options is set by the 'RootDirectory' option, which \
+* The meaning of 'current repo' for the above two options is set by the 'RepositoryDirectory' option, which \
 defaults to the root of the repo containing the DevUtils package.
 * Additional metadata is written to 'LibraryTargetDirectory' in a file called 'libSetReplaceBuildInfo.json'.
 * The library file name includes a hash based on the library and build utility sources.
@@ -47,13 +47,13 @@ BuildLibSetReplace::badsourcedir = "Source directory `` did not exist.";
 BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
   (* options processing *)
   UnpackOptions[
-    rootDirectory, librarySourceDirectory, libraryTargetDirectory,
+    repositoryDirectory, librarySourceDirectory, libraryTargetDirectory,
     systemID, compiler, compilerInstallation, workingDirectory, loggingFunction,
     preBuildCallback, caching
   ];
 
-  SetAutomatic[librarySourceDirectory, FileNameJoin[{rootDirectory, "libSetReplace"}]];
-  SetAutomatic[libraryTargetDirectory, FileNameJoin[{rootDirectory, "LibraryResources", systemID}]];
+  SetAutomatic[librarySourceDirectory, FileNameJoin[{repositoryDirectory, "libSetReplace"}]];
+  SetAutomatic[libraryTargetDirectory, FileNameJoin[{repositoryDirectory, "LibraryResources", systemID}]];
 
   (* path processing *)
   buildDataPath = FileNameJoin[{libraryTargetDirectory, "libSetReplaceBuildInfo.json"}];
