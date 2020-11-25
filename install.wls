@@ -7,6 +7,10 @@ Check[
   Exit[1];
 ];
 
+If[$VersionNumber < 12.1,
+  Needs["PacletManager`"];
+];
+
 Check[
   InstallGitLink[];
 

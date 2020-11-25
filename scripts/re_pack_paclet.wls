@@ -13,11 +13,13 @@ Print["$Version: ", $Version];
 Print["$InstallationDirectory: ", $InstallationDirectory];
 Unset[$MessagePrePrint];
 
+$repoDir = FileNameDrop[$InputFileName, -2];
 $buildDir = FileNameJoin[{AntProperty["files_directory"], AntProperty["component"]}];
 $outputDir = AntProperty["output_directory"];
 
 $opts = {
   "RootDirectory" -> $buildDir,
+  "RepositoryDirectory" -> $repoDir,
   "MasterBranch" -> "origin/master",
   "OutputDirectory" -> $outputDir
 };

@@ -2,11 +2,13 @@ Package["SetReplaceDevUtils`"]
 
 PackageImport["GeneralUtilities`"]
 
+PackageImport["PacletManager`"] (* for PacletFind, PacletInstall in versions prior to 12.1 *)
+
 PackageExport["$GitLinkAvailableQ"]
 
 (* unfortunately, owing to a bug in GitLink, GitLink *needs* to be on the $ContextPath or GitRepo objects
 end up in the wrong context, since they are generated in a loopback link unqualified *)
-$GitLinkAvailableQ := $GitLinkAvailableQ = !FailureQ[Quiet @ Check[Needs["GitLink`"], $Failed]];
+$GitLinkAvailableQ := !FailureQ[Quiet @ Check[Needs["GitLink`"], $Failed]];
 
 PackageExport["GitSHAWithDirtyStar"]
 
@@ -18,14 +20,14 @@ for the Git repository at 'path$'. Unlike the GitSHA function, this will include
 if the current working tree is dirty.
 "
 
-GitSHAWithDirtyStar[rootDir_] /; TrueQ[$GitLinkAvailableQ] := ModuleScope[
-  repo = GitLink`GitOpen[rootDir];
+GitSHAWithDirtyStar[repoDir_] /; TrueQ[$GitLinkAvailableQ] := ModuleScope[
+  repo = GitLink`GitOpen[repoDir];
   sha = GitLink`GitSHA[repo, repo["HEAD"]];
   cleanQ = AllTrue[# === {} &] @ GitLink`GitStatus[repo];
   If[cleanQ, sha, sha <> "*"]
 ]
 
-GitSHAWithDirtyStar[rootDir_] /; FalseQ[$GitLinkAvailableQ] := Missing["NotAvailable"];
+GitSHAWithDirtyStar[_] /; FalseQ[$GitLinkAvailableQ] := Missing["NotAvailable"];
 
 PackageExport["InstallGitLink"]
 
@@ -43,14 +45,14 @@ InstallGitLink[] := If[PacletFind["GitLink", "Internal" -> All] === {},
 PackageExport["CalculateMinorVersionNumber"]
 
 SetUsage @ "
-CalculateMinorVersionNumber[rootDirectory$, masterBranch$] will calculate a minor version \
+CalculateMinorVersionNumber[repositoryDirectory$, masterBranch$] will calculate a minor version \
 derived from the number of commits between the last checkpoint and the 'master' branch, \
 which can be overriden with the 'MasterBranch' option. The checkpoint is defined in scripts/version.wl.
 "
 
-CalculateMinorVersionNumber[rootDirectory_, masterBranch_] := ModuleScope[
-  versionInformation = Import[FileNameJoin[{rootDirectory, "scripts", "version.wl"}]];
-  gitRepo = GitLink`GitOpen[rootDirectory];
+CalculateMinorVersionNumber[repoDir_, masterBranch_] := ModuleScope[
+  versionInformation = Import[FileNameJoin[{repoDir, "scripts", "version.wl"}]];
+  gitRepo = GitLink`GitOpen[repoDir];
   If[$internalBuildQ, GitLink`GitFetch[gitRepo, "origin"]];
   minorVersionNumber = Max[0, Length[GitLink`GitRange[
     gitRepo,

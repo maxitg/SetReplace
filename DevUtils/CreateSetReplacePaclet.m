@@ -6,6 +6,7 @@ PackageExport["CreateSetReplacePaclet"]
 
 Options[CreateSetReplacePaclet] = {
   "RootDirectory" :> $SetReplaceRoot,
+  "RepositoryDirectory" -> Automatic,
   "MasterBranch" -> "master", (* for calculating the minor version *)
   "OutputDirectory" -> Automatic
 };
@@ -27,13 +28,14 @@ which can be overriden with the 'MasterBranch' option. The checkpoint is defined
 "
 
 CreateSetReplacePaclet[OptionsPattern[]] := ModuleScope[
-  UnpackOptions[rootDirectory, masterBranch, outputDirectory];
+  UnpackOptions[rootDirectory, repositoryDirectory, masterBranch, outputDirectory];
   SetAutomatic[outputDirectory, FileNameJoin[{rootDirectory, "BuiltPaclets"}]];
+  SetAutomatic[repositoryDirectory, rootDirectory];
   EnsureDirectory[outputDirectory];
   If[$GitLinkAvailableQ,
-    minorVersionNumber = CalculateMinorVersionNumber[rootDirectory, masterBranch];
+    minorVersionNumber = CalculateMinorVersionNumber[repositoryDirectory, masterBranch];
     pacletInfoFile = createUpdatedPacletInfo[rootDirectory, minorVersionNumber];
-    gitSHA = GitSHAWithDirtyStar[rootDirectory];
+    gitSHA = GitSHAWithDirtyStar[repositoryDirectory];
   ,
     Message[CreateSetReplacePaclet::nogitlink];
     pacletInfoFile = FileNameJoin[{rootDirectory, "PacletInfo.m"}];
@@ -49,9 +51,17 @@ CreateSetReplacePaclet[OptionsPattern[]] := ModuleScope[
     FileNameJoin[{rootDirectory, "LibraryResources"}],
     pacletInfoFile, tempBuildInfoFile
   };
-  pacletFileName = CreatePacletArchive[fileTree, outputDirectory];
+
+  pacletCreatorFunction = If[$VersionNumber >= 12.1,
+    Symbol["System`CreatePacletArchive"],
+    Symbol["PacletManager`PackPaclet"]];
+  pacletFileName = pacletCreatorFunction[fileTree, outputDirectory];
+
   If[StringQ[pacletFileName],
-    Return[PacletObject[File[pacletFileName]]],
+    Return @ If[$VersionNumber >= 12.1,
+      PacletObject[File[pacletFileName]],
+      <|"Location" -> pacletFileName|>
+    ],
     ReturnFailed["packfailed", rootDirectory, outputDirectory]
   ]
 ];
