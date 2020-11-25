@@ -7,9 +7,16 @@ Check[
   Exit[1];
 ];
 
-result = ConsoleBuildLibSetReplace[
-  "Compiler" -> ToExpression @ ConsoleTryEnvironment["COMPILER", Automatic],
-  "CompilerInstallation" -> ConsoleTryEnvironment["COMPILER", Automatic]
+Check[
+  result = ConsoleBuildLibSetReplace[
+    "Compiler" -> ToExpression @ ConsoleTryEnvironment["COMPILER", Automatic],
+    "CompilerInstallation" -> ConsoleTryEnvironment["COMPILER", Automatic]
+  ];
+
+  If[!AssociationQ[result], Exit[1]];
+,
+  Print["Message occurred during loading of DevUtils. Build failed."];
+  Exit[1];
 ];
 
-If[!AssociationQ[result], Exit[1], Exit[0]];
+Exit[0];

@@ -2,8 +2,6 @@ Package["SetReplaceDevUtils`"]
 
 PackageImport["GeneralUtilities`"]
 
-
-
 PackageExport["BuildLibSetReplace"]
 
 Options[BuildLibSetReplace] = {
@@ -47,7 +45,6 @@ BuildLibSetReplace::compfail = "Compilation of C++ code at `` failed.";
 BuildLibSetReplace::badsourcedir = "Source directory `` did not exist.";
 
 BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
-
   (* options processing *)
   UnpackOptions[
     rootDirectory, librarySourceDirectory, libraryTargetDirectory,
@@ -78,8 +75,8 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
   calculateBuildData[] := Association[
     "LibraryPath" -> libraryPath,
     "LibraryFileName" -> libraryFileName,
-    "LibraryBuildTime" -> DateList[FileDate[libraryPath], TimeZone -> "UTC"],
-    "LibrarySourceHash" -> Hash[sourceHashes]
+    "LibraryBuildTime" -> Round[DateList[FileDate[libraryPath], TimeZone -> "UTC"]],
+    "LibrarySourceHash" -> finalHash
   ];
 
   (* if a cached library exists with the right name, we can skip the compilation step, and need
@@ -167,10 +164,9 @@ $compileOptions = Switch[$OperatingSystem,
     Join[{"-std=c++17"}, $warningsFlags]
 ];
 
-
 flushLibrariesIfFull[libraryDirectory_] := Scope[
   files = FileNames["lib*", libraryDirectory];
-  If[Length[files] > 128,
+  If[Length[files] > 127,
     oldestFile = MinimalBy[files, FileDate, 8];
     Scan[DeleteFile, oldestFile]
   ]

@@ -38,8 +38,8 @@ Print[$yellowColor, "Running re_build_library.wls", $endColor];
 Get[FileNameJoin[{$thisDir, "re_build_library.wls"}]];
 
 (* Then run the pack script *)
-Print[$yellowColor, "\nRunning re_build_paclet.wls", $endColor];
-Get[FileNameJoin[{$thisDir, "re_build_paclet.wls"}]];
+Print[$yellowColor, "\nRunning re_pack_paclet.wls", $endColor];
+Get[FileNameJoin[{$thisDir, "re_pack_paclet.wls"}]];
 
 Print["\nScripts complete, testing for presence of final .paclet."];
 

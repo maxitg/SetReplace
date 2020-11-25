@@ -2,11 +2,15 @@ Package["SetReplaceDevUtils`"]
 
 PackageImport["GeneralUtilities`"]
 
-
 PackageExport["ConsoleBuildLibSetReplace"]
 
-ConsoleBuildLibSetReplace[opts___] := ModuleScope @ Check[
+SetUsage @ "
+ConsoleBuildLibSetReplace[opts$$] calls BuildLibSetReplace[opts$$] but prints information to \
+the command line when success or failure occurs. It also checks for messages and aborts if they \
+occur. It returns a string of the library path on success, and $Failed on failure.
+"
 
+ConsoleBuildLibSetReplace[opts___] := ModuleScope @ Check[
   Off[General::stop];
 
   result = BuildLibSetReplace[opts, "PreBuildCallback" -> "Print"];
@@ -17,11 +21,11 @@ ConsoleBuildLibSetReplace[opts___] := ModuleScope @ Check[
   ];
 
   If[result["FromCache"],
-    Print["Using cached build"];
+    Print["Using cached build."];
   ];
 
   Print["Library at ", result["LibraryPath"]];
-  Print["Build succeeded"];
+  Print["Build succeeded."];
 
   result
 ,
@@ -29,11 +33,15 @@ ConsoleBuildLibSetReplace[opts___] := ModuleScope @ Check[
   $Failed
 ];
 
-
 PackageExport["ConsoleCreateSetReplacePaclet"]
 
-ConsoleCreateSetReplacePaclet[opts___] := ModuleScope @ Check[
+SetUsage @ "
+ConsoleCreateSetReplacePaclet[opts$$] calls CreateSetReplacePaclet[opts$$] but prints information to \
+the command line when success or failure occurs. It also checks for messages and aborts if they \
+occur. it returns a string of the paclet file path on success, and $Failed on failure.
+"
 
+ConsoleCreateSetReplacePaclet[opts___] := ModuleScope @ Check[
   If[!AssociationQ[ConsoleBuildLibSetReplace[opts]],
     Print["Build failed, creation of paclet aborted."];
     ReturnFailed[]];
@@ -54,8 +62,6 @@ ConsoleCreateSetReplacePaclet[opts___] := ModuleScope @ Check[
   $Failed
 ];
 
-
-
 PackageExport["ConsolePrintList"]
 
 SetUsage @ "
@@ -69,12 +75,11 @@ ConsolePrintList[list_List] := (
   Print["}"];
 );
 
-
-
 PackageExport["ConsoleTryEnvironment"]
 
 SetUsage @ "
-ConsoleTryEnvironment[var$, default$] will look up the value of the environment variable var$, but use default$ if it is not availabe.
+ConsoleTryEnvironment[var$, default$] will look up the value of the environment variable var$, but use \
+default$ if it is not availabe.
 "
 
 SetAttributes[ConsoleTryEnvironment, HoldRest];

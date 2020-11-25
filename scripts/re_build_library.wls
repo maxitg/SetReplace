@@ -14,7 +14,8 @@ Print["$InstallationDirectory: ", $InstallationDirectory];
 Unset[$MessagePrePrint];
 
 $systemID = AntProperty["system_id"];
-$targetDirectory = FileNameJoin[{AntProperty["files_directory"], AntProperty["component"], "LibraryResources", $systemID}];
+$targetDirectory = FileNameJoin[
+  {AntProperty["files_directory"], AntProperty["component"], "LibraryResources", $systemID}];
 
 $opts = {
   "LibraryTargetDirectory" -> $targetDirectory,
@@ -37,5 +38,3 @@ If[!AssociationQ[$result],
 ];
 
 Print["Built library to ", $result["LibraryPath"]];
-
-Exit[0];

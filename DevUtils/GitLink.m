@@ -2,7 +2,6 @@ Package["SetReplaceDevUtils`"]
 
 PackageImport["GeneralUtilities`"]
 
-
 PackageExport["$GitLinkAvailableQ"]
 
 (* unfortunately, owing to a bug in GitLink, GitLink *needs* to be on the $ContextPath or GitRepo objects
@@ -28,7 +27,6 @@ GitSHAWithDirtyStar[rootDir_] /; TrueQ[$GitLinkAvailableQ] := ModuleScope[
 
 GitSHAWithDirtyStar[rootDir_] /; FalseQ[$GitLinkAvailableQ] := Missing["NotAvailable"];
 
-
 PackageExport["InstallGitLink"]
 
 SetUsage @ "
@@ -42,8 +40,13 @@ InstallGitLink[] := If[PacletFind["GitLink", "Internal" -> All] === {},
   ];
 ];
 
-
 PackageExport["CalculateMinorVersionNumber"]
+
+SetUsage @ "
+CalculateMinorVersionNumber[rootDirectory$, masterBranch$] will calculate a minor version \
+derived from the number of commits between the last checkpoint and the 'master' branch, \
+which can be overriden with the 'MasterBranch' option. The checkpoint is defined in scripts/version.wl.
+"
 
 CalculateMinorVersionNumber[rootDirectory_, masterBranch_] := ModuleScope[
   versionInformation = Import[FileNameJoin[{rootDirectory, "scripts", "version.wl"}]];
@@ -52,6 +55,6 @@ CalculateMinorVersionNumber[rootDirectory_, masterBranch_] := ModuleScope[
   minorVersionNumber = Max[0, Length[GitLink`GitRange[
     gitRepo,
     Except[versionInformation["Checkpoint"]],
-    GitLink`GitMergeBase[gitRepo, "HEAD", masterBranch]] - 1]];
+    GitLink`GitMergeBase[gitRepo, "HEAD", masterBranch]]] - 1];
   minorVersionNumber
 ];

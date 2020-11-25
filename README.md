@@ -104,7 +104,7 @@ You only need three things to use *SetReplace*:
 
 ## Build Instructions
 
-For users who wish to make use of SetReplace functionality, and not modify the source code itself, we recommend simply building and installing the paclet.
+For users who wish to make use of *SetReplace* functionality, and not modify the source code itself, we recommend simply building and installing the paclet.
 
 To do this, run the following on the command line:
 
@@ -115,11 +115,13 @@ cd ~/PATH-TO-CHECKOUT/SetReplace
 
 Please note that if you do not have GitLink installed, it will be installed for you.
 
-For more info about doing development on the SetReplace codebase and the associated workflows, see the Contributing guide.
+Now that you have installed the *SetReplace* paclet, you should evaluate ``<< SetReplace` `` every time you start a fresh Mathematica session. This will load the paclet and bring the various functions into scope, so that you can call thaem.
+
+For more info about doing development on the *SetReplace* codebase and the associated workflows, see the [Contributing guide](.github/Contributing.md).
 
 ### C++ 17
 
-If you see an error message about c++17, make sure the C++ compiler you are using is up-to-date. If your default system compiler does not support c++17, you can choose a different one with environmental variables. The following, for instance, typically works on a Mac:
+If, while building, you see an error message about c++17, make sure the C++ compiler you are using is up-to-date. If your default system compiler does not support c++17, you can choose a different one with environmental variables. The following, for instance, typically works on a Mac:
 
     ```bash
     COMPILER=CCompilerDriver\`ClangCompiler\`ClangCompiler COMPILER_INSTALLATION=/usr/bin ./install.wls

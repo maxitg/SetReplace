@@ -9,8 +9,6 @@
 
   "$SetReplaceGitSHA" -> <|
     "tests" -> {
-      (* This tests will fail if the paclet was built from a dirty repo, i.e. there were uncommitted changes.
-         The output will have an "*" at the end in this case. *)
       VerificationTest[
         StringMatchQ[$SetReplaceGitSHA, Repeated[HexadecimalCharacter, 40] ~~ Repeated["*", {0, 1}]]
       ]

@@ -7,7 +7,13 @@ Check[
   Exit[1];
 ];
 
-InstallGitLink[];
+Check[
+  InstallGitLink[];
+,
+  Print["Message occurred during loading of DevUtils. Pack failed."];
+  Exit[1];
+];
+
 result = ConsoleCreateSetReplacePaclet[];
 
 If[!StringQ[result], Exit[1], Exit[0]];

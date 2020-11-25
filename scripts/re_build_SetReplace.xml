@@ -42,7 +42,7 @@
       />
   </target>
 
-  <target name='NativeLibrary.SetReplace.MacOSX-x86-64.postbuild' extensionOf='NativeLibrary.postbuild' if='is.linux'>
+  <target name='NativeLibrary.SetReplace.Linux-x86-64.postbuild' extensionOf='NativeLibrary.postbuild' if='is.linux'>
     <sign dir='${files_directory}'>
       <include name='**/*.so' />
       <include name='**/*.json' />

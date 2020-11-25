@@ -18,16 +18,18 @@ If[FileExistsQ[$devUtilsPath],
 
   (* forwarders for the functions we want from DevUtils. This is done so
   we don't create the SetReplaceDevUtils context for ordinary users (when DevUtils *isn't* available) *)
-  $buildLibSetReplace = Symbol["SetReplaceDevUtils`BuildLibSetReplace"];
-  $gitSHAWithDirtyStar = Symbol["SetReplaceDevUtils`GitSHAWithDirtyStar"];
+  buildLibSetReplace = Symbol["SetReplaceDevUtils`BuildLibSetReplace"];
+  gitSHAWithDirtyStar = Symbol["SetReplaceDevUtils`GitSHAWithDirtyStar"];
 
   (* try build the C++ code immediately (which will most likely retrieve a cached library) *)
   (* if there is a frontend, then give a temporary progress panel, otherwise just Print *)
   If[TrueQ @ $Notebooks,
+    (* WithLocalSettings will run the final 'cleanup' argument even if the evaluation of the second
+    argument aborts (due to a Throw, user abort, etc.) *)
     Internal`WithLocalSettings[
       $progCell = None;
     ,
-      $buildResult = $buildLibSetReplace["PreBuildCallback" -> Function[
+      $buildResult = buildLibSetReplace["PreBuildCallback" -> Function[
         $progCell = PrintTemporary @ Panel[
           "Building libSetReplace from sources in " <> #LibrarySourceDirectory,
           Background -> LightOrange]]];
@@ -36,7 +38,7 @@ If[FileExistsQ[$devUtilsPath],
       $progCell = None;
     ];
   ,
-    $buildResult = $buildLibSetReplace["PreBuildCallback" -> "Print"];
+    $buildResult = buildLibSetReplace["PreBuildCallback" -> "Print"];
   ];
 
   If[!AssociationQ[$buildResult],
@@ -76,7 +78,7 @@ PackageExport["$SetReplaceGitSHA"]
 
 SetUsage @ "
 $SetReplaceBuildTime gives the time at which this SetReplace paclet was built.
-* When evaluated for an in-place build, this time is Now.
+* When evaluated for an in-place build, this time is the time at which SetReplace was loaded.
 "
 
 SetUsage @ "
@@ -90,7 +92,7 @@ If[FileExistsQ[$pacletBuildInfoPath] && AssociationQ[$pacletBuildInfo = readJSON
   $SetReplaceBuildTime = DateObject[$pacletBuildInfo["BuildTime"], TimeZone -> "UTC"];
   $SetReplaceGitSHA = $pacletBuildInfo["GitSHA"];
 ,
-  $SetReplaceGitSHA = $gitSHAWithDirtyStar[$packageRoot];
+  $SetReplaceGitSHA = gitSHAWithDirtyStar[$packageRoot];
   If[!StringQ[$SetReplaceGitSHA], Missing["GitLinkNotAvailable"]];
   $SetReplaceBuildTime = DateObject[TimeZone -> "UTC"];
 ];

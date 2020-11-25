@@ -80,9 +80,9 @@ Each change to the code must fundamentally pass through 5 steps, more or less in
 
 ### Building in-place
 
-The main workflow we recommend is what we are calling an "in-place build". This largely happens automatically when you load the SetReplace package by calling `Get["~/git/SetReplace/Kernel/init.m"]` or equivalent. If the C++ library has not already been built, it will automatically be built for you, and the resulting libraries placed in the `LibraryResources` subdirectory of the repository root.
+The main workflow we recommend is what we are calling an "in-place build". This largely happens automatically when you load the *SetReplace* package by calling `Get["~/git/SetReplace/Kernel/init.m"]` or equivalent. If the C++ library (*libSetReplace*) has not already been built, it will automatically be built for you, and the resulting libraries placed in the `LibraryResources` subdirectory of the repository root.
 
-If you later modify the C++ code and call `Get[...]` again, the library will be automatically rebuilt, and hot-loaded into your current Mathematica session (you do not need to Quit). Moreover, builds of the library will be cached based on the hash of the C++ code, making it easy to switch quickly between several library versions (say, in different Git branches).
+If you later modify the C++ code and call `Get[...]` again, the library will be automatically rebuilt, and hot-loaded into your current Mathematica session (you do not need to run `Quit[]`). Moreover, builds of the library will be cached based on the hash of the C++ code, making it easy to switch quickly between several library versions (say, in different Git branches).
 
 If you wish to invoke the library build process *directly*, you run the following on the command line:
 
@@ -102,7 +102,7 @@ Doing so will automatically rebuild the library, if necessary.
 
 ### Build Paclets
 
-You may occasionally want to build and install a paclet from the current state of the repository. This will package together all the Wolfram Language source code, along with the library, and various metadata, into a single ".paclet" file, which has a automatically computed version number associated with it.
+You may occasionally want to build and install a paclet from the current state of the repository. This will package together all the Wolfram Language source code, along with the library, and various metadata, into a single ".paclet" file, which has an automatically computed version number associated with it.
 
 To simply build the paclet, without installing it, just run:
 
@@ -120,9 +120,7 @@ cd ~/git/SetReplace
 ./install.wls
 ```
 
-The paclet will be installed in your system, replacing any existing version of the paclet you may have. This will allow you to load the paclet in future by running simply ``Get["SetReplace`"] ``.
-
-A less frequently updated version is available through the Wolfram public paclet server and can be installed with `PacletInstall["SetReplace"]`.
+The paclet will be installed in your system, replacing any existing version of the paclet you may have. This will allow you to load the paclet in the future by running simply ``Get["SetReplace`"] ``.
 
 ### Writing code
 
@@ -150,7 +148,7 @@ It is essential to keep your pull requests as small as possible (definitely unde
 
 ### Automated tests
 
-To run the tests, `cd` to the repository root, and run `./test.wls` from the command line. Note that `./test.wls` will automatically rebuild libSetReplace for you before running the tests if your libSetReplace is out of date (for example, if you changed some C++ files but you did not either `Get` SetReplace or run `./build.wls`). If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
+To run the tests, `cd` to the repository root, and run `./test.wls` from the command line. Note that `./test.wls` will automatically rebuild *libSetReplace* for you before running the tests if your *libSetReplace* is out of date (for example, if you changed some C++ files but you did not either `Get` *SetReplace* or run `./build.wls`). If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
 
 The `test.wls` script accepts various arguments. Running `./test.wls testfile`, where `testfile` is the name (without trailing `.wlt`) of a test file under the `Tests` directory, will limit the test run to only that file. With the `--load-installed-paclet` (or `-lip`) flag, the script will load the *installed paclet* instead of the local codebase. With the `--disable-parallelization` (or `-dp`) flag, you can disable the use of parallel sub-kernels to perform tests. Using parallel sub-kernels will accelerate running the entire test suite, so it is the default behavior, but if you are running only a single test file with a small number of tests, the startup time of the sub-kernels can outweight any speedup they give, and so `--disable-parallelization` will improve performance.
 
@@ -391,7 +389,19 @@ Some things to note are:
 
 ### Scripts
 
-The three main scripts of *SetReplace* are [build.wls](/build.wls), [install.wls](/install.wls) and [test.wls](/test.wls). The build script is the most complex of the three, and it uses additional definitions in [buildInit.wl](/scripts/buildInit.wl). In addition to building the C++ code and packing the paclet, it also auto-generates the paclet version number based on the number of commits to master from the checkpoint defined in [version.wl](/scripts/version.wl). Some of the code in the [scripts](/scripts) folder is only used for building *SetReplace* on the internal Wolfram Research systems and should not be modified by external developers as CI has no way of testing it.
+If you are using the *in-place* workflow, you will typically only need to run the [test.wls](/test.wls) script, but this section will describe the other scripts too.
+
+The four main scripts of *SetReplace* are:
+* [build.wls](/build.wls), which builds *libSetReplace* (if necessary)
+* [test.wls](/test.wls), which first calls `build.wls`, then runs the full test suite.
+* [pack.wls](/pack.wls), which first calls `build.wls`, then produces a `.paclet` file
+* [install.wls](/install.wls), which first calls `pack.wls`, then installs the resulting `.paclet` file
+
+All four scripts use functionality defined in the [DevUtils](/DevUtils) package.
+
+Note that the `pack.wls` script will auto-generate the paclet version number based on the number of commits to master from the checkpoint defined in [version.wl](/scripts/version.wl).
+
+The code in the [scripts](/scripts) folder is only used for building *SetReplace* on the internal Wolfram Research systems and should not be modified by external developers as CI has no way of testing it.
 
 ## Code style
 

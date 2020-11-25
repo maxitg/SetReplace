@@ -33,5 +33,3 @@ If[Head[$builtPaclet] =!= PacletObject,
 ];
 
 Print["Built paclet to ", $builtPaclet["Location"]];
-
-Exit[0];
