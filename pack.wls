@@ -2,6 +2,7 @@
 
 Check[
   Get[FileNameJoin[{DirectoryName[$InputFileName], "DevUtils", "init.m"}]];
+  Off[General::stop];
 ,
   Print["Message occurred during loading of DevUtils. Pack failed."];
   Exit[1];
@@ -9,11 +10,17 @@ Check[
 
 Check[
   InstallGitLink[];
+
+  buildResult = BuildLibSetReplace["Verbose" -> True];
+  If[!AssociationQ[buildResult], Exit[1]];
+
+  packResult = PackSetReplace["Verbose" -> True];
+  pacletLocation = packResult["Location"];
+  If[!StringQ[pacletLocation], Exit[1]];
 ,
-  Print["Message occurred during loading of DevUtils. Pack failed."];
+  Print["Message occurred during packing. Pack failed."];
   Exit[1];
 ];
 
-result = ConsoleCreateSetReplacePaclet[];
-
-If[!StringQ[result], Exit[1], Exit[0]];
+Print["Pack succeeded."];
+Exit[0];

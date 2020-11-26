@@ -24,7 +24,8 @@ $opts = {
   "CompilerInstallation" -> ConsoleTryEnvironment["COMPILER_INSTALLATION", Automatic],
   "LoggingFunction" -> Global`AntLog,
   "WorkingDirectory" -> Replace[AntProperty["scratch_directory"], Except[_String] -> Automatic],
-  "Caching" -> False
+  "Caching" -> False,
+  "Verbose" -> True
 }
 
 Print["Calling BuildLibSetReplace with the following options:"];

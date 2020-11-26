@@ -21,13 +21,14 @@ $opts = {
   "RepositoryDirectory" -> $repoDir,
   "LibraryDirectory" -> $buildDir,
   "MasterBranch" -> "origin/master",
-  "OutputDirectory" -> $outputDir
+  "OutputDirectory" -> $outputDir,
+  "Verbose" -> True
 };
 
-Print["Calling ConsoleCreateSetReplacePaclet with the following options:"];
+Print["Calling PackSetReplace with the following options:"];
 ConsolePrintList[$opts];
 
-$builtPaclet = CreateSetReplacePaclet @@ $opts;
+$builtPaclet = PackSetReplace @@ $opts;
 
 If[Head[$builtPaclet] =!= PacletObject,
   AntFail["Paclet not produced"];

@@ -14,7 +14,8 @@ Options[BuildLibSetReplace] = {
   "WorkingDirectory" -> Automatic,
   "LoggingFunction" -> None,
   "PreBuildCallback" -> None,
-  "Caching" -> True
+  "Caching" -> True,
+  "Verbose" -> False
 };
 
 SetUsage @ "
@@ -39,6 +40,7 @@ and 'LoggingFunction'.
 if a build is actually required. This is useful for printing a message in this case. This function is \
 given the keys containing relevant build information.
 * Setting 'Caching' to False can be used to prevent the caching mechanism from being applied.
+* Setting 'Verbose' to True will Print information about the progress of the build.
 "
 
 BuildLibSetReplace::compfail = "Compilation of C++ code at `` failed.";
@@ -49,9 +51,11 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
   UnpackOptions[
     repositoryDirectory, librarySourceDirectory, libraryTargetDirectory,
     systemID, compiler, compilerInstallation, workingDirectory, loggingFunction,
-    preBuildCallback, caching
+    preBuildCallback, caching, verbose
   ];
 
+  SetAutomatic[compiler, ToExpression @ ConsoleTryEnvironment["COMPILER", Automatic]];
+  SetAutomatic[compilerInstallation, ConsoleTryEnvironment["COMPILER_INSTALLATION", Automatic]];
   SetAutomatic[librarySourceDirectory, FileNameJoin[{repositoryDirectory, "libSetReplace"}]];
   SetAutomatic[libraryTargetDirectory, FileNameJoin[{repositoryDirectory, "LibraryResources", systemID}]];
 
@@ -92,6 +96,7 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
       writeBuildData[buildDataPath, buildData];
     ];
     buildData["FromCache"] = True;
+    If[verbose, Print["Using cached library at ", libraryPath]];
     Return[buildData];
   ];
 
@@ -99,6 +104,7 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
   If[caching, flushLibrariesIfFull[libraryTargetDirectory]];
 
   (* if user gave a callback, call it now with relevant info *)
+  If[verbose && preBuildCallback === None, preBuildCallback = "Print"];
   If[preBuildCallback =!= None,
     If[preBuildCallback === "Print", preBuildCallback = $printPreBuildCallback];
     preBuildCallback[<|
@@ -120,10 +126,15 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
       "TargetSystemID" -> systemID,
       "WorkingDirectory" -> workingDirectory
   ];
+
   If[!StringQ[libraryPath],
     Message[BuildLibSetReplace::compfail, librarySourceDirectory];
+    If[verbose, Print["Build failed"]];
     ReturnFailed[];
   ];
+  If[verbose,
+    Print["Library compiled to ", libraryPath]];
+
   buildData = calculateBuildData[];
   writeBuildData[buildDataPath, buildData];
   buildData["FromCache"] = False;
