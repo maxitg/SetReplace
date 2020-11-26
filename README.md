@@ -115,9 +115,9 @@ cd ~/PATH-TO-CHECKOUT/SetReplace
 
 Please note that if you do not have GitLink installed, it will be installed for you.
 
-Now that you have installed the *SetReplace* paclet, you should evaluate ``<< SetReplace` `` every time you start a fresh Mathematica session. This will load the paclet and bring the various functions into scope, so that you can call thaem.
+Now that you have installed the *SetReplace* paclet, you should evaluate ``<< SetReplace` `` every time you start a fresh Mathematica session. This will load the paclet and bring the various functions into scope, so that you can call them.
 
-For more info about doing development on the *SetReplace* codebase and the associated workflows, see the [Contributing guide](.github/Contributing.md).
+For more info about doing development on the *SetReplace* codebase and the associated workflows, see the [Contributing guide](.github/CONTRIBUTING.md#building-in-place).
 
 ### C++ 17
 
