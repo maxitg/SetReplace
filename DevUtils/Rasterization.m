@@ -9,11 +9,11 @@ SetRelatedSymbolGroup[
 ];
 
 $usageSuffix = "
-* 'path$' should be a path, releative to the repository root, with a CamelCased filename ending in '.png'.
+* 'path$' should be a path, relative to the repository root, with a CamelCased filename ending in '.png'.
 * If 'path$' consists of only a file name, the subdirectory 'Documentation/Images' will be used.
 * The resulting markdown will contain an absolute path relative to the root of the repository. It will \
 correctly render on e.g. GitHub but may not render in e.g. VSCode.
-* The option 'MaxWidth' controls the desird maximum width of the resulting raster. If possible, the expression \
+* The option 'MaxWidth' controls the desired maximum width of the resulting raster. If possible, the expression \
 being rasterized will line-break so as not to exceed this width. Note that this width can occassionally be exceeded.
 ";
 
@@ -44,10 +44,9 @@ RasterizeExpressionAndExportToMarkdown[relativePath_, expr_, opts:OptionsPattern
 PackageExport["RasterizePreviousOutputAndExportToMarkdown"]
 
 SetUsage @ Evaluate["
-RasterizePreviousOutputAndExportToMarkdown['path$', expr$] ill read the previous output cell from the current \
+RasterizePreviousOutputAndExportToMarkdown['path$'] will read the previous output cell from the current \
 notebook, rasterize it, write the result to 'path$', and return an HTML <img> tag that can be pasted \
 directly into a markdown file.
-HTML <img> tag that can be pasted directly into a markdown file.
 * The resulting image WILL include an attached Out[]= label." <> $usageSuffix];
 
 SyntaxInformation[RasterizePreviousOutputAndExportToMarkdown] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
@@ -66,8 +65,8 @@ PackageExport["RasterizePreviousInputOutputAndExportToMarkdown"]
 
 SetUsage @ Evaluate["
 RasterizePreviousInputOutputAndExportToMarkdown['path$'] will read the previous input and output cell from the \
-current notebook, rasterize the output, write the result to 'path$', and return an markdown code block containing \
-the input and an HTML <img> tag containing the output rasterize, that can be pasted directly into a markdown file.
+current notebook, rasterize the output, write the result to 'path$', and return a markdown code block containing \
+the input and an HTML <img> tag containing the rasterized output, that can be pasted directly into a markdown file.
 * If the input cell does not contain purely textual boxes, it cannot be faithfully represented as text, and so \
 it will be included in the rasterized image instead.
 * The option 'RasterizeInput' -> True will force the input to be rasterized, and will not create a markdown \

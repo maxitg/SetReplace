@@ -542,7 +542,7 @@ Images (e.g., of output cells) can be made by selecting the relevant cells in th
 The above process can be somewhat automated from within a notebook by using the `RasterizePreviousInputOutputAndExportToMarkdown` function in the ``DevUtils` `` support package. To use this workflow, first load DevUtils by running the following (where you should substitute the actual location of your *SetReplace* repository):
 
 ```wl
-Get["~/git/SetReplace/DevUtils/Kernel.init"];
+Get["~/git/SetReplace/DevUtils/init.m"];
 ```
 
 Next, find the input/output cell pair that you wish to include in your markdown. Then, create a new input cell *after* the pair, containing the following code, and run it:
