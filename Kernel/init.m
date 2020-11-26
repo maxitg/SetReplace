@@ -1,5 +1,8 @@
 Unprotect["SetReplace`*"];
 
+(* this is a no-op the first time round, subsequent loads will unload the C++ library first *)
+SetReplace`PackageScope`unloadLibrary[];
+
 ClearAll @@ (# <> "*" & /@ Contexts["SetReplace`*"]);
 
 (* Make sure that we don't affect $ContextPath by getting GU, and that we are isolated from

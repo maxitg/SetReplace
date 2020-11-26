@@ -11,7 +11,7 @@ $endColor = "\033[0m";
 
 $commandLineArgs = Rest[$ScriptCommandLine];
 tryPopFlag[longFlag_String, shortFlag_String] := If[
-  MemberQ[$commandLineArgs, longFlag | shortFlag], 
+  MemberQ[$commandLineArgs, longFlag | shortFlag],
   $commandLineArgs = DeleteCases[$commandLineArgs, longFlag | shortFlag];
   True
 ,
@@ -21,8 +21,7 @@ tryPopFlag[longFlag_String, shortFlag_String] := If[
 If[tryPopFlag["--load-installed-paclet", "-lip"],
   $localSetReplaceEntryPoint = "SetReplace`";
 ,
-  $setReplaceBuildDirectory = FileNameJoin[{$TemporaryDirectory, "SetReplace", "Build"}];
-  $localSetReplaceEntryPoint = FileNameJoin[{$setReplaceBuildDirectory, "Kernel", "init.m"}];
+  $localSetReplaceEntryPoint = FileNameJoin[{FileNameDrop[$InputFileName], "Kernel", "init.m"}];
 ];
 
 Print["Loading SetReplace from ", $yellowColor, FindFile[$localSetReplaceEntryPoint], $endColor];
@@ -81,8 +80,8 @@ importAsHeldExpression[file_] := Module[{exprs},
   If[!$allowParallelization, exprs = exprs /. HoldPattern[ParallelMap] -> Map];
   If[FailureQ[exprs],
     WriteString["stdout", $redColor <> "There were syntax errors in \"" <> file <> "\"" <> $endColor, ":"];
-    (* this will cause a message that will print out the syntax error as Get would, but without evaluating any expressions. 
-    The Options override is because apparently someone changed Get in the kernel and forget to change FullGet, so it is 
+    (* this will cause a message that will print out the syntax error as Get would, but without evaluating any expressions.
+    The Options override is because apparently someone changed Get in the kernel and forget to change FullGet, so it is
     missing an option! *)
     Unprotect[Language`FullGet];
     Options[Language`FullGet] = Options[Get];

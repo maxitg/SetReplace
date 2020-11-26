@@ -1,41 +1,20 @@
 #!/usr/bin/env wolframscript
 
 Check[
-  Get[FileNameJoin[{DirectoryName[$InputFileName], "scripts", "buildInit.wl"}]];,
-
+  Get[FileNameJoin[{DirectoryName[$InputFileName], "DevUtils", "init.m"}]];
+  Off[General::stop];
+,
+  Print["Message occurred during loading of DevUtils. Build failed."];
   Exit[1];
-];
-
-$success = True;
-
-Check[
-  Print["Temporary build directory is ", $buildDirectory];
-  $builtLibSetReplaceHash = builtLibSetReplaceHash[];
-  $libSetReplaceSourceHash = libSetReplaceSourceHash[];
-  If[$builtLibSetReplaceHash =!= $libSetReplaceSourceHash,
-    buildLibSetReplace[];
-    saveBuiltLibSetReplaceHash[$libSetReplaceSourceHash];,
-
-    Print["Using cached libSetReplace: ", $builtLibSetReplaceHash];
-  ],
-
-  $success = False;
 ];
 
 Check[
-  copyWLSourceToBuildDirectory[];
-  $version = updateVersion[];
-  $context = renameContext[Automatic, $version];
-  updateBuildData[];
-  packPaclet[$context];,
-  Print["Message occurred during build."];
+  result = BuildLibSetReplace["Verbose" -> True];
+  If[!AssociationQ[result], Exit[1]];
+,
+  Print["Message occurred during building. Build failed."];
   Exit[1];
 ];
 
-If[$success,
-  Print["Build done."];
-  Exit[0];,
-
-  Print["Build failed."];
-  Exit[1];
-];
+Print["Build succeeded."];
+Exit[0];
