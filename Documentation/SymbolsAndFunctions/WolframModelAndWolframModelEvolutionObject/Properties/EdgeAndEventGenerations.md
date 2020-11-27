@@ -20,7 +20,7 @@ In[] := With[{
      {{2, 2}, {3, 2}, {3, 4}, {3, 5}},
     {{1, 1}, {1, 1}, {1, 1}}, 5]},
  MapThread[
-  WolframModelPlot[#, EdgeStyle -> #2] &, {evolution["StatesList"],
+  HypergraphPlot[#, EdgeStyle -> #2] &, {evolution["StatesList"],
    Replace[evolution[
         "EdgeGenerationsList"][[#]] & /@ (evolution[
          "StateEdgeIndicesAfterEvent", #] &) /@

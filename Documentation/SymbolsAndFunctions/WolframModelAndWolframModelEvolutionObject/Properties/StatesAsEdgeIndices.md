@@ -18,7 +18,7 @@ Out[] = {{1, 2, 3, 4, 5}, {4, 5, 6, 7, 8, 9, 10, 11, 12, 13}, {5, 8, 9, 10,
 One can easily go back to states:
 
 ```wl
-In[] := WolframModelPlot /@ With[{
+In[] := HypergraphPlot /@ With[{
    evolution = WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
       {{2, 7, 8}, {3, 9, 10}, {5, 11, 12}, {6, 13, 14}, {8, 12}, {11,
         10}, {13, 7}, {14, 9}},

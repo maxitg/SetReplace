@@ -278,9 +278,9 @@ $propertyOptions = <|
   "ExpressionsEventsGraph" -> $expressionsEventsGraphOptions,
   "CausalGraph" -> $causalGraphOptions,
   "LayeredCausalGraph" -> $layeredCausalGraphOptions,
-  "StatesPlotsList" -> Options[WolframModelPlot],
-  "EventsStatesPlotsList" -> Options[WolframModelPlot],
-  "FinalStatePlot" -> Options[WolframModelPlot]
+  "StatesPlotsList" -> Options[HypergraphPlot],
+  "EventsStatesPlotsList" -> Options[HypergraphPlot],
+  "FinalStatePlot" -> Options[HypergraphPlot]
 |>;
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
@@ -458,14 +458,14 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
     property : "FinalStatePlot",
-    o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]] == {})] :=
+    o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] :=
   Check[
     Quiet[
       Check[
-        WolframModelPlot[propertyEvaluate[True, boundary][obj, caller, "FinalState"], o],
+        HypergraphPlot[propertyEvaluate[True, boundary][obj, caller, "FinalState"], o],
         Message[caller::nonHypergraphPlot, property],
-        WolframModelPlot::invalidEdges],
-      WolframModelPlot::invalidEdges],
+        HypergraphPlot::invalidEdges],
+      HypergraphPlot::invalidEdges],
     Throw[$Failed]]
 
 (* AllEventsStatesEdgeIndicesList & AllEventsStatesList *)
@@ -529,18 +529,18 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
     property : "StatesPlotsList",
-    o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]] == {})] :=
+    o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] :=
   Check[
     Quiet[
       Map[
         Check[
           Check[
-            WolframModelPlot[#, o],
+            HypergraphPlot[#, o],
             Message[caller::nonHypergraphPlot, property],
-            WolframModelPlot::invalidEdges],
+            HypergraphPlot::invalidEdges],
           Throw[$Failed]] &,
         propertyEvaluate[True, boundary][obj, caller, "StatesList"]],
-      WolframModelPlot::invalidEdges],
+      HypergraphPlot::invalidEdges],
     Throw[$Failed]]
 
 (* EventsStatesPlotsList *)
@@ -549,7 +549,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
       caller_,
       property : "EventsStatesPlotsList",
-      o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[WolframModelPlot]]] == {})] := ModuleScope[
+      o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] := ModuleScope[
   events = propertyEvaluate[True, boundary][obj, caller, "AllEventsList"][[All, 2]];
   stateIndices = FoldList[
     Function[{currentState, newEvent}, Module[{alreadyDeletedExpressions},
@@ -572,7 +572,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       MapThread[
         Check[
           Check[
-            WolframModelPlot[
+            HypergraphPlot[
               allEdges[[#]],
               o,
               EdgeStyle -> ReplacePart[
@@ -583,12 +583,12 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
                   Thread[Position[#, Alternatives @@ #4][[All, 1]] ->
                     style[$lightTheme][$destroyedAndCreatedEdgeStyle]]]]],
             Message[caller::nonHypergraphPlot, property],
-            WolframModelPlot::invalidEdges],
+            HypergraphPlot::invalidEdges],
           Throw[$Failed]] &,
         If[MatchQ[boundary, "Initial" | All], Rest /@ # &, # &] @
           If[MatchQ[boundary, All | "Final"], Most /@ # &, # &] @
           {stateIndices, destroyedOnlyIndices, createdOnlyIndices, destroyedAndCreatedIndices}],
-      WolframModelPlot::invalidEdges],
+      HypergraphPlot::invalidEdges],
     Throw[$Failed]]
 ]
 

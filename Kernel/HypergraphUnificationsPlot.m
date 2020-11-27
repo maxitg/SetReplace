@@ -13,7 +13,7 @@ containing both e$1 and e$2 as rule input matches.
 
 SyntaxInformation[HypergraphUnificationsPlot] = {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 
-Options[HypergraphUnificationsPlot] := Options[WolframModelPlot];
+Options[HypergraphUnificationsPlot] := Options[HypergraphPlot];
 
 (* Implementation *)
 
@@ -40,7 +40,7 @@ hypergraphUnificationsPlot[e1_, e2_, opts : OptionsPattern[]] := ModuleScope[
   {vertexLabels, edgeStyle} =
     Check[OptionValue[HypergraphUnificationsPlot, {opts}, #], Throw[$Failed]] & /@ {VertexLabels, EdgeStyle};
   MapThread[
-    Check[WolframModelPlot[
+    Check[HypergraphPlot[
       #1,
       VertexLabels -> Replace[vertexLabels, Automatic -> #4],
       EdgeStyle -> Replace[edgeStyle, Automatic -> ReplacePart[
