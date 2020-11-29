@@ -13,7 +13,7 @@ jobs:
       - run:
           name: Activate Wolframscript
           command: |
-            wolframscript -authenticate $ANTONY_WOLFRAM_EMAIL $ANTONY_WOLFRAM_PASSWORD
+            wolframscript -authenticate "$ANTONY_WOLFRAM_EMAIL" "$ANTONY_WOLFRAM_PASSWORD"
             wolframscript -activate
 
       - run:
