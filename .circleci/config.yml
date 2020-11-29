@@ -12,7 +12,7 @@ jobs:
 
       - run:
           name: Activate Wolframscript
-          command: echo -e "$ANTONY_WOLFRAM_EMAIL\n$ANTONY_WOLFRAM_PASSWORD\n" | wolframscript
+          command: wolframscript -authenticate $ANTONY_WOLFRAM_EMAIL $ANTONY_WOLFRAM_PASSWORD
 
       - run:
           name: Build
