@@ -3,98 +3,94 @@ Package["SetReplace`"]
 PackageImport["GeneralUtilities`"]
 
 PackageScope["$cppSetReplaceAvailable"]
+
 PackageScope["setSubstitutionSystem$cpp"]
+PackageScope["unloadLibrary"]
 
 (* Interface to the C++ implementation of setSubstitutionSystem. *)
 
-(* Load libSetReplace *)
-
-$expectedLibName = "libSetReplace." <> System`Dump`LibraryExtension[];
-
-findLibraryIn[basePath_] := Scope[
-  libraryPath = FileNameJoin[{basePath, "LibraryResources", $SystemID, $expectedLibName}];
-  If[FileExistsQ[libraryPath], libraryPath, $Failed]
+(* this function is defined now, but only run the *next* time Kernel/init.m is called, before all symbols
+are cleared. *)
+unloadLibrary[] := If[StringQ[$libraryFile],
+  Scan[LibraryFunctionUnload, $libraryFunctions];
+  $libraryFunctions = Null;
+  Quiet @ LibraryUnload[$libraryFile];
 ];
 
-$parentDirectory = FileNameDrop[$InputFileName, -2];
-$buildDirectory = FileNameJoin[{$parentDirectory, "Build"}];
+SetReplace::nolibsetreplace = "libSetReplace (``) could not be found, some functionality will not be available.";
 
-SetReplace::nolibsetreplace = "Could not locate ``, some functionality will not be available.";
-SetReplace::alienlibsetreplace = "LibraryResources directory not present in ``, falling back on `` found in temporary build directory at ``.";
+$libraryFile = $SetReplaceLibraryPath;
 
-$libraryFile = findLibraryIn[$parentDirectory];
-If[FailureQ[$libraryFile],
-  $libraryFile = findLibraryIn[$buildDirectory];
-  If[FailureQ[$libraryFile],
-    Message[SetReplace::nolibsetreplace, $expectedLibName];
-  ,
-    (* for developers *)
-    Message[SetReplace::alienlibsetreplace, $parentDirectory, $expectedLibName, $buildDirectory];
-  ];
+If[!StringQ[$libraryFile] || !FileExistsQ[$libraryFile],
+  Message[SetReplace::nolibsetreplace, $libraryFile];
+  $libraryFile = $Failed;
 ];
 
-$cpp$setCreate = If[$libraryFile =!= $Failed,
-  LibraryFunctionLoad[
-    $libraryFile,
-    "setCreate",
-    {{Integer, 1}, (* rules *)
-      {Integer, 1}, (* event selection functions for rules *)
-      {Integer, 1}, (* initial set *)
-      Integer, (* event selection function *)
-      {Integer, 1}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
-      Integer, (* event deduplication *)
-      Integer}, (* random seed *)
-    Integer], (* set ptr *)
-  $Failed];
+(* Load libSetReplace functions *)
+$libraryFunctions = {
+  $cpp$setCreate = If[$libraryFile =!= $Failed,
+    LibraryFunctionLoad[
+      $libraryFile,
+      "setCreate",
+      {{Integer, 1}, (* rules *)
+        {Integer, 1}, (* event selection functions for rules *)
+        {Integer, 1}, (* initial set *)
+        Integer, (* event selection function *)
+        {Integer, 1}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
+        Integer, (* event deduplication *)
+        Integer}, (* random seed *)
+      Integer], (* set ptr *)
+    $Failed],
 
-$cpp$setDelete = If[$libraryFile =!= $Failed,
-  LibraryFunctionLoad[
-    $libraryFile,
-    "setDelete",
-    {Integer}, (* set ptr *)
-    "Void"],
-  $Failed];
+  $cpp$setDelete = If[$libraryFile =!= $Failed,
+    LibraryFunctionLoad[
+      $libraryFile,
+      "setDelete",
+      {Integer}, (* set ptr *)
+      "Void"],
+    $Failed],
 
-$cpp$setReplace = If[$libraryFile =!= $Failed,
-  LibraryFunctionLoad[
-    $libraryFile,
-    "setReplace",
-    {Integer, (* set ptr *)
-      {Integer, 1}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
-    "Void"],
-  $Failed];
+  $cpp$setReplace = If[$libraryFile =!= $Failed,
+    LibraryFunctionLoad[
+      $libraryFile,
+      "setReplace",
+      {Integer, (* set ptr *)
+        {Integer, 1}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
+      "Void"],
+    $Failed],
 
-$cpp$setExpressions = If[$libraryFile =!= $Failed,
-  LibraryFunctionLoad[
-    $libraryFile,
-    "setExpressions",
-    {Integer}, (* set ptr *)
-    {Integer, 1}], (* expressions *)
-  $Failed];
+  $cpp$setExpressions = If[$libraryFile =!= $Failed,
+    LibraryFunctionLoad[
+      $libraryFile,
+      "setExpressions",
+      {Integer}, (* set ptr *)
+      {Integer, 1}], (* expressions *)
+    $Failed],
 
-$cpp$setEvents = If[$libraryFile =!= $Failed,
-  LibraryFunctionLoad[
-    $libraryFile,
-    "setEvents",
-    {Integer}, (* set ptr *)
-    {Integer, 1}], (* expressions *)
-  $Failed];
+  $cpp$setEvents = If[$libraryFile =!= $Failed,
+    LibraryFunctionLoad[
+      $libraryFile,
+      "setEvents",
+      {Integer}, (* set ptr *)
+      {Integer, 1}], (* expressions *)
+    $Failed],
 
-$cpp$maxCompleteGeneration = If[$libraryFile =!= $Failed,
-  LibraryFunctionLoad[
-    $libraryFile,
-    "maxCompleteGeneration",
-    {Integer}, (* set ptr *)
-    Integer], (* generation *)
-  $Failed];
+  $cpp$maxCompleteGeneration = If[$libraryFile =!= $Failed,
+    LibraryFunctionLoad[
+      $libraryFile,
+      "maxCompleteGeneration",
+      {Integer}, (* set ptr *)
+      Integer], (* generation *)
+    $Failed],
 
-$cpp$terminationReason = If[$libraryFile =!= $Failed,
-  LibraryFunctionLoad[
-    $libraryFile,
-    "terminationReason",
-    {Integer}, (* set ptr *)
-    Integer], (* reason *)
-  $Failed];
+  $cpp$terminationReason = If[$libraryFile =!= $Failed,
+    LibraryFunctionLoad[
+      $libraryFile,
+      "terminationReason",
+      {Integer}, (* set ptr *)
+      Integer], (* reason *)
+    $Failed]
+};
 
 (* The following code turns a nested list into a single list, prepending sizes of each sublist. I.e., {{a}, {b, c, d}}
    becomes {2, 1, a, 3, b, c, d}, where the first 2 is the length of the entire list, and 1 and 3 are the lengths of

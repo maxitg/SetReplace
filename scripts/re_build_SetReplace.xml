@@ -10,18 +10,6 @@
   <import file='${env.RE_ANTLIBRARY_HOME}/ant-lib.xml' />
 
   <!--
-    Component (platform-independent)
-  -->
-  <target name='Component.SetReplace.execute' extensionOf='Component.execute'>
-    <copy todir='${files_directory}/${component}'>
-      <fileset dir='.' >
-        <include name='Kernel/**' />
-        <include name='PacletInfo.m' />
-      </fileset>
-    </copy>
-  </target>
-
-  <!--
     Native libraries
   -->
   <target name='NativeLibrary.SetReplace.init.custom' extensionOf='NativeLibrary.init.custom'>
@@ -38,13 +26,21 @@
       exe='${mathExe}'
       fresh='true'
       quit='true'
-      runfile='${basedir}${file.separator}scripts${file.separator}buildLibSetReplace.wls'
+      runfile='${basedir}${file.separator}scripts${file.separator}re_build_library.wls'
       />
+  </target>
+
+  <target name='NativeLibrary.SetReplace.Linux-x86-64.postbuild' extensionOf='NativeLibrary.postbuild' if='is.linux'>
+    <sign dir='${files_directory}'>
+      <include name='**/*.so' />
+      <include name='**/*.json' />
+    </sign>
   </target>
 
   <target name='NativeLibrary.SetReplace.MacOSX-x86-64.postbuild' extensionOf='NativeLibrary.postbuild' if='is.osx'>
     <sign dir='${files_directory}'>
       <include name='**/*.dylib' />
+      <include name='**/*.json' />
     </sign>
   </target>
 
@@ -53,6 +49,7 @@
       <include name='**/*.dll' />
       <include name='**/*.exe' />
       <include name='**/*.lib' />
+      <include name='**/*.json' />
     </sign>
   </target>
 
@@ -68,14 +65,14 @@
     -->
     <property name='keep.files_directory' value='true' />
   </target>
-  
+
   <property name='PacletNew.execute.has-custom' value='true' />
   <target name='PacletNew.SetReplace.execute' extensionOf='PacletNew.execute.custom'>
     <mathematica
       exe='${mathExe}'
       fresh='true'
       quit='true'
-      runfile='${basedir}${file.separator}scripts${file.separator}packPaclet.wls'
+      runfile='${basedir}${file.separator}scripts${file.separator}re_build_paclet.wls'
       />
   </target>
 
