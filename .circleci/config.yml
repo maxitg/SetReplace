@@ -2,13 +2,17 @@ version: 2
 jobs:
   wolfram-language:
     docker:
-      - image: maxitg/set-replace-wl-ci:12.1.1
+      - image: aokellermann/setreplace-wl:latest
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
 
     steps:
       - checkout
+
+      - run:
+          name: Activate Wolframscript
+          command: echo -e "$ANTONY_WOLFRAM_EMAIL\n$ANTONY_WOLFRAM_PASSWORD\n" | wolframscript
 
       - run:
           name: Build
