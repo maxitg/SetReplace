@@ -15,13 +15,15 @@ $usageSuffix = "
 correctly render on e.g. GitHub but may not render in e.g. VSCode.
 * The option 'MaxWidth' controls the desired maximum width of the resulting raster. If possible, the expression \
 being rasterized will line-break so as not to exceed this width. Note that this width can occassionally be exceeded.
+* With the option 'DryRun' -> True, the resulting image will be printed, but not written to disk.
 ";
 
 $exportOptions = {
   Magnification -> 0.6,
   "MaxWidth" -> 700,
   "CompressionLevel" -> 1.0,
-  "ColorMapLength" -> Automatic
+  "ColorMapLength" -> Automatic,
+  "DryRun" -> False
 };
 
 PackageExport["RasterizeExpressionAndExportToMarkdown"]
@@ -56,6 +58,7 @@ Options[RasterizePreviousOutputAndExportToMarkdown] = $exportOptions;
 RasterizePreviousOutputAndExportToMarkdown[relativePath_, opts:OptionsPattern[]] := CatchFailureAsMessage @ Scope[
   ocell = NotebookRead @ PreviousCell[];
   If[Head[ocell] =!= Cell, ReturnFailed["exportmdnocell"]];
+  If[cellType[ocell] =!= "Output", ReturnFailed["exportmdiotype"]];
   UnpackOptions[maxWidth];
   image = rasterizeCells[maxWidth, ocell];
   exportImageToMarkdown[relativePath, image, FilterOptions @ opts]
@@ -97,10 +100,14 @@ cellToString[cell_] := Scope[
   string
 ];
 
+cellType[Cell[_, type_String, ___]] := type;
+cellType[_] := $Failed;
+
 RasterizePreviousInputOutputAndExportToMarkdown[relativePath_, opts:OptionsPattern[]] := CatchFailureAsMessage @ Scope[
   ocell = PreviousCell[]; icell = PreviousCell @ ocell;
   ocell = NotebookRead[ocell]; icell = NotebookRead[icell];
   If[Head[icell] =!= Cell || Head[ocell] =!= Cell, ReturnFailed["exportmdnocell"]];
+  If[cellType[icell] =!= "Input" && cellType[ocell] =!= "Output", ReturnFailed["exportmdiotype"]];
   UnpackOptions[rasterizeInput, maxWidth];
   If[TrueQ[rasterizeInput],
     icellString = $Failed;
@@ -119,6 +126,10 @@ RasterizePreviousInputOutputAndExportToMarkdown[relativePath_, opts:OptionsPatte
 
 (* This is the general driver code that the above functions share *)
 
+General::exportmdiotype =
+  "The previous cell(s) were not of the appropriate types for this function.";
+General::exportmdrelpathstr =
+  "Path to export to (the first argument) should be a string.";
 General::exportmdnocell =
   "Could not obtain previous cell(s) in order to rasterize them.";
 General::exportmdnoparentdir =
@@ -131,6 +142,7 @@ General::exportmdfail =
 Options[exportImageToMarkdown] = $exportOptions;
 
 exportImageToMarkdown[relativePath_, image_, OptionsPattern[]] := Scope[
+  If[!StringQ[relativePath], ThrowFailure["exportmdrelpathstr"]];
   filename = FileNameTake[relativePath];
   relativeDir = FileNameDrop[relativePath];
   If[Or[filename === "",!UpperCaseQ[StringTake[filename, 1]],
@@ -140,9 +152,13 @@ exportImageToMarkdown[relativePath_, image_, OptionsPattern[]] := Scope[
   absoluteDir = FileNameJoin[{$SetReplaceRoot, relativeDir}];
   If[FileType[absoluteDir] =!= Directory, ThrowFailure["exportmdnoparentdir", absoluteDir]];
   path = FileNameJoin[{absoluteDir, filename}];
-  UnpackOptions[compressionLevel, magnification, colorMapLength];
-  exportResult = Export[path, image, CompressionLevel -> compressionLevel, "ColorMapLength" -> colorMapLength];
-  If[!StringQ[exportResult], ThrowFailure["exportmdfail"]];
+  UnpackOptions[compressionLevel, magnification, colorMapLength, dryRun];
+  If[TrueQ[dryRun],
+    Print[image];
+  ,
+    exportResult = Export[path, image, CompressionLevel -> compressionLevel, "ColorMapLength" -> colorMapLength];
+    If[!StringQ[exportResult], ThrowFailure["exportmdfail"]];
+  ];
   width = First @ ImageDimensions[image];
   relativePath = StringDrop[path, StringLength[$SetReplaceRoot]];
   $imageMarkdownTemplate[relativePath, width * magnification]
