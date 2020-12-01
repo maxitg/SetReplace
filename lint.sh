@@ -41,6 +41,10 @@ for file in $sourceFiles; do
   fi
 done
 
+if [ $exitStatus -eq 1 ]; then
+  echo "Found formatting errors. Run ./lint.sh -i to automatically fix by applying the printed patch."
+fi
+
 if ! cpplint --quiet --extensions=hpp,cpp $sourceFiles; then
   exitStatus=1
 fi
