@@ -45,7 +45,7 @@ As an example consider a set:
 We can render it as a collection of ordered hyperedges:
 
 ```wl
-In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := HypergraphPlot[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
@@ -61,7 +61,7 @@ We can then have a rule which would pick a subset of these hyperedges related th
 Note the [`Module`](https://reference.wolfram.com/language/ref/Module.html) on the right-hand side creates a new variable (vertex) which causes the hypergraph to grow. Due to optimizations, it's not always a [`Module`](https://reference.wolfram.com/language/ref/Module.html) that creates vertices, so its name may be different. After a single replacement we get this (the new vertex is v11):
 
 ```wl
-In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
   {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]],
  VertexLabels -> Automatic]
@@ -72,7 +72,7 @@ In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
 After 10 steps, we get a more complicated structure:
 
 ```wl
-In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
   {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 10],
  VertexLabels -> Automatic]
@@ -83,7 +83,7 @@ In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
 And after 100 steps, it gets even more elaborate:
 
 ```wl
-In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
   {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 100]]
 ```
@@ -174,7 +174,7 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
     - ["EventDeduplication"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventDeduplication.md)
     - [Method](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/Method.md)
     - [Time Constraint](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/TimeConstraint.md)
-- [WolframModelPlot](Documentation/SymbolsAndFunctions/WolframModelPlot.md)
+- [HypergraphPlot](Documentation/SymbolsAndFunctions/HypergraphPlot.md)
 - [RulePlot of WolframModel](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
 - Utility Functions
   - [IndexHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/IndexHypergraph.md)
@@ -199,4 +199,4 @@ You can find many more details about our physics results in *Stephen Wolfram*'s 
 
 # Acknowledgements
 
-In additional to commit authors and reviewers, *Stephen Wolfram* has contributed to the API design of most functions, and *Jeremy Davis* has contributed to the visual style of [`WolframModelPlot`](Documentation/SymbolsAndFunctions/WolframModelPlot.md), [`RulePlot`](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md) and [`"CausalGraph"`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).
+In additional to commit authors and reviewers, *Stephen Wolfram* has contributed to the API design of most functions, and *Jeremy Davis* has contributed to the visual style of [`HypergraphPlot`](Documentation/SymbolsAndFunctions/HypergraphPlot.md), [`RulePlot`](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md) and [`"CausalGraph"`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).

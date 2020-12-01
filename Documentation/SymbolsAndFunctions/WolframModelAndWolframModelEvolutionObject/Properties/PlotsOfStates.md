@@ -2,7 +2,7 @@
 
 # Plots of States
 
-Instead of explicitly calling [`WolframModelPlot`](../../WolframModelPlot.md), one can use short-hand properties **`"FinalStatePlot"`** and **`"StatesPlotsList"`**:
+Instead of explicitly calling [`HypergraphPlot`](../../HypergraphPlot.md), one can use short-hand properties **`"FinalStatePlot"`** and **`"StatesPlotsList"`**:
 
 ```wl
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
@@ -22,7 +22,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 
 <img src="/Documentation/Images/StatesListPlot.png" width="746">
 
-These properties take the same options as [`WolframModelPlot`](../../WolframModelPlot.md) (but one has to specify them in a call to the evolution object, not `WolframModel`):
+These properties take the same options as [`HypergraphPlot`](../../HypergraphPlot.md) (but one has to specify them in a call to the evolution object, not `WolframModel`):
 
 ```wl
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->

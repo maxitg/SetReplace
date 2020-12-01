@@ -116,8 +116,8 @@ correctOptionsQ[args_, {opts___}] :=
   correctSpacingsQ[{opts}] &&
   correctRulePartsAspectRatioQ[OptionValue[RulePlot, {opts}, "RulePartsAspectRatio"]] &&
   And @@ (styleNotListQ[OptionValue[RulePlot, {opts}, #]] & /@ {VertexStyle, EdgeStyle, "EdgePolygonStyle"}) &&
-  correctWolframModelPlotOptionsQ[
-    RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[WolframModelPlot]]]
+  correctHypergraphPlotOptionsQ[
+    RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[HypergraphPlot]]]
 
 correctEdgeTypeQ[edgeType_] := If[MatchQ[edgeType, Alternatives @@ $edgeTypes],
   True,
@@ -273,7 +273,7 @@ rulePartsPlots[
   vertexCoordinateRules = Join[
     ruleCoordinateRules[edgeType, hyperedgeRendering, externalVertexCoordinateRules, rule],
     externalVertexCoordinateRules];
-  ruleSidePlots = WolframModelPlot[
+  ruleSidePlots = HypergraphPlot[
       #,
       edgeType,
       GraphHighlight -> sharedRuleElements[rule],
