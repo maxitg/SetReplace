@@ -523,7 +523,9 @@ code.
 #### Markdown
 We are using GitHub-flavored Markdown for documentation and research notes.
 
-Images (e.g., of output cells) should be made by selecting the relevant cells in the Front End, copying them as bitmaps, and saving them as .png files to [Documentation/Images](/Documentation/Images) (in the documentation) or to the Images directory of the corresponding research note. They should then be inserted using the code similar to this:
+#### Manual image embedding
+
+Images (e.g., of output cells) can be made by selecting the relevant cells in the Front End, copying them as bitmaps, and saving them as .png files to [Documentation/Images](/Documentation/Images) (in the documentation) or to the Images directory of the corresponding research note. They should then be inserted using the code similar to this:
 
   ```html
   <img src="/Documentation/Images/image.png" width="xxx">
@@ -534,6 +536,28 @@ Images (e.g., of output cells) should be made by selecting the relevant cells in
   ```wl
   Round[0.6 First @ Import["$RepoRoot/Documentation/Images/image.png", "ImageSize"]]
   ```
+
+#### Markdown automation
+
+The above process can be somewhat automated from within a notebook by using the `RasterizePreviousInputOutputAndExportToMarkdown` function in the ``DevUtils` `` support package. To use this workflow, first load DevUtils by running the following (where you should substitute the actual location of your *SetReplace* repository):
+
+```wl
+Get["~/git/SetReplace/DevUtils/init.m"];
+```
+
+Next, find the input/output cell pair that you wish to include in your markdown. Then, create a new input cell *after* the pair, containing the following code, and run it:
+
+```wl
+RasterizePreviousInputOutputAndExportToMarkdown["Documentation/Images/NameOfTargetFile.png"]
+```
+
+This will rasterize the previous *output* cell, save the resulting image to the given location within the repository, and produce a snippet of markdown code that contains the right image tag. In addition, the markdown will contain a code block that contains the textual form of the preceeding *input* cell. You can copy-paste this markdown code into the appropriate markdown file.
+
+Note that for convenience, the relative directory "Documentation/Images/" will be automatically used if you do not specify a directory for the image file.
+
+If the image is too large, you can use the option "ColorMapLength" -> 10 (or below) to reduce the file size. You can experiment with the value 10 to balance file size with accuracy.
+
+Run `?RasterizePreviousInputOutputAndExportToMarkdown` to see more information and options, as well as related rasterization functions.
 
 # Research
 
