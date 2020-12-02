@@ -14,9 +14,15 @@ jobs:
           name: Build
           command: ./build.wls
 
+      - store_artifacts:
+          path: ./LibraryResources/
+
       - run:
           name: Install
           command: ./install.wls
+
+      - store_artifacts:
+          path: ./BuiltPaclets/
 
       - run:
           name: Reinstall
