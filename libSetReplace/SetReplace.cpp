@@ -193,12 +193,13 @@ MTensor putEvents(const std::vector<Event>& events, WolframLibraryData libData) 
 
   for (const auto& event : events) {
     // Cannot do static_cast due to 32-bit Windows support
-    appendToTensor(event.inputExpressions);
+    appendToTensor(std::vector<mint>(event.inputExpressions.begin(), event.inputExpressions.end()));
     outputsPointer += event.inputExpressions.size();
   }
 
   for (const auto& event : events) {
-    appendToTensor(event.outputExpressions);
+    // Cannot do static_cast due to 32-bit Windows support
+    appendToTensor(std::vector<mint>(event.outputExpressions.begin(), event.outputExpressions.end()));
   }
 
   return output;

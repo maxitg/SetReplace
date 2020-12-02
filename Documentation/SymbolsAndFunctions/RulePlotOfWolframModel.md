@@ -2,7 +2,7 @@
 
 # RulePlot of WolframModel
 
-[**`RulePlot`**](https://reference.wolfram.com/language/ref/RulePlot.html) can be used to get a [`WolframModelPlot`](WolframModelPlot.md)-based visual representation of hypergraph substitution rules:
+[**`RulePlot`**](https://reference.wolfram.com/language/ref/RulePlot.html) can be used to get a [`HypergraphPlot`](HypergraphPlot.md)-based visual representation of hypergraph substitution rules:
 
 ```wl
 In[] := RulePlot[WolframModel[{{1, 2}, {1, 2}} ->
@@ -35,7 +35,7 @@ Passing a [`WolframModelEvolutionObject`](/Documentation/SymbolsAndFunctions/Wol
 
 <img src="/Documentation/Images/RulePlot.png" width="429">
 
-Sometimes an incorrectly scaled layout might be produced due to the issue discussed above in [`VertexCoordinateRules`](WolframModelPlot.md#vertexcoordinaterules):
+Sometimes an incorrectly scaled layout might be produced due to the issue discussed above in [`VertexCoordinateRules`](HypergraphPlot.md#vertexcoordinaterules):
 
 ```wl
 In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
@@ -55,7 +55,7 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
 
 <img src="/Documentation/Images/RulePlotWithCustomCoordinates.png" width="429">
 
-Some of the [`WolframModelPlot`](WolframModelPlot.md) options are supported, specifically [`GraphHighlightStyle`](WolframModelPlot.md#graphhighlight-and-graphhighlightstyle), [`"HyperedgeRendering"`](WolframModelPlot.md#hyperedgerendering), [`VertexCoordinateRules`](WolframModelPlot.md#vertexcoordinaterules), [`VertexLabels`](WolframModelPlot.md#vertexlabels), [`VertexSize`, `"ArrowheadLength"`](WolframModelPlot.md#vertexsize-and-arrowheadlength), and [style options](WolframModelPlot.md#style-options). `"EdgeType"` is supported as an option instead of [the second argument](WolframModelPlot.md#edge-type) like in [`WolframModelPlot`](WolframModelPlot.md).
+Some of the [`HypergraphPlot`](HypergraphPlot.md) options are supported, specifically [`GraphHighlightStyle`](HypergraphPlot.md#graphhighlight-and-graphhighlightstyle), [`"HyperedgeRendering"`](HypergraphPlot.md#hyperedgerendering), [`VertexCoordinateRules`](HypergraphPlot.md#vertexcoordinaterules), [`VertexLabels`](HypergraphPlot.md#vertexlabels), [`VertexSize`, `"ArrowheadLength"`](HypergraphPlot.md#vertexsize-and-arrowheadlength), and [style options](HypergraphPlot.md#style-options). `"EdgeType"` is supported as an option instead of [the second argument](HypergraphPlot.md#edge-type) like in [`HypergraphPlot`](HypergraphPlot.md).
 
 There are also two additional `RulePlot`-specific style options. **`Spacings`** controls the amount of empty space between the rule parts and the frame (or the space where the frame would be if it's not shown):
 

@@ -69,7 +69,7 @@
 
       testUnevaluated[
         HypergraphUnificationsPlot[{{1, 2, 3}, {3, 4, 5}}, {{a, b, c}}, VertexSize -> -1],
-        {WolframModelPlot::invalidSize}
+        {HypergraphPlot::invalidSize}
       ],
 
       VerificationTest[

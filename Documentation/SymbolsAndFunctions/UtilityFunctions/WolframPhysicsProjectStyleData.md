@@ -2,9 +2,9 @@
 
 # WolframPhysicsProjectStyleData
 
-**`WolframPhysicsProjectStyleData`** allows one to lookup styles used in various *SetReplace* functions and properties such as [`WolframModelPlot`](../WolframModelPlot.md) and [`"CausalGraph"`](../WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).
+**`WolframPhysicsProjectStyleData`** allows one to lookup styles used in various *SetReplace* functions and properties such as [`HypergraphPlot`](../HypergraphPlot.md) and [`"CausalGraph"`](../WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).
 
-For example, here is the default style used to draw polygons in [`WolframModelPlot`](../WolframModelPlot.md):
+For example, here is the default style used to draw polygons in [`HypergraphPlot`](../HypergraphPlot.md):
 
 ```wl
 In[] := WolframPhysicsProjectStyleData["SpatialGraph", "EdgePolygonStyle"]

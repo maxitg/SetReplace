@@ -56,7 +56,7 @@ First, assign one of the *type* labels to your pull request:
 Then, assign one of the *component* labels:
 * `evolution`: modifies code for running the evolution of the model.
 * `analysis`: adds or changes evolution analysis tools, e.g., `WolframModelEvolutionObject` properties.
-* `visualization`: has to do with visualization code, such as `WolframModelPlot`.
+* `visualization`: has to do with visualization code, such as `HypergraphPlot`.
 * `physics`: explores a connection with known physics. Would typically only be used with some `research` notes.
 * `utilities`: implements a tool that does not fit in the above categories (e.g., [`Subhypergraph`](https://github.com/maxitg/SetReplace/pull/431)).
 * `infrastructure`: implements changes to the development process, e.g., build scripts, CI, testing utilities, etc.
@@ -440,7 +440,7 @@ In addition to that, here are some more-or-less established rules:
 * The function arguments should either all go on the same line, or should each be put on a separate line (except for special cases where a large quantity of short arguments is used):
 
   ```wl
-  wolframModelPlot[
+  hypergraphPlot[
       edges_,
       edgeType_,
       styles_,
