@@ -48,8 +48,8 @@ PackageExport["RasterizeCellsAndExportToMarkdown"]
 SetUsage @ Evaluate["
 RasterizeCellsAndExportToMarkdown['path$', cells$] will rasterize a cell or set of cells, write the result to 'path$', \
 and return an HTML <img> tag that can be pasted directly into a markdown file.
-* Cells can be Cell[$$] expressions or CellObject[$]] expressions (which will be read with NotebookRead).
-* The resulting images WILL include cell labels (In[]=, Out[]=, etc)." <> $usageSuffix
+* Cells can be Cell[$$] expressions or CellObject[$$] expressions (which will be read with NotebookRead).
+* The resulting image WILL include cell labels (In[]:=, Out[]=, etc)." <> $usageSuffix
 ];
 
 SyntaxInformation[RasterizeCellsAndExportToMarkdown] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
