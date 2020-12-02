@@ -511,6 +511,9 @@ To run these automatically, call `./lint.sh`. This will print a formatting diff 
 If there are no errors found, it will exit with no output.
 To edit the code in place with the fixed formatting use `./lint.sh -i`.
 
+We recommend installing a git hook that runs `./lint.sh` automatically before each push.
+You can do that by running `scripts/install_git_hooks.sh`.
+
 If `cpplint` flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
 positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
 space, or `// NOLINTNEXTLINE` on a new line above if there is no space. For any usages of `// NOLINT` or
