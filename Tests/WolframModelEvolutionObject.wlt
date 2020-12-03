@@ -2050,7 +2050,7 @@
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
         evo["FinalStatePlot", VertexSize -> x],
-        {WolframModelPlot::invalidSize}
+        {HypergraphPlot::invalidSize}
       ]],
 
       With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
@@ -2094,7 +2094,7 @@
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
         evo["StatesPlotsList", VertexSize -> x],
-        {WolframModelPlot::invalidSize}
+        {HypergraphPlot::invalidSize}
       ]],
 
       With[{evolution = WolframModel[{{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {1, 2}} -> {}},
@@ -2150,7 +2150,7 @@
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, <|"MaxEvents" -> 30|>]}, testUnevaluated[
         evo["EventsStatesPlotsList", VertexSize -> x],
-        {WolframModelPlot::invalidSize}
+        {HypergraphPlot::invalidSize}
       ]],
 
       VerificationTest[

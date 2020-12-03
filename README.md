@@ -45,7 +45,7 @@ As an example consider a set:
 We can render it as a collection of ordered hyperedges:
 
 ```wl
-In[] := WolframModelPlot[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := HypergraphPlot[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
@@ -61,7 +61,7 @@ We can then have a rule which would pick a subset of these hyperedges related th
 Note the [`Module`](https://reference.wolfram.com/language/ref/Module.html) on the right-hand side creates a new variable (vertex) which causes the hypergraph to grow. Due to optimizations, it's not always a [`Module`](https://reference.wolfram.com/language/ref/Module.html) that creates vertices, so its name may be different. After a single replacement we get this (the new vertex is v11):
 
 ```wl
-In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
   {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}]],
  VertexLabels -> Automatic]
@@ -72,7 +72,7 @@ In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
 After 10 steps, we get a more complicated structure:
 
 ```wl
-In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
   {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 10],
  VertexLabels -> Automatic]
@@ -83,7 +83,7 @@ In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
 And after 100 steps, it gets even more elaborate:
 
 ```wl
-In[] := WolframModelPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
+In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
   {{v1_, v2_, v3_}, {v2_, v4_, v5_}} :>
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 100]]
 ```
@@ -104,22 +104,30 @@ You only need three things to use *SetReplace*:
 
 ## Build Instructions
 
-To build:
+For users who wish to make use of *SetReplace* functionality, and not modify the source code itself, we recommend simply building and installing the paclet.
 
-1. `cd` to the root directory of the repository.
-2. Run `./build.wls` to create the paclet file. If you see an error message about c++17, make sure the C++ compiler you are using is up-to-date. If your default system compiler does not support c++17, you can choose a different one with environmental variables. The following, for instance, typically works on a Mac:
+To do this, run the following on the command line:
+
+```
+cd ~/PATH-TO-CHECKOUT/SetReplace
+./install.wls
+```
+
+Please note that if you do not have GitLink installed, it will be installed for you.
+
+Now that you have installed the *SetReplace* paclet, you should evaluate ``<< SetReplace` `` every time you start a fresh Mathematica session. This will load the paclet and bring the various functions into scope, so that you can call them.
+
+For more info about doing development on the *SetReplace* codebase and the associated workflows, see the [Contributing guide](.github/CONTRIBUTING.md#building-in-place).
+
+### C++ 17
+
+If, while building, you see an error message about c++17, make sure the C++ compiler you are using is up-to-date. If your default system compiler does not support c++17, you can choose a different one with environmental variables. The following, for instance, typically works on a Mac:
 
     ```bash
-    COMPILER=CCompilerDriver\`ClangCompiler\`ClangCompiler COMPILER_INSTALLATION=/usr/bin ./build.wls
+    COMPILER=CCompilerDriver\`ClangCompiler\`ClangCompiler COMPILER_INSTALLATION=/usr/bin ./install.wls
     ```
 
     Here `ClangCompiler` can be replaced with one of ``<< CCompilerDriver`; "Compiler" /. CCompilerDriver`CCompilers[Full]``, and `COMPILER_INSTALLATION` is a directory in which the compiler binary can be found.
-
-3. Run `./install.wls` to install the paclet into your Wolfram system.
-4. Evaluate `PacletDataRebuild[]` in all running Wolfram kernels.
-5. Evaluate ``<< SetReplace` `` every time before using the package.
-
-A less frequently updated version is available through the Wolfram public paclet server and can be installed with `PacletInstall["SetReplace"]`.
 
 ## Contributing
 
@@ -167,7 +175,7 @@ We have a [Discord server](https://discord.setreplace.org). If you would like to
     - ["EventDeduplication"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventDeduplication.md)
     - [Method](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/Method.md)
     - [Time Constraint](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/TimeConstraint.md)
-- [WolframModelPlot](Documentation/SymbolsAndFunctions/WolframModelPlot.md)
+- [HypergraphPlot](Documentation/SymbolsAndFunctions/HypergraphPlot.md)
 - [RulePlot of WolframModel](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
 - Utility Functions
   - [IndexHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/IndexHypergraph.md)
@@ -192,4 +200,4 @@ You can find many more details about our physics results in *Stephen Wolfram*'s 
 
 # Acknowledgements
 
-In additional to commit authors and reviewers, *Stephen Wolfram* has contributed to the API design of most functions, and *Jeremy Davis* has contributed to the visual style of [`WolframModelPlot`](Documentation/SymbolsAndFunctions/WolframModelPlot.md), [`RulePlot`](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md) and [`"CausalGraph"`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).
+In additional to commit authors and reviewers, *Stephen Wolfram* has contributed to the API design of most functions, and *Jeremy Davis* has contributed to the visual style of [`HypergraphPlot`](Documentation/SymbolsAndFunctions/HypergraphPlot.md), [`RulePlot`](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md) and [`"CausalGraph"`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).

@@ -14,9 +14,15 @@ jobs:
           name: Build
           command: ./build.wls
 
+      - store_artifacts:
+          path: ./LibraryResources/
+
       - run:
           name: Install
           command: ./install.wls
+
+      - store_artifacts:
+          path: ./BuiltPaclets/
 
       - run:
           name: Reinstall
@@ -44,7 +50,14 @@ jobs:
 
       - run:
           name: Lint
-          command: ./lint.sh
+          command: |
+            set +eo pipefail
+            ./lint.sh
+            if [ $? -ne 0 ]
+            then
+              echo "Please run scripts/install_git_hooks.sh to detect linting issues before git push."
+              exit 1
+            fi
 
       - run:
           name: Build

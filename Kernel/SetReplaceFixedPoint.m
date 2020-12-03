@@ -6,14 +6,11 @@ PackageExport["SetReplaceFixedPoint"]
 
 (* Same as SetReplace, but automatically stops replacing when the set no longer changes. *)
 
-SetReplaceFixedPoint::usage = usageString[
-  "SetReplaceFixedPoint[`s`, {\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) \[Rule] ",
-  "\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
-  "\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
-  "\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), \[Ellipsis]}] performs SetReplace repeatedly ",
-  "until no further events can be matched, and returns the final set.",
-  "\n",
-  "Will go into infinite loop if fixed point does not exist."];
+SetUsage @ "
+SetReplaceFixedPoint[s$, {i$1 -> o$1, i$2 -> o$2, $$}] performs SetReplace repeatedly until \
+no further events can be matched, and returns the final set.
+Will go into infinite loop if fixed point does not exist.
+"
 
 SyntaxInformation[SetReplaceFixedPoint] =
   {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};

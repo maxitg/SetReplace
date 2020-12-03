@@ -6,12 +6,9 @@ PackageExport["SetReplaceList"]
 
 (* Same as SetReplace, but returns all intermediate steps in a List. *)
 
-SetReplaceList::usage = usageString[
-  "SetReplaceList[`s`, {\!\(\*SubscriptBox[\(`i`\), \(`1`\)]\) \[Rule] ",
-  "\!\(\*SubscriptBox[\(`o`\), \(`1`\)]\), ",
-  "\!\(\*SubscriptBox[\(`i`\), \(`2`\)]\) \[Rule] ",
-  "\!\(\*SubscriptBox[\(`o`\), \(`2`\)]\), \[Ellipsis]}, `n`] performs SetReplace `n` times ",
-  "and returns the list of all intermediate results."];
+SetUsage @ "
+SetReplaceList[s$, r$, n$] performs SetReplace n$ times and returns the list of all intermediate results.
+"
 
 SyntaxInformation[SetReplaceList] = {"ArgumentsPattern" -> {_, _, _, OptionsPattern[]}};
 

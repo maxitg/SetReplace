@@ -15,7 +15,7 @@ A more complicated example:
 In[] := GroupOrder[
  HypergraphAutomorphismGroup[
   EchoFunction[
-    WolframModelPlot] @ {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}, {1, 7, 3}, {3,
+    HypergraphPlot] @ {{1, 2, 3}, {3, 4, 5}, {5, 6, 1}, {1, 7, 3}, {3,
       8, 5}, {5, 9, 1}}]]
 ```
 

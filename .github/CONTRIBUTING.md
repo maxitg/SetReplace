@@ -56,7 +56,7 @@ First, assign one of the *type* labels to your pull request:
 Then, assign one of the *component* labels:
 * `evolution`: modifies code for running the evolution of the model.
 * `analysis`: adds or changes evolution analysis tools, e.g., `WolframModelEvolutionObject` properties.
-* `visualization`: has to do with visualization code, such as `WolframModelPlot`.
+* `visualization`: has to do with visualization code, such as `HypergraphPlot`.
 * `physics`: explores a connection with known physics. Would typically only be used with some `research` notes.
 * `utilities`: implements a tool that does not fit in the above categories (e.g., [`Subhypergraph`](https://github.com/maxitg/SetReplace/pull/431)).
 * `infrastructure`: implements changes to the development process, e.g., build scripts, CI, testing utilities, etc.
@@ -77,6 +77,50 @@ In the sections below, we describe our [development process](#development-proces
 ## Development process
 
 Each change to the code must fundamentally pass through 5 steps, more or less in that order: [writing code](#writing-code), [opening a pull request](#opening-a-pull-request), passing [automated tests](#automated-tests), passing [code review](#code-review), and [merging the PR](#merging).
+
+### Building in-place
+
+The main workflow we recommend is what we are calling an "in-place build". This largely happens automatically when you load the *SetReplace* package by calling `Get["~/git/SetReplace/Kernel/init.m"]` or equivalent. If the C++ library (*libSetReplace*) has not already been built, it will automatically be built for you, and the resulting libraries placed in the `LibraryResources` subdirectory of the repository root.
+
+If you later modify the C++ code and call `Get[...]` again, the library will be automatically rebuilt, and hot-loaded into your current Mathematica session (you do not need to run `Quit[]`). Moreover, builds of the library will be cached based on the hash of the C++ code, making it easy to switch quickly between several library versions (say, in different Git branches).
+
+If you wish to invoke the library build process *directly*, you run the following on the command line:
+
+```
+cd ~/git/SetReplace
+./build.wls
+```
+
+Remember that you can run the test suite anytime you want, by running:
+
+```
+cd ~/git/SetReplace
+./test.wls
+```
+
+Doing so will automatically rebuild the library, if necessary.
+
+### Build Paclets
+
+You may occasionally want to build and install a paclet from the current state of the repository. This will package together all the Wolfram Language source code, along with the library, and various metadata, into a single ".paclet" file, which has an automatically computed version number associated with it.
+
+To simply build the paclet, without installing it, just run:
+
+```
+cd ~/git/SetReplace
+./pack.wls
+```
+
+This will automatically build the library if needed and produce a paclet file, placing it in the `BuiltPaclets` directory.
+
+If you wish to also install the paclet you've built, you can run the following (instead of the step above, not in addition to it):
+
+```
+cd ~/git/SetReplace
+./install.wls
+```
+
+The paclet will be installed in your system, replacing any existing version of the paclet you may have. This will allow you to load the paclet in the future by running simply ``Get["SetReplace`"] ``.
 
 ### Writing code
 
@@ -104,7 +148,7 @@ It is essential to keep your pull requests as small as possible (definitely unde
 
 ### Automated tests
 
-To run the tests, `cd` to the repository root, and run `./build.wls && ./test.wls` from the command line. If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
+To run the tests, `cd` to the repository root, and run `./test.wls` from the command line. Note that `./test.wls` will automatically rebuild *libSetReplace* for you before running the tests if your *libSetReplace* is out of date (for example, if you changed some C++ files but you did not either `Get` *SetReplace* or run `./build.wls`). If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
 
 The `test.wls` script accepts various arguments. Running `./test.wls testfile`, where `testfile` is the name (without trailing `.wlt`) of a test file under the `Tests` directory, will limit the test run to only that file. With the `--load-installed-paclet` (or `-lip`) flag, the script will load the *installed paclet* instead of the local codebase. With the `--disable-parallelization` (or `-dp`) flag, you can disable the use of parallel sub-kernels to perform tests. Using parallel sub-kernels will accelerate running the entire test suite, so it is the default behavior, but if you are running only a single test file with a small number of tests, the startup time of the sub-kernels can outweight any speedup they give, and so `--disable-parallelization` will improve performance.
 
@@ -198,7 +242,7 @@ Each file should start with a ``Package["SetReplace`"]`` line, followed by lines
 
 Note these declarations are macros, not Wolfram Language code, so you have to put each one of them on a separate line, and you cannot use them with Wolfram Language code, like mapping them over a [`List`](https://reference.wolfram.com/language/ref/List.html).
 
-Your public symbols should also include a `usage` message, which should be created with a [`usageString`](/Kernel/usageString.m) function. Each argument, number, and ellipsis should be [enclosed in backticks](https://github.com/maxitg/SetReplace/blob/6b9df76dc7fa3c08ac8803b90d625ce454f51f0c/Kernel/GeneralizedGridGraph.m#L7), which would automatically convert it to the correct style.
+Your public symbols should also include a `usage` message, which should be created with the [`SetUsage`](https://github.com/maxitg/SetReplace/blob/7f89c5103cae6a7c1d21b967973811fdeacfd63b/Kernel/GeneralizedGridGraph.m#L9) function. For more information, see ``?GeneralUtilities`SetUsage``.
 
 Further, public symbols must include [`SyntaxInformation`](https://reference.wolfram.com/language/ref/SyntaxInformation.html), see [an example](https://github.com/maxitg/SetReplace/blob/6b9df76dc7fa3c08ac8803b90d625ce454f51f0c/Kernel/WolframModel.m#L23) for `WolframModel`.
 
@@ -345,7 +389,19 @@ Some things to note are:
 
 ### Scripts
 
-The three main scripts of *SetReplace* are [build.wls](/build.wls), [install.wls](/install.wls) and [test.wls](/test.wls). The build script is the most complex of the three, and it uses additional definitions in [buildInit.wl](/scripts/buildInit.wl). In addition to building the C++ code and packing the paclet, it also auto-generates the paclet version number based on the number of commits to master from the checkpoint defined in [version.wl](/scripts/version.wl). Some of the code in the [scripts](/scripts) folder is only used for building *SetReplace* on the internal Wolfram Research systems and should not be modified by external developers as CI has no way of testing it.
+If you are using the *in-place* workflow, you will typically only need to run the [test.wls](/test.wls) script, but this section will describe the other scripts too.
+
+The four main scripts of *SetReplace* are:
+* [build.wls](/build.wls), which builds *libSetReplace* (if necessary)
+* [test.wls](/test.wls), which first calls `build.wls`, then runs the full test suite.
+* [pack.wls](/pack.wls), which first calls `build.wls`, then produces a `.paclet` file
+* [install.wls](/install.wls), which first calls `pack.wls`, then installs the resulting `.paclet` file
+
+All four scripts use functionality defined in the [DevUtils](/DevUtils) package.
+
+Note that the `pack.wls` script will auto-generate the paclet version number based on the number of commits to master from the checkpoint defined in [version.wl](/scripts/version.wl).
+
+The code in the [scripts](/scripts) folder is only used for building *SetReplace* on the internal Wolfram Research systems and should not be modified by external developers as CI has no way of testing it.
 
 ## Code style
 
@@ -384,7 +440,7 @@ In addition to that, here are some more-or-less established rules:
 * The function arguments should either all go on the same line, or should each be put on a separate line (except for special cases where a large quantity of short arguments is used):
 
   ```wl
-  wolframModelPlot[
+  hypergraphPlot[
       edges_,
       edgeType_,
       styles_,
@@ -455,6 +511,9 @@ To run these automatically, call `./lint.sh`. This will print a formatting diff 
 If there are no errors found, it will exit with no output.
 To edit the code in place with the fixed formatting use `./lint.sh -i`.
 
+We recommend installing a git hook that runs `./lint.sh` automatically before each push.
+You can do that by running `scripts/install_git_hooks.sh`.
+
 If `cpplint` flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
 positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
 space, or `// NOLINTNEXTLINE` on a new line above if there is no space. For any usages of `// NOLINT` or
@@ -467,7 +526,9 @@ code.
 #### Markdown
 We are using GitHub-flavored Markdown for documentation and research notes.
 
-Images (e.g., of output cells) should be made by selecting the relevant cells in the Front End, copying them as bitmaps, and saving them as .png files to [Documentation/Images](/Documentation/Images) (in the documentation) or to the Images directory of the corresponding research note. They should then be inserted using the code similar to this:
+#### Manual image embedding
+
+Images (e.g., of output cells) can be made by selecting the relevant cells in the Front End, copying them as bitmaps, and saving them as .png files to [Documentation/Images](/Documentation/Images) (in the documentation) or to the Images directory of the corresponding research note. They should then be inserted using the code similar to this:
 
   ```html
   <img src="/Documentation/Images/image.png" width="xxx">
@@ -478,6 +539,28 @@ Images (e.g., of output cells) should be made by selecting the relevant cells in
   ```wl
   Round[0.6 First @ Import["$RepoRoot/Documentation/Images/image.png", "ImageSize"]]
   ```
+
+#### Markdown automation
+
+The above process can be somewhat automated from within a notebook by using the `RasterizePreviousInputOutputAndExportToMarkdown` function in the ``DevUtils` `` support package. To use this workflow, first load DevUtils by running the following (where you should substitute the actual location of your *SetReplace* repository):
+
+```wl
+Get["~/git/SetReplace/DevUtils/init.m"];
+```
+
+Next, find the input/output cell pair that you wish to include in your markdown. Then, create a new input cell *after* the pair, containing the following code, and run it:
+
+```wl
+RasterizePreviousInputOutputAndExportToMarkdown["Documentation/Images/NameOfTargetFile.png"]
+```
+
+This will rasterize the previous *output* cell, save the resulting image to the given location within the repository, and produce a snippet of markdown code that contains the right image tag. In addition, the markdown will contain a code block that contains the textual form of the preceeding *input* cell. You can copy-paste this markdown code into the appropriate markdown file.
+
+Note that for convenience, the relative directory "Documentation/Images/" will be automatically used if you do not specify a directory for the image file.
+
+If the image is too large, you can use the option "ColorMapLength" -> 10 (or below) to reduce the file size. You can experiment with the value 10 to balance file size with accuracy.
+
+Run `?RasterizePreviousInputOutputAndExportToMarkdown` to see more information and options, as well as related rasterization functions.
 
 # Research
 

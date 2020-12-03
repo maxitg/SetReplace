@@ -1,5 +1,8 @@
 Unprotect["SetReplace`*"];
 
+(* this is a no-op the first time round, subsequent loads will unload the C++ library first *)
+SetReplace`PackageScope`unloadLibrary[];
+
 ClearAll @@ (# <> "*" & /@ Contexts["SetReplace`*"]);
 
 (* Make sure that we don't affect $ContextPath by getting GU, and that we are isolated from
@@ -23,7 +26,7 @@ Block[
     HoldPattern[ReturnFailed[msg_String, args___]] :> ReturnFailed[MessageName[$LHSHead, msg], args],
     HoldPattern[ReturnFailure[msg_String, args___]] :> ReturnFailure[MessageName[$LHSHead, msg], args]
   }},
-  Get[FileNameJoin[{$SetReplaceRootDirectory, "Kernel", "usageString.m"}]];
+  Get[FileNameJoin[{$SetReplaceRootDirectory, "Kernel", "utilities.m"}]];
 ];
 
 End[];

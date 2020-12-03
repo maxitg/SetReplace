@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageImport["GeneralUtilities`"]
+
 PackageExport["$WolframPhysicsProjectPlotThemes"]
 
 PackageScope["style"]
@@ -32,7 +34,7 @@ PackageScope["$highlightedEdgeLineStyleDirective"]
 PackageScope["$highlightedEdgePolygonStyleDirective"]
 PackageScope["$highlightStyle"]
 PackageScope["$hyperedgeRendering"]
-PackageScope["$wolframModelPlotImageSize"]
+PackageScope["$hypergraphPlotImageSize"]
 PackageScope["$spatialGraphBackground"]
 PackageScope["$sharedRuleElementsHighlight"]
 PackageScope["$ruleHyperedgeRendering"]
@@ -96,7 +98,7 @@ $styleNames = KeySort /@ KeySort @ <|
     "HighlightedEdgePolygonStyleDirective" -> $highlightedEdgePolygonStyleDirective,
     "HighlightStyle" -> $highlightStyle,
     "HyperedgeRendering" -> $hyperedgeRendering,
-    "DefaultImageSize" -> $wolframModelPlotImageSize,
+    "DefaultImageSize" -> $hypergraphPlotImageSize,
     "Background" -> $spatialGraphBackground,
     combinedOptionsProperties[Graph][VertexStyle -> $vertexStyle, EdgeStyle -> $edgeLineStyle]
   |>,
@@ -196,9 +198,9 @@ $styleNames = KeySort /@ KeySort @ <|
 
 $lightTheme = "Light";
 
-$WolframPhysicsProjectPlotThemes::usage = usageString[
-  "$WolframPhysicsProjectPlotThemes gives the list of plot themes available for the Wolfram Physics Project."
-];
+SetUsage @ "
+$WolframPhysicsProjectPlotThemes gives the list of plot themes available for the Wolfram Physics Project.
+"
 
 $WolframPhysicsProjectPlotThemes = {$lightTheme};
 
@@ -221,7 +223,7 @@ style[$lightTheme] = <|
   $causalGraphEdgeStyle -> Hue[0, 1, 0.56],
   $causalGraphBackground -> None,
 
-  (* WolframModelPlot *)
+  (* HypergraphPlot *)
   $vertexSize -> 0.06,
   $arrowheadLengthFunction -> (Max[0.1, Min[0.185, 0.066 + 0.017 #PlotRange]] &),
   $edgeArrowheadShape -> Polygon[{
@@ -240,7 +242,7 @@ style[$lightTheme] = <|
   $highlightedEdgePolygonStyleDirective -> Opacity[0.3],
   $highlightStyle -> Red,
   $hyperedgeRendering -> "Polygons",
-  $wolframModelPlotImageSize -> {{360}, {420}},
+  $hypergraphPlotImageSize -> {{360}, {420}},
   $spatialGraphBackground -> None,
 
   (* RulePlot *)
