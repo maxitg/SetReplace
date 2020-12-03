@@ -1917,7 +1917,7 @@
 
       (* FeatureAssociation *)
 
-      With[{objs, evolutionObjects := 
+      With[{evolutionObjects = 
           WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@ 
             {{0}, {3, "EventSelectionFunction" -> "MultiwaySpacelike"}, {3}, {8}}}, 
         {
@@ -1941,9 +1941,8 @@
           (* FinalState features for Multyway return missings *)
           VerificationTest[ And @@ MissingQ/@Flatten@Values@evolutionObjects[[2]]["FeatureAssociation", "StructurePreservingFinalState"] ],
           (* Error Messages check *)
-          objs = evolutionObjects;
-          testUnevaluated[objs[[2]]["FeatureAssociation", 3], {WolframModelEvolutionObject::invalidFeatureSpec}],
-          testUnevaluated[objs[[3]]["FeatureAssociation", "EasterEgg"], {WolframModelEvolutionObject::unknownFeatureGroup}]
+          testUnevaluated[Evaluate[evolutionObjects[[3]]["FeatureAssociation", 3]], {WolframModelEvolutionObject::invalidFeatureSpec}],
+          testUnevaluated[Evaluate[evolutionObjects[[3]]["FeatureAssociation", "EasterEgg"]], {WolframModelEvolutionObject::unknownFeatureGroup}]
         }
       ],
 
