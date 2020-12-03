@@ -91,9 +91,12 @@ $dummyICell = Cell[BoxData[""], "Input"]; (* needed to ensure CellTag gets inclu
 
 $maxWidthCompensation = 0.9;
 rasterize[maxWidth_, expr_Image] := expr;
-rasterize[maxWidth_, expr_] := Rasterize[expr, ImageFormattingWidth -> maxWidth * $maxWidthCompensation];
-rasterizeCells[maxWidth_, {cell_}] := ImageTake[rasterize[maxWidth, Notebook[{$dummyICell, cell}]], {60, -1}];
-rasterizeCells[maxWidth_, {cells__}] := rasterize[maxWidth, Notebook[{cells}]];
+rasterize[maxWidth_, expr_] := Rasterize[expr, ImageFormattingWidth -> If[NumberQ[maxWidth], maxWidth * $maxWidthCompensation, Automatic]];
+rasterizeCells[maxWidth_, {cell_}] := ImageTake[rasterize[maxWidth, Notebook[{$dummyICell, preRasterCell @ cell}]], {60, -1}];
+rasterizeCells[maxWidth_, {cells__}] := rasterize[maxWidth, Notebook[preRasterCell /@ {cells}]];
+
+Clear[preRasterCell];
+preRasterCell[e_] := e;
 
 findFinalExpressionStart[str_String] := Scope[
   stream = StringToStream[str];
@@ -202,3 +205,39 @@ exportImageToMarkdown[relativePath_, image_, OptionsPattern[]] := Scope[
 ];
 
 $imageMarkdownTemplate = StringTemplate["<img src=\"``\" width=\"``\">"];
+
+(* the following code is for Unix platforms which appear to rasterize incorectly *)
+
+PackageExport["$EnableLabelRasterizationWorkaround"]
+
+$EnableLabelRasterizationWorkaround = ($OperatingSystem === "Unix")
+
+SetUsage @ "
+$EnableLabelRasterizationWorkaround determines whether the various rasterization \
+functions will manually render and attach cell 'In[]:=' and 'Out[]=' cell lables, or \
+rely on the functionality of Rasterize[Notebook[$$]] to do so automatically. The \
+workaround appears to be necessary on Linux platforms.
+"
+
+makeCellLabel[text_] := With[
+  {img = rasterize[Automatic, Cell[text, "CellLabel", "CellLabelExpired"]]},
+  ImagePad[img, {{64 - ImageDimensions[img][[1]], 0}, {0, 10}}, White]
+];
+
+$outputCellLabel := $outputCellLabel = makeCellLabel["Out[\:f759\:f363]="];
+$inputCellLabel := $inputCellLabel = makeCellLabel["In[\:f759\:f363]:="];
+$blankCellLabel := $blankCellLabel = makeCellLabel[""];
+
+preRasterCell[cell:Cell[_, type_String, ___]] /; $EnableLabelRasterizationWorkaround := Scope[
+  cellLabelImage = Switch[type, "Input", $inputCellLabel, "Output", $outputCellLabel, _, $blankCellLabel];
+  cell = DeleteCases[cell, CellLabel -> _];
+  AppendTo[cell, ShowCellLabel -> False];
+  {w, h, dh} = 2 * Rasterize[cell, "BoundingBox"];
+  labelBaseline = 27;
+  cellLabelImage = ImagePad[cellLabelImage, {{0, 0}, {0, dh - labelBaseline}}, White];
+  labelHeight = Last @ ImageDimensions[cellLabelImage];
+  cellLabelImage = ImagePad[cellLabelImage, {{0, 0}, {h - labelHeight, 0}}, White];
+  cellLabelBoxes = Cell[BoxData @ ToBoxes[cellLabelImage, StandardForm], "Graphics"];
+  AppendTo[cell, CellFrameLabels -> {{cellLabelBoxes, None}, {None, None}}];
+  cell
+];
