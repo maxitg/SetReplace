@@ -221,7 +221,7 @@ class Matcher::Implementation {
       const uint64_t& numThreadsToUse = token->numThreads();
 
       auto addMatchesForRuleRange = [=](RuleID start) {
-        for (RuleID i = start; i < static_cast<int>(rules_.size()); i += numThreadsToUse) {
+        for (RuleID i = start; i < static_cast<RuleID>(rules_.size()); i += numThreadsToUse) {
           addMatchesForRule(expressionIDs, i, shouldAbort);
         }
       };
@@ -237,7 +237,7 @@ class Matcher::Implementation {
         }
       } else {
         // Single-threaded path
-        for (RuleID i = 0; i < static_cast<int>(rules_.size()); ++i) {
+        for (RuleID i = 0; i < static_cast<RuleID>(rules_.size()); ++i) {
           addMatchesForRule(expressionIDs, i, shouldAbort);
         }
       }
