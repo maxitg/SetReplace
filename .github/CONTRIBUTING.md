@@ -86,14 +86,14 @@ If you later modify the C++ code and call `Get[...]` again, the library will be 
 
 If you wish to invoke the library build process *directly*, you run the following on the command line:
 
-```
+```bash
 cd ~/git/SetReplace
 ./build.wls
 ```
 
 Remember that you can run the test suite anytime you want, by running:
 
-```
+```bash
 cd ~/git/SetReplace
 ./test.wls
 ```
@@ -106,7 +106,7 @@ You may occasionally want to build and install a paclet from the current state o
 
 To simply build the paclet, without installing it, just run:
 
-```
+```bash
 cd ~/git/SetReplace
 ./pack.wls
 ```
@@ -115,7 +115,7 @@ This will automatically build the library if needed and produce a paclet file, p
 
 If you wish to also install the paclet you've built, you can run the following (instead of the step above, not in addition to it):
 
-```
+```bash
 cd ~/git/SetReplace
 ./install.wls
 ```
@@ -210,7 +210,7 @@ We use [Reviewable](https://reviewable.io) for code review, which greatly simpli
 
 If you are reviewing a pull request from a fork, CI will not run automatically. You can (and need to) still run it manually, however, by pushing the changes to a new branch on GitHub. To do that, run the following where `123` is the pull request number:
 
-```sh
+```bash
 git fetch origin pull/123/head:pr/123
 git checkout pr/123
 git push -u origin pr/123
@@ -332,7 +332,7 @@ Then, after building, you can run the tests using the binaries in `libSetReplace
 
 If a third-party project wants to use `SetReplace`, it is enough to write in their `CMakeLists.txt`:
 
-```
+```cmake
 add_library(foo ...)
 
 find_package(SetReplace)
