@@ -44,7 +44,7 @@ bool isAvailable(const HardwareType& type);
 
 #ifdef LIBSETREPLACE_BUILD_TESTING
 namespace Testing {
-void overrideNumHardwareThreads(const HardwareType& type, const int64_t& numThreads);
+void overrideNumHardwareThreads(const HardwareType& type, const unsigned& numThreads);
 }
 #endif
 }  // namespace SetReplace::Parallelism
