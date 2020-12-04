@@ -9,6 +9,8 @@ PackageExport["$SetReplaceRoot"]
 PackageExport["$DevUtilsRoot"]
 PackageExport["$DevUtilsTemporaryDirectory"]
 
+ClearAll @@ (# <> "*" & /@ Contexts["SetReplaceDevUtils`*"]);
+
 $SetReplaceRoot = FileNameDrop[$InputFileName, -2];
 $DevUtilsRoot = FileNameDrop[$InputFileName, -1];
 $DevUtilsTemporaryDirectory := EnsureDirectory @ FileNameJoin[{$TemporaryDirectory, "SetReplace"}];

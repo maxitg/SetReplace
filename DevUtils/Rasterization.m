@@ -227,7 +227,7 @@ makeCellLabel[text_, styles_, padding_] := With[
   ImagePad[img, {{64 - ImageDimensions[img][[1]], 0}, padding}, White]
 ];
 
-makeIOLabel[text_] := makeCellLabel[text, {"CellLabel", "CellLabelExpired"}, {5, 10}];
+makeIOLabel[text_] := makeCellLabel[text, {"CellLabel", "CellLabelExpired"}, {0, 10}];
 
 $outputCellLabel := $outputCellLabel = makeIOLabel["Out[\:f759\:f363]="];
 $inputCellLabel := $inputCellLabel = makeIOLabel["In[\:f759\:f363]:="];
