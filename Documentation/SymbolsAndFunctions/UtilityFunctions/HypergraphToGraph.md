@@ -34,7 +34,7 @@ In[]:= HypergraphToGraph[
 
 ## **"StructurePreserving"**
 
-Converts a hypergraph to a graph by preserving its structure. This is achieved by a one-to-one correspondance between vertices and hyperedges in the hypergraph and 2 different kind of vertices - `{"Hyperedge", hyperedgeIndex_, vertexIndex_}` and `{"Vertex", vertexName_}` - in the graph:
+Converts a hypergraph to a graph by preserving its structure. This is achieved by a one-to-one correspondence between vertices and hyperedges in the hypergraph and 2 different kind of vertices - `{"Hyperedge", hyperedgeIndex_, vertexIndex_}` and `{"Vertex", vertexName_}` - in the graph:
 
 ```wl
 In[]:= HypergraphToGraph[
