@@ -108,7 +108,7 @@ For users who wish to make use of *SetReplace* functionality, and not modify the
 
 To do this, run the following on the command line:
 
-```
+```bash
 cd ~/PATH-TO-CHECKOUT/SetReplace
 ./install.wls
 ```
@@ -119,15 +119,15 @@ Now that you have installed the *SetReplace* paclet, you should evaluate ``<< Se
 
 For more info about doing development on the *SetReplace* codebase and the associated workflows, see the [Contributing guide](.github/CONTRIBUTING.md#building-in-place).
 
-### C++ 17
+### C++17
 
-If, while building, you see an error message about c++17, make sure the C++ compiler you are using is up-to-date. If your default system compiler does not support c++17, you can choose a different one with environmental variables. The following, for instance, typically works on a Mac:
+If, while building, you see an error message about C++17, make sure the C++ compiler you are using is up-to-date. If your default system compiler does not support C++17, you can choose a different one with environmental variables. The following, for instance, typically works on a Mac:
 
-    ```bash
-    COMPILER=CCompilerDriver\`ClangCompiler\`ClangCompiler COMPILER_INSTALLATION=/usr/bin ./install.wls
-    ```
+```bash
+COMPILER=CCompilerDriver\`ClangCompiler\`ClangCompiler COMPILER_INSTALLATION=/usr/bin ./install.wls
+```
 
-    Here `ClangCompiler` can be replaced with one of ``<< CCompilerDriver`; "Compiler" /. CCompilerDriver`CCompilers[Full]``, and `COMPILER_INSTALLATION` is a directory in which the compiler binary can be found.
+Here `ClangCompiler` can be replaced with one of ``<< CCompilerDriver`; "Compiler" /. CCompilerDriver`CCompilers[Full]``, and `COMPILER_INSTALLATION` is a directory in which the compiler binary can be found.
 
 ## Contributing
 

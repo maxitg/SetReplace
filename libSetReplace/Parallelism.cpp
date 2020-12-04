@@ -41,7 +41,7 @@ class Parallelism<HardwareType::StdCpu> : private ParallelismBase {
     threadsInUse_ -= numThreadsToReturn;
   }
 
-  void overrideNumHardwareThreads(const int64_t& numThreads) { numHardwareThreads_ = numThreads; }
+  void overrideNumHardwareThreads(const unsigned& numThreads) { numHardwareThreads_ = numThreads; }
 };
 
 Parallelism<HardwareType::StdCpu> cpuParallelism;
@@ -88,7 +88,7 @@ bool isAvailable(const HardwareType& type) {
 }
 
 namespace Testing {
-void overrideNumHardwareThreads(const HardwareType& type, const int64_t& numThreads) {
+void overrideNumHardwareThreads(const HardwareType& type, const unsigned& numThreads) {
   if (type == HardwareType::StdCpu) {
     cpuParallelism.overrideNumHardwareThreads(numThreads);
   } else {
