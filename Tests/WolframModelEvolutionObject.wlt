@@ -1,7 +1,7 @@
 <|
   "WolframModelEvolutionObject" -> <|
     "init" -> (
-      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
+      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAllComplete};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
 
@@ -1906,8 +1906,10 @@
           (* FinalState features for Multyway return missings *)
           VerificationTest[ And @@ MissingQ/@Flatten@Values@evolutionObjects[[2]]["FeatureAssociation", "StructurePreservingFinalState"] ],
           (* Error Messages check *)
-          testUnevaluated[Evaluate[evolutionObjects[[3]]["FeatureAssociation", 3]], {WolframModelEvolutionObject::invalidFeatureSpec}],
-          testUnevaluated[Evaluate[evolutionObjects[[3]]["FeatureAssociation", "EasterEgg"]], {WolframModelEvolutionObject::unknownFeatureGroup}]
+          With[{obj = evolutionObjects[[3]]}, {
+            testUnevaluated[obj["FeatureAssociation", 3], {WolframModelEvolutionObject::invalidFeatureSpec}],
+            testUnevaluated[obj["FeatureAssociation", "EasterEgg"], {WolframModelEvolutionObject::unknownFeatureGroup}]
+          }]
         }
       ],
 
