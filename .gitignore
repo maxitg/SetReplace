@@ -30,6 +30,10 @@ LibraryResources/
 
 BuiltPaclets/
 
+# CMake build directory
+
+build/
+
 # Test results
 
 exit_status.txt
