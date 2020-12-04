@@ -86,14 +86,14 @@ If you later modify the C++ code and call `Get[...]` again, the library will be 
 
 If you wish to invoke the library build process *directly*, you run the following on the command line:
 
-```
+```bash
 cd ~/git/SetReplace
 ./build.wls
 ```
 
 Remember that you can run the test suite anytime you want, by running:
 
-```
+```bash
 cd ~/git/SetReplace
 ./test.wls
 ```
@@ -106,7 +106,7 @@ You may occasionally want to build and install a paclet from the current state o
 
 To simply build the paclet, without installing it, just run:
 
-```
+```bash
 cd ~/git/SetReplace
 ./pack.wls
 ```
@@ -115,7 +115,7 @@ This will automatically build the library if needed and produce a paclet file, p
 
 If you wish to also install the paclet you've built, you can run the following (instead of the step above, not in addition to it):
 
-```
+```bash
 cd ~/git/SetReplace
 ./install.wls
 ```
@@ -150,7 +150,7 @@ It is essential to keep your pull requests as small as possible (definitely unde
 
 To run the tests, `cd` to the repository root, and run `./test.wls` from the command line. Note that `./test.wls` will automatically rebuild *libSetReplace* for you before running the tests if your *libSetReplace* is out of date (for example, if you changed some C++ files but you did not either `Get` *SetReplace* or run `./build.wls`). If everything is ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see error messages telling you which test inputs failed and for what reason.
 
-The `test.wls` script accepts various arguments. Running `./test.wls testfile`, where `testfile` is the name (without trailing `.wlt`) of a test file under the `Tests` directory, will limit the test run to only that file. With the `--load-installed-paclet` (or `-lip`) flag, the script will load the *installed paclet* instead of the local codebase. With the `--disable-parallelization` (or `-dp`) flag, you can disable the use of parallel sub-kernels to perform tests. Using parallel sub-kernels will accelerate running the entire test suite, so it is the default behavior, but if you are running only a single test file with a small number of tests, the startup time of the sub-kernels can outweight any speedup they give, and so `--disable-parallelization` will improve performance.
+The `test.wls` script accepts various arguments. Running `./test.wls testfile`, where `testfile` is the name (without trailing `.wlt`) of a test file under the `Tests` directory, will limit the test run to only that file. With the `--load-installed-paclet` (or `-lip`) flag, the script will load the *installed paclet* instead of the local codebase. With the `--disable-parallelization` (or `-dp`) flag, you can disable the use of parallel sub-kernels to perform tests. Using parallel sub-kernels will accelerate running the entire test suite, so it is the default behavior, but if you are running only a single test file with a small number of tests, the startup time of the sub-kernels can outweigh any speedup they give, and so `--disable-parallelization` will improve performance.
 
 We have a CI that automatically runs tests for all commits on all branches (kudos to [Circle CI](https://circleci.com) for providing free resources for this project). You need collaborator access to run the CI. If you don't have such access yet, the reviewer will run it for you.
 
@@ -210,7 +210,7 @@ We use [Reviewable](https://reviewable.io) for code review, which greatly simpli
 
 If you are reviewing a pull request from a fork, CI will not run automatically. You can (and need to) still run it manually, however, by pushing the changes to a new branch on GitHub. To do that, run the following where `123` is the pull request number:
 
-```sh
+```bash
 git fetch origin pull/123/head:pr/123
 git checkout pr/123
 git push -u origin pr/123
@@ -332,7 +332,7 @@ Then, after building, you can run the tests using the binaries in `libSetReplace
 
 If a third-party project wants to use `SetReplace`, it is enough to write in their `CMakeLists.txt`:
 
-```
+```cmake
 add_library(foo ...)
 
 find_package(SetReplace)
@@ -466,7 +466,7 @@ In addition to that, here are some more-or-less established rules:
   ```
 
 * Start global constants with `$`, whether internal or public, and tags (such as used in [`Throw`](https://reference.wolfram.com/language/ref/Throw.html) or [`Sow`](https://reference.wolfram.com/language/ref/Sow.html), or as generic enum labels) with `$$`. Global pure functions (defined as [`OwnValues`](https://reference.wolfram.com/language/ref/OwnValues.html)) should still be treated as ordinary (e.g., [`DownValues`](https://reference.wolfram.com/language/ref/DownValues.html)) functions and not start with `$`, unless they are public, in which case they should start with `$` and end with the word `Function`.
-* Use the macros `ModuleScope` and `Scope` (defined in ``"GeneralUtilities`"``) instead of `Module` and `Block` (respectively) when defining functions of the form `f[x__] := (Module|Block)[...]`. The main benefit of using them is that there is no need to specify a list of local variables (i.e. `{localVar1, localVar2, ...}`) at the begining, as a list of local variables will be automatically generated by looking for expressions of the form `Set` (`=`) or `SetDelayed` (`:=`) anywhere in the body of the function (See `?Scope` and [#460](https://github.com/maxitg/SetReplace/pull/460) for more information). For example:
+* Use the macros `ModuleScope` and `Scope` (defined in ``"GeneralUtilities`"``) instead of `Module` and `Block` (respectively) when defining functions of the form `f[x__] := (Module|Block)[...]`. The main benefit of using them is that there is no need to specify a list of local variables (i.e. `{localVar1, localVar2, ...}`) at the beginning, as a list of local variables will be automatically generated by looking for expressions of the form `Set` (`=`) or `SetDelayed` (`:=`) anywhere in the body of the function (See `?Scope` and [#460](https://github.com/maxitg/SetReplace/pull/460) for more information). For example:
 
   ```wl
   example[hypergraph1_, hypergraph2_] := ModuleScope[
@@ -554,7 +554,7 @@ Next, find the input/output cell pair that you wish to include in your markdown.
 RasterizePreviousInputOutputAndExportToMarkdown["Documentation/Images/NameOfTargetFile.png"]
 ```
 
-This will rasterize the previous *output* cell, save the resulting image to the given location within the repository, and produce a snippet of markdown code that contains the right image tag. In addition, the markdown will contain a code block that contains the textual form of the preceeding *input* cell. You can copy-paste this markdown code into the appropriate markdown file.
+This will rasterize the previous *output* cell, save the resulting image to the given location within the repository, and produce a snippet of markdown code that contains the right image tag. In addition, the markdown will contain a code block that contains the textual form of the preceding *input* cell. You can copy-paste this markdown code into the appropriate markdown file.
 
 Note that for convenience, the relative directory "Documentation/Images/" will be automatically used if you do not specify a directory for the image file.
 
@@ -572,7 +572,7 @@ We expect the same high level of quality here as in the rest of *SetReplace*. In
 * If you are discussing a hypothesis or speculation that is not necessarily correct, it should be explicitly mentioned in the text.
 * If you rely on results of a computation, you can only use stable code to run that computation. This includes *SetReplace* and build-in Wolfram Language functions. However, it ***does not*** include Wolfram Function Repository functions. If you need to rely on such functions' output, you will need to add similar functionality to *SetReplace* first.
 * However, you can use Wolfram Function Repository functions for demonstration purposes in cases where their output can be easily verified by a reviewer.
-* You are equivally welcome to modify existing research notes as well as create new ones. You don't have to be the original author of the note to modify it (although it is a good idea to request a review from the original author).
+* You are equally welcome to modify existing research notes as well as create new ones. You don't have to be the original author of the note to modify it (although it is a good idea to request a review from the original author).
 
 Research notes should follow the same [development process](#development-process) as the rest of *SetReplace* except for tests. In particular, pull requests should still be kept under 500 lines and follow the [Markdown formatting rules](#markdown).
 
