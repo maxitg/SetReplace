@@ -37,7 +37,7 @@ In[] := HypergraphPlot[{{1, 2, 1}, {2, 3}, {3, 2}}]
 
 <img src="/Documentation/Images/HyperSelfLoopDoubleBinaryEdgesComparison.png" width="478">
 
-Multiedges are shown in a darker color (because of overlayed partially transparent polygons), or as separate polygons depending on the layout (and are admittedly sometimes hard to understand):
+Multiedges are shown in a darker color (because of overlaid partially transparent polygons), or as separate polygons depending on the layout (and are admittedly sometimes hard to understand):
 
 ```wl
 In[] := HypergraphPlot[{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6,
