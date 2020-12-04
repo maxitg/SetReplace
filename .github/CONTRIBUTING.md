@@ -314,9 +314,6 @@ Options available for CMake:
 - `SET_REPLACE_BUILD_TESTING`:
 Enable cpp testing using googletest, which is downloaded at build time.
 
-- `SET_REPLACE_WITH_MATHEMATICA`:
-Generates the target `SetReplaceMathematica` that provides an interface for using *libSetReplace* in Wolfram Language.
-
 - `SET_REPLACE_ENABLE_ALLWARNINGS`:
 For developers and contributors. Useful for continuous integration. Add compile options to the targets enabling extra warnings and treating warnings as errors.
 
@@ -337,7 +334,6 @@ add_library(foo ...)
 
 find_package(SetReplace)
 target_link_libraries(foo SetReplace::SetReplace)
-#or target_link_libraries(foo SetReplace::SetReplaceMathematica)
 ```
 
 and provide to their CMake project the CMake variable: `SetReplace_DIR` pointing to the file `SetReplaceConfig.cmake`.
