@@ -220,8 +220,8 @@ class Matcher::Implementation {
       const auto token = Parallelism::acquire(Parallelism::HardwareType::StdCpu, rules_.size());
       const uint64_t& numThreadsToUse = token->numThreads();
 
-      auto addMatchesForRuleRange = [=](uint64_t start) {
-        for (uint64_t i = start; i < static_cast<uint64_t>(rules_.size()); i += numThreadsToUse) {
+      auto addMatchesForRuleRange = [=](RuleID start) {
+        for (RuleID i = start; i < static_cast<RuleID>(rules_.size()); i += numThreadsToUse) {
           addMatchesForRule(expressionIDs, i, shouldAbort);
         }
       };
@@ -237,7 +237,7 @@ class Matcher::Implementation {
         }
       } else {
         // Single-threaded path
-        for (size_t i = 0; i < rules_.size(); ++i) {
+        for (RuleID i = 0; i < static_cast<RuleID>(rules_.size()); ++i) {
           addMatchesForRule(expressionIDs, i, shouldAbort);
         }
       }

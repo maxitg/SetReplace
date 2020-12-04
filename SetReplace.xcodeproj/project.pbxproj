@@ -252,7 +252,7 @@
 				DEVELOPMENT_TEAM = "";
 				HEADER_SEARCH_PATHS = "build/_deps/googletest-src/googletest/include";
 				LIBRARY_SEARCH_PATHS = "build/_deps/googletest-build/googlemock/gtest";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_LDFLAGS = (
 					"-lgtest",
 					"-lgtest_main",
@@ -270,7 +270,7 @@
 				DEVELOPMENT_TEAM = "";
 				HEADER_SEARCH_PATHS = "build/_deps/googletest-src/googletest/include";
 				LIBRARY_SEARCH_PATHS = "build/_deps/googletest-build/googlemock/gtest";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_LDFLAGS = (
 					"-lgtest",
 					"-lgtest_main",
@@ -406,7 +406,7 @@
 					/Applications/Mathematica.app/Contents/SystemFiles/IncludeFiles/C,
 				);
 				LIBRARY_SEARCH_PATHS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -426,7 +426,7 @@
 					/Applications/Mathematica.app/Contents/SystemFiles/IncludeFiles/C,
 				);
 				LIBRARY_SEARCH_PATHS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
