@@ -1,7 +1,7 @@
 #!/bin/bash
 # Adapted from https://stackoverflow.com/a/3464399
 
-hookNames="pre-push"
+hookNames="pre-push pre-commit"
 repoRoot=$(git rev-parse --show-toplevel)
 hookDir=$repoRoot/.git/hooks
 

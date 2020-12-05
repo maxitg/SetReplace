@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+staged_files=$(git diff --name-only --cached | sort)
+source_files=$(find libSetReplace libSetReplace/test -maxdepth 1 -type f -name *pp | sort)
+target_files=$(comm -12 <(echo "$staged_files") <(echo "$source_files"))
+
+for file in $target_files; do
+	clang-format -i "$file"
+	git add "$file"
+done
