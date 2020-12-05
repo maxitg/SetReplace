@@ -4,7 +4,6 @@ project(SetReplace
     LANGUAGES CXX)
 message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 
-option(SET_REPLACE_WITH_MATHEMATICA "Add the library definition for Wolfram LibraryLink" OFF)
 option(SET_REPLACE_BUILD_TESTING "Enable cpp testing." OFF)
 include(GNUInstallDirs) # Define CMAKE_INSTALL_xxx: LIBDIR, INCLUDEDIR
 set(SetReplace_export_file "${PROJECT_BINARY_DIR}/SetReplaceTargets.cmake")
@@ -41,7 +40,6 @@ else()
   endif()
 endif()
 message(STATUS "SET_REPLACE_BUILD_TESTING: ${SET_REPLACE_BUILD_TESTING}")
-message(STATUS "SET_REPLACE_WITH_MATHEMATICA: ${SET_REPLACE_WITH_MATHEMATICA}")
 message(STATUS "SET_REPLACE_EXTRA_COMPILE_OPTIONS: ${SET_REPLACE_EXTRA_COMPILE_OPTIONS}")
 
 set(libSetReplace_headers
@@ -52,6 +50,7 @@ set(libSetReplace_headers
     Match.hpp
     Set.hpp
     Parallelism.hpp
+    SetReplace.hpp
     )
 set(libSetReplace_sources
     Event.cpp
@@ -59,10 +58,8 @@ set(libSetReplace_sources
     Match.cpp
     Set.cpp
     Parallelism.cpp
+    SetReplace.cpp
     )
-if(SET_REPLACE_WITH_MATHEMATICA)
-  list(APPEND libSetReplace_headers SetReplace.hpp)
-endif()
 list(TRANSFORM libSetReplace_headers PREPEND "libSetReplace/")
 list(TRANSFORM libSetReplace_sources PREPEND "libSetReplace/")
 
@@ -74,20 +71,6 @@ target_include_directories(SetReplace PUBLIC
 target_compile_options(SetReplace PRIVATE ${SET_REPLACE_EXTRA_COMPILE_OPTIONS})
 
 set(SET_REPLACE_LIBRARIES SetReplace)
-
-if(SET_REPLACE_WITH_MATHEMATICA)
-  set(libSetReplaceMathematica_sources
-    SetReplace.cpp)
-  list(TRANSFORM libSetReplaceMathematica_sources PREPEND "libSetReplace/")
-  add_library(SetReplaceMathematica ${libSetReplaceMathematica_sources})
-  target_link_libraries(SetReplaceMathematica SetReplace)
-  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
-  find_package(Mathematica REQUIRED)
-  target_include_directories(SetReplaceMathematica PUBLIC ${Mathematica_INCLUDE_DIR})
-  target_link_libraries(SetReplaceMathematica ${Mathematica_LIBRARIES})
-  target_compile_options(SetReplaceMathematica PRIVATE ${SET_REPLACE_EXTRA_COMPILE_OPTIONS})
-  list(APPEND SET_REPLACE_LIBRARIES SetReplaceMathematica)
-endif()
 
 install(TARGETS ${SET_REPLACE_LIBRARIES}
         EXPORT SetReplaceTargets
@@ -143,7 +126,6 @@ install (EXPORT SetReplaceTargets
   DESTINATION ${install_cmake_dir} )
 
 install(FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindMathematica.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/cmake/SetReplaceConfig.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/SetReplaceConfigVersion.cmake
   DESTINATION ${install_cmake_dir} )
