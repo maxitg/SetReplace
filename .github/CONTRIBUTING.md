@@ -513,6 +513,8 @@ We have two useful git hooks that you may install:
 
 You may install these hooks by running `./scripts/install_git_hooks.sh`. By default, both hooks will be installed. If you only wish to install one, pass the name of the hook as an argument (e.g., `./scripts/install_git_hooks.sh pre-commit`).
 
+You may uninstall a hook by running `rm .git/hooks/hook-name` where `hook-name` is `pre-commit` or `pre-push`.
+
 If `cpplint` flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
 positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
 space, or `// NOLINTNEXTLINE` on a new line above if there is no space. For any usages of `// NOLINT` or
