@@ -3,7 +3,7 @@
 #ifndef LIBSETREPLACE_SETREPLACE_HPP_
 #define LIBSETREPLACE_SETREPLACE_HPP_
 
-#include "WolframLibrary.h"
+#include "WolframHeaders/WolframLibrary.h"
 
 EXTERN_C DLLEXPORT mint WolframLibrary_getVersion();
 

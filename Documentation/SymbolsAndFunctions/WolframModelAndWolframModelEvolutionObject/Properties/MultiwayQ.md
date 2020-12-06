@@ -18,7 +18,7 @@ In[] := EchoFunction[#["ExpressionsEventsGraph"] &][
 Out[] = True
 ```
 
-Note that even if [`"EventSelectionFunction"`](/Documentation/WolframModelAndWolframModelEvolutionObject/Options/EventSelectionFunction.md) is set to allow multiway branching, the system might still be singleway if no overlapping matches occurred:
+Note that even if [`"EventSelectionFunction"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventSelectionFunction.md) is set to allow multiway branching, the system might still be singleway if no overlapping matches occurred:
 
 
 ```wl

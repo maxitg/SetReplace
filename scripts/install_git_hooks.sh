@@ -1,7 +1,19 @@
 #!/bin/bash
 # Adapted from https://stackoverflow.com/a/3464399
 
-hookNames="pre-push"
+hookNames=$(find scripts/git_hooks -type f -exec basename {} \; | tr '\n' ' ')
+
+if [[ -n "$1" ]]
+then
+  if test -e "scripts/git_hooks/$1"
+  then
+    hookNames="$1"
+  else
+    echo "The argument must be one of: $hookNames"
+    exit 1
+  fi
+fi
+
 repoRoot=$(git rev-parse --show-toplevel)
 hookDir=$repoRoot/.git/hooks
 
