@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		69015F4E257AA3FF00B01241 /* SetReplace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 69CAF8732257B23B006F9C60 /* SetReplace.cpp */; };
 		6914D39B2532AEE000B2B197 /* Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 691C67D22486A44100BC0D82 /* Event.cpp */; };
 		6914D39E2532AEE200B2B197 /* Expression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6961A1D523184ABC009461C8 /* Expression.cpp */; };
 		6914D3A12532AEE400B2B197 /* Match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6909EBA922258611001458D2 /* Match.cpp */; };
@@ -225,6 +226,7 @@
 				6914D39B2532AEE000B2B197 /* Event.cpp in Sources */,
 				6914D39E2532AEE200B2B197 /* Expression.cpp in Sources */,
 				6914D3A12532AEE400B2B197 /* Match.cpp in Sources */,
+				69015F4E257AA3FF00B01241 /* SetReplace.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,10 +403,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
-				HEADER_SEARCH_PATHS = (
-					"/Applications/Wolfram\\ Desktop.app/Contents/SystemFiles/IncludeFiles/C",
-					/Applications/Mathematica.app/Contents/SystemFiles/IncludeFiles/C,
-				);
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -421,10 +419,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
-				HEADER_SEARCH_PATHS = (
-					"/Applications/Wolfram\\ Desktop.app/Contents/SystemFiles/IncludeFiles/C",
-					/Applications/Mathematica.app/Contents/SystemFiles/IncludeFiles/C,
-				);
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";

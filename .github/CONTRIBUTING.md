@@ -314,9 +314,6 @@ Options available for CMake:
 - `SET_REPLACE_BUILD_TESTING`:
 Enable cpp testing using googletest, which is downloaded at build time.
 
-- `SET_REPLACE_WITH_MATHEMATICA`:
-Generates the target `SetReplaceMathematica` that provides an interface for using *libSetReplace* in Wolfram Language.
-
 - `SET_REPLACE_ENABLE_ALLWARNINGS`:
 For developers and contributors. Useful for continuous integration. Add compile options to the targets enabling extra warnings and treating warnings as errors.
 
@@ -337,7 +334,6 @@ add_library(foo ...)
 
 find_package(SetReplace)
 target_link_libraries(foo SetReplace::SetReplace)
-#or target_link_libraries(foo SetReplace::SetReplaceMathematica)
 ```
 
 and provide to their CMake project the CMake variable: `SetReplace_DIR` pointing to the file `SetReplaceConfig.cmake`.
@@ -511,8 +507,13 @@ To run these automatically, call `./lint.sh`. This will print a formatting diff 
 If there are no errors found, it will exit with no output.
 To edit the code in place with the fixed formatting use `./lint.sh -i`.
 
-We recommend installing a git hook that runs `./lint.sh` automatically before each push.
-You can do that by running `scripts/install_git_hooks.sh`.
+We have two useful git hooks that you may install:
+1. `pre-commit` formats any staged files before committing.
+2. `pre-push` checks for formatting and linting errors before pushing.
+
+You may install these hooks by running `./scripts/install_git_hooks.sh`. By default, both hooks will be installed. If you only wish to install one, pass the name of the hook as an argument (e.g., `./scripts/install_git_hooks.sh pre-commit`).
+
+You may uninstall a hook by running `rm .git/hooks/hook-name` where `hook-name` is `pre-commit` or `pre-push`.
 
 If `cpplint` flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
 positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
