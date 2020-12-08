@@ -8,7 +8,7 @@ option(SET_REPLACE_BUILD_TESTING "Enable cpp testing." OFF)
 include(GNUInstallDirs) # Define CMAKE_INSTALL_xxx: LIBDIR, INCLUDEDIR
 set(SetReplace_export_file "${PROJECT_BINARY_DIR}/SetReplaceTargets.cmake")
 
-set(default_build_type "Release")
+set(default_build_type "Debug")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
     set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
