@@ -3,8 +3,10 @@
 Check[
   Needs["GeneralUtilities`"];
   Needs["GitLink`"];
-  Get["DevUtils/init.m"];
-  Get["Kernel/init.m"];
+
+  $setReplaceRoot = FileNameDrop[$InputFileName, -1];
+  Get[FileNameJoin[{$setReplaceRoot, "DevUtils", "init.m"}]];
+  Get[FileNameJoin[{$setReplaceRoot, "Kernel", "init.m"}]];
 ,
   Print["Could not get one of the dependencies. Exiting."];
   Exit[1];
@@ -84,7 +86,7 @@ Check[
     CloseKernels[];
     {kernel} = LaunchKernels[1];
     result = ParallelEvaluate[
-      Get["Kernel/init.m"];
+      Get[FileNameJoin[{$setReplaceRoot, "Kernel", "init.m"}]];
       Check[
         meanAroundTiming @@@ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]]
       ,
