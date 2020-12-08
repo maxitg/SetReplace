@@ -68,7 +68,7 @@
           pathGraph17,
           4]["$opt$" -> 3],
         WolframModelEvolutionObject[___]["$opt$" -> 3],
-        {WolframModelEvolutionObject::argm},
+        {WolframModelEvolutionObject::unknownProperty},
         SameTest -> MatchQ
       ],
 
@@ -130,6 +130,40 @@
         WolframModelEvolutionObject[___]["SetAfterEvent"],
         {WolframModelEvolutionObject::pargx},
         SameTest -> MatchQ
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{1, 3}},
+          pathGraph17,
+          4][##2],
+        WolframModelEvolutionObject[___][##2],
+        {MessageName[WolframModelEvolutionObject, #]},
+        SameTest -> MatchQ
+      ] & @@@ {
+        {"pargx", "FinalState", {}, {}},
+        {"pargx", "FinalState", {{}, {}}},
+        {"nonopt", "CausalGraph", {}},
+        {"nonopt", "CausalGraph", {}, {}},
+        {"nonopt", "CausalGraph", {{}, {}}},
+        {"nonopt", "CausalGraph", {}, EdgeStyle -> Red},
+        {"nonopt", "CausalGraph", {}, {EdgeStyle -> Red}},
+        {"nonopt", "CausalGraph", {EdgeStyle -> Red}, {}},
+        {"nonopt", "CausalGraph", EdgeStyle -> Red, {}},
+        {"nonopt", "CausalGraph", {}, EdgeStyle -> Red, {}},
+        {"unknownProperty", "$opt$" -> 3},
+        {"unknownProperty", "$opt$" -> 3, {}}
+      },
+
+      VerificationTest[
+        GraphQ[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]["CausalGraph", {{}, EdgeStyle -> Red}]]
+      ],
+
+      (* Check options are being picked up even if they are in a list *)
+      VerificationTest[
+        VertexList[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 2][
+          "CausalGraph", {{"IncludeBoundaryEvents" -> "Initial"}, EdgeStyle -> Red}]],
+        Range[0, 4]
       ],
 
       (* Incorrect step arguments *)
