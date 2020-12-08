@@ -309,13 +309,27 @@ cmake ..
 cmake --build .
 ```
 
+By default, the build type is set to Debug. To use Release, which enables `-O2` optimization, set `-DCMAKE_BUILD_TYPE=Release`.
+
+If configuring for Visual Studio on Windows, the Visual Studio solution with both Debug and Release configs will be created. Then, to build Release, replace the third line in the above with:
+
+```bash
+cmake --build . --config=Release
+```
+
 Options available for CMake:
 
 - `SET_REPLACE_BUILD_TESTING`:
-Enable cpp testing using googletest, which is downloaded at build time.
+Enable cpp testing using googletest, which is downloaded at build time. This is not supported on Windows at this time.
 
 - `SET_REPLACE_ENABLE_ALLWARNINGS`:
 For developers and contributors. Useful for continuous integration. Add compile options to the targets enabling extra warnings and treating warnings as errors.
+
+- `SET_REPLACE_EXTRA_COMPILE_OPTIONS`:
+Add extra compilation options in addition to ones added by using the options above.
+
+- `SET_REPLACE_COMPILE_OPTIONS_OVERRIDE`:
+Set all compilations options directly.
 
 For example, to build *libSetReplace* with tests, replace the second line in the above with
 
