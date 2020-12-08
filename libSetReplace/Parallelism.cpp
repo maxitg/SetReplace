@@ -22,7 +22,7 @@ class Parallelism;
 template <>
 class Parallelism<HardwareType::StdCpu> : private ParallelismBase {
  public:
-  Parallelism() noexcept : ParallelismBase(std::thread::hardware_concurrency()) {}
+  Parallelism() noexcept : ParallelismBase(static_cast<int>(std::thread::hardware_concurrency())) {}
 
   [[nodiscard]] bool isAvailable() const { return numHardwareThreads_ >= 2; }
 

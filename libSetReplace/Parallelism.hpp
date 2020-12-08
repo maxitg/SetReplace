@@ -1,7 +1,6 @@
 #ifndef LIBSETREPLACE_PARALLELISM_HPP_
 #define LIBSETREPLACE_PARALLELISM_HPP_
 
-#include <cstdint>
 #include <memory>
 
 namespace SetReplace::Parallelism {
