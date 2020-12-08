@@ -63,7 +63,14 @@ set(libSetReplace_sources
 list(TRANSFORM libSetReplace_headers PREPEND "libSetReplace/")
 list(TRANSFORM libSetReplace_sources PREPEND "libSetReplace/")
 
-add_library(SetReplace ${libSetReplace_sources})
+option(SET_REPLACE_SHARED_LIBRARY "Build a shared instead of a static library" OFF)
+if(SET_REPLACE_SHARED_LIBRARY)
+  set(SET_REPLACE_LIBRARY_TYPE SHARED)
+else()
+  SET(SET_REPLACE_LIBRARY_TYPE STATIC)
+endif()
+message(STATUS "SET_REPLACE_LIBRARY_TYPE: ${SET_REPLACE_LIBRARY_TYPE}")
+add_library(SetReplace ${SET_REPLACE_LIBRARY_TYPE} ${libSetReplace_sources})
 target_include_directories(SetReplace PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libSetReplace>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
