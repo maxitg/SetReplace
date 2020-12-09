@@ -85,7 +85,7 @@ jobs:
 
       - run:
           name: Install Required Tools
-          command: apk add --no-cache g++ make cmake
+          command: apk add --no-cache git g++ make cmake
 
       - run:
           name: Build
