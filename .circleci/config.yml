@@ -88,7 +88,7 @@ jobs:
               | grep win64-x64.zip)
             curl -L --output cmake-win64-x64.zip $cmakeURL
             unzip -q cmake-win64-x64.zip
-            cmakeDir=$(find cmake-*-win64-x64 -d 0)
+            cmakeDir=$(find "cmake-*-win64-x64" -d 0)
             echo "export PATH=\"$(pwd)/$cmakeDir/bin:$PATH\"" >> $BASH_ENV
 
       - run:
