@@ -24,10 +24,7 @@ fi
 
 libSetReplaceTestsDir=TestResults/libSetReplace
 
-if [ ! -d "$libSetReplaceTestsDir" ]
-then
-  mkdir TestResults
-fi
+mkdir -p TestResults
 
 exitStatus=0
 isFirstTest=1
