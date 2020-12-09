@@ -75,7 +75,7 @@ jobs:
 
   cpp-32:
     docker:
-      - image: i386/alpine:edge
+      - image: i386/alpine:3.12.1
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
