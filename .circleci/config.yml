@@ -73,6 +73,36 @@ jobs:
       - store_test_results:
           path: TestResults
 
+  cpp-32:
+    docker:
+      - image: i386/alpine:edge
+        auth:
+          username: maxitg
+          password: $DOCKERHUB_PASSWORD
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install Required Tools
+          command: apk add --no-cache g++ make cmake
+
+      - run:
+          name: Build
+          command: |
+            mkdir build
+            cd build
+            cmake .. -DSET_REPLACE_BUILD_TESTING=ON \
+                     -DSET_REPLACE_ENABLE_ALLWARNINGS=ON
+            cmake --build .
+
+      - run:
+          name: Test
+          command: ./libSetReplaceTest.sh
+
+      - store_test_results:
+          path: TestResults
+
   windows:
     executor:
       name: win/default
@@ -111,4 +141,5 @@ workflows:
     jobs:
       - wolfram-language
       - cpp
+      - cpp-32
       - windows
