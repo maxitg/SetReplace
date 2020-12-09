@@ -22,6 +22,13 @@ then
   exit 1
 fi
 
+libSetReplaceTestsDir=TestResults/libSetReplace
+
+if [ ! -d "$libSetReplaceTestsDir" ]
+then
+  mkdir TestResults
+fi
+
 exitStatus=0
 isFirstTest=1
 for testBinary in $testBinaries
@@ -31,8 +38,9 @@ do
     echo
   fi
   isFirstTest=0
-  echo "$(basename $testBinary)..."
-  if ! eval $testBinary
+  testBasename=$(basename $testBinary)
+  echo "$testBasename..."
+  if ! eval $testBinary --gtest_output=xml:$libSetReplaceTestsDir/$testBasename.xml
   then
     exitStatus=1
   fi
