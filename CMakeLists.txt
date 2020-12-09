@@ -8,7 +8,7 @@ option(SET_REPLACE_BUILD_TESTING "Enable cpp testing." OFF)
 include(GNUInstallDirs) # Define CMAKE_INSTALL_xxx: LIBDIR, INCLUDEDIR
 set(SetReplace_export_file "${PROJECT_BINARY_DIR}/SetReplaceTargets.cmake")
 
-set(default_build_type "Debug")
+set(default_build_type "Release")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
     set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
@@ -32,22 +32,12 @@ if(MSVC)
   if(SET_REPLACE_ENABLE_ALLWARNINGS)
     list(APPEND SET_REPLACE_DEFAULT_COMPILE_OPTIONS /W4 /WX)
   endif()
-  if(CMAKE_BUILD_TYPE)
-    if (${CMAKE_BUILD_TYPE} STREQUAL Release)
-      list(APPEND SET_REPLACE_DEFAULT_COMPILE_OPTIONS /O2)
-    endif()
-  endif()
 else()
   if(SET_REPLACE_ENABLE_ALLWARNINGS)
     list(APPEND SET_REPLACE_DEFAULT_COMPILE_OPTIONS
          -Wall -Wextra -Werror -pedantic -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2
          -Winit-self -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow
          -Wsign-promo -Wswitch-default -Wundef -Wno-unused)
-  endif()
-  if(CMAKE_BUILD_TYPE)
-    if (${CMAKE_BUILD_TYPE} STREQUAL Release)
-      list(APPEND SET_REPLACE_DEFAULT_COMPILE_OPTIONS -O2)
-    endif()
   endif()
 endif()
 
