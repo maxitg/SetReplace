@@ -314,7 +314,7 @@ By default, the build type is set to Release. To use Debug, set `-DCMAKE_BUILD_T
 If configuring for Visual Studio on Windows, the Visual Studio solution with both Debug and Release configs will be created. Then, to build Release, replace the third line in the above with:
 
 ```bash
-cmake --build . --config=Release
+cmake --build . --config Release
 ```
 
 Options available for CMake:
