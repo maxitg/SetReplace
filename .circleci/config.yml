@@ -1,4 +1,8 @@
-version: 2
+version: 2.1
+
+orbs:
+  win: circleci/windows@2.2.0
+
 jobs:
   wolfram-language:
     docker:
@@ -66,9 +70,42 @@ jobs:
           name: Test
           command: ./libSetReplaceTest.sh
 
+  windows:
+    executor:
+      name: win/default
+      shell: bash.exe
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install CMake
+          command: |
+            cmakeURL=$(\
+              curl -s https://api.github.com/repos/Kitware/CMake/releases/latest \
+              | grep 'browser_download_url' \
+              | cut -d\" -f4 \
+              | grep win64-x64.zip)
+            curl -L --output cmake-win64-x64.zip $cmakeURL
+            unzip -q cmake-win64-x64.zip
+            cmakeDir=$(dir -1 | findstr -i cmake-*-win64-x64)
+            echo "export PATH=\"$(pwd)/$cmakeDir/bin:$PATH\"" >> $BASH_ENV
+
+      - run:
+          name: Build
+          command: |
+            mkdir build
+            cd build
+            cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON -DBUILD_SHARED_LIBS=ON
+            cmake --build . --config Release
+
+      - store_artifacts:
+          path: ./build/Release/
+
 workflows:
   version: 2
   build-and-test:
     jobs:
       - wolfram-language
       - cpp
+      - windows
