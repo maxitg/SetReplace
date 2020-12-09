@@ -81,10 +81,15 @@ jobs:
       - run:
           name: Install CMake
           command: |
-            curl -L --output cmake-3.19.1-win64-x64.zip \
-                    https://github.com/Kitware/CMake/releases/download/v3.19.1/cmake-3.19.1-win64-x64.zip
-            unzip -q cmake-3.19.1-win64-x64.zip
-            echo "export PATH=\"$(pwd)/cmake-3.19.1-win64-x64/bin:$PATH\"" >> $BASH_ENV
+            cmakeURL=$(\
+              curl -s https://api.github.com/repos/Kitware/CMake/releases/latest \
+              | grep 'browser_download_url' \
+              | cut -d\" -f4 \
+              | grep win64-x64.zip)
+            curl -L --output cmake-win64-x64.zip $cmakeURL
+            unzip -q cmake-win64-x64.zip
+            cmakeDir=$(find cmake-*-win64-x64 -d 0)
+            echo "export PATH=\"$(pwd)/$cmakeDir/bin:$PATH\"" >> $BASH_ENV
 
       - run:
           name: Build
