@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Adapted from https://stackoverflow.com/a/3464399
 
 hookNames=$(find scripts/git_hooks -type f -exec basename {} \; | tr '\n' ' ')
