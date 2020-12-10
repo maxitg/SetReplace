@@ -32,7 +32,7 @@ for testBinary in $testBinaries; do
   isFirstTest=0
   testBasename=$(basename "$testBinary")
   echo "$testBasename..."
-  if ! eval "$testBinary" --gtest_output=xml:$libSetReplaceTestsDir/$testBasename.xml; then
+  if ! eval "$testBinary" --gtest_output=xml:$libSetReplaceTestsDir/"$testBasename".xml; then
     exitStatus=1
   fi
 done

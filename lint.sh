@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-sourceFiles="libSetReplace/*pp libSetReplace/test/*pp"
+sourceFiles=$(find libSetReplace -type f -name "*pp")
+# Some bash files don't use .sh extension, so find by shebang
 bashFiles=$(grep -rIzl '^#![[:blank:]]*/usr/bin/env bash' --exclude-dir=*build* .)
 
 red="\\\033[0;31m"
@@ -43,9 +44,9 @@ done
 
 for file in $bashFiles; do
   if [ $formatInPlace -eq 1 ]; then
-    shfmt -w -i 2 $file
+    shfmt -w -i 2 "$file"
   else
-    shfmt -l -d -i 2 $file || exitStatus=1
+    shfmt -l -d -i 2 "$file" || exitStatus=1
   fi
 done
 
@@ -53,12 +54,12 @@ if [ $exitStatus -eq 1 ]; then
   echo "Found formatting errors. Run ./lint.sh -i to automatically fix by applying the printed patch."
 fi
 
-if ! cpplint --quiet --extensions=hpp,cpp $sourceFiles; then
-  exitStatus=1
-fi
+for file in $sourceFiles; do
+  cpplint --quiet --extensions=hpp,cpp "$file" || exitStatus=1
+done
 
 for file in $bashFiles; do
-  shellcheck $file || exitStatus=1
+  shellcheck "$file" || exitStatus=1
 done
 
 exit $exitStatus
