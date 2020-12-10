@@ -39,7 +39,7 @@ If[tryPopFlag["--disable-parallelization", "-dp"],
   $allowParallelization = True;
 
   (* This hack fixes a bug in Mathematica 12.1.1: if any messages or Prints occur in a subkernel, unformatted
-  KernelObject is printed, obscuring any relevant information. It has been reported upstream. *)
+     KernelObject is printed, obscuring any relevant information. It has been reported upstream. *)
   LaunchKernels; (* trigger autoload *)
   Unprotect[System`KernelObject];
   System`KernelObject /: StringForm["From `1`:", ko_KernelObject] := $orangeColor <> "From subkernel:" <> $endColor;
@@ -80,9 +80,9 @@ importAsHeldExpression[file_] := Module[{exprs},
   If[!$allowParallelization, exprs = exprs /. HoldPattern[ParallelMap] -> Map];
   If[FailureQ[exprs],
     WriteString["stdout", $redColor <> "There were syntax errors in \"" <> file <> "\"" <> $endColor, ":"];
-    (* this will cause a message that will print out the syntax error as Get would, but without evaluating any expressions.
-    The Options override is because apparently someone changed Get in the kernel and forget to change FullGet, so it is
-    missing an option! *)
+    (* this will cause a message that will print out the syntax error as Get would, but without evaluating any
+       expressions. The Options override is because apparently someone changed Get in the kernel and forget to change
+       FullGet, so it is missing an option! *)
     Unprotect[Language`FullGet];
     Options[Language`FullGet] = Options[Get];
     Language`FullGet[file, Null, HoldComplete];

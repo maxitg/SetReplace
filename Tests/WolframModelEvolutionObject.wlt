@@ -1308,7 +1308,8 @@
       (* #258 *)
       VerificationTest[
         WolframModel[
-          <|"PatternRules" -> {{{1, 2}} -> {{1, 4}}, {{1, 4}} -> {{1, 5}}, {{1, 3}} -> {{1, 6}}, {{1, 5}, {1, 6}} -> {}}|>,
+          <|"PatternRules" ->
+            {{{1, 2}} -> {{1, 4}}, {{1, 4}} -> {{1, 5}}, {{1, 3}} -> {{1, 6}}, {{1, 5}, {1, 6}} -> {}}|>,
           {{1, 2}, {1, 3}},
           Infinity,
           "AllEventsGenerationsList",
@@ -1605,8 +1606,8 @@
       ],
 
       VerificationTest[
-        Sort[VertexLabels /. FilterRules[AbsoluteOptions[WolframModel[
-          {{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 2]["ExpressionsEventsGraph", VertexLabels -> Automatic]], VertexLabels]],
+        Sort[VertexLabels /. FilterRules[AbsoluteOptions[WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 2][
+          "ExpressionsEventsGraph", VertexLabels -> Automatic]], VertexLabels]],
         {{"Event", 1} -> None, {"Event", 2} -> None, {"Event", 3} -> None,
          {"Expression", 1} -> "{1, 1}", {"Expression", 2} -> "{1, 2}", {"Expression", 3} -> "{2, 1}",
          {"Expression", 4} -> "{1, 3}", {"Expression", 5} -> "{3, 2}", {"Expression", 6} -> "{2, 4}",
@@ -1787,7 +1788,8 @@
 
         VerificationTest[
           WolframModel[{{{1, 2}} -> {{1}, {2}}, {{1}} -> {{1, 2}}}, {{1}}, 4, Method -> method]["AllEventsList"],
-          {{2, {1} -> {2}}, {1, {2} -> {3, 4}}, {2, {3} -> {5}}, {2, {4} -> {6}}, {1, {5} -> {7, 8}}, {1, {6} -> {9, 10}}}
+          {{2, {1} -> {2}}, {1, {2} -> {3, 4}}, {2, {3} -> {5}}, {2, {4} -> {6}}, {1, {5} -> {7, 8}},
+           {1, {6} -> {9, 10}}}
         ],
 
         VerificationTest[
