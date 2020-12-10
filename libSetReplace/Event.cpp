@@ -1,7 +1,9 @@
 #include "Event.hpp"
 
 #include <algorithm>
+#include <memory>
 #include <unordered_map>
+#include <vector>
 
 namespace SetReplace {
 class CausalGraph::Implementation {
