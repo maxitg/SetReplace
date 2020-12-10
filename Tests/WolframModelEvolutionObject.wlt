@@ -1942,6 +1942,8 @@
             #["FeatureAssociation", All],
             #["FeatureAssociation"]
           ] & /@ evolutionObjects,
+          (* Empty List spec *)
+          VerificationTest[#["FeatureAssociation", {}], <||>] & /@ evolutionObjects,
           (* FinalState features for Multyway return missings *)
           VerificationTest[ And @@ MissingQ/@Flatten@Values@evolutionObjects[[2]]["FeatureAssociation", 
             "StructurePreservingFinalState"] ],
