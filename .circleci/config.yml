@@ -41,10 +41,19 @@ jobs:
           command: ./performanceTest.wls master @HEAD 2
   cpp:
     docker:
-      - image: maxitg/set-replace-cpp-ci
+      - image: alpine:3.12.1
+        auth:
+          username: maxitg
+          password: $DOCKERHUB_PASSWORD
 
     steps:
       - checkout
+
+      - run:
+          name: Install Required Tools
+          command: |
+            apk add --no-cache bash git g++ make cmake clang py-pip
+            pip install cpplint
 
       - run:
           name: Lint
