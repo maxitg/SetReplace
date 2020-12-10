@@ -113,6 +113,35 @@ jobs:
       - store_test_results:
           path: TestResults
 
+  macos:
+    macos:
+      xcode: 12.2.0
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install CMake
+          command: |
+            cmakeURL=$(\
+              curl -s https://api.github.com/repos/Kitware/CMake/releases/latest \
+              | grep 'browser_download_url' \
+              | cut -d\" -f4 \
+              | grep Darwin-x86_64.tar.gz)
+            curl -L --output cmake-Darwin-x86_64.tar.gz $cmakeURL
+            tar xf cmake-Darwin-x86_64.tar.gz
+            cmakeDir=$(ls | grep cmake-*-Darwin-x86_64)
+            mkdir -p /usr/local/bin /usr/local/share
+            cp -r $cmakeDir/CMake.app/Contents/bin/* /usr/local/bin/
+            cp -r $cmakeDir/CMake.app/Contents/share/* /usr/local/share/
+
+      - run:
+          name: Build
+          command: scripts/buildLibraryResources.sh
+
+      - store_artifacts:
+          path: ./LibraryResources/
+
   windows:
     executor:
       name: win/default
@@ -136,14 +165,10 @@ jobs:
 
       - run:
           name: Build
-          command: |
-            mkdir build
-            cd build
-            cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON -DBUILD_SHARED_LIBS=ON
-            cmake --build . --config Release
+          command: scripts/buildLibraryResources.sh
 
       - store_artifacts:
-          path: ./build/Release/
+          path: ./LibraryResources/
 
 workflows:
   version: 2
@@ -152,4 +177,5 @@ workflows:
       - wolfram-language
       - cpp
       - cpp-32
+      - macos
       - windows
