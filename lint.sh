@@ -32,12 +32,12 @@ done
 exitStatus=0
 
 for file in $sourceFiles; do
-  diff=$(diff -U0 --label $file $file --label formatted <(clang-format $file))
+  diff=$(diff -U0 --label "$file" "$file" --label formatted <(clang-format "$file"))
   if [ $formatInPlace -eq 1 ]; then
-    clang-format -i $file
+    clang-format -i "$file"
   fi
-  if [[ ! -z "$diff" ]]; then
-    printf -- "$(echo "$diff\n\n" | sed "s|^-|$red-|g" | sed "s|^+|$green+|g" | sed "s|$|$endColor|g")"
+  if [[ -n "$diff" ]]; then
+    printf -- "%s" "$(printf "%s" "$diff\n\n" | sed "s|^-|$red-|g" | sed "s|^+|$green+|g" | sed "s|$|$endColor|g")"
     exitStatus=1
   fi
 done
