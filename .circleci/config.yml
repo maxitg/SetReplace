@@ -4,7 +4,7 @@ orbs:
   win: circleci/windows@2.2.0
 
 jobs:
-  wolfram-language:
+  wolfram-language-paclet-test:
     docker:
       - image: maxitg/set-replace-wl-ci:12.1.1
         auth:
@@ -20,6 +20,13 @@ jobs:
 
       - store_artifacts:
           path: ./LibraryResources/
+
+      - attach_workspace:
+          at: /tmp/workspace
+
+      - run:
+          name: Copy libraries from other platforms
+          command: cp -r /tmp/workspace/* ./LibraryResources/
 
       - run:
           name: Install
@@ -39,7 +46,8 @@ jobs:
       - run:
           name: Performance Test
           command: ./performanceTest.wls master @HEAD 2
-  cpp:
+
+  cpp-test:
     docker:
       - image: alpine:3.12.1
         auth:
@@ -82,7 +90,7 @@ jobs:
       - store_test_results:
           path: TestResults
 
-  cpp-32:
+  cpp-32-test:
     docker:
       - image: i386/alpine:3.12.1
         auth:
@@ -112,7 +120,7 @@ jobs:
       - store_test_results:
           path: TestResults
 
-  macos:
+  macos-build:
     macos:
       xcode: 12.2.0
 
@@ -138,10 +146,15 @@ jobs:
           name: Build
           command: scripts/buildLibraryResources.sh
 
+      - persist_to_workspace:
+          root: LibraryResources
+          paths:
+            - MacOSX-x86-64
+
       - store_artifacts:
           path: ./LibraryResources/
 
-  windows:
+  windows-build:
     executor:
       name: win/default
       shell: bash.exe
@@ -166,6 +179,11 @@ jobs:
           name: Build
           command: scripts/buildLibraryResources.sh
 
+      - persist_to_workspace:
+          root: LibraryResources
+          paths:
+            - Windows-x86-64
+
       - store_artifacts:
           path: ./LibraryResources/
 
@@ -173,8 +191,11 @@ workflows:
   version: 2
   build-and-test:
     jobs:
-      - wolfram-language
-      - cpp
-      - cpp-32
-      - macos
-      - windows
+      - macos-build
+      - windows-build
+      - cpp-test
+      - cpp-32-test
+      - wolfram-language-paclet-test:
+          requires:
+            - macos-build
+            - windows-build
