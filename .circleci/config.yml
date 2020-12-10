@@ -52,7 +52,7 @@ jobs:
       - run:
           name: Install Required Tools
           command: |
-            apk add --no-cache bash git g++ make cmake clang python2
+            apk add --no-cache bash git g++ make cmake clang python2 shellcheck shfmt
             wget https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py
             install -Dm755 cpplint.py /usr/bin/cpplint
 

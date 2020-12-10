@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 sourceFiles="libSetReplace/*pp libSetReplace/test/*pp"
+bashFiles=$(grep -rIzl '^#![[:blank:]]*/usr/bin/env bash' --exclude-dir=*build* .)
 
 red="\\\033[0;31m"
 green="\\\033[0;32m"
@@ -8,14 +9,13 @@ endColor="\\\033[0m"
 
 formatInPlace=0
 
-for arg in "$@"
-do
+for arg in "$@"; do
   case $arg in
-    -i)
+  -i)
     formatInPlace=1
     shift
     ;;
-    *)
+  *)
     echo "Argument $arg is not recognized."
     echo
     echo "Usage: ./lint.sh [-i]"
@@ -41,6 +41,14 @@ for file in $sourceFiles; do
   fi
 done
 
+for file in $bashFiles; do
+  if [ $formatInPlace -eq 1 ]; then
+    shfmt -w -i 2 $file
+  else
+    shfmt -l -d -i 2 $file || exitStatus=1
+  fi
+done
+
 if [ $exitStatus -eq 1 ]; then
   echo "Found formatting errors. Run ./lint.sh -i to automatically fix by applying the printed patch."
 fi
@@ -48,5 +56,9 @@ fi
 if ! cpplint --quiet --extensions=hpp,cpp $sourceFiles; then
   exitStatus=1
 fi
+
+for file in $bashFiles; do
+  shellcheck $file || exitStatus=1
+done
 
 exit $exitStatus
