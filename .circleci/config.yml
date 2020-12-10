@@ -155,14 +155,10 @@ jobs:
 
       - run:
           name: Build
-          command: |
-            mkdir build
-            cd build
-            cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON -DBUILD_SHARED_LIBS=ON
-            cmake --build . --config Release
+          command: scripts/buildLibraryResources.sh
 
       - store_artifacts:
-          path: ./build/Release/
+          path: ./LibraryResources/
 
 workflows:
   version: 2
