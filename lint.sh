@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 sourceFiles="libSetReplace/*pp libSetReplace/test/*pp"
 

@@ -284,11 +284,14 @@ $propertyOptions = <|
   "FinalStatePlot" -> Options[HypergraphPlot]
 |>;
 
+(* Prevent {}, {{}}, {{}, {}}, etc. being treated as options *)
+$nonEmptyOptionsPattern = OptionsPattern[] ? (AllTrue[{##}, Length[Flatten[{#}, Infinity]] > 0 &] &);
+
 propertyEvaluate[True, includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
     property : Alternatives @@ Keys[$propertyOptions],
-    o : OptionsPattern[]] := (
+    o : $nonEmptyOptionsPattern] := (
   Message[
     caller::optx,
     First[Last[Complement[{o}, FilterRules[{o}, Options[$propertyOptions[property]]]]]],
@@ -459,7 +462,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
     property : "FinalStatePlot",
-    o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] :=
+    o : $nonEmptyOptionsPattern /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] :=
   Check[
     Quiet[
       Check[
@@ -530,7 +533,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
     property : "StatesPlotsList",
-    o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] :=
+    o : $nonEmptyOptionsPattern /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] :=
   Check[
     Quiet[
       Map[
@@ -550,7 +553,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
       caller_,
       property : "EventsStatesPlotsList",
-      o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] := ModuleScope[
+      o : $nonEmptyOptionsPattern /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] := ModuleScope[
   events = propertyEvaluate[True, boundary][obj, caller, "AllEventsList"][[All, 2]];
   stateIndices = FoldList[
     Function[{currentState, newEvent}, Module[{alreadyDeletedExpressions},
@@ -685,7 +688,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
       caller_,
       property : "ExpressionsEventsGraph",
-      o : OptionsPattern[]] /;
+      o : $nonEmptyOptionsPattern] /;
         (Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) := ModuleScope[
   {eventsToOutputs, expressionsToDestroyers} = eventsExpressionsRelations[obj, caller, boundary];
   {labeledEvents, labeledOutputs, labeledExpressions, labeledDestroyers} =
@@ -758,7 +761,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
       caller_,
       property : "CausalGraph",
-      o : OptionsPattern[]] /;
+      o : $nonEmptyOptionsPattern] /;
         (Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) := ModuleScope[
   {eventsToOutputs, expressionsToDestroyers} = eventsExpressionsRelations[obj, caller, boundary];
   eventsToEvents = Catenate /@ Map[expressionsToDestroyers, eventsToOutputs, {2}];
@@ -787,7 +790,7 @@ propertyEvaluate[True, includeBoundaryEvents : includeBoundaryEventsPattern][
     evolution : WolframModelEvolutionObject[data_ ? evolutionDataQ],
     caller_,
     property : "LayeredCausalGraph",
-    o : OptionsPattern[]] /;
+    o : $nonEmptyOptionsPattern] /;
       (Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) :=
   Graph[
     propertyEvaluate[True, includeBoundaryEvents][evolution, caller, "CausalGraph", ##] & @@
@@ -981,17 +984,18 @@ $masterOptions = {
   "IncludeBoundaryEvents" -> None
 };
 
-WolframModelEvolutionObject[
-    data_ ? evolutionDataQ][
-    property__ ? (Not[MatchQ[#, OptionsPattern[]]] &),
-    opts : OptionsPattern[]] := ModuleScope[
+WolframModelEvolutionObject[data_ ? evolutionDataQ][args__] := ModuleScope[
+  {property, opts} = Replace[
+    {args},
+    {property__, opts : Longest[$nonEmptyOptionsPattern]} :>
+      {{property}, {opts}}];
   result = Catch[
     (propertyEvaluate @@
-        (OptionValue[Join[{opts}, $masterOptions], #] & /@ {"IncludePartialGenerations", "IncludeBoundaryEvents"}))[
+        (OptionValue[Join[opts, $masterOptions], #] & /@ {"IncludePartialGenerations", "IncludeBoundaryEvents"}))[
       WolframModelEvolutionObject[data],
       WolframModelEvolutionObject,
-      property,
-      ##] & @@ Flatten[FilterRules[{opts}, Except[$masterOptions]]]];
+      Sequence @@ property,
+      ##] & @@ Flatten[FilterRules[opts, Except[$masterOptions]]]];
   result /; result =!= $Failed
 ]
 
@@ -1004,8 +1008,8 @@ WolframModelEvolutionObject[
 WolframModelEvolutionObject[args___] := 0 /;
   !Developer`CheckArgumentCount[WolframModelEvolutionObject[args], 1, 1] && False
 
-WolframModelEvolutionObject[data_][opts : OptionsPattern[]] := 0 /;
-  Message[WolframModelEvolutionObject::argm, Defer[WolframModelEvolutionObject[data][opts]], 0, 1]
+WolframModelEvolutionObject[data_][] := 0 /;
+  Message[WolframModelEvolutionObject::argm, Defer[WolframModelEvolutionObject[data][]], 0, 1]
 
 (* Association has correct fields *)
 
