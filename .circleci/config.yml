@@ -52,9 +52,8 @@ jobs:
       - run:
           name: Install Required Tools
           command: |
-            apk add --no-cache bash git g++ make cmake clang python2
-            wget https://raw.githubusercontent.com/cpplint/cpplint/develop/cpplint.py
-            install -Dm755 cpplint.py /usr/bin/cpplint
+            apk add --no-cache bash git g++ make cmake clang py-pip
+            pip install cpplint
 
       - run:
           name: Lint
