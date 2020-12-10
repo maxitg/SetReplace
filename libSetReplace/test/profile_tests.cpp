@@ -1,5 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <utility>
+#include <vector>
+
 #include "Set.hpp"
 
 namespace SetReplace {

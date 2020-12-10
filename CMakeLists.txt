@@ -24,23 +24,35 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 # Set extra compile options
-set(_set_replace_extra_compile_options_docstring "Add extra compile options to the CXX targets")
+option(SET_REPLACE_ENABLE_ALLWARNINGS
+       "Add all compiler warnings to the C++ targets"
+       OFF)
 if(MSVC)
-  set(SET_REPLACE_EXTRA_COMPILE_OPTIONS /EHsc CACHE STRING ${_set_replace_extra_compile_options_docstring})
-else()
-  option(SET_REPLACE_ENABLE_ALLWARNINGS "Add compile options to the cpp targets. The warnings are set in SET_REPLACE_EXTRA_COMPILE_OPTIONS" OFF)
+  list(APPEND SET_REPLACE_DEFAULT_COMPILE_OPTIONS /EHsc)
   if(SET_REPLACE_ENABLE_ALLWARNINGS)
-    set(SET_REPLACE_EXTRA_COMPILE_OPTIONS
-      -Wall -Wextra -Werror -pedantic -Wcast-align -Wcast-qual
-      -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2
-      -Winit-self -Wmissing-include-dirs -Wold-style-cast
-      -Woverloaded-virtual -Wredundant-decls -Wshadow
-      -Wsign-promo -Wswitch-default -Wundef -Wno-unused
-      CACHE STRING ${_set_replace_extra_compile_options_docstring})
+    list(APPEND SET_REPLACE_DEFAULT_COMPILE_OPTIONS /W4 /WX)
+  endif()
+else()
+  if(SET_REPLACE_ENABLE_ALLWARNINGS)
+    list(APPEND SET_REPLACE_DEFAULT_COMPILE_OPTIONS
+         -Wall -Wextra -Werror -pedantic -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2
+         -Winit-self -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow
+         -Wsign-promo -Wswitch-default -Wundef -Wno-unused)
   endif()
 endif()
+
+set(SET_REPLACE_EXTRA_COMPILE_OPTIONS CACHE STRING "Add extra compile options to the C++ targets")
+set(SET_REPLACE_COMPILE_OPTIONS_OVERRIDE CACHE STRING "Overwrite compile options for the C++ targets")
+if(SET_REPLACE_COMPILE_OPTIONS_OVERRIDE)
+  set(SET_REPLACE_COMPILE_OPTIONS ${SET_REPLACE_COMPILE_OPTIONS_OVERRIDE})
+else()
+  set(SET_REPLACE_COMPILE_OPTIONS ${SET_REPLACE_DEFAULT_COMPILE_OPTIONS} ${SET_REPLACE_EXTRA_COMPILE_OPTIONS})
+endif()
+
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
 message(STATUS "SET_REPLACE_BUILD_TESTING: ${SET_REPLACE_BUILD_TESTING}")
-message(STATUS "SET_REPLACE_EXTRA_COMPILE_OPTIONS: ${SET_REPLACE_EXTRA_COMPILE_OPTIONS}")
+message(STATUS "SET_REPLACE_COMPILE_OPTIONS: ${SET_REPLACE_COMPILE_OPTIONS}")
 
 set(libSetReplace_headers
     Event.hpp
@@ -68,7 +80,7 @@ target_include_directories(SetReplace PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libSetReplace>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
-target_compile_options(SetReplace PRIVATE ${SET_REPLACE_EXTRA_COMPILE_OPTIONS})
+target_compile_options(SetReplace PRIVATE ${SET_REPLACE_COMPILE_OPTIONS})
 
 set(SET_REPLACE_LIBRARIES SetReplace)
 
@@ -104,7 +116,7 @@ if(SET_REPLACE_BUILD_TESTING)
   FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG v1.8.x
+    GIT_TAG v1.10.x
   )
 
   set(CMAKE_POLICY_DEFAULT_CMP0048 NEW) # google test raises warning about it

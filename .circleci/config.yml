@@ -1,4 +1,8 @@
-version: 2
+version: 2.1
+
+orbs:
+  win: circleci/windows@2.2.0
+
 jobs:
   wolfram-language:
     docker:
@@ -31,12 +35,25 @@ jobs:
       - run:
           name: Test
           command: ./.circleci/test.sh
+
+      - run:
+          name: Performance Test
+          command: ./performanceTest.wls master @HEAD 2
   cpp:
     docker:
-      - image: maxitg/set-replace-cpp-ci
+      - image: alpine:3.12.1
+        auth:
+          username: maxitg
+          password: $DOCKERHUB_PASSWORD
 
     steps:
       - checkout
+
+      - run:
+          name: Install Required Tools
+          command: |
+            apk add --no-cache bash git g++ make cmake clang py-pip
+            pip install cpplint
 
       - run:
           name: Lint
@@ -62,9 +79,102 @@ jobs:
           name: Test
           command: ./libSetReplaceTest.sh
 
+      - store_test_results:
+          path: TestResults
+
+  cpp-32:
+    docker:
+      - image: i386/alpine:3.12.1
+        auth:
+          username: maxitg
+          password: $DOCKERHUB_PASSWORD
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install Required Tools
+          command: apk add --no-cache bash git g++ make cmake
+
+      - run:
+          name: Build
+          command: |
+            mkdir build
+            cd build
+            cmake .. -DSET_REPLACE_BUILD_TESTING=ON \
+                     -DSET_REPLACE_ENABLE_ALLWARNINGS=ON
+            cmake --build .
+
+      - run:
+          name: Test
+          command: ./libSetReplaceTest.sh
+
+      - store_test_results:
+          path: TestResults
+
+  macos:
+    macos:
+      xcode: 12.2.0
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install CMake
+          command: |
+            cmakeURL=$(\
+              curl -s https://api.github.com/repos/Kitware/CMake/releases/latest \
+              | grep 'browser_download_url' \
+              | cut -d\" -f4 \
+              | grep Darwin-x86_64.tar.gz)
+            curl -L --output cmake-Darwin-x86_64.tar.gz $cmakeURL
+            tar xf cmake-Darwin-x86_64.tar.gz
+            cmakeDir=$(ls | grep cmake-*-Darwin-x86_64)
+            mkdir -p /usr/local/bin /usr/local/share
+            cp -r $cmakeDir/CMake.app/Contents/bin/* /usr/local/bin/
+            cp -r $cmakeDir/CMake.app/Contents/share/* /usr/local/share/
+
+      - run:
+          name: Build
+          command: scripts/buildLibraryResources.sh
+
+      - store_artifacts:
+          path: ./LibraryResources/
+
+  windows:
+    executor:
+      name: win/default
+      shell: bash.exe
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install CMake
+          command: |
+            cmakeURL=$(\
+              curl -s https://api.github.com/repos/Kitware/CMake/releases/latest \
+              | grep 'browser_download_url' \
+              | cut -d\" -f4 \
+              | grep win64-x64.zip)
+            curl -L --output cmake-win64-x64.zip $cmakeURL
+            unzip -q cmake-win64-x64.zip
+            cmakeDir=$(dir -1 | findstr -i cmake-*-win64-x64)
+            echo "export PATH=\"$(pwd)/$cmakeDir/bin:$PATH\"" >> $BASH_ENV
+
+      - run:
+          name: Build
+          command: scripts/buildLibraryResources.sh
+
+      - store_artifacts:
+          path: ./LibraryResources/
+
 workflows:
   version: 2
   build-and-test:
     jobs:
       - wolfram-language
       - cpp
+      - cpp-32
+      - macos
+      - windows

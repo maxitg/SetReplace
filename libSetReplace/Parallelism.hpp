@@ -1,7 +1,6 @@
 #ifndef LIBSETREPLACE_PARALLELISM_HPP_
 #define LIBSETREPLACE_PARALLELISM_HPP_
 
-#include <cstdint>
 #include <memory>
 
 namespace SetReplace::Parallelism {
@@ -19,11 +18,11 @@ enum class HardwareType {
  */
 class ThreadAcquisitionToken {
  public:
-  ThreadAcquisitionToken(const HardwareType& type, const int64_t& requestedNumThreads);
+  ThreadAcquisitionToken(const HardwareType& type, const int& requestedNumThreads);
 
   /** @brief Returns the number of threads successfully reserved.
    */
-  [[nodiscard]] int64_t numThreads() const noexcept;
+  [[nodiscard]] int numThreads() const noexcept;
 
  private:
   class Implementation;
@@ -34,7 +33,7 @@ using ThreadAcquisitionTokenPtr = std::shared_ptr<const ThreadAcquisitionToken>;
 
 /** @brief Returns a RAII token for reserving the given number of threads for the given hardware type.
  */
-inline ThreadAcquisitionTokenPtr acquire(const HardwareType& type, const int64_t& requestedNumThreads) {
+inline ThreadAcquisitionTokenPtr acquire(const HardwareType& type, const int& requestedNumThreads) {
   return std::make_shared<ThreadAcquisitionTokenPtr::element_type>(type, requestedNumThreads);
 }
 
@@ -44,7 +43,7 @@ bool isAvailable(const HardwareType& type);
 
 #ifdef LIBSETREPLACE_BUILD_TESTING
 namespace Testing {
-void overrideNumHardwareThreads(const HardwareType& type, const unsigned& numThreads);
+void overrideNumHardwareThreads(const HardwareType& type, const int& numThreads);
 }
 #endif
 }  // namespace SetReplace::Parallelism

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ $(uname) = "Darwin" ]
 then
@@ -22,6 +22,10 @@ then
   exit 1
 fi
 
+libSetReplaceTestsDir=TestResults/libSetReplace
+
+mkdir -p TestResults
+
 exitStatus=0
 isFirstTest=1
 for testBinary in $testBinaries
@@ -31,8 +35,9 @@ do
     echo
   fi
   isFirstTest=0
-  echo "$(basename $testBinary)..."
-  if ! eval $testBinary
+  testBasename=$(basename $testBinary)
+  echo "$testBasename..."
+  if ! eval $testBinary --gtest_output=xml:$libSetReplaceTestsDir/$testBasename.xml
   then
     exitStatus=1
   fi
