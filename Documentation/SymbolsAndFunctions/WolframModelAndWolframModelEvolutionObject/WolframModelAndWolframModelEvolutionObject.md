@@ -203,7 +203,7 @@ Out[] = {"AllEventsCount", "AllEventsDistinctElementsCount",
   "GenerationComplete", "GenerationEventsCountList",
   "GenerationEventsList", "GenerationsCount", "LayeredCausalGraph",
   "MaxCompleteGeneration", "PartialGenerationsCount", "StatesList",
-  "StatesPlotsList", "TerminationReason", "TotalGenerationsCount", "FeatureVector",
+  "StatesPlotsList", "TerminationReason", "TotalGenerationsCount", "FeatureVector", "FeatureAssociation"
   "UpdatedStatesList", "Version", "VertexCountList"}
 ```
 
