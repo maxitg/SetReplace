@@ -88,7 +88,7 @@ echo "Writing metadata to $setReplaceRoot/$metadataDestination"
 echo "\
 {
   \"LibraryFileName\": \"libSetReplace-$shortSHA.$libraryExtension\",
-  \"LibraryBuildTime\": $(date -u "+[%Y, %m, %d, %H, %M, %S]"),
+  \"LibraryBuildTime\": $(date -u "+[%-Y, %-m, %-d, %-H, %-M, %-S]"),
   \"LibrarySourceHash\": \"$shortSHA\"
 }" > $metadataDestination
 
