@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-if [ $(uname) = "Darwin" ]; then
+if [ "$(uname)" = "Darwin" ]; then
   testBinaries=$(find build/libSetReplace/test -type f -perm +111 -print)
-elif [ $(uname) = "Linux" ]; then
+elif [ "$(uname)" = "Linux" ]; then
   testBinaries=$(find build/libSetReplace/test -type f -executable -print)
 else
   echo "Operating System not supported."
@@ -30,9 +30,9 @@ for testBinary in $testBinaries; do
     echo
   fi
   isFirstTest=0
-  testBasename=$(basename $testBinary)
+  testBasename=$(basename "$testBinary")
   echo "$testBasename..."
-  if ! eval $testBinary --gtest_output=xml:$libSetReplaceTestsDir/$testBasename.xml; then
+  if ! eval "$testBinary" --gtest_output=xml:$libSetReplaceTestsDir/$testBasename.xml; then
     exitStatus=1
   fi
 done

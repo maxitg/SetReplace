@@ -2,7 +2,7 @@
 
 ./lint.sh
 
-if [ $? -ne 0 ]; then
+if [ ./lint.sh -ne 0 ]; then
   echo "Linter errors need to be fixed before pushing."
   exit 1
 fi
