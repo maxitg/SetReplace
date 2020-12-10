@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -eo pipefail
 
 setReplaceRoot=$(dirname $(cd $(dirname $0) && pwd))
