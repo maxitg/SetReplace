@@ -914,7 +914,7 @@ graphFeatureAssociation[g_Graph] := <|
 General::invalidFeatureSpec = "Feature specification `1` should be one of `2`, a list of them, or All.";
 General::unknownFeatureGroup = "Feature group `1` should be one of `2`";
 
-fromFeaturesSpec[caller_, All] := {"CausalGraph", "StructurePreservingFinalState"}
+fromFeaturesSpec[caller_, All] := {"CausalGraph", "StructurePreservingFinalStateGraph"}
 fromFeaturesSpec[caller_, featuresSpecs_List] := featuresSpecs
 fromFeaturesSpec[caller_, featuresSpecs_String] := {featuresSpecs}
 fromFeaturesSpec[caller_, wrongInput_] := (Message[caller::invalidFeatureSpec, wrongInput, fromFeaturesSpec[caller, All]]; Throw[$Failed])
@@ -925,7 +925,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     "FeatureAssociation", featuresSpecs_ : All] := With[{featureList = fromFeaturesSpec[caller, featuresSpecs]},
   nestedToSingleAssociation @ AssociationThread[featureList -> Replace[featureList, {
     "CausalGraph" -> graphFeatureAssociation[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]],
-    "StructurePreservingFinalState" -> If[!propertyEvaluate[True, boundary][obj, caller, "MultiwayQ"],
+    "StructurePreservingFinalStateGraph" -> If[!propertyEvaluate[True, boundary][obj, caller, "MultiwayQ"],
       graphFeatureAssociation @ HypergraphToGraph[#, "StructurePreserving"] & @
         propertyEvaluate[True, boundary][obj, caller, "FinalState"],  
       Replace[graphFeatureAssociation[Graph[{1 -> 2}]], {_ ? NumberQ -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}]}, Infinity]],

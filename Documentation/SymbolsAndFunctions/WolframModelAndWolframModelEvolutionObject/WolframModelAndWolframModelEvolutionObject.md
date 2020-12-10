@@ -171,7 +171,7 @@ Out[] = {"AllEventsCount", "AllEventsDistinctElementsCount",
   "GenerationComplete", "GenerationEventsCountList",
   "GenerationEventsList", "GenerationsCount", "LayeredCausalGraph",
   "MaxCompleteGeneration", "PartialGenerationsCount", "StatesList",
-  "StatesPlotsList", "TerminationReason", "TotalGenerationsCount", "FeatureVector",
+  "StatesPlotsList", "TerminationReason", "TotalGenerationsCount", "FeatureVector", "FeatureAssociation"
   "UpdatedStatesList", "Version", "VertexCountList"}
 ```
 
@@ -343,6 +343,7 @@ Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, s
 - [Final Element Counts](Properties/FinalElementCounts.md)
 - [Total Element Counts](Properties/TotalElementCounts.md)
 - [Rules](Properties/Rules.md)
+- [Feature Association](Properties/FeatureAssociation.md)
 - [Feature Vector](Properties/FeatureVector.md)
 - [Version](Properties/Version.md) 
 
