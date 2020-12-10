@@ -1922,7 +1922,8 @@
         {
           VerificationTest[And @@ StringQ /@ Keys[#["FeatureAssociation"]]] & /@ evolutionObjects,
 
-          VerificationTest[And @@ (NumberQ [#] || MissingQ[#] &) /@ #["FeatureAssociation"]] & /@ evolutionObjects,
+          VerificationTest[And @@ (NumberQ [#] || MissingQ[#] &) /@ Values[#["FeatureAssociation"]]] &
+            /@ evolutionObjects,
 
           VerificationTest[SameQ @@ (Replace[#, _?(NumberQ[#] || MissingQ[#] &) -> 1, Infinity] &
             [#["FeatureAssociation"]] & /@ evolutionObjects)],
