@@ -6,7 +6,7 @@ cd "$setReplaceRoot"
 
 # Compute the source hash
 
-sourceFiles=$(find libSetReplace -type f -name "*pp" && find cmake CMakeLists.txt scripts/buildLibraryResources.sh -type f)
+sourceFiles="$(ls libSetReplace/*pp CMakeLists.txt cmake/* scripts/buildLibraryResources.sh)"
 
 if command -v shasum &>/dev/null; then
   echo "Using SHA tool: $(which shasum)"
