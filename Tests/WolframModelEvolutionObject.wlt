@@ -1922,7 +1922,7 @@
         {
           VerificationTest[And @@ StringQ /@ Keys[#["FeatureAssociation"]]] & /@ evolutionObjects,
 
-          VerificationTest[And @@ (NumberQ [#] || MissingQ[#] &) /@ Values[#["FeatureAssociation"]]] &
+          VerificationTest[And @@ (NumberQ[#] || MissingQ[#] &) /@ Flatten[Values[#["FeatureAssociation"]]]] &
             /@ evolutionObjects,
 
           VerificationTest[SameQ @@ (Replace[#, _?(NumberQ[#] || MissingQ[#] &) -> 1, Infinity] &
@@ -1934,8 +1934,8 @@
           ] & /@ evolutionObjects,
           (* List spec *)
           VerificationTest[
-            #["FeatureAssociation", {"StructurePreservingFinalState"}], 
-            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "StructurePreservingFinalState" ~~ __] &]
+            #["FeatureAssociation", {"StructurePreservingFinalStateGraph"}], 
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "StructurePreservingFinalStateGraph" ~~ __] &]
           ] & /@ evolutionObjects,
           (* All spec *)
           VerificationTest[
@@ -1946,7 +1946,7 @@
           VerificationTest[#["FeatureAssociation", {}], <||>] & /@ evolutionObjects,
           (* FinalState features for Multyway return missings *)
           VerificationTest[ And @@ MissingQ/@Flatten@Values@evolutionObjects[[2]]["FeatureAssociation", 
-            "StructurePreservingFinalState"] ],
+            "StructurePreservingFinalStateGraph"] ],
           (* Error Messages check *)
           With[{obj = evolutionObjects[[3]]}, {
             testUnevaluated[obj["FeatureAssociation", 3], {WolframModelEvolutionObject::invalidFeatureSpec}],
