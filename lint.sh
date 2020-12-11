@@ -3,7 +3,7 @@ set -eo pipefail
 
 sourceFiles=$(find libSetReplace -type f -name "*pp")
 # Some bash files don't use .sh extension, so find by shebang
-bashFiles=$(grep -rIzl '^#![[:blank:]]*/usr/bin/env bash' --exclude-dir=*build* .)
+bashFiles=$(grep -rIl '^#![[:blank:]]*/usr/bin/env bash' --exclude-dir={*build*,*.git*} .)
 
 red="\\\033[0;31m"
 green="\\\033[0;32m"
