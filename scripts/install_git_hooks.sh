@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Adapted from https://stackoverflow.com/a/3464399
+set -eo pipefail
 
 hookNames=$(find scripts/git_hooks -type f -exec basename {} \; | tr '\n' ' ')
 

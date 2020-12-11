@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -eo pipefail
 
 if [ "$(uname)" = "Darwin" ]; then
   testBinaries=$(find build/libSetReplace/test -type f -perm +111 -print)

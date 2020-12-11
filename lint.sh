@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -eo pipefail
 
 sourceFiles=$(find libSetReplace -type f -name "*pp")
 # Some bash files don't use .sh extension, so find by shebang
