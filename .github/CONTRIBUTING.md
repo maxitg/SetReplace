@@ -154,11 +154,11 @@ The `test.wls` script accepts various arguments. Running `./test.wls testfile`, 
 
 We have a CI that automatically runs tests for all commits on all branches (kudos to [Circle CI](https://circleci.com) for providing free resources for this project). You need collaborator access to run the CI. If you don't have such access yet, the reviewer will run it for you.
 
-We use a private docker image `maxitg/set-replace:ci` running *Ubuntu* and *Wolfram Engine*, which [runs](https://app.circleci.com/pipelines/github/maxitg/SetReplace/408/workflows/8577ff51-2f5a-4517-992c-b20c76dcf170/jobs/444) [build](/build.wls), [install](/install.wls) and [test](/test.wls) scripts.
+We have a workflow ([example](https://app.circleci.com/pipelines/github/maxitg/SetReplace/1452/workflows/75b2a72b-c36e-43e2-bb51-2ff0e690e64c)) that builds a paclet (in wolfram-language-paclet-test) with libraries for Linux (also in wolfram-language-paclet-test), Mac (macos-build) and Windows (windows-build) and runs both C++ (cpp-test and cpp-32-test) and Wolfram Language (wolfram-language-paclet-test) tests.
 
-Your code must successfully pass all tests to be mergeable to master.
+Your code must successfully complete all builds and pass all tests to be mergeable to master.
 
-We also have a setup within Wolfram Research that allows us to build the paclet containing compiled binary libraries for all platforms, which we use for releases, but it's only available to developers working in the company. If you need such paclet for a version that is not a current release, please contact [@maxitg](https://github.com/maxitg).
+The paclets built by the wolfram-language-paclet-test job are the same as we use for releases.
 
 In addition to correctness tests, we have a performance testing tool, which is currently in the early stage of development, and only allows testing of the performance of the evolution. To use it, run in the repository root:
 
@@ -386,7 +386,7 @@ Note that it's essential to test not only the functionality but also the behavio
 
 The tests should be deterministic so that they can be easily reproduced. If the test cases are randomly generated, this can be achieved by setting [`SeedRandom`](https://reference.wolfram.com/language/ref/SeedRandom.html).
 
-If you want to implement performance tests, leave considerable leeway for the performance target, as the performance of CI servers may be different from what you might expect, and could fluctuate from run to run, which could result in randomly failing CI.
+If you want to implement performance tests, put them in the [`./performanceTest.wls` script](/performanceTest.wls) instead of the [Tests directory](/Tests).
 
 ### Documentation
 
@@ -410,8 +410,6 @@ The four main scripts of *SetReplace* are:
 All four scripts use functionality defined in the [DevUtils](/DevUtils) package.
 
 Note that the `pack.wls` script will auto-generate the paclet version number based on the number of commits to master from the checkpoint defined in [version.wl](/scripts/version.wl).
-
-The code in the [scripts](/scripts) folder is only used for building *SetReplace* on the internal Wolfram Research systems and should not be modified by external developers as CI has no way of testing it.
 
 ## Code style
 
