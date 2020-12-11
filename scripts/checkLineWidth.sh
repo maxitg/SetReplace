@@ -23,12 +23,12 @@ if [ -n "$deletedFiles" ]; then
   filesToCheck=$(echo "$filesToCheck" | grep --invert-match --word-regexp --fixed-strings "$deletedFiles")
 fi
 
-oneOverWidthLimit=121
+widthLimit=120
 
-grepOutput=$(grep --line-number --color=never --extended-regexp ".{$oneOverWidthLimit}" $filesToCheck)
+grepOutput=$(grep --line-number --color=never --extended-regexp ".{$(( widthLimit + 1 ))}" $filesToCheck)
 
 if [ -n "$grepOutput" ]; then
-  echo "Found lines exceeding the maximum allowed length of 120:"
+  echo "Found lines exceeding the maximum allowed length of ${widthLimit}:"
   echo "$grepOutput"
   exit 1
 fi
