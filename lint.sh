@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -eo pipefail
 
 sourceFiles="libSetReplace/*pp libSetReplace/test/*pp"
 
