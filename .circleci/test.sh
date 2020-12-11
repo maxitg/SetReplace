@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -eo pipefail
 
 rm -f exit_status.txt
 STATUS_FILE=1 ./test.wls -lip -e performance
