@@ -16,7 +16,7 @@ lsfilesOptions=(
   ':(exclude)*.h'
 )
 
-filesToCheck="$(comm -13 <(git ls-files --deleted) <(git ls-files "${lsfilesOptions[@]}"))"
+filesToCheck="$(comm -13 <(git ls-files --deleted | sort) <(git ls-files "${lsfilesOptions[@]}" | sort))"
 
 widthLimit=120
 
