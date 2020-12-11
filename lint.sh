@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-setReplaceRoot=$(cd $(dirname $0) && pwd)
+setReplaceRoot=$(cd "$(dirname "$0")" && pwd)
 cd "$setReplaceRoot"
 
 sourceFiles=$(find libSetReplace -type f -name "*pp")
@@ -58,7 +58,9 @@ if [ $exitStatus -eq 1 ]; then
   echo "Found formatting errors. Run ./lint.sh -i to automatically fix by applying the printed patch."
 fi
 
-cpplint --quiet --extensions=hpp,cpp $sourceFiles || exitStatus=1
+for file in $sourceFiles; do
+  cpplint --quiet --extensions=hpp,cpp "$file" || exitStatus=1
+done
 
 for file in $bashFiles; do
   shellcheck "$file" || exitStatus=1
