@@ -61,7 +61,7 @@ jobs:
           name: Install Required Tools
           command: |
             apk update
-            apk add bash git g++ make cmake clang py-pip
+            apk add bash git g++ make cmake clang py-pip shellcheck shfmt
             apk add --upgrade grep
             pip install cpplint
 
