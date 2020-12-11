@@ -16,7 +16,7 @@ lsfilesOptions=(
   ':(exclude)*.h'
 )
 
-mapfile -t filesToCheck < <(comm -13 <(git ls-files --deleted | sort) <(git ls-files "${lsfilesOptions[@]}" | sort))
+mapfile -t filesToCheck < <(LC_ALL=C comm -13 <(git ls-files --deleted) <(git ls-files "${lsfilesOptions[@]}"))
 
 widthLimit=120
 
