@@ -16,12 +16,7 @@ lsfilesOptions=(
   ':(exclude)*.h'
 )
 
-filesToCheck=$(git ls-files "${lsfilesOptions[@]}")
-deletedFiles=$(git ls-files --deleted)
-
-if [ -n "$deletedFiles" ]; then
-  filesToCheck=$(echo "$filesToCheck" | grep --invert-match --word-regexp --fixed-strings "$deletedFiles")
-fi
+filesToCheck="$(comm -13 <(git ls-files --deleted) <(git ls-files "${lsfilesOptions[@]}"))"
 
 widthLimit=120
 
