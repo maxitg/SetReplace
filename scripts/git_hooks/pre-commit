@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 stagedFiles=$(git diff --name-only --cached | sort)
-sourceFiles=$(find libSetReplace libSetReplace/test -maxdepth 1 -type f -name *pp | sort)
+sourceFiles=$(find libSetReplace libSetReplace/test -maxdepth 1 -type f -name "*pp" | sort)
 targetFiles=$(comm -12 <(echo "$stagedFiles") <(echo "$sourceFiles"))
 
 for file in $targetFiles; do

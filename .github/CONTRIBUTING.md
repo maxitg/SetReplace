@@ -203,7 +203,7 @@ Otherwise, please review within one or two days or give an ETA to the pull reque
 
 The main objectives for the code review:
 1. Verify the code works (i.e., make sure you can reproduce examples in the pull request message).
-2. Read the code, understand it, and see if you can spot any potential weeds/unnecessary slowdowns/issues with it (including issues with code style as we currently only have a linter for the C++, but not for the Wolfram Language code).
+2. Read the code, understand it, and see if you can spot any potential weeds/unnecessary slowdowns/issues with it (including issues with code style as we currently only have a linter for the C++ and Bash, but not for the Wolfram Language code).
 3. Check the pull request has unit tests and changes documentation if appropriate.
 
 We use [Reviewable](https://reviewable.io) for code review, which greatly simplifies the tracking of comments (Reviewable button should automatically appear on the bottom of pull requests). Please comment directly on the lines of code.
@@ -513,9 +513,12 @@ following exceptions:
 * We use `.cpp` and `.hpp` extensions for source files.
 
 We use [`clang-format`](https://clang.llvm.org/docs/ClangFormat.html) for formatting and
-[`cpplint`](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py) for linting.
+[`cpplint`](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py) for linting C++ code.
 
-To run these automatically, call `./lint.sh`. This will print a formatting diff and error messages from `cpplint`.
+We use [`shfmt`](https://github.com/mvdan/sh) for formatting and
+[`shellcheck`](https://github.com/koalaman/shellcheck) for linting Bash code.
+
+To run these automatically, call `./lint.sh`. This will print a formatting diff and error messages from `cpplint` and `shellcheck`.
 If there are no errors found, it will exit with no output.
 To edit the code in place with the fixed formatting use `./lint.sh -i`.
 
