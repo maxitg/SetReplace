@@ -20,7 +20,7 @@ mapfile -t filesToCheck < <(LC_ALL=C comm -13 <(git ls-files --deleted) <(git ls
 
 widthLimit=120
 
-grepOutput=$(grep --line-number --color=never --extended-regexp ".{$((widthLimit + 1))}" "${filesToCheck[@]}")
+grepOutput=$(grep --line-number --color=never --extended-regexp ".{$((widthLimit + 1))}" "${filesToCheck[@]}" || :)
 
 if [ -n "$grepOutput" ]; then
   echo "Found lines exceeding the maximum allowed length of ${widthLimit}:"
