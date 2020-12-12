@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+setReplaceRoot=$(cd "$(dirname "$0")" && pwd)
+cd "$setReplaceRoot"
+
 sourceFiles=$(find libSetReplace -type f -name "*pp")
 # Some bash files don't use .sh extension, so find by shebang
 bashFiles=$(grep -rIl '^#![[:blank:]]*/usr/bin/env bash' --exclude-dir={*build*,*.git*} .)
@@ -62,5 +65,7 @@ done
 for file in $bashFiles; do
   shellcheck "$file" || exitStatus=1
 done
+
+./scripts/checkLineWidth.sh || exitStatus=1
 
 exit $exitStatus
