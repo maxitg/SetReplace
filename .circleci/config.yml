@@ -62,7 +62,11 @@ jobs:
 
       - run:
           name: Performance Test
-          command: ./performanceTest.wls master @HEAD 2
+          command: |
+            if [ $CIRCLE_NODE_INDEX -eq 0 ]
+            then
+              ./performanceTest.wls master @HEAD 2
+            fi
 
   cpp-test:
     docker:
