@@ -45,8 +45,9 @@ jobs:
           command: |
             ./.circleci/test.sh $(circleci tests glob "Tests/*.wlt" \
               | circleci tests split --split-by=timings \
+              | sed "s/\.wlt//" \
               | sed "s/Tests\///" \
-              | sed "s/performance//")
+              | sed "/performance/d")
 
       - run:
           name: Performance Test
