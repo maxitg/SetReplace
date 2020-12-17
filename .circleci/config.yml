@@ -134,10 +134,10 @@ jobs:
               curl -s https://api.github.com/repos/Kitware/CMake/releases/latest \
               | grep 'browser_download_url' \
               | cut -d\" -f4 \
-              | grep Darwin-x86_64.tar.gz)
-            curl -L --output cmake-Darwin-x86_64.tar.gz $cmakeURL
-            tar xf cmake-Darwin-x86_64.tar.gz
-            cmakeDir=$(ls | grep cmake-*-Darwin-x86_64)
+              | grep macos-universal.tar.gz)
+            curl -L --output cmake-macos-universal.tar.gz $cmakeURL
+            tar xf cmake-macos-universal.tar.gz
+            cmakeDir=$(ls | grep cmake-*-macos-universal)
             mkdir -p /usr/local/bin /usr/local/share
             cp -r $cmakeDir/CMake.app/Contents/bin/* /usr/local/bin/
             cp -r $cmakeDir/CMake.app/Contents/share/* /usr/local/share/
