@@ -10,6 +10,7 @@ jobs:
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
+    parallelism: 4
 
     steps:
       - checkout
@@ -41,7 +42,11 @@ jobs:
 
       - run:
           name: Test
-          command: ./.circleci/test.sh
+          command: |
+            ./.circleci/test.sh $(circleci tests glob "Tests/*.wlt" \
+              | circleci tests split --split-by=timings \
+              | sed "s/Tests\///" \
+              | sed "s/performance//")
 
       - run:
           name: Performance Test
