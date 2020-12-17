@@ -54,6 +54,12 @@ for file in $bashFiles; do
   fi
 done
 
+if [ $formatInPlace -eq 1 ]; then
+  markdownlint -f -c .markdownlint.json ./**/*.md || exitStatus=1
+else
+  markdownlint -c .markdownlint.json ./**/*.md || exitStatus=1
+fi
+
 if [ $exitStatus -eq 1 ]; then
   echo "Found formatting errors. Run ./lint.sh -i to automatically fix by applying the printed patch."
 fi
