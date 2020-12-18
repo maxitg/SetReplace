@@ -16,8 +16,7 @@ says:
 > In the theory of term rewriting, a closely related property is confluence.
 > In a terminating system, causal invariance implies that whatever path is taken, the "answer" will always be the same.
 
-> **Confluence**: A simplified form of causal invariance considered in term rewriting systems such as ones that reach
-> fixed points.
+> **Confluence**: A simplified form of causal invariance considered in term rewriting systems such as ones that reach fixed points.
 
 However, the glossary does not explicitly define confluence, so we are going to use the
 [standard definition](https://en.wikipedia.org/wiki/Confluence_%28abstract_rewriting%29#General_case_and_theory) from
@@ -222,7 +221,6 @@ Out[] = True
 It is not, however, confluent, because the final states in these two evolutions are not isomorphic, and the evolutions
 terminate after these states are reached:
 
-
 ```wl
 In[] := ResourceFunction["MultiwaySystem"][
   "WolframModel" -> {causalInvariantRule}, {causalInvariantInit}, 2, "StatesGraph", VertexSize -> .7]
@@ -263,6 +261,7 @@ We will also need to generalize the definition of causal invariance to non-termi
 
 It will be interesting to investigate other similar properties.
 For example, one can investigate a stronger version of confluence:
+
 1. Consider any infinite singleway evolution of a system.
 2. Consider another finite partial singleway evolution.
 3. If any such finite evolution can be continued in such a way as to reach one of the states from the infinite

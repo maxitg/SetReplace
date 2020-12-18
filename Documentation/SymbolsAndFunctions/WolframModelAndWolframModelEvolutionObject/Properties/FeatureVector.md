@@ -10,6 +10,7 @@ Out[] = {22, 42, 0, 2, 2, 2, 6, 6}
 ```
 
 The list of properties is:
+
 - [`VertexCount`](https://reference.wolfram.com/language/ref/VertexCount.html): The number of vertices in the causal graph. Related to the [total number of events](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EventCounts.md)
 - [`EdgeCount`](https://reference.wolfram.com/language/ref/EdgeCount.html): The number of edges in the causal graph. Related to the [total number of expressions](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TotalElementCounts.md)
 - [`VertexConnectivity`](https://reference.wolfram.com/language/ref/VertexConnectivity.html): The smallest number of vertices whose deletion from `g` disconnects `g`. This is computed on the undirected version of the causal graph.

@@ -8,6 +8,7 @@
 In[]:= Subhypergraph[{{1, 1, 1}, {1, 2}, {2, 3, 3}, {2, 3, 4}}, {2, 3, 4}]
 Out[]= {{2, 3, 3}, {2, 3, 4}}
 ```
+
 **`WeakSubhypergraph`** is the weak version of the previous function, where hyperedges are selected if they contain any vertex from the requested list:
 
 ```wl

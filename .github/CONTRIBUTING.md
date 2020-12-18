@@ -17,18 +17,25 @@ The issues in this repository are only related to *SetReplace*, not the entire W
 Similarly, the weeds in function repository functions should be reported on the function repository website rather than here.
 
 To report a weed, follow these steps:
+
+<!-- markdownlint-disable ul-indent ol-prefix -->
+
 1. Go to the [Issues page](https://github.com/maxitg/SetReplace/issues), and use the search to check if the weed you have encountered is in the list already. If it is, and it was not getting much attention lately, the best you can do is to comment that you care about it being fixed, and to leave the example you have encountered that's not working (if it's not similar to ones already there).
 2. If the weed is not in the list, click "New issue", and then "Get started" next to the "Weed report".
 3. Fill in all the fields including:
+
   * Brief description in natural language.
   * The line of Wolfram Language code that results in unexpected behavior (or a screenshot if the weed is in the UI).
   * The actual output you are getting.
   * The output you expect to see.
   * The output of `SystemInformation["Small"]` and `$SetReplaceGitSHA`.
   * If the weed appears randomly and is not easy to reproduce, add details about how often and in what circumstances you encounter it.
+
 4. If you have a Mathematica notebook with more details, you can attach it to the issue, just compress it to a `ZIP` file first.
 5. Click "Submit new issue".
 6. Your issue is now on the list, and a developer will look at it if/when they have a chance. But if it does not get any attention, the best you can do is to [fix it yourself](#code).
+
+<!-- markdownlint-enable ul-indent ol-prefix -->
 
 Also, please understand that mistakes happen and are unavoidable. We never blame people for unintentional mistakes in this project. Instead, we improve our development process to minimize the probability of mistakes in the future.
 
@@ -43,6 +50,7 @@ The process is similar to weed reports, just use the "Feature request" option in
 It is helpful to add [labels](https://github.com/maxitg/SetReplace/labels) to your issue. This makes it easier for developers to find something they are interested in and comfortable working with. We have several categories of labels corresponding to different colors.
 
 First, assign one of the *type* labels to your pull request:
+
 * `feature`: new functionality, or change in existing functionality.
 * `weed`: fixes something that was not working.
 * `test`: adds new tests for existing functionality.
@@ -54,6 +62,7 @@ First, assign one of the *type* labels to your pull request:
 * `research`: introduces new ideas about the structure of the models themselves ([research notes](#research) will typically have this label).
 
 Then, assign one of the *component* labels:
+
 * `evolution`: modifies code for running the evolution of the model.
 * `analysis`: adds or changes evolution analysis tools, e.g., `WolframModelEvolutionObject` properties.
 * `visualization`: has to do with visualization code, such as `HypergraphPlot`.
@@ -64,6 +73,7 @@ Then, assign one of the *component* labels:
 It is also helpful to specify the language one expects to use to solve the issue. This helps developers to find issues they are comfortable working with. The current choices are `c++`, `wolfram language`, and `english` (e.g., for research documents).
 
 Also, one of the following may be used:
+
 * `critical`: fixes something that severely breaks the package (usually used for weeds).
 * `breaking`: introduces API changes that would break existing code, better to avoid if possible.
 * `blocked`: another issue needs to be closed before this one can be started. If using this label, you need to mention the blocking issue in the description.
@@ -120,7 +130,7 @@ cd ~/git/SetReplace
 ./install.wls
 ```
 
-The paclet will be installed in your system, replacing any existing version of the paclet you may have. This will allow you to load the paclet in the future by running simply ``Get["SetReplace`"] ``.
+The paclet will be installed in your system, replacing any existing version of the paclet you may have. This will allow you to load the paclet in the future by running simply ``Get["SetReplace`"]``.
 
 ### Writing code
 
@@ -174,6 +184,7 @@ The tool will checkout other branches while testing, so don't use git/modify any
 
 As an example, test an optimization done to *libSetReplace* by [@aokellermann](https://github.com/aokellermann):
 
+<!-- markdownlint-disable-next-line fenced-code-language -->
 ```
 > ./performanceTest.wls db6f15c7b4ae1be98be5ced0c188859e2f9eef29 8910175fe9be3847f96a1cf3c877a3b54a64823d
 
@@ -202,6 +213,7 @@ First, if someone has assigned a `critical` pull request to you, please stop rea
 Otherwise, please review within one or two days or give an ETA to the pull request author if that is not possible.
 
 The main objectives for the code review:
+
 1. Verify the code works (i.e., make sure you can reproduce examples in the pull request message).
 2. Read the code, understand it, and see if you can spot any potential weeds/unnecessary slowdowns/issues with it (including issues with code style as we currently only have a linter for the C++ and Bash, but not for the Wolfram Language code).
 3. Check the pull request has unit tests and changes documentation if appropriate.
@@ -319,16 +331,16 @@ cmake --build . --config Release
 
 Options available for CMake:
 
-- `SET_REPLACE_BUILD_TESTING`:
+* `SET_REPLACE_BUILD_TESTING`:
 Enable cpp testing using googletest, which is downloaded at build time. This is not supported on Windows at this time.
 
-- `SET_REPLACE_ENABLE_ALLWARNINGS`:
+* `SET_REPLACE_ENABLE_ALLWARNINGS`:
 For developers and contributors. Useful for continuous integration. Add compile options to the targets enabling extra warnings and treating warnings as errors.
 
-- `SET_REPLACE_EXTRA_COMPILE_OPTIONS`:
+* `SET_REPLACE_EXTRA_COMPILE_OPTIONS`:
 Add extra compilation options in addition to ones added by using the options above.
 
-- `SET_REPLACE_COMPILE_OPTIONS_OVERRIDE`:
+* `SET_REPLACE_COMPILE_OPTIONS_OVERRIDE`:
 Set all compilations options directly.
 
 For example, to build *libSetReplace* with tests, replace the second line in the above with
@@ -393,6 +405,7 @@ If you want to implement performance tests, put them in the [`./performanceTest.
 The *SetReplace* documentation is contained in three places: [README.md](/README.md), [CONTRIBUTING.md](CONTRIBUTING.md) (this file), and the code comments.
 
 Some things to note are:
+
 * Large [README](/README.md) sections should include navigation bars in the beginning.
 * All references to functions should be links, either to [the Wolfram Language documentation](https://reference.wolfram.com/language/) or to the corresponding section in [README](/README.md).
 * The comments in the Wolfram Language code are encouraged, and the C++ code is documented using [Doxygen](http://www.doxygen.nl).
@@ -402,6 +415,7 @@ Some things to note are:
 If you are using the *in-place* workflow, you will typically only need to run the [test.wls](/test.wls) script, but this section will describe the other scripts too.
 
 The four main scripts of *SetReplace* are:
+
 * [build.wls](/build.wls), which builds *libSetReplace* (if necessary)
 * [test.wls](/test.wls), which first calls `build.wls`, then runs the full test suite.
 * [pack.wls](/pack.wls), which first calls `build.wls`, then produces a `.paclet` file
@@ -413,11 +427,12 @@ Note that the `pack.wls` script will auto-generate the paclet version number bas
 
 ## Code style
 
-#### Wolfram Language
+### Wolfram Language
 
 Unfortunately, there are no established style guidelines for Wolfram Language code. Here, the best rule is to try to be consistent as much as possible with the existing *SetReplace* code.
 
 In addition to that, here are some more-or-less established rules:
+
 * Keep line widths within 120 characters.
 * Use at most a single empty line to separate code paragraphs (note, the Front End uses two by default, which should be manually fixed if you use the Front End for editing).
 * Don't use section and cell definitions for comments, such as `(* ::Text:: *)`.
@@ -485,6 +500,7 @@ In addition to that, here are some more-or-less established rules:
     ];
   ]
   ```
+
   is expanded to:
 
   ```wl
@@ -497,16 +513,18 @@ In addition to that, here are some more-or-less established rules:
   ]
   ```
 
-#### C++
+### C++
+
 The code should follow [Google C++ Style](https://google.github.io/styleguide/cppguide.html) guidelines, save for the
 following exceptions:
+
 * Maximum line length is 120 characters.
 * Function and variable names, including const and constexpr variables, use lower camel case.
 * Namespace and class names use upper camel case.
 * C++ exceptions may be thrown.
 * White space in pointer and reference declarations goes after the `*` or `&` character. For example:
-    * `int* foo;`
-    * `const std::string& string;`
+  * `int* foo;`
+  * `const std::string& string;`
 * If splitting function arguments into multiple lines, each argument should go on a separate line.
 * License, authors, and file descriptions should not be put at the top of files.
 * Doxygen format is used for documentation.
@@ -523,6 +541,7 @@ If there are no errors found, it will exit with no output.
 To edit the code in place with the fixed formatting use `./lint.sh -i`.
 
 We have two useful git hooks that you may install:
+
 1. `pre-commit` formats any staged files before committing.
 2. `pre-push` checks for formatting and linting errors before pushing.
 
@@ -540,6 +559,7 @@ If you want to disable formatting, use `// clang-format off` and `// clang-forma
 code.
 
 #### Markdown
+
 We are using GitHub-flavored Markdown for documentation and research notes.
 
 #### Manual image embedding
@@ -585,6 +605,7 @@ We have recently started publishing research notes directly in *SetReplace*. The
 The idea here is to have a mini-"journal", where the peer review is implemented in the same way as code review, the documents are organized as a wiki (by subject rather than by date), and can be updated any time.
 
 We expect the same high level of quality here as in the rest of *SetReplace*. In particular, we should be reasonably confident that everything written in the research notes is correct. This means:
+
 * If you are discussing a hypothesis or speculation that is not necessarily correct, it should be explicitly mentioned in the text.
 * If you rely on results of a computation, you can only use stable code to run that computation. This includes *SetReplace* and build-in Wolfram Language functions. However, it ***does not*** include Wolfram Function Repository functions. If you need to rely on such functions' output, you will need to add similar functionality to *SetReplace* first.
 * However, you can use Wolfram Function Repository functions for demonstration purposes in cases where their output can be easily verified by a reviewer.

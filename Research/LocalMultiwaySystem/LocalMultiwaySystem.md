@@ -418,12 +418,14 @@ In this case, we have to define the separation above as branchlike, as the two f
 simultaneously appear in the same singleway system.
 
 Thus, to determine the separation between two expressions, `A` and `B`, in an expressions-events graph:
+
 1. Compute the past causal cones of both `A` and `B`.
 2. Compute the intersection between the causal cones.
 3. Consider all vertices with out-degree zero (the future boundary of the intersection):
-  * If the boundary contains either `A` or `B`, they are timelike separated
-  * If any vertices on the boundary are expression-vertices, they are branchlike separated
-  * Otherwise, all vertices on the boundary are event-vertices, and they are spacelike separated
+
+* If the boundary contains either `A` or `B`, they are timelike separated
+* If any vertices on the boundary are expression-vertices, they are branchlike separated
+* Otherwise, all vertices on the boundary are event-vertices, and they are spacelike separated
 
 ## Spacelike-Only Local Multiway System
 

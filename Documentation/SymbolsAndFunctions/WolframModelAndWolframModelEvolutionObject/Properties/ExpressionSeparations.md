@@ -6,6 +6,7 @@ Expressions can be related in different ways to one another depending on the cau
 graph.
 
 There are three fundamental cases, the separation between two expressions can be:
+
 * spacelike -- the expressions were produced (directly or indirectly) by a single event;
 * branchlike -- the expressions were produced (directly or indirectly) by multiple events that matched the same
 expression;
@@ -61,6 +62,7 @@ In[] := WolframModel[<|"PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}},
 
 Specifically, the general algorithm for computing the separation between two expressions `A` and `B` in an
 expressions-events graph is:
+
 1. Compute the past causal cones of both `A` and `B`.
 2. Compute the intersection between the causal cones.
 3. Take all vertices with out-degree zero (the future boundary of the intersection).

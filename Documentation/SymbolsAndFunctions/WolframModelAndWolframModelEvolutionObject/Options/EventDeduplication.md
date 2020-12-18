@@ -1,6 +1,5 @@
 ###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Options](../WolframModelAndWolframModelEvolutionObject.md#options) >
 
-
 # "EventDeduplication"
 
 Some rules can match the same set of inputs in different ways.

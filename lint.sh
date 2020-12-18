@@ -7,6 +7,7 @@ cd "$setReplaceRoot"
 sourceFiles=$(find libSetReplace -type f -name "*pp")
 # Some bash files don't use .sh extension, so find by shebang
 bashFiles=$(grep -rIl '^#![[:blank:]]*/usr/bin/env bash' --exclude-dir={*build*,*.git*} .)
+markdownFiles=$(find . -type f -name "*.md" -not -path "*build*")
 
 red="\\\033[0;31m"
 green="\\\033[0;32m"
@@ -54,11 +55,13 @@ for file in $bashFiles; do
   fi
 done
 
-if [ $formatInPlace -eq 1 ]; then
-  markdownlint -f -c .markdownlint.json ./**/*.md || exitStatus=1
-else
-  markdownlint -c .markdownlint.json ./**/*.md || exitStatus=1
-fi
+for file in $markdownFiles; do
+  if [ $formatInPlace -eq 1 ]; then
+    markdownlint -f "$file"
+  else
+    markdownlint "$file" || exitStatus=1
+  fi
+done
 
 if [ $exitStatus -eq 1 ]; then
   echo "Found formatting errors. Run ./lint.sh -i to automatically fix by applying the printed patch."
