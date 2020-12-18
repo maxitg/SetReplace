@@ -57,7 +57,7 @@ done
 
 for file in $markdownFiles; do
   if [ $formatInPlace -eq 1 ]; then
-    markdownlint -f "$file"
+    markdownlint -f "$file" || :
   else
     markdownlint "$file" || exitStatus=1
   fi
