@@ -1,0 +1,10 @@
+{
+  "line-length": {
+    "line_length": 120,
+    "headers": false
+  },
+  "no-inline-html": false,
+  "first-line-h1": false,
+  "no-blanks-blockquote": false,
+  "no-duplicate-heading": false
+}

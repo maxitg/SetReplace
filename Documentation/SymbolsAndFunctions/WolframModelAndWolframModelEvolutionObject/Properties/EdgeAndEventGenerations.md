@@ -2,7 +2,8 @@
 
 # Edge and Event Generations
 
-**`"EdgeGenerationsList"`** (aka `"ExpressionGenerations"`) yields the list of generation numbers (numbers of predecessor layers) for each edge in [`"AllEventsEdgesList"`](AllEdgesThroughoutEvolution.md):
+**`"EdgeGenerationsList"`** (aka `"ExpressionGenerations"`) yields the list of generation numbers (numbers of
+predecessor layers) for each edge in [`"AllEventsEdgesList"`](AllEdgesThroughoutEvolution.md):
 
 ```wl
 In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
@@ -12,7 +13,8 @@ Out[] = {0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
    5, 5, 5, 5}
 ```
 
- **`"AllEventsGenerationsList"`** (aka `"EventGenerations"`) gives the same for events. The generation of an event is defined as the generation of edges it produces as output. Here edges of different generations are colored differently:
+**`"AllEventsGenerationsList"`** (aka `"EventGenerations"`) gives the same for events. The generation of an event is
+defined as the generation of edges it produces as output. Here edges of different generations are colored differently:
 
 ```wl
 In[] := With[{
@@ -30,7 +32,8 @@ In[] := With[{
 
 <img src="/Documentation/Images/GenerationColoredStatePlots.png" width="746">
 
-Event and expression generations correspond to layers in [`"LayeredCausalGraph"`](CausalGraphs.md) and [`"ExpressionsEventsGraph"`](CausalGraphs.md):
+Event and expression generations correspond to layers in [`"LayeredCausalGraph"`](CausalGraphs.md)
+and [`"ExpressionsEventsGraph"`](CausalGraphs.md):
 
 ```wl
 In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->

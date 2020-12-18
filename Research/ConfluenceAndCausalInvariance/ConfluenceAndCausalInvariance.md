@@ -3,9 +3,8 @@
 ## Introduction
 
 There are claims made in the [Wolfram Physics Project](https://www.wolframphysics.org) about the equivalence of
-confluence and causal invariance.
-This note demonstrates that some of these claims are not correct.
-For example, consider
+confluence and causal invariance. This note demonstrates that some of these claims are not correct. For example,
+consider
 [the glossary](https://www.wolframphysics.org/glossary/#CausalInvariance) on the project's website, which,
 [as of 10/30/2020](http://web.archive.org/web/20201030155847/https://www.wolframphysics.org/glossary/#CausalInvariance),
 says:
@@ -17,7 +16,7 @@ says:
 > In a terminating system, causal invariance implies that whatever path is taken, the "answer" will always be the same.
 
 > **Confluence**: A simplified form of causal invariance considered in term rewriting systems such as ones that reach
-> fixed points.
+   fixed points.
 
 However, the glossary does not explicitly define confluence, so we are going to use the
 [standard definition](https://en.wikipedia.org/wiki/Confluence_%28abstract_rewriting%29#General_case_and_theory) from
@@ -36,8 +35,8 @@ We can summarize the statements above with the following definitions:
 > are isomorphic.
 
 Note that the definition above is only meaningful for terminating systems (i.e., the systems that always reach a
-[`"FixedPoint"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TerminationReason.md),
-a state during the evolution where no more matches can be made to its expressions).
+[`"FixedPoint"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TerminationReason.md)
+, a state during the evolution where no more matches can be made to its expressions).
 
 We can then define confluence as:
 
@@ -56,8 +55,8 @@ We will not make any comments in this note about the physics claims made above.
 Before we get to specific examples, it's essential to understand the fundamental difference between these two
 properties.
 *Causal invariance* has to do with symmetries between evolution branches of
-[expressions-events graphs](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).
-It requires that, even though the branches operate on different expressions, they have the same causal structure:
+[expressions-events graphs](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
+. It requires that, even though the branches operate on different expressions, they have the same causal structure:
 
 <!--
 ```wl
@@ -70,9 +69,8 @@ WolframModel[{{{1, 1, 2}} -> {{1, 1, 3}, {3, 3, 2}}, {{1, 2,
 
 <img src="Images/LargeCausalInvariantEvolution.png" width="720">
 
-On the other hand, *confluence* has to do with the symmetries between expressions' contents.
-It requires that particular states from different branches are isomorphic as hypergraphs, regardless of the causal
-structures that lead to them:
+On the other hand, *confluence* has to do with the symmetries between expressions' contents. It requires that particular
+states from different branches are isomorphic as hypergraphs, regardless of the causal structures that lead to them:
 
 <!--
 ```wl
@@ -148,9 +146,8 @@ In[] := ResourceFunction["MultiwaySystem"][
 
 <img src="Images/ConfluentStatesGraph.png" width="358">
 
-However, this system is not causal invariant.
-We can generate two non-isomorphic causal graphs by using different event ordering functions, which contradicts the
-definition above:
+However, this system is not causal invariant. We can generate two non-isomorphic causal graphs by using different event
+ordering functions, which contradicts the definition above:
 
 ```wl
 In[] := IsomorphicGraphQ @@ Echo @ (
@@ -167,8 +164,8 @@ Out[] = False
 Therefore, confluence *does not imply* causal invariance.
 
 Note that the `"CausalInvariantQ"` property of
-[`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) checks for
-confluence despite its name:
+[`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) checks for confluence
+despite its name:
 
 ```wl
 In[] := ResourceFunction["MultiwaySystem"]["WolframModel" -> {confluentRule}, {confluentInit}, 2, "CausalInvariantQ"]
@@ -222,7 +219,6 @@ Out[] = True
 It is not, however, confluent, because the final states in these two evolutions are not isomorphic, and the evolutions
 terminate after these states are reached:
 
-
 ```wl
 In[] := ResourceFunction["MultiwaySystem"][
   "WolframModel" -> {causalInvariantRule}, {causalInvariantInit}, 2, "StatesGraph", VertexSize -> .7]
@@ -244,15 +240,14 @@ Out[] = False
 
 ## Future Research
 
-It would be interesting to investigate the systems exhibiting these properties in different combinations.
-For example, systems that don't exhibit [multiway branching](/Research/LocalMultiwaySystem/LocalMultiwaySystem.md) at
-all do satisfy both of these conditions.
-One can also consider systems in which causal-graphs isomorphism is equivalent to states isomorphism by
-construction&mdash;for example,
-[classical sequential growth models of causal sets](https://arxiv.org/abs/gr-qc/9904062).
-It might be possible to generalize this to include more classes of systems.
-We could also enumerate ([#57](https://github.com/maxitg/SetReplace/issues/57)) simple rules and determine how many of
-them exhibit just one of these properties, both or neither.
+It would be interesting to investigate the systems exhibiting these properties in different combinations. For example,
+systems that don't exhibit [multiway branching](/Research/LocalMultiwaySystem/LocalMultiwaySystem.md) at all do satisfy
+both of these conditions. One can also consider systems in which causal-graphs isomorphism is equivalent to states
+isomorphism by construction&mdash;for example,
+[classical sequential growth models of causal sets](https://arxiv.org/abs/gr-qc/9904062). It might be possible to
+generalize this to include more classes of systems. We could also
+enumerate ([#57](https://github.com/maxitg/SetReplace/issues/57)) simple rules and determine how many of them exhibit
+just one of these properties, both or neither.
 
 To do that, we need to implement tests for both confluence ([#59](https://github.com/maxitg/SetReplace/issues/59),
 [#477](https://github.com/maxitg/SetReplace/issues/477)) and causal invariance
@@ -261,9 +256,10 @@ To do that, we need to implement tests for both confluence ([#59](https://github
 We will also need to generalize the definition of causal invariance to non-terminating Wolfram models
 ([#487](https://github.com/maxitg/SetReplace/issues/487)).
 
-It will be interesting to investigate other similar properties.
-For example, one can investigate a stronger version of confluence:
+It will be interesting to investigate other similar properties. For example, one can investigate a stronger version of
+confluence:
+
 1. Consider any infinite singleway evolution of a system.
 2. Consider another finite partial singleway evolution.
 3. If any such finite evolution can be continued in such a way as to reach one of the states from the infinite
-evolution, we define the system as *"super"-confluent* ([#478](https://github.com/maxitg/SetReplace/issues/478)).
+   evolution, we define the system as *"super"-confluent* ([#478](https://github.com/maxitg/SetReplace/issues/478)).

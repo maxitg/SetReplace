@@ -2,16 +2,20 @@
 
 # Termination Reason
 
-**`"TerminationReason"`** shows why the evaluation of the model was stopped. It's particularly useful if multiple [stopping conditions](../WolframModelAndWolframModelEvolutionObject.md#step-limiters) are specified.
+**`"TerminationReason"`** shows why the evaluation of the model was stopped. It's particularly useful if
+multiple [stopping conditions](../WolframModelAndWolframModelEvolutionObject.md#step-limiters) are specified.
 
 All possible values are:
 
-* `"MaxEvents"`, `"MaxGenerations"`, `"MaxVertices"`, `"MaxVertexDegree"` and `"MaxEdges"` correspond directly to [step limiters](../WolframModelAndWolframModelEvolutionObject.md#step-limiters).
+* `"MaxEvents"`, `"MaxGenerations"`, `"MaxVertices"`, `"MaxVertexDegree"` and `"MaxEdges"` correspond directly
+  to [step limiters](../WolframModelAndWolframModelEvolutionObject.md#step-limiters).
 * `"FixedPoint"` means there were no more matches possible to rule inputs.
 * `"TimeConstraint"` could occur if a [`"TimeConstraint"`](../Options/TimeConstraint.md) option is used.
-* `"Aborted"` would occur if the evaluation was manually interrupted (i.e., by pressing ⌘. on a Mac). In that case, a partially computed evolution object is returned.
+* `"Aborted"` would occur if the evaluation was manually interrupted (i.e., by pressing ⌘. on a Mac). In that case, a
+  partially computed evolution object is returned.
 
-As an example, in our arithmetic model a `"FixedPoint"` is reached (which is why we can use [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html) as the number of steps):
+As an example, in our arithmetic model a `"FixedPoint"` is reached (which is why we can
+use [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html) as the number of steps):
 
 ```wl
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,

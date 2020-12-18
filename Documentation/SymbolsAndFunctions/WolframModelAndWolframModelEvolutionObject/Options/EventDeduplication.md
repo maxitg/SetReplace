@@ -1,12 +1,11 @@
 ###### [Symbols and Functions](/README.md#symbols-and-functions) > [WolframModel and WolframModelEvolutionObject](../WolframModelAndWolframModelEvolutionObject.md) > [Options](../WolframModelAndWolframModelEvolutionObject.md#options) >
 
-
 # "EventDeduplication"
 
-Some rules can match the same set of inputs in different ways.
-For example, consider the rule `{{a, b}, {a, c}} -> {{b, c}}` starting with an initial condition `{{1, 2}, {1, 3}}`.
-There are two possible ways to match it: `<|a -> 1, b -> 2, c -> 3|>` and `<|a -> 1, b -> 3, c -> 2|>`.
-In this case, these matches yield different results, `{2, 3}` and `{3, 2}` respectively:
+Some rules can match the same set of inputs in different ways. For example, consider the
+rule `{{a, b}, {a, c}} -> {{b, c}}` starting with an initial condition `{{1, 2}, {1, 3}}`. There are two possible ways
+to match it: `<|a -> 1, b -> 2, c -> 3|>` and `<|a -> 1, b -> 3, c -> 2|>`. In this case, these matches yield different
+results, `{2, 3}` and `{3, 2}` respectively:
 
 ```wl
 In[] := WolframModel[{{a, b}, {a, c}} -> {{b, c}}, {{1, 2}, {1, 3}},

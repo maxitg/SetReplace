@@ -2,7 +2,10 @@
 
 # Total Element Counts
 
-**`"AllEventsDistinctElementsCount"`** (aka `"AtomsCountTotal"`) and **`"AllEventsEdgesCount"`** (aka `"ExpressionsCountTotal"`) are similar to [`"FinalDistinctElementsCount"`](FinalElementCounts.md) and [`"FinalEdgeCount"`](FinalElementCounts.md), except they count atoms and edges throughout the entire evolution instead of just in the final step.
+**`"AllEventsDistinctElementsCount"`** (aka `"AtomsCountTotal"`) and **`"AllEventsEdgesCount"`** (
+aka `"ExpressionsCountTotal"`) are similar to [`"FinalDistinctElementsCount"`](FinalElementCounts.md)
+and [`"FinalEdgeCount"`](FinalElementCounts.md), except they count atoms and edges throughout the entire evolution
+instead of just in the final step.
 
 For instance,
 

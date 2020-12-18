@@ -2,11 +2,14 @@
 
 # HypergraphToGraph
 
-**`HypergraphToGraph`** converts a hypergraph to a [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) object. There are (currently) 3 ways to perform this transformation:
+**`HypergraphToGraph`** converts a hypergraph to a [`Graph`](https://reference.wolfram.com/language/ref/Graph.html)
+object. There are (currently) 3 ways to perform this transformation:
 
 ## **"DirectedDistancePreserving"**
 
-Converts a hypergraph to a directed graph with the same distance matrix, where distance between two vertices `v1` and `v2` in a hypergraph is defined as the minimum length of a path which connects `v1` and `v2` (i.e. 1 if both vertices belong to the same hyperedge):
+Converts a hypergraph to a directed graph with the same distance matrix, where distance between two vertices `v1`
+and `v2` in a hypergraph is defined as the minimum length of a path which connects `v1` and `v2` (i.e. 1 if both
+vertices belong to the same hyperedge):
 
 ```wl
 In[]:= HypergraphToGraph[
@@ -20,7 +23,8 @@ In[]:= HypergraphToGraph[
 
 ## **"UndirectedDistancePreserving"**
 
-Converts a hypergraph to an undirected graph with the same distance matrix, that is, each hyperedge is mapped to a complete subgraph:
+Converts a hypergraph to an undirected graph with the same distance matrix, that is, each hyperedge is mapped to a
+complete subgraph:
 
 ```wl
 In[]:= HypergraphToGraph[
@@ -34,7 +38,9 @@ In[]:= HypergraphToGraph[
 
 ## **"StructurePreserving"**
 
-Converts a hypergraph to a graph by preserving its structure. This is achieved by a one-to-one correspondence between vertices and hyperedges in the hypergraph and 2 different kind of vertices - `{"Hyperedge", hyperedgeIndex_, vertexIndex_}` and `{"Vertex", vertexName_}` - in the graph:
+Converts a hypergraph to a graph by preserving its structure. This is achieved by a one-to-one correspondence between
+  vertices and hyperedges in the hypergraph and 2 different kind of
+  vertices - `{"Hyperedge", hyperedgeIndex_, vertexIndex_}` and `{"Vertex", vertexName_}` - in the graph:
 
 ```wl
 In[]:= HypergraphToGraph[
@@ -45,7 +51,8 @@ In[]:= HypergraphToGraph[
 
 <img src="/Documentation/Images/HypergraphToGraphStructurePreserving.png" width="352">
 
-It is important to mention that this conversion does not lose any information, and it is possible to unambiguously retrieve the original hypergraph from the resulting [`Graph`](https://reference.wolfram.com/language/ref/Graph.html):
+It is important to mention that this conversion does not lose any information, and it is possible to unambiguously
+retrieve the original hypergraph from the resulting [`Graph`](https://reference.wolfram.com/language/ref/Graph.html):
 
 ```wl
 fromStructurePreserving[graph_Graph] := Values @ KeySort @ Join[

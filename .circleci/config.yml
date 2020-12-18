@@ -81,8 +81,9 @@ jobs:
       - run:
           name: Install Required Tools
           command: |
-            apk add --no-cache bash git g++ make cmake clang py-pip shellcheck shfmt grep
+            apk add --no-cache bash git g++ make cmake clang py-pip shellcheck shfmt grep npm
             pip install cpplint
+            npm install -g markdownlint-cli
 
       - run:
           name: Lint

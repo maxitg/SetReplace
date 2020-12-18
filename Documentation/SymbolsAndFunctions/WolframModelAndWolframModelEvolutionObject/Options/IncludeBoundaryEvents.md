@@ -2,9 +2,13 @@
 
 # "IncludeBoundaryEvents"
 
-**`"IncludeBoundaryEvents"`** allows one to include "fake" initial and final events in properties such as [`"ExpressionsEventsGraph"`](../Properties/CausalGraphs.md). It does not affect the evolution itself and does not affect the evolution object. It has 4 settings: [`None`](https://reference.wolfram.com/language/ref/None.html), `"Initial"`, `"Final"` and [`All`](https://reference.wolfram.com/language/ref/All.html).
+**`"IncludeBoundaryEvents"`** allows one to include "fake" initial and final events in properties such
+as [`"ExpressionsEventsGraph"`](../Properties/CausalGraphs.md). It does not affect the evolution itself and does not
+affect the evolution object. It has 4 settings: [`None`](https://reference.wolfram.com/language/ref/None.html)
+, `"Initial"`, `"Final"` and [`All`](https://reference.wolfram.com/language/ref/All.html).
 
-Here is an example of an [`"ExpressionsEventsGraph"`](../Properties/CausalGraphs.md) with the initial and final "events" included:
+Here is an example of an [`"ExpressionsEventsGraph"`](../Properties/CausalGraphs.md) with the initial and final "events"
+included:
 
 ```wl
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,

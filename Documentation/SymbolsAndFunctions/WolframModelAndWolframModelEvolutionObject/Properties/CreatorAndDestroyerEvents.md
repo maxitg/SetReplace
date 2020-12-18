@@ -2,7 +2,9 @@
 
 # Creator and Destroyer Events
 
-An event is said to *destroy* the edges in its input, and *create* the edges in its output. Creator and destroyer events for each edge can be obtained with **`"EdgeCreatorEventIndices"`** (aka `"CreatorEvents"`) and **`"EdgeDestroyerEventsIndices"`** properties.
+An event is said to *destroy* the edges in its input, and *create* the edges in its output. Creator and destroyer events
+for each edge can be obtained with **`"EdgeCreatorEventIndices"`** (aka `"CreatorEvents"`)
+and **`"EdgeDestroyerEventsIndices"`** properties.
 
 As an example, for a simple rule that splits each edge in two, one can see that edges are created in pairs:
 
@@ -23,9 +25,13 @@ Out[] = {{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12},
    {}, {}, {}, {}}
 ```
 
-Here 0 refers to the initial state. Note the format is different for creator and destroyer events. That is because each edge has a unique creator event, but can have multiple destroyer events in [multiway systems](../Options/EventSelectionFunction.md).
+Here 0 refers to the initial state. Note the format is different for creator and destroyer events. That is because each
+edge has a unique creator event, but can have multiple destroyer events
+in [multiway systems](../Options/EventSelectionFunction.md).
 
-There is another property, **`"EdgeDestroyerEventIndices"`** (aka `"DestroyerEvents"`), left for compatibility reasons, which has the same format as **`"EdgeCreatorEventIndices"`**. However, it does not work for [multiway systems](../Options/EventSelectionFunction.md).
+There is another property, **`"EdgeDestroyerEventIndices"`** (aka `"DestroyerEvents"`), left for compatibility reasons,
+which has the same format as **`"EdgeCreatorEventIndices"`**. However, it does not work
+for [multiway systems](../Options/EventSelectionFunction.md).
 
 ```wl
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},

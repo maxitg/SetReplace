@@ -2,18 +2,18 @@
 
 # "EventSelectionFunction"
 
-**`EventSelectionFunction`** allows one to evaluate multiway systems.
-Currently, three values are supported, `"GlobalSpacelike"`, `"MultiwaySpacelike"` and `None`.
+**`EventSelectionFunction`** allows one to evaluate multiway systems. Currently, three values are
+supported, `"GlobalSpacelike"`, `"MultiwaySpacelike"` and `None`.
 
 `"GlobalSpacelike"` is the default, and is the single-way evolution.
 "Spacelike" refers to relationships between expressions, and "global" means each expression is only used once in an
-event, so there is always a global state in which all expressions are pairwise spacelike.
-Note that one can obtain different evolutions in this case depending on [the ordering function](EventOrderingFunction.md).
+event, so there is always a global state in which all expressions are pairwise spacelike. Note that one can obtain
+different evolutions in this case depending on [the ordering function](EventOrderingFunction.md).
 
-`"MultiwaySpacelike"` evolution is the multiway version of `"GlobalSpacelike"`.
-Essentially, it evolves it for all possible ordering functions and combines the result to a single evolution object.
-It achieves that by not disabling expressions after they were used.
-Only spacelike separated expressions are matched for any given event, however, so every individual expression of the
+`"MultiwaySpacelike"` evolution is the multiway version of `"GlobalSpacelike"`. Essentially, it evolves it for all
+possible ordering functions and combines the result to a single evolution object. It achieves that by not disabling
+expressions after they were used. Only spacelike separated expressions are matched for any given event, however, so
+every individual expression of the
 `"MultiwaySpacelike"` evolution can be obtained with a particular choice of the event ordering function.
 (It does not imply that it can actually be done in *SetReplace* as only few ordering functions are implemented at this
 time.)
@@ -28,8 +28,8 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {2, 3}, {2, 4}},
 <img src="/Documentation/Images/GlobalSpacelikeEvolution.png" width="419">
 
 In this example we used the default `"GlobalSpacelike"` selection function, and the evolution terminated after a single
-event, because the expression `{1, 2}` was used, and it could not be reused to be matched with `{2, 4}`.
-However, let's look at what `"EventSelectionFunction" -> "MultiwaySpacelike"` will do:
+event, because the expression `{1, 2}` was used, and it could not be reused to be matched with `{2, 4}`. However, let's
+look at what `"EventSelectionFunction" -> "MultiwaySpacelike"` will do:
 
 ```wl
 In[] := WolframModel[{{1, 2}, {2, 3}} -> {{1, 3}}, {{1, 2}, {2, 3}, {2, 4}},
@@ -64,8 +64,8 @@ In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
 
 <img src="/Documentation/Images/NoBranchlikeMatching.png" width="478">
 
-However, `"EventSelectionFunction" -> None` also matches expressions that are branchlike and timelike.
-So, further evolution will be generated in the previous example:
+However, `"EventSelectionFunction" -> None` also matches expressions that are branchlike and timelike. So, further
+evolution will be generated in the previous example:
 
 ```wl
 In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
