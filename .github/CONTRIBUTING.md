@@ -425,7 +425,7 @@ All four scripts use functionality defined in the [DevUtils](/DevUtils) package.
 
 Note that the `pack.wls` script will auto-generate the paclet version number based on the number of commits to master from the checkpoint defined in [version.wl](/scripts/version.wl).
 
-## Code style
+## Style
 
 ### Wolfram Language
 
@@ -558,9 +558,11 @@ comments section.
 If you want to disable formatting, use `// clang-format off` and `// clang-format on` around the manually formatted
 code.
 
-#### Markdown
+### Markdown
 
 We are using GitHub-flavored Markdown for documentation and research notes.
+
+We use [`markdownlint`](https://github.com/DavidAnson/markdownlint) for formatting and linting markdown text.
 
 #### Manual image embedding
 
