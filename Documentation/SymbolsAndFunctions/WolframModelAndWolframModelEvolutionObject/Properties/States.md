@@ -2,7 +2,8 @@
 
 # States
 
-These are the properties used to extract states at a particular moment in the evolution. They always return lists, but in the examples below, we plot them for clarity.
+These are the properties used to extract states at a particular moment in the evolution. They always return lists, but
+in the examples below, we plot them for clarity.
 
 **`"FinalState"`** (aka -1) yields the state obtained after all replacements of the evolution have been made:
 
@@ -49,7 +50,8 @@ In[] := HypergraphPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 
 <img src="/Documentation/Images/StatesListPlot.png" width="746">
 
-`"StatesList"` shows a compressed version of the evolution. To see how the state changes with each applied replacement, use **`"AllEventsStatesList"`**:
+`"StatesList"` shows a compressed version of the evolution. To see how the state changes with each applied replacement,
+use **`"AllEventsStatesList"`**:
 
 ```wl
 In[] := HypergraphPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
@@ -73,4 +75,5 @@ In[] := HypergraphPlot @ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 
 <img src="/Documentation/Images/StateAfterEventPlot.png" width="478">
 
-`"StateAfterEvent"` is equivalent to taking a corresponding part in `"AllEventsStatesList"`, but it is much faster to compute than the entire list.
+`"StateAfterEvent"` is equivalent to taking a corresponding part in `"AllEventsStatesList"`, but it is much faster to
+compute than the entire list.

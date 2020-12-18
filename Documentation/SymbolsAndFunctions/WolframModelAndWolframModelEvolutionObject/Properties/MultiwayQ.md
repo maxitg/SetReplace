@@ -2,7 +2,8 @@
 
 # MultiwayQ
 
-**`"MultiwayQ"`** checks if a given evolution contains multiway branching, i.e., there is an expression used in multiple events.
+**`"MultiwayQ"`** checks if a given evolution contains multiway branching, i.e., there is an expression used in multiple
+events.
 
 ```wl
 In[] := EchoFunction[#["ExpressionsEventsGraph"] &][
@@ -18,7 +19,9 @@ In[] := EchoFunction[#["ExpressionsEventsGraph"] &][
 Out[] = True
 ```
 
-Note that even if [`"EventSelectionFunction"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventSelectionFunction.md) is set to allow multiway branching, the system might still be singleway if no overlapping matches occurred:
+Note that even
+if [`"EventSelectionFunction"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventSelectionFunction.md)
+is set to allow multiway branching, the system might still be singleway if no overlapping matches occurred:
 
 ```wl
 In[] := EchoFunction[#["ExpressionsEventsGraph"] &][WolframModel[

@@ -2,7 +2,8 @@
 
 # Rule Indices for Events
 
-**`"AllEventsRuleIndices"`** returns which rule was used for each event (the same can be obtained by mapping [`First`](https://reference.wolfram.com/language/ref/First.html) over [`"AllEventsList"`](Events.md)):
+**`"AllEventsRuleIndices"`** returns which rule was used for each event (the same can be obtained by
+mapping [`First`](https://reference.wolfram.com/language/ref/First.html) over [`"AllEventsList"`](Events.md)):
 
 ```wl
 In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}},
@@ -11,7 +12,9 @@ In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}},
 Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
 ```
 
-A neat example of using `"AllEventsRuleIndices"` is coloring events in a causal graph according to the rule index. With this visualization, one can see, for instance, that the outputs of the second rule in the example above are never used in any further inputs:
+A neat example of using `"AllEventsRuleIndices"` is coloring events in a causal graph according to the rule index. With
+this visualization, one can see, for instance, that the outputs of the second rule in the example above are never used
+in any further inputs:
 
 ```wl
 In[] := With[{

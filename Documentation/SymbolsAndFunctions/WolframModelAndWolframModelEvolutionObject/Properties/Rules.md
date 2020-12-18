@@ -11,4 +11,5 @@ In[] := WolframModel[<|"PatternRules" ->
 Out[] = <|"PatternRules" -> {{a_}} :> {{a + 1}, {a - 1}, {{a + 2, a - 2}}}|>
 ```
 
-This is useful for display in the information box of the evolution object, and if one needs to reproduce an evolution object, the input for which is no longer available.
+This is useful for display in the information box of the evolution object, and if one needs to reproduce an evolution
+object, the input for which is no longer available.

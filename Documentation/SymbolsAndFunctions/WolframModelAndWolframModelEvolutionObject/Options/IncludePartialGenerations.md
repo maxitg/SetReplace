@@ -2,7 +2,9 @@
 
 # "IncludePartialGenerations"
 
-In case partial generations were produced, they can be automatically dropped by setting **`"IncludePartialGenerations"`** to [`False`](https://reference.wolfram.com/language/ref/False.html). Compare for instance
+In case partial generations were produced, they can be automatically dropped by
+setting **`"IncludePartialGenerations"`** to [`False`](https://reference.wolfram.com/language/ref/False.html). Compare
+for instance
 
 ```wl
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},

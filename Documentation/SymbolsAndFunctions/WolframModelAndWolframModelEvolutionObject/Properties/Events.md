@@ -2,7 +2,9 @@
 
 # Events
 
-**`"AllEventsList"`** (aka `"EventsList"`) and **`"GenerationEventsList"`** both return all replacement events throughout the evolution. The only difference is how the events are arranged. `"AllEventsList"` returns the flat list of all events, whereas `"GenerationEventsList"` splits them into sublists for each generation:
+**`"AllEventsList"`** (aka `"EventsList"`) and **`"GenerationEventsList"`** both return all replacement events
+throughout the evolution. The only difference is how the events are arranged. `"AllEventsList"` returns the flat list of
+all events, whereas `"GenerationEventsList"` splits them into sublists for each generation:
 
 ```wl
 In[] := WolframModel[{{1, 2}} -> {{3, 4}, {3, 1}, {4, 1}, {2, 4}},

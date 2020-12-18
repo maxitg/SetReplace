@@ -2,7 +2,8 @@
 
 # GeneralizedGridGraph
 
-**`GeneralizedGridGraph`** is similar to [`GridGraph`](https://reference.wolfram.com/language/ref/GridGraph.html), but it allows for additional specifiers in each direction of the grid:
+**`GeneralizedGridGraph`** is similar to [`GridGraph`](https://reference.wolfram.com/language/ref/GridGraph.html), but
+it allows for additional specifiers in each direction of the grid:
 
 ```wl
 In[] := GeneralizedGridGraph[{5 -> "Directed", 5 -> "Circular"}]
@@ -18,7 +19,8 @@ In[] := GeneralizedGridGraph[{3 -> {"Directed", "Circular"}, 6}]
 
 <img src="/Documentation/Images/DirectedCircularGridGraph.png" width="478">
 
-The same options as [`GridGraph`](https://reference.wolfram.com/language/ref/GridGraph.html) are supported. In addition `"VertexNamingFunction" -> "Coordinates"` names vertices according to their position in a grid:
+The same options as [`GridGraph`](https://reference.wolfram.com/language/ref/GridGraph.html) are supported. In
+addition `"VertexNamingFunction" -> "Coordinates"` names vertices according to their position in a grid:
 
 ```wl
 In[] := GeneralizedGridGraph[{4, 5, 2},

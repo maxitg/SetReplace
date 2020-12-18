@@ -2,7 +2,8 @@
 
 # Element Count Lists
 
-**`"VertexCountList"`** and **`"EdgeCountList"`** return counts of vertices and edges respectively in each state of [`"StatesList"`](States.md). They are useful to see how quickly a particular system grows:
+**`"VertexCountList"`** and **`"EdgeCountList"`** return counts of vertices and edges respectively in each state
+of [`"StatesList"`](States.md). They are useful to see how quickly a particular system grows:
 
 ```wl
 In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->

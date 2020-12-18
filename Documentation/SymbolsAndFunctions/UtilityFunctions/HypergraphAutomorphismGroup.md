@@ -2,7 +2,9 @@
 
 # HypergraphAutomorphismGroup
 
-**`HypergraphAutomorphismGroup`** does the same thing as [`GraphAutomorphismGroup`](https://reference.wolfram.com/language/ref/GraphAutomorphismGroup.html), but for ordered hypergraphs:
+**`HypergraphAutomorphismGroup`** does the same thing
+as [`GraphAutomorphismGroup`](https://reference.wolfram.com/language/ref/GraphAutomorphismGroup.html), but for ordered
+hypergraphs:
 
 ```wl
 In[] := HypergraphAutomorphismGroup[{{1, 2, 3}, {1, 2, 4}}]

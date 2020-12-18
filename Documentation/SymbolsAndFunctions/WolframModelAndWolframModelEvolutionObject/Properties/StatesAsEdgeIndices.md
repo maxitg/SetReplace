@@ -2,7 +2,8 @@
 
 # States as Edge Indices
 
-**`"AllEventsStatesEdgeIndicesList"`** is similar to [`"AllEventsStatesList"`](States.md), except instead of actual edges the list it returns contains the indices of edges from [`"AllEventsEdgesList"`](AllEdgesThroughoutEvolution.md):
+**`"AllEventsStatesEdgeIndicesList"`** is similar to [`"AllEventsStatesList"`](States.md), except instead of actual
+edges the list it returns contains the indices of edges from [`"AllEventsEdgesList"`](AllEdgesThroughoutEvolution.md):
 
 ```wl
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->

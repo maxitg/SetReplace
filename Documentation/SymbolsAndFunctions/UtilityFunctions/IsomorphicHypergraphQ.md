@@ -2,7 +2,11 @@
 
 # IsomorphicHypergraphQ
 
-**`IsomorphicHypergraphQ`** is the natural extension of [`IsomorphicGraphQ`](https://reference.wolfram.com/language/ref/IsomorphicGraphQ.html) for hypergraphs. It yields [`True`](https://reference.wolfram.com/language/ref/True.html) for [isomorphic](https://en.wikipedia.org/wiki/Hypergraph#Isomorphism_and_equality) (ordered) hypergraphs, and [`False`](https://reference.wolfram.com/language/ref/False.html) otherwise:
+**`IsomorphicHypergraphQ`** is the natural extension
+of [`IsomorphicGraphQ`](https://reference.wolfram.com/language/ref/IsomorphicGraphQ.html) for hypergraphs. It
+yields [`True`](https://reference.wolfram.com/language/ref/True.html)
+for [isomorphic](https://en.wikipedia.org/wiki/Hypergraph#Isomorphism_and_equality) (ordered) hypergraphs,
+and [`False`](https://reference.wolfram.com/language/ref/False.html) otherwise:
 
 ```wl
 In[]:= IsomorphicHypergraphQ[

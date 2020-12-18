@@ -2,7 +2,8 @@
 
 # RandomHypergraph
 
-**`RandomHypergraph`** generates a random hypergraph. The first argument specifies either the hypergraph "complexity" or its signature. The second (optional) argument is the maximum possible number of distinct vertices of said hypergraph.
+**`RandomHypergraph`** generates a random hypergraph. The first argument specifies either the hypergraph "complexity" or
+its signature. The second (optional) argument is the maximum possible number of distinct vertices of said hypergraph.
 
 Pass a positive integer `n` to generate a hypergraph where the total of all hyperedge arities is `n`:
 
