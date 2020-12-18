@@ -18,19 +18,15 @@ Similarly, the weeds in function repository functions should be reported on the 
 
 To report a weed, follow these steps:
 
-<!-- markdownlint-disable ul-indent ol-prefix -->
-
 1. Go to the [Issues page](https://github.com/maxitg/SetReplace/issues), and use the search to check if the weed you have encountered is in the list already. If it is, and it was not getting much attention lately, the best you can do is to comment that you care about it being fixed, and to leave the example you have encountered that's not working (if it's not similar to ones already there).
 2. If the weed is not in the list, click "New issue", and then "Get started" next to the "Weed report".
 3. Fill in all the fields including:
-
-  * Brief description in natural language.
-  * The line of Wolfram Language code that results in unexpected behavior (or a screenshot if the weed is in the UI).
-  * The actual output you are getting.
-  * The output you expect to see.
-  * The output of `SystemInformation["Small"]` and `$SetReplaceGitSHA`.
-  * If the weed appears randomly and is not easy to reproduce, add details about how often and in what circumstances you encounter it.
-
+    * Brief description in natural language.
+    * The line of Wolfram Language code that results in unexpected behavior (or a screenshot if the weed is in the UI).
+    * The actual output you are getting.
+    * The output you expect to see.
+    * The output of `SystemInformation["Small"]` and `$SetReplaceGitSHA`.
+    * If the weed appears randomly and is not easy to reproduce, add details about how often and in what circumstances you encounter it.
 4. If you have a Mathematica notebook with more details, you can attach it to the issue, just compress it to a `ZIP` file first.
 5. Click "Submit new issue".
 6. Your issue is now on the list, and a developer will look at it if/when they have a chance. But if it does not get any attention, the best you can do is to [fix it yourself](#code).
@@ -184,9 +180,8 @@ The tool will checkout other branches while testing, so don't use git/modify any
 
 As an example, test an optimization done to *libSetReplace* by [@aokellermann](https://github.com/aokellermann):
 
-<!-- markdownlint-disable-next-line fenced-code-language -->
-```
-> ./performanceTest.wls db6f15c7b4ae1be98be5ced0c188859e2f9eef29 8910175fe9be3847f96a1cf3c877a3b54a64823d
+```console
+$ ./performanceTest.wls db6f15c7b4ae1be98be5ced0c188859e2f9eef29 8910175fe9be3847f96a1cf3c877a3b54a64823d
 
 Testing db6f15c7b4ae1be98be5ced0c188859e2f9eef29
 Build done.
