@@ -1329,7 +1329,7 @@
           {WolframModelEvolutionObject::nonopt},
           SameTest -> MatchQ
         ],
-  
+
         VerificationTest[
           WolframModel[
             {{1, 2}, {2, 3}} -> {{1, 3}},
@@ -1339,7 +1339,7 @@
           {WolframModelEvolutionObject::nonopt},
           SameTest -> MatchQ
         ],
-  
+
         VerificationTest[
           WolframModel[
             {{1, 2}, {2, 3}} -> {{1, 3}},
@@ -1353,7 +1353,7 @@
         VerificationTest[
           AcyclicGraphQ[ReleaseHold[largeEvolution[type]]]
         ],
-        
+
         VerificationTest[
           LoopFreeGraphQ[ReleaseHold[largeEvolution[type]]]
         ],
@@ -1432,7 +1432,7 @@
             VertexCount[ReleaseHold[largeEvolution[type]]],
             ReleaseHold[largeEvolution["EventsCount"]]
           ],
-  
+
           VerificationTest[
             GraphDistance[ReleaseHold[largeEvolution[type]], 1, ReleaseHold[largeEvolution["EventsCount"]]],
             ReleaseHold[largeEvolution["TotalGenerationsCount"]] - 1
@@ -1461,7 +1461,7 @@
             1][type]]],
           {Range[8], {}}
         ],
-        
+
         VerificationTest[
           Through[{VertexList, Rule @@@ EdgeList[#] &}[WolframModel[
             {{1, 2}, {2, 3}} -> {{1, 3}},
@@ -1716,7 +1716,6 @@
         Join[Join[{10}, 2 Floor[Log2[16 - Range[15]]] + 2, {0}], 2 Floor[Log2[32 - Range[31]]] + 1]
       ],
 
-
       Function[{events, sameStyleQ},
         VerificationTest[
           SameQ @@ (events /. (VertexStyle /. Options[
@@ -1915,7 +1914,6 @@
           {WolframModelEvolutionObject::multiwayState}
         ]
       ],
-
 
       (* FeatureVector *)
 

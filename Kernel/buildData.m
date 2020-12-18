@@ -2,7 +2,6 @@ Package["SetReplace`"]
 
 PackageImport["GeneralUtilities`"]
 
-
 PackageScope["$packageRoot"]
 
 $packageRoot = FileNameDrop[$InputFileName, -2];
@@ -46,9 +45,7 @@ If[FileExistsQ[$devUtilsPath],
   ];
 ];
 
-
 readJSONFile[file_] := Quiet @ Check[Developer`ReadRawJSONFile[file], $Failed];
-
 
 PackageExport["$SetReplaceLibraryBuildTime"]
 PackageExport["$SetReplaceLibraryPath"]
@@ -71,7 +68,6 @@ If[$buildData === $Failed,
   $SetReplaceLibraryBuildTime = DateObject[$buildData["LibraryBuildTime"], TimeZone -> "UTC"];
   $SetReplaceLibraryPath = FileNameJoin[{$libraryDirectory, $buildData["LibraryFileName"]}];
 ];
-
 
 PackageExport["$SetReplaceBuildTime"]
 PackageExport["$SetReplaceGitSHA"]

@@ -18,7 +18,7 @@ allLeftHandSidePermutations[input_Condition :> output_List] := ModuleScope[
 
   With[{right = heldOutput, condition = input[[2]]}, (* condition is already held before it's passed here *)
     # /; condition :> right & /@ inputPermutations] /. Hold[expr_] :> expr
-] 
+]
 
 (* Now, if there are new vertices that need to be created, we will disassemble the Module remembering which variables
    it applies to, and then reassemble it for the output. *)
