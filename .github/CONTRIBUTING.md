@@ -50,8 +50,6 @@ To report a weed, follow these steps:
 6. Your issue is now on the list, and a developer will look at it if/when they have a chance. But if it does not get any
    attention, the best you can do is to [fix it yourself](#code).
 
-<!-- markdownlint-enable ul-indent ol-prefix -->
-
 Also, please understand that mistakes happen and are unavoidable. We never blame people for unintentional mistakes in
 this project. Instead, we improve our development process to minimize the probability of mistakes in the future.
 
