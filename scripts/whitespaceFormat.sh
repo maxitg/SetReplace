@@ -24,6 +24,7 @@ filename="$1"
 
 formatted=$(
   expand -t 2 "$filename" |                # Tabs to spaces
+    sed "s/\r$//" |                        # Use Unix-style end of lines
     sed -E "s/ +$//" |                     # Remove trailing spaces
     awk '/./ {e = 0} /^$/ {e += 1} e <= 1' # Remove repeated empty lines
 )
