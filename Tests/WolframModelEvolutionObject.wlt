@@ -1916,9 +1916,9 @@
 
       (* FeatureAssociation *)
 
-      With[{evolutionObjects = 
-          WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@ 
-            {{0}, {3, "EventSelectionFunction" -> "MultiwaySpacelike"}, {3}, {8}}}, 
+      With[{evolutionObjects =
+          WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@
+            {{0}, {3, "EventSelectionFunction" -> "MultiwaySpacelike"}, {3}, {8}}},
         {
           VerificationTest[And @@ StringQ /@ Keys[#["FeatureAssociation"]]] & /@ evolutionObjects,
 
@@ -1927,26 +1927,32 @@
 
           VerificationTest[SameQ @@ (Replace[#, _?(NumberQ[#] || MissingQ[#] &) -> 1, Infinity] &
             [#["FeatureAssociation"]] & /@ evolutionObjects)],
+
           (* String spec *)
           VerificationTest[
-            #["FeatureAssociation", "CausalGraph"], 
+            #["FeatureAssociation", "CausalGraph"],
             KeySelect[#["FeatureAssociation"], StringMatchQ[#, "CausalGraph" ~~ __] &]
           ] & /@ evolutionObjects,
+
           (* List spec *)
           VerificationTest[
-            #["FeatureAssociation", {"StructurePreservingFinalStateGraph"}], 
+            #["FeatureAssociation", {"StructurePreservingFinalStateGraph"}],
             KeySelect[#["FeatureAssociation"], StringMatchQ[#, "StructurePreservingFinalStateGraph" ~~ __] &]
           ] & /@ evolutionObjects,
+
           (* All spec *)
           VerificationTest[
             #["FeatureAssociation", All],
             #["FeatureAssociation"]
           ] & /@ evolutionObjects,
+
           (* Empty List spec *)
           VerificationTest[#["FeatureAssociation", {}], <||>] & /@ evolutionObjects,
+
           (* FinalState features for Multyway return missings *)
-          VerificationTest[ And @@ MissingQ/@Flatten@Values@evolutionObjects[[2]]["FeatureAssociation", 
+          VerificationTest[ And @@ MissingQ/@Flatten@Values@evolutionObjects[[2]]["FeatureAssociation",
             "StructurePreservingFinalStateGraph"] ],
+
           (* Error Messages check *)
           With[{obj = evolutionObjects[[3]]}, {
             testUnevaluated[obj["FeatureAssociation", 3], {WolframModelEvolutionObject::invalidFeatureSpec}],
