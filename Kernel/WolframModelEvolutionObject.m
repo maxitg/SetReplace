@@ -904,6 +904,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 
 nestedToSingleAssociation[association_] :=
   Join @@ (Function[parentKey, KeyMap[StringJoin[parentKey, #] &, association[parentKey]]] /@ Keys[association])
+nestedToSingleAssociation[<||>] := <||>
 
 vertexDegreeQuantiles[g_Graph] := Quantile[VertexDegree[g], {0, 0.25, 0.50, 0.75, 1}]
 vertexDegreeQuantiles[g_Graph] /; VertexCount[g] == 0 := {0, 0, 0, 0, 0} (* Edge case for empty graphs *)
