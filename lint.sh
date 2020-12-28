@@ -114,6 +114,9 @@ checkLineWidthOutput=$(
   for file in "${remainingFiles[@]}"; do
     ./scripts/checkLineWidth.sh "$file" "$widthLimit"
   done
+  for file in "${bashFiles[@]}"; do
+    ./scripts/checkLineWidth.sh "$file" "$widthLimit"
+  done
 )
 if [ -n "$checkLineWidthOutput" ]; then
   exitStatus=1
