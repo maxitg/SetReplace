@@ -19,7 +19,7 @@ $frictionStrength = 10;
 $plotRangePadding = 0.05;
 
 Options[evolutionVideo] = Join[
-  FilterRules[Options[WolframModelPlot], Except[{"HyperedgeRendering", VertexCoordinateRules, "ArrowheadLength"}]],
+  FilterRules[Options[HypergraphPlot], Except[{"HyperedgeRendering", VertexCoordinateRules, "ArrowheadLength"}]],
   {"ArrowheadLength" -> $arrowheadLength}];
 
 getEventTimes[obj_, boundary_] := ModuleScope[
@@ -151,15 +151,15 @@ evolutionVideo[obj_, caller_, boundary_, o : OptionsPattern[]] := ModuleScope[Bl
 
   Print["Solving equations: ", AbsoluteTime[] - startTime, " s"];
   startTime = AbsoluteTime[];
-  PrintTemporary["WolframModelPlotting..."];
+  PrintTemporary["HypergraphPlotting..."];
 
   frames = Catenate[Function[{state, coordinateLists},
-      WolframModelPlot[state, VertexCoordinateRules -> Normal[#]] & /@ coordinateLists] @@@
+      HypergraphPlot[state, VertexCoordinateRules -> Normal[#]] & /@ coordinateLists] @@@
     Transpose[{states, frameCoordinates}]];
 
   plotRange = CoordinateBounds[Catenate[Transpose /@ PlotRange /@ frames], $plotRangePadding];
 
-  Print["WolframModelPlotting: ", AbsoluteTime[] - startTime, " s"];
+  Print["HypergraphPlotting: ", AbsoluteTime[] - startTime, " s"];
   startTime = AbsoluteTime[];
   PrintTemporary["Rasterizing..."];
 
