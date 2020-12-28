@@ -603,7 +603,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
     property : "EvolutionVideo",
-    o : OptionsPattern[] /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] :=
+    o : $nonEmptyOptionsPattern /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] :=
   evolutionVideo[obj, caller, boundary, o]
 
 (* FinalDistinctElementsCount *)
