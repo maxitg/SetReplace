@@ -1,0 +1,53 @@
+---
+# Same checks as in the root directory with a few more inspections disabled for the specific needs of unit tests
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  -cert-dcl21-cpp,
+  -cert-err58-cpp,
+  -cert-oop11-cpp,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  google-*,
+  -google-readability-braces-around-statements,
+  -google-runtime-references,
+  -google-runtime-int,
+  hicpp-avoid-goto
+  hicpp-exception-baseclass
+  hicpp-multiway-paths-covered
+  hicpp-no-assembler
+  hicpp-signed-bitwise
+  llvm-*,
+  -llvm-namespace-comment,
+  -llvm-qualified-auto,
+  misc-*,
+  modernize-*,
+  -modernize-avoid-c-arrays,
+  -modernize-use-nodiscard,
+  -modernize-use-trailing-return-type,
+  performance-*,
+  portability-*,
+  readability-*,
+  -readability-magic-numbers,
+  -readability-redundant-access-specifiers
+WarningsAsErrors: false
+AnalyzeTemporaryDtors: false
+CheckOptions:
+  - key:             cppcoreguidelines-macro-usage.CheckCapsOnly
+    value:           '1'
+  - key:             misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value:           '1'
+  - key:             cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value:           '1'
+  - key:             performance-unnecessary-value-param.AllowedTypes
+    value:           'MArrayDimensions'
+  - key:             readability-implicit-bool-conversion.AllowPointerConditions
+    value:           '1'
+  - key:             readability-uppercase-literal-suffix.NewSuffixes
+    value:           'L;LL;LU;LLU'
+...

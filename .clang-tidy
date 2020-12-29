@@ -1,0 +1,53 @@
+---
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  -cert-dcl21-cpp,
+  -cert-err58-cpp,
+  -cert-oop11-cpp,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -cppcoreguidelines-owning-memory,
+  google-*,
+  -google-readability-braces-around-statements,
+  -google-runtime-references,
+  -google-runtime-int,
+  hicpp-avoid-goto
+  hicpp-exception-baseclass
+  hicpp-multiway-paths-covered
+  hicpp-no-assembler
+  hicpp-signed-bitwise
+  llvm-*,
+  -llvm-namespace-comment,
+  -llvm-qualified-auto,
+  misc-*,
+  modernize-*,
+  -modernize-avoid-c-arrays,
+  -modernize-use-nodiscard,
+  -modernize-use-trailing-return-type,
+  performance-*,
+  portability-*,
+  readability-*,
+  -readability-magic-numbers,
+  -readability-redundant-access-specifiers
+WarningsAsErrors: false
+HeaderFilterRegex: ''
+AnalyzeTemporaryDtors: false
+FormatStyle:     file
+User:            rafal
+CheckOptions:
+  - key:             cppcoreguidelines-macro-usage.AllowedRegexp
+    value:           '^DEBUG_*|^LLU_*|^WS_*|LIBRARY_(.*)_FUNCTION|^DEFINE_MANAGED_STORE_AND_SPECIALIZATION'
+  - key:             misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value:           '1'
+  - key:             cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value:           '1'
+  - key:             performance-unnecessary-value-param.AllowedTypes
+    value:           'MArrayDimensions'
+  - key:             readability-implicit-bool-conversion.AllowPointerConditions
+    value:           '1'
+  - key:             readability-uppercase-literal-suffix.NewSuffixes
+    value:           'L;LL;LU;LLU'
+...

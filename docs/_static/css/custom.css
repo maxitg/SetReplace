@@ -1,0 +1,47 @@
+.wy-side-nav-search {
+	background-color: unset;
+}
+
+.wy-nav-content {
+	max-width: 1440px;
+}
+
+.rst-content .cpp.function > dt {
+	width: 100%;
+}
+
+.rst-content .cpp.class > dt {
+	width: 100%;
+	font-size: 120%;
+}
+
+.rst-content .cpp.struct > dt {
+	width: 100%;
+	font-size: 120%;
+}
+
+.rst-content .highlight > pre {
+	line-height: 1.5;
+}
+
+.dropdown-icon {
+	float: right;
+}
+
+/* Work around WL code parser bug in Sphinx, which marks valid code as erroneous */
+.highlight .err {
+	color: inherit;
+	background-color: inherit;
+}
+
+kbd > kbd {
+	background-color: #eee;
+	border-radius: 3px;
+	border: 1px solid #b4b4b4;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
+	font-size: .85em;
+	font-weight: 700;
+	line-height: 1;
+	padding: 2px 4px;
+	white-space: nowrap;
+}

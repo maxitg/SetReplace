@@ -1,0 +1,16 @@
+# IDEs metadata
+.project
+.cproject
+.settings/
+.vscode/
+.vs/
+CMakeSettings.json
+.idea/
+
+# Other
+Debug/
+lib/
+build*/
+cmake-build*/
+tests/Demo/build*/
+install/
