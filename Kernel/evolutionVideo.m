@@ -106,26 +106,6 @@ frameCoordinatesForState[
   {coordinateLists (* output *), {finalCoordinates, finalVelocities} (* init for the next step *)}
 ]
 
-exprToCell[expr_] := Cell[BoxData[ToBoxes[expr]], "Output"]
-
-cellToExportPacket[cell_] := ExportPacket[cell,
-                                          "BitmapPacket",
-                                          ColorSpace -> RGBColor,
-                                          Verbose -> False,
-                                          "AlphaChannel" -> False,
-                                          "DataCompression" -> True,
-                                          ImageResolution -> 144]
-
-exprToExportPacket[expr_] := cellToExportPacket[exprToCell[expr]]
-
-resultToImage[System`ConvertersDump`Bitmap[rawString_, {width_, height_, depth_}, ___]] := ModuleScope[
-  bytes = NumericArray[Developer`RawUncompress @ rawString, "Byte"];
-  Internal`ArrayReshapeTo[bytes, {height, width, depth}];
-  Image[Image`ReverseNumericArray[bytes, False], Interleaving -> True, Magnification -> 0.5]
-]
-
-rasterizeList[expr_List] := Map[resultToImage, MathLink`CallFrontEnd @ Map[exprToExportPacket, expr]];
-
 evolutionVideo[obj_, caller_, boundary_, o : OptionsPattern[]] := ModuleScope[BlockRandom[
   startTime = AbsoluteTime[];
 
@@ -154,27 +134,18 @@ evolutionVideo[obj_, caller_, boundary_, o : OptionsPattern[]] := ModuleScope[Bl
   PrintTemporary["HypergraphPlotting..."];
 
   frames = Catenate[Function[{state, coordinateLists},
-      HypergraphPlot[state, VertexCoordinateRules -> Normal[#]] & /@ coordinateLists] @@@
+      {state, Normal[#], Transpose[PlotRange[HypergraphPlot[state, VertexCoordinateRules -> Normal[#]]]]} & /@ coordinateLists] @@@
     Transpose[{states, frameCoordinates}]];
 
-  plotRange = CoordinateBounds[Catenate[Transpose /@ PlotRange /@ frames], $plotRangePadding];
+  plotRange = CoordinateBounds[Catenate[frames[[All, 3]]], $plotRangePadding];
 
   Print["HypergraphPlotting: ", AbsoluteTime[] - startTime, " s"];
   startTime = AbsoluteTime[];
-  PrintTemporary["Rasterizing..."];
-
-  rasterizedFrames = rasterizeList[Show[#, PlotRange -> plotRange] & /@ frames];
-
-  Print["Rasterizing: ", AbsoluteTime[] - startTime, " s"];
-  startTime = AbsoluteTime[];
   PrintTemporary["Making video..."];
 
-  videosDirectory = FileNameJoin[{$TemporaryDirectory, "SetReplace", "evolutionVideo"}];
-  If[!DirectoryQ[videosDirectory], CreateDirectory[videosDirectory]];
-  videoHash = Hash[{obj, caller, boundary, o}, "Expression", "Base36String"];
-  result = Video @ Export[FileNameJoin[{videosDirectory, videoHash <> ".mp4"}],
-                 rasterizedFrames,
-                 FrameRate -> $frameRate];
+  result = VideoGenerator[With[{index = Max[1, Round[# $frameRate]]}, HypergraphPlot[frames[[index, 1]], VertexCoordinateRules -> frames[[index, 2]], PlotRange -> plotRange]] &, N[Length[frames] / $frameRate], FrameRate -> $frameRate]
+
+  (*result = VideoGenerator[Show[frames[[Max[1, Round[# $frameRate]]]], PlotRange -> plotRange] &, N[Length[frames] / $frameRate], FrameRate -> $frameRate];*)
 
   Print["Making video: ", AbsoluteTime[] - startTime, " s"];
   result,
