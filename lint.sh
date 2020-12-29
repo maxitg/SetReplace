@@ -10,6 +10,7 @@ lsfilesOptions=(
   --exclude-standard # exclude .gitignore
   '*'
   ':(exclude)*.png'
+  ':(exclude)Dependencies/*'
   ':(exclude)libSetReplace/WolframHeaders/*'
   ':(exclude)*.xcodeproj/*' # Xcode manages these automatically
 )
