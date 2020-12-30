@@ -8,7 +8,7 @@
 
 ```wl
 In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 5]["FeatureAssociation"]
-Out[] = <| 
+Out[] = <|
  "CausalGraphVertexCount" -> 22,
  "CausalGraphEdgeCount" -> 42,
  "CausalGraphVertexConnectivity" -> 1,
@@ -37,7 +37,7 @@ In[] := FeatureSpacePlot[#["FeatureAssociation"]
 
 <img src="/Documentation/Images/FeatureAssociationFeatureSpacePlot.png" width=478.2>
 
-For [`Multiway Systems`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md) it only computes features associated with the [`"Causal Graph"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md), returning `Missing["NotExistent", {"MultiwaySystem", "FinalState"}]` for features related to `"StructurePreservingFinalStateGraph"`, as there is no [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md) in a Multiway System:
+For [`Multiway Systems`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md) it only computes features associated with the [`causal graph`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md), returning `Missing["NotExistent", {"MultiwaySystem", "FinalState"}]` for features related to `"StructurePreservingFinalStateGraph"`, as there is no [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md) in a Multiway System:
 
 ```wl
 In[] := WolframModel[
@@ -46,17 +46,17 @@ In[] := WolframModel[
   3,
   "EventSelectionFunction" -> "MultiwaySpacelike"]["FeatureAssociation"]
 Out[] = <|
-	"CausalGraphVertexCount" -> 4054,
-	"CausalGraphEdgeCount" -> 7824,
-	"CausalGraphVertexConnectivity" -> 0,
-	"CausalGraphVertexDegreesQuantiles" -> {1, 2, 2, 2, 260},
-	"StructurePreservingFinalStateGraphVertexCount" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-	"StructurePreservingFinalStateGraphEdgeCount" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-	"StructurePreservingFinalStateGraphVertexConnectivity" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-	"StructurePreservingFinalStateGraphVertexDegreesQuantiles" -> {
-		Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-	 	Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-	  Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-	 	Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-	  Missing["NotExistent", {"MultiwaySystem", "FinalState"}]}|>
+  "CausalGraphVertexCount" -> 4054,
+  "CausalGraphEdgeCount" -> 7824,
+  "CausalGraphVertexConnectivity" -> 0,
+  "CausalGraphVertexDegreesQuantiles" -> {1, 2, 2, 2, 260},
+  "StructurePreservingFinalStateGraphVertexCount" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
+  "StructurePreservingFinalStateGraphEdgeCount" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
+  "StructurePreservingFinalStateGraphVertexConnectivity" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
+  "StructurePreservingFinalStateGraphVertexDegreesQuantiles" -> {
+    Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
+    Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
+    Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
+    Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
+    Missing["NotExistent", {"MultiwaySystem", "FinalState"}]}|>
 ```

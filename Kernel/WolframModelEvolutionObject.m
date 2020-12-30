@@ -934,9 +934,12 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     "CausalGraph" -> graphFeatureAssociation[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]],
     "StructurePreservingFinalStateGraph" -> If[!propertyEvaluate[True, boundary][obj, caller, "MultiwayQ"],
       graphFeatureAssociation @ HypergraphToGraph[#, "StructurePreserving"] & @
-        propertyEvaluate[True, boundary][obj, caller, "FinalState"],
+        propertyEvaluate[True, boundary][obj, caller, "FinalState"]
+    ,
       Replace[graphFeatureAssociation[Graph[{1 -> 2}]],
-        {_ ? NumberQ -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}]}, Infinity]],
+        {_ ? NumberQ -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}]},
+        Infinity]
+    ],
     other_ :> (Message[caller::unknownFeatureGroup, other, fromFeaturesSpec[caller, All]]; Throw[$Failed])
   }, {1}]]
 ]
