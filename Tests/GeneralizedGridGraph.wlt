@@ -9,7 +9,7 @@
       testSymbolLeak[
         GeneralizedGridGraph[{4, 4 -> "Circular", 5 -> "Directed"}]
       ],
-      
+
       testUnevaluated[
         GeneralizedGridGraph[],
         {GeneralizedGridGraph::argx}

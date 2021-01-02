@@ -23,7 +23,7 @@
     "tests" -> {
       With[{init = $init, rule = $rule}, {
         (** C++ performance **)
-  
+
           VerificationTest[
             Head[SetReplace[
               init,
@@ -33,9 +33,9 @@
             TimeConstraint -> 10,
             MemoryConstraint -> 5*^6
           ],
-  
+
           (** WL performance **)
-  
+
           VerificationTest[
             Head[SetReplace[
               init,
@@ -46,9 +46,9 @@
             TimeConstraint -> 60,
             MemoryConstraint -> 5*^6
           ] & /@ {14, 100},
-  
+
           (** Naming function performance **)
-  
+
           VerificationTest[
             Head[WolframModel[
               <|"PatternRules" -> rule|>,

@@ -11,7 +11,7 @@
       testSymbolLeak[
         SetReplaceAll[Range[10], {a_, b_} :> {a + b, a - b, a b}, 7]
       ],
-      
+
       (* Argument Checks *)
 
       (** Argument count **)
@@ -66,7 +66,7 @@
 
       (* Implementation *)
 
-      VerificationTest[ 
+      VerificationTest[
         SetReplaceAll[{1, 2, 3}, n_ :> -n],
         {-1, -2, -3}
       ],
@@ -102,7 +102,7 @@
 
       VerificationTest[
         Length @ SetReplaceAll[
-          {{0, 1}, {0, 2}, {0, 3}}, 
+          {{0, 1}, {0, 2}, {0, 3}},
           ToPatternRules[
             {{0, 1}, {0, 2}, {0, 3}} ->
             {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}],
@@ -112,7 +112,7 @@
 
       VerificationTest[
         Length @ SetReplaceAll[
-          {{0, 0}, {0, 0}, {0, 0}}, 
+          {{0, 0}, {0, 0}, {0, 0}},
           ToPatternRules[
             {{0, 1}, {0, 2}, {0, 3}} ->
             {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}],
@@ -122,7 +122,7 @@
 
       VerificationTest[
         Length @ SetReplaceAll[
-          {{0, 1}, {0, 2}, {0, 3}}, 
+          {{0, 1}, {0, 2}, {0, 3}},
           ToPatternRules[
             {{0, 1}, {0, 2}, {0, 3}} ->
             {{4, 5}, {5, 4}, {4, 6}, {6, 4}, {5, 6}, {6, 5},

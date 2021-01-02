@@ -13,7 +13,7 @@
       testSymbolLeak[
         HypergraphUnifications[{{1, 2}, {2, 3}, {3, 4, 5}}, {{a, b}, {b, c}, {c, d, e}}]
       ],
-      
+
       testUnevaluated[
         HypergraphUnifications[],
         {HypergraphUnifications::argrx}
