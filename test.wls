@@ -213,7 +213,6 @@ $reportFile = UsingFrontEnd[
   ]
 ];
 
-
 Print["Report file: ", $reportFile];
 
 If[$MessageList =!= {}, $successQ = False];

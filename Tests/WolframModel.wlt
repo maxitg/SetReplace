@@ -453,7 +453,7 @@
           WolframModel[$incrementingRule, {1}, <|"MaxVertices" -> 4|>, "FinalState"],
           {WolframModel::nonListExpressions}
         ],
-      
+
         VerificationTest[
           WolframModel[
             $incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxVertices" -> 12|>, {"AtomsCountFinal", "TerminationReason"}],
@@ -720,7 +720,7 @@
           WolframModel[$incrementingRule, {1}, <|"MaxVertexDegree" -> 4|>, "FinalState"],
           {WolframModel::nonListExpressions}
         ],
-      
+
         VerificationTest[
           maxVertexDegree[
             WolframModel[$incrementingRule, {{{{{{{{{1}}}}}}}}}, <|"MaxVertexDegree" -> 34|>, "FinalState"]],

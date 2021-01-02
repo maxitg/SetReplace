@@ -339,7 +339,7 @@
       (** Vertex amplification **)
 
       VerificationTest[
-        First[Cases[checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], Disk[_, r_] :> r, All]] > 
+        First[Cases[checkGraphics @ RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}]], Disk[_, r_] :> r, All]] >
           First[Cases[checkGraphics @ HypergraphPlot[{{1, 2, 3}}], Disk[_, r_] :> r, All]]
       ],
 

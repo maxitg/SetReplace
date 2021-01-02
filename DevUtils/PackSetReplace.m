@@ -96,4 +96,3 @@ createUpdatedPacletInfo[pacletInfoFilename_, minorVersionNumber_] := ModuleScope
   ];
   tempFilename
 ];
-
