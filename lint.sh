@@ -112,10 +112,7 @@ done
 
 widthLimit=120
 checkLineWidthOutput=$(
-  for file in "${remainingFiles[@]}"; do
-    ./scripts/checkLineWidth.sh "$file" "$widthLimit"
-  done
-  for file in "${bashFiles[@]}"; do
+  for file in "${remainingFiles[@]}" "${bashFiles[@]}"; do
     ./scripts/checkLineWidth.sh "$file" "$widthLimit"
   done
 )
