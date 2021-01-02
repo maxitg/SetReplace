@@ -11,7 +11,7 @@
       testSymbolLeak[
         SetReplaceFixedPoint[Range[1000], {a_, b_} :> {a + b}]
       ],
-      
+
       (* Argument Checks *)
 
       (** Argument count **)

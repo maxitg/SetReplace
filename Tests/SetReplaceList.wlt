@@ -11,7 +11,7 @@
       testSymbolLeak[
         SetReplaceList[Range[100], {a_, b_} :> {a + b}, 5]
       ],
-      
+
       (* Argument Checks *)
 
       (** Argument count **)
