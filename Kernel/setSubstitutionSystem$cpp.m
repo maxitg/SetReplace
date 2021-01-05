@@ -214,8 +214,8 @@ setSubstitutionSystem$cpp[
       globalIndex,
       localIndices[[K]]],
     {K, Length[canonicalRules]}];
-  managedLibraryExpression = CreateManagedLibraryExpression["SetReplace", managedSet];
-  setID = ManagedLibraryExpressionID[managedLibraryExpression, "SetReplace"];
+  setHandle = CreateManagedLibraryExpression["SetReplace", managedSet];
+  setID = ManagedLibraryExpressionID[setHandle, "SetReplace"];
   $cpp$setCreate[
     encodeNestedLists[List @@@ mappedRules],
     eventSelectionCodes[eventSelectionFunction, Length[canonicalRules]],
