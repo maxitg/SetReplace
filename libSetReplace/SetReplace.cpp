@@ -375,11 +375,11 @@ int terminationReason([[maybe_unused]] WolframLibraryData, mint argc, MArgument*
 
 EXTERN_C mint WolframLibrary_getVersion() { return WolframLibraryVersion; }
 
-EXTERN_C int WolframLibrary_initialize([[maybe_unused]] WolframLibraryData libData) {
+EXTERN_C int WolframLibrary_initialize(WolframLibraryData libData) {
   return (*libData->registerLibraryExpressionManager)("SetReplace", SetReplace::setManageInstance);
 }
 
-EXTERN_C void WolframLibrary_uninitialize([[maybe_unused]] WolframLibraryData libData) {
+EXTERN_C void WolframLibrary_uninitialize(WolframLibraryData libData) {
   (*libData->unregisterLibraryExpressionManager)("SetReplace");
 }
 
