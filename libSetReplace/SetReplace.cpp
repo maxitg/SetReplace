@@ -12,15 +12,8 @@
 
 #include "Set.hpp"
 
-mint getData(const mint* data, const mint& length, const mint& index) {
-  if (index >= length || index < 0) {
-    throw LIBRARY_FUNCTION_ERROR;
-  } else {
-    return data[index];
-  }
-}
-
 namespace SetReplace {
+namespace {
 // These are global variables that keep all sets returned to Wolfram Language until they are no longer referenced.
 // Pointers are not returned directly for security reasons.
 using SetID = mint;
@@ -35,6 +28,14 @@ void setManageInstance([[maybe_unused]] WolframLibraryData libData, mbool mode, 
     sets_.emplace(id, nullptr);
   } else {
     sets_.erase(id);
+  }
+}
+
+mint getData(const mint* data, const mint& length, const mint& index) {
+  if (index >= length || index < 0) {
+    throw LIBRARY_FUNCTION_ERROR;
+  } else {
+    return data[index];
   }
 }
 
@@ -371,6 +372,7 @@ int terminationReason([[maybe_unused]] WolframLibraryData, mint argc, MArgument*
 
   return LIBRARY_NO_ERROR;
 }
+}  // namespace
 }  // namespace SetReplace
 
 EXTERN_C mint WolframLibrary_getVersion() { return WolframLibraryVersion; }
