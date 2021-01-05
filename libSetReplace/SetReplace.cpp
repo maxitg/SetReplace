@@ -21,7 +21,7 @@ mint getData(const mint* data, const mint& length, const mint& index) {
 }
 
 namespace SetReplace {
-// These are global variables that keep all sets returned to Wolfram Language until they are destroyed.
+// These are global variables that keep all sets returned to Wolfram Language until they are no longer referenced.
 // Pointers are not returned directly for security reasons.
 using SetID = mint;
 // We use a pointer here because map key insertion (setManageInstance) is separate from map value insertion (setCreate).
