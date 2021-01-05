@@ -13,12 +13,7 @@ EXTERN_C DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData);
 
 /** @brief Creates a new set object.
  */
-EXTERN_C DLLEXPORT int setCreate(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result);
-
-/** @brief Destroys a set given an ID.
- * @note This is optional, as memory is managed.
- */
-EXTERN_C DLLEXPORT int setDelete(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result);
+EXTERN_C DLLEXPORT int setInitialize(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result);
 
 /** @brief Performs a specified number of replacements, but does not return anything.
  */

@@ -219,26 +219,26 @@ MTensor putEvents(const std::vector<Event>& events, WolframLibraryData libData) 
   return output;
 }
 
-int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, [[maybe_unused]] MArgument result) {
+int setInitialize(WolframLibraryData libData, mint argc, const MArgument* argv, [[maybe_unused]] MArgument result) {
   if (argc != 8) {
     return LIBRARY_FUNCTION_ERROR;
   }
 
+  SetID thisSetID;
   std::vector<Rule> rules;
   std::vector<AtomsVector> initialExpressions;
   Set::SystemType systemType;
   Matcher::OrderingSpec orderingSpec;
   Matcher::EventDeduplication eventDeduplication;
   unsigned int randomSeed;
-  SetID thisSetID;
   try {
-    rules = getRules(libData, MArgument_getMTensor(argv[0]), MArgument_getMTensor(argv[1]));
-    initialExpressions = getSet(libData, MArgument_getMTensor(argv[2]));
-    systemType = static_cast<Set::SystemType>(MArgument_getInteger(argv[3]));
-    orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[4]));
-    eventDeduplication = static_cast<Matcher::EventDeduplication>(MArgument_getInteger(argv[5]));
-    randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[6]));
-    thisSetID = MArgument_getInteger(argv[7]);
+    thisSetID = MArgument_getInteger(argv[1]);
+    rules = getRules(libData, MArgument_getMTensor(argv[0]), MArgument_getMTensor(argv[2]));
+    initialExpressions = getSet(libData, MArgument_getMTensor(argv[3]));
+    systemType = static_cast<Set::SystemType>(MArgument_getInteger(argv[4]));
+    orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[5]));
+    eventDeduplication = static_cast<Matcher::EventDeduplication>(MArgument_getInteger(argv[6]));
+    randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[7]));
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
@@ -251,17 +251,6 @@ int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, [[ma
   }
 
   return LIBRARY_NO_ERROR;
-}
-
-int setDelete([[maybe_unused]] WolframLibraryData libData,
-              mint argc,
-              MArgument* argv,
-              [[maybe_unused]] MArgument result) {
-  if (argc != 1) {
-    return LIBRARY_FUNCTION_ERROR;
-  }
-
-  return libData->releaseManagedLibraryExpression("SetReplace", MArgument_getInteger(argv[0]));
 }
 
 std::function<bool()> shouldAbort(WolframLibraryData libData) {
@@ -385,12 +374,8 @@ EXTERN_C void WolframLibrary_uninitialize(WolframLibraryData libData) {
   (*libData->unregisterLibraryExpressionManager)("SetReplace");
 }
 
-EXTERN_C int setCreate(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
-  return SetReplace::setCreate(libData, argc, argv, result);
-}
-
-EXTERN_C int setDelete(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
-  return SetReplace::setDelete(libData, argc, argv, result);
+EXTERN_C int setInitialize(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
+  return SetReplace::setInitialize(libData, argc, argv, result);
 }
 
 EXTERN_C int setReplace(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {

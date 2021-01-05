@@ -32,23 +32,14 @@ $libraryFunctions = {
     LibraryFunctionLoad[
       $libraryFile,
       "setCreate",
-      {{Integer, 1}, (* rules *)
+      {Integer, (* set ID *)
+        {Integer, 1}, (* rules *)
         {Integer, 1}, (* event selection functions for rules *)
         {Integer, 1}, (* initial set *)
         Integer, (* event selection function *)
         {Integer, 1}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
         Integer, (* event deduplication *)
-        Integer, (* random seed *)
-        Integer}, (* set ID *)
-      "Void"],
-    $Failed],
-
-  (* Expressions are automatically managed, so this is only here for optional manual resource release. *)
-  $cpp$setDelete = If[$libraryFile =!= $Failed,
-    LibraryFunctionLoad[
-      $libraryFile,
-      "setDelete",
-      {Integer}, (* set ID *)
+        Integer}, (* random seed *)
       "Void"],
     $Failed],
 
