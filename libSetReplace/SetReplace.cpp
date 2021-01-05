@@ -17,8 +17,8 @@ namespace {
 // These are global variables that keep all sets returned to Wolfram Language until they are no longer referenced.
 // Pointers are not returned directly for security reasons.
 using SetID = mint;
-// We use a pointer here because map key insertion (setManageInstance) is separate from map value insertion (setCreate).
-// Until the value is inserted, the set is nullptr.
+// We use a pointer here because map key insertion (setManageInstance) is separate from map value insertion
+// (setInitialize). Until the value is inserted, the set is nullptr.
 std::unordered_map<SetID, std::unique_ptr<Set>> sets_;
 
 /** @brief Either acquires or a releases a set, depending on the mode.

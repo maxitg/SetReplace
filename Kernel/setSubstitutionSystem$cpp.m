@@ -28,10 +28,10 @@ If[!StringQ[$libraryFile] || !FileExistsQ[$libraryFile],
 
 (* Load libSetReplace functions *)
 $libraryFunctions = {
-  $cpp$setCreate = If[$libraryFile =!= $Failed,
+  $cpp$setInitialize = If[$libraryFile =!= $Failed,
     LibraryFunctionLoad[
       $libraryFile,
-      "setCreate",
+      "setInitialize",
       {Integer, (* set ID *)
         {Integer, 1}, (* rules *)
         {Integer, 1}, (* event selection functions for rules *)
@@ -207,7 +207,7 @@ setSubstitutionSystem$cpp[
     {K, Length[canonicalRules]}];
   setHandle = CreateManagedLibraryExpression["SetReplace", managedSet];
   setID = ManagedLibraryExpressionID[setHandle, "SetReplace"];
-  $cpp$setCreate[
+  $cpp$setInitialize[
     encodeNestedLists[List @@@ mappedRules],
     eventSelectionCodes[eventSelectionFunction, Length[canonicalRules]],
     encodeNestedLists[mappedSet],
