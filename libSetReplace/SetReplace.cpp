@@ -11,6 +11,13 @@
 
 #include "Set.hpp"
 
+namespace SetReplace {
+namespace {
+// These are global variables that keep all sets returned to Wolfram Language until they are destroyed.
+// Pointers are not returned directly for security reasons.
+using SetID = int64_t;
+std::unordered_map<SetID, Set> sets_;
+
 mint getData(const mint* data, const mint& length, const mint& index) {
   if (index >= length || index < 0) {
     throw LIBRARY_FUNCTION_ERROR;
@@ -18,12 +25,6 @@ mint getData(const mint* data, const mint& length, const mint& index) {
     return data[index];
   }
 }
-
-namespace SetReplace {
-// These are global variables that keep all sets returned to Wolfram Language until they are destroyed.
-// Pointers are not returned directly for security reasons.
-using SetID = int64_t;
-std::unordered_map<SetID, Set> sets_;
 
 std::vector<AtomsVector> getNextSet(const mint& tensorLength, const mint* tensorData, mint* startReadIndex) {
   const auto getDataFunc = [&tensorData, &tensorLength, startReadIndex]() -> mint {
@@ -369,6 +370,7 @@ int terminationReason([[maybe_unused]] WolframLibraryData, mint argc, MArgument*
 
   return LIBRARY_NO_ERROR;
 }
+}  // namespace
 }  // namespace SetReplace
 
 EXTERN_C mint WolframLibrary_getVersion() { return WolframLibraryVersion; }
