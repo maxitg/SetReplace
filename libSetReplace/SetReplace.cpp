@@ -232,8 +232,8 @@ int setInitialize(WolframLibraryData libData, mint argc, const MArgument* argv, 
   Matcher::EventDeduplication eventDeduplication;
   unsigned int randomSeed;
   try {
-    thisSetID = MArgument_getInteger(argv[1]);
-    rules = getRules(libData, MArgument_getMTensor(argv[0]), MArgument_getMTensor(argv[2]));
+    thisSetID = MArgument_getInteger(argv[0]);
+    rules = getRules(libData, MArgument_getMTensor(argv[1]), MArgument_getMTensor(argv[2]));
     initialExpressions = getSet(libData, MArgument_getMTensor(argv[3]));
     systemType = static_cast<Set::SystemType>(MArgument_getInteger(argv[4]));
     orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[5]));

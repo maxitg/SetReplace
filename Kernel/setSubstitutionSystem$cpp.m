@@ -208,14 +208,14 @@ setSubstitutionSystem$cpp[
   setHandle = CreateManagedLibraryExpression["SetReplace", managedSet];
   setID = ManagedLibraryExpressionID[setHandle, "SetReplace"];
   $cpp$setInitialize[
+    setID,
     encodeNestedLists[List @@@ mappedRules],
     eventSelectionCodes[eventSelectionFunction, Length[canonicalRules]],
     encodeNestedLists[mappedSet],
     systemTypeCode[eventSelectionFunction],
     Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
     Replace[eventDeduplication, $eventDeduplicationCodes],
-    RandomInteger[{0, $maxUInt32}],
-    setID
+    RandomInteger[{0, $maxUInt32}]
   ];
   TimeConstrained[
     CheckAbort[
