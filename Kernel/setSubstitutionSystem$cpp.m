@@ -39,7 +39,7 @@ $libraryFunctions = {
         {Integer, 1}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
         Integer, (* event deduplication *)
         Integer, (* random seed *)
-        Integer}, (* set ptr *)
+        Integer}, (* set ID *)
       "Void"],
     $Failed],
 
@@ -48,7 +48,7 @@ $libraryFunctions = {
     LibraryFunctionLoad[
       $libraryFile,
       "setDelete",
-      {Integer}, (* set ptr *)
+      {Integer}, (* set ID *)
       "Void"],
     $Failed],
 
@@ -56,7 +56,7 @@ $libraryFunctions = {
     LibraryFunctionLoad[
       $libraryFile,
       "setReplace",
-      {Integer, (* set ptr *)
+      {Integer, (* set ID *)
         {Integer, 1}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
       "Void"],
     $Failed],
@@ -65,7 +65,7 @@ $libraryFunctions = {
     LibraryFunctionLoad[
       $libraryFile,
       "setExpressions",
-      {Integer}, (* set ptr *)
+      {Integer}, (* set ID *)
       {Integer, 1}], (* expressions *)
     $Failed],
 
@@ -73,7 +73,7 @@ $libraryFunctions = {
     LibraryFunctionLoad[
       $libraryFile,
       "setEvents",
-      {Integer}, (* set ptr *)
+      {Integer}, (* set ID *)
       {Integer, 1}], (* expressions *)
     $Failed],
 
@@ -81,7 +81,7 @@ $libraryFunctions = {
     LibraryFunctionLoad[
       $libraryFile,
       "maxCompleteGeneration",
-      {Integer}, (* set ptr *)
+      {Integer}, (* set ID *)
       Integer], (* generation *)
     $Failed],
 
@@ -89,7 +89,7 @@ $libraryFunctions = {
     LibraryFunctionLoad[
       $libraryFile,
       "terminationReason",
-      {Integer}, (* set ptr *)
+      {Integer}, (* set ID *)
       Integer], (* reason *)
     $Failed]
 };
