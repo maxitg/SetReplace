@@ -1,10 +1,5 @@
 #include "SetReplace.hpp"
 
-// NOLINTNEXTLINE(build/c++11)
-#include <chrono>  // <chrono> is banned in Chromium, so cpplint flags it https://stackoverflow.com/a/33653404/905496
-#include <limits>
-#include <random>
-#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -22,8 +17,16 @@ mint getData(const mint* data, const mint& length, const mint& index) {
 namespace SetReplace {
 // These are global variables that keep all sets returned to Wolfram Language until they are destroyed.
 // Pointers are not returned directly for security reasons.
-using SetID = int64_t;
-std::unordered_map<SetID, Set> sets_;
+using SetID = mint;
+std::unordered_map<SetID, std::unique_ptr<Set>> sets_;
+
+void setManageInstance([[maybe_unused]] WolframLibraryData libData, mbool mode, mint id) {
+  if (mode == 0) {
+    sets_.emplace(id, nullptr);
+  } else {
+    sets_.erase(id);
+  }
+}
 
 std::vector<AtomsVector> getNextSet(const mint& tensorLength, const mint* tensorData, mint* startReadIndex) {
   const auto getDataFunc = [&tensorData, &tensorLength, startReadIndex]() -> mint {
@@ -205,8 +208,8 @@ MTensor putEvents(const std::vector<Event>& events, WolframLibraryData libData) 
   return output;
 }
 
-int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, MArgument result) {
-  if (argc != 7) {
+int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, [[maybe_unused]] MArgument result) {
+  if (argc != 8) {
     return LIBRARY_FUNCTION_ERROR;
   }
 
@@ -216,6 +219,7 @@ int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, MArg
   Matcher::OrderingSpec orderingSpec;
   Matcher::EventDeduplication eventDeduplication;
   unsigned int randomSeed;
+  SetID thisSetID;
   try {
     rules = getRules(libData, MArgument_getMTensor(argv[0]), MArgument_getMTensor(argv[1]));
     initialExpressions = getSet(libData, MArgument_getMTensor(argv[2]));
@@ -223,23 +227,18 @@ int setCreate(WolframLibraryData libData, mint argc, const MArgument* argv, MArg
     orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[4]));
     eventDeduplication = static_cast<Matcher::EventDeduplication>(MArgument_getInteger(argv[5]));
     randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[6]));
+    thisSetID = MArgument_getInteger(argv[7]);
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
 
-  SetID thisSetID;
-  do {
-    std::mt19937_64 randomGenerator(std::chrono::system_clock::now().time_since_epoch().count());
-    std::uniform_int_distribution<SetID> distribution(0, std::numeric_limits<SetID>::max());
-    thisSetID = distribution(randomGenerator);
-  } while (sets_.count(thisSetID) > 0);
   try {
-    sets_.insert({thisSetID, Set(rules, initialExpressions, systemType, orderingSpec, eventDeduplication, randomSeed)});
+    sets_[thisSetID] =
+        std::make_unique<Set>(rules, initialExpressions, systemType, orderingSpec, eventDeduplication, randomSeed);
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
 
-  MArgument_setInteger(result, thisSetID);
   return LIBRARY_NO_ERROR;
 }
 
@@ -250,15 +249,8 @@ int setDelete([[maybe_unused]] WolframLibraryData libData,
   if (argc != 1) {
     return LIBRARY_FUNCTION_ERROR;
   }
-  const SetID setToDelete = MArgument_getInteger(argv[0]);
 
-  const auto setToDeleteIterator = sets_.find(setToDelete);
-  if (setToDeleteIterator != sets_.end()) {
-    sets_.erase(setToDeleteIterator);
-  } else {
-    return LIBRARY_FUNCTION_ERROR;
-  }
-  return LIBRARY_NO_ERROR;
+  return libData->releaseManagedLibraryExpression("SetReplace", MArgument_getInteger(argv[0]));
 }
 
 std::function<bool()> shouldAbort(WolframLibraryData libData) {
@@ -268,7 +260,7 @@ std::function<bool()> shouldAbort(WolframLibraryData libData) {
 Set& setFromID(const SetID id) {
   const auto setIDIterator = sets_.find(id);
   if (setIDIterator != sets_.end()) {
-    return setIDIterator->second;
+    return *setIDIterator->second;
   } else {
     throw LIBRARY_FUNCTION_ERROR;
   }
@@ -373,9 +365,13 @@ int terminationReason([[maybe_unused]] WolframLibraryData, mint argc, MArgument*
 
 EXTERN_C mint WolframLibrary_getVersion() { return WolframLibraryVersion; }
 
-EXTERN_C int WolframLibrary_initialize([[maybe_unused]] WolframLibraryData libData) { return 0; }
+EXTERN_C int WolframLibrary_initialize([[maybe_unused]] WolframLibraryData libData) {
+  return (*libData->registerLibraryExpressionManager)("SetReplace", SetReplace::setManageInstance);
+}
 
-EXTERN_C void WolframLibrary_uninitialize([[maybe_unused]] WolframLibraryData libData) { return; }
+EXTERN_C void WolframLibrary_uninitialize([[maybe_unused]] WolframLibraryData libData) {
+  (*libData->unregisterLibraryExpressionManager)("SetReplace");
+}
 
 EXTERN_C int setCreate(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
   return SetReplace::setCreate(libData, argc, argv, result);
