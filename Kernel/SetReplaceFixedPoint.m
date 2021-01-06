@@ -30,4 +30,4 @@ SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] /;
       rules, set, <||>, SetReplaceFixedPoint, False, o],
     $Failed];
   If[result === $Aborted, result, result[-1]] /; result =!= $Failed
-]
+];

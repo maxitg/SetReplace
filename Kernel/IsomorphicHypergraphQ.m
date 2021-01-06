@@ -38,4 +38,4 @@ isomorphicHypergraphQ[expr_, _ ? (Not @* hypergraphQ), _] :=
 
 isomorphicHypergraphQ[expr_, _, _? (Not @* hypergraphQ)] :=
   (Message[IsomorphicHypergraphQ::invalidHypergraph, 2, HoldForm @ expr];
-  Throw[$Failed])
+  Throw[$Failed]);

@@ -111,4 +111,4 @@ subhypergraph[expr_][args0___][args1___] /; (Length[{args1}] =!= 1) :=
 
 weakSubhypergraph[expr_][args0___][args1___] /; (Length[{args1}] =!= 1) :=
   (Message[WeakSubhypergraph::argx, HoldForm @ expr, Length @ {args1}, 1];
-  Throw[$Failed])
+  Throw[$Failed]);

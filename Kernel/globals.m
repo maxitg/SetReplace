@@ -9,4 +9,4 @@ PackageExport["$SetReplaceRootDirectory"]
 SetUsage @ "
 $SetReplaceRootDirectory contains the path of the root of the SetReplace package that was loaded. \
 This corresponds to the directory that containts the Kernel/ directory.
-"
+";

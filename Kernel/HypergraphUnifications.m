@@ -106,4 +106,4 @@ findUnion[e1_, e2_, edgeMatch_, vertexMatch_] := With[{
   Association @ Sort @ Join[
     Thread[uniqueE2Edges -> Range[Length[uniqueE2Edges]] + Length[uniqueE1Edges]],
     Thread[Values[edgeMatch] -> Range[Length[edgeMatch]] + Length[uniqueE1Edges] + Length[uniqueE2Edges]]]
-}]
+}];

@@ -24,4 +24,4 @@ knownOptionsQ[func_, funcCall_, opts_, allowedOptions_ : Automatic] := With[{
     Message[func::optx, unknownOptions[[1]], funcCall]
   ];
   Length[unknownOptions] == 0
-]
+];

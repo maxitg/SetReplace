@@ -97,4 +97,4 @@ singleDimensionEdges[dimSpecs_, k_] := Catenate[
 
 singleThreadEdges[{n_, wrapSpec_, dirSpec_}, thread_] :=
   Replace[dirSpec, {$$directed -> DirectedEdge, $$undirected -> UndirectedEdge}] @@@
-    Partition[thread /. threadDim -> # & /@ Range[n], 2, 1, {1, Replace[wrapSpec, {$$linear -> -1, $$circular -> 1}]}]
+    Partition[thread /. threadDim -> # & /@ Range[n], 2, 1, {1, Replace[wrapSpec, {$$linear -> -1, $$circular -> 1}]}];

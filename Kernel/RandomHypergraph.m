@@ -77,4 +77,4 @@ randomHypergraph[caller_, sig : Except[$signaturePattern | {$signaturePattern ..
 
 randomHypergraph[caller_, sig_, max_] :=
   (Message[RandomHypergraph::intpa, caller, 2];
-  Throw[$Failed])
+  Throw[$Failed]);

@@ -246,4 +246,4 @@ setSubstitutionSystem$cpp[
       $terminationReason -> terminationReason,
       $atomLists -> ReleaseHold @ Map[inverseGlobalMap, numericAtomLists, {2}]|>,
     events]]
-]
+];

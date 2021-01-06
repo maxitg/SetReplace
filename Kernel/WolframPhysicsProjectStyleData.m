@@ -54,4 +54,4 @@ WolframPhysicsProjectStyleData::invalidArg =
 expr : WolframPhysicsProjectStyleData[RepeatedNull[_, 3]] := (
   Message[WolframPhysicsProjectStyleData::invalidArg, Defer[expr]];
   0 /; False
-)
+);

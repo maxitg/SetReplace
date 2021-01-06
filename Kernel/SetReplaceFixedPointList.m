@@ -30,4 +30,4 @@ SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] /;
     $Failed];
   If[result === $Aborted, result, result["SetAfterEvent", #] & /@ Range[0, result["EventsCount"]]] /;
     result =!= $Failed
-]
+];

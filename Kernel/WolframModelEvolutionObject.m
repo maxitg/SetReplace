@@ -1036,4 +1036,4 @@ WolframModelEvolutionObject::corrupt =
 
 WolframModelEvolutionObject[data_] /;
     Lookup[data, $version, 1] <= $currentVersion && !evolutionDataQ[data] := 0 /;
-  Message[WolframModelEvolutionObject::corrupt]
+  Message[WolframModelEvolutionObject::corrupt];

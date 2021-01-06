@@ -523,4 +523,4 @@ drawEmbedding[
       vertexLabelsGraphics[embedding, vertexSize, vertexLabels]
     ]
   ]
-]
+];

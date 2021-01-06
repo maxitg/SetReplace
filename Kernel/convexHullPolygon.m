@@ -37,4 +37,4 @@ convexHullPolygon[points_] := ModuleScope[
   ) &, deduplicatedPoints];
 
   Polygon[Join[{center}, # + center & /@ Normal[stack]]]
-]
+];

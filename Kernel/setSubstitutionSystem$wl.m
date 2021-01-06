@@ -369,4 +369,4 @@ setSubstitutionSystem$wl[
     $eventInputs -> allEvents[[All, 2, 1]],
     $eventOutputs -> allEvents[[All, 2, 2]],
     $eventGenerations -> allEvents[[All, 3]]|>]
-]
+];

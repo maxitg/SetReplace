@@ -41,4 +41,4 @@ toCanonicalRule[input_ :> Module[newAtoms_List, outputExprs : Except[_List]]] :=
 (* After all of that's done, drop toCanonicalRule *)
 
 toCanonicalRule[rule : (inertCondition[inputExprs_List, condition_] :> Module[newAtoms_List, outputExprs_List])] :=
-  rule /. inertCondition -> Condition
+  rule /. inertCondition -> Condition;

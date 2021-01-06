@@ -108,4 +108,4 @@ hypergraphToGraph[expr_, hgraph_ ? (Not @* hypergraphQ), ___] :=
 
 hypergraphToGraph[expr_, _, method_, ___] /; !MemberQ[$validMethods, method] :=
   (Message[HypergraphToGraph::invalidMethod, HoldForm @ expr];
-  Throw[$Failed])
+  Throw[$Failed]);

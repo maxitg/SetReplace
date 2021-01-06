@@ -65,4 +65,4 @@ toPatternRules[rules : {___Rule}, caller_] :=
 ToPatternRules[rules_] := ModuleScope[
   result = Check[toPatternRules[rules, ToPatternRules], $Failed];
   result /; result =!= $Failed
-]
+];

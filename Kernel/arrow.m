@@ -46,4 +46,4 @@ lineDrop[pts_, length_] /; Length[pts] > 2 := With[{
 
 lineDrop[{pt1_, pt2_}, length_] := {pt1 + Normalize[pt2 - pt1] * length, pt2};
 
-lineDrop[pts : ({_} | {}), _] := pts
+lineDrop[pts : ({_} | {}), _] := pts;

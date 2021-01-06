@@ -116,4 +116,4 @@ wolframModelRuleValue[rule : Rule[_, _], "TraditionalSignature"] :=
 
 wolframModelRuleValue[rule : Rule[_, _], "TransformationCount"] := wolframModelRuleValue[{rule}, "TransformationCount"];
 
-wolframModelRuleValue[rules : {Rule[_, _]...}, "TransformationCount"] := Length[rules]
+wolframModelRuleValue[rules : {Rule[_, _]...}, "TransformationCount"] := Length[rules];

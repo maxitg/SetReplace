@@ -36,4 +36,4 @@ expr : SetReplaceAll[
         rules, set, <|$maxGenerationsLocal -> generations|>, SetReplaceAll, False, o],
       $Failed];
     If[result === $Aborted, result, result[-1]] /; result =!= $Failed
-  ]
+  ];

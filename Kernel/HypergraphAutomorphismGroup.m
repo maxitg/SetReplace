@@ -60,4 +60,4 @@ hypergraphAutomorphismGroup[args___] /; !Developer`CheckArgumentCount[Hypergraph
 hypergraphAutomorphismGroup[e : Except[{{Except[_List]...}...}]] := (
   Message[HypergraphAutomorphismGroup::invalidHypergraph, e];
   Throw[$Failed];
-)
+);

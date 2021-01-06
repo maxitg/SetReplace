@@ -51,4 +51,4 @@ checkGraphics[graphics_] := (
   graphics
 );
 
-graphicsQ[graphics_] := Head[graphics] === Graphics && frontEndErrors[graphics] === {}
+graphicsQ[graphics_] := Head[graphics] === Graphics && frontEndErrors[graphics] === {};

@@ -62,4 +62,4 @@ unificationVertexLabels[e1_, e2_][unification_, edgeMapping1_, edgeMapping2_] :=
         Function[{unif, color}, Style[#, color] & /@ Lookup[unif, #, {}]] @@@ {{labels1, $color1}, {labels2, $color2}}],
       ","] &,
     vertexList[unification]]
-]
+];

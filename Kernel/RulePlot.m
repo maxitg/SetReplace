@@ -383,4 +383,4 @@ graphicsRiffle[
       {-spacings[[1, 1]], totalWidth + spacings[[1, 2]]},
       {-spacings[[2, 1]], height + spacings[[2, 2]]}}
   }
-]
+];

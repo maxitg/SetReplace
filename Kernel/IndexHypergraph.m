@@ -39,4 +39,4 @@ indexHypergraph[expr_, hgraph_ ? (Not @* hypergraphQ), ___] :=
 
 indexHypergraph[expr_, _ , _] :=
   (Message[IndexHypergraph::int, expr, 2];
-  Throw[$Failed])
+  Throw[$Failed]);
