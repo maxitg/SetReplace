@@ -33,11 +33,11 @@ $libraryFunctions = {
       $libraryFile,
       "setInitialize",
       {Integer, (* set ID *)
-        {Integer, 1}, (* rules *)
-        {Integer, 1}, (* event selection functions for rules *)
-        {Integer, 1}, (* initial set *)
+        {Integer, 1, "Constant"}, (* rules *)
+        {Integer, 1, "Constant"}, (* event selection functions for rules *)
+        {Integer, 1, "Constant"}, (* initial set *)
         Integer, (* event selection function *)
-        {Integer, 1}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
+        {Integer, 1, "Constant"}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
         Integer, (* event deduplication *)
         Integer}, (* random seed *)
       "Void"],
@@ -48,7 +48,7 @@ $libraryFunctions = {
       $libraryFile,
       "setReplace",
       {Integer, (* set ID *)
-        {Integer, 1}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
+        {Integer, 1, "Constant"}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
       "Void"],
     $Failed],
 
