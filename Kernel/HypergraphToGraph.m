@@ -8,7 +8,7 @@ PackageExport["HypergraphToGraph"]
 
 SetUsage @ "
 HypergraphToGraph[hg$, method$] uses method$ to convert a hypergraph hg$ to a Graph.
-"
+";
 
 (* Options *)
 Options[HypergraphToGraph] = Options[Graph];
@@ -36,7 +36,7 @@ HypergraphToGraph::invalidMethod = StringJoin[{
 
 (* Argument count *)
 HypergraphToGraph[args___] := 0 /;
-  !Developer`CheckArgumentCount[HypergraphToGraph[args], 2, 2] && False
+  !Developer`CheckArgumentCount[HypergraphToGraph[args], 2, 2] && False;
 
 (* main *)
 expr : HypergraphToGraph[
@@ -46,19 +46,19 @@ expr : HypergraphToGraph[
   ModuleScope[
     res = Catch[hypergraphToGraph[HoldForm @ expr, hgraph, method, opts]];
     res /; res =!= $Failed
-  ]
+  ];
 
 (* helper *)
-graphJoin[{}, opts___] := Graph[{}, opts]
+graphJoin[{}, opts___] := Graph[{}, opts];
 graphJoin[graphs : {__Graph}, opts___] := With[{
     vertices = Sort @ Union @ Catenate[VertexList /@ graphs],
     edges = Sort @ Catenate[EdgeList /@ graphs]},
   Graph[vertices, edges, opts]
-]
+];
 
 (* Distance preserving *)
 toDistancePreserving[{directedness_, hyperedge_}, opts___] :=
-  Graph[hyperedge, directedness @@@ Subsets[hyperedge, {2}], opts]
+  Graph[hyperedge, directedness @@@ Subsets[hyperedge, {2}], opts];
 
 hypergraphToGraph[
     _,
@@ -69,11 +69,11 @@ hypergraphToGraph[
     graphJoin[
       toDistancePreserving[{directedness, #}, opts] & /@ hgraph,
       opts]
-  ]
+  ];
 
 (* Structure preserving *)
 toStructurePreserving[{hyperedgeIndex_, {}}, opts___] :=
-  Graph[{{"Hyperedge", hyperedgeIndex, 0}}, {}, opts]
+  Graph[{{"Hyperedge", hyperedgeIndex, 0}}, {}, opts];
 toStructurePreserving[{hyperedgeIndex_, hyperedge_}, opts___] := ModuleScope[
   hyperedgeVertices = Table[
     {"Hyperedge", hyperedgeIndex, vertexPositionIndex},
@@ -85,7 +85,7 @@ toStructurePreserving[{hyperedgeIndex_, hyperedge_}, opts___] := ModuleScope[
       DirectedEdge @@@ Partition[hyperedgeVertices, 2, 1],
       Thread[DirectedEdge[hyperedgeVertices, vertexVertices]]],
     opts]
-]
+];
 
 hypergraphToGraph[_, hgraph_ ? hypergraphQ, "StructurePreserving", opts : OptionsPattern[]] :=
   With[{
@@ -99,12 +99,12 @@ hypergraphToGraph[_, hgraph_ ? hypergraphQ, "StructurePreserving", opts : Option
           DirectedEdge[{"Hyperedge", _, _}, {"Hyperedge", _, _}],
           style[$lightTheme][$structurePreservingHyperedgeToHyperedgeEdgeStyle]]}],
       opts]
-  ]
+  ];
 
 (* Incorrect arguments messages *)
 hypergraphToGraph[expr_, hgraph_ ? (Not @* hypergraphQ), ___] :=
   (Message[HypergraphToGraph::invalidHypergraph, 1, HoldForm @ expr];
-  Throw[$Failed])
+  Throw[$Failed]);
 
 hypergraphToGraph[expr_, _, method_, ___] /; !MemberQ[$validMethods, method] :=
   (Message[HypergraphToGraph::invalidMethod, HoldForm @ expr];

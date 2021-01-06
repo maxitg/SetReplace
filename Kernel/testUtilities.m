@@ -42,13 +42,13 @@ frontEndErrors[expr_] := UsingFrontEnd @ Module[{notebook, result},
   result = MathLink`CallFrontEnd[FrontEnd`GetErrorsInSelectionPacket[notebook]];
   NotebookClose[notebook];
   result
-]
+];
 
 checkGraphics::frontEndErrors := "``";
 
 checkGraphics[graphics_] := (
   Message[checkGraphics::frontEndErrors, #] & /@ Flatten[frontEndErrors[graphics]];
   graphics
-)
+);
 
 graphicsQ[graphics_] := Head[graphics] === Graphics && frontEndErrors[graphics] === {}

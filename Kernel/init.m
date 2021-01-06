@@ -16,7 +16,7 @@ $SetReplaceRootDirectory = FileNameDrop[$InputFileName, -2];
 Needs["GeneralUtilities`"];
 
 (* ensure private symbols we use below don't show up on Global, etc *)
-Begin["SetReplace`Private`"]
+Begin["SetReplace`Private`"];
 
 Block[
   (* Temporarily overrule some of the more exotic features of the macro system.

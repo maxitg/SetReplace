@@ -47,7 +47,7 @@ $timeConstraint = "TimeConstraint";
 
 SetUsage @ "
 $SetReplaceMethods gives the list of available values for Method option of SetReplace and related functions.
-"
+";
 
 (* Argument Checks *)
 
@@ -60,17 +60,17 @@ $SetReplaceMethods gives the list of available values for Method option of SetRe
 setSubstitutionSystem[
     rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !ListQ[set] &&
-  makeMessage[caller, "setNotList", set]
+  makeMessage[caller, "setNotList", set];
 
 (* Rules are valid *)
 
 setReplaceRulesQ[rules_] :=
-  MatchQ[rules, {(_Rule | _RuleDelayed)..} | _Rule | _RuleDelayed]
+  MatchQ[rules, {(_Rule | _RuleDelayed)..} | _Rule | _RuleDelayed];
 
 setSubstitutionSystem[
     rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !setReplaceRulesQ[rules] &&
-  makeMessage[caller, "invalidRules", rules]
+  makeMessage[caller, "invalidRules", rules];
 
 (* Step count is valid *)
 
@@ -91,11 +91,11 @@ $stepSpecNamesInErrorMessage = <|
   $maxFinalVertexDegree -> "vertex degree",
   $maxFinalExpressions -> "number of edges"|>;
 
-stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity]
+stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity];
 
-multiwayEventSelectionFunctionQ[None | $spacelike] = True
+multiwayEventSelectionFunctionQ[None | $spacelike] = True;
 
-multiwayEventSelectionFunctionQ[_] = False
+multiwayEventSelectionFunctionQ[_] = False;
 
 stepSpecQ[caller_, set_, spec_, eventSelectionFunction_] :=
   (* Check everything is a non-negative integer. *)
@@ -123,7 +123,7 @@ stepSpecQ[caller_, set_, spec_, eventSelectionFunction_] :=
       {$maxFinalVertices, $maxFinalExpressions, $maxFinalVertexDegree},
       If[spec[#] === Infinity || MissingQ[spec[#]],
         True,
-        makeMessage[caller, "multiwayFinalStepLimit", $stepSpecNamesInErrorMessage[#]]; False] &])
+        makeMessage[caller, "multiwayFinalStepLimit", $stepSpecNamesInErrorMessage[#]]; False] &]);
 
 (* Method is valid *)
 
@@ -135,14 +135,14 @@ $SetReplaceMethods = {Automatic, $cppMethod, $wlMethod};
 setSubstitutionSystem[
     rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
-  makeMessage[caller, "invalidMethod"]
+  makeMessage[caller, "invalidMethod"];
 
 (* TimeConstraint is valid *)
 
 setSubstitutionSystem[
     rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !MatchQ[OptionValue[TimeConstraint], _ ? (# > 0 &)] &&
-  Message[caller::timc, OptionValue[TimeConstraint]]
+  Message[caller::timc, OptionValue[TimeConstraint]];
 
 (* EventOrderingFunction is valid *)
 
@@ -162,28 +162,28 @@ $eventOrderingFunctions = <|
 (* This applies only to C++ due to #158, WL code uses similar order but does not apply "LeastRecentEdge" correctly. *)
 $eventOrderingFunctionDefault = $eventOrderingFunctions /@ {"LeastRecentEdge", "RuleOrdering", "RuleIndex"};
 
-parseEventOrderingFunction[caller_, Automatic] := $eventOrderingFunctionDefault
+parseEventOrderingFunction[caller_, Automatic] := $eventOrderingFunctionDefault;
 
-parseEventOrderingFunction[caller_, s_String] := parseEventOrderingFunction[caller, {s}]
+parseEventOrderingFunction[caller_, s_String] := parseEventOrderingFunction[caller, {s}];
 
 parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
     !FreeQ[func, "Random"] :=
-  parseEventOrderingFunction[caller, func[[1 ;; FirstPosition[func, "Random"][[1]] - 1]]]
+  parseEventOrderingFunction[caller, func[[1 ;; FirstPosition[func, "Random"][[1]] - 1]]];
 
 parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
     !FreeQ[func, "Any"] && FirstPosition[func, "Any"][[1]] != Length[func] :=
-    parseEventOrderingFunction[caller, func[[1 ;; FirstPosition[func, "Any"][[1]]]]]
+    parseEventOrderingFunction[caller, func[[1 ;; FirstPosition[func, "Any"][[1]]]]];
 
 parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
     FreeQ[func, "Random"] :=
-  $eventOrderingFunctions /@ func
+  $eventOrderingFunctions /@ func;
 
 General::invalidEventOrdering = "EventOrderingFunction `1` should be one of `2`, or a list of them by priority.";
 
 parseEventOrderingFunction[caller_, func_] := (
   Message[caller::invalidEventOrdering, func, Keys[$eventOrderingFunctions]];
   $Failed
-)
+);
 
 (* String-valued parameter is valid *)
 
@@ -198,28 +198,28 @@ $eventDeduplications = <|
   "SameInputSetIsomorphicOutputs" -> $sameInputSetIsomorphicOutputs
 |>;
 
-parseParameterValue[caller_, name_, value_, association_] /; MemberQ[Keys[association], value] := association[value]
+parseParameterValue[caller_, name_, value_, association_] /; MemberQ[Keys[association], value] := association[value];
 
 General::invalidParameterValue = "`1` `2` should be one of `3`.";
 
 parseParameterValue[caller_, name_, value_, association_] := (
   Message[caller::invalidParameterValue, name, value, Keys[association]];
   $Failed
-)
+);
 
 (* Checks if a rule that can be understood by C++ code. Will be generalized in the future until simply returns True. *)
 
 SetAttributes[inertCondition, HoldAll];
 
-simpleRuleQ[rule_] := inertConditionSimpleRuleQ[rule /. Condition -> inertCondition]
+simpleRuleQ[rule_] := inertConditionSimpleRuleQ[rule /. Condition -> inertCondition];
 
 (* Left-hand side of the rule must refer either to specific atoms, *)
-atomPatternQ[pattern_ ? AtomQ] := True
+atomPatternQ[pattern_ ? AtomQ] := True;
 
 (* or to patterns referring to one atom at-a-time. *)
-atomPatternQ[pattern_Pattern ? (AtomQ[#[[1]]] && #[[2]] === Blank[] &)] := True
+atomPatternQ[pattern_Pattern ? (AtomQ[#[[1]]] && #[[2]] === Blank[] &)] := True;
 
-atomPatternQ[_] := False
+atomPatternQ[_] := False;
 
 inertConditionSimpleRuleQ[
     (* empty expressions/subsets are not supported in the input, conditions are not supported *)
@@ -231,9 +231,9 @@ inertConditionSimpleRuleQ[
         (Partition[#, 2, 1] & /@ (Append[#, #[[1]]] &) /@ left),
         {2}]]
       /. x_Pattern :> p[x[[1]]]]
-]
+];
 
-inertConditionSimpleRuleQ[___] := False
+inertConditionSimpleRuleQ[___] := False;
 
 (* This function accepts both the number of generations and the number of steps as an input, and runs until the first
    of the two is reached. it also takes a caller function as an argument, which is used for message generation. *)

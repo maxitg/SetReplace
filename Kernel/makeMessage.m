@@ -13,7 +13,7 @@ PackageScope["recognizedOptionsQ"]
 makeMessage[function_, type_String, args___] := (
   MessageName[function, type] = messageTemplate[type];
   Message[MessageName[function, type], function, args]
-)
+);
 
 Attributes[recognizedOptionsQ] = HoldFirst;
 recognizedOptionsQ[expr_, func_, opts_] := With[{unrecognizedOptions = FilterRules[opts, Except[Options[func]]]},
@@ -23,7 +23,7 @@ recognizedOptionsQ[expr_, func_, opts_] := With[{unrecognizedOptions = FilterRul
     Message[func::optx, unrecognizedOptions[[1]], Defer[expr]];
     False
   ]
-]
+];
 
 (* Message templates *)
 

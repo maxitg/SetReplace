@@ -13,12 +13,12 @@ SetUsage @ "
 SetReplaceAll[s$, r$] performs SetReplace[s$, r$] as many times as it takes until no \
 replacement can be done without touching the same edge twice.
 SetReplaceAll[s$, r$, n$] performes the same operation n$ times, i.e., any edge will at most be replaced n$ times.
-"
+";
 
 SyntaxInformation[SetReplaceAll] = {"ArgumentsPattern" -> {_, _, _., OptionsPattern[]}};
 
 SetReplaceAll[args___] := 0 /;
-  !Developer`CheckArgumentCount[SetReplaceAll[args], 2, 3] && False
+  !Developer`CheckArgumentCount[SetReplaceAll[args], 2, 3] && False;
 
 Options[SetReplaceAll] = {
   Method -> Automatic,

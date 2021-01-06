@@ -41,7 +41,7 @@ if a build is actually required. This is useful for printing a message in this c
 given the keys containing relevant build information.
 * Setting 'Caching' to False can be used to prevent the caching mechanism from being applied.
 * Setting 'Verbose' to True will Print information about the progress of the build.
-"
+";
 
 BuildLibSetReplace::compfail = "Compilation of C++ code at `` failed.";
 BuildLibSetReplace::badsourcedir = "Source directory `` did not exist.";

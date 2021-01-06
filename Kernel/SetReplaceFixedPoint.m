@@ -10,13 +10,13 @@ SetUsage @ "
 SetReplaceFixedPoint[s$, {i$1 -> o$1, i$2 -> o$2, $$}] performs SetReplace repeatedly until \
 no further events can be matched, and returns the final set.
 Will go into infinite loop if fixed point does not exist.
-"
+";
 
 SyntaxInformation[SetReplaceFixedPoint] =
   {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 
 SetReplaceFixedPoint[args___] := 0 /;
-  !Developer`CheckArgumentCount[SetReplaceFixedPoint[args], 2, 2] && False
+  !Developer`CheckArgumentCount[SetReplaceFixedPoint[args], 2, 2] && False;
 
 Options[SetReplaceFixedPoint] = {
   Method -> Automatic,

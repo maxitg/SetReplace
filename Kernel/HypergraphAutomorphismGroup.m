@@ -8,7 +8,7 @@ PackageExport["HypergraphAutomorphismGroup"]
 
 SetUsage @ "
 HypergraphAutomorphismGroup[e$] gives the authomorphism group of a list of hyperedges e$.
-"
+";
 
 SyntaxInformation[HypergraphAutomorphismGroup] = {"ArgumentsPattern" -> {_}};
 
@@ -20,7 +20,7 @@ HypergraphAutomorphismGroup::invalidHypergraph =
 HypergraphAutomorphismGroup[args___] := ModuleScope[
   result = Catch[hypergraphAutomorphismGroup[args]];
   result /; result =!= $Failed
-]
+];
 
 (* Algorithm has 3 steps:
     1. First, convert the hypergraph into a normal Graph preserving structure (but adding new vertices).
@@ -30,14 +30,14 @@ HypergraphAutomorphismGroup[args___] := ModuleScope[
 hypergraphAutomorphismGroup[e : {{Except[_List]...}...}] := With[{
     binaryGraph = Graph[Catenate[toStructurePreservingBinaryEdges /@ e]]},
   removeAuxiliaryElements[GraphAutomorphismGroup[binaryGraph], binaryGraph, e]
-]
+];
 
 toStructurePreservingBinaryEdges[hyperedge_] := ModuleScope[
   edgeVertices = Table[edge[Unique[v, {Temporary}]], Length[hyperedge]];
   Join[
     EdgeList[PathGraph[edgeVertices, DirectedEdges -> True]],
     Thread[DirectedEdge[edgeVertices, hyperedge]]]
-]
+];
 
 (* Note, auxiliary vertices cannot mix with original vertices in the same cycle, since auxiliary vertices have
     out-degrees of at least 1, whereas original vertices always have out-degree 0.
@@ -52,10 +52,10 @@ removeAuxiliaryElements[group_, graph_, hypergraph_] := ModuleScope[
   vertexToHypergraphIndex = Thread[vertexList[hypergraph] -> Range[Length[binaryGraphIndexToVertex]]];
   DeleteCases[group, Except[Alternatives @@ trueVertexIndices, _Integer], All] /.
     binaryGraphIndexToVertex /. vertexToHypergraphIndex /. Cycles[{}] -> Nothing
-]
+];
 
 hypergraphAutomorphismGroup[args___] /; !Developer`CheckArgumentCount[HypergraphAutomorphismGroup[args], 1, 1] :=
-  Throw[$Failed]
+  Throw[$Failed];
 
 hypergraphAutomorphismGroup[e : Except[{{Except[_List]...}...}]] := (
   Message[HypergraphAutomorphismGroup::invalidHypergraph, e];
