@@ -18,7 +18,7 @@ allLeftHandSidePermutations[input_Condition :> output_List] := ModuleScope[
 
   With[{right = heldOutput, condition = input[[2]]}, (* condition is already held before it's passed here *)
     # /; condition :> right & /@ inputPermutations] /. Hold[expr_] :> expr
-]
+];
 
 (* Now, if there are new vertices that need to be created, we will disassemble the Module remembering which variables
    it applies to, and then reassemble it for the output. *)
@@ -36,7 +36,7 @@ allLeftHandSidePermutations[input_Condition :> output_Module] := ModuleScope[
       ruleInputOriginal /; ruleCondition :> Evaluate @ moduleInputContents /.
         Hold[expr_] :> expr] //.
     Hold[expr_] :> expr
-]
+];
 
 (* toNormalRules turns set substitution rules into normal Wolfram Language rules for use in, i.e., Replace. *)
 
@@ -95,7 +95,7 @@ toNormalRules[rules_List] := ModuleScope[
             separateNormalRules[[All, 1]]}],
     untouchedNames];
   With[{evaluatedOutput = output}, input :> evaluatedOutput] //. Hold[expr_] :> expr
-]
+];
 
 (* This function just does the replacements, but it does not keep track of any metadata (generations and events).
    Returns {finalState, terminationReason}, and sows deleted expressions. *)
@@ -139,7 +139,7 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
       ]],
     $$setReplaceResult
   ]
-]
+];
 
 (* We need to not only perform the evolution, but also keep track of the metadata such as generation numbers, creator
    events, etc. The way we do it is by implementing the metadata tracking itself as pattern rules.
@@ -224,7 +224,7 @@ addMetadataManagement[
               wholeInputPatternNames}] /; condition :>
           Module[moduleArguments, newModuleContents]]] //.
             Hold[expr_] :> expr]
-]
+];
 
 $generationMetadataIndex = 2; (* {id, generation, atoms} *)
 
@@ -247,7 +247,7 @@ maxCompleteGeneration[output_, rulesNoMetadata_] := ModuleScope[
     _,
       Max[matches[[1, All, $generationMetadataIndex]]]
   ]
-]
+];
 
 (* This function renames all rule inputs to avoid collisions with outputs from other rules. *)
 
@@ -264,11 +264,11 @@ renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAt
       {RuleDelayed::rhs}]];
   newInputAtoms = Table[Unique["inputAtom", {Temporary}], Length[inputAtoms]];
   # /. (((HoldPattern[#1] /. Hold[s_] :> s) -> #2) & @@@ Thread[inputAtoms -> newInputAtoms])
-] & /@ patternRules]
+] & /@ patternRules];
 
 (* This yields unique elements in the expressions upto level 1. *)
 
-expressionVertices[expr_] := If[ListQ[expr], Union[expr], Throw[expr, $$nonListExpression]]
+expressionVertices[expr_] := If[ListQ[expr], Union[expr], Throw[expr, $$nonListExpression]];
 
 (* The following is used to keep track of how many times vertices appear in the set.
    All operations here should evaluate in O(1). *)
@@ -278,9 +278,9 @@ Attributes[$vertexIndex] = {HoldAll};
 initVertexIndex[$vertexIndex[index_], set_] := (
   index = Counts[Catenate[expressionVertices /@ set]];
   set
-)
+);
 
-initVertexIndex[$noIndex, set_] := set
+initVertexIndex[$noIndex, set_] := set;
 
 deleteFromVertexIndex[$vertexIndex[index_], expr_] := (
   Scan[
@@ -288,9 +288,9 @@ deleteFromVertexIndex[$vertexIndex[index_], expr_] := (
     If[index[#] == 0, index[#] =.]; &,
     expressionVertices[expr]];
   expr
-)
+);
 
-deleteFromVertexIndex[$noIndex, expr_] := expr
+deleteFromVertexIndex[$noIndex, expr_] := expr;
 
 addToVertexIndex[$vertexIndex[index_], expr_, limit_] := (
   Scan[
@@ -298,13 +298,13 @@ addToVertexIndex[$vertexIndex[index_], expr_, limit_] := (
     If[index[#] > limit, Throw[#, $$reachedAtomDegreeLimit]]; &,
     expressionVertices[expr]];
   expr
-)
+);
 
-addToVertexIndex[$noIndex, expr_, limit_] := expr
+addToVertexIndex[$noIndex, expr_, limit_] := expr;
 
-vertexCount[$vertexIndex[index_]] := Length[index]
+vertexCount[$vertexIndex[index_]] := Length[index];
 
-vertexCount[$noIndex] := 0
+vertexCount[$noIndex] := 0;
 
 (* This function runs a modified version of the set substitution system that also keeps track of metadata such as
    generations and events. It uses setReplace$wl to evaluate that modified system. *)
@@ -369,4 +369,4 @@ setSubstitutionSystem$wl[
     $eventInputs -> allEvents[[All, 2, 1]],
     $eventOutputs -> allEvents[[All, 2, 2]],
     $eventGenerations -> allEvents[[All, 3]]|>]
-]
+];

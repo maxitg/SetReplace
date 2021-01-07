@@ -15,7 +15,7 @@ PackageScope["toPatternRules"]
 
 SetUsage @ "
 ToPatternRules[r$] converts a list of anonymous rules r$ to explicit pattern rules.
-"
+";
 
 SyntaxInformation[ToPatternRules] = {"ArgumentsPattern" -> {_}};
 
@@ -24,14 +24,14 @@ SyntaxInformation[ToPatternRules] = {"ArgumentsPattern" -> {_}};
 (* Argument count *)
 
 ToPatternRules[args___] := 0 /;
-  !Developer`CheckArgumentCount[ToPatternRules[args], 1, 1] && False
+  !Developer`CheckArgumentCount[ToPatternRules[args], 1, 1] && False;
 
 (* Argument is a list of rules or a single rule *)
 
-anonymousRulesQ[rules_] := MatchQ[rules, {___Rule} | _Rule]
+anonymousRulesQ[rules_] := MatchQ[rules, {___Rule} | _Rule];
 
 toPatternRules[rules_, caller_] := 0 /;
-  !anonymousRulesQ[rules] && makeMessage[caller, "notRules", rules]
+  !anonymousRulesQ[rules] && makeMessage[caller, "notRules", rules];
 
 (* We are going to find all non-lists in the rules, map them to symbols, and then replace original rules with these
    symbols using patterns and modules accordingly. *)
@@ -57,12 +57,12 @@ toPatternRules[rule : _Rule, caller_] := ModuleScope[
       newLeft :> moduleExpression
     ]
   ] /. Hold[expr_] :> expr
-]
+];
 
 toPatternRules[rules : {___Rule}, caller_] :=
-  toPatternRules[#, caller] & /@ rules
+  toPatternRules[#, caller] & /@ rules;
 
 ToPatternRules[rules_] := ModuleScope[
   result = Check[toPatternRules[rules, ToPatternRules], $Failed];
   result /; result =!= $Failed
-]
+];

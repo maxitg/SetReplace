@@ -12,12 +12,12 @@ SetReplace[s$, {i$1 -> o$1, i$2 -> o$2, $$}] attempts to replace a subset i$1 of
 If not found, replaces i$1 with o$2, etc. Elements of i$k can appear in s$ in any order, however the elements \
 closest to the beginning of s$ will be replaced, and the elements of o$k will be put at the end.
 SetReplace[s$, {i$1 -> o$1, i$2 -> o$2, $$}, n$] performs replacement n$ times and returns the result.
-"
+";
 
 SyntaxInformation[SetReplace] = {"ArgumentsPattern" -> {_, _, _., OptionsPattern[]}};
 
 SetReplace[args___] := 0 /;
-  !Developer`CheckArgumentCount[SetReplace[args], 2, 3] && False
+  !Developer`CheckArgumentCount[SetReplace[args], 2, 3] && False;
 
 Options[SetReplace] = {
   Method -> Automatic,
@@ -31,4 +31,4 @@ expr : SetReplace[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPat
       setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplace, False, o],
       $Failed];
     If[result === $Aborted, result, result[-1]] /; result =!= $Failed
-  ]
+  ];

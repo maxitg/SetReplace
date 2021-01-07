@@ -12,33 +12,33 @@ PackageScope["toCanonicalRules"]
 
 (* If there is a single rule, we put it in a list *)
 
-toCanonicalRules[rules_List] := toCanonicalRule /@ (rules /. Condition -> inertCondition)
+toCanonicalRules[rules_List] := toCanonicalRule /@ (rules /. Condition -> inertCondition);
 
-toCanonicalRules[rule : Except[_List]] := toCanonicalRules[{rule}]
+toCanonicalRules[rule : Except[_List]] := toCanonicalRules[{rule}];
 
 (* Force RuleDelayed *)
 
-toCanonicalRule[input_ -> output_] := toCanonicalRule[input :> output]
+toCanonicalRule[input_ -> output_] := toCanonicalRule[input :> output];
 
 (* Force Condition *)
 
-toCanonicalRule[input : Except[_inertCondition] :> output_] := toCanonicalRule[inertCondition[input, True] :> output]
+toCanonicalRule[input : Except[_inertCondition] :> output_] := toCanonicalRule[inertCondition[input, True] :> output];
 
 (* Force Module *)
 
-toCanonicalRule[input_ :> output : Except[_Module]] := toCanonicalRule[input :> Module[{}, output]]
+toCanonicalRule[input_ :> output : Except[_Module]] := toCanonicalRule[input :> Module[{}, output]];
 
 (* If input or output are not lists, we assume it is a single element set, so we put it into a single element list *)
 
 SetAttributes[inertCondition, HoldRest];
 
 toCanonicalRule[inertCondition[inputExprs : Except[_List], condition_] :> output_] :=
-  toCanonicalRule[inertCondition[{inputExprs}, condition] :> output]
+  toCanonicalRule[inertCondition[{inputExprs}, condition] :> output];
 
 toCanonicalRule[input_ :> Module[newAtoms_List, outputExprs : Except[_List]]] :=
-  toCanonicalRule[input :> Module[newAtoms, {outputExprs}]]
+  toCanonicalRule[input :> Module[newAtoms, {outputExprs}]];
 
 (* After all of that's done, drop toCanonicalRule *)
 
 toCanonicalRule[rule : (inertCondition[inputExprs_List, condition_] :> Module[newAtoms_List, outputExprs_List])] :=
-  rule /. inertCondition -> Condition
+  rule /. inertCondition -> Condition;

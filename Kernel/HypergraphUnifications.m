@@ -9,7 +9,7 @@ PackageExport["HypergraphUnifications"]
 SetUsage @ "
 HypergraphUnifications[e$1, e$2] yields a list of edge pairings to hypergraphs \
 containing both e$1 and e$2 as rule input matches.
-"
+";
 
 SyntaxInformation[HypergraphUnifications] = {"ArgumentsPattern" -> {_, _}};
 
@@ -22,9 +22,9 @@ HypergraphUnifications::edgeNotList = "Hypergraph edge `` should be a List.";
 HypergraphUnifications[args___] := ModuleScope[
   result = Catch[hypergraphUnifications[args]];
   result /; result =!= $Failed
-]
+];
 
-hypergraphUnifications[args___] /; !Developer`CheckArgumentCount[HypergraphUnifications[args], 2, 2] := Throw[$Failed]
+hypergraphUnifications[args___] /; !Developer`CheckArgumentCount[HypergraphUnifications[args], 2, 2] := Throw[$Failed];
 
 hypergraphUnifications[e1_List, e2_List] := With[{
     uniqueE1 = Map[$$1, e1, {2}], uniqueE2 = Map[$$2, e2, {2}]},
@@ -32,20 +32,20 @@ hypergraphUnifications[e1_List, e2_List] := With[{
     Replace[
       Reap[findRemainingOverlaps[uniqueE1, uniqueE2, emptyEdgeMatch[], emptyVertexMatch[]]][[2]],
       {overlaps_} -> overlaps]
-]
+];
 
-hypergraphUnifications[e : Except[_List], _] := hypergraphNotListFail[e]
+hypergraphUnifications[e : Except[_List], _] := hypergraphNotListFail[e];
 
-hypergraphUnifications[_, e : Except[_List]] := hypergraphNotListFail[e]
+hypergraphUnifications[_, e : Except[_List]] := hypergraphNotListFail[e];
 
 hypergraphNotListFail[e_] := (
   Message[HypergraphUnifications::hypergraphNotList, e];
   Throw[$Failed]
-)
+);
 
 findRemainingOverlaps[e1_, e2_, edgeMatch_, vertexMatch_] :=
   Outer[(tryMatch[e1, e2, edgeMatch, vertexMatch, #1, #2]) &, ##] & @@
-    Range /@ Length /@ {e1, e2}
+    Range /@ Length /@ {e1, e2};
 
 tryMatch[e1_, e2_, edgeMatch_, vertexMatch_, nextIndex1_, nextIndex2_] /;
       matchQ[e1[[nextIndex1]], e2[[nextIndex2]]] &&
@@ -55,43 +55,43 @@ tryMatch[e1_, e2_, edgeMatch_, vertexMatch_, nextIndex1_, nextIndex2_] /;
     newVertexMatch = combinedVertexMatch[vertexMatch, e1[[nextIndex1]], e2[[nextIndex2]]]},
   Sow[{newEdgeMatch, Graph[newVertexMatch, VertexLabels -> Automatic]}];
   findRemainingOverlaps[e1, e2, newEdgeMatch, newVertexMatch];
-]
+];
 
-matchQ[edge1_List, edge2_List] /; Length[edge1] == Length[edge2] := True
+matchQ[edge1_List, edge2_List] /; Length[edge1] == Length[edge2] := True;
 
-matchQ[edge : Except[_List], _] := edgeNotListFail[edge]
+matchQ[edge : Except[_List], _] := edgeNotListFail[edge];
 
-matchQ[_, edge : Except[_List]] := edgeNotListFail[edge]
+matchQ[_, edge : Except[_List]] := edgeNotListFail[edge];
 
 edgeNotListFail[edge_] := (
   Message[HypergraphUnifications::edgeNotList, edge];
   Throw[$Failed]
-)
+);
 
 edgesAlreadyUsedQ[edgeMatch_, nextIndex1_, nextIndex2_] :=
-  MemberQ[Keys[edgeMatch], nextIndex1] || MemberQ[Values[edgeMatch], nextIndex2]
+  MemberQ[Keys[edgeMatch], nextIndex1] || MemberQ[Values[edgeMatch], nextIndex2];
 
-backtrackingMatchQ[<||>, nextIndex1_, nextIndex2_] := False
+backtrackingMatchQ[<||>, nextIndex1_, nextIndex2_] := False;
 
-backtrackingMatchQ[edgeMatch_, nextIndex1_, nextIndex2_] /; nextIndex1 < Last[Keys[edgeMatch]] := True
+backtrackingMatchQ[edgeMatch_, nextIndex1_, nextIndex2_] /; nextIndex1 < Last[Keys[edgeMatch]] := True;
 
 backtrackingMatchQ[edgeMatch_, nextIndex1_, nextIndex2_] /;
-    nextIndex1 == Last[Keys[edgeMatch]] && nextIndex2 < Last[Values[edgeMatch]] := True
+    nextIndex1 == Last[Keys[edgeMatch]] && nextIndex2 < Last[Values[edgeMatch]] := True;
 
-backtrackingMatchQ[__] := False
+backtrackingMatchQ[__] := False;
 
-emptyEdgeMatch[] := <||>
+emptyEdgeMatch[] := <||>;
 
-combinedEdgeMatch[match_, newIndex1_, newIndex2_] := Append[match, <|newIndex1 -> newIndex2|>]
+combinedEdgeMatch[match_, newIndex1_, newIndex2_] := Append[match, <|newIndex1 -> newIndex2|>];
 
 (* every time we identify two vertices we add an edge, so that we consider each connected component to be identical *)
 
-emptyVertexMatch[] := Graph[{}]
+emptyVertexMatch[] := Graph[{}];
 
-combinedVertexMatch[match_, newEdge1_, newEdge2_] := EdgeAdd[match, Thread[UndirectedEdge[newEdge1, newEdge2]]]
+combinedVertexMatch[match_, newEdge1_, newEdge2_] := EdgeAdd[match, Thread[UndirectedEdge[newEdge1, newEdge2]]];
 
 vertexIdentificationRules[match_] :=
-  Catenate[Function[{edge}, # -> edge[[1]] & /@ edge[[2 ;;]]] /@ ConnectedComponents[match]]
+  Catenate[Function[{edge}, # -> edge[[1]] & /@ edge[[2 ;;]]] /@ ConnectedComponents[match]];
 
 findUnion[e1_, e2_, edgeMatch_, vertexMatch_] := With[{
     uniqueE1Edges = Complement[Range[Length[e1]], Keys[edgeMatch]],
@@ -106,4 +106,4 @@ findUnion[e1_, e2_, edgeMatch_, vertexMatch_] := With[{
   Association @ Sort @ Join[
     Thread[uniqueE2Edges -> Range[Length[uniqueE2Edges]] + Length[uniqueE1Edges]],
     Thread[Values[edgeMatch] -> Range[Length[edgeMatch]] + Length[uniqueE1Edges] + Length[uniqueE2Edges]]]
-}]
+}];

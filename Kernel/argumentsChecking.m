@@ -15,7 +15,7 @@ supportedOptionQ[func_, optionToCheck_, validValues_, opts_] := ModuleScope[
     Message[func::invalidFiniteOption, optionToCheck, value, validValues]
   ];
   supportedQ
-]
+];
 
 knownOptionsQ[func_, funcCall_, opts_, allowedOptions_ : Automatic] := With[{
     unknownOptions =
@@ -24,4 +24,4 @@ knownOptionsQ[func_, funcCall_, opts_, allowedOptions_ : Automatic] := With[{
     Message[func::optx, unknownOptions[[1]], funcCall]
   ];
   Length[unknownOptions] == 0
-]
+];

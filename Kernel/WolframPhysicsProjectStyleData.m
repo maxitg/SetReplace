@@ -12,7 +12,7 @@ WolframPhysicsProjectStyleData[theme$] gives styles for a particular theme$.
 WolframPhysicsProjectStyleData[t$] gives styles for a particular plot type t$.
 WolframPhysicsProjectStyleData[t$, e$] gives a value for a particular style element e$ of plot type t$.
 WolframPhysicsProjectStyleData[theme$, t$, e$] gives a value for an element e$ of plot type t$ for $theme$.
-"
+";
 
 SyntaxInformation[WolframPhysicsProjectStyleData] = {"ArgumentsPattern" -> {_., _., _.}};
 
@@ -30,23 +30,23 @@ With[{
 
 (* Evaluate needed to get values for PackageScope symbols loaded after style.m *)
 WolframPhysicsProjectStyleData[theme : Alternatives @@ $WolframPhysicsProjectPlotThemes : $lightTheme] :=
-  Map[Evaluate, $styleNames /. style[theme], {2}]
+  Map[Evaluate, $styleNames /. style[theme], {2}];
 
 WolframPhysicsProjectStyleData[
     theme : Alternatives @@ $WolframPhysicsProjectPlotThemes : $lightTheme,
     group : Alternatives @@ $styleGroupNames] :=
-  Evaluate /@ ($styleNames[group] /. style[theme])
+  Evaluate /@ ($styleNames[group] /. style[theme]);
 
 WolframPhysicsProjectStyleData[
     theme : Alternatives @@ $WolframPhysicsProjectPlotThemes : $lightTheme,
     group : Alternatives @@ $styleGroupNames,
     element_] /; MemberQ[Keys[$styleNames[group]], element] :=
-  $styleNames[group][element] /. style[theme]
+  $styleNames[group][element] /. style[theme];
 
 WolframPhysicsProjectStyleData[args___] /;
     !Developer`CheckArgumentCount[WolframPhysicsProjectStyleData[args], 0, 3] := (
   0 /; False
-)
+);
 
 WolframPhysicsProjectStyleData::invalidArg =
   "The arguments in `1` should be a style theme (optional), a style group, and a style element (optional).";
@@ -54,4 +54,4 @@ WolframPhysicsProjectStyleData::invalidArg =
 expr : WolframPhysicsProjectStyleData[RepeatedNull[_, 3]] := (
   Message[WolframPhysicsProjectStyleData::invalidArg, Defer[expr]];
   0 /; False
-)
+);

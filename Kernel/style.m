@@ -75,7 +75,7 @@ PackageScope["$structurePreservingHyperedgeToHyperedgeEdgeStyle"]
 combinedOptionsProperties[plotFunction_][options__] := Sequence[
   "Options" -> {options},
   "Function" -> (plotFunction[#, options] &)
-]
+];
 
 $styleNames = KeySort /@ KeySort @ <|
   "EvolutionObject" -> <|"Icon" -> $evolutionObjectIcon|>,
@@ -200,7 +200,7 @@ $lightTheme = "Light";
 
 SetUsage @ "
 $WolframPhysicsProjectPlotThemes gives the list of plot themes available for the Wolfram Physics Project.
-"
+";
 
 $WolframPhysicsProjectPlotThemes = {$lightTheme};
 

@@ -60,7 +60,7 @@ WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`Ch
     If[Head[result] === rulePlot$parse,
       result = $Failed];
     result /; result =!= $Failed
-  ]
+  ];
 
 (* Evolution object *)
 
@@ -70,7 +70,7 @@ WolframModelEvolutionObject /: RulePlot[evo : WolframModelEvolutionObject[data_ 
     If[Head[result] === rulePlot$parse,
       result = $Failed];
     result /; result =!= $Failed
-  ]
+  ];
 
 (* Arguments parsing *)
 
@@ -88,26 +88,26 @@ rulePlot$parse[{
         {"EdgeType", GraphHighlightStyle, "HyperedgeRendering", VertexCoordinateRules, VertexLabels, Frame, FrameStyle,
           PlotLegends, Spacings, "RulePartsAspectRatio", PlotStyle, VertexStyle, EdgeStyle, "EdgePolygonStyle",
           VertexSize, "ArrowheadLength", Background}] /;
-    correctOptionsQ[{rulesSpec, o}, {opts}]
+    correctOptionsQ[{rulesSpec, o}, {opts}];
 
-hypergraphRulesSpecQ[rulesSpec_List ? wolframModelRulesSpecQ] := Fold[# && hypergraphRulesSpecQ[#2] &, True, rulesSpec]
+hypergraphRulesSpecQ[rulesSpec_List ? wolframModelRulesSpecQ] := Fold[# && hypergraphRulesSpecQ[#2] &, True, rulesSpec];
 
 hypergraphRulesSpecQ[ruleSpec_Rule ? wolframModelRulesSpecQ] := If[
   MatchQ[ruleSpec, {___List} -> {___List}],
   True,
   Message[RulePlot::notHypergraphRule, ruleSpec];
   False
-]
+];
 
 hypergraphRulesSpecQ[rulesSpec_Association ? wolframModelRulesSpecQ] := (
   Message[RulePlot::patternRules, rulesSpec];
   False
-)
+);
 
 hypergraphRulesSpecQ[rulesSpec_] := (
   Message[RulePlot::invalidRules, rulesSpec];
   False
-)
+);
 
 correctOptionsQ[args_, {opts___}] :=
   knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], {opts}, $allowedOptions] &&
@@ -117,35 +117,35 @@ correctOptionsQ[args_, {opts___}] :=
   correctRulePartsAspectRatioQ[OptionValue[RulePlot, {opts}, "RulePartsAspectRatio"]] &&
   And @@ (styleNotListQ[OptionValue[RulePlot, {opts}, #]] & /@ {VertexStyle, EdgeStyle, "EdgePolygonStyle"}) &&
   correctHypergraphPlotOptionsQ[
-    RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[HypergraphPlot]]]
+    RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[HypergraphPlot]]];
 
 correctEdgeTypeQ[edgeType_] := If[MatchQ[edgeType, Alternatives @@ $edgeTypes],
   True,
   Message[RulePlot::invalidEdgeType, edgeType, $edgeTypes];
   False
-]
+];
 
 correctSpacingsQ[opts_] := ModuleScope[
   spacings = OptionValue[RulePlot, opts, Spacings];
   correctQ = MatchQ[spacings, Automatic | (_ ? NumericQ) | {Repeated[{Repeated[_ ? NumericQ, {2}]}, {2}]}];
   If[!correctQ, Message[RulePlot::invalidSpacings, spacings]];
   correctQ
-]
+];
 
-correctRulePartsAspectRatioQ[Automatic] := True
+correctRulePartsAspectRatioQ[Automatic] := True;
 
 correctRulePartsAspectRatioQ[aspectRatio_] :=
   If[NumericQ[aspectRatio] && aspectRatio > 0,
     True,
     Message[RulePlot::invalidAspectRatio, aspectRatio];
-    False]
+    False];
 
 styleNotListQ[styles_List] := (
   Message[RulePlot::elementwiseStyle, styles];
   False
-)
+);
 
-styleNotListQ[styles : Except[_List]] := True
+styleNotListQ[styles : Except[_List]] := True;
 
 (* Implementation *)
 
@@ -174,7 +174,7 @@ rulePlot[
       rules, edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
         spacings, rulePartsAspectRatio, plotStyle, vertexStyle, edgeStyle, edgePolygonStyle, vertexSize,
         arrowheadLength, background, graphicsOpts]
-  ]
+  ];
 
 rulePlot[
     rule_Rule,
@@ -198,7 +198,7 @@ rulePlot[
   rulePlot[
     {rule}, edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinateRules, vertexLabels, frameQ, frameStyle,
       spacings, rulePartsAspectRatio, plotStyle, vertexStyle, edgeStyle, edgePolygonStyle, vertexSize, arrowheadLength,
-      background, graphicsOpts]
+      background, graphicsOpts];
 
 rulePlot[
     rules_List,
@@ -242,9 +242,9 @@ rulePlot[
     Background -> Replace[background, Automatic -> style[$lightTheme][$ruleBackground]],
     PlotRange -> plotRange,
     ImageSizeRaw -> style[$lightTheme][$ruleImageSizePerPlotRange] (plotRange[[1, 2]] - plotRange[[1, 1]])]
-]
+];
 
-aspectRatio[{{xMin_, xMax_}, {yMin_, yMax_}}] := (yMax - yMin) / (xMax - xMin)
+aspectRatio[{{xMin_, xMax_}, {yMin_, yMax_}}] := (yMax - yMin) / (xMax - xMin);
 
 aspectRatioFromPlotRanges[plotRanges_] := ModuleScope[
   singleAspectRatios = aspectRatio /@ plotRanges;
@@ -254,7 +254,7 @@ aspectRatioFromPlotRanges[plotRanges_] := ModuleScope[
     _ ? (Min[#] > 1 &), Min[minMax, style[$lightTheme][$rulePartsAspectRatioMax]],
     _, 1
   ]
-]
+];
 
 (* returns {{leftPlot, rightPlot}, plotRange} *)
 rulePartsPlots[
@@ -292,22 +292,22 @@ rulePartsPlots[
     Catenate[List @@ (Transpose[PlotRange[#]] & /@ ruleSidePlots)],
     style[$lightTheme][$ruleGraphPadding]];
   {ruleSidePlots, plotRange}
-]
+];
 
-connectedQ[edges_] := ConnectedGraphQ[Graph[UndirectedEdge @@@ Catenate[Partition[#, 2, 1] & /@ edges]]]
+connectedQ[edges_] := ConnectedGraphQ[Graph[UndirectedEdge @@@ Catenate[Partition[#, 2, 1] & /@ edges]]];
 
 layoutReferenceSide[in_, out_] := ModuleScope[
   {inConnectedQ, outConnectedQ} = connectedQ /@ {in, out};
   If[inConnectedQ && !outConnectedQ, Return[out]];
   If[outConnectedQ && !inConnectedQ, Return[in]];
   If[Length[in] > Length[out], in, out]
-]
+];
 
 ruleCoordinateRules[edgeType_, hyperedgeRendering_, externalVertexCoordinateRules_, in_ -> out_] :=
   #[[1]] -> #[[2, 1, 1]] & /@
-    hypergraphEmbedding[edgeType, hyperedgeRendering, externalVertexCoordinateRules][layoutReferenceSide[in, out]][[1]]
+    hypergraphEmbedding[edgeType, hyperedgeRendering, externalVertexCoordinateRules][layoutReferenceSide[in, out]][[1]];
 
-sharedRuleElements[in_ -> out_] := multisetIntersection @@ (Join[vertexList[#], #] & /@ {in, out})
+sharedRuleElements[in_ -> out_] := multisetIntersection @@ (Join[vertexList[#], #] & /@ {in, out});
 
 (* returns {shapes, plotRange} *)
 combinedRuleParts[sides_, plotRange_, spacings_, rulePartsAspectRatio_] := ModuleScope[
@@ -335,13 +335,13 @@ combinedRuleParts[sides_, plotRange_, spacings_, rulePartsAspectRatio_] := Modul
     style[$lightTheme][$ruleArrowLength] (1 + style[$lightTheme][$ruleArrowPadding]),
     spacings,
     None]
-]
+];
 
-toListSpacings[spacings_List] := spacings
+toListSpacings[spacings_List] := spacings;
 
-toListSpacings[spacings : Except[_List]] := ConstantArray[spacings, {2, 2}]
+toListSpacings[spacings : Except[_List]] := ConstantArray[spacings, {2, 2}];
 
-frame[{{xMin_, xMax_}, {yMin_, yMax_}}] := Line[{{xMin, yMin}, {xMax, yMin}, {xMax, yMax}, {xMin, yMax}, {xMin, yMin}}]
+frame[{{xMin_, xMax_}, {yMin_, yMax_}}] := Line[{{xMin, yMin}, {xMax, yMin}, {xMax, yMax}, {xMin, yMax}, {xMin, yMin}}];
 
 (* returns {shapes, plotRange} *)
 graphicsRiffle[
@@ -383,4 +383,4 @@ graphicsRiffle[
       {-spacings[[1, 1]], totalWidth + spacings[[1, 2]]},
       {-spacings[[2, 1]], height + spacings[[2, 2]]}}
   }
-]
+];

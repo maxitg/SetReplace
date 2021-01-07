@@ -19,7 +19,7 @@ PackSetReplace::packfailed = "Could not pack paclet from `` into ``.";
 PackSetReplace::nopacletinfo = "Paclet info file was not present at ``.";
 PackSetReplace::nobuildinfo = "Build info file was not present at ``.";
 PackSetReplace::nogitlink = "GitLink is not installed, so the built paclet version cannot be correctly \
-calculated. Proceed with caution, and consider installing GitLink by running InstallGitLink[]."
+calculated. Proceed with caution, and consider installing GitLink by running InstallGitLink[].";
 
 SetUsage @ "
 PackSetReplace[] creates a PacletObject containing the local source and last built library.
@@ -36,7 +36,7 @@ but that can be overriden with the 'OutputDirectory' option.
 which can be overriden with the 'MasterBranch' option. The checkpoint is defined in `scripts/version.wl`. The \
 git repo is assumed to live at 'RepositoryDirectory'.
 * Setting 'Verbose' to True will Print information about the progress of the pack.
-"
+";
 
 PackSetReplace[OptionsPattern[]] := ModuleScope[
   UnpackOptions[sourceDirectory, libraryDirectory, repositoryDirectory, masterBranch, outputDirectory, verbose];

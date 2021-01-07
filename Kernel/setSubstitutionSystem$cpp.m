@@ -90,8 +90,8 @@ $libraryFunctions = {
    sublists. *)
 (* This format is used to pass both rules and set data into libSetReplace over LibraryLink *)
 
-encodeNestedLists[list_List] := Flatten @ {Length @ list, encodeNestedLists /@ list}
-encodeNestedLists[arg_] := arg
+encodeNestedLists[list_List] := Flatten @ {Length @ list, encodeNestedLists /@ list};
+encodeNestedLists[arg_] := arg;
 
 (* This is the reverse, used to decode set data (a list of expressions) from libSetReplace *)
 
@@ -100,7 +100,7 @@ decodeAtomLists[list_List] := ModuleScope[
   atomPointers = list[[2 ;; (count + 1) + 1]];
   atomRanges = Partition[atomPointers, 2, 1];
   list[[#[[1]] ;; #[[2]] - 1]] & /@ atomRanges
-]
+];
 
 (* Similar function for the events *)
 
@@ -114,7 +114,7 @@ decodeEvents[list_List] := ModuleScope[
     $eventInputs -> inputLists + 1, (* C++ indexing starts from 0 *)
     $eventOutputs -> outputLists + 1,
     $eventGenerations -> Most[generations]|>
-]
+];
 
 (* Check if we have simple anonymous rules and use C++ library in that case *)
 
@@ -130,7 +130,7 @@ ruleAtoms[left_ :> right_] := ModuleScope[
   (* {global, local} *)
   {Union @ Join[Hold /@ leftAtoms, rightAtoms],
     Union @ Join[patternSymbols, createdAtoms]}
-]
+];
 
 ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := ModuleScope[
   newLeft = Replace[
@@ -143,7 +143,7 @@ ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := ModuleScope[
     x_ :> Lookup[localIndex, x, globalIndex[x]],
     {2}];
   newLeft -> newRight
-]
+];
 
 $cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
 
@@ -161,7 +161,7 @@ $terminationReasonCodes = <|
   7 -> $Aborted
 |>;
 
-systemTypeCode[eventSelectionFunction_] := Boole[multiwayEventSelectionFunctionQ[eventSelectionFunction]]
+systemTypeCode[eventSelectionFunction_] := Boole[multiwayEventSelectionFunctionQ[eventSelectionFunction]];
 
 (* 0 -> All
    1 -> Spacelike *)
@@ -170,7 +170,7 @@ systemTypeCode[eventSelectionFunction_] := Boole[multiwayEventSelectionFunctionQ
    and All is much faster to evaluate. *)
 
 eventSelectionCodes[eventSelectionFunction_, ruleCount_] :=
-  ConstantArray[eventSelectionFunction /. {$globalSpacelike -> 0, None -> 0, $spacelike -> 1}, ruleCount]
+  ConstantArray[eventSelectionFunction /. {$globalSpacelike -> 0, None -> 0, $spacelike -> 1}, ruleCount];
 
 $orderingFunctionCodes = <|
   $sortedExpressionIDs -> 0,
@@ -246,4 +246,4 @@ setSubstitutionSystem$cpp[
       $terminationReason -> terminationReason,
       $atomLists -> ReleaseHold @ Map[inverseGlobalMap, numericAtomLists, {2}]|>,
     events]]
-]
+];

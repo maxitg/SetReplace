@@ -605,6 +605,12 @@ In addition to that, here are some more-or-less established rules:
   manually fixed if you use the Front End for editing).
 * Don't use section and cell definitions for comments, such as `(* ::Text:: *)`.
 * Use spaces instead of tabs, and use 2 spaces for indentation.
+* Put semicolons at the end of file-level expressions:
+
+  ```wl
+  F[x_] := x;
+  ```
+
 * Close code block function brackets on the new line (for functions such
   as [`Module`](https://reference.wolfram.com/language/ref/Module.html)
   , [`With`](https://reference.wolfram.com/language/ref/With.html)

@@ -18,14 +18,14 @@ SetUsage @ "
 GitSHAWithDirtyStar['path$'] returns the SHA hash of the commit that is currently checked on \
 for the Git repository at 'path$'. Unlike the GitSHA function, this will include a '*' character \
 if the current working tree is dirty.
-"
+";
 
 GitSHAWithDirtyStar[repoDir_] /; TrueQ[$GitLinkAvailableQ] := ModuleScope[
   repo = GitLink`GitOpen[repoDir];
   sha = GitLink`GitSHA[repo, repo["HEAD"]];
   cleanQ = AllTrue[# === {} &] @ GitLink`GitStatus[repo];
   If[cleanQ, sha, sha <> "*"]
-]
+];
 
 GitSHAWithDirtyStar[_] /; FalseQ[$GitLinkAvailableQ] := Missing["NotAvailable"];
 
@@ -33,7 +33,7 @@ PackageExport["InstallGitLink"]
 
 SetUsage @ "
 InstallGitLink[] will attempt to install GitLink on the current system (if necessary).
-"
+";
 
 InstallGitLink[] := If[PacletFind["GitLink", "Internal" -> All] === {},
   PacletInstall["https://www.wolframcloud.com/obj/maxp1/GitLink-2019.11.26.01.paclet"];
@@ -45,7 +45,7 @@ SetUsage @ "
 CalculateMinorVersionNumber[repositoryDirectory$, masterBranch$] will calculate a minor version \
 derived from the number of commits between the last checkpoint and the 'master' branch, \
 which can be overriden with the 'MasterBranch' option. The checkpoint is defined in scripts/version.wl.
-"
+";
 
 CalculateMinorVersionNumber[repoDir_, masterBranch_] := ModuleScope[
   versionInformation = Import[FileNameJoin[{repoDir, "scripts", "version.wl"}]];

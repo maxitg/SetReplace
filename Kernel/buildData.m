@@ -52,11 +52,11 @@ PackageExport["$SetReplaceLibraryPath"]
 
 SetUsage @ "
 $SetReplaceLibraryBuildTime gives the date object at which this C++ libSetReplace library was built.
-"
+";
 
 SetUsage @ "
 $SetReplaceLibraryPath stores the path of the C++ libSetReplace library.
-"
+";
 
 $libraryDirectory = FileNameJoin[{$packageRoot, "LibraryResources", $SystemID}];
 $libraryBuildDataPath = FileNameJoin[{$libraryDirectory, "libSetReplaceBuildInfo.json"}];
@@ -75,12 +75,12 @@ PackageExport["$SetReplaceGitSHA"]
 SetUsage @ "
 $SetReplaceBuildTime gives the time at which this SetReplace paclet was built.
 * When evaluated for an in-place build, this time is the time at which SetReplace was loaded.
-"
+";
 
 SetUsage @ "
 $SetReplaceGitSHA gives the Git SHA of the repository from which this SetRepace paclet was built.
 * When evaluated for an in-place build, this is simply the current HEAD of the git repository.
-"
+";
 
 $pacletBuildInfoPath = FileNameJoin[{$packageRoot, "PacletBuildInfo.json"}];
 

@@ -13,11 +13,11 @@ peekNextToTop[stack_] := With[{
     nextToTop = stack["Peek"]},
   stack["Push", top];
   nextToTop
-]
+];
 
 (* Returns a positive value for counterclockwise direction, negative for clockwise, and zero otherwise *)
 rotationDirection[pt1_, pt2_, pt3_] :=
-  (pt2[[1]] - pt1[[1]]) (pt3[[2]] - pt2[[2]]) - (pt2[[2]] - pt1[[2]]) (pt3[[1]] - pt2[[1]])
+  (pt2[[1]] - pt1[[1]]) (pt3[[2]] - pt2[[2]]) - (pt2[[2]] - pt1[[2]]) (pt3[[1]] - pt2[[1]]);
 
 convexHullPolygon[points_] := ModuleScope[
   (* Sort is broken for symbolic values in Wolfram Language 12.2 *)
@@ -37,4 +37,4 @@ convexHullPolygon[points_] := ModuleScope[
   ) &, deduplicatedPoints];
 
   Polygon[Join[{center}, # + center & /@ Normal[stack]]]
-]
+];

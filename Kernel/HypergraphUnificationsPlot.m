@@ -9,7 +9,7 @@ PackageExport["HypergraphUnificationsPlot"]
 SetUsage @ "
 HypergraphUnificationsPlot[e$1, e$2] yields a list of plots of all hypergraphs \
 containing both e$1 and e$2 as rule input matches.
-"
+";
 
 SyntaxInformation[HypergraphUnificationsPlot] = {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
 
@@ -20,10 +20,10 @@ Options[HypergraphUnificationsPlot] := Options[HypergraphPlot];
 HypergraphUnificationsPlot[args___] := ModuleScope[
   result = Catch[hypergraphUnificationsPlot[args]];
   result /; result =!= $Failed
-]
+];
 
 hypergraphUnificationsPlot[args___] /; !Developer`CheckArgumentCount[HypergraphUnificationsPlot[args], 2, 2] :=
-  Throw[$Failed]
+  Throw[$Failed];
 
 $color1 = Red;
 $color2 = Blue;
@@ -50,7 +50,7 @@ hypergraphUnificationsPlot[e1_, e2_, opts : OptionsPattern[]] := ModuleScope[
           Thread[Values[#2] -> $color1], Thread[Values[#3] -> $color2]]]],
         opts], Throw[$Failed]] &,
     {unifications[[All, 1]], unifications[[All, 2]], unifications[[All, 3]], automaticVertexLabelsList}]
-]
+];
 
 unificationVertexLabels[e1_, e2_][unification_, edgeMapping1_, edgeMapping2_] := ModuleScope[
   {labels1, labels2} =
@@ -62,4 +62,4 @@ unificationVertexLabels[e1_, e2_][unification_, edgeMapping1_, edgeMapping2_] :=
         Function[{unif, color}, Style[#, color] & /@ Lookup[unif, #, {}]] @@@ {{labels1, $color1}, {labels2, $color2}}],
       ","] &,
     vertexList[unification]]
-]
+];

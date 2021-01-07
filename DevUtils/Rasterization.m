@@ -107,7 +107,7 @@ findFinalExpressionStart[str_String] := Scope[
     ];
   ];
   lastPos + 1
-]
+];
 
 cellToString[cell_] := Scope[
   packet = FrontEnd`ExportPacket[Notebook[{cell}], "InputText", "AllowExportAutoReplacements" -> False];

@@ -11,7 +11,7 @@ FileTreeHashes['path$', pattern$, depth$, excludeList$] returns a list of pairs 
 * depth$ instructs FileTreeHash how many directories to preserve from the returned absolute paths to ensure they
 are independent of the overall location of a file tree on disk.
 * excludeList$ can contain a list of file names to exclude.
-"
+";
 
 FileTreeHashes[path_, pattern_, depth_:1, exclude_:{}] := ModuleScope[
   path = AbsoluteFileName[path];
