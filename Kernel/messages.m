@@ -64,10 +64,5 @@ General::parameterNotInteger =
 General::multiwayFinalStepLimit =
   "The limit for the `2` is not supported for multiway systems.";
 
-General::nonPropertyOpt =
-  "Options expected (instead of `2`) " <>
-  "beyond position 1 for `1` property. " <>
-  "An option must be a rule or a list of rules.";
-
 General::multiwayState =
   "Multiple destroyer events found for edge index `1`. States are not supported for multiway systems.";

@@ -298,11 +298,11 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 );
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
-    WolframModelEvolutionObject[_ ? evolutionDataQ],
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
     property : Alternatives @@ Keys[$propertyOptions],
     o___] := (
-  Message[caller::nonPropertyOpt, property, Last[{o}]];
+  Message[caller::nonopt, Last[{o}], 1, Defer[obj[property, o]]];
   Throw[$Failed]
 );
 

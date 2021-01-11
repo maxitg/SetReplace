@@ -143,14 +143,14 @@
       ] & @@@ {
         {"pargx", "FinalState", {}, {}},
         {"pargx", "FinalState", {{}, {}}},
-        {"nonPropertyOpt", "CausalGraph", {}},
-        {"nonPropertyOpt", "CausalGraph", {}, {}},
-        {"nonPropertyOpt", "CausalGraph", {{}, {}}},
-        {"nonPropertyOpt", "CausalGraph", {}, EdgeStyle -> Red},
-        {"nonPropertyOpt", "CausalGraph", {}, {EdgeStyle -> Red}},
-        {"nonPropertyOpt", "CausalGraph", {EdgeStyle -> Red}, {}},
-        {"nonPropertyOpt", "CausalGraph", EdgeStyle -> Red, {}},
-        {"nonPropertyOpt", "CausalGraph", {}, EdgeStyle -> Red, {}},
+        {"nonopt", "CausalGraph", {}},
+        {"nonopt", "CausalGraph", {}, {}},
+        {"nonopt", "CausalGraph", {{}, {}}},
+        {"nonopt", "CausalGraph", {}, EdgeStyle -> Red},
+        {"nonopt", "CausalGraph", {}, {EdgeStyle -> Red}},
+        {"nonopt", "CausalGraph", {EdgeStyle -> Red}, {}},
+        {"nonopt", "CausalGraph", EdgeStyle -> Red, {}},
+        {"nonopt", "CausalGraph", {}, EdgeStyle -> Red, {}},
         {"unknownProperty", "$opt$" -> 3},
         {"unknownProperty", "$opt$" -> 3, {}}
       },
@@ -1326,7 +1326,7 @@
             pathGraph17,
             4][type, 1],
           WolframModelEvolutionObject[___][type, 1],
-          {WolframModelEvolutionObject::nonPropertyOpt},
+          {WolframModelEvolutionObject::nonopt},
           SameTest -> MatchQ
         ],
 
@@ -1336,7 +1336,7 @@
             pathGraph17,
             4][type, 1, "str" -> 3],
           WolframModelEvolutionObject[___][type, 1, "str" -> 3],
-          {WolframModelEvolutionObject::nonPropertyOpt},
+          {WolframModelEvolutionObject::nonopt},
           SameTest -> MatchQ
         ],
 
@@ -2030,7 +2030,7 @@
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
         evo["FinalStatePlot", "$$$invalid$$$"],
-        {WolframModelEvolutionObject::nonPropertyOpt}
+        {WolframModelEvolutionObject::nonopt}
       ]],
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
@@ -2075,7 +2075,7 @@
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
         evo["StatesPlotsList", "$$$invalid$$$"],
-        {WolframModelEvolutionObject::nonPropertyOpt}
+        {WolframModelEvolutionObject::nonopt}
       ]],
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
@@ -2131,7 +2131,7 @@
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
         evo["EventsStatesPlotsList", "$$$invalid$$$"],
-        {WolframModelEvolutionObject::nonPropertyOpt}
+        {WolframModelEvolutionObject::nonopt}
       ]],
 
       With[{evo = WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3]}, testUnevaluated[
