@@ -30,7 +30,7 @@ $newOptions = {
   GraphHighlightStyle -> style[$lightTheme][$highlightStyle],
   "HyperedgeRendering" -> style[$lightTheme][$hyperedgeRendering],
   PlotStyle -> Automatic,
-  VertexCoordinateRules -> {},
+  VertexCoordinates -> {},
   VertexLabels -> None,
   VertexSize -> style[$lightTheme][$vertexSize],
   "ArrowheadLength" -> Automatic,
@@ -188,7 +188,7 @@ hypergraphPlot$parse[
     edges, edgeType, styles, ##, FilterRules[{o}, $defaultGraphicsOptions]] & @@
       (optionValue /@ {
         "HyperedgeRendering",
-        VertexCoordinateRules,
+        VertexCoordinates,
         VertexLabels,
         VertexSize,
         "ArrowheadLength",
@@ -220,7 +220,7 @@ correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
   knownOptionsQ[head, expr, opts] &&
   (And @@ (supportedOptionQ[head, ##, opts] & @@@ {
       {"HyperedgeRendering", $hyperedgeRenderings}})) &&
-  correctCoordinateRulesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinateRules]] &&
+  correctCoordinateRulesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinates]] &&
   correctHighlightQ[OptionValue[HypergraphPlot, opts, GraphHighlight]] &&
   correctSizeQ[head, "Vertex size", OptionValue[HypergraphPlot, opts, VertexSize], {}] &&
   correctSizeQ[head, "Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"], {Automatic}] &&
@@ -392,7 +392,7 @@ graphEmbedding[vertices_, edges_, layout_, coordinateRules_] := Replace[
     GraphPlot[
       Graph[vertices, edges],
       GraphLayout -> layout,
-      VertexCoordinateRules -> coordinateRules,
+      VertexCoordinates -> coordinateRules,
       VertexShapeFunction -> (Sow[#2 -> #, "v"] &),
       EdgeShapeFunction -> (Sow[#2 -> #, "e"] &)],
     {"v", "e"}][[2]],

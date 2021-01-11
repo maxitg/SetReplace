@@ -3,7 +3,7 @@
 # HypergraphPlot
 
 [Edge Type](#edge-type) | [GraphHighlight and GraphHighlightStyle](#graphhighlight-and-graphhighlightstyle)
-| ["HyperedgeRendering"](#hyperedgerendering) | [VertexCoordinateRules](#vertexcoordinaterules)
+| ["HyperedgeRendering"](#hyperedgerendering) | [VertexCoordinates](#vertexcoordinaterules)
 | [VertexLabels](#vertexlabels) | [VertexSize and "ArrowheadLength"](#vertexsize-and-arrowheadlength)
 | ["MaxImageSize"](#maximagesize) | [Style Options](#style-options) | [Graphics Options](#graphics-options)
 
@@ -127,13 +127,13 @@ In[] := HypergraphPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 
 <img src="/Documentation/Images/SubgraphsHyperedgeRendering.png" width="478">
 
-## VertexCoordinateRules
+## VertexCoordinates
 
 It is possible to manually specify some or all coordinates for the vertices:
 
 ```wl
 In[] := HypergraphPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
- VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {0, 1}},
+ VertexCoordinates -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {0, 1}},
  Axes -> True]
 ```
 
@@ -146,14 +146,14 @@ affect [`RulePlot`](RulePlotOfWolframModel.md) in some cases.
 
 ```wl
 In[] := HypergraphPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
- VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}}]
+ VertexCoordinates -> {1 -> {0, 0}, 2 -> {1, 0}}]
 ```
 
 <img src="/Documentation/Images/IncorrectlyScaledPlot.png" width="466">
 
 ```wl
 In[] := HypergraphPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
- VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}},
+ VertexCoordinates -> {1 -> {0, 0}, 2 -> {1, 0}},
  VertexSize -> 0.03, "ArrowheadLength" -> 0.06]
 ```
 
