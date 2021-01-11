@@ -1,3 +1,0 @@
-Package["SetReplace`"]
-
-(* General Messages *)
