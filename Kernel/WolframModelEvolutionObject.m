@@ -207,6 +207,9 @@ propertyEvaluate[masterOptions___][
     obj_WolframModelEvolutionObject, caller_, property : Alternatives @@ Keys[$oldToNewPropertyNames], args___] :=
   propertyEvaluate[masterOptions][obj, caller, $oldToNewPropertyNames[property], args];
 
+General::unknownProperty =
+  "Property \"`1`\" should be one of \"Properties\".";
+
 propertyEvaluate[___][
     WolframModelEvolutionObject[data_ ? evolutionDataQ],
     caller_,
@@ -217,6 +220,10 @@ propertyEvaluate[___][
 );
 
 (* Check property argument counts *)
+
+General::pargx =
+  "Property \"`1`\" requested with `2` argument`3`; " <>
+  "`4``5``6``7` argument`8` `9` expected.";
 
 makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := Message[
   caller::pargx,
@@ -307,6 +314,15 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 );
 
 (* Convert to positive parameter (i.e., generation) number, similar to, e.g., expr[[-1]] *)
+
+General::parameterNotInteger =
+  "`1` `2` must be an integer.";
+
+General::parameterTooLarge =
+  "`1` `2` requested out of `3` total.";
+
+General::parameterTooSmall =
+  "`1` `2` cannot be smaller than `3`.";
 
 toPositiveParameter[min_ : 0, total_, requested_, caller_, name_] := Switch[requested,
   Except[_Integer],
@@ -413,6 +429,9 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
   Lookup[data, $accessorProperties[property], Missing["NotAvailable"]];
 
 (* StateEdgeIndicesAfterEvents (not a property yet) *)
+
+General::multiwayState =
+  "Multiple destroyer events found for edge index `1`. States are not supported for multiway systems.";
 
 stateEdgeIndicesAfterEvents[WolframModelEvolutionObject[data_], caller_, events_] := ModuleScope[
   createdExpressions = Catenate[data[$eventOutputs][[events + 1]]];

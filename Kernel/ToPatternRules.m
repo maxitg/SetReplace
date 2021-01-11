@@ -30,6 +30,9 @@ ToPatternRules[args___] := 0 /;
 
 anonymousRulesQ[rules_] := MatchQ[rules, {___Rule} | _Rule];
 
+General::notRules =
+  "The rule specification `1` should be either a Rule, or a List of rules.";
+
 toPatternRules[rules_, caller_] := 0 /;
   !anonymousRulesQ[rules] && Message[caller::notRules, rules];
 

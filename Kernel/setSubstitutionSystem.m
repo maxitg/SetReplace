@@ -57,6 +57,9 @@ $SetReplaceMethods gives the list of available values for Method option of SetRe
 
 (* Set is a list *)
 
+General::setNotList =
+  "The set specification `1` should be a List.";
+
 setSubstitutionSystem[
     rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !ListQ[set] &&
@@ -66,6 +69,10 @@ setSubstitutionSystem[
 
 setReplaceRulesQ[rules_] :=
   MatchQ[rules, {(_Rule | _RuleDelayed)..} | _Rule | _RuleDelayed];
+
+General::invalidRules =
+  "The rule specification `1` should be either a Rule, RuleDelayed, or " ~~
+  "a List of them.";
 
 setSubstitutionSystem[
     rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
@@ -96,6 +103,18 @@ stepCountQ[n_] := IntegerQ[n] && n >= 0 || n == \[Infinity];
 multiwayEventSelectionFunctionQ[None | $spacelike] = True;
 
 multiwayEventSelectionFunctionQ[_] = False;
+
+General::nonIntegerIterations =
+  "The `1` `2` should be a non-negative integer or infinity.";
+
+General::nonListExpressions =
+  "Encountered expression `1` which is not a list, even though a constraint on vertices is specified.";
+
+General::tooSmallStepLimit =
+  "The maximum `1` `2` is smaller than that in initial condition `3`.";
+
+General::multiwayFinalStepLimit =
+  "The limit for the `2` is not supported for multiway systems.";
 
 stepSpecQ[caller_, set_, spec_, eventSelectionFunction_] :=
   (* Check everything is a non-negative integer. *)
@@ -263,6 +282,13 @@ Options[setSubstitutionSystem] = {
 (* It automatically switches between WL and C++ implementations *)
 
 General::symbOrdering = "Custom event ordering, selection and deduplication are not supported for symbolic method.";
+
+General::noLowLevel =
+  "Low level implementation was not compiled for your system type.";
+
+General::lowLevelNotImplemented =
+  "Low level implementation is only available for local rules, " <>
+  "and only for sets of lists (hypergraphs).";
 
 General::symbNotImplemented =
   "Custom event ordering, selection and deduplication are only available for local rules, " <>
