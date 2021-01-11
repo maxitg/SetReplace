@@ -11,16 +11,17 @@ SetReplaceFixedPointList[s$, {i$1 -> o$1, i$2 -> o$2, $$}] performs SetReplace r
 no further events can be matched, and returns the list of all intermediate sets.
 ";
 
-SyntaxInformation[SetReplaceFixedPointList] =
-  {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
-
-SetReplaceFixedPointList[args___] := 0 /;
-  !Developer`CheckArgumentCount[SetReplaceFixedPointList[args], 2, 2] && False;
-
 Options[SetReplaceFixedPointList] = {
   Method -> Automatic,
   TimeConstraint -> Infinity,
   "EventOrderingFunction" -> Automatic};
+
+SyntaxInformation[SetReplaceFixedPointList] = {
+  "ArgumentsPattern" -> {_, _, OptionsPattern[]},
+  "OptionNames" -> Options[SetReplaceFixedPointList][[All, 1]]};
+
+SetReplaceFixedPointList[args___] := 0 /;
+  !Developer`CheckArgumentCount[SetReplaceFixedPointList[args], 2, 2] && False;
 
 SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] /;
     recognizedOptionsQ[expr, SetReplaceFixedPointList, {o}] := ModuleScope[
