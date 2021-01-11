@@ -144,7 +144,7 @@ $wlMethod = "Symbolic";
 $SetReplaceMethods = {Automatic, $cppMethod, $wlMethod};
 
 General::invalidMethod =
-  "Method should be one of " <> listToSentence[Echo @ $SetReplaceMethods] <> ".";
+  "Method should be one of " <> listToSentence[$SetReplaceMethods] <> ".";
 
 setSubstitutionSystem[
     rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
