@@ -32,7 +32,7 @@
               ListQ[Lookup[SyntaxInformation[Unevaluated @ symbol], "OptionNames"]]]]],
         HoldFirst];
       VerificationTest[
-        Select[exports, Not @* hasSyntaxInformationQ],
+        Complement[exports, Select[exports, hasSyntaxInformationQ]],
         HoldComplete[]
       ],
 
