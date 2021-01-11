@@ -19,10 +19,17 @@
       ],
 
       (* All public symbols have syntax information *)
+      (* Additionally, SyntaxInformation should specify "OptionNames" if the symbol has Options. *)
 
-      hasNoSyntaxInformationQ = Function[symbol, Not[
+      hasNoSyntaxInformationQ = Function[
+        symbol,
+        Not[
           StringStartsQ[SymbolName @ Unevaluated @ symbol, "$"] ||
-          SyntaxInformation[Unevaluated @ symbol] =!= {}], HoldFirst];
+          SyntaxInformation[Unevaluated @ symbol] =!= {} ||
+          And[
+            Options[Unevaluated @ symbol] =!= {},
+            MissingQ[Lookup[SyntaxInformation[Unevaluated @ symbol], "OptionNames"]]]],
+        HoldFirst];
       VerificationTest[
         Select[exports, hasNoSyntaxInformationQ],
         HoldComplete[]
