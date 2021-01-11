@@ -11,6 +11,7 @@ PackageScope["connectedHypergraphQ"]
 PackageScope["mapHold"]
 PackageScope["heldPart"]
 PackageScope["hypergraphQ"]
+PackageScope["listToSentence"]
 
 fromCounts[association_] := Catenate @ KeyValueMap[ConstantArray] @ association;
 
@@ -51,5 +52,5 @@ heldPart[expr_, part__Integer] := Extract[Unevaluated[expr], {part}, Hold];
 
 hypergraphQ = MatchQ[#, {___List}] &;
 
-General::invalidHypergraph =
-  "The argument at position `1` in `2` is not a valid hypergraph.";
+listToSentence[list_List] :=
+  Replace[ToString[#, InputForm] & /@ list, {{a__, b_} :> {Riffle[{a}, ", "], " or ", b}}];

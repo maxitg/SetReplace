@@ -60,7 +60,7 @@ $SetReplaceMethods gives the list of available values for Method option of SetRe
 setSubstitutionSystem[
     rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !ListQ[set] &&
-  makeMessage[caller, "setNotList", set];
+  Message[caller::setNotList, set];
 
 (* Rules are valid *)
 
@@ -70,7 +70,7 @@ setReplaceRulesQ[rules_] :=
 setSubstitutionSystem[
     rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !setReplaceRulesQ[rules] &&
-  makeMessage[caller, "invalidRules", rules];
+  Message[caller::invalidRules, rules];
 
 (* Step count is valid *)
 
@@ -101,19 +101,27 @@ stepSpecQ[caller_, set_, spec_, eventSelectionFunction_] :=
   (* Check everything is a non-negative integer. *)
   And @@ KeyValueMap[
       If[stepCountQ[#2],
-        True,
-        makeMessage[caller, "nonIntegerIterations", $stepSpecNamesInErrorMessage[#1], #2]; False] &,
+        True
+      ,
+        Message[caller::nonIntegerIterations, $stepSpecNamesInErrorMessage[#1], #2];
+        False
+      ] &,
       spec] &&
   (* Check vertices make sense if vertex constraints are specified. *)
   If[(MissingQ[spec[$maxFinalVertices]] && MissingQ[spec[$maxFinalVertexDegree]]) || AllTrue[set, ListQ],
-    True,
-    makeMessage[
-        caller, "nonListExpressions", SelectFirst[set, Not @* ListQ]]; False] &&
+    True
+  ,
+    Message[caller::nonListExpressions, SelectFirst[set, Not @* ListQ]];
+    False
+  ] &&
   (* Check initial condition does not violate the limits already. *)
   And @@ (
       If[Lookup[spec, #1, Infinity] >= #2,
-        True,
-        makeMessage[caller, "tooSmallStepLimit", $stepSpecNamesInErrorMessage[#1], spec[#1], #2]; False] & @@@ {
+        True
+      ,
+        Message[caller::tooSmallStepLimit, $stepSpecNamesInErrorMessage[#1], spec[#1], #2];
+        False
+      ] & @@@ {
     {$maxFinalVertices, If[MissingQ[spec[$maxFinalVertices]], 0, Length[Union[Catenate[set]]]]},
     {$maxFinalVertexDegree, If[MissingQ[spec[$maxFinalVertexDegree]], 0, Max[Counts[Catenate[Union /@ set]]]]},
     {$maxFinalExpressions, Length[set]}}) &&
@@ -122,8 +130,11 @@ stepSpecQ[caller_, set_, spec_, eventSelectionFunction_] :=
     AllTrue[
       {$maxFinalVertices, $maxFinalExpressions, $maxFinalVertexDegree},
       If[spec[#] === Infinity || MissingQ[spec[#]],
-        True,
-        makeMessage[caller, "multiwayFinalStepLimit", $stepSpecNamesInErrorMessage[#]]; False] &]);
+        True
+      ,
+        Message[caller::multiwayFinalStepLimit, $stepSpecNamesInErrorMessage[#]];
+        False
+      ] &]);
 
 (* Method is valid *)
 
@@ -132,10 +143,13 @@ $wlMethod = "Symbolic";
 
 $SetReplaceMethods = {Automatic, $cppMethod, $wlMethod};
 
+General::invalidMethod =
+  "Method should be one of " <> listToSentence[Echo @ $SetReplaceMethods] <> ".";
+
 setSubstitutionSystem[
     rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods] &&
-  makeMessage[caller, "invalidMethod"];
+  Message[caller::invalidMethod];
 
 (* TimeConstraint is valid *)
 
@@ -296,8 +310,9 @@ setSubstitutionSystem[
   If[MatchQ[method, $cppMethod],
     failedQ = True;
     If[!$cppSetReplaceAvailable,
-      makeMessage[caller, "noLowLevel"],
-      makeMessage[caller, "lowLevelNotImplemented"]
+      Message[caller::noLowLevel]
+    ,
+      Message[caller::lowLevelNotImplemented]
     ]
   ];
   If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],

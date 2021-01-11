@@ -212,15 +212,14 @@ propertyEvaluate[___][
     caller_,
     s : Except[_Integer],
     ___] /; !MemberQ[Keys[$propertyArgumentCounts], s] := (
-  makeMessage[caller, "unknownProperty", s];
+  Message[caller::unknownProperty, s];
   Throw[$Failed]
 );
 
 (* Check property argument counts *)
 
-makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := makeMessage[
-  caller,
-  "pargx",
+makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := Message[
+  caller::pargx,
   property,
   givenArgs,
   If[givenArgs == 1, "", "s"],
@@ -303,7 +302,7 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
     caller_,
     property : Alternatives @@ Keys[$propertyOptions],
     o___] := (
-  makeMessage[caller, "nonopt", property, Last[{o}]];
+  Message[caller::nonPropertyOpt, property, Last[{o}]];
   Throw[$Failed]
 );
 
@@ -311,13 +310,13 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 
 toPositiveParameter[min_ : 0, total_, requested_, caller_, name_] := Switch[requested,
   Except[_Integer],
-    makeMessage[caller, "parameterNotInteger", name, requested];
+    Message[caller::parameterNotInteger, name, requested];
     Throw[$Failed],
   _ ? (# > total || # < - total - 1 + min &),
-    makeMessage[caller, "parameterTooLarge", name, requested, total];
+    Message[caller::parameterTooLarge, name, requested, total];
     Throw[$Failed],
   _ ? (0 <= # < min &),
-    makeMessage[caller, "parameterTooSmall", name, requested, min];
+    Message[caller::parameterTooSmall, name, requested, min];
     Throw[$Failed],
   _ ? Negative,
     1 + total + requested,
@@ -419,9 +418,9 @@ stateEdgeIndicesAfterEvents[WolframModelEvolutionObject[data_], caller_, events_
   createdExpressions = Catenate[data[$eventOutputs][[events + 1]]];
   destroyedExpressions = Catenate[data[$eventInputs][[events + 1]]];
   If[DuplicateFreeQ[destroyedExpressions],
-    Sort[Complement[createdExpressions, destroyedExpressions]],
-  (* else *)
-    makeMessage[caller, "multiwayState", Last[Keys[Sort[Counts[destroyedExpressions]]]]];
+    Sort[Complement[createdExpressions, destroyedExpressions]]
+  ,
+    Message[caller::multiwayState, Last[Keys[Sort[Counts[destroyedExpressions]]]]];
     Throw[$Failed]
   ]
 ];
@@ -558,8 +557,9 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     Function[{currentState, newEvent}, Module[{alreadyDeletedExpressions},
       alreadyDeletedExpressions = Complement[newEvent[[1]], currentState];
       If[alreadyDeletedExpressions =!= {},
-        makeMessage[caller, "multiwayState", alreadyDeletedExpressions[[1]]];
-        Throw[$Failed]];
+        Message[caller::multiwayState, alreadyDeletedExpressions[[1]]];
+        Throw[$Failed]
+      ];
       Join[DeleteCases[currentState, Alternatives @@ newEvent[[1]]], newEvent[[2]]]]],
     If[MatchQ[boundary, "Initial" | All],
       {},
@@ -877,7 +877,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
 eventListToSingleEvent[caller_, {event_}, _] := event;
 
 eventListToSingleEvent[caller_, {_, __}, expression_] := (
-  makeMessage[caller, "multiwayState", expression];
+  Message[caller::multiwayState, expression];
   Throw[$Failed]
 );
 
