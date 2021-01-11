@@ -591,7 +591,7 @@ All four scripts use functionality defined in the [DevUtils](/DevUtils) package.
 Note that the `pack.wls` script will auto-generate the paclet version number based on the number of commits to master
 from the checkpoint defined in [version.wl](/scripts/version.wl).
 
-## Style
+## Code Style
 
 ### Wolfram Language
 
