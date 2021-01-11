@@ -12,6 +12,7 @@ PackageScope["mapHold"]
 PackageScope["heldPart"]
 PackageScope["hypergraphQ"]
 PackageScope["listToSentence"]
+PackageScope["recognizedOptionsQ"]
 
 fromCounts[association_] := Catenate @ KeyValueMap[ConstantArray] @ association;
 
@@ -53,4 +54,14 @@ heldPart[expr_, part__Integer] := Extract[Unevaluated[expr], {part}, Hold];
 hypergraphQ = MatchQ[#, {___List}] &;
 
 listToSentence[list_List] :=
-  Replace[ToString[#, InputForm] & /@ list, {{a__, b_} :> {Riffle[{a}, ", "], " or ", b}}];
+  StringJoin @ Replace[ToString[#, InputForm] & /@ list, {{a__, b_} :> {Riffle[{a}, ", "], " or ", b}}];
+
+Attributes[recognizedOptionsQ] = {HoldFirst};
+recognizedOptionsQ[expr_, func_, opts_] := With[{unrecognizedOptions = FilterRules[opts, Except[Options[func]]]},
+  If[unrecognizedOptions === {},
+    True
+  ,(* else, some options are not recognized *)
+    Message[func::optx, unrecognizedOptions[[1]], Defer[expr]];
+    False
+  ]
+];

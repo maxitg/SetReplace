@@ -1,19 +1,5 @@
 Package["SetReplace`"]
 
-PackageScope["recognizedOptionsQ"]
-
-(* Implementation *)
-
-Attributes[recognizedOptionsQ] = HoldFirst;
-recognizedOptionsQ[expr_, func_, opts_] := With[{unrecognizedOptions = FilterRules[opts, Except[Options[func]]]},
-  If[unrecognizedOptions === {},
-    True,
-  (* else, some options are not recognized *)
-    Message[func::optx, unrecognizedOptions[[1]], Defer[expr]];
-    False
-  ]
-];
-
 (* General Messages *)
 
 General::invalidHypergraph =
