@@ -3,7 +3,7 @@
 # HypergraphPlot
 
 [Edge Type](#edge-type) | [GraphHighlight and GraphHighlightStyle](#graphhighlight-and-graphhighlightstyle)
-| ["HyperedgeRendering"](#hyperedgerendering) | [VertexCoordinates](#vertexcoordinaterules)
+| ["HyperedgeRendering"](#hyperedgerendering) | [VertexCoordinates](#vertexcoordinates)
 | [VertexLabels](#vertexlabels) | [VertexSize and "ArrowheadLength"](#vertexsize-and-arrowheadlength)
 | ["MaxImageSize"](#maximagesize) | [Style Options](#style-options) | [Graphics Options](#graphics-options)
 
