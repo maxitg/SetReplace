@@ -23,16 +23,16 @@
 
       hasSyntaxInformationQ = Function[
         symbol,
-        And[
-          !StringStartsQ[SymbolName @ Unevaluated @ symbol, "$"],
-          Or[
-            SyntaxInformation[Unevaluated @ symbol] === {},
-            And[
+        Or[
+          StringStartsQ[SymbolName @ Unevaluated @ symbol, "$"],
+          And[
+            SyntaxInformation[Unevaluated @ symbol] =!= {},
+            Implies[
               Options[Unevaluated @ symbol] =!= {},
-              MissingQ[Lookup[SyntaxInformation[Unevaluated @ symbol], "OptionNames"]]]]],
+              ListQ[Lookup[SyntaxInformation[Unevaluated @ symbol], "OptionNames"]]]]],
         HoldFirst];
       VerificationTest[
-        Select[exports, hasSyntaxInformationQ],
+        Select[exports, Not @* hasSyntaxInformationQ],
         HoldComplete[]
       ],
 
