@@ -374,7 +374,7 @@ function. For more information, see ``?GeneralUtilities`SetUsage``.
 
 Further, public symbols must
 include [`SyntaxInformation`](https://reference.wolfram.com/language/ref/SyntaxInformation.html),
-see [an example](https://github.com/maxitg/SetReplace/blob/6b9df76dc7fa3c08ac8803b90d625ce454f51f0c/Kernel/WolframModel.m#L23)
+see [an example](https://github.com/maxitg/SetReplace/blob/415f965bd228b119185c1ef05e55fe893103d69b/Kernel/WolframModel.m#L29)
 for `WolframModel`.
 
 Functions must handle invalid inputs correctly. For example, if you try to evaluate

@@ -15,15 +15,17 @@ replacement can be done without touching the same edge twice.
 SetReplaceAll[s$, r$, n$] performes the same operation n$ times, i.e., any edge will at most be replaced n$ times.
 ";
 
-SyntaxInformation[SetReplaceAll] = {"ArgumentsPattern" -> {_, _, _., OptionsPattern[]}};
-
-SetReplaceAll[args___] := 0 /;
-  !Developer`CheckArgumentCount[SetReplaceAll[args], 2, 3] && False;
-
 Options[SetReplaceAll] = {
   Method -> Automatic,
   TimeConstraint -> Infinity,
   "EventOrderingFunction" -> Automatic};
+
+SyntaxInformation[SetReplaceAll] = {
+  "ArgumentsPattern" -> {_, _, _., OptionsPattern[]},
+  "OptionNames" -> Options[SetReplaceAll][[All, 1]]};
+
+SetReplaceAll[args___] := 0 /;
+  !Developer`CheckArgumentCount[SetReplaceAll[args], 2, 3] && False;
 
 (* We just run SetSubstitutionSystem for the specified number of generations, and take the last set. *)
 
