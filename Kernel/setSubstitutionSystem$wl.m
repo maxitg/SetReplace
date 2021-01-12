@@ -336,7 +336,7 @@ setSubstitutionSystem$wl[
       setReplace$wl[initWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint],
       {$$deletedExpressions, $$events}],
     $$nonListExpression,
-    (makeMessage[caller, "nonListExpressions", #];
+    (Message[caller::nonListExpressions, #];
       Return[$Failed]) &]; (* {{finalState, terminationReason}, {{deletedExpressions}, {events}}} *)
   If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
   allExpressions = SortBy[

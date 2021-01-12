@@ -27,7 +27,7 @@ $validMethods = {
 (* Error messages *)
 HypergraphToGraph::invalidMethod = StringJoin[{
   "The argument at position 2 in `1` is not ",
-  Replace[ToString[#, InputForm] & /@ $validMethods, {{a__, b_} :> {Riffle[{a}, ", "], " or ", b}}],
+  listToSentence @ $validMethods,
   "."}];
 
 (* Autocompletition *)
