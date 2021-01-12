@@ -207,20 +207,26 @@ propertyEvaluate[masterOptions___][
     obj_WolframModelEvolutionObject, caller_, property : Alternatives @@ Keys[$oldToNewPropertyNames], args___] :=
   propertyEvaluate[masterOptions][obj, caller, $oldToNewPropertyNames[property], args];
 
+General::unknownProperty =
+  "Property \"`1`\" should be one of \"Properties\".";
+
 propertyEvaluate[___][
     WolframModelEvolutionObject[data_ ? evolutionDataQ],
     caller_,
     s : Except[_Integer],
     ___] /; !MemberQ[Keys[$propertyArgumentCounts], s] := (
-  makeMessage[caller, "unknownProperty", s];
+  Message[caller::unknownProperty, s];
   Throw[$Failed]
 );
 
 (* Check property argument counts *)
 
-makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := makeMessage[
-  caller,
-  "pargx",
+General::pargx =
+  "Property \"`1`\" requested with `2` argument`3`; " <>
+  "`4``5``6``7` argument`8` `9` expected.";
+
+makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := Message[
+  caller::pargx,
   property,
   givenArgs,
   If[givenArgs == 1, "", "s"],
@@ -299,25 +305,34 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 );
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
-    WolframModelEvolutionObject[_ ? evolutionDataQ],
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
     property : Alternatives @@ Keys[$propertyOptions],
     o___] := (
-  makeMessage[caller, "nonopt", property, Last[{o}]];
+  Message[caller::nonopt, Last[{o}], 1, Defer[obj[property, o]]];
   Throw[$Failed]
 );
 
 (* Convert to positive parameter (i.e., generation) number, similar to, e.g., expr[[-1]] *)
 
+General::parameterNotInteger =
+  "`1` `2` must be an integer.";
+
+General::parameterTooLarge =
+  "`1` `2` requested out of `3` total.";
+
+General::parameterTooSmall =
+  "`1` `2` cannot be smaller than `3`.";
+
 toPositiveParameter[min_ : 0, total_, requested_, caller_, name_] := Switch[requested,
   Except[_Integer],
-    makeMessage[caller, "parameterNotInteger", name, requested];
+    Message[caller::parameterNotInteger, name, requested];
     Throw[$Failed],
   _ ? (# > total || # < - total - 1 + min &),
-    makeMessage[caller, "parameterTooLarge", name, requested, total];
+    Message[caller::parameterTooLarge, name, requested, total];
     Throw[$Failed],
   _ ? (0 <= # < min &),
-    makeMessage[caller, "parameterTooSmall", name, requested, min];
+    Message[caller::parameterTooSmall, name, requested, min];
     Throw[$Failed],
   _ ? Negative,
     1 + total + requested,
@@ -415,13 +430,16 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 
 (* StateEdgeIndicesAfterEvents (not a property yet) *)
 
+General::multiwayState =
+  "Multiple destroyer events found for edge index `1`. States are not supported for multiway systems.";
+
 stateEdgeIndicesAfterEvents[WolframModelEvolutionObject[data_], caller_, events_] := ModuleScope[
   createdExpressions = Catenate[data[$eventOutputs][[events + 1]]];
   destroyedExpressions = Catenate[data[$eventInputs][[events + 1]]];
   If[DuplicateFreeQ[destroyedExpressions],
-    Sort[Complement[createdExpressions, destroyedExpressions]],
-  (* else *)
-    makeMessage[caller, "multiwayState", Last[Keys[Sort[Counts[destroyedExpressions]]]]];
+    Sort[Complement[createdExpressions, destroyedExpressions]]
+  ,
+    Message[caller::multiwayState, Last[Keys[Sort[Counts[destroyedExpressions]]]]];
     Throw[$Failed]
   ]
 ];
@@ -558,8 +576,9 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     Function[{currentState, newEvent}, Module[{alreadyDeletedExpressions},
       alreadyDeletedExpressions = Complement[newEvent[[1]], currentState];
       If[alreadyDeletedExpressions =!= {},
-        makeMessage[caller, "multiwayState", alreadyDeletedExpressions[[1]]];
-        Throw[$Failed]];
+        Message[caller::multiwayState, alreadyDeletedExpressions[[1]]];
+        Throw[$Failed]
+      ];
       Join[DeleteCases[currentState, Alternatives @@ newEvent[[1]]], newEvent[[2]]]]],
     If[MatchQ[boundary, "Initial" | All],
       {},
@@ -877,7 +896,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
 eventListToSingleEvent[caller_, {event_}, _] := event;
 
 eventListToSingleEvent[caller_, {_, __}, expression_] := (
-  makeMessage[caller, "multiwayState", expression];
+  Message[caller::multiwayState, expression];
   Throw[$Failed]
 );
 

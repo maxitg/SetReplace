@@ -11,9 +11,11 @@ HypergraphUnificationsPlot[e$1, e$2] yields a list of plots of all hypergraphs \
 containing both e$1 and e$2 as rule input matches.
 ";
 
-SyntaxInformation[HypergraphUnificationsPlot] = {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
-
 Options[HypergraphUnificationsPlot] := Options[HypergraphPlot];
+
+SyntaxInformation[HypergraphUnificationsPlot] = {
+  "ArgumentsPattern" -> {_, _, OptionsPattern[]},
+  "OptionNames" -> Options[HypergraphUnificationsPlot][[All, 1]]};
 
 (* Implementation *)
 

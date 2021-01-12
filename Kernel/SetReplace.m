@@ -14,15 +14,17 @@ closest to the beginning of s$ will be replaced, and the elements of o$k will be
 SetReplace[s$, {i$1 -> o$1, i$2 -> o$2, $$}, n$] performs replacement n$ times and returns the result.
 ";
 
-SyntaxInformation[SetReplace] = {"ArgumentsPattern" -> {_, _, _., OptionsPattern[]}};
-
-SetReplace[args___] := 0 /;
-  !Developer`CheckArgumentCount[SetReplace[args], 2, 3] && False;
-
 Options[SetReplace] = {
   Method -> Automatic,
   TimeConstraint -> Infinity,
   "EventOrderingFunction" -> Automatic};
+
+SyntaxInformation[SetReplace] = {
+  "ArgumentsPattern" -> {_, _, _., OptionsPattern[]},
+  "OptionNames" -> Options[SetReplace][[All, 1]]};
+
+SetReplace[args___] := 0 /;
+  !Developer`CheckArgumentCount[SetReplace[args], 2, 3] && False;
 
 expr : SetReplace[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
     recognizedOptionsQ[expr, SetReplace, {o}] :=
