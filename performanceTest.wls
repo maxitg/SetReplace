@@ -110,8 +110,11 @@ Check[
     Exit[1];
   ];
 
-  $oldSHA = If[Length @ $ScriptCommandLine >= 2, $ScriptCommandLine[[2]], "master"];
-  $newSHA = If[Length @ $ScriptCommandLine >= 3, $ScriptCommandLine[[3]], $currentSHA];
+  dereferenceHead["HEAD"] := $currentSHA;
+  dereferenceHead[arg_] := arg;
+
+  $oldSHA = If[Length @ $ScriptCommandLine >= 2, dereferenceHead @ $ScriptCommandLine[[2]], "master"];
+  $newSHA = If[Length @ $ScriptCommandLine >= 3, dereferenceHead @ $ScriptCommandLine[[3]], $currentSHA];
 
   $symbolicRef = RunProcess[{"git", "symbolic-ref", "--short", "HEAD"}];
   $originalRef = If[$symbolicRef["ExitCode"] === 0, StringExtract[$symbolicRef["StandardOutput"], 1], $currentSHA];
