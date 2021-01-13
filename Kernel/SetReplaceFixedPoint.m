@@ -12,16 +12,17 @@ no further events can be matched, and returns the final set.
 Will go into infinite loop if fixed point does not exist.
 ";
 
-SyntaxInformation[SetReplaceFixedPoint] =
-  {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
-
-SetReplaceFixedPoint[args___] := 0 /;
-  !Developer`CheckArgumentCount[SetReplaceFixedPoint[args], 2, 2] && False;
-
 Options[SetReplaceFixedPoint] = {
   Method -> Automatic,
   TimeConstraint -> Infinity,
   "EventOrderingFunction" -> Automatic};
+
+SyntaxInformation[SetReplaceFixedPoint] = {
+  "ArgumentsPattern" -> {_, _, OptionsPattern[]},
+  "OptionNames" -> Options[SetReplaceFixedPoint][[All, 1]]};
+
+SetReplaceFixedPoint[args___] := 0 /;
+  !Developer`CheckArgumentCount[SetReplaceFixedPoint[args], 2, 2] && False;
 
 SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] /;
     recognizedOptionsQ[expr, SetReplaceFixedPoint, {o}] := ModuleScope[

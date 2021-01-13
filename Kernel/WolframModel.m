@@ -20,14 +20,15 @@ SetUsage @ "
 $WolframModelProperties gives the list of available properties of WolframModel.
 ";
 
-SyntaxInformation[WolframModel] =
-  {"ArgumentsPattern" -> {_, _ ..., OptionsPattern[]}};
-
 Options[WolframModel] := Join[{
   "VertexNamingFunction" -> Automatic,
   "IncludePartialGenerations" -> True,
   "IncludeBoundaryEvents" -> None},
   Options[setSubstitutionSystem]];
+
+SyntaxInformation[WolframModel] = {
+  "ArgumentsPattern" -> {_, _ ..., OptionsPattern[]},
+  "OptionNames" -> Options[WolframModel][[All, 1]]};
 
 (* Arguments parsing *)
 
