@@ -220,7 +220,7 @@ correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
   knownOptionsQ[head, expr, opts] &&
   (And @@ (supportedOptionQ[head, ##, opts] & @@@ {
       {"HyperedgeRendering", $hyperedgeRenderings}})) &&
-  correctCoordinateRulesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinates]] &&
+  correctVertexCoordinatesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinates]] &&
   correctHighlightQ[OptionValue[HypergraphPlot, opts, GraphHighlight]] &&
   correctSizeQ[head, "Vertex size", OptionValue[HypergraphPlot, opts, VertexSize], {}] &&
   correctSizeQ[head, "Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"], {Automatic}] &&
@@ -238,11 +238,11 @@ correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
     Length[edges],
     OptionValue[HypergraphPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"});
 
-correctCoordinateRulesQ[head_, coordinateRules_] :=
-  If[!MatchQ[coordinateRules,
+correctVertexCoordinatesQ[head_, vertexCoordinates_] :=
+  If[!MatchQ[vertexCoordinates,
       Automatic |
       {(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
-    Message[head::invalidCoordinates, coordinateRules];
+    Message[head::invalidCoordinates, vertexCoordinates];
     False,
     True
   ];
@@ -333,14 +333,14 @@ adjustImageSize[dims_, _] := (Message[HypergraphPlot::invalidMaxImageSize, dims]
 
 (*** SpringElectricalEmbedding ***)
 
-hypergraphEmbedding[edgeType_, hyperedgeRendering : "Subgraphs", coordinateRules_] :=
-  hypergraphEmbedding[edgeType, edgeType, hyperedgeRendering, coordinateRules];
+hypergraphEmbedding[edgeType_, hyperedgeRendering : "Subgraphs", vertexCoordinates_] :=
+  hypergraphEmbedding[edgeType, edgeType, hyperedgeRendering, vertexCoordinates];
 
 hypergraphEmbedding[
       vertexLayoutEdgeType_,
       edgeLayoutEdgeType_,
       hyperedgeRendering : "Subgraphs",
-      coordinateRules_][
+      vertexCoordinates_][
       edges_] := ModuleScope[
   vertices = vertexList[edges];
   {vertexEmbeddingNormalEdges, edgeEmbeddingNormalEdges} =
@@ -353,7 +353,7 @@ hypergraphEmbedding[
       Catenate[vertexEmbeddingNormalEdges],
       Catenate[edgeEmbeddingNormalEdges],
       $graphLayout,
-      coordinateRules]]
+      vertexCoordinates]]
 ];
 
 toNormalEdges[edges_, partitionArgs___] := DirectedEdge @@@ Partition[#, partitionArgs] & /@ edges;
@@ -362,21 +362,21 @@ toNormalEdges[edges_, "Ordered"] := toNormalEdges[edges, 2, 1];
 
 toNormalEdges[edges_, "Cyclic"] := toNormalEdges[edges, 2, 1, 1];
 
-graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, coordinateRules_] := ModuleScope[
-  relevantCoordinateRules = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][coordinateRules], Last]];
+graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, vertexCoordinates_] := ModuleScope[
+  relevantVertexCoordinates = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][vertexCoordinates], Last]];
   unscaledEmbedding = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
-    graphEmbedding[vertices, edgeEmbeddingEdges, layout, relevantCoordinateRules],
-    With[{ve = vertexEmbedding[vertices, vertexEmbeddingEdges, layout, relevantCoordinateRules]},
+    graphEmbedding[vertices, edgeEmbeddingEdges, layout, relevantVertexCoordinates],
+    With[{ve = vertexEmbedding[vertices, vertexEmbeddingEdges, layout, relevantVertexCoordinates]},
       {ve, edgeEmbedding[vertices, edgeEmbeddingEdges, layout, ve]}
     ]
   ];
-  rescaleEmbedding[unscaledEmbedding, relevantCoordinateRules]
+  rescaleEmbedding[unscaledEmbedding, relevantVertexCoordinates]
 ];
 
 vertexEmbedding[vertices_, edges_, layout_, {}] := Thread[vertices -> GraphEmbedding[Graph[vertices, edges], layout]];
 
-vertexEmbedding[vertices_, edges_, layout_, coordinateRules_] :=
-  graphEmbedding[vertices, edges, layout, coordinateRules][[1]];
+vertexEmbedding[vertices_, edges_, layout_, vertexCoordinates_] :=
+  graphEmbedding[vertices, edges, layout, vertexCoordinates][[1]];
 
 edgeEmbedding[vertices_, edges_, "SpringElectricalEmbedding", vertexCoordinates_] /;
     SimpleGraphQ[Graph[UndirectedEdge @@@ edges]] := ModuleScope[
@@ -387,12 +387,12 @@ edgeEmbedding[vertices_, edges_, "SpringElectricalEmbedding", vertexCoordinates_
 edgeEmbedding[vertices_, edges_, layout_, vertexCoordinates_] :=
   graphEmbedding[vertices, edges, layout, vertexCoordinates][[2]];
 
-graphEmbedding[vertices_, edges_, layout_, coordinateRules_] := Replace[
+graphEmbedding[vertices_, edges_, layout_, vertexCoordinates_] := Replace[
   Reap[
     GraphPlot[
       Graph[vertices, edges],
       GraphLayout -> layout,
-      VertexCoordinates -> coordinateRules,
+      VertexCoordinates -> vertexCoordinates,
       VertexShapeFunction -> (Sow[#2 -> #, "v"] &),
       EdgeShapeFunction -> (Sow[#2 -> #, "e"] &)],
     {"v", "e"}][[2]],
