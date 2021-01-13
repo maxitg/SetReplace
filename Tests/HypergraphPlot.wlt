@@ -192,26 +192,26 @@
       (* Valid coordinates *)
 
       testUnevaluated[
-        HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> $$$invalid$$$],
+        HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> $$$invalid$$$],
         {HypergraphPlot::invalidCoordinates}
       ],
 
       testUnevaluated[
-        HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {{0, 0}}],
+        HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {{0, 0}}],
         {HypergraphPlot::invalidCoordinates}
       ],
 
       testUnevaluated[
-        HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0}}],
+        HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0}}],
         {HypergraphPlot::invalidCoordinates}
       ],
 
       VerificationTest[
-        graphicsQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinateRules -> {1 -> {0, 0}}]]
+        graphicsQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, VertexCoordinates -> {1 -> {0, 0}}]]
       ],
 
       VerificationTest[
-        graphicsQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered", VertexCoordinateRules -> {1 -> {0, 0}}]]
+        graphicsQ[HypergraphPlot[{{1, 2, 3}, {3, 4, 5}}, "Ordered", VertexCoordinates -> {1 -> {0, 0}}]]
       ],
 
       (* Valid GraphHighlight *)
@@ -377,13 +377,13 @@
           All]]
       ],
 
-      (* VertexCoordinateRules *)
+      (* VertexCoordinates *)
 
       VerificationTest[
         And @@ (MemberQ[
             diskCoordinates[checkGraphics @ HypergraphPlot[
               {{1, 2, 3}, {3, 4, 5}, {3, 3}},
-              VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}}]],
+              VertexCoordinates -> {1 -> {0, 0}, 2 -> {1, 0}}]],
             #] & /@
           {{0., 0.}, {1., 0.}})
       ],
@@ -391,19 +391,19 @@
       VerificationTest[
         Chop @ diskCoordinates[checkGraphics @ HypergraphPlot[
           {{1, 2, 3}, {3, 4, 5}},
-          VertexCoordinateRules -> {3 -> {0, 0}}]] != Table[{0, 0}, 5]
+          VertexCoordinates -> {3 -> {0, 0}}]] != Table[{0, 0}, 5]
       ],
 
       VerificationTest[
         Chop @ diskCoordinates[checkGraphics @ HypergraphPlot[
           {{1, 2, 3}, {3, 4, 5}},
-          VertexCoordinateRules -> {3 -> {1, 0}, 3 -> {0, 0}}]] != Table[{0, 0}, 5]
+          VertexCoordinates -> {3 -> {1, 0}, 3 -> {0, 0}}]] != Table[{0, 0}, 5]
       ],
 
       (** Same coordinates should not produce any messages **)
       VerificationTest[
         And @@ Cases[
-          checkGraphics @ HypergraphPlot[{{1, 2, 3}}, VertexCoordinateRules -> {1 -> {1, 0}, 2 -> {1, 0}}],
+          checkGraphics @ HypergraphPlot[{{1, 2, 3}}, VertexCoordinates -> {1 -> {1, 0}, 2 -> {1, 0}}],
           Rotate[_, {v1_, v2_}] :> v1 != {0, 0} && v2 != {0, 0},
           All]
       ],
@@ -665,7 +665,7 @@
         {GraphHighlight -> {3, {3, 4, 5}}},
         {VertexSize -> 0.1, "ArrowheadLength" -> 0.2},
         {EdgeStyle -> Red},
-        {VertexCoordinateRules -> {3 -> {0, 0}, 4 -> {1, 0}}}
+        {VertexCoordinates -> {3 -> {0, 0}, 4 -> {1, 0}}}
       },
 
       (* GraphHighlight and style interaction *)

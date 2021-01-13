@@ -41,7 +41,7 @@ property:
 <img src="/Documentation/Images/RulePlot.png" width="429">
 
 Sometimes an incorrectly scaled layout might be produced due to the issue discussed above
-in [`VertexCoordinateRules`](HypergraphPlot.md#vertexcoordinaterules):
+in [`VertexCoordinates`](HypergraphPlot.md#vertexcoordinates):
 
 ```wl
 In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
@@ -50,12 +50,12 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
 
 <img src="/Documentation/Images/IncorrectlyScaledRulePlot.png" width="429">
 
-`VertexCoordinateRules` can be used in that case to specify the layout manually:
+`VertexCoordinates` can be used in that case to specify the layout manually:
 
 ```wl
 In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
    {{2, 2}, {2, 2}, {2, 5}, {3, 2}}],
- VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {0, 1},
+ VertexCoordinates -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {0, 1},
    4 -> {-1, 0}, 5 -> {2, 1}}]
 ```
 
@@ -64,7 +64,7 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
 Some of the [`HypergraphPlot`](HypergraphPlot.md) options are supported,
 specifically [`GraphHighlightStyle`](HypergraphPlot.md#graphhighlight-and-graphhighlightstyle)
 , [`"HyperedgeRendering"`](HypergraphPlot.md#hyperedgerendering)
-, [`VertexCoordinateRules`](HypergraphPlot.md#vertexcoordinaterules), [`VertexLabels`](HypergraphPlot.md#vertexlabels)
+, [`VertexCoordinates`](HypergraphPlot.md#vertexcoordinates), [`VertexLabels`](HypergraphPlot.md#vertexlabels)
 , [`VertexSize`, `"ArrowheadLength"`](HypergraphPlot.md#vertexsize-and-arrowheadlength),
 and [style options](HypergraphPlot.md#style-options). `"EdgeType"` is supported as an option instead
 of [the second argument](HypergraphPlot.md#edge-type) like in [`HypergraphPlot`](HypergraphPlot.md).

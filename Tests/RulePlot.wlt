@@ -146,14 +146,14 @@
         {RulePlot::invalidFiniteOption}
       ],
 
-      (** VertexCoordinateRules **)
+      (** VertexCoordinates **)
 
       VerificationTest[
         SameQ @@
           Cases[
             checkGraphics @ RulePlot[
               WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}],
-              VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {2, 0}, 4 -> {3, 0}, 5 -> {4, 0}}],
+              VertexCoordinates -> {1 -> {0, 0}, 2 -> {1, 0}, 3 -> {2, 0}, 4 -> {3, 0}, 5 -> {4, 0}}],
             Disk[p_, _] :> p,
             All][[All, 2]]
       ],
@@ -166,18 +166,18 @@
               Cases[
                 checkGraphics @ RulePlot[
                   WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}],
-                  VertexCoordinateRules -> {1 -> {0, 0}, 2 -> {0, 0}, 3 -> {0, 0}, 4 -> {0, 0}, 5 -> {0, 0}}],
+                  VertexCoordinates -> {1 -> {0, 0}, 2 -> {0, 0}, 3 -> {0, 0}, 4 -> {0, 0}, 5 -> {0, 0}}],
                 Disk[p_, _] :> p,
                 All]]]
           <= 2
       ],
 
       VerificationTest[
-        graphicsQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexCoordinateRules -> {}]]
+        graphicsQ[RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexCoordinates -> {}]]
       ],
 
       testUnevaluated[
-        RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexCoordinateRules -> {1}],
+        RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], VertexCoordinates -> {1}],
         {RulePlot::invalidCoordinates}
       ],
 
@@ -374,20 +374,20 @@
           SameQ @@ (ImageSizeRaw /.
               Options[
                   checkGraphics @ RulePlot[
-                    WolframModel[rule], VertexCoordinateRules -> coordinatesNormal, "RulePartsAspectRatio" -> #],
+                    WolframModel[rule], VertexCoordinates -> coordinatesNormal, "RulePartsAspectRatio" -> #],
                   ImageSizeRaw] & /@
                 {0.01, 0.1})
         ],
 
         Function[coordinates, checkAspectRatio[
             checkGraphics @ RulePlot[
-              WolframModel[rule], VertexCoordinateRules -> coordinates, "RulePartsAspectRatio" -> #],
+              WolframModel[rule], VertexCoordinates -> coordinates, "RulePartsAspectRatio" -> #],
             #,
             0.001,
             2] & /@
           {0.01, 0.1, 0.5, 0.8, 1, 1.2, 2, 10, 100}] /@ {coordinatesNormal, coordaintesSquare, coordinatesFlipped},
 
-        checkAspectRatio[checkGraphics @ RulePlot[WolframModel[rule], VertexCoordinateRules -> #1], #2, #3, 2] & @@@ {
+        checkAspectRatio[checkGraphics @ RulePlot[WolframModel[rule], VertexCoordinates -> #1], #2, #3, 2] & @@@ {
           {coordinatesNormal, 2 / 3, 0.1},
           {coordaintesSquare, 1, 0.1},
           {coordinatesFlipped, 2, 0.1},
@@ -396,7 +396,7 @@
 
         (* outer frame *)
         checkAspectRatio[
-            checkGraphics @ RulePlot[WolframModel[Table[rule, #]], Frame -> True, VertexCoordinateRules -> #2],
+            checkGraphics @ RulePlot[WolframModel[Table[rule, #]], Frame -> True, VertexCoordinates -> #2],
             #3,
             0.1,
             1] & @@@ {
