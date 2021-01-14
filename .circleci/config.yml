@@ -65,7 +65,7 @@ jobs:
           command: |
             if [ $CIRCLE_NODE_INDEX -eq 0 ]
             then
-              ./performanceTest.wls master @HEAD 2
+              ./performanceTest.wls master HEAD 2
             fi
 
   cpp-test:
