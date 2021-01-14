@@ -113,7 +113,7 @@ Check[
   argumentReferenceToSHA[ref_] := ModuleScope[
     revParseOutput = RunProcess[{"git", "rev-parse", ref}];
     If[revParseOutput["ExitCode"] === 0,
-      revParseOutput["StandardOutput"]
+      StringExtract[revParseOutput["StandardOutput"], 1] (* remove \n at the end *)
     ,
       Print["Reference ", ref, " is not recognized."];
       Exit[1];
