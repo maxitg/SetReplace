@@ -110,10 +110,15 @@ Check[
     Exit[1];
   ];
 
-  argumentReferenceToSHA[ref_] := Replace[GitSHA[$gitRepo, ref], $Failed :> (
-    Print["Reference ", ref, " is not recognized."];
-    Exit[1];
-  )];
+  argumentReferenceToSHA[ref_] := ModuleScope[
+    revParseOutput = RunProcess[{"git", "rev-parse", ref}];
+    If[revParseOutput["ExitCode"] === 0,
+      revParseOutput["StandardOutput"]
+    ,
+      Print["Reference ", ref, " is not recognized."];
+      Exit[1];
+    ]
+  ];
 
   $oldSHA = If[Length @ $ScriptCommandLine >= 2, argumentReferenceToSHA @ $ScriptCommandLine[[2]], "master"];
   $newSHA = If[Length @ $ScriptCommandLine >= 3, argumentReferenceToSHA @ $ScriptCommandLine[[3]], $currentSHA];
