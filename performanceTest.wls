@@ -102,7 +102,7 @@ Check[
   speedupDelta[old_, new_] := (old - new) / old;
 
   $gitRepo = GitOpen[$SetReplaceRoot];
-  $currentSHA = GitSHA[$gitRepo, $gitRepo["HEAD"]];
+  $currentSHA = GitSHA[$gitRepo, "HEAD"];
   $cleanQ = AllTrue[# === {} &] @ GitStatus[$gitRepo];
 
   If[!$cleanQ,
@@ -110,11 +110,13 @@ Check[
     Exit[1];
   ];
 
-  dereferenceHead["HEAD"] := $currentSHA;
-  dereferenceHead[arg_] := arg;
+  argumentReferenceToSHA[ref_] := Replace[GitSHA[$gitRepo, ref], $Failed :> (
+    Print["Reference ", ref, " is not recognized."];
+    Exit[1];
+  )];
 
-  $oldSHA = If[Length @ $ScriptCommandLine >= 2, dereferenceHead @ $ScriptCommandLine[[2]], "master"];
-  $newSHA = If[Length @ $ScriptCommandLine >= 3, dereferenceHead @ $ScriptCommandLine[[3]], $currentSHA];
+  $oldSHA = If[Length @ $ScriptCommandLine >= 2, argumentReferenceToSHA @ $ScriptCommandLine[[2]], "master"];
+  $newSHA = If[Length @ $ScriptCommandLine >= 3, argumentReferenceToSHA @ $ScriptCommandLine[[3]], $currentSHA];
 
   $symbolicRef = RunProcess[{"git", "symbolic-ref", "--short", "HEAD"}];
   $originalRef = If[$symbolicRef["ExitCode"] === 0, StringExtract[$symbolicRef["StandardOutput"], 1], $currentSHA];
