@@ -183,13 +183,16 @@ expr : WolframModel[
       modifiedEvolution,
       WolframModel,
       #] &;
-    result = Catch[Check[
+    result = Catch @ Check[
       If[modifiedEvolution =!= $Failed,
         If[ListQ[property],
           Catch[
-            Check[propertyEvaluateWithOptions[#], Throw[$Failed, $propertyMessages]] & /@ property,
-            $propertyMessages,
-            $Failed &]
+            Check[propertyEvaluateWithOptions[#], Throw[$Failed, $propertyMessages]] & /@ property
+          ,
+            $propertyMessages
+          ,
+            $Failed &
+          ]
         ,
           propertyEvaluateWithOptions @ property
         ] /.
@@ -200,7 +203,7 @@ expr : WolframModel[
       ]
     ,
       $Failed
-    ]];
+    ];
     result /; result =!= $Failed
   ];
 

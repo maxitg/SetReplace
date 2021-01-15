@@ -30,7 +30,9 @@ expr : SetReplace[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPat
     recognizedOptionsQ[expr, SetReplace, {o}] :=
   ModuleScope[
     result = Check[
-      setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplace, False, o],
-      $Failed];
+      setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplace, False, o]
+    ,
+      $Failed
+    ];
     If[result === $Aborted, result, result[-1]] /; result =!= $Failed
   ];

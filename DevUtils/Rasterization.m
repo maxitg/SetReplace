@@ -102,7 +102,8 @@ findFinalExpressionStart[str_String] := Scope[
   While[MatchQ[expr, _Hold],
     {lastPos, pos} = {pos, StreamPosition[stream]};
     expr = Quiet @ Check[
-      Read[stream, Hold[Expression]],
+      Read[stream, Hold[Expression]]
+    ,
       Return[$Failed]
     ];
   ];
