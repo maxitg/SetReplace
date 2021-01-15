@@ -723,7 +723,7 @@ In addition to that, here are some more-or-less established rules:
   ]
   ```
 
-  This also applies to other functions that expect compound expressions:
+  This also applies to other functions that expect compound expressions, e.g. `Catch`, `Check`, `Quiet`:
 
   ```wl
   Catch[
