@@ -114,9 +114,12 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
             ];
             {newResult, {deletedExpressions, events}} = Reap[
               Catch[
-                Replace[#, normalRules],
-                $$reachedAtomDegreeLimit,
-                Throw[{previousResult, $maxFinalVertexDegree}, $$setReplaceResult] &],
+                Replace[#, normalRules]
+              ,
+                $$reachedAtomDegreeLimit
+              ,
+                Throw[{previousResult, $maxFinalVertexDegree}, $$setReplaceResult] &
+              ],
               {$$deletedExpressions, $$events}];
             If[vertexCount[vertexIndex] > Lookup[stepSpec, $maxFinalVertices, Infinity],
               Throw[{previousResult, $maxFinalVertices}, $$setReplaceResult];
@@ -138,7 +141,8 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
         {previousResult, $timeConstraint}
       ,
         Return[$Aborted]
-      ]],
+      ]]
+  ,
     $$setReplaceResult
   ]
 ];
@@ -340,10 +344,12 @@ setSubstitutionSystem$wl[
   outputWithMetadata = Catch[
     Reap[
       setReplace$wl[initWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint],
-      {$$deletedExpressions, $$events}],
-    $$nonListExpression,
-    (Message[caller::nonListExpressions, #];
-      Return[$Failed]) &]; (* {{finalState, terminationReason}, {{deletedExpressions}, {events}}} *)
+      {$$deletedExpressions, $$events}]
+  ,
+    $$nonListExpression
+  ,
+    (Message[caller::nonListExpressions, #]; Return[$Failed]) &
+  ]; (* {{finalState, terminationReason}, {{deletedExpressions}, {events}}} *)
   If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
   allExpressions = SortBy[
     Join[
