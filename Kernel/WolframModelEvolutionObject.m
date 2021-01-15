@@ -578,8 +578,10 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
         ,
           Throw[$Failed]
         ] &,
-        propertyEvaluate[True, boundary][obj, caller, "StatesList"]],
-      HypergraphPlot::invalidEdges]
+        propertyEvaluate[True, boundary][obj, caller, "StatesList"]]
+    ,
+      HypergraphPlot::invalidEdges
+    ]
   ,
     Throw[$Failed]
   ];

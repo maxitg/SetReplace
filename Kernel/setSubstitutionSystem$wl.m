@@ -268,8 +268,10 @@ renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAt
         ,
           With[{originalP = p /. pattern -> Pattern}, Message[Pattern::patvar, originalP]]; Throw[$Failed]
         ],
-        All],
-      {RuleDelayed::rhs}]];
+        All]
+    ,
+      {RuleDelayed::rhs}
+    ]];
   newInputAtoms = Table[Unique["inputAtom", {Temporary}], Length[inputAtoms]];
   # /. (((HoldPattern[#1] /. Hold[s_] :> s) -> #2) & @@@ Thread[inputAtoms -> newInputAtoms])
 ] & /@ patternRules];
