@@ -60,8 +60,10 @@ WolframModelEvolutionObject /:
   generationsCount = evo["TotalGenerationsCount"];
   maxCompleteGeneration = Replace[evo["CompleteGenerationsCount"], _ ? MissingQ -> "?"];
   generationsDisplay = If[generationsCount === maxCompleteGeneration,
-    generationsCount,
-    Row[{maxCompleteGeneration, "\[Ellipsis]", generationsCount}]];
+    generationsCount
+  ,
+    Row[{maxCompleteGeneration, "\[Ellipsis]", generationsCount}]
+  ];
   eventsCount = evo["AllEventsCount"];
   terminationReason = evo["TerminationReason"];
   rules = evo["Rules"];
@@ -164,10 +166,12 @@ $newParameterlessProperties = Intersection[$propertiesParameterless, Keys[$prope
 
 General::missingMaxCompleteGeneration = "Cannot drop incomplete generations in an object with missing information.";
 
-propertyEvaluate[False, boundary_][evolution_, caller_, rest___] := If[MissingQ[evolution["CompleteGenerationsCount"]],
-  Message[caller::missingMaxCompleteGeneration],
-  propertyEvaluate[True, boundary][deleteIncompleteGenerations[evolution], caller, rest]
-];
+propertyEvaluate[False, boundary_][evolution_, caller_, rest___] :=
+  If[MissingQ[evolution["CompleteGenerationsCount"]],
+    Message[caller::missingMaxCompleteGeneration]
+  ,
+    propertyEvaluate[True, boundary][deleteIncompleteGenerations[evolution], caller, rest]
+  ];
 
 propertyEvaluate[False, boundary_][evolution_, caller_, rest___] :=
   propertyEvaluate[True, boundary][deleteIncompleteGenerations[evolution], caller, rest];
@@ -373,8 +377,10 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
     caller_,
     "PartialGenerationsCount"] :=
   If[MissingQ[obj["CompleteGenerationsCount"]],
-    obj["CompleteGenerationsCount"],
-    obj["TotalGenerationsCount"] - obj["CompleteGenerationsCount"]];
+    obj["CompleteGenerationsCount"]
+  ,
+    obj["TotalGenerationsCount"] - obj["CompleteGenerationsCount"]
+  ];
 
 (* GenerationsCount *)
 
@@ -581,7 +587,8 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       ];
       Join[DeleteCases[currentState, Alternatives @@ newEvent[[1]]], newEvent[[2]]]]],
     If[MatchQ[boundary, "Initial" | All],
-      {},
+      {}
+    ,
       propertyEvaluate[True, None][obj, caller, "StateEdgeIndicesAfterEvent", 0]
     ],
     events];

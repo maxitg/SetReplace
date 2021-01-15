@@ -78,8 +78,10 @@ $automaticStepsTimeConstraint = 5.0;
 fromStepsSpec[init_, {Automatic, factor_}, timeConstraint_, eventSelectionFunction_] := {
   <|$maxEvents -> Round[factor $automaticMaxEvents],
     $maxFinalExpressions -> If[multiwayEventSelectionFunctionQ[eventSelectionFunction],
-      Infinity,
-      Max[Round[factor $automaticMaxFinalExpressions], Length[init]]]|>,
+      Infinity
+    ,
+      Max[Round[factor $automaticMaxFinalExpressions], Length[init]]
+    ]|>,
   Automatic, (* termination reason *)
   {TimeConstraint -> Min[timeConstraint, Replace[factor, 0 | 0. -> 1] $automaticStepsTimeConstraint],
     "IncludePartialGenerations" -> False},
@@ -160,8 +162,10 @@ expr : WolframModel[
           "EventOrderingFunction" -> overridenOptionValue["EventOrderingFunction"],
           "EventSelectionFunction" -> overridenOptionValue["EventSelectionFunction"],
           "EventDeduplication" -> overridenOptionValue["EventDeduplication"]],
-        $Failed],
-      $Failed];
+        $Failed]
+    ,
+      $Failed
+    ];
     If[evolution === $Aborted, Return[$Aborted]];
     modifiedEvolution = If[evolution =!= $Failed,
       Check[
@@ -169,8 +173,10 @@ expr : WolframModel[
           evolution,
           AssociationQ[rulesSpec],
           overridenOptionValue["VertexNamingFunction"]],
-        $Failed],
-      $Failed];
+        $Failed]
+    ,
+      $Failed
+    ];
     propertyEvaluateWithOptions = propertyEvaluate[
       overridenOptionValue["IncludePartialGenerations"],
       overridenOptionValue["IncludeBoundaryEvents"]][
@@ -180,15 +186,21 @@ expr : WolframModel[
     result = Catch[Check[
       If[modifiedEvolution =!= $Failed,
         If[ListQ[property],
-            Catch[
-              Check[propertyEvaluateWithOptions[#], Throw[$Failed, $propertyMessages]] & /@ property,
-              $propertyMessages,
-              $Failed &],
-            propertyEvaluateWithOptions @ property] /.
+          Catch[
+            Check[propertyEvaluateWithOptions[#], Throw[$Failed, $propertyMessages]] & /@ property,
+            $propertyMessages,
+            $Failed &]
+        ,
+          propertyEvaluateWithOptions @ property
+        ] /.
           HoldPattern[WolframModelEvolutionObject[data_Association]] :>
-            WolframModelEvolutionObject[Join[data, <|$rules -> rulesSpec|>]],
-        $Failed],
-      $Failed]];
+            WolframModelEvolutionObject[Join[data, <|$rules -> rulesSpec|>]]
+      ,
+        $Failed
+      ]
+    ,
+      $Failed
+    ]];
     result /; result =!= $Failed
   ];
 

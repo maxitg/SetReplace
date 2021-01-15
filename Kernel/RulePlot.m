@@ -58,7 +58,8 @@ WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`Ch
   ModuleScope[
     result = rulePlot$parse[{args}, {opts}];
     If[Head[result] === rulePlot$parse,
-      result = $Failed];
+      result = $Failed
+    ];
     result /; result =!= $Failed
   ];
 
@@ -68,7 +69,8 @@ WolframModelEvolutionObject /: RulePlot[evo : WolframModelEvolutionObject[data_ 
   ModuleScope[
     result = rulePlot$parse[{evo["Rules"]}, {opts}];
     If[Head[result] === rulePlot$parse,
-      result = $Failed];
+      result = $Failed
+    ];
     result /; result =!= $Failed
   ];
 
@@ -92,12 +94,13 @@ rulePlot$parse[{
 
 hypergraphRulesSpecQ[rulesSpec_List ? wolframModelRulesSpecQ] := Fold[# && hypergraphRulesSpecQ[#2] &, True, rulesSpec];
 
-hypergraphRulesSpecQ[ruleSpec_Rule ? wolframModelRulesSpecQ] := If[
-  MatchQ[ruleSpec, {___List} -> {___List}],
-  True,
-  Message[RulePlot::notHypergraphRule, ruleSpec];
-  False
-];
+hypergraphRulesSpecQ[ruleSpec_Rule ? wolframModelRulesSpecQ] :=
+  If[MatchQ[ruleSpec, {___List} -> {___List}],
+    True
+  ,
+    Message[RulePlot::notHypergraphRule, ruleSpec];
+    False
+  ];
 
 hypergraphRulesSpecQ[rulesSpec_Association ? wolframModelRulesSpecQ] := (
   Message[RulePlot::patternRules, rulesSpec];
@@ -119,11 +122,13 @@ correctOptionsQ[args_, {opts___}] :=
   correctHypergraphPlotOptionsQ[
     RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[HypergraphPlot]]];
 
-correctEdgeTypeQ[edgeType_] := If[MatchQ[edgeType, Alternatives @@ $edgeTypes],
-  True,
-  Message[RulePlot::invalidEdgeType, edgeType, $edgeTypes];
-  False
-];
+correctEdgeTypeQ[edgeType_] :=
+  If[MatchQ[edgeType, Alternatives @@ $edgeTypes],
+    True
+  ,
+    Message[RulePlot::invalidEdgeType, edgeType, $edgeTypes];
+    False
+  ];
 
 correctSpacingsQ[opts_] := ModuleScope[
   spacings = OptionValue[RulePlot, opts, Spacings];
@@ -136,9 +141,11 @@ correctRulePartsAspectRatioQ[Automatic] := True;
 
 correctRulePartsAspectRatioQ[aspectRatio_] :=
   If[NumericQ[aspectRatio] && aspectRatio > 0,
-    True,
+    True
+  ,
     Message[RulePlot::invalidAspectRatio, aspectRatio];
-    False];
+    False
+  ];
 
 styleNotListQ[styles_List] := (
   Message[RulePlot::elementwiseStyle, styles];
@@ -369,7 +376,8 @@ graphicsRiffle[
       Sow[Translate[scaledShapes[[#2]], {#, 0}]];
       Sow[Translate[scaledSeparator, {# + shapeWidth, 0}]];
       If[gridStyle =!= None,
-        Sow[{explicitGridStyle, Line[{{#, 0}, {#, height}}] & @ (# + shapeWidth + relativeSeparatorWidth / 2)}]];
+        Sow[{explicitGridStyle, Line[{{#, 0}, {#, height}}] & @ (# + shapeWidth + relativeSeparatorWidth / 2)}]
+      ];
       # + shapeWidth + relativeSeparatorWidth
     ] &,
     0,

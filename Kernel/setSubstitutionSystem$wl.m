@@ -129,12 +129,14 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
             previousResult = newResult]] &,
           List @@ set], $fixedPoint},
         If[returnOnAbortQ,
-          {previousResult, $Aborted},
+          {previousResult, $Aborted}
+        ,
           Abort[]
         ]],
       timeConstraint,
       If[returnOnAbortQ,
-        {previousResult, $timeConstraint},
+        {previousResult, $timeConstraint}
+      ,
         Return[$Aborted]
       ]],
     $$setReplaceResult
@@ -258,8 +260,10 @@ renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAt
       Cases[
         # /. Pattern -> pattern,
         p : pattern[s_, rest___] :> If[MatchQ[Hold[s], Hold[_Symbol]],
-          Hold[s],
-          With[{originalP = p /. pattern -> Pattern}, Message[Pattern::patvar, originalP]]; Throw[$Failed]],
+          Hold[s]
+        ,
+          With[{originalP = p /. pattern -> Pattern}, Message[Pattern::patvar, originalP]]; Throw[$Failed]
+        ],
         All],
       {RuleDelayed::rhs}]];
   newInputAtoms = Table[Unique["inputAtom", {Temporary}], Length[inputAtoms]];
@@ -318,8 +322,10 @@ setSubstitutionSystem$wl[
   renamedRules = renameRuleInputs[toCanonicalRules[rules]];
   If[renamedRules === $Failed, Return[$Failed]];
   vertexIndex = If[MissingQ[stepSpec[$maxFinalVertices]] && MissingQ[stepSpec[$maxFinalVertexDegree]],
-    $noIndex,
-    $vertexIndex[expressionsCountsPerVertex]];
+    $noIndex
+  ,
+    $vertexIndex[expressionsCountsPerVertex]
+  ];
   initVertexIndex[vertexIndex, init];
 
   rulesWithMetadata = MapIndexed[
@@ -350,7 +356,8 @@ setSubstitutionSystem$wl[
   maxCompleteGenerationResult = CheckAbort[
     Min[maxCompleteGeneration[outputWithMetadata[[1, 1]], renamedRules], generationsCount],
     If[returnOnAbortQ,
-      Missing["Unknown", $Aborted],
+      Missing["Unknown", $Aborted]
+    ,
       Return[$Aborted]
     ]];
 
@@ -362,8 +369,10 @@ setSubstitutionSystem$wl[
       outputWithMetadata[[1, 2]],
       $fixedPoint ->
         If[generationsCount == Lookup[stepSpec, $maxGenerationsLocal, Infinity],
-          $maxGenerationsLocal,
-          $fixedPoint]],
+          $maxGenerationsLocal
+        ,
+          $fixedPoint
+        ]],
     $atomLists -> allExpressions[[All, 3]],
     $eventRuleIDs -> allEvents[[All, 1]],
     $eventInputs -> allEvents[[All, 2, 1]],

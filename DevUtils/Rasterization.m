@@ -122,7 +122,7 @@ cellToString[cell_] := Scope[
 
 previousCellData[cell_, requiredType_] := Scope[
   cellObject = If[cell === None, PreviousCell[], PreviousCell @ cell];
-    cellExpr = NotebookRead[cellObject];
+  cellExpr = NotebookRead[cellObject];
   If[Head[cellExpr] =!= Cell, ThrowFailure["exportmdnocell"]];
   cellType = Replace[cellExpr, {Cell[_, type_String, ___] :> type, _ :> $Failed}];
   If[!MatchQ[cellType, requiredType], ThrowFailure["exportmdiotype", cellType]];
@@ -183,7 +183,8 @@ exportImageToMarkdown[relativePath_, image_, OptionsPattern[]] := Scope[
       StringContainsQ[filename, " "],
       Not @ StringEndsQ[filename, ".png", IgnoreCase -> True]
     ],
-    ThrowFailure["exportmdbadfilename", filename]];
+    ThrowFailure["exportmdbadfilename", filename]
+  ];
   If[relativeDir === "", relativeDir = FileNameJoin[{"Documentation", "Images"}]];
   absoluteDir = FileNameJoin[{$SetReplaceRoot, relativeDir}];
   If[FileType[absoluteDir] =!= Directory, ThrowFailure["exportmdnoparentdir", absoluteDir]];
