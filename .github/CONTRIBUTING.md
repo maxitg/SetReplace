@@ -711,6 +711,7 @@ In addition to that, here are some more-or-less established rules:
     ];
   ]
   ```
+
 * In order to spot the difference between a compound expression and an "else" branch in an `If` expression, the
   following style is used:
 
