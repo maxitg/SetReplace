@@ -37,4 +37,8 @@ EXTERN_C DLLEXPORT int maxCompleteGeneration(WolframLibraryData libData, mint ar
  */
 EXTERN_C DLLEXPORT int terminationReason(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result);
 
+/** @brief Renders a video of the evolution to the specified video file.
+ */
+EXTERN_C DLLEXPORT int renderEvolutionVideo(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result);
+
 #endif  // LIBSETREPLACE_SETREPLACE_HPP_

@@ -10,6 +10,7 @@
 #include <utility>
 #include <vector>
 
+#include "HypergraphRenderer.hpp"
 #include "Set.hpp"
 
 namespace SetReplace {
@@ -361,6 +362,39 @@ int terminationReason([[maybe_unused]] WolframLibraryData, mint argc, MArgument*
 
   return LIBRARY_NO_ERROR;
 }
+
+std::string getString(WolframLibraryData libData, MTensor charsTensor) {
+  mint stringLength = libData->MTensor_getFlattenedLength(charsTensor);
+  mint* tensorData = libData->MTensor_getIntegerData(charsTensor);
+  std::string result;
+  result.reserve(stringLength);
+  for (mint i = 0; i < stringLength; ++i) {
+    result.push_back(static_cast<char>(getData(tensorData, stringLength, i)));
+  }
+  return result;
+}
+
+int renderEvolutionVideo(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
+  if (argc != 5) {
+    return LIBRARY_FUNCTION_ERROR;
+  }
+
+  const SetID setID = MArgument_getInteger(argv[0]);
+  const std::string filename = getString(libData, MArgument_getMTensor(argv[1]));
+  const int width = static_cast<int>(MArgument_getInteger(argv[2]));
+  const int height = static_cast<int>(MArgument_getInteger(argv[3]));
+  const int fps = static_cast<int>(MArgument_getInteger(argv[4]));
+
+  HypergraphRenderer::Error errorCode;
+  try {
+    HypergraphRenderer renderer(setFromID(setID));
+    errorCode = renderer.renderEvolutionVideo(filename, {width, height}, fps);
+  } catch (...) {
+    return LIBRARY_FUNCTION_ERROR;
+  }
+
+  return static_cast<int>(errorCode);
+}
 }  // namespace
 }  // namespace SetReplace
 
@@ -396,4 +430,8 @@ EXTERN_C int maxCompleteGeneration(WolframLibraryData libData, mint argc, MArgum
 
 EXTERN_C int terminationReason(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
   return SetReplace::terminationReason(libData, argc, argv, result);
+}
+
+EXTERN_C int renderEvolutionVideo(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
+  return SetReplace::renderEvolutionVideo(libData, argc, argv, result);
 }
