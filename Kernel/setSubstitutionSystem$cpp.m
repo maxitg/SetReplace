@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+PackageExport["LibSetReplaceSet"]
+
 PackageImport["GeneralUtilities`"]
 
 PackageScope["$cppSetReplaceAvailable"]
@@ -205,7 +207,7 @@ setSubstitutionSystem$cpp[
       globalIndex,
       localIndices[[K]]],
     {K, Length[canonicalRules]}];
-  setHandle = CreateManagedLibraryExpression["SetReplace", managedSet];
+  setHandle = CreateManagedLibraryExpression["SetReplace", LibSetReplaceSet];
   setID = ManagedLibraryExpressionID[setHandle, "SetReplace"];
   $cpp$setInitialize[
     setID,
@@ -240,7 +242,8 @@ setSubstitutionSystem$cpp[
   inverseGlobalMap = Association @ Thread[resultAtoms
     -> (Lookup[inversePartialGlobalMap, #, Unique["v", {Temporary}]] & /@ resultAtoms)];
   WolframModelEvolutionObject[Join[
-    <|$version -> 2,
+    <|$version -> 3,
+      $libSetReplaceSet -> setHandle,
       $rules -> rules,
       $maxCompleteGeneration -> maxCompleteGeneration,
       $terminationReason -> terminationReason,

@@ -355,7 +355,8 @@ setSubstitutionSystem$wl[
     ]];
 
   WolframModelEvolutionObject[<|
-    $version -> 2,
+    $version -> 3,
+    $libSetReplaceSet -> Missing["SymbolicEvolution"],
     $rules -> rules,
     $maxCompleteGeneration -> maxCompleteGenerationResult,
     $terminationReason -> Replace[

@@ -300,7 +300,8 @@
         WolframModel[
           {{1, 2}, {2, 3}} -> {{1, 3}},
           pathGraph17,
-          4]
+          4] /. LibSetReplaceSet[_] :> LibSetReplaceSet[_],
+        SameTest -> MatchQ
       ],
 
       (* Version *)
@@ -308,7 +309,7 @@
       (* Will need to be updated with each new version. *)
       VerificationTest[
         WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 1, Method -> #]["Version"],
-        2
+        3
       ] & /@ {"LowLevel", "Symbolic"},
 
       (* Rules *)
@@ -2254,6 +2255,29 @@
                                       "MaxCompleteGeneration" -> 2,
                                       "EventRuleIDs" -> {1, 1, 1}|>],
         {WolframModelEvolutionObject::corrupt}
+      ],
+
+      (* v2 -> v3 *)
+      VerificationTest[
+        WolframModelEvolutionObject[<|"Version" -> 2,
+                                      "Rules" -> {{1, 2}, {2, 3}} -> {{1, 3}},
+                                      "MaxCompleteGeneration" -> 2,
+                                      "TerminationReason" -> "FixedPoint",
+                                      "AtomLists" -> {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {1, 3}, {3, 5}, {1, 5}},
+                                      "EventRuleIDs" -> {0, 1, 1, 1},
+                                      "EventInputs" -> {{}, {1, 2}, {3, 4}, {5, 6}},
+                                      "EventOutputs" -> {{1, 2, 3, 4}, {5}, {6}, {7}},
+                                      "EventGenerations" -> {0, 1, 1, 2}|>],
+        WolframModelEvolutionObject[<|"Version" -> 3,
+                                      "LibSetReplaceSet" -> Missing["Migrated"],
+                                      "Rules" -> {{1, 2}, {2, 3}} -> {{1, 3}},
+                                      "MaxCompleteGeneration" -> 2,
+                                      "TerminationReason" -> "FixedPoint",
+                                      "AtomLists" -> {{1, 2}, {2, 3}, {3, 4}, {4, 5}, {1, 3}, {3, 5}, {1, 5}},
+                                      "EventRuleIDs" -> {0, 1, 1, 1},
+                                      "EventInputs" -> {{}, {1, 2}, {3, 4}, {5, 6}},
+                                      "EventOutputs" -> {{1, 2, 3, 4}, {5}, {6}, {7}},
+                                      "EventGenerations" -> {0, 1, 1, 2}|>]
       ],
 
       (* future version *)
