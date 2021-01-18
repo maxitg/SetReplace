@@ -993,6 +993,13 @@ WolframModelEvolutionObject[data_ ? evolutionDataQ][args__] := ModuleScope[
   result /; result =!= $Failed
 ];
 
+(* Equality *)
+
+(* The objects are equal if the fields are the same even if they refer to different libSetReplace instances. *)
+
+WolframModelEvolutionObject /: Equal[evolutions__WolframModelEvolutionObject] :=
+  SameQ @@ KeyDrop[$libSetReplaceSet] /@ First /@ {evolutions}
+
 (** Argument Checks **)
 (* Argument Checks should be evaluated after Implementation, otherwise ::corrupt messages will be created while
    assigning SubValues. *)
