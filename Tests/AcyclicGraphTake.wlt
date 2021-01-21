@@ -5,9 +5,16 @@
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
     ),
     "tests" -> {
-      
+
+      (* Verification tests *)
       VerificationTest[
-          AcyclicGraphTake[CycleGraph[10,]]
+        Sort[EdgeList[AcyclicGraphTake[Graph[{1 -> 2, 2 -> 3, 2 -> 4, 3 -> 4, 4 -> 5, 5 -> 6}], {2, 5}]]],
+        Sort[EdgeList[Graph[{2 -> 3, 2 -> 4, 3 -> 4, 4 -> 5}]]]
+      ]
+
+      VerificationTest[
+        Sort[EdgeList[AcyclicGraphTake[Graph[{1 -> 1, 1 -> 2, 2 -> 3, 4 -> 5}], {1, 3}]]],
+        Sort[EdgeList[Graph[{1 -> 1, 1 -> 2, 2 -> 3}]]]
       ]
 
 
