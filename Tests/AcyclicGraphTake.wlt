@@ -89,6 +89,7 @@
         ]
         }
       ]
-    }
+    },
+    "options" -> <|"Parallel" -> False|>
   |>
 |>
