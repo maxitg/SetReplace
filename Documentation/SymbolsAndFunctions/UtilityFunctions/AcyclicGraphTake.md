@@ -3,7 +3,7 @@
 # AcyclicGraphTake
 
 **`AcyclicGraphTake`** gives the intersectiom of the out-component of the first vertex
-with the in-component of the second vertex;
+with the in-component of the second vertex:
 
 ```wl
 In[] := graph = BlockRandom[
@@ -12,10 +12,10 @@ In[] := graph = BlockRandom[
 ]
 ```
 
-<img src="/Documentation/Images/AcyclicGraphTakeInput.png" width="398.4">
+<img src="/Documentation/Images/AcyclicGraphTakeInput.png" width="478.2">
 
 ```wl
 In[] := AcyclicGraphTake[graph, {1, 9}]
 ```
 
-<img src="/Documentation/Images/AcyclicGraphTakeOutput.png" width="193.2">
+<img src="/Documentation/Images/AcyclicGraphTakeOutput.png" width="232.2">
