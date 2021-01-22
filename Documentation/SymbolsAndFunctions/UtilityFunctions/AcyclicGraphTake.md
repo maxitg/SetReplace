@@ -2,9 +2,19 @@
 
 # AcyclicGraphTake
 
-**`AcyclicGraphTake`** gives the subgraph of a graph between two vertices.
+**`AcyclicGraphTake`** gives the intersectiom of the out-component of the first vertex with the in-component of the second vertex;
 
 ```wl
-In[]:= AcyclicGraphTake[DirectedGraph[CycleGraph[10], "Acyclic"], {1, 4}]
-Out[]= Graph[1 -> 2, 2 -> 3, 3 -> 4]
+In[] := graph = BlockRandom[
+  DirectedGraph[RandomGraph[{10, 10}], "Acyclic", VertexLabels -> Automatic], 
+  RandomSeeding -> 2
+]
 ```
+
+<img src="Documentation/Images/AcyclicGraphTakeInput.png" width="398.4">
+
+```wl
+In[] := AcyclicGraphTake[graph, {1, 9}]
+```
+
+<img src="Documentation/Images/AcyclicGraphTakeOutput.png" width="193.2">

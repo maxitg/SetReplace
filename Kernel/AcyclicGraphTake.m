@@ -4,6 +4,8 @@ PackageImport["GeneralUtilities`"]
 
 PackageExport["AcyclicGraphTake"]
 
+dagQ[graph_] := AcyclicGraphQ[graph] && DirectedGraphQ[graph] && LoopFreeGraphQ[graph]
+
 (* SyntaxInformation *)
 SyntaxInformation[AcyclicGraphTake] =
   {"ArgumentsPattern" -> {_, _}};
@@ -19,7 +21,7 @@ expr : AcyclicGraphTake[graph_, vertices_] := ModuleScope[
 ];
 
 (* Normal form *)
-acyclicGraphTake[_, graph_ ? (AcyclicGraphQ[#] && DirectedGraphQ[#] &), {startVertex_, endVertex_}] /;
+acyclicGraphTake[_, graph_ ? dagQ, {startVertex_, endVertex_}] /;
     VertexQ[graph, startVertex] && VertexQ[graph, endVertex] := ModuleScope[
   Subgraph[graph, Intersection[
     VertexInComponent[graph, endVertex], VertexOutComponent[graph, startVertex]]]
@@ -27,7 +29,7 @@ acyclicGraphTake[_, graph_ ? (AcyclicGraphQ[#] && DirectedGraphQ[#] &), {startVe
 
 (* Incorrect arguments messages *)
 AcyclicGraphTake::invalidGraph = "The argument at position `1` in `2` should be a directed, acyclic graph.";
-acyclicGraphTake[expr_, graph_ ? (Not @* (AcyclicGraphQ[#] && DirectedGraphQ[#] &)), _] :=
+acyclicGraphTake[expr_, graph_ ? (Not @* dagQ), _] :=
   (Message[AcyclicGraphTake::invalidGraph, 1, HoldForm @ expr];
   Throw[$Failed]);
 
@@ -41,4 +43,3 @@ acyclicGraphTake[expr_, graph_Graph, {startVertex_, endVertex_}] /;
     (Not @ (VertexQ[graph, startVertex] && VertexQ[graph, endVertex])) :=
   (Message[AcyclicGraphTake::invalidVertex, If[VertexQ[graph, startVertex], endVertex, startVertex], HoldForm @ expr];
   Throw[$Failed]);
-  
