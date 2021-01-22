@@ -4,7 +4,14 @@ PackageImport["GeneralUtilities`"]
 
 PackageExport["AcyclicGraphTake"]
 
+(* Utility function to check for directed, acyclic graphs *)
 dagQ[graph_] := AcyclicGraphQ[graph] && DirectedGraphQ[graph] && LoopFreeGraphQ[graph]
+
+(* Documentation *)
+SetUsage @ "
+AcyclicGraphTake[gr$, vrts$] gives the intersection in graph gr$ of the in-component of the first vertex in vrts$ \
+with the out-component of the second vertex in vrts$.
+";
 
 (* SyntaxInformation *)
 SyntaxInformation[AcyclicGraphTake] =
