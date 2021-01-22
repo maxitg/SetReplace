@@ -2,12 +2,12 @@
 
 # AcyclicGraphTake
 
-**`AcyclicGraphTake`** gives the intersectiom of the out-component of the first vertex 
+**`AcyclicGraphTake`** gives the intersectiom of the out-component of the first vertex
 with the in-component of the second vertex;
 
 ```wl
 In[] := graph = BlockRandom[
-  DirectedGraph[RandomGraph[{10, 10}], "Acyclic", VertexLabels -> Automatic], 
+  DirectedGraph[RandomGraph[{10, 10}], "Acyclic", VertexLabels -> Automatic],
   RandomSeeding -> 2
 ]
 ```
