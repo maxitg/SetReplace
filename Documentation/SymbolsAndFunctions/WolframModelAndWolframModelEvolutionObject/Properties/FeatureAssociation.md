@@ -28,16 +28,16 @@ The list of features computed for each graph `g` in a feature group is:
 This property is useful for applying machine learning to Wolfram Models explorations:
 
 ```wl
-inits = Partition[#, 2] & /@ Tuples[ConstantArray[Range[0, 3], 4]];
+In[] := SeedRandom[2];
 
-In[] := FeatureSpacePlot[#["FeatureAssociation"]
-    -> #["CausalGraph"] & /@ (WolframModel[{{x, y}, {x, z}}
-      -> {{x, z}, {x, w}, {y, w}, {z, w}}, #, 6] &) /@ inits]
+In[] := FeatureSpacePlot[#["FeatureAssociation"] -> Image[#["FinalStatePlot"], ImageSize -> Tiny] & /@
+  (WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, #, 6] &) /@
+    Table[RandomHypergraph[{3, 2}, 2], 10], LabelingFunction -> Callout]
 ```
 
-<img src="/Documentation/Images/FeatureAssociationFeatureSpacePlot.png" width=478.2>
+<img src="/Documentation/Images/FeatureAssociationFeatureSpacePlot.png" width="611.4">
 
-For [`Multiway Systems`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md) it only computes features associated with the [`causal graph`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md), returning `Missing["NotExistent", {"MultiwaySystem", "FinalState"}]` for features related to `"StructurePreservingFinalStateGraph"`, as there is no [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md) in a Multiway System:
+For [Multiway Systems](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md) it only computes features associated with the [causal graph](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md), returning `Missing["NotExistent", {"MultiwaySystem", "FinalState"}]` for features related to `"StructurePreservingFinalStateGraph"`, as there is no [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md) in a Multiway System:
 
 ```wl
 In[] := WolframModel[
