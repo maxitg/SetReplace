@@ -955,7 +955,8 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       graphFeatureAssociation @ HypergraphToGraph[#, "StructurePreserving"] & @
         propertyEvaluate[True, boundary][obj, caller, "FinalState"]
     ,
-      Replace[graphFeatureAssociation[Graph[{1 -> 2}]],
+      Replace[
+        graphFeatureAssociation[Graph[{1 -> 2}]],
         {_ ? NumberQ -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}]},
         Infinity]
     ],
