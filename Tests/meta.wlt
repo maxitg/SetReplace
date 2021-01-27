@@ -2,7 +2,8 @@
   "meta" -> <|
     "init" -> (
       $testsDirectory = If[$TestFileName =!= "",
-        FileNameJoin[Most @ FileNameSplit @ $TestFileName],
+        FileNameJoin[Most @ FileNameSplit @ $TestFileName]
+      ,
         FileNameJoin[Append[Most[FileNameSplit[$ScriptCommandLine[[1]]]], "Tests"]]
       ];
     ),

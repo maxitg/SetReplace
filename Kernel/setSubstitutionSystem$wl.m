@@ -114,9 +114,12 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
             ];
             {newResult, {deletedExpressions, events}} = Reap[
               Catch[
-                Replace[#, normalRules],
-                $$reachedAtomDegreeLimit,
-                Throw[{previousResult, $maxFinalVertexDegree}, $$setReplaceResult] &],
+                Replace[#, normalRules]
+              ,
+                $$reachedAtomDegreeLimit
+              ,
+                Throw[{previousResult, $maxFinalVertexDegree}, $$setReplaceResult] &
+              ],
               {$$deletedExpressions, $$events}];
             If[vertexCount[vertexIndex] > Lookup[stepSpec, $maxFinalVertices, Infinity],
               Throw[{previousResult, $maxFinalVertices}, $$setReplaceResult];
@@ -129,14 +132,17 @@ setReplace$wl[set_, rules_, stepSpec_, vertexIndex_, returnOnAbortQ_, timeConstr
             previousResult = newResult]] &,
           List @@ set], $fixedPoint},
         If[returnOnAbortQ,
-          {previousResult, $Aborted},
+          {previousResult, $Aborted}
+        ,
           Abort[]
         ]],
       timeConstraint,
       If[returnOnAbortQ,
-        {previousResult, $timeConstraint},
+        {previousResult, $timeConstraint}
+      ,
         Return[$Aborted]
-      ]],
+      ]]
+  ,
     $$setReplaceResult
   ]
 ];
@@ -258,10 +264,14 @@ renameRuleInputs[patternRules_] := Catch[Module[{pattern, inputAtoms, newInputAt
       Cases[
         # /. Pattern -> pattern,
         p : pattern[s_, rest___] :> If[MatchQ[Hold[s], Hold[_Symbol]],
-          Hold[s],
-          With[{originalP = p /. pattern -> Pattern}, Message[Pattern::patvar, originalP]]; Throw[$Failed]],
-        All],
-      {RuleDelayed::rhs}]];
+          Hold[s]
+        ,
+          With[{originalP = p /. pattern -> Pattern}, Message[Pattern::patvar, originalP]]; Throw[$Failed]
+        ],
+        All]
+    ,
+      {RuleDelayed::rhs}
+    ]];
   newInputAtoms = Table[Unique["inputAtom", {Temporary}], Length[inputAtoms]];
   # /. (((HoldPattern[#1] /. Hold[s_] :> s) -> #2) & @@@ Thread[inputAtoms -> newInputAtoms])
 ] & /@ patternRules];
@@ -318,8 +328,10 @@ setSubstitutionSystem$wl[
   renamedRules = renameRuleInputs[toCanonicalRules[rules]];
   If[renamedRules === $Failed, Return[$Failed]];
   vertexIndex = If[MissingQ[stepSpec[$maxFinalVertices]] && MissingQ[stepSpec[$maxFinalVertexDegree]],
-    $noIndex,
-    $vertexIndex[expressionsCountsPerVertex]];
+    $noIndex
+  ,
+    $vertexIndex[expressionsCountsPerVertex]
+  ];
   initVertexIndex[vertexIndex, init];
 
   rulesWithMetadata = MapIndexed[
@@ -334,10 +346,12 @@ setSubstitutionSystem$wl[
   outputWithMetadata = Catch[
     Reap[
       setReplace$wl[initWithMetadata, rulesWithMetadata, stepSpec, vertexIndex, returnOnAbortQ, timeConstraint],
-      {$$deletedExpressions, $$events}],
-    $$nonListExpression,
-    (Message[caller::nonListExpressions, #];
-      Return[$Failed]) &]; (* {{finalState, terminationReason}, {{deletedExpressions}, {events}}} *)
+      {$$deletedExpressions, $$events}]
+  ,
+    $$nonListExpression
+  ,
+    (Message[caller::nonListExpressions, #]; Return[$Failed]) &
+  ]; (* {{finalState, terminationReason}, {{deletedExpressions}, {events}}} *)
   If[outputWithMetadata[[1]] === $Aborted, Return[$Aborted]];
   allExpressions = SortBy[
     Join[
@@ -350,7 +364,8 @@ setSubstitutionSystem$wl[
   maxCompleteGenerationResult = CheckAbort[
     Min[maxCompleteGeneration[outputWithMetadata[[1, 1]], renamedRules], generationsCount],
     If[returnOnAbortQ,
-      Missing["Unknown", $Aborted],
+      Missing["Unknown", $Aborted]
+    ,
       Return[$Aborted]
     ]];
 
@@ -362,8 +377,10 @@ setSubstitutionSystem$wl[
       outputWithMetadata[[1, 2]],
       $fixedPoint ->
         If[generationsCount == Lookup[stepSpec, $maxGenerationsLocal, Infinity],
-          $maxGenerationsLocal,
-          $fixedPoint]],
+          $maxGenerationsLocal
+        ,
+          $fixedPoint
+        ]],
     $atomLists -> allExpressions[[All, 3]],
     $eventRuleIDs -> allEvents[[All, 1]],
     $eventInputs -> allEvents[[All, 2, 1]],

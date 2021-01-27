@@ -26,8 +26,10 @@ SetReplaceList[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPatter
     recognizedOptionsQ[expr, SetReplaceList, {o}] :=
   ModuleScope[
     result = Check[
-      setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplaceList, False, o],
-      $Failed];
+      setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplaceList, False, o]
+    ,
+      $Failed
+    ];
     If[result === $Aborted, result, result["SetAfterEvent", #] & /@ Range[0, result["EventsCount"]]] /;
       result =!= $Failed
   ];

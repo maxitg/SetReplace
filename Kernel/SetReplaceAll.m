@@ -34,8 +34,9 @@ expr : SetReplaceAll[
       recognizedOptionsQ[expr, SetReplaceAll, {o}] :=
   ModuleScope[
     result = Check[
-      setSubstitutionSystem[
-        rules, set, <|$maxGenerationsLocal -> generations|>, SetReplaceAll, False, o],
-      $Failed];
+      setSubstitutionSystem[rules, set, <|$maxGenerationsLocal -> generations|>, SetReplaceAll, False, o]
+    ,
+      $Failed
+    ];
     If[result === $Aborted, result, result[-1]] /; result =!= $Failed
   ];

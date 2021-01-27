@@ -71,8 +71,10 @@ generalizedGridGraphExplicit[dimSpecs_, opts___] := ModuleScope[
   edges = singleDimensionEdges[dimSpecs, #] & /@ Range[Length[dimSpecs]];
   directionalEdgeStyle = EdgeStyle -> If[
       ListQ[edgeStyle] && Length[edgeStyle] == Length[dimSpecs] && AllTrue[edgeStyle, Head[#] =!= Rule &],
-    Catenate @ MapThread[Function[{dirEdges, style}, # -> style & /@ dirEdges], {edges, edgeStyle}],
-    Nothing];
+    Catenate @ MapThread[Function[{dirEdges, style}, # -> style & /@ dirEdges], {edges, edgeStyle}]
+  ,
+    Nothing
+  ];
   If[GraphQ[#], #, Throw[$Failed]] & @ Graph[
     renameVertices[vertexNamingFunction] @ Graph[
       (* Reversal is needed to be consistent with "GridEmbedding" *)
