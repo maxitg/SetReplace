@@ -625,7 +625,8 @@ In addition to that, here are some more-or-less established rules:
 
   ```wl
   If[MatchQ[hypergraph, {__List}],
-    Sort @ Union @ Catenate @ hypergraph,
+    Sort @ Union @ Catenate @ hypergraph
+  ,
     Throw @ $Failed
   ]
   ```
@@ -653,7 +654,8 @@ In addition to that, here are some more-or-less established rules:
       maxImageSize_,
       background_,
       graphicsOptions_] := Catch[
-        ...]
+        ...
+      ]
   ```
 
 * Avoid using [`Flatten`](https://reference.wolfram.com/language/ref/Flatten.html)
@@ -707,6 +709,29 @@ In addition to that, here are some more-or-less established rules:
       size = Length @ hypergraph1,
       size = Length @ hypergraph2
     ];
+  ]
+  ```
+
+* In order to spot the difference between a compound expression and an "else" branch in an `If` expression, the
+  following style is used:
+
+  ```wl
+  If[DuplicateFreeQ[destroyedExpressions],
+    Sort[Complement[createdExpressions, destroyedExpressions]]
+  ,
+    Message[caller::multiwayState, Last[Keys[Sort[Counts[destroyedExpressions]]]]];
+    Throw[$Failed]
+  ]
+  ```
+
+  This also applies to other functions that expect compound expressions, e.g. `Catch`, `Check`, `Quiet`:
+
+  ```wl
+  Catch[
+    Message[abc::def];
+    x = 5;
+  ,
+    Exit[1]
   ]
   ```
 

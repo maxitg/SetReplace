@@ -63,13 +63,15 @@ $testFiles = If[Length @ $commandLineArgs >= 1,
       !MatchQ[FileBaseName @ #, Alternatives @@ Rest[args]] &
     ],
     args_List :> (FileNameJoin[{AbsoluteFileName["."], "Tests", # <> ".wlt"}] & /@ args)}
-  ],
+  ]
+,
   FileNames[FileNameJoin[{AbsoluteFileName["."], "Tests", "*.wlt"}]]
 ];
 
 If[!FileExistsQ[#],
   Print["Test file ", #, " does not exist."];
-  Exit[1];] & /@ $testFiles;
+  Exit[1];
+] & /@ $testFiles;
 
 (* Read tests *)
 
@@ -149,15 +151,20 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
   testReport = TestReport[testResults];
 
   (* Print the summery (green if ok, red if failed) *)
-  WriteString["stdout", If[testReport["AllTestsSucceeded"],
-    $greenColor <> "[ok]" <> $endColor,
-    $successQ = False;
-    StringJoin[
-      $redColor <> "[",
-      ToString @ testReport["TestsFailedCount"],
-      "/",
-      ToString @ Length @ testReport["TestResults"],
-      " failed]" <> $endColor]], "\n"];
+  WriteString[
+    "stdout",
+    If[testReport["AllTestsSucceeded"],
+      $greenColor <> "[ok]" <> $endColor
+    ,
+      $successQ = False;
+      StringJoin[
+        $redColor <> "[",
+        ToString @ testReport["TestsFailedCount"],
+        "/",
+        ToString @ Length @ testReport["TestResults"],
+        " failed]" <> $endColor]
+    ],
+    "\n"];
 
   (* If tests failed, print why *)
   failedTests = Join @@ testReport["TestsFailed"];
@@ -223,7 +230,8 @@ If[Environment["STATUS_FILE"] === "1",
 
 If[$successQ,
   Print["Tests passed."];
-  Exit[0],
+  Exit[0]
+,
   Print["Tests failed."];
   Exit[1]
 ]
