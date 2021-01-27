@@ -3,6 +3,7 @@
 # Feature Association
 
 **`"FeatureAssociation"`** computes some features of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) evolution and returns an [`Association`](https://reference.wolfram.com/language/ref/Association.html) whose keys describe each feature computed. For now, it computes properties associated with these feature groups:
+
 - [`"CausalGraph"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
 - `"StructurePreservingFinalStateGraph"`: The [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) version of the [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md) as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md) using the `"StructurePreserving"` transformation
 
@@ -20,6 +21,7 @@ Out[] = <|
 ```
 
 The list of features computed for each graph `g` in a feature group is:
+
 - [`VertexCount`](https://reference.wolfram.com/language/ref/VertexCount.html): The number of vertices in the graph.
 - [`EdgeCount`](https://reference.wolfram.com/language/ref/EdgeCount.html): The number of edges in the graph.
 - [`VertexConnectivity`](https://reference.wolfram.com/language/ref/VertexConnectivity.html): The smallest number of vertices whose deletion from `g` disconnects `g`. This is computed on the undirected version of the given graph.

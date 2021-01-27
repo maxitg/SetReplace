@@ -191,7 +191,7 @@ ideas. So, if you are interested, please join!
     - [Rules](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/Rules.md)
     - [Feature Association](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FeatureAssociation.md)
     - [Feature Vector](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FeatureVector.md)
-    - [Version](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/Version.md) 
+    - [Version](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/Version.md)
   - Options
     - ["VertexNamingFunction"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/VertexNamingFunction.md)
     - ["IncludePartialGenerations"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/IncludePartialGenerations.md)
