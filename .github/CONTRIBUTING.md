@@ -718,7 +718,7 @@ In addition to that, here are some more-or-less established rules:
   ```wl
   If[DuplicateFreeQ[destroyedExpressions],
     Sort[Complement[createdExpressions, destroyedExpressions]]
-  , (* else *)
+  ,
     Message[caller::multiwayState, Last[Keys[Sort[Counts[destroyedExpressions]]]]];
     Throw[$Failed]
   ]
