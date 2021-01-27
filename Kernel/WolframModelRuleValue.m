@@ -16,7 +16,7 @@ SetUsage @ "
 $WolframModelRuleProperties gives the list of all available rule properties.
 ";
 
-SyntaxInformation[WolframModelRuleValue] = {"ArgumentsPattern" -> {_, _.}};
+SyntaxInformation[WolframModelRuleValue] = {"ArgumentsPattern" -> {rule_, property_.}};
 
 $WolframModelRuleProperties = Sort @ {
   "ConnectedInput", "ConnectedOutput", "ConnectedInputOutputUnion", "MaximumArity", "NodeCounts", "NodesDroppedAdded",

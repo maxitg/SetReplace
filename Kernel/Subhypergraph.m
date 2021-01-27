@@ -22,10 +22,10 @@ WeakSubhypergraph[vertices$] represents the operator form for a hypergraph.
 
 (* SyntaxInformation *)
 SyntaxInformation[Subhypergraph] =
-  {"ArgumentsPattern" -> {_, _.}};
+  {"ArgumentsPattern" -> {hypergraph_, vertexList_.}};
 
 SyntaxInformation[WeakSubhypergraph] =
-  {"ArgumentsPattern" -> {_, _.}};
+  {"ArgumentsPattern" -> {hypergraph_, vertexList_.}};
 
 (* Argument count *)
 Subhypergraph[args___] := 0 /;

@@ -16,7 +16,7 @@ SetUsage[RandomHypergraph, RandomHypergraph::usage];
 
 (* SyntaxInformation *)
 SyntaxInformation[RandomHypergraph] =
-  {"ArgumentsPattern" -> {_, _.}};
+  {"ArgumentsPattern" -> {signature_, maxVertices_.}};
 
 (* Argument count *)
 RandomHypergraph[args___] := 0 /;

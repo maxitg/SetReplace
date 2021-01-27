@@ -19,7 +19,7 @@ Options[GeneralizedGridGraph] = Join[Options[Graph], {"VertexNamingFunction" -> 
 $vertexNamingFunctions = {Automatic (* IndexGraph *), "Coordinates"};
 
 SyntaxInformation[GeneralizedGridGraph] =
-  {"ArgumentsPattern" -> {_, OptionsPattern[]}, "OptionNames" -> Options[GeneralizedGridGraph][[All, 1]]};
+  {"ArgumentsPattern" -> {dimSpecs_, OptionsPattern[]}, "OptionNames" -> Options[GeneralizedGridGraph][[All, 1]]};
 
 GeneralizedGridGraph::dimsNotList = "Dimensions specification `` should be a list.";
 

@@ -376,6 +376,12 @@ Further, public symbols must
 include [`SyntaxInformation`](https://reference.wolfram.com/language/ref/SyntaxInformation.html),
 see [an example](https://github.com/maxitg/SetReplace/blob/415f965bd228b119185c1ef05e55fe893103d69b/Kernel/WolframModel.m#L29)
 for `WolframModel`.
+Also please name the patterns in `SyntaxInformation`. If you do that, you can turn
+`"HighlightMissingArgumentsWithTemplate" -> True` in the options inspector and get a helpful hint about the arguments in
+the Front End (`Null` has to do with options, and unfortunately renaming them causes the corresponding template to be
+displayed if no options are specified):
+
+<img src="/Documentation/Images/HighlightMissingArgumentsWithTemplate.png" width="362.4">
 
 Functions must handle invalid inputs correctly. For example, if you try to evaluate
 

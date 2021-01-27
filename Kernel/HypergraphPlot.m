@@ -43,7 +43,7 @@ $defaultGraphicsOptions = FilterRules[Options[Graphics], Except[$newOptions]];
 Options[HypergraphPlot] = Join[$newOptions, $defaultGraphicsOptions];
 
 SyntaxInformation[HypergraphPlot] = {
-  "ArgumentsPattern" -> {_, _., OptionsPattern[]},
+  "ArgumentsPattern" -> {hypergraph_, edgeType_., OptionsPattern[]},
   "OptionNames" -> Options[HypergraphPlot][[All, 1]]};
 
 $edgeTypes = {"Ordered", "Cyclic"};

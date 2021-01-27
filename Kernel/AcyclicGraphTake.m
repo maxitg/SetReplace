@@ -15,7 +15,7 @@ with the out-component of the second vertex in vrts$.
 
 (* SyntaxInformation *)
 SyntaxInformation[AcyclicGraphTake] =
-  {"ArgumentsPattern" -> {_, _}};
+  {"ArgumentsPattern" -> {graph_, vertices_}};
 
 (* Argument count *)
 AcyclicGraphTake[args___] := 0 /;

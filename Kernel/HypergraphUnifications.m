@@ -11,7 +11,7 @@ HypergraphUnifications[e$1, e$2] yields a list of edge pairings to hypergraphs \
 containing both e$1 and e$2 as rule input matches.
 ";
 
-SyntaxInformation[HypergraphUnifications] = {"ArgumentsPattern" -> {_, _}};
+SyntaxInformation[HypergraphUnifications] = {"ArgumentsPattern" -> {hypergraph1_, hypergraph2_}};
 
 HypergraphUnifications::hypergraphNotList = "Hypergraph `` should be a List.";
 

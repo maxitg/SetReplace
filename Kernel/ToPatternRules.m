@@ -17,7 +17,7 @@ SetUsage @ "
 ToPatternRules[r$] converts a list of anonymous rules r$ to explicit pattern rules.
 ";
 
-SyntaxInformation[ToPatternRules] = {"ArgumentsPattern" -> {_}};
+SyntaxInformation[ToPatternRules] = {"ArgumentsPattern" -> {hypergraphRules_}};
 
 (* Argument Checks *)
 

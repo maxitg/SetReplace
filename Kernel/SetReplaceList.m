@@ -16,7 +16,7 @@ Options[SetReplaceList] = {
   "EventOrderingFunction" -> Automatic};
 
 SyntaxInformation[SetReplaceList] = {
-  "ArgumentsPattern" -> {_, _, _, OptionsPattern[]},
+  "ArgumentsPattern" -> {set_, rules_, eventCount_, OptionsPattern[]},
   "OptionNames" -> Options[SetReplaceList][[All, 1]]};
 
 SetReplaceList[args___] := 0 /;

@@ -12,7 +12,7 @@ IsomorphicHypergraphQ[h$1, h$2] yields True if the hypergraphs h$1 and h$2 are i
 
 (* SyntaxInformation *)
 SyntaxInformation[IsomorphicHypergraphQ] =
-  {"ArgumentsPattern" -> {_, _}};
+  {"ArgumentsPattern" -> {hypergraph1_, hypergraph2_}};
 
 (* Argument count *)
 IsomorphicHypergraphQ[args___] := 0 /;

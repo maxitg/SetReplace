@@ -15,7 +15,7 @@ Options[HypergraphToGraph] = Options[Graph];
 
 (* SyntaxInformation *)
 SyntaxInformation[HypergraphToGraph] = {
-  "ArgumentsPattern" -> {_, _, OptionsPattern[]},
+  "ArgumentsPattern" -> {hypergraph_, method_, OptionsPattern[]},
   "OptionNames" -> Options[HypergraphToGraph][[All, 1]]};
 
 (* Methods *)

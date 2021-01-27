@@ -14,7 +14,7 @@ WolframPhysicsProjectStyleData[t$, e$] gives a value for a particular style elem
 WolframPhysicsProjectStyleData[theme$, t$, e$] gives a value for an element e$ of plot type t$ for $theme$.
 ";
 
-SyntaxInformation[WolframPhysicsProjectStyleData] = {"ArgumentsPattern" -> {_., _., _.}};
+SyntaxInformation[WolframPhysicsProjectStyleData] = {"ArgumentsPattern" -> {theme_., group_., element_.}};
 
 $styleGroupNames = Keys[$styleNames];
 $styleElementNames = Catenate[Keys /@ Values @ $styleNames];

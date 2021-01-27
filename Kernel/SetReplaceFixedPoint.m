@@ -18,7 +18,7 @@ Options[SetReplaceFixedPoint] = {
   "EventOrderingFunction" -> Automatic};
 
 SyntaxInformation[SetReplaceFixedPoint] = {
-  "ArgumentsPattern" -> {_, _, OptionsPattern[]},
+  "ArgumentsPattern" -> {set_, rules_, OptionsPattern[]},
   "OptionNames" -> Options[SetReplaceFixedPoint][[All, 1]]};
 
 SetReplaceFixedPoint[args___] := 0 /;

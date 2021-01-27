@@ -14,7 +14,7 @@ containing both e$1 and e$2 as rule input matches.
 Options[HypergraphUnificationsPlot] := Options[HypergraphPlot];
 
 SyntaxInformation[HypergraphUnificationsPlot] = {
-  "ArgumentsPattern" -> {_, _, OptionsPattern[]},
+  "ArgumentsPattern" -> {hypergraph1_, hypergraph2_, OptionsPattern[]},
   "OptionNames" -> Options[HypergraphUnificationsPlot][[All, 1]]};
 
 (* Implementation *)

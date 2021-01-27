@@ -27,7 +27,7 @@ Options[WolframModel] := Join[{
   Options[setSubstitutionSystem]];
 
 SyntaxInformation[WolframModel] = {
-  "ArgumentsPattern" -> {_, _ ..., OptionsPattern[]},
+  "ArgumentsPattern" -> {rules_, init_., stepSpec_., property_., OptionsPattern[]},
   "OptionNames" -> Options[WolframModel][[All, 1]]};
 
 (* Arguments parsing *)

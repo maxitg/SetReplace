@@ -33,7 +33,8 @@ RasterizeExpressionAndExportToMarkdown['path$', expr$] will rasterize expr$, wri
 return an HTML <img> tag that can be pasted directly into a markdown file.
 * The resulting image WILL NOT have an attached Out[]= label." <> $usageSuffix];
 
-SyntaxInformation[RasterizeExpressionAndExportToMarkdown] = {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
+SyntaxInformation[RasterizeExpressionAndExportToMarkdown] =
+  {"ArgumentsPattern" -> {relativePath_, expr_, OptionsPattern[]}};
 
 Options[RasterizeExpressionAndExportToMarkdown] = $exportOptions;
 
@@ -52,7 +53,8 @@ and return an HTML <img> tag that can be pasted directly into a markdown file.
 * The resulting image WILL include cell labels (In[]:=, Out[]=, etc)." <> $usageSuffix
 ];
 
-SyntaxInformation[RasterizeCellsAndExportToMarkdown] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
+SyntaxInformation[RasterizeCellsAndExportToMarkdown] =
+  {"ArgumentsPattern" -> {relativePath_, cells_, OptionsPattern[]}};
 
 Options[RasterizeCellsAndExportToMarkdown] = $exportOptions;
 
@@ -81,7 +83,8 @@ code block.
 
 Options[RasterizePreviousInputOutputAndExportToMarkdown] = Append[$exportOptions, "RasterizeInput" -> False];
 
-SyntaxInformation[RasterizePreviousInputOutputAndExportToMarkdown] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
+SyntaxInformation[RasterizePreviousInputOutputAndExportToMarkdown] =
+  {"ArgumentsPattern" -> {relativePath_, OptionsPattern[]}};
 
 (* this detects whether formatting boxes have been embedded into the input string via so-called
 "Linear Syntax" (which is an insane thing that shouldn't exist) *)

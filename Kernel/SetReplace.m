@@ -20,7 +20,7 @@ Options[SetReplace] = {
   "EventOrderingFunction" -> Automatic};
 
 SyntaxInformation[SetReplace] = {
-  "ArgumentsPattern" -> {_, _, _., OptionsPattern[]},
+  "ArgumentsPattern" -> {set_, rules_, eventCount_., OptionsPattern[]},
   "OptionNames" -> Options[SetReplace][[All, 1]]};
 
 SetReplace[args___] := 0 /;
