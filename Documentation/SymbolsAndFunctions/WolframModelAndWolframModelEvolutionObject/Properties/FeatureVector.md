@@ -2,7 +2,10 @@
 
 # Feature Vector
 
-**`"FeatureVector"`** returns the values of the features of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) evolution as computed by [`"FeatureAssociation"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FeatureAssociation.md).
+**`"FeatureVector"`** returns the values of the features of the [`WolframModel`](/Documentation/SymbolsAndFunctions/
+WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) evolution as computed by
+[`"FeatureAssociation"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/
+FeatureAssociation.md).
 
 ```wl
 In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 5]["FeatureVector"]
