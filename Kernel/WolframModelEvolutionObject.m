@@ -60,8 +60,10 @@ WolframModelEvolutionObject /:
   generationsCount = evo["TotalGenerationsCount"];
   maxCompleteGeneration = Replace[evo["CompleteGenerationsCount"], _ ? MissingQ -> "?"];
   generationsDisplay = If[generationsCount === maxCompleteGeneration,
-    generationsCount,
-    Row[{maxCompleteGeneration, "\[Ellipsis]", generationsCount}]];
+    generationsCount
+  ,
+    Row[{maxCompleteGeneration, "\[Ellipsis]", generationsCount}]
+  ];
   eventsCount = evo["AllEventsCount"];
   terminationReason = evo["TerminationReason"];
   rules = evo["Rules"];
@@ -165,10 +167,12 @@ $newParameterlessProperties = Intersection[$propertiesParameterless, Keys[$prope
 
 General::missingMaxCompleteGeneration = "Cannot drop incomplete generations in an object with missing information.";
 
-propertyEvaluate[False, boundary_][evolution_, caller_, rest___] := If[MissingQ[evolution["CompleteGenerationsCount"]],
-  Message[caller::missingMaxCompleteGeneration],
-  propertyEvaluate[True, boundary][deleteIncompleteGenerations[evolution], caller, rest]
-];
+propertyEvaluate[False, boundary_][evolution_, caller_, rest___] :=
+  If[MissingQ[evolution["CompleteGenerationsCount"]],
+    Message[caller::missingMaxCompleteGeneration]
+  ,
+    propertyEvaluate[True, boundary][deleteIncompleteGenerations[evolution], caller, rest]
+  ];
 
 propertyEvaluate[False, boundary_][evolution_, caller_, rest___] :=
   propertyEvaluate[True, boundary][deleteIncompleteGenerations[evolution], caller, rest];
@@ -374,8 +378,10 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
     caller_,
     "PartialGenerationsCount"] :=
   If[MissingQ[obj["CompleteGenerationsCount"]],
-    obj["CompleteGenerationsCount"],
-    obj["TotalGenerationsCount"] - obj["CompleteGenerationsCount"]];
+    obj["CompleteGenerationsCount"]
+  ,
+    obj["TotalGenerationsCount"] - obj["CompleteGenerationsCount"]
+  ];
 
 (* GenerationsCount *)
 
@@ -484,11 +490,18 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
   Check[
     Quiet[
       Check[
-        HypergraphPlot[propertyEvaluate[True, boundary][obj, caller, "FinalState"], o],
-        Message[caller::nonHypergraphPlot, property],
-        HypergraphPlot::invalidEdges],
-      HypergraphPlot::invalidEdges],
-    Throw[$Failed]];
+        HypergraphPlot[propertyEvaluate[True, boundary][obj, caller, "FinalState"], o]
+      ,
+        Message[caller::nonHypergraphPlot, property]
+      ,
+        HypergraphPlot::invalidEdges
+      ]
+    ,
+      HypergraphPlot::invalidEdges
+    ]
+  ,
+    Throw[$Failed]
+  ];
 
 (* AllEventsStatesEdgeIndicesList & AllEventsStatesList *)
 
@@ -557,13 +570,22 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       Map[
         Check[
           Check[
-            HypergraphPlot[#, o],
-            Message[caller::nonHypergraphPlot, property],
-            HypergraphPlot::invalidEdges],
-          Throw[$Failed]] &,
-        propertyEvaluate[True, boundary][obj, caller, "StatesList"]],
-      HypergraphPlot::invalidEdges],
-    Throw[$Failed]];
+            HypergraphPlot[#, o]
+          ,
+            Message[caller::nonHypergraphPlot, property]
+          ,
+            HypergraphPlot::invalidEdges
+          ]
+        ,
+          Throw[$Failed]
+        ] &,
+        propertyEvaluate[True, boundary][obj, caller, "StatesList"]]
+    ,
+      HypergraphPlot::invalidEdges
+    ]
+  ,
+    Throw[$Failed]
+  ];
 
 (* EventsStatesPlotsList *)
 
@@ -582,7 +604,8 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       ];
       Join[DeleteCases[currentState, Alternatives @@ newEvent[[1]]], newEvent[[2]]]]],
     If[MatchQ[boundary, "Initial" | All],
-      {},
+      {}
+    ,
       propertyEvaluate[True, None][obj, caller, "StateEdgeIndicesAfterEvent", 0]
     ],
     events];
@@ -604,15 +627,24 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
                   Thread[Position[#, Alternatives @@ #2][[All, 1]] -> style[$lightTheme][$destroyedEdgeStyle]],
                   Thread[Position[#, Alternatives @@ #3][[All, 1]] -> style[$lightTheme][$createdEdgeStyle]],
                   Thread[Position[#, Alternatives @@ #4][[All, 1]] ->
-                    style[$lightTheme][$destroyedAndCreatedEdgeStyle]]]]],
-            Message[caller::nonHypergraphPlot, property],
-            HypergraphPlot::invalidEdges],
-          Throw[$Failed]] &,
+                    style[$lightTheme][$destroyedAndCreatedEdgeStyle]]]]]
+          ,
+            Message[caller::nonHypergraphPlot, property]
+          ,
+            HypergraphPlot::invalidEdges
+          ]
+        ,
+          Throw[$Failed]
+        ] &,
         If[MatchQ[boundary, "Initial" | All], Rest /@ # &, # &] @
           If[MatchQ[boundary, All | "Final"], Most /@ # &, # &] @
-          {stateIndices, destroyedOnlyIndices, createdOnlyIndices, destroyedAndCreatedIndices}],
-      HypergraphPlot::invalidEdges],
-    Throw[$Failed]]
+          {stateIndices, destroyedOnlyIndices, createdOnlyIndices, destroyedAndCreatedIndices}]
+    ,
+      HypergraphPlot::invalidEdges
+    ]
+  ,
+    Throw[$Failed]
+  ]
 ];
 
 (* FinalDistinctElementsCount *)
@@ -1019,7 +1051,8 @@ WolframModelEvolutionObject[data_ ? evolutionDataQ][args__] := ModuleScope[
       WolframModelEvolutionObject[data],
       WolframModelEvolutionObject,
       Sequence @@ property,
-      ##] & @@ Flatten[FilterRules[opts, Except[$masterOptions]]]];
+      ##] & @@ Flatten[FilterRules[opts, Except[$masterOptions]]]
+  ];
   result /; result =!= $Failed
 ];
 

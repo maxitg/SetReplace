@@ -18,7 +18,8 @@ FileTreeHashes[path_, pattern_, depth_:1, exclude_:{}] := ModuleScope[
   If[FailureQ[path] || !DirectoryQ[path], Return[$Failed]];
   fileNames = FileNames[pattern, path, IgnoreCase -> True];
   If[exclude =!= {},
-    fileNames = Discard[fileNames, StringEndsQ[#, exclude, IgnoreCase -> True]&]];
+    fileNames = Discard[fileNames, StringEndsQ[#, exclude, IgnoreCase -> True] &]
+  ];
   hashes = FileHash[fileNames, "SHA"];
   (* strip off *depth* subdirs to get the canonical path *)
   fileNames = StringDrop[fileNames, StringLength @ FileNameDrop[path, -depth]];

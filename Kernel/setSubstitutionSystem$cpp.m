@@ -40,8 +40,10 @@ $libraryFunctions = {
         {Integer, 1, "Constant"}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
         Integer, (* event deduplication *)
         Integer}, (* random seed *)
-      "Void"],
-    $Failed],
+      "Void"]
+  ,
+    $Failed
+  ],
 
   $cpp$setReplace = If[$libraryFile =!= $Failed,
     LibraryFunctionLoad[
@@ -49,40 +51,50 @@ $libraryFunctions = {
       "setReplace",
       {Integer, (* set ID *)
         {Integer, 1, "Constant"}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
-      "Void"],
-    $Failed],
+      "Void"]
+  ,
+    $Failed
+  ],
 
   $cpp$setExpressions = If[$libraryFile =!= $Failed,
     LibraryFunctionLoad[
       $libraryFile,
       "setExpressions",
       {Integer}, (* set ID *)
-      {Integer, 1}], (* expressions *)
-    $Failed],
+      {Integer, 1}] (* expressions *)
+  ,
+    $Failed
+  ],
 
   $cpp$setEvents = If[$libraryFile =!= $Failed,
     LibraryFunctionLoad[
       $libraryFile,
       "setEvents",
       {Integer}, (* set ID *)
-      {Integer, 1}], (* expressions *)
-    $Failed],
+      {Integer, 1}] (* expressions *)
+  ,
+    $Failed
+  ],
 
   $cpp$maxCompleteGeneration = If[$libraryFile =!= $Failed,
     LibraryFunctionLoad[
       $libraryFile,
       "maxCompleteGeneration",
       {Integer}, (* set ID *)
-      Integer], (* generation *)
-    $Failed],
+      Integer] (* generation *)
+  ,
+    $Failed
+  ],
 
   $cpp$terminationReason = If[$libraryFile =!= $Failed,
     LibraryFunctionLoad[
       $libraryFile,
       "terminationReason",
       {Integer}, (* set ID *)
-      Integer], (* reason *)
-    $Failed]
+      Integer] (* reason *)
+  ,
+    $Failed
+  ]
 };
 
 (* The following code turns a nested list into a single list, prepending sizes of each sublist. I.e., {{a}, {b, c, d}}

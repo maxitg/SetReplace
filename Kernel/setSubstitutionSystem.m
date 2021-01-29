@@ -342,7 +342,8 @@ setSubstitutionSystem[
     ]
   ];
   If[failedQ || !MatchQ[OptionValue[Method], Alternatives @@ $SetReplaceMethods],
-    $Failed,
+    $Failed
+  ,
     If[!symbolicEvaluationSupportedQ,
       Message[caller::symbNotImplemented];
       Return[$Failed]

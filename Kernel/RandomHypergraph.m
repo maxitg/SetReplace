@@ -57,7 +57,8 @@ randomHypergraph[caller_, sig : {$signaturePattern ..}, n : (_Integer ? Positive
   ModuleScope[
     If[n === Automatic,
       (* Maximum possible number of atoms *)
-      max = Total[Times @@@ sig],
+      max = Total[Times @@@ sig]
+    ,
       max = n
     ];
     Catenate[RandomInteger[{1, max}, #] & /@ sig]

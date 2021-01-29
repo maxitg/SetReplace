@@ -26,9 +26,10 @@ SetReplaceFixedPointList[args___] := 0 /;
 SetReplaceFixedPointList[set_, rules_, o : OptionsPattern[]] /;
     recognizedOptionsQ[expr, SetReplaceFixedPointList, {o}] := ModuleScope[
   result = Check[
-    setSubstitutionSystem[
-      rules, set, <||>, SetReplaceFixedPointList, False, o],
-    $Failed];
+    setSubstitutionSystem[rules, set, <||>, SetReplaceFixedPointList, False, o]
+  ,
+    $Failed
+  ];
   If[result === $Aborted, result, result["SetAfterEvent", #] & /@ Range[0, result["EventsCount"]]] /;
     result =!= $Failed
 ];

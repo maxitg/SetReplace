@@ -109,7 +109,8 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
     If[preBuildCallback === "Print", preBuildCallback = $printPreBuildCallback];
     preBuildCallback[<|
       "LibrarySourceDirectory" -> librarySourceDirectory,
-      "LibraryFileName" -> libraryFileName|>]];
+      "LibraryFileName" -> libraryFileName|>]
+  ];
 
   fileNames = FileNames["*.cpp", librarySourceDirectory];
   libraryPath = wrappedCreateLibrary[
@@ -133,7 +134,8 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
     ReturnFailed[];
   ];
   If[verbose,
-    Print["Library compiled to ", libraryPath]];
+    Print["Library compiled to ", libraryPath]
+  ];
 
   buildData = calculateBuildData[];
   writeBuildData[buildDataPath, buildData];

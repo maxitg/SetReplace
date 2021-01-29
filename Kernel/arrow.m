@@ -14,8 +14,10 @@ arrow[shape_, arrowheadLength_, vertexSize_][pts_] := ModuleScope[
         shape,
         Last[ptsStartToArrowEnd],
         Normalize[ptsStartToArrowEnd[[-1]] - ptsStartToLineEnd[[-1]]],
-        arrowheadLength],
-      Nothing]
+        arrowheadLength]
+    ,
+      Nothing
+    ]
   }
 ];
 
@@ -39,7 +41,8 @@ lineTake[pts_, start_ ;; end_] := Reverse[lineDrop[Reverse[lineDrop[pts, start]]
 lineDrop[pts_, length_] /; Length[pts] > 2 := With[{
     firstSegmentLength = EuclideanDistance @@ pts[[{1, 2}]]},
   If[firstSegmentLength <= length,
-    lineDrop[Rest[pts], length - firstSegmentLength],
+    lineDrop[Rest[pts], length - firstSegmentLength]
+  ,
     Join[lineDrop[pts[[{1, 2}]], length], Drop[pts, 2]]
   ]
 ];
