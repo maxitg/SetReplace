@@ -8,10 +8,11 @@ PackageExport["SetReplace"]
    general function. *)
 
 SetUsage @ "
-SetReplace[s$, {i$1 -> o$1, i$2 -> o$2, $$}] attempts to replace a subset i$1 of list s$ with o$1. \
+SetReplace[set$, {i$1 -> o$1, i$2 -> o$2, $$}] attempts to replace a subset i$1 of set$ with o$1. \
 If not found, replaces i$1 with o$2, etc. Elements of i$k can appear in s$ in any order, however the elements \
-closest to the beginning of s$ will be replaced, and the elements of o$k will be put at the end.
-SetReplace[s$, {i$1 -> o$1, i$2 -> o$2, $$}, n$] performs replacement n$ times and returns the result.
+closest to the beginning of set$ will be replaced, and the elements of o$k will be put at the end.
+SetReplace[set$, {i$1 -> o$1, i$2 -> o$2, $$}, eventCount$] performs replacement eventCount$ times and returns the \
+result.
 ";
 
 Options[SetReplace] = {

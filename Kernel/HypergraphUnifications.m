@@ -7,8 +7,8 @@ PackageExport["HypergraphUnifications"]
 (* Documentation *)
 
 SetUsage @ "
-HypergraphUnifications[e$1, e$2] yields a list of edge pairings to hypergraphs \
-containing both e$1 and e$2 as rule input matches.
+HypergraphUnifications[hypergraph$1, hypergraph$2] yields a list of hyperedge pairings to hypergraphs \
+containing the hyperedges of both hypergraph$1 and hypergraph$2 as rule input matches.
 ";
 
 SyntaxInformation[HypergraphUnifications] = {"ArgumentsPattern" -> {hypergraph1_, hypergraph2_}};

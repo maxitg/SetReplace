@@ -10,9 +10,9 @@ PackageExport["$WolframModelProperties"]
 PackageScope["wolframModelRulesSpecQ"]
 
 SetUsage @ "
-WolframModel[rules$, init$, t$] generates an object representing the evolution of the Wolfram Model \
-with the specified rules from the initial condition init$ for t$ generations.
-WolframModel[rules$, init$, t$, prop$] gives the property prop$ of the evolution.
+WolframModel[rules$, init$, generationCount$] generates an object representing the evolution of the Wolfram Model \
+with the specified rules from the initial condition init$ for generationCount$ generations.
+WolframModel[rules$, init$, generationCount$, property$] gives the specified property$ of the evolution.
 WolframModel[rules$] represents the operator form for a Wolfram Model.
 ";
 

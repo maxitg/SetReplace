@@ -10,9 +10,10 @@ PackageExport["SetReplaceAll"]
    don't want to touch edges twice in a single step. *)
 
 SetUsage @ "
-SetReplaceAll[s$, r$] performs SetReplace[s$, r$] as many times as it takes until no \
-replacement can be done without touching the same edge twice.
-SetReplaceAll[s$, r$, n$] performes the same operation n$ times, i.e., any edge will at most be replaced n$ times.
+SetReplaceAll[set$, rules$] performs SetReplace[set$, rules$] as many times as it takes until no \
+replacement can be done without touching the same expression twice.
+SetReplaceAll[set$, rules$, generationCount$] performes the same operation generationCount$ times, i.e., any edge will \
+at most be replaced generationCount$ times.
 ";
 
 Options[SetReplaceAll] = {

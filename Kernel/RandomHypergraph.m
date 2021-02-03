@@ -10,7 +10,7 @@ RandomHypergraph[n$] generates a random hypergraph, where n$ is the total of its
 RandomHypergraph[{e$, a$}] generates a random hypergraph with e$ hyperedges of arity a$.
 RandomHypergraph[{{e$(1), a$(1)}, {e$(2), a$(2)}, $$}] generates a random hypergraph with e$(i) hyperedges \
 of arity a$(i).
-RandomHypergraph[sig$, max$] generates a random hypergraph with at most max$ vertices.";
+RandomHypergraph[signature$, maxVertices$] generates a random hypergraph with at most maxVertices$ vertices.";
 
 SetUsage[RandomHypergraph, RandomHypergraph::usage];
 

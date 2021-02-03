@@ -7,7 +7,8 @@ PackageExport["IsomorphicHypergraphQ"]
 (* Documentation *)
 
 SetUsage @ "
-IsomorphicHypergraphQ[h$1, h$2] yields True if the hypergraphs h$1 and h$2 are isomorphic, and False otherwise.
+IsomorphicHypergraphQ[hypergraph$1, hypergraph$2] yields True if hypergraph$1 and hypergraph$2 are isomorphic, and \
+False otherwise.
 ";
 
 (* SyntaxInformation *)
