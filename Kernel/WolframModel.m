@@ -38,7 +38,6 @@ With[{properties = $newParameterlessProperties,
       stepSpecKeys = Values[$stepSpecKeys]},
   FE`Evaluate[FEPrivate`AddSpecialArgCompletion["WolframModel" -> {{"PatternRules"}, 0, stepSpecKeys, properties}]]];
 
-
 (* Arguments parsing *)
 
 (* Rules *)
