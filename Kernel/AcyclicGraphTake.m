@@ -14,16 +14,15 @@ vertexList$ with the out-component of the second vertex in vertexList$.
 ";
 
 (* SyntaxInformation *)
-SyntaxInformation[AcyclicGraphTake] =
-  {"ArgumentsPattern" -> {graph_, vertices_}};
+SyntaxInformation[AcyclicGraphTake] = {"ArgumentsPattern" -> {graph_, vertexList_}};
 
 (* Argument count *)
 AcyclicGraphTake[args___] := 0 /;
   !Developer`CheckArgumentCount[AcyclicGraphTake[args], 2, 2] && False;
 
 (* main *)
-expr : AcyclicGraphTake[graph_, vertices_] := ModuleScope[
-  res = Catch[acyclicGraphTake[HoldForm @ expr, graph, vertices]];
+expr : AcyclicGraphTake[graph_, vertexList_] := ModuleScope[
+  res = Catch[acyclicGraphTake[HoldForm @ expr, graph, vertexList]];
   res /; res =!= $Failed
 ];
 

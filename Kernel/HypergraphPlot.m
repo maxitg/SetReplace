@@ -7,6 +7,7 @@ PackageExport["WolframModelPlot"]
 
 PackageScope["correctHypergraphPlotOptionsQ"]
 PackageScope["$edgeTypes"]
+PackageScope["$hyperedgeRenderings"]
 PackageScope["hypergraphEmbedding"]
 
 (* Documentation *)
@@ -52,10 +53,16 @@ $defaultEdgeType = "Ordered";
 $graphLayout = "SpringElectricalEmbedding";
 $hyperedgeRenderings = {"Subgraphs", "Polygons"};
 
+With[{edgeTypes = $edgeTypes},
+  FE`Evaluate[FEPrivate`AddSpecialArgCompletion["HypergraphPlot" -> {0, edgeTypes}]]
+];
+
 (* for compatibility reasons, we don't care for messages and unevaluated code to preserve WolframModelPlot *)
-SetUsage[WolframModelPlot, "WolframModelPlot is deprecated. Use HypergraphPlot."];
-SyntaxInformation[WolframModelPlot] = SyntaxInformation[HypergraphPlot];
+SetUsage[WolframModelPlot,
+         "WolframModelPlot is deprecated. Use HypergraphPlot which takes the same arguments.\n" <>
+           StringReplace[HypergraphPlot::usage, "HypergraphPlot" -> "WolframModelPlot"]];
 Options[WolframModelPlot] = Options[HypergraphPlot];
+SyntaxInformation[WolframModelPlot] = SyntaxInformation[HypergraphPlot];
 WolframModelPlot = HypergraphPlot;
 
 (* Messages *)

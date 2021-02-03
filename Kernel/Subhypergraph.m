@@ -16,8 +16,8 @@ Subhypergraph[vertexList$] represents the operator form for a hypergraph.
 ";
 
 SetUsage @ "
-WeakSubhypergraph[hypergraph$, vertexList$] selects any hyperedge from hypergraph$ whose elements are contained in \
-vertexList$.
+WeakSubhypergraph[hypergraph$, vertexList$] selects hyperedges from hypergraph$ such that any of their elements are \
+contained in vertexList$.
 WeakSubhypergraph[vertexList$] represents the operator form for a hypergraph.
 ";
 

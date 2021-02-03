@@ -18,6 +18,9 @@ Options[BuildLibSetReplace] = {
   "Verbose" -> False
 };
 
+SyntaxInformation[BuildLibSetReplace] =
+  {"ArgumentsPattern" -> {OptionsPattern[]}, "OptionNames" -> Options[BuildLibSetReplace][[All, 1]]};
+
 SetUsage @ "
 BuildLibSetReplace[] builds the libSetReplace library from source, and returns an association of metadata \
 on completion, or $Failed if the library could not be built.

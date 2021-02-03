@@ -2,6 +2,10 @@ Package["SetReplaceDevUtils`"]
 
 PackageImport["GeneralUtilities`"]
 
+PackageExport["RasterizeExpressionAndExportToMarkdown"]
+PackageExport["RasterizeCellsAndExportToMarkdown"]
+PackageExport["RasterizePreviousInputOutputAndExportToMarkdown"]
+
 SetRelatedSymbolGroup[
   RasterizeExpressionAndExportToMarkdown,
   RasterizeCellsAndExportToMarkdown,
@@ -26,25 +30,22 @@ $exportOptions = {
   "DryRun" -> False
 };
 
-PackageExport["RasterizeExpressionAndExportToMarkdown"]
-
 SetUsage @ Evaluate["
 RasterizeExpressionAndExportToMarkdown['relativePath$', expr$] will rasterize expr$, write the result to \
 'relativePath$', and return an HTML <img> tag that can be pasted directly into a markdown file.
 * The resulting image WILL NOT have an attached Out[]= label." <> $usageSuffix];
 
-SyntaxInformation[RasterizeExpressionAndExportToMarkdown] =
-  {"ArgumentsPattern" -> {relativePath_, expr_, OptionsPattern[]}};
-
 Options[RasterizeExpressionAndExportToMarkdown] = $exportOptions;
+
+SyntaxInformation[RasterizeExpressionAndExportToMarkdown] = {
+  "ArgumentsPattern" -> {relativePath_, expr_, OptionsPattern[]},
+  "OptionNames" -> Options[RasterizeExpressionAndExportToMarkdown][[All, 1]]};
 
 RasterizeExpressionAndExportToMarkdown[relativePath_, expr_, opts:OptionsPattern[]] := CatchFailureAsMessage @ Scope[
   UnpackOptions[maxWidth];
   image = rasterize[maxWidth, expr];
   exportImageToMarkdown[relativePath, image, FilterOptions @ opts]
 ];
-
-PackageExport["RasterizeCellsAndExportToMarkdown"]
 
 SetUsage @ Evaluate["
 RasterizeCellsAndExportToMarkdown['relativePath$', cells$] will rasterize a cell or set of cells, write the result to \
@@ -53,10 +54,11 @@ RasterizeCellsAndExportToMarkdown['relativePath$', cells$] will rasterize a cell
 * The resulting image WILL include cell labels (In[]:=, Out[]=, etc)." <> $usageSuffix
 ];
 
-SyntaxInformation[RasterizeCellsAndExportToMarkdown] =
-  {"ArgumentsPattern" -> {relativePath_, cells_, OptionsPattern[]}};
-
 Options[RasterizeCellsAndExportToMarkdown] = $exportOptions;
+
+SyntaxInformation[RasterizeCellsAndExportToMarkdown] = {
+  "ArgumentsPattern" -> {relativePath_, cells_, OptionsPattern[]},
+  "OptionNames" -> Options[RasterizeCellsAndExportToMarkdown][[All, 1]]};
 
 $cellP = HoldPattern[Cell[_, __]] | HoldPattern[CellObject[_]];
 
@@ -68,8 +70,6 @@ RasterizeCellsAndExportToMarkdown[relativePath_, cells_, opts:OptionsPattern[]] 
   image = rasterizeCells[maxWidth, cells];
   exportImageToMarkdown[relativePath, image, FilterOptions @ opts]
 ];
-
-PackageExport["RasterizePreviousInputOutputAndExportToMarkdown"]
 
 SetUsage @ Evaluate["
 RasterizePreviousInputOutputAndExportToMarkdown['relativePath$'] will read the previous input and output cell from the \
@@ -84,8 +84,9 @@ code block.
 
 Options[RasterizePreviousInputOutputAndExportToMarkdown] = Append[$exportOptions, "RasterizeInput" -> False];
 
-SyntaxInformation[RasterizePreviousInputOutputAndExportToMarkdown] =
-  {"ArgumentsPattern" -> {relativePath_, OptionsPattern[]}};
+SyntaxInformation[RasterizePreviousInputOutputAndExportToMarkdown] = {
+  "ArgumentsPattern" -> {relativePath_, OptionsPattern[]},
+  "OptionNames" -> Options[RasterizePreviousInputOutputAndExportToMarkdown][[All, 1]]};
 
 (* this detects whether formatting boxes have been embedded into the input string via so-called
 "Linear Syntax" (which is an insane thing that shouldn't exist) *)

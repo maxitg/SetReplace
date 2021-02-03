@@ -8,8 +8,8 @@ PackageExport["$WolframModelRuleProperties"]
 (* Documentation *)
 
 SetUsage @ "
-WolframModelRuleValue[rule$, property$] yields a value for property property$ of Wolfram model rule rule$.
-WolframModelRuleValue[rule$] yields values of all available properties.
+WolframModelRuleValue[rule$, property$] yields the value for a property$ of a Wolfram model rule$.
+WolframModelRuleValue[rule$] yields the values of all available properties.
 ";
 
 SetUsage @ "

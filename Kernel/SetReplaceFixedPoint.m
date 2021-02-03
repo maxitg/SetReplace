@@ -7,9 +7,9 @@ PackageExport["SetReplaceFixedPoint"]
 (* Same as SetReplace, but automatically stops replacing when the set no longer changes. *)
 
 SetUsage @ "
-SetReplaceFixedPoint[set$, {i$1 -> o$1, i$2 -> o$2, $$}] performs SetReplace repeatedly until \
+SetReplaceFixedPoint[set$, {input$1 -> output$1, input$2 -> output$2, $$}] performs SetReplace repeatedly until \
 no further events can be matched, and returns the final set.
-Will go into infinite loop if a fixed point does not exist.
+It will go into an infinite loop if a fixed point does not exist.
 ";
 
 Options[SetReplaceFixedPoint] = {

@@ -31,7 +31,7 @@ SetReplaceAll[args___] := 0 /;
 (* We just run SetSubstitutionSystem for the specified number of generations, and take the last set. *)
 
 expr : SetReplaceAll[
-    set_, rules_, generations : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
+    set_, rules_, generationCount : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
       recognizedOptionsQ[expr, SetReplaceAll, {o}] :=
   ModuleScope[
     result = Check[

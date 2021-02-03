@@ -10,10 +10,14 @@ PackageExport["$WolframModelProperties"]
 PackageScope["wolframModelRulesSpecQ"]
 
 SetUsage @ "
-WolframModel[rules$, init$, generationCount$] generates an object representing the evolution of the Wolfram Model \
-with the specified rules from the initial condition init$ for generationCount$ generations.
-WolframModel[rules$, init$, generationCount$, property$] gives the specified property$ of the evolution.
-WolframModel[rules$] represents the operator form for a Wolfram Model.
+WolframModel[rules$, init$, generationCount$] generates an object representing the evolution of the Wolfram model \
+with the specified rules$ from the initial condition init$ for generationCount$ generations.
+WolframModel[<|'PatternRules' -> rules$|>, init$, generationCount$] generates an evolution of the set substitution \
+system with specified rules$.
+WolframModel[rules$, init$, <|'property$1' -> constraint$1, 'property$2' -> constraint$2, $$|>] stops the evolution \
+once any of the constraints are reached for specified properties.
+WolframModel[rules$, init$, stepSpec$, property$] gives the specified property$ of the evolution.
+WolframModel[rules$] represents the operator form for a Wolfram model.
 ";
 
 SetUsage @ "
@@ -29,6 +33,11 @@ Options[WolframModel] := Join[{
 SyntaxInformation[WolframModel] = {
   "ArgumentsPattern" -> {rules_, init_., stepSpec_., property_., OptionsPattern[]},
   "OptionNames" -> Options[WolframModel][[All, 1]]};
+
+With[{properties = $newParameterlessProperties,
+      stepSpecKeys = Values[$stepSpecKeys]},
+  FE`Evaluate[FEPrivate`AddSpecialArgCompletion["WolframModel" -> {{"PatternRules"}, 0, stepSpecKeys, properties}]]];
+
 
 (* Arguments parsing *)
 
@@ -332,8 +341,3 @@ expr : WolframModel[
     property : Except[OptionsPattern[]] ? (Not[wolframModelPropertyQ[#]] &),
     o : OptionsPattern[] /; recognizedOptionsQ[expr, WolframModel, {o}]] := 0 /;
   Message[WolframModel::invalidProperty, property];
-
-(* Code autocompletion *)
-
-With[{properties = $newParameterlessProperties},
-  FE`Evaluate[FEPrivate`AddSpecialArgCompletion["WolframModel" -> {0, 0, 0, properties}]]];

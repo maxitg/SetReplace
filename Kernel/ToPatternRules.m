@@ -14,7 +14,8 @@ PackageScope["anonymousRulesQ"]
 PackageScope["toPatternRules"]
 
 SetUsage @ "
-ToPatternRules[hypergraphRules$] converts a list of anonymous rules hypergraphRules$ to explicit pattern rules.
+ToPatternRules[hypergraphRules$] converts a list of hypergraphRules$ to explicit pattern rules of a set substitution \
+system.
 ";
 
 SyntaxInformation[ToPatternRules] = {"ArgumentsPattern" -> {hypergraphRules_}};

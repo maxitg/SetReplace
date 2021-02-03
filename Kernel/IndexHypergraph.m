@@ -12,8 +12,7 @@ IndexHypergraph[hypergraph$, startIndex$] replaces the vertices with integers st
 ";
 
 (* SyntaxInformation *)
-SyntaxInformation[IndexHypergraph] =
-  {"ArgumentsPattern" -> {hypergraph_, startIndex_.}};
+SyntaxInformation[IndexHypergraph] = {"ArgumentsPattern" -> {hypergraph_, startIndex_.}};
 
 (* Argument count *)
 IndexHypergraph[args___] := 0 /;

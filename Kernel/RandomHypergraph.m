@@ -5,18 +5,17 @@ PackageImport["GeneralUtilities`"]
 PackageExport["RandomHypergraph"]
 
 (* Documentation *)
-RandomHypergraph::usage = "\
-RandomHypergraph[n$] generates a random hypergraph, where n$ is the total of its hyperedge arities.
-RandomHypergraph[{e$, a$}] generates a random hypergraph with e$ hyperedges of arity a$.
-RandomHypergraph[{{e$(1), a$(1)}, {e$(2), a$(2)}, $$}] generates a random hypergraph with e$(i) hyperedges \
-of arity a$(i).
-RandomHypergraph[signature$, maxVertices$] generates a random hypergraph with at most maxVertices$ vertices.";
-
-SetUsage[RandomHypergraph, RandomHypergraph::usage];
+SetUsage @ "
+RandomHypergraph[size$] generates a random hypergraph, where size$ is the total of its hyperedge arities.
+RandomHypergraph[{count$, arity$}] generates a random hypergraph with count$ hyperedges of a specified arity$.
+RandomHypergraph[{{count$(1), arity$(1)}, {count$(2), arity$(2)}, $$}] generates a random hypergraph with hyperedges \
+of multiple arities.
+RandomHypergraph[sizeSpec$, maxVertices$] also limits the vertex count.
+";
 
 (* SyntaxInformation *)
 SyntaxInformation[RandomHypergraph] =
-  {"ArgumentsPattern" -> {signature_, maxVertices_.}};
+  {"ArgumentsPattern" -> {sizeSpec_, maxVertices_.}};
 
 (* Argument count *)
 RandomHypergraph[args___] := 0 /;

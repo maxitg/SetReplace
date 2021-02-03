@@ -7,11 +7,11 @@ PackageExport["WolframPhysicsProjectStyleData"]
 (* Documentation *)
 
 SetUsage @ "
-WolframPhysicsProjectStyleData[] yields an association describing default styles used in Wolfram Physics Project.
+WolframPhysicsProjectStyleData[] yields an association describing default styles used in the Wolfram Physics Project.
 WolframPhysicsProjectStyleData[theme$] gives styles for a particular theme$.
 WolframPhysicsProjectStyleData[plotType$] gives styles for a particular plotType$.
-WolframPhysicsProjectStyleData[plotType$, element$] gives a value for a particular style element$ of plotType$.
-WolframPhysicsProjectStyleData[theme$, plotType$, element$] gives a value for the element$ of plotType$ for theme$.
+WolframPhysicsProjectStyleData[plotType$, element$] gives a value for a particular element$ of plotType$.
+WolframPhysicsProjectStyleData[theme$, plotType$, element$] gives a value for the element$ of plotType$ in theme$.
 ";
 
 SyntaxInformation[WolframPhysicsProjectStyleData] = {"ArgumentsPattern" -> {theme_., group_., element_.}};

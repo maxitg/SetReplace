@@ -21,6 +21,9 @@ PackSetReplace::nobuildinfo = "Build info file was not present at ``.";
 PackSetReplace::nogitlink = "GitLink is not installed, so the built paclet version cannot be correctly \
 calculated. Proceed with caution, and consider installing GitLink by running InstallGitLink[].";
 
+SyntaxInformation[PackSetReplace] =
+  {"ArgumentsPattern" -> {OptionsPattern[]}, "OptionNames" -> Options[PackSetReplace][[All, 1]]};
+
 SetUsage @ "
 PackSetReplace[] creates a PacletObject containing the local source and last built library.
 * Note that PackSetReplace[] does *not* call BuildLibSetReplace[], unlike the command line scripts.

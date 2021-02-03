@@ -7,11 +7,11 @@ PackageExport["GeneralizedGridGraph"]
 (* Documentation *)
 
 SetUsage @ "
-GeneralizedGridGraph[{n$1, n$2, $$, n$k}] gives the k-dimensional grid graph with n$1 \[Times] n$2 \[Times] $$ n$k \
- vertices.
-GeneralizedGridGraph[{$$, n$k -> 'Circular', $$}] makes the grid wrap around in k-th dimension.
-GeneralizedGridGraph[{$$, n$k -> 'Directed', $$}] makes the edges directed in k-th dimension.
-GeneralizedGridGraph[{$$, n$k -> {'Circular', 'Directed'}, $$}] makes the grid both circular and directed.
+GeneralizedGridGraph[{size$1, size$2, $$, size$k}] gives the k$-dimensional grid graph with \
+size$1 \[Times] size$2 \[Times] $$ size$k vertices.
+GeneralizedGridGraph[{$$, size$k -> 'Circular', $$}] makes the grid wrap around in k$-th dimension.
+GeneralizedGridGraph[{$$, size$k -> 'Directed', $$}] makes the edges directed in k$-th dimension.
+GeneralizedGridGraph[{$$, size$k -> {'Circular', 'Directed'}, $$}] makes the grid both circular and directed.
 ";
 
 Options[GeneralizedGridGraph] = Join[Options[Graph], {"VertexNamingFunction" -> Automatic}];
@@ -19,7 +19,9 @@ Options[GeneralizedGridGraph] = Join[Options[Graph], {"VertexNamingFunction" -> 
 $vertexNamingFunctions = {Automatic (* IndexGraph *), "Coordinates"};
 
 SyntaxInformation[GeneralizedGridGraph] =
-  {"ArgumentsPattern" -> {dimSpecs_, OptionsPattern[]}, "OptionNames" -> Options[GeneralizedGridGraph][[All, 1]]};
+  {"ArgumentsPattern" -> {dimensionSpecs_, OptionsPattern[]}, "OptionNames" -> Options[GeneralizedGridGraph][[All, 1]]};
+
+FE`Evaluate[FEPrivate`AddSpecialArgCompletion["GeneralizedGridGraph" -> {{"Circular", "Directed"}}]];
 
 GeneralizedGridGraph::dimsNotList = "Dimensions specification `` should be a list.";
 
@@ -40,10 +42,11 @@ generalizedGridGraph[args_, opts___] /;
 generalizedGridGraph[args_, opts___] /;
     !supportedOptionQ[GeneralizedGridGraph, "VertexNamingFunction", $vertexNamingFunctions, {opts}] := Throw[$Failed];
 
-generalizedGridGraph[dimSpecs_List, opts___] := generalizedGridGraphExplicit[toExplicitDimSpec /@ dimSpecs, opts];
+generalizedGridGraph[dimensionSpecs_List, opts___] :=
+  generalizedGridGraphExplicit[toExplicitDimSpec /@ dimensionSpecs, opts];
 
-generalizedGridGraph[dimSpecs : Except[_List], opts___] := (
-  Message[GeneralizedGridGraph::dimsNotList, dimSpecs];
+generalizedGridGraph[dimensionSpecs : Except[_List], opts___] := (
+  Message[GeneralizedGridGraph::dimsNotList, dimensionSpecs];
   Throw[$Failed];
 );
 
@@ -66,11 +69,11 @@ toExplicitDimSpec[originalSpec_, _ -> _List] := (
   Throw[$Failed];
 );
 
-generalizedGridGraphExplicit[dimSpecs_, opts___] := ModuleScope[
+generalizedGridGraphExplicit[dimensionSpecs_, opts___] := ModuleScope[
   {edgeStyle, vertexNamingFunction} = OptionValue[GeneralizedGridGraph, {opts}, {EdgeStyle, "VertexNamingFunction"}];
-  edges = singleDimensionEdges[dimSpecs, #] & /@ Range[Length[dimSpecs]];
+  edges = singleDimensionEdges[dimensionSpecs, #] & /@ Range[Length[dimensionSpecs]];
   directionalEdgeStyle = EdgeStyle -> If[
-      ListQ[edgeStyle] && Length[edgeStyle] == Length[dimSpecs] && AllTrue[edgeStyle, Head[#] =!= Rule &],
+      ListQ[edgeStyle] && Length[edgeStyle] == Length[dimensionSpecs] && AllTrue[edgeStyle, Head[#] =!= Rule &],
     Catenate @ MapThread[Function[{dirEdges, style}, # -> style & /@ dirEdges], {edges, edgeStyle}]
   ,
     Nothing
@@ -78,9 +81,9 @@ generalizedGridGraphExplicit[dimSpecs_, opts___] := ModuleScope[
   If[GraphQ[#], #, Throw[$Failed]] & @ Graph[
     renameVertices[vertexNamingFunction] @ Graph[
       (* Reversal is needed to be consistent with "GridEmbedding" *)
-      If[!ListQ[#], {}, #] & @ Flatten[Outer[v @@ Reverse[{##}] &, ##] & @@ Reverse[Range /@ dimSpecs[[All, 1]]]],
+      If[!ListQ[#], {}, #] & @ Flatten[Outer[v @@ Reverse[{##}] &, ##] & @@ Reverse[Range /@ dimensionSpecs[[All, 1]]]],
       Catenate[edges],
-      GraphLayout -> graphLayout[dimSpecs],
+      GraphLayout -> graphLayout[dimensionSpecs],
       directionalEdgeStyle],
     If[directionalEdgeStyle[[2]] === Nothing, {opts}, FilterRules[{opts}, Except[EdgeStyle]]]]
 ];
@@ -93,9 +96,9 @@ graphLayout[{{n1_, $$linear, _}, {n2_, $$linear, _}}] := {"GridEmbedding", "Dime
 
 graphLayout[_] := "SpringElectricalEmbedding";
 
-singleDimensionEdges[dimSpecs_, k_] := Catenate[
-  singleThreadEdges[dimSpecs[[k]], #] & /@
-    Flatten[Outer[v, ##] & @@ ReplacePart[Range /@ dimSpecs[[All, 1]], k -> {threadDim}]]];
+singleDimensionEdges[dimensionSpecs_, k_] := Catenate[
+  singleThreadEdges[dimensionSpecs[[k]], #] & /@
+    Flatten[Outer[v, ##] & @@ ReplacePart[Range /@ dimensionSpecs[[All, 1]], k -> {threadDim}]]];
 
 singleThreadEdges[{n_, wrapSpec_, dirSpec_}, thread_] :=
   Replace[dirSpec, {$$directed -> DirectedEdge, $$undirected -> UndirectedEdge}] @@@
