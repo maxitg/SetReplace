@@ -12,7 +12,8 @@ PackageScope["hypergraphEmbedding"]
 (* Documentation *)
 
 SetUsage @ "
-HypergraphPlot[s$, opts$] plots a list of vertex lists s$ as a hypergraph.
+HypergraphPlot[hypergraph$, opts$] plots an ordered hypergraph$ represented as a list of vertex lists.
+HypergraphPlot[hypergraph$, 'Cyclic', opts$] plots a 'Cyclic' hypergraph$ instead.
 ";
 
 $plotStyleAutomatic = <|

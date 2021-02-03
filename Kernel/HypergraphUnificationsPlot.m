@@ -7,8 +7,8 @@ PackageExport["HypergraphUnificationsPlot"]
 (* Documentation *)
 
 SetUsage @ "
-HypergraphUnificationsPlot[e$1, e$2] yields a list of plots of all hypergraphs \
-containing both e$1 and e$2 as rule input matches.
+HypergraphUnificationsPlot[hypergraph$1, hypergraph$2] yields a list of plots of all hypergraphs \
+containing both hypergraph$1 and hypergraph$2 as rule input matches.
 ";
 
 Options[HypergraphUnificationsPlot] := Options[HypergraphPlot];

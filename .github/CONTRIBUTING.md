@@ -370,7 +370,8 @@ a [`List`](https://reference.wolfram.com/language/ref/List.html).
 
 Your public symbols should also include a `usage` message, which should be created with
 the [`SetUsage`](https://github.com/maxitg/SetReplace/blob/7f89c5103cae6a7c1d21b967973811fdeacfd63b/Kernel/GeneralizedGridGraph.m#L9)
-function. For more information, see ``?GeneralUtilities`SetUsage``.
+function. For more information, see ``?GeneralUtilities`SetUsage``. Please use full descriptive names for the arguments
+in your usage message.
 
 Further, public symbols must
 include [`SyntaxInformation`](https://reference.wolfram.com/language/ref/SyntaxInformation.html),

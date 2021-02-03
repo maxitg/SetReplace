@@ -7,7 +7,7 @@ PackageExport["HypergraphToGraph"]
 (* Documentation *)
 
 SetUsage @ "
-HypergraphToGraph[hg$, method$] uses method$ to convert a hypergraph hg$ to a Graph.
+HypergraphToGraph[hypergraph$, method$] uses method$ to convert hypergraph$ to a Graph.
 ";
 
 (* Options *)

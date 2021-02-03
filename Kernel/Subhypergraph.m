@@ -11,13 +11,14 @@ PackageExport["WeakSubhypergraph"]
 (* Documentation *)
 
 SetUsage @ "
-Subhypergraph[hg$, vertices$] selects hyperedges from hg$ that are subsets of vertices$.
-Subhypergraph[vertices$] represents the operator form for a hypergraph.
+Subhypergraph[hypergraph$, vertexList$] selects hyperedges from hypergraph$ that are subsets of vertexList$.
+Subhypergraph[vertexList$] represents the operator form for a hypergraph.
 ";
 
 SetUsage @ "
-WeakSubhypergraph[hg$, vertices$] selects any hyperedge from hg$ whose elements are contained in vertices$.
-WeakSubhypergraph[vertices$] represents the operator form for a hypergraph.
+WeakSubhypergraph[hypergraph$, vertexList$] selects any hyperedge from hypergraph$ whose elements are contained in \
+vertexList$.
+WeakSubhypergraph[vertexList$] represents the operator form for a hypergraph.
 ";
 
 (* SyntaxInformation *)

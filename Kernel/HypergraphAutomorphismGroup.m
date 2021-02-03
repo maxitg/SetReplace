@@ -7,7 +7,8 @@ PackageExport["HypergraphAutomorphismGroup"]
 (* Documentation *)
 
 SetUsage @ "
-HypergraphAutomorphismGroup[e$] gives the authomorphism group of a list of hyperedges e$.
+HypergraphAutomorphismGroup[hypergraph$] gives the authomorphism group of hypergraph$ represented as a list of \
+hyperedges.
 ";
 
 SyntaxInformation[HypergraphAutomorphismGroup] = {"ArgumentsPattern" -> {_}};

@@ -7,8 +7,8 @@ PackageExport["IndexHypergraph"]
 (* Documentation *)
 
 SetUsage @ "
-IndexHypergraph[hg$] replaces the vertices of the hypergraph hg$ by its vertex indices.
-IndexHypergraph[hg$, r$] replaces the vertices with integers r$, r$ + 1, $$.
+IndexHypergraph[hypergraph$] replaces the vertices of hypergraph$ by its vertex indices.
+IndexHypergraph[hypergraph$, startIndex$] replaces the vertices with integers startIndex$, startIndex$ + 1, $$.
 ";
 
 (* SyntaxInformation *)
