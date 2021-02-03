@@ -56,7 +56,8 @@ toPatternRules[rule : _Rule, caller_] := ModuleScope[
       {moduleVariables = rightOnlyVertices,
       moduleExpression = Replace[rule[[2]], Thread[symbols -> newVertexNames], {0, 2}]},
     If[moduleVariables =!= {},
-      newLeft :> Module[moduleVariables, moduleExpression],
+      newLeft :> Module[moduleVariables, moduleExpression]
+    ,
       newLeft :> moduleExpression
     ]
   ] /. Hold[expr_] :> expr

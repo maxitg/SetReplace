@@ -243,7 +243,8 @@ correctVertexCoordinatesQ[head_, vertexCoordinates_] :=
       Automatic |
       {(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
     Message[head::invalidCoordinates, vertexCoordinates];
-    False,
+    False
+  ,
     True
   ];
 
@@ -309,8 +310,10 @@ hypergraphPlot[
     graphicsOptions,
     Background -> Replace[background, Automatic -> style[$lightTheme][$spatialGraphBackground]],
     If[maxImageSize === Automatic,
-      ImageSizeRaw -> style[$lightTheme][$hypergraphPlotImageSize] imageSizeScaleFactor,
-      ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]]]
+      ImageSizeRaw -> style[$lightTheme][$hypergraphPlotImageSize] imageSizeScaleFactor
+    ,
+      ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]
+    ]]
 ]];
 
 vertexEmbeddingRange[{}] := 0;
@@ -365,7 +368,8 @@ toNormalEdges[edges_, "Cyclic"] := toNormalEdges[edges, 2, 1, 1];
 graphEmbedding[vertices_, vertexEmbeddingEdges_, edgeEmbeddingEdges_, layout_, vertexCoordinates_] := ModuleScope[
   relevantVertexCoordinates = Normal[Merge[Select[MemberQ[vertices, #[[1]]] &][vertexCoordinates], Last]];
   unscaledEmbedding = If[vertexEmbeddingEdges === edgeEmbeddingEdges,
-    graphEmbedding[vertices, edgeEmbeddingEdges, layout, relevantVertexCoordinates],
+    graphEmbedding[vertices, edgeEmbeddingEdges, layout, relevantVertexCoordinates]
+  ,
     With[{ve = vertexEmbedding[vertices, vertexEmbeddingEdges, layout, relevantVertexCoordinates]},
       {ve, edgeEmbedding[vertices, edgeEmbeddingEdges, layout, ve]}
     ]
@@ -484,7 +488,8 @@ vertexLabelsGraphics[embedding_, vertexSize_, vertexLabels_] := ModuleScope[
     Cases[embedding[[2]], Line[{pt1_, ___, pt2_}] :> UndirectedEdge @@ pointsToVertices /@ Point /@ {pt1, pt2}, All];
   vertexCoordinatesDiagonal = EuclideanDistance @@ Transpose[CoordinateBounds[First /@ Keys[pointsToVertices]]];
   graphPlotVertexSize = If[vertexCoordinatesDiagonal == 0,
-    2 vertexSize,
+    2 vertexSize
+  ,
     {"Scaled", 2 vertexSize / vertexCoordinatesDiagonal}
   ];
   GraphPlot[
@@ -519,7 +524,8 @@ drawEmbedding[
       applyStyle[styles[$edgePoint],
           Cases[#, Point[pts_] :> Circle[pts, getSingleVertexEdgeRadius[pts]], All] & /@ embedding[[2, All, 2]]]}],
     If[vertexLabels === None,
-      Graphics[{}],
+      Graphics[{}]
+    ,
       vertexLabelsGraphics[embedding, vertexSize, vertexLabels]
     ]
   ]

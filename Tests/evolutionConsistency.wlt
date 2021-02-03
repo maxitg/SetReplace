@@ -92,7 +92,8 @@
            #Method === Automatic && (AssociationQ[#Rule] ||
              !AllTrue[Replace[#Rule, {r_Rule :> {r}}], SetReplace`PackageScope`connectedHypergraphQ[#[[1]]] &]) ||
            #StepLimiter === "MaxVertexDegree" && AssociationQ[#Rule],
-          Nothing,
+          Nothing
+        ,
         (* else, the system can be evaluated *)
           SeedRandom[#Seed];
           timedEvolution = WolframModel[#Rule,
@@ -115,8 +116,8 @@
               Max[Counts[Catenate[Union /@ #]]] + #2 & @@@ {{timedEvolution["FinalState"], -1}, {#Init, 0}})
           ];
           If[stepLimitValue === Nothing,
-            Nothing,
-          (* else, we got a new system to run *)
+            Nothing
+          , (* else, we got a new system to run *)
             Join[#, <|"StepLimit" -> <|#StepLimiter -> stepLimitValue|>|>]
           ]
         ]

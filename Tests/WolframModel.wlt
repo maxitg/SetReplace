@@ -1461,15 +1461,19 @@
                 {k, 3}]
             ],
 
-            If[!ListQ[property], VerificationTest[
-              SameQ @@ Table[
-                WolframModel[
-                  #1,
-                  #2,
-                  <|"MaxEvents" -> eventCounts[[k]]|>,
-                  Method -> method][property, "IncludePartialGenerations" -> False],
-                {k, 3}]
-            ], Nothing],
+            If[!ListQ[property],
+              VerificationTest[
+                SameQ @@ Table[
+                  WolframModel[
+                    #1,
+                    #2,
+                    <|"MaxEvents" -> eventCounts[[k]]|>,
+                    Method -> method][property, "IncludePartialGenerations" -> False],
+                  {k, 3}]
+              ]
+            ,
+              Nothing
+            ],
 
             VerificationTest[
               Not @* SameQ @@ Table[
@@ -1483,15 +1487,19 @@
                 {k, {1, 4}}]
             ],
 
-            If[!ListQ[property], VerificationTest[
-              Not @* SameQ @@ Table[
-                WolframModel[
-                  #1,
-                  #2,
-                  <|"MaxEvents" -> eventCounts[[k]]|>,
-                  Method -> method][property, "IncludePartialGenerations" -> False],
-                {k, {1, 4}}]
-            ], Nothing]
+            If[!ListQ[property],
+              VerificationTest[
+                Not @* SameQ @@ Table[
+                  WolframModel[
+                    #1,
+                    #2,
+                    <|"MaxEvents" -> eventCounts[[k]]|>,
+                    Method -> method][property, "IncludePartialGenerations" -> False],
+                  {k, {1, 4}}]
+              ]
+            ,
+              Nothing
+            ]
           }], {property, {"EvolutionObject", "FinalState", {"FinalState", "AtomsCountFinal"}}}]
         }] & @@@ models
       ], {method, DeleteCases[$SetReplaceMethods, Automatic]}],

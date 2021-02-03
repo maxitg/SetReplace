@@ -42,15 +42,19 @@ hypergraphUnificationsPlot[e1_, e2_, opts : OptionsPattern[]] := ModuleScope[
   {vertexLabels, edgeStyle} =
     Check[OptionValue[HypergraphUnificationsPlot, {opts}, #], Throw[$Failed]] & /@ {VertexLabels, EdgeStyle};
   MapThread[
-    Check[HypergraphPlot[
-      #1,
-      VertexLabels -> Replace[vertexLabels, Automatic -> #4],
-      EdgeStyle -> Replace[edgeStyle, Automatic -> ReplacePart[
-        Table[Automatic, Length[#]],
-        Join[
-          Thread[Intersection[Values[#2], Values[#3]] -> Blend[{$color1, $color2}]],
-          Thread[Values[#2] -> $color1], Thread[Values[#3] -> $color2]]]],
-        opts], Throw[$Failed]] &,
+    Check[
+      HypergraphPlot[
+        #1,
+        VertexLabels -> Replace[vertexLabels, Automatic -> #4],
+        EdgeStyle -> Replace[edgeStyle, Automatic -> ReplacePart[
+          Table[Automatic, Length[#]],
+          Join[
+            Thread[Intersection[Values[#2], Values[#3]] -> Blend[{$color1, $color2}]],
+            Thread[Values[#2] -> $color1], Thread[Values[#3] -> $color2]]]],
+          opts]
+      ,
+        Throw[$Failed]
+    ] &,
     {unifications[[All, 1]], unifications[[All, 2]], unifications[[All, 3]], automaticVertexLabelsList}]
 ];
 
