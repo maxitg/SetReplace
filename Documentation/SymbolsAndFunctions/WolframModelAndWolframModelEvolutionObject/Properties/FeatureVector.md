@@ -22,8 +22,8 @@ This property is useful for applying machine learning to Wolfram Models explorat
 In[] := BlockRandom[
   FeatureSpacePlot[#["FeatureVector"] -> Image[#["FinalStatePlot"], ImageSize -> Tiny] & /@
     (WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, #, 6] &) /@
-      Table[RandomHypergraph[{3, 2}, 2], 10], LabelingFunction -> Callout]
-  ]
+      Table[RandomHypergraph[{3, 2}, 2], 10], LabelingFunction -> Callout], RandomSeeding -> 2
+]
 ```
 
 <img src="/Documentation/Images/FeatureVectorFeatureSpacePlot.png" width="815.4">

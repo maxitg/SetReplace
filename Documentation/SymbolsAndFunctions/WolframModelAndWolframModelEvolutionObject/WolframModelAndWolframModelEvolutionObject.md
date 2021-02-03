@@ -396,6 +396,7 @@ returns values for all properties even if terminated due to time constraint), an
 * [Final Element Counts](Properties/FinalElementCounts.md)
 * [Total Element Counts](Properties/TotalElementCounts.md)
 * [Rules](Properties/Rules.md)
+* [Feature Association](Properties/FeatureAssociation.md)
 * [Feature Vector](Properties/FeatureVector.md)
 * [Version](Properties/Version.md)
 

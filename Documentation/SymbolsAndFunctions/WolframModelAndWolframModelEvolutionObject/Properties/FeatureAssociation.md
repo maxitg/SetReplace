@@ -41,11 +41,11 @@ This property is useful for applying machine learning to Wolfram Models explorat
 In[] := BlockRandom[
   FeatureSpacePlot[#["FeatureAssociation"] -> Image[#["FinalStatePlot"], ImageSize -> Tiny] & /@
     (WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, #, 6] &) /@
-      Table[RandomHypergraph[{3, 2}, 2], 10], LabelingFunction -> Callout]
-  ]
+      Table[RandomHypergraph[{3, 2}, 2], 10], LabelingFunction -> Callout], RandomSeeding -> 3
+]
 ```
 
-<img src="/Documentation/Images/FeatureAssociationFeatureSpacePlot.png" width="815.4">
+<img src="/Documentation/Images/FeatureAssociationFeatureSpacePlot.png" width="684.6">
 
 For [Multiway Systems](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/
 MultiwayQ.md) it only computes features associated with the [causal graph](/Documentation/SymbolsAndFunctions/
