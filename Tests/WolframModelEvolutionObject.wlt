@@ -1,7 +1,7 @@
 <|
   "WolframModelEvolutionObject" -> <|
     "init" -> (
-      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
+      Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAllComplete};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
 
@@ -1915,12 +1915,60 @@
         ]
       ],
 
+      (* FeatureAssociation *)
+
+      With[{evolutionObjects =
+          WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@
+            {{0}, {3, "EventSelectionFunction" -> "MultiwaySpacelike"}, {3}, {8}}},
+        {
+          VerificationTest[And @@ StringQ /@ Keys[#["FeatureAssociation"]]] & /@ evolutionObjects,
+
+          VerificationTest[And @@ (NumberQ[#] || MissingQ[#] &) /@ Flatten[Values[#["FeatureAssociation"]]]] &
+            /@ evolutionObjects,
+
+          VerificationTest[SameQ @@ (Replace[#, _?(NumberQ[#] || MissingQ[#] &) -> 1, Infinity] &
+            [#["FeatureAssociation"]] & /@ evolutionObjects)],
+
+          (* String spec *)
+          VerificationTest[
+            #["FeatureAssociation", "CausalGraph"],
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "CausalGraph" ~~ __] &]
+          ] & /@ evolutionObjects,
+
+          (* List spec *)
+          VerificationTest[
+            #["FeatureAssociation", {"StructurePreservingFinalStateGraph"}],
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "StructurePreservingFinalStateGraph" ~~ __] &]
+          ] & /@ evolutionObjects,
+
+          (* All spec *)
+          VerificationTest[
+            #["FeatureAssociation", All],
+            #["FeatureAssociation"]
+          ] & /@ evolutionObjects,
+
+          (* Empty List spec *)
+          VerificationTest[#["FeatureAssociation", {}], <||>] & /@ evolutionObjects,
+
+          (* FinalState features for Multyway return missings *)
+          VerificationTest[ And @@ MissingQ/@Flatten@Values@evolutionObjects[[2]]["FeatureAssociation",
+            "StructurePreservingFinalStateGraph"] ],
+
+          (* Error Messages check *)
+          With[{obj = evolutionObjects[[3]]}, {
+            testUnevaluated[obj["FeatureAssociation", 3], {WolframModelEvolutionObject::invalidFeatureSpec}],
+
+            testUnevaluated[obj["FeatureAssociation", "EasterEgg"], {WolframModelEvolutionObject::unknownFeatureGroup}]
+          }]
+        }
+      ],
+
       (* FeatureVector *)
 
       With[{evolutionObjects =
           WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@
             {{0}, {3, "EventSelectionFunction" -> "MultiwaySpacelike"}, {3}, {8}}},
-        VerificationTest[And @@ NumberQ /@ #["FeatureVector"]] & /@ evolutionObjects
+        VerificationTest[And @@ (NumberQ[#] || MissingQ[#] &) /@ #["FeatureVector"]] & /@ evolutionObjects
       ],
 
       (* ExpressionsSeparation *)
