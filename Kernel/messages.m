@@ -20,29 +20,31 @@ declareMessage[messageName_, template_] := Module[{templateObject, argumentNames
 ];
 
 message::messageNotFound = "Message `` could not be found. Messages need to be declared first with declareMessage.";
-message::extraArgs = "Arguments `2` not expected for message `1`.";
 message::missingArgs = "Arguments `2` missing for message `1`.";
 
 Attributes[message] = {HoldFirst};
-message[messageName_, args_] := ModuleScope[
+message[messageName_, args_ ? AssociationQ] := ModuleScope[
   argumentsOrder =
     Lookup[$messageSlotNames, Hold[messageName], $messageSlotNames[ReplacePart[Hold[messageName], {1, 1} -> General]]];
   If[MissingQ[argumentsOrder],
     Message[message::messageNotFound, HoldForm[messageName]]
   ,
-    extraArgs = Complement[Keys[args], argumentsOrder];
     missingArgs = Complement[argumentsOrder, Keys[args]];
-    If[#1 =!= {},
-      Message[MessageName[message, #2], HoldForm[messageName], #1]
-    ] & @@@ {{extraArgs, "extraArgs"}, {missingArgs, "missingArgs"}};
-    If[extraArgs === {} && missingArgs === {},
+    If[missingArgs =!= {},
+      Message[MessageName[message, "missingArgs"], HoldForm[messageName], missingArgs];
+    ,
       Message[messageName, ##] & @@ Replace[argumentsOrder, args, 1];
     ];
   ];
 ];
 
-message[head_, failure_ ? FailureQ] := With[{messageName = failure[[1]], messageArguments = failure[[2]]},
+(* extraArgs is useful for passing public symbol-specific information such as the public function call. *)
+
+message[head_, failure_ ? FailureQ, extraArgs : _ ? AssociationQ : <||>] := With[{
+    messageName = failure[[1]],
+    messageArguments = Join[failure[[2]], extraArgs]},
   message[MessageName[head, messageName], messageArguments];
+  Failure[messageName, messageArguments]
 ];
 
 message[head_][failure_ ? FailureQ, ___] := message[head, failure];
