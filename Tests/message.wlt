@@ -7,6 +7,16 @@
 
       Attributes[Global`testUnevaluated] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
+
+      HalfInteger[x_] := ModuleScope[
+        result = Catch[halfInteger[x], _ ? FailureQ, message[HalfInteger]];
+        result /; !FailureQ[result]
+      ];
+
+      halfInteger[x_ ? EvenQ] := x / 2;
+
+      declareMessage[HalfInteger::odd, "The number `number` is odd."];
+      halfInteger[x_ ? OddQ] := throw[Failure["odd", <|"number" -> x|>]];
     },
     "tests" -> {
       VerificationTest[
@@ -89,16 +99,6 @@
       ,
         {symb::msg}
       ],
-
-      HalfInteger[x_] := ModuleScope[
-        result = Catch[halfInteger[x], _ ? FailureQ, message[HalfInteger]];
-        result /; !FailureQ[result]
-      ];
-
-      halfInteger[x_ ? EvenQ] := x / 2;
-
-      declareMessage[HalfInteger::odd, "The number `number` is odd."];
-      halfInteger[x_ ? OddQ] := throw[Failure["odd", <|"number" -> x|>]];
 
       VerificationTest[
         HalfInteger[2],
