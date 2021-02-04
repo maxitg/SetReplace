@@ -39,3 +39,7 @@ message[messageName_, args_] := ModuleScope[
     ];
   ];
 ];
+
+message[head_, failure_Failure] := With[{messageName = failure[[1]], messageArguments = failure[[2]]},
+  message[MessageName[head, messageName], messageArguments];
+];
