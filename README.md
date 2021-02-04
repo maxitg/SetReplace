@@ -213,7 +213,7 @@ ideas. So, if you are interested, please join!
   * [GeneralizedGridGraph](Documentation/SymbolsAndFunctions/UtilityFunctions/GeneralizedGridGraph.md)
   * [HypergraphAutomorphismGroup](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphAutomorphismGroup.md)
   * [HypergraphUnifications](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphUnifications.md)
-  * [WolframPhysicsProjectStyleData](Documentation/SymbolsAndFunctions/UtilityFunctions/WolframPhysicsProjectStyleData.md)
+  * [SetReplaceStyleData](Documentation/SymbolsAndFunctions/UtilityFunctions/SetReplaceStyleData.md)
   * [Build Data](Documentation/SymbolsAndFunctions/UtilityFunctions/BuildData.md)
 
 # Physics

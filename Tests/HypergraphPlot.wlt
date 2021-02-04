@@ -30,7 +30,7 @@
       };
 
       {$minArrowheadSize, $maxArrowheadSize} =
-        WolframPhysicsProjectStyleData["SpatialGraph", "ArrowheadLengthFunction"][
+        SetReplaceStyleData["SpatialGraph", "ArrowheadLengthFunction"][
           <|"PlotRange" -> #|>] & /@ {0, 1.*^100};
 
       $selfLoopLength = FirstCase[

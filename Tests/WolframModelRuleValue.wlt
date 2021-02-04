@@ -1,5 +1,5 @@
 <|
-  "WolframPhysicsProjectStyleData" -> <|
+  "WolframModelRuleValue" -> <|
     "init" -> (
       Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
