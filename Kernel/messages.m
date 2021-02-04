@@ -4,6 +4,7 @@ PackageImport["GeneralUtilities`"]
 
 PackageScope["declareMessage"]
 PackageScope["message"]
+PackageScope["throw"]
 
 $messageSlotNames = <||>;
 
@@ -40,6 +41,12 @@ message[messageName_, args_] := ModuleScope[
   ];
 ];
 
-message[head_, failure_Failure] := With[{messageName = failure[[1]], messageArguments = failure[[2]]},
+message[head_, failure_ ? FailureQ] := With[{messageName = failure[[1]], messageArguments = failure[[2]]},
   message[MessageName[head, messageName], messageArguments];
 ];
+
+message[head_][failure_ ? FailureQ, ___] := message[head, failure];
+
+(* Throws identical value and tag so that the value can be caught with the second argument of Catch *)
+
+throw[exception_] := Throw[exception, exception];
