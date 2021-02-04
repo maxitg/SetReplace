@@ -130,7 +130,8 @@ $propertyArgumentCounts = Join[
     "EdgeDestroyerEventsIndices" -> {0, 0},
     "EdgeDestroyerEventIndices" -> {0, 0},
     "EdgeGenerationsList" -> {0, 0},
-    "FeatureVector" -> {0, 0},
+    "FeatureAssociation" -> {0, 1},
+    "FeatureVector" -> {0, 1},
     "ExpressionsSeparation" -> {2, 2},
     "MultiwayQ" -> {0, 0},
     "Properties" -> {0, 0}|>,
@@ -950,24 +951,59 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
     propertyEvaluate[True, "Initial"][obj, caller, "EdgeCreatorEventIndices"] + 1]]
 );
 
-(* FeatureVector *)
+(* FeatureAssociation *)
 
-vertexDegreeQuantiles[g_Graph] := Quantile[VertexDegree[g], {0, 0.25, 0.50, 0.75, 1}];
-vertexDegreeQuantiles[g_Graph] /; VertexCount[g] == 0 := {0, 0, 0, 0, 0}; (* Edge case for empty graphs *)
+nestedToSingleAssociation[association_] :=
+  Join @@ (Function[parentKey, KeyMap[StringJoin[parentKey, #] &, association[parentKey]]] /@ Keys[association])
+nestedToSingleAssociation[<||>] := <||>
 
-causalGraphFeatureAssociation[g_Graph] := <|
+vertexDegreeQuantiles[g_Graph] := Quantile[VertexDegree[g], {0, 0.25, 0.50, 0.75, 1}]
+vertexDegreeQuantiles[g_Graph] /; VertexCount[g] == 0 := {0, 0, 0, 0, 0} (* Edge case for empty graphs *)
+
+graphFeatureAssociation[g_Graph] := <|
     "VertexCount" -> VertexCount[g],
     "EdgeCount" -> EdgeCount[g],
     "VertexConnectivity" -> VertexConnectivity[UndirectedGraph[g]],
     "VertexDegreesQuantiles" -> vertexDegreeQuantiles[g]
 |>;
 
-causalGraphFeatureVector[g_Graph] := Flatten @ Values[causalGraphFeatureAssociation[g]];
+General::invalidFeatureSpec = "Feature specification `1` should be one of `2`, a list of them, or All.";
+General::unknownFeatureGroup = "Feature group `1` should be one of `2`";
+
+fromFeaturesSpec[caller_, All] := {"CausalGraph", "StructurePreservingFinalStateGraph"}
+fromFeaturesSpec[caller_, featuresSpecs_List] := featuresSpecs
+fromFeaturesSpec[caller_, featuresSpecs_String] := {featuresSpecs}
+fromFeaturesSpec[caller_, wrongInput_] := (Message[caller::invalidFeatureSpec,
+  wrongInput, fromFeaturesSpec[caller, All]]; Throw[$Failed])
 
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
-    "FeatureVector"] := causalGraphFeatureVector[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]];
+    "FeatureAssociation",
+    featuresSpecs_ : All] := With[{featureGroupList = fromFeaturesSpec[caller, featuresSpecs]},
+  nestedToSingleAssociation @ AssociationThread[featureGroupList -> Replace[featureGroupList, {
+    "CausalGraph" -> graphFeatureAssociation[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]],
+    "StructurePreservingFinalStateGraph" -> If[!propertyEvaluate[True, boundary][obj, caller, "MultiwayQ"],
+      graphFeatureAssociation @ HypergraphToGraph[#, "StructurePreserving"] & @
+        propertyEvaluate[True, boundary][obj, caller, "FinalState"]
+    ,
+      Replace[
+        graphFeatureAssociation[Graph[{1 -> 2}]],
+        {_ ? NumberQ -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}]},
+        Infinity]
+    ],
+    other_ :> (Message[caller::unknownFeatureGroup, other, fromFeaturesSpec[caller, All]]; Throw[$Failed])
+  }, {1}]]
+]
+
+(* FeatureVector *)
+
+propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+    caller_,
+    "FeatureVector",
+    featuresSpecs_ : All] := Flatten @ Values @ propertyEvaluate[True, boundary][
+      obj, caller, "FeatureAssociation", featuresSpecs]
 
 (* ExpressionsSeparation *)
 
