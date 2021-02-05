@@ -25,8 +25,7 @@ is, in itself, interesting to investigate.
 Another approach is to consider the so-called multiway systems, which evaluate all possible ways to resolve such
 overlaps between matches. This is the approach that is discussed in this note.
 
-The original type of the multiway system that was first considered in the
-[Wolfram Physics Project](https://www.wolframphysics.org) is what we will call the
+One type of the multiway system is what we will call the
 [*global* multiway system](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem), which will
 be discussed in more detail in the next section. Here we propose a new kind of multiway system, called a *local*
 multiway system. The prime difference is that it allows one to consider the branching of only parts of space (subgraphs

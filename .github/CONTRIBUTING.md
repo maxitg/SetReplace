@@ -19,13 +19,7 @@ implicitly sends a message that *bugs* (aka insects) are someone bad and should 
 sentiment, as *bugs* :ant: :beetle: :spider: are living creatures who deserve moral consideration. Hence, let's leave "
 bugs" alone, and go *weed whacking*.
 
-The issues in this repository are only related to *SetReplace*, not the entire Wolfram Physics Project. If you have
-found an issue with a Wolfram Physics [bulletin](https://www.wolframphysics.org/bulletins/), or with anything else on
-the Wolfram Physics [website](https://www.wolframphysics.org), please report it using the tools available there. The
-bulletins that also appear as [research notes](/Research) in this repository are the only exceptions. The issues with
-these should be reported here.
-
-Similarly, the weeds in function repository functions should be reported on the function repository website rather than
+Note that the weeds in function repository functions should be reported on the function repository website rather than
 here.
 
 To report a weed, follow these steps:

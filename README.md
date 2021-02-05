@@ -224,15 +224,9 @@ the one this package implements.
 A slightly different version of this system was first introduced in *Stephen Wolfram*'
 s [A New Kind Of Science](https://www.wolframscience.com/nks/chap-9--fundamental-physics/).
 
-You can find many more details about our physics results in *Stephen Wolfram*'
-s [Technical Introduction](https://www.wolframphysics.org/technical-introduction/), and *Jonathan Gorard*'s papers
-on [Relativity](https://www.wolframcloud.com/obj/wolframphysics/Documents/some-relativistic-and-gravitational-properties-of-the-wolfram-model.pdf)
-and [Quantum Mechanics](https://www.wolframcloud.com/obj/wolframphysics/Documents/some-quantum-mechanical-properties-of-the-wolfram-model.pdf)
-. And there is much more on [wolframphysics.org](https://www.wolframphysics.org).
-
 # Acknowledgements
 
-In additional to commit authors and reviewers, *Stephen Wolfram* has contributed to the API design of most functions,
+In additional to commit authors and reviewers, *Stephen Wolfram* has contributed to the API design of some functions,
 and *Jeremy Davis* has contributed to the visual style
 of [`HypergraphPlot`](Documentation/SymbolsAndFunctions/HypergraphPlot.md)
 , [`RulePlot`](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
