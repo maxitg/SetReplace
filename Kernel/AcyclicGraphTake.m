@@ -4,6 +4,8 @@ PackageImport["GeneralUtilities`"]
 
 PackageExport["AcyclicGraphTake"]
 
+PackageScope["acyclicGraphTake"]
+
 (* Utility function to check for directed, acyclic graphs *)
 dagQ[graph_] := AcyclicGraphQ[graph] && DirectedGraphQ[graph] && LoopFreeGraphQ[graph]
 
@@ -23,30 +25,32 @@ AcyclicGraphTake[args___] := 0 /;
 
 (* main *)
 expr : AcyclicGraphTake[graph_, vertices_] := ModuleScope[
-  res = Catch[acyclicGraphTake[HoldForm @ expr, graph, vertices]];
-  res /; res =!= $Failed
+  res = Catch[acyclicGraphTake[graph, vertices]];
+  If[FailureQ[res], Switch[res[[1]],
+    "invalidGraph", Message[AcyclicGraphTake::invalidGraph, 1, HoldForm @ expr],
+    "invalidVertexList", Message[AcyclicGraphTake::invalidVertexList, 2, HoldForm @ expr],
+    "invalidVertex", Message[AcyclicGraphTake::invalidVertex, res[[2, "vertex"]], HoldForm @ expr]
+  ]];
+  res /; !FailureQ[res]
 ];
 
 (* Normal form *)
-acyclicGraphTake[_, graph_ ? dagQ, {startVertex_, endVertex_}] /;
+acyclicGraphTake[graph_ ? dagQ, {startVertex_, endVertex_}] /;
     VertexQ[graph, startVertex] && VertexQ[graph, endVertex] := ModuleScope[
   Subgraph[graph, Intersection[
     VertexInComponent[graph, endVertex], VertexOutComponent[graph, startVertex]]]
 ]
 
 (* Incorrect arguments messages *)
-AcyclicGraphTake::invalidGraph = "The argument at position `1` in `2` should be a directed, acyclic graph.";
-acyclicGraphTake[expr_, graph_ ? (Not @* dagQ), _] :=
-  (Message[AcyclicGraphTake::invalidGraph, 1, HoldForm @ expr];
-  Throw[$Failed]);
+General::invalidGraph = "The argument at position `1` in `2` should be a directed, acyclic graph.";
+acyclicGraphTake[graph_ ? (Not @* dagQ), _] :=
+  Throw[Failure["invalidGraph", <||>]];
 
-AcyclicGraphTake::invalidVertexList = "The argument at position `1` in `2` should be a list of two vertices.";
-acyclicGraphTake[expr_, _, Except[{_, _}]] :=
-  (Message[AcyclicGraphTake::invalidVertexList, 2, HoldForm @ expr];
-  Throw[$Failed]);
+General::invalidVertexList = "The argument at position `1` in `2` should be a list of two vertices.";
+acyclicGraphTake[_, Except[{_, _}]] :=
+  Throw[Failure["invalidVertexList", <||>]];
 
-AcyclicGraphTake::invalidVertex = "The argument `1` is not a valid vertex in `2`.";
-acyclicGraphTake[expr_, graph_Graph, {startVertex_, endVertex_}] /;
+General::invalidVertex = "The argument `1` is not a valid vertex in `2`.";
+acyclicGraphTake[graph_Graph, {startVertex_, endVertex_}] /;
     (Not @ (VertexQ[graph, startVertex] && VertexQ[graph, endVertex])) :=
-  (Message[AcyclicGraphTake::invalidVertex, If[VertexQ[graph, startVertex], endVertex, startVertex], HoldForm @ expr];
-  Throw[$Failed]);
+  Throw[Failure["invalidVertex", <|"vertex" -> If[VertexQ[graph, startVertex], endVertex, startVertex]|>]];

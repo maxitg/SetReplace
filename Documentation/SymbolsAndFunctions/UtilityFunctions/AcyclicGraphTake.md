@@ -2,7 +2,7 @@
 
 # AcyclicGraphTake
 
-**`AcyclicGraphTake`** gives the intersectiom of the out-component of the first vertex
+**`AcyclicGraphTake`** gives the intersection of the out-component of the first vertex
 with the in-component of the second vertex:
 
 ```wl
