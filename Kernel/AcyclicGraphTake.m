@@ -54,4 +54,3 @@ General::invalidVertex = "The argument `1` is not a valid vertex in `2`.";
 acyclicGraphTake[graph_Graph, {startVertex_, endVertex_}] /;
     (Not @ (VertexQ[graph, startVertex] && VertexQ[graph, endVertex])) :=
   Throw[Failure["invalidVertex", <|"vertex" -> If[VertexQ[graph, startVertex], endVertex, startVertex]|>]];
-  
