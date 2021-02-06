@@ -12,7 +12,7 @@ Attributes[declareMessage] = {HoldFirst};
 declareMessage[messageName_, template_] := Module[{templateObject, argumentNames, namesToIndices},
   templateObject = StringTemplate[template];
   argumentNames = First /@ Cases[templateObject[[1]], _TemplateSlot];
-  namesToIndices = Association[Thread[argumentNames -> Range[Length[argumentNames]]]];
+  namesToIndices = AssociationThread[argumentNames -> Range[Length[argumentNames]]];
   AssociateTo[$messageSlotNames, Hold[messageName] -> argumentNames];
   messageName = StringJoin[Replace[templateObject[[1]],
                                    TemplateSlot[name_] :> "`" <> ToString[namesToIndices[name]] <> "`",
@@ -24,6 +24,8 @@ message::missingArgs = "Arguments `2` missing for message `1`.";
 
 Attributes[message] = {HoldFirst};
 message[messageName_, args_ ? AssociationQ] := ModuleScope[
+  (* Look for the specific message first, e.g., symb::msg. If not found, look for General::msg.
+     General:: messages should be possible to generate for any symbol. *)
   argumentsOrder =
     Lookup[$messageSlotNames, Hold[messageName], $messageSlotNames[ReplacePart[Hold[messageName], {1, 1} -> General]]];
   If[MissingQ[argumentsOrder],
@@ -31,7 +33,7 @@ message[messageName_, args_ ? AssociationQ] := ModuleScope[
   ,
     missingArgs = Complement[argumentsOrder, Keys[args]];
     If[missingArgs =!= {},
-      Message[MessageName[message, "missingArgs"], HoldForm[messageName], missingArgs];
+      Message[message::missingArgs, HoldForm[messageName], missingArgs];
     ,
       Message[messageName, ##] & @@ Replace[argumentsOrder, args, 1];
     ];
