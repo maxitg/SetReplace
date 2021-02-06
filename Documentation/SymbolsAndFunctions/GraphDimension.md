@@ -6,7 +6,8 @@
 below.
 
 ## Dimension estimation methods
-### `FlatCausalDiamondRelationProbability`: Uses the Myrheim-Meyer dimension estimation algorithm. This method is
+### `FlatCausalDiamondRelationProbability` 
+Uses the Myrheim-Meyer dimension estimation algorithm. This method is
 based on Causal Set Theory, an approach to quantum gravity which, much like the Wolfram Model, describes spacetime
 not as a continuum but as a large collection of discrete points endowed with a causal partial order of the form 
 x \[Precedes] y, i.e. "x is to the past of y." A causal set then contains a finite set of causal relations following
