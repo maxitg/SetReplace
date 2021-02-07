@@ -28,7 +28,7 @@ expr : RandomHypergraph[sizeSpec_, maxVertices_ : Automatic] := ModuleScope[
 ];
 
 (* Error messages *)
-RandomHypergraph::invalidSizeSpec = "\
+RandomHypergraph::invalidSig = "\
 The argument at position `2` in `1` should be a positive integer or a hypergraph size specification.";
 
 (* Support functions *)
@@ -72,7 +72,7 @@ randomHypergraph[caller_, sizeSpec : $sizeSpecPattern, n_] :=
 
 (* Incorrect arguments messages *)
 randomHypergraph[caller_, sizeSpec : Except[$sizeSpecPattern | {$sizeSpecPattern ..} | _Integer ? Positive], _] :=
-  (Message[RandomHypergraph::invalidSizeSpec, caller, 1];
+  (Message[RandomHypergraph::invalidSig, caller, 1];
   Throw[$Failed]);
 
 randomHypergraph[caller_, sizeSpec_, maxVertices_] :=
