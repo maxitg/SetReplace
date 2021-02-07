@@ -10,6 +10,7 @@ jobs:
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
+    resource_class: medium+
     parallelism: 4
 
     steps:
