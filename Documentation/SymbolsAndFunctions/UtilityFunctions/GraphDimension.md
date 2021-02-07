@@ -10,7 +10,7 @@ below.
 ### "FlatCausalDiamondRelationProbability"
 
 Uses the Myrheim-Meyer dimension estimation algorithm. This method is
-based on (Causal Set Theory)[https://en.wikipedia.org/wiki/Causal_sets], an approach to quantum gravity which, 
+based on [Causal Set Theory](https://en.wikipedia.org/wiki/Causal_sets), an approach to quantum gravity which, 
 much like the Wolfram Model, describes spacetime not as a continuum but as a large collection of discrete points 
 endowed with a causal partial order of the form *x* ≺ *y*, i.e. "*x* is to the past of *y*." A causal set then 
 contains a finite set of causal relations following this partial order in spacetime. 
@@ -31,7 +31,7 @@ that a random choice of elements in the causal set are causally connected is dir
 of the region *A[p, q]* in this set. By then evaluating an integral over this interval, one can obtain an
 expectation value for the number of causal relations in that specified region. The result of this integration
 is that of the right-hand side of the above expression. An explicit derivation of this result can be found in
-(D. Meyer, The Dimension of Causal Sets)[https://dspace.mit.edu/handle/1721.1/14328], where, note, spacetime is
+[D. Meyer, The Dimension of Causal Sets](https://dspace.mit.edu/handle/1721.1/14328), where, note, spacetime is
 defined as 1 + *d*-dimensional Minkowski space, which corresponds to *d* in our convention for `GraphDimension`.
 
 The right-hand side of this equation is a monotonically decreasing function, meaning that one can invert the
