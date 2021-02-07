@@ -67,7 +67,7 @@ toPatternRules[rule : _Rule, caller_] := ModuleScope[
 toPatternRules[rules : {___Rule}, caller_] :=
   toPatternRules[#, caller] & /@ rules;
 
-ToPatternRules[rules_] := ModuleScope[
-  result = Check[toPatternRules[rules, ToPatternRules], $Failed];
+ToPatternRules[hypergraphRules_] := ModuleScope[
+  result = Check[toPatternRules[hypergraphRules, ToPatternRules], $Failed];
   result /; result =!= $Failed
 ];

@@ -36,11 +36,13 @@ WeakSubhypergraph[args___] := 0 /;
   !Developer`CheckArgumentCount[WeakSubhypergraph[args], 1, 2] && False;
 
 (* main *)
-expr : Subhypergraph[arg1_, arg2_] := With[{res = Catch[subhypergraph[HoldForm @ expr, arg1, arg2]]},
+expr : Subhypergraph[hypergraph_, vertexList_] := With[{
+    res = Catch[subhypergraph[HoldForm @ expr, hypergraph, vertexList]]},
   res /; res =!= $Failed
 ];
 
-expr : WeakSubhypergraph[arg1_, arg2_] := With[{res = Catch[weakSubhypergraph[HoldForm @ expr, arg1, arg2]]},
+expr : WeakSubhypergraph[hypergraph_, vertexList_] := With[{
+    res = Catch[weakSubhypergraph[HoldForm @ expr, hypergraph, vertexList]]},
   res /; res =!= $Failed
 ];
 
