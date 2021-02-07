@@ -16,8 +16,8 @@ With[{
 
 (* Documentation *)
 SetUsage @ "
-GraphDimension[graph$, method$, vertices$] gives an estimate of the dimension of a subgraph of the graph gr$ \
-between the vertices vrts$, using the method mth$.
+GraphDimension[graph$, method$, vertices$] gives an estimate of the dimension of a subgraph of the graph graph$ \
+between the vertices vertices$, using the method method$.
 ";
 
 (* SyntaxInformation *)
