@@ -13,7 +13,7 @@
       },
       {
         (* Verification tests *)
-        
+
         VerificationTest[
           GraphDimension[Graph[{1 -> 2, 2 -> 3}], "FlatCausalDiamondRelationProbability", {1, 2}],
           2,
