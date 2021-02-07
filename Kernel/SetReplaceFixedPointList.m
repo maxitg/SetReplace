@@ -7,7 +7,7 @@ PackageExport["SetReplaceFixedPointList"]
 (* Same as SetReplaceFixedPoint, but returns all intermediate steps. *)
 
 SetUsage @ "
-SetReplaceFixedPointList[s$, {i$1 -> o$1, i$2 -> o$2, $$}] performs SetReplace repeatedly until \
+SetReplaceFixedPointList[set$, {input$1 -> output$1, input$2 -> output$2, $$}] performs SetReplace repeatedly until \
 no further events can be matched, and returns the list of all intermediate sets.
 ";
 
@@ -17,7 +17,7 @@ Options[SetReplaceFixedPointList] = {
   "EventOrderingFunction" -> Automatic};
 
 SyntaxInformation[SetReplaceFixedPointList] = {
-  "ArgumentsPattern" -> {_, _, OptionsPattern[]},
+  "ArgumentsPattern" -> {set_, rules_, OptionsPattern[]},
   "OptionNames" -> Options[SetReplaceFixedPointList][[All, 1]]};
 
 SetReplaceFixedPointList[args___] := 0 /;

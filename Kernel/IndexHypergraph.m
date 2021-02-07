@@ -7,33 +7,32 @@ PackageExport["IndexHypergraph"]
 (* Documentation *)
 
 SetUsage @ "
-IndexHypergraph[hg$] replaces the vertices of the hypergraph hg$ by its vertex indices.
-IndexHypergraph[hg$, r$] replaces the vertices with integers r$, r$ + 1, $$.
+IndexHypergraph[hypergraph$] replaces the vertices of hypergraph$ by its vertex indices.
+IndexHypergraph[hypergraph$, startIndex$] replaces the vertices with integers startIndex$, startIndex$ + 1, $$.
 ";
 
 (* SyntaxInformation *)
-SyntaxInformation[IndexHypergraph] =
-  {"ArgumentsPattern" -> {_, _.}};
+SyntaxInformation[IndexHypergraph] = {"ArgumentsPattern" -> {hypergraph_, startIndex_.}};
 
 (* Argument count *)
 IndexHypergraph[args___] := 0 /;
   !Developer`CheckArgumentCount[IndexHypergraph[args], 1, 2] && False;
 
 (* main *)
-expr : IndexHypergraph[hgraph_, start : _ : 1] := ModuleScope[
-  res = Catch[indexHypergraph[HoldForm @ expr, hgraph, start]];
+expr : IndexHypergraph[hypergraph_, startIndex : _ : 1] := ModuleScope[
+  res = Catch[indexHypergraph[HoldForm @ expr, hypergraph, startIndex]];
   res /; res =!= $Failed
 ];
 
 (* Normal form *)
-indexHypergraph[_, hgraph_ ? hypergraphQ, start : _Integer ? IntegerQ] := ModuleScope[
-  vertices = vertexList @ hgraph;
-  vertexIndices = Range[0, Length[vertices] - 1] + start;
-  Replace[hgraph, Thread[vertices -> vertexIndices], {2}]
+indexHypergraph[_, hypergraph_ ? hypergraphQ, startIndex : _Integer ? IntegerQ] := ModuleScope[
+  vertices = vertexList @ hypergraph;
+  vertexIndices = Range[0, Length[vertices] - 1] + startIndex;
+  Replace[hypergraph, Thread[vertices -> vertexIndices], {2}]
 ];
 
 (* Incorrect arguments messages *)
-indexHypergraph[expr_, hgraph_ ? (Not @* hypergraphQ), ___] :=
+indexHypergraph[expr_, hypergraph_ ? (Not @* hypergraphQ), ___] :=
   (Message[IndexHypergraph::invalidHypergraph, 1, HoldForm @ expr];
   Throw[$Failed]);
 

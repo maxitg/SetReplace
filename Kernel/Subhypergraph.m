@@ -11,21 +11,22 @@ PackageExport["WeakSubhypergraph"]
 (* Documentation *)
 
 SetUsage @ "
-Subhypergraph[hg$, vertices$] selects hyperedges from hg$ that are subsets of vertices$.
-Subhypergraph[vertices$] represents the operator form for a hypergraph.
+Subhypergraph[hypergraph$, vertexList$] selects hyperedges from hypergraph$ that are subsets of vertexList$.
+Subhypergraph[vertexList$] represents the operator form for a hypergraph.
 ";
 
 SetUsage @ "
-WeakSubhypergraph[hg$, vertices$] selects any hyperedge from hg$ whose elements are contained in vertices$.
-WeakSubhypergraph[vertices$] represents the operator form for a hypergraph.
+WeakSubhypergraph[hypergraph$, vertexList$] selects hyperedges from hypergraph$ such that any of their elements are \
+contained in vertexList$.
+WeakSubhypergraph[vertexList$] represents the operator form for a hypergraph.
 ";
 
 (* SyntaxInformation *)
 SyntaxInformation[Subhypergraph] =
-  {"ArgumentsPattern" -> {_, _.}};
+  {"ArgumentsPattern" -> {hypergraph_, vertexList_.}};
 
 SyntaxInformation[WeakSubhypergraph] =
-  {"ArgumentsPattern" -> {_, _.}};
+  {"ArgumentsPattern" -> {hypergraph_, vertexList_.}};
 
 (* Argument count *)
 Subhypergraph[args___] := 0 /;
@@ -35,11 +36,13 @@ WeakSubhypergraph[args___] := 0 /;
   !Developer`CheckArgumentCount[WeakSubhypergraph[args], 1, 2] && False;
 
 (* main *)
-expr : Subhypergraph[arg1_, arg2_] := With[{res = Catch[subhypergraph[HoldForm @ expr, arg1, arg2]]},
+expr : Subhypergraph[hypergraph_, vertexList_] := With[{
+    res = Catch[subhypergraph[HoldForm @ expr, hypergraph, vertexList]]},
   res /; res =!= $Failed
 ];
 
-expr : WeakSubhypergraph[arg1_, arg2_] := With[{res = Catch[weakSubhypergraph[HoldForm @ expr, arg1, arg2]]},
+expr : WeakSubhypergraph[hypergraph_, vertexList_] := With[{
+    res = Catch[weakSubhypergraph[HoldForm @ expr, hypergraph, vertexList]]},
   res /; res =!= $Failed
 ];
 

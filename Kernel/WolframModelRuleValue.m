@@ -8,15 +8,15 @@ PackageExport["$WolframModelRuleProperties"]
 (* Documentation *)
 
 SetUsage @ "
-WolframModelRuleValue[r$, p$] yields a value for property p$ of Wolfram model rule r$.
-WolframModelRuleValue[r$] yields values of all available properties.
+WolframModelRuleValue[rule$, property$] yields the value for a property$ of a Wolfram model rule$.
+WolframModelRuleValue[rule$] yields the values of all available properties.
 ";
 
 SetUsage @ "
 $WolframModelRuleProperties gives the list of all available rule properties.
 ";
 
-SyntaxInformation[WolframModelRuleValue] = {"ArgumentsPattern" -> {_, _.}};
+SyntaxInformation[WolframModelRuleValue] = {"ArgumentsPattern" -> {rule_, property_.}};
 
 $WolframModelRuleProperties = Sort @ {
   "ConnectedInput", "ConnectedOutput", "ConnectedInputOutputUnion", "MaximumArity", "NodeCounts", "NodesDroppedAdded",

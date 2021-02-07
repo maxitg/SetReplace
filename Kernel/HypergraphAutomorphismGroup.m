@@ -7,10 +7,11 @@ PackageExport["HypergraphAutomorphismGroup"]
 (* Documentation *)
 
 SetUsage @ "
-HypergraphAutomorphismGroup[e$] gives the authomorphism group of a list of hyperedges e$.
+HypergraphAutomorphismGroup[hypergraph$] gives the authomorphism group of hypergraph$ represented as a list of \
+hyperedges.
 ";
 
-SyntaxInformation[HypergraphAutomorphismGroup] = {"ArgumentsPattern" -> {_}};
+SyntaxInformation[HypergraphAutomorphismGroup] = {"ArgumentsPattern" -> {hypergraph_}};
 
 HypergraphAutomorphismGroup::invalidHypergraph =
   "Hypergraph `` should be a list of lists of vertices, which are not themselves lists.";
@@ -27,9 +28,9 @@ HypergraphAutomorphismGroup[args___] := ModuleScope[
     2. Then, compute the automorhpism group for that normal Graph.
     3. Finally, remove added auxiliary vertices from the spec of that group. *)
 
-hypergraphAutomorphismGroup[e : {{Except[_List]...}...}] := With[{
-    binaryGraph = Graph[Catenate[toStructurePreservingBinaryEdges /@ e]]},
-  removeAuxiliaryElements[GraphAutomorphismGroup[binaryGraph], binaryGraph, e]
+hypergraphAutomorphismGroup[hypergraph : {{Except[_List]...}...}] := With[{
+    binaryGraph = Graph[Catenate[toStructurePreservingBinaryEdges /@ hypergraph]]},
+  removeAuxiliaryElements[GraphAutomorphismGroup[binaryGraph], binaryGraph, hypergraph]
 ];
 
 toStructurePreservingBinaryEdges[hyperedge_] := ModuleScope[

@@ -7,7 +7,7 @@ PackageExport["HypergraphToGraph"]
 (* Documentation *)
 
 SetUsage @ "
-HypergraphToGraph[hg$, method$] uses method$ to convert a hypergraph hg$ to a Graph.
+HypergraphToGraph[hypergraph$, method$] uses method$ to convert hypergraph$ to a Graph.
 ";
 
 (* Options *)
@@ -15,7 +15,7 @@ Options[HypergraphToGraph] = Options[Graph];
 
 (* SyntaxInformation *)
 SyntaxInformation[HypergraphToGraph] = {
-  "ArgumentsPattern" -> {_, _, OptionsPattern[]},
+  "ArgumentsPattern" -> {hypergraph_, method_, OptionsPattern[]},
   "OptionNames" -> Options[HypergraphToGraph][[All, 1]]};
 
 (* Methods *)
@@ -40,11 +40,11 @@ HypergraphToGraph[args___] := 0 /;
 
 (* main *)
 expr : HypergraphToGraph[
-      hgraph_,
+      hypergraph_,
       method_,
       opts : OptionsPattern[]] /; recognizedOptionsQ[expr, HypergraphToGraph, {opts}] :=
   ModuleScope[
-    res = Catch[hypergraphToGraph[HoldForm @ expr, hgraph, method, opts]];
+    res = Catch[hypergraphToGraph[HoldForm @ expr, hypergraph, method, opts]];
     res /; res =!= $Failed
   ];
 
@@ -62,12 +62,12 @@ toDistancePreserving[{directedness_, hyperedge_}, opts___] :=
 
 hypergraphToGraph[
     _,
-    hgraph_ ? hypergraphQ,
+    hypergraph_ ? hypergraphQ,
     method : "DirectedDistancePreserving" | "UndirectedDistancePreserving",
     opts : OptionsPattern[]] :=
   With[{directedness = Switch[method, "DirectedDistancePreserving", DirectedEdge, _, UndirectedEdge]},
     graphJoin[
-      toDistancePreserving[{directedness, #}, opts] & /@ hgraph,
+      toDistancePreserving[{directedness, #}, opts] & /@ hypergraph,
       opts]
   ];
 
@@ -87,9 +87,9 @@ toStructurePreserving[{hyperedgeIndex_, hyperedge_}, opts___] := ModuleScope[
     opts]
 ];
 
-hypergraphToGraph[_, hgraph_ ? hypergraphQ, "StructurePreserving", opts : OptionsPattern[]] :=
+hypergraphToGraph[_, hypergraph_ ? hypergraphQ, "StructurePreserving", opts : OptionsPattern[]] :=
   With[{
-      hyperedgeGraphs = MapIndexed[toStructurePreserving[{#2[[1]], #1}, opts] &, hgraph]},
+      hyperedgeGraphs = MapIndexed[toStructurePreserving[{#2[[1]], #1}, opts] &, hypergraph]},
     graphJoin[
       hyperedgeGraphs,
       VertexStyle -> Replace[OptionValue[Graph, {opts}, VertexStyle],
@@ -102,7 +102,7 @@ hypergraphToGraph[_, hgraph_ ? hypergraphQ, "StructurePreserving", opts : Option
   ];
 
 (* Incorrect arguments messages *)
-hypergraphToGraph[expr_, hgraph_ ? (Not @* hypergraphQ), ___] :=
+hypergraphToGraph[expr_, hypergraph_ ? (Not @* hypergraphQ), ___] :=
   (Message[HypergraphToGraph::invalidHypergraph, 1, HoldForm @ expr];
   Throw[$Failed]);
 

@@ -14,10 +14,11 @@ PackageScope["anonymousRulesQ"]
 PackageScope["toPatternRules"]
 
 SetUsage @ "
-ToPatternRules[r$] converts a list of anonymous rules r$ to explicit pattern rules.
+ToPatternRules[hypergraphRules$] converts a list of hypergraphRules$ to explicit pattern rules of a set substitution \
+system.
 ";
 
-SyntaxInformation[ToPatternRules] = {"ArgumentsPattern" -> {_}};
+SyntaxInformation[ToPatternRules] = {"ArgumentsPattern" -> {hypergraphRules_}};
 
 (* Argument Checks *)
 
@@ -66,7 +67,7 @@ toPatternRules[rule : _Rule, caller_] := ModuleScope[
 toPatternRules[rules : {___Rule}, caller_] :=
   toPatternRules[#, caller] & /@ rules;
 
-ToPatternRules[rules_] := ModuleScope[
-  result = Check[toPatternRules[rules, ToPatternRules], $Failed];
+ToPatternRules[hypergraphRules_] := ModuleScope[
+  result = Check[toPatternRules[hypergraphRules, ToPatternRules], $Failed];
   result /; result =!= $Failed
 ];

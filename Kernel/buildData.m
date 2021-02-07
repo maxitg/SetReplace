@@ -2,6 +2,11 @@ Package["SetReplace`"]
 
 PackageImport["GeneralUtilities`"]
 
+PackageExport["$SetReplaceLibraryBuildTime"]
+PackageExport["$SetReplaceLibraryPath"]
+PackageExport["$SetReplaceBuildTime"]
+PackageExport["$SetReplaceGitSHA"]
+
 PackageScope["$packageRoot"]
 
 $packageRoot = FileNameDrop[$InputFileName, -2];
@@ -47,9 +52,6 @@ If[FileExistsQ[$devUtilsPath],
 
 readJSONFile[file_] := Quiet @ Check[Developer`ReadRawJSONFile[file], $Failed];
 
-PackageExport["$SetReplaceLibraryBuildTime"]
-PackageExport["$SetReplaceLibraryPath"]
-
 SetUsage @ "
 $SetReplaceLibraryBuildTime gives the date object at which this C++ libSetReplace library was built.
 ";
@@ -68,9 +70,6 @@ If[$buildData === $Failed,
   $SetReplaceLibraryBuildTime = DateObject[$buildData["LibraryBuildTime"], TimeZone -> "UTC"];
   $SetReplaceLibraryPath = FileNameJoin[{$libraryDirectory, $buildData["LibraryFileName"]}];
 ];
-
-PackageExport["$SetReplaceBuildTime"]
-PackageExport["$SetReplaceGitSHA"]
 
 SetUsage @ "
 $SetReplaceBuildTime gives the time at which this SetReplace paclet was built.

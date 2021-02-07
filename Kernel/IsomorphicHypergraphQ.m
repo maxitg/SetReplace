@@ -7,27 +7,28 @@ PackageExport["IsomorphicHypergraphQ"]
 (* Documentation *)
 
 SetUsage @ "
-IsomorphicHypergraphQ[h$1, h$2] yields True if the hypergraphs h$1 and h$2 are isomorphic, and False otherwise.
+IsomorphicHypergraphQ[hypergraph$1, hypergraph$2] yields True if hypergraph$1 and hypergraph$2 are isomorphic, and \
+False otherwise.
 ";
 
 (* SyntaxInformation *)
 SyntaxInformation[IsomorphicHypergraphQ] =
-  {"ArgumentsPattern" -> {_, _}};
+  {"ArgumentsPattern" -> {hypergraph1_, hypergraph2_}};
 
 (* Argument count *)
 IsomorphicHypergraphQ[args___] := 0 /;
   !Developer`CheckArgumentCount[IsomorphicHypergraphQ[args], 2, 2] && False;
 
 (* main *)
-expr : IsomorphicHypergraphQ[hgraph1_, hgraph2_] := ModuleScope[
-  res = Catch[isomorphicHypergraphQ[HoldForm @ expr, hgraph1, hgraph2]];
+expr : IsomorphicHypergraphQ[hypergraph1_, hypergraph2_] := ModuleScope[
+  res = Catch[isomorphicHypergraphQ[HoldForm @ expr, hypergraph1, hypergraph2]];
   res /; res =!= $Failed
 ];
 
 (* Normal form *)
-isomorphicHypergraphQ[_, hgraph1_ ? hypergraphQ, hgraph2_ ? hypergraphQ] := With[{
-    graph1 = HypergraphToGraph[hgraph1, "StructurePreserving"],
-    graph2 = HypergraphToGraph[hgraph2, "StructurePreserving"]},
+isomorphicHypergraphQ[_, hypergraph1_ ? hypergraphQ, hypergraph2_ ? hypergraphQ] := With[{
+    graph1 = HypergraphToGraph[hypergraph1, "StructurePreserving"],
+    graph2 = HypergraphToGraph[hypergraph2, "StructurePreserving"]},
   IsomorphicGraphQ[graph1, graph2]
 ];
 

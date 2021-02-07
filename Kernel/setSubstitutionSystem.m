@@ -8,6 +8,8 @@ PackageExport["$SetReplaceMethods"]
    produce a WolframModelEvolutionObject that contains information about evolution of the network step-by-step.
    All SetReplace* and WolframModel functions use argument checks and implementation done here. *)
 
+PackageScope["$eventOrderingFunctions"]
+
 PackageScope["setReplaceRulesQ"]
 PackageScope["stepCountQ"]
 PackageScope["multiwayEventSelectionFunctionQ"]

@@ -10,9 +10,10 @@ PackageExport["SetReplaceAll"]
    don't want to touch edges twice in a single step. *)
 
 SetUsage @ "
-SetReplaceAll[s$, r$] performs SetReplace[s$, r$] as many times as it takes until no \
-replacement can be done without touching the same edge twice.
-SetReplaceAll[s$, r$, n$] performes the same operation n$ times, i.e., any edge will at most be replaced n$ times.
+SetReplaceAll[set$, rules$] performs SetReplace[set$, rules$] as many times as it takes until no \
+replacement can be done without touching the same expression twice.
+SetReplaceAll[set$, rules$, generationCount$] performes the same operation generationCount$ times, i.e., any edge will \
+at most be replaced generationCount$ times.
 ";
 
 Options[SetReplaceAll] = {
@@ -21,7 +22,7 @@ Options[SetReplaceAll] = {
   "EventOrderingFunction" -> Automatic};
 
 SyntaxInformation[SetReplaceAll] = {
-  "ArgumentsPattern" -> {_, _, _., OptionsPattern[]},
+  "ArgumentsPattern" -> {set_, rules_, generationCount_., OptionsPattern[]},
   "OptionNames" -> Options[SetReplaceAll][[All, 1]]};
 
 SetReplaceAll[args___] := 0 /;
@@ -30,11 +31,11 @@ SetReplaceAll[args___] := 0 /;
 (* We just run SetSubstitutionSystem for the specified number of generations, and take the last set. *)
 
 expr : SetReplaceAll[
-    set_, rules_, generations : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
+    set_, rules_, generationCount : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
       recognizedOptionsQ[expr, SetReplaceAll, {o}] :=
   ModuleScope[
     result = Check[
-      setSubstitutionSystem[rules, set, <|$maxGenerationsLocal -> generations|>, SetReplaceAll, False, o]
+      setSubstitutionSystem[rules, set, <|$maxGenerationsLocal -> generationCount|>, SetReplaceAll, False, o]
     ,
       $Failed
     ];

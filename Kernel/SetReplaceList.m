@@ -7,7 +7,8 @@ PackageExport["SetReplaceList"]
 (* Same as SetReplace, but returns all intermediate steps in a List. *)
 
 SetUsage @ "
-SetReplaceList[s$, r$, n$] performs SetReplace n$ times and returns the list of all intermediate results.
+SetReplaceList[set$, rules$, eventCount$] performs SetReplace eventCount$ times and returns the list of all \
+intermediate results.
 ";
 
 Options[SetReplaceList] = {
@@ -16,7 +17,7 @@ Options[SetReplaceList] = {
   "EventOrderingFunction" -> Automatic};
 
 SyntaxInformation[SetReplaceList] = {
-  "ArgumentsPattern" -> {_, _, _, OptionsPattern[]},
+  "ArgumentsPattern" -> {set_, rules_, eventCount_, OptionsPattern[]},
   "OptionNames" -> Options[SetReplaceList][[All, 1]]};
 
 SetReplaceList[args___] := 0 /;
