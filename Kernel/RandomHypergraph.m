@@ -22,8 +22,8 @@ RandomHypergraph[args___] := 0 /;
   !Developer`CheckArgumentCount[RandomHypergraph[args], 1, 2] && False;
 
 (* Main entry *)
-expr : RandomHypergraph[sizeSpec_, max_ : Automatic] := ModuleScope[
-  res = Catch[randomHypergraph[HoldForm @ expr, sizeSpec, max]];
+expr : RandomHypergraph[sizeSpec_, maxVertices_ : Automatic] := ModuleScope[
+  res = Catch[randomHypergraph[HoldForm @ expr, sizeSpec, maxVertices]];
   res /; res =!= $Failed
 ];
 
@@ -44,8 +44,8 @@ In[]:= RandomHypergraph[8]
 Out[]= {{4, 4, 3}, {2, 7}, {5, 6}, {8}}
 *)
 randomHypergraph[caller_, complexity_Integer ? Positive, n : (_Integer ? Positive | Automatic)] :=
-  With[{max = Replace[n, Automatic -> complexity]},
-    RandomInteger[{1, max}, #] & /@ DeleteCases[randomPartition @ complexity, 0]
+  With[{maxVertices = Replace[n, Automatic -> complexity]},
+    RandomInteger[{1, maxVertices}, #] & /@ DeleteCases[randomPartition @ complexity, 0]
   ];
 
 (*
@@ -56,11 +56,11 @@ randomHypergraph[caller_, sizeSpec : {$sizeSpecPattern ..}, n : (_Integer ? Posi
   ModuleScope[
     If[n === Automatic,
       (* Maximum possible number of atoms *)
-      max = Total[Times @@@ sizeSpec]
+      maxVertices = Total[Times @@@ sizeSpec]
     ,
-      max = n
+      maxVertices = n
     ];
-    Catenate[RandomInteger[{1, max}, #] & /@ sizeSpec]
+    Catenate[RandomInteger[{1, maxVertices}, #] & /@ sizeSpec]
   ];
 
 (*
@@ -75,6 +75,6 @@ randomHypergraph[caller_, sizeSpec : Except[$sizeSpecPattern | {$sizeSpecPattern
   (Message[RandomHypergraph::invalidSizeSpec, caller, 1];
   Throw[$Failed]);
 
-randomHypergraph[caller_, sizeSpec_, max_] :=
+randomHypergraph[caller_, sizeSpec_, maxVertices_] :=
   (Message[RandomHypergraph::intpa, caller, 2];
   Throw[$Failed]);
