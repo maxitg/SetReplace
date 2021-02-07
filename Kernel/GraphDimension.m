@@ -16,7 +16,7 @@ With[{
 
 (* Documentation *)
 SetUsage @ "
-GraphDimension[gr$, mth$, vrts$] gives an estimate of the dimension of a subgraph of the graph gr$ \
+GraphDimension[graph$, method$, vertices$] gives an estimate of the dimension of a subgraph of the graph gr$ \
 between the vertices vrts$, using the method mth$.
 ";
 
@@ -41,14 +41,16 @@ expr : GraphDimension[causalGraph_, method_, vertices_] := ModuleScope[
 ];
 
 (* Normal form *)
-graphDimension[causalGraph_, "FlatCausalDiamondRelationProbability", vertices_] := ModuleScope[
-    With[{
-        diamond = TransitiveClosureGraph[acyclicGraphTake[causalGraph, vertices]]},
-        If[EmptyGraphQ[diamond], Infinity,
-          Replace[d, FindRoot[
-            {EdgeCount[diamond]/((VertexCount[diamond])^2) == (Gamma[d + 1]*Gamma[d/2])/(4 Gamma[3 d/2])},
-            {d, 1, 0, Infinity}]]]
-    ]
+graphDimension[causalGraph_, "FlatCausalDiamondRelationProbability", vertices_] := Module[{d},
+  With[{
+    diamond = TransitiveClosureGraph[acyclicGraphTake[causalGraph, vertices]]},
+    If[EmptyGraphQ[diamond], 
+      Infinity
+    ,
+      Replace[d, FindRoot[
+        {EdgeCount[diamond] / ((VertexCount[diamond])^2) == (Gamma[d + 1] * Gamma[d / 2])/(4 Gamma[3 d / 2])},
+        {d, 1, 0, Infinity}]]]
+  ]
 ]
 
 (* Incorrect arguments messages *)
