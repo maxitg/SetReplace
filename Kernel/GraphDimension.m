@@ -44,7 +44,7 @@ expr : GraphDimension[causalGraph_, method_, vertices_] := ModuleScope[
 graphDimension[causalGraph_, "FlatCausalDiamondRelationProbability", vertices_] := Module[{d},
   With[{
     diamond = TransitiveClosureGraph[acyclicGraphTake[causalGraph, vertices]]},
-    If[EmptyGraphQ[diamond], 
+    If[EmptyGraphQ[diamond],
       Infinity
     ,
       Replace[d, FindRoot[
