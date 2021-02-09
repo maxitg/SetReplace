@@ -10,18 +10,18 @@ below.
 ### "FlatCausalDiamondRelationProbability"
 
 Uses the Myrheim-Meyer dimension estimation algorithm. This method is
-based on [Causal Set Theory](https://en.wikipedia.org/wiki/Causal_sets), an approach to quantum gravity which, 
-much like the Wolfram Model, describes spacetime not as a continuum but as a large collection of discrete points 
-endowed with a causal partial order of the form *x* ≺ *y*, i.e. "*x* is to the past of *y*." A causal set then 
-contains a finite set of causal relations following this partial order in spacetime. 
+based on [Causal Set Theory](https://en.wikipedia.org/wiki/Causal_sets), an approach to quantum gravity which,
+much like the Wolfram Model, describes spacetime not as a continuum but as a large collection of discrete points
+endowed with a causal partial order of the form *x* ≺ *y*, i.e. "*x* is to the past of *y*." A causal set then
+contains a finite set of causal relations following this partial order in spacetime.
 
 Starting from *d*-dimensional flat (Minkowski) space, the Myrheim-Meyer dimension
 estimation works essentially as a box-counting method, whereby one can consider two points *p* and *q* in that space
-that are causally connected. The Alexandrov Interval or causal diamond *A[p, q]* is then defined to be the 
+that are causally connected. The Alexandrov Interval or causal diamond *A[p, q]* is then defined to be the
 intersection of the future of the event *p* with the past of the event *q*. In this interval, define *C*<sub>*2*</sub>
 to be the number of causal relations, i.e. the number of pairs *x* ≺ *y* between *p* and *q*, and define
-*C*<sub>*1*</sub> to be the average number of events (i.e. vertices) in the interval. It is found that a suitable 
-ratio between *C*<sub>*2*</sub> and *C*<sub>*1*</sub> is dependent on the dimensionality *d* into which 
+*C*<sub>*1*</sub> to be the average number of events (i.e. vertices) in the interval. It is found that a suitable
+ratio between *C*<sub>*2*</sub> and *C*<sub>*1*</sub> is dependent on the dimensionality *d* into which
 the causal set embeds:
 
 <img src="/Documentation/Images/MyrheimMeyer.png" width="203.8">,
