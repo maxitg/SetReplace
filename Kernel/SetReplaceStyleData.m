@@ -12,7 +12,7 @@ SetReplaceStyleData[] yields an association describing default styles used in Se
 SetReplaceStyleData[theme$] gives styles for a particular theme$.
 SetReplaceStyleData[plotType$] gives styles for a particular plotType$.
 SetReplaceStyleData[plotType$, element$] gives a value for a particular element$ of plotType$.
-SetReplaceStyleData[theme$, plotType$, element$] gives a value for the element$ of plotType$ in $theme$.
+SetReplaceStyleData[theme$, plotType$, element$] gives a value for the element$ of plotType$ in theme$.
 ";
 
 SyntaxInformation[SetReplaceStyleData] = {"ArgumentsPattern" -> {theme_., group_., element_.}};
