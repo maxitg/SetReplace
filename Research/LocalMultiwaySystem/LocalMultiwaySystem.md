@@ -529,13 +529,13 @@ In[] := Graph[{{1} -> 1, {1} -> 2, 1 -> {1, 2, 3}, {1, 2, 3} -> 3,
   3 -> {1, 3}, {1, 2} -> 4, {1, 2} -> 5, {1, 3} -> 4, {1, 3} -> 5,
   4 -> {1, 2, 3, 4}, 5 -> {1, 3, 2, 4}},
  EdgeStyle ->
-  WolframPhysicsProjectStyleData["ExpressionsEventsGraph",
+  SetReplaceStyleData["ExpressionsEventsGraph",
    "EdgeStyle"],
  VertexLabels ->
   Prepend[Automatic][# -> "Rule " <> ToString[#2] & @@@ {{1, 1}, {2,
       3}, {3, 2}, {4, 4}, {5, 4}}],
  VertexStyle -> (# ->
-      WolframPhysicsProjectStyleData[
+      SetReplaceStyleData[
        "ExpressionsEventsGraph", #2] & @@@ {{{__Integer},
       "ExpressionVertexStyle"}, {_Integer, "EventVertexStyle"}})]
 ```

@@ -115,12 +115,12 @@ Module[{leftBranch, rightBranch}, Graph[Join[
       0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,
       1, 0, 1, 0, 1, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
       5}}, VertexStyle -> {_ ->
-     WolframPhysicsProjectStyleData["ExpressionsEventsGraph",
+     SetReplaceStyleData["ExpressionsEventsGraph",
       "ExpressionVertexStyle"], {"Event", ___} ->
-     WolframPhysicsProjectStyleData["ExpressionsEventsGraph",
+     SetReplaceStyleData["ExpressionsEventsGraph",
       "EventVertexStyle"]},
   EdgeStyle ->
-   WolframPhysicsProjectStyleData["ExpressionsEventsGraph",
+   SetReplaceStyleData["ExpressionsEventsGraph",
     "EdgeStyle"], ImageSize -> 600]]
 ```
 -->
