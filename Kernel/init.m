@@ -28,7 +28,7 @@ Block[
   }},
   (* All files are loaded lexicographically starting with A0*. Note, "$" comes after "A" in Wolfram Language.
      File names starting with digits are not allowed. "_" and "-" are not allowed. *)
-  Get[FileNameJoin[{$SetReplaceRootDirectory, "Kernel", "utilities.m"}]];
+  Get[FileNameJoin[{$SetReplaceRootDirectory, "Kernel", "A0$messages.m"}]];
 ];
 
 End[];

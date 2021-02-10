@@ -1,5 +1,8 @@
 Package["SetReplace`"]
 
+(* declareMessage should be loaded before everything else because it is used outside of functions.
+   (Files are loaded lexicographically.) *)
+
 PackageImport["GeneralUtilities`"]
 
 PackageScope["declareMessage"]
