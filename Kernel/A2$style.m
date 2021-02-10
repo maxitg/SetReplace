@@ -1,5 +1,7 @@
 Package["SetReplace`"]
 
+(* Style definitions are used at import in WolframPhysicsProjectStyleData. (Files are loaded lexicographically.) *)
+
 PackageImport["GeneralUtilities`"]
 
 PackageExport["$WolframPhysicsProjectPlotThemes"]
