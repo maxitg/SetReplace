@@ -1,17 +1,14 @@
 ###### [Symbols and Functions](/README.md#symbols-and-functions) > Utility Functions >
 
-# GraphDimension
+# CausalDensityDimension
 
-**`GraphDimension`** estimates the dimension of a subregion of a given graph, using one of the supported methods
-below.
+**`CausalDensityDimension`** estimates the dimension of a subregion of a given graph, using the Myrheim-Meyer
+dimension estimation algorithm.
 
-## Dimension estimation methods
+### Myrheim Meyer Dimension Estimation
 
-### "FlatCausalDiamondRelationProbability"
-
-Uses the Myrheim-Meyer dimension estimation algorithm. This method is
-based on [Causal Set Theory](https://en.wikipedia.org/wiki/Causal_sets), an approach to quantum gravity which,
-much like the Wolfram Model, describes spacetime not as a continuum but as a large collection of discrete points
+This method is based on [Causal Set Theory](https://en.wikipedia.org/wiki/Causal_sets), an approach to quantum gravity
+which, much like the Wolfram Model, describes spacetime not as a continuum but as a large collection of discrete points
 endowed with a causal partial order of the form *x* ≺ *y*, i.e. "*x* is to the past of *y*." A causal set then
 contains a finite set of causal relations following this partial order in spacetime.
 
@@ -20,7 +17,7 @@ estimation works essentially as a box-counting method, whereby one can consider 
 that are causally connected. The Alexandrov Interval or causal diamond *A[p, q]* is then defined to be the
 intersection of the future of the event *p* with the past of the event *q*. In this interval, define *C*<sub>*2*</sub>
 to be the number of causal relations, i.e. the number of pairs *x* ≺ *y* between *p* and *q*, and define
-*C*<sub>*1*</sub> to be the average number of events (i.e. vertices) in the interval. It is found that a suitable
+*C*<sub>*1*</sub> to be the number of events (i.e. vertices) in the interval. It is found that a suitable
 ratio between *C*<sub>*2*</sub> and *C*<sub>*1*</sub> is dependent on the dimensionality *d* into which
 the causal set embeds:
 
@@ -32,7 +29,8 @@ of the region *A[p, q]* in this set. By then evaluating an integral over this in
 expectation value for the number of causal relations in that specified region. The result of this integration
 is that of the right-hand side of the above expression. An explicit derivation of this result can be found in
 [D. Meyer, The Dimension of Causal Sets](https://dspace.mit.edu/handle/1721.1/14328), where, note, spacetime is
-defined as 1 + *d*-dimensional Minkowski space, which corresponds to *d* in our convention for `GraphDimension`.
+defined as 1 + *d*-dimensional Minkowski space, which corresponds to *d* in our convention for
+`CausalDensityDimension`.
 
 The right-hand side of this equation is a monotonically decreasing function, meaning that one can invert the
 relationship in order to determine the dimension *d*. It is worth noting that when the events *p* and *q* defining
@@ -48,9 +46,9 @@ sprinkledGraph = BlockRandom[Module[{coordinates, causalSet},
 ], RandomSeeding -> 0]
 ```
 
-<img src="/Documentation/Images/GraphDimensionInput.png" width="386.4">
+<img src="/Documentation/Images/CausalDensityDimensionInput.png" width="386.4">
 
 ```wl
-In[] := GraphDimension[sprinkledGraph, "FlatCausalDiamondRelationProbability", {1, 50}]
+In[] := CausalDensityDimension[sprinkledGraph, {1, 50}]
 Out[] := 1.92705
 ```

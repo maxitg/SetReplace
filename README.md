@@ -204,7 +204,7 @@ ideas. So, if you are interested, please join!
 * [HypergraphPlot](Documentation/SymbolsAndFunctions/HypergraphPlot.md)
 * [RulePlot of WolframModel](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
 * Utility Functions
-  * [GraphDimension](Documentation/SymbolsAndFunctions/UtilityFunctions/GraphDimension.md)
+  * [CausalDensityDimension](Documentation/SymbolsAndFunctions/UtilityFunctions/CausalDensityDimension.md)
   * [AcyclicGraphTake](Documentation/SymbolsAndFunctions/UtilityFunctions/AcyclicGraphTake.md)
   * [IndexHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/IndexHypergraph.md)
   * [IsomorphicHypergraphQ](Documentation/SymbolsAndFunctions/UtilityFunctions/IsomorphicHypergraphQ.md)
