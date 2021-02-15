@@ -5,7 +5,7 @@
 **`CausalDensityDimension`** estimates the dimension of a subregion of a given graph, using the Myrheim-Meyer
 dimension estimation algorithm.
 
-### Myrheim Meyer Dimension Estimation
+## Myrheim Meyer Dimension Estimation
 
 This method is based on [Causal Set Theory](https://en.wikipedia.org/wiki/Causal_sets), an approach to quantum gravity
 which, much like the Wolfram Model, describes spacetime not as a continuum but as a large collection of discrete points
