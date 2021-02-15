@@ -30,8 +30,8 @@
             ],
 
             VerificationTest[
-              CausalDensityDimension[IndexGraph[Graph[Join["i" -> # & /@ Range[1000], # -> "o" & /@ Range[1000]]]], {1, 1002}],
-              Replace[d, FindRoot[
+              CausalDensityDimension[IndexGraph[Graph[Join["i" -> # & /@ Range[1000], # -> "o" & /@ Range[1000]]]],
+                {1, 1002}], Replace[d, FindRoot[
                   (Gamma[d + 1] * Gamma[d / 2]) / (4 Gamma[3 d / 2]) == (2 * (1002 - 2) + 1)/(1002^2), {d, 1, 10}]],
               SameTest -> Equal
             ]
