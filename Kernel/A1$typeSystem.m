@@ -42,11 +42,11 @@ declareTypeTranslation[function_, fromType_, toType_] :=
 (* This function is called after all declarations to combine translations to a Graph to allow multi-step conversions. *)
 
 initializeTypeSystemTranslations[] := (
-  $typesGraph = Graph[DirectedEdge @@@ Rest /@ $translations];
-  $translationFunctions = Association[Thread[EdgeList[$typesGraph] -> (First /@ $translations)]];
+  $typeGraph = Graph[DirectedEdge @@@ Rest /@ $translations];
+  $translationFunctions = Association[Thread[EdgeList[$typeGraph] -> (First /@ $translations)]];
 
   (* Find all strings used in the type names even on deeper levels (e.g., {"HypergraphSubstitutionSystem", 3}). *)
-  With[{typeStrings = Cases[VertexList[$typesGraph], _String, All]},
+  With[{typeStrings = Cases[VertexList[$typeGraph], _String, All]},
     If[Length[typeStrings] > 0, FE`Evaluate[FEPrivate`AddSpecialArgCompletion["TypeConvert" -> {typeStrings}]]];
   ];
 );
@@ -72,8 +72,8 @@ declareMessage[General::noConversionPath, "Cannot convert an object from `from` 
 
 typeConvert[toType_][object_] := ModuleScope[
   fromType = objectType[object];
-  If[!VertexQ[$typesGraph, type[#]], throw[Failure["unconvertibleType", <|"type" -> #|>]]] & /@ {fromType, toType};
-  path = FindShortestPath[$typesGraph, type[fromType], type[toType]];
+  If[!VertexQ[$typeGraph, type[#]], throw[Failure["unconvertibleType", <|"type" -> #|>]]] & /@ {fromType, toType};
+  path = FindShortestPath[$typeGraph, type[fromType], type[toType]];
   If[path === {} && toType =!= fromType,
     throw[Failure["noConversionPath", <|"from" -> fromType, "to" -> toType|>]];
   ];
@@ -99,10 +99,10 @@ declareRawProperty[implementationFunction_, fromType_, toProperty_Symbol] :=
 
 initializeRawProperties[] := Module[{newEdges},
   newEdges = DirectedEdge @@@ Rest /@ $rawProperties;
-  $typesGraph = EdgeAdd[$typesGraph, newEdges];
+  $typeGraph = EdgeAdd[$typeGraph, newEdges];
   $propertyEvaluationFunctions = Association[Thread[newEdges -> (First /@ $rawProperties)]];
 
-  defineDownValuesForProperty /@ Cases[VertexList[$typesGraph], property[name_] :> name, {1}];
+  defineDownValuesForProperty /@ Cases[VertexList[$typeGraph], property[name_] :> name, {1}];
 ];
 
 (* declareCompositeProperty declares an implementation for a property that takes other properties as arguments. The
@@ -187,8 +187,8 @@ defineDownValuesForProperty[publicProperty_] := (
 
   propertyImplementation[publicProperty][args___][object_] := ModuleScope[
     fromType = objectType[object];
-    If[!VertexQ[$typesGraph, type[fromType]], throw[Failure["unknownType", <|"type" -> fromType|>]]];
-    path = FindShortestPath[$typesGraph, type[fromType], property[publicProperty]];
+    If[!VertexQ[$typeGraph, type[fromType]], throw[Failure["unknownType", <|"type" -> fromType|>]]];
+    path = FindShortestPath[$typeGraph, type[fromType], property[publicProperty]];
     If[path === {},
       throw[Failure["noPropertyPath", <|"type" -> fromType, "property" -> publicProperty|>]];
     ];
