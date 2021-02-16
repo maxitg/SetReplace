@@ -47,7 +47,7 @@ initializeTypeSystemTranslations[] := (
 
   (* Find all strings used in the type names even on deeper levels (e.g., {"HypergraphSubstitutionSystem", 3}). *)
   With[{typeStrings = Cases[VertexList[$typesGraph], _String, All]},
-    FE`Evaluate[FEPrivate`AddSpecialArgCompletion["TypeConvert" -> {typeStrings}]];
+    If[Length[typeStrings] > 0, FE`Evaluate[FEPrivate`AddSpecialArgCompletion["TypeConvert" -> {typeStrings}]]];
   ];
 );
 
