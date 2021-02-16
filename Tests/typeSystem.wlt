@@ -95,7 +95,7 @@
       testUnevaluated[multipliedHalf[halfInteger[3], 4, 5], multipliedHalf::invalidPropertyArgumentCount],
       testUnevaluated[description[1] @ halfInteger[4], description::invalidPropertyArgumentCount],
       testUnevaluated[description[halfInteger[3], 3], description::invalidPropertyArgumentCount],
-      
+
       testUnevaluated[multipliedHalf[4, 4, 5][], multipliedHalf::invalidPropertyOperatorArgument],
       testUnevaluated[multipliedHalf[4, 4, 5][halfInteger[4], 2, 3], multipliedHalf::invalidPropertyOperatorArgument],
       testUnevaluated[description[][], description::invalidPropertyOperatorArgument],
