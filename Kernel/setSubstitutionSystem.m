@@ -328,7 +328,7 @@ setSubstitutionSystem[
   If[MatchQ[method, Automatic | $cppMethod]
       && MatchQ[set, {{___}...}]
       && MatchQ[canonicalRules, {___ ? simpleRuleQ}],
-    If[$cppSetReplaceAvailable,
+    If[$libSetReplaceAvailable,
       Return[
         setSubstitutionSystem$cpp[
           rules, set, stepSpec, returnOnAbortQ, timeConstraint, eventOrderingFunction, eventSelectionFunction,
@@ -337,7 +337,7 @@ setSubstitutionSystem[
   ];
   If[MatchQ[method, $cppMethod],
     failedQ = True;
-    If[!$cppSetReplaceAvailable,
+    If[!$libSetReplaceAvailable,
       Message[caller::noLowLevel]
     ,
       Message[caller::lowLevelNotImplemented]
