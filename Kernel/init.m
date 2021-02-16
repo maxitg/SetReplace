@@ -31,7 +31,7 @@ Block[
   Get[First[FileNames["*", FileNameJoin[{$SetReplaceRootDirectory, "Kernel"}]]]];
 
   (* Multihistory should be initialized after all Kernel files are loaded. *)
-  SetReplace`PackageScope`initializeMultihistory[];
+  SetReplace`PackageScope`initializeTypeSystem[];
 ];
 
 End[];
