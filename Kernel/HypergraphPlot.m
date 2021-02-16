@@ -7,12 +7,14 @@ PackageExport["WolframModelPlot"]
 
 PackageScope["correctHypergraphPlotOptionsQ"]
 PackageScope["$edgeTypes"]
+PackageScope["$hyperedgeRenderings"]
 PackageScope["hypergraphEmbedding"]
 
 (* Documentation *)
 
 SetUsage @ "
-HypergraphPlot[s$, opts$] plots a list of vertex lists s$ as a hypergraph.
+HypergraphPlot[hypergraph$, opts$] plots an ordered hypergraph$ represented as a list of vertex lists.
+HypergraphPlot[hypergraph$, 'Cyclic', opts$] plots a 'Cyclic' hypergraph$ instead.
 ";
 
 $plotStyleAutomatic = <|
@@ -43,7 +45,7 @@ $defaultGraphicsOptions = FilterRules[Options[Graphics], Except[$newOptions]];
 Options[HypergraphPlot] = Join[$newOptions, $defaultGraphicsOptions];
 
 SyntaxInformation[HypergraphPlot] = {
-  "ArgumentsPattern" -> {_, _., OptionsPattern[]},
+  "ArgumentsPattern" -> {hypergraph_, edgeType_., OptionsPattern[]},
   "OptionNames" -> Options[HypergraphPlot][[All, 1]]};
 
 $edgeTypes = {"Ordered", "Cyclic"};
@@ -51,10 +53,16 @@ $defaultEdgeType = "Ordered";
 $graphLayout = "SpringElectricalEmbedding";
 $hyperedgeRenderings = {"Subgraphs", "Polygons"};
 
+With[{edgeTypes = $edgeTypes},
+  FE`Evaluate[FEPrivate`AddSpecialArgCompletion["HypergraphPlot" -> {0, edgeTypes}]]
+];
+
 (* for compatibility reasons, we don't care for messages and unevaluated code to preserve WolframModelPlot *)
-SetUsage[WolframModelPlot, "WolframModelPlot is deprecated. Use HypergraphPlot."];
-SyntaxInformation[WolframModelPlot] = SyntaxInformation[HypergraphPlot];
+SetUsage[WolframModelPlot,
+         "WolframModelPlot is deprecated. Use HypergraphPlot which takes the same arguments.\n" <>
+           StringReplace[HypergraphPlot::usage, "HypergraphPlot" -> "WolframModelPlot"]];
 Options[WolframModelPlot] = Options[HypergraphPlot];
+SyntaxInformation[WolframModelPlot] = SyntaxInformation[HypergraphPlot];
 WolframModelPlot = HypergraphPlot;
 
 (* Messages *)

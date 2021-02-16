@@ -2,6 +2,10 @@ Package["SetReplaceDevUtils`"]
 
 PackageImport["GeneralUtilities`"]
 
+PackageExport["RasterizeExpressionAndExportToMarkdown"]
+PackageExport["RasterizeCellsAndExportToMarkdown"]
+PackageExport["RasterizePreviousInputOutputAndExportToMarkdown"]
+
 SetRelatedSymbolGroup[
   RasterizeExpressionAndExportToMarkdown,
   RasterizeCellsAndExportToMarkdown,
@@ -9,8 +13,8 @@ SetRelatedSymbolGroup[
 ];
 
 $usageSuffix = "
-* 'path$' should be a path, relative to the repository root, with a CamelCased filename ending in '.png'.
-* If 'path$' consists of only a file name, the subdirectory 'Documentation/Images' will be used.
+* 'relativePath$' should be a path, relative to the repository root, with a CamelCased filename ending in '.png'.
+* If 'relativePath$' consists of only a file name, the subdirectory 'Documentation/Images' will be used.
 * The resulting markdown will contain an absolute path relative to the root of the repository. It will \
 correctly render on e.g. GitHub but may not render in e.g. VSCode.
 * The option 'MaxWidth' controls the desired maximum width of the resulting raster. If possible, the expression \
@@ -26,16 +30,16 @@ $exportOptions = {
   "DryRun" -> False
 };
 
-PackageExport["RasterizeExpressionAndExportToMarkdown"]
-
 SetUsage @ Evaluate["
-RasterizeExpressionAndExportToMarkdown['path$', expr$] will rasterize expr$, write the result to 'path$', and
-return an HTML <img> tag that can be pasted directly into a markdown file.
+RasterizeExpressionAndExportToMarkdown['relativePath$', expr$] will rasterize expr$, write the result to \
+'relativePath$', and return an HTML <img> tag that can be pasted directly into a markdown file.
 * The resulting image WILL NOT have an attached Out[]= label." <> $usageSuffix];
 
-SyntaxInformation[RasterizeExpressionAndExportToMarkdown] = {"ArgumentsPattern" -> {_, _, OptionsPattern[]}};
-
 Options[RasterizeExpressionAndExportToMarkdown] = $exportOptions;
+
+SyntaxInformation[RasterizeExpressionAndExportToMarkdown] = {
+  "ArgumentsPattern" -> {relativePath_, expr_, OptionsPattern[]},
+  "OptionNames" -> Options[RasterizeExpressionAndExportToMarkdown][[All, 1]]};
 
 RasterizeExpressionAndExportToMarkdown[relativePath_, expr_, opts:OptionsPattern[]] := CatchFailureAsMessage @ Scope[
   UnpackOptions[maxWidth];
@@ -43,18 +47,18 @@ RasterizeExpressionAndExportToMarkdown[relativePath_, expr_, opts:OptionsPattern
   exportImageToMarkdown[relativePath, image, FilterOptions @ opts]
 ];
 
-PackageExport["RasterizeCellsAndExportToMarkdown"]
-
 SetUsage @ Evaluate["
-RasterizeCellsAndExportToMarkdown['path$', cells$] will rasterize a cell or set of cells, write the result to 'path$', \
-and return an HTML <img> tag that can be pasted directly into a markdown file.
+RasterizeCellsAndExportToMarkdown['relativePath$', cells$] will rasterize a cell or set of cells, write the result to \
+'relativePath$', and return an HTML <img> tag that can be pasted directly into a markdown file.
 * Cells can be Cell[$$] expressions or CellObject[$$] expressions (which will be read with NotebookRead).
 * The resulting image WILL include cell labels (In[]:=, Out[]=, etc)." <> $usageSuffix
 ];
 
-SyntaxInformation[RasterizeCellsAndExportToMarkdown] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
-
 Options[RasterizeCellsAndExportToMarkdown] = $exportOptions;
+
+SyntaxInformation[RasterizeCellsAndExportToMarkdown] = {
+  "ArgumentsPattern" -> {relativePath_, cells_, OptionsPattern[]},
+  "OptionNames" -> Options[RasterizeCellsAndExportToMarkdown][[All, 1]]};
 
 $cellP = HoldPattern[Cell[_, __]] | HoldPattern[CellObject[_]];
 
@@ -67,12 +71,11 @@ RasterizeCellsAndExportToMarkdown[relativePath_, cells_, opts:OptionsPattern[]] 
   exportImageToMarkdown[relativePath, image, FilterOptions @ opts]
 ];
 
-PackageExport["RasterizePreviousInputOutputAndExportToMarkdown"]
-
 SetUsage @ Evaluate["
-RasterizePreviousInputOutputAndExportToMarkdown['path$'] will read the previous input and output cell from the \
-current notebook, rasterize the output, write the result to 'path$', and return a markdown code block containing \
-the input and an HTML <img> tag containing the rasterized output, that can be pasted directly into a markdown file.
+RasterizePreviousInputOutputAndExportToMarkdown['relativePath$'] will read the previous input and output cell from the \
+current notebook, rasterize the output, write the result to 'relativePath$', and return a markdown code block \
+containing the input and an HTML <img> tag containing the rasterized output, that can be pasted directly into a \
+markdown file.
 * If the input cell does not contain purely textual boxes, it cannot be faithfully represented as text, and so \
 it will be included in the rasterized image instead.
 * The option 'RasterizeInput' -> True will force the input to be rasterized, and will not create a markdown \
@@ -81,7 +84,9 @@ code block.
 
 Options[RasterizePreviousInputOutputAndExportToMarkdown] = Append[$exportOptions, "RasterizeInput" -> False];
 
-SyntaxInformation[RasterizePreviousInputOutputAndExportToMarkdown] = {"ArgumentsPattern" -> {_, OptionsPattern[]}};
+SyntaxInformation[RasterizePreviousInputOutputAndExportToMarkdown] = {
+  "ArgumentsPattern" -> {relativePath_, OptionsPattern[]},
+  "OptionNames" -> Options[RasterizePreviousInputOutputAndExportToMarkdown][[All, 1]]};
 
 (* this detects whether formatting boxes have been embedded into the input string via so-called
 "Linear Syntax" (which is an insane thing that shouldn't exist) *)

@@ -8,10 +8,12 @@ PackageExport["SetReplace"]
    general function. *)
 
 SetUsage @ "
-SetReplace[s$, {i$1 -> o$1, i$2 -> o$2, $$}] attempts to replace a subset i$1 of list s$ with o$1. \
-If not found, replaces i$1 with o$2, etc. Elements of i$k can appear in s$ in any order, however the elements \
-closest to the beginning of s$ will be replaced, and the elements of o$k will be put at the end.
-SetReplace[s$, {i$1 -> o$1, i$2 -> o$2, $$}, n$] performs replacement n$ times and returns the result.
+SetReplace[set$, {input$1 -> output$1, input$2 -> output$2, $$}] attempts to replace a subset input$1 of set$ with \
+output$1. If not found, replaces input$2 with output$2, etc. Elements of input$k can appear in set$ in any order, \
+however the elements closest to the beginning of set$ will be replaced, and the elements of output$k will be put at \
+the end.
+SetReplace[set$, {input$1 -> output$1, input$2 -> output$2, $$}, eventCount$] performs replacement eventCount$ times \
+and returns the result.
 ";
 
 Options[SetReplace] = {
@@ -20,17 +22,17 @@ Options[SetReplace] = {
   "EventOrderingFunction" -> Automatic};
 
 SyntaxInformation[SetReplace] = {
-  "ArgumentsPattern" -> {_, _, _., OptionsPattern[]},
+  "ArgumentsPattern" -> {set_, rules_, eventCount_., OptionsPattern[]},
   "OptionNames" -> Options[SetReplace][[All, 1]]};
 
 SetReplace[args___] := 0 /;
   !Developer`CheckArgumentCount[SetReplace[args], 2, 3] && False;
 
-expr : SetReplace[set_, rules_, events : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
+expr : SetReplace[set_, rules_, eventCount : Except[_ ? OptionQ] : 1, o : OptionsPattern[]] /;
     recognizedOptionsQ[expr, SetReplace, {o}] :=
   ModuleScope[
     result = Check[
-      setSubstitutionSystem[rules, set, <|$maxEvents -> events|>, SetReplace, False, o]
+      setSubstitutionSystem[rules, set, <|$maxEvents -> eventCount|>, SetReplace, False, o]
     ,
       $Failed
     ];

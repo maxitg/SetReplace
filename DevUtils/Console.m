@@ -3,6 +3,9 @@ Package["SetReplaceDevUtils`"]
 PackageImport["GeneralUtilities`"]
 
 PackageExport["ConsolePrintList"]
+PackageExport["ConsoleTryEnvironment"]
+
+SyntaxInformation[ConsolePrintList] = {"ArgumentsPattern" -> {list_}};
 
 SetUsage @ "
 ConsolePrintList[list$] will print a list of items in InputForm, one per line, with commas as appropriate.
@@ -15,7 +18,7 @@ ConsolePrintList[list_List] := (
   Print["}"];
 );
 
-PackageExport["ConsoleTryEnvironment"]
+SyntaxInformation[ConsoleTryEnvironment] = {"ArgumentsPattern" -> {var_, default_}};
 
 SetUsage @ "
 ConsoleTryEnvironment[var$, default$] will look up the value of the environment variable var$, but use \

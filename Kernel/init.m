@@ -26,7 +26,9 @@ Block[
     HoldPattern[ReturnFailed[msg_String, args___]] :> ReturnFailed[MessageName[$LHSHead, msg], args],
     HoldPattern[ReturnFailure[msg_String, args___]] :> ReturnFailure[MessageName[$LHSHead, msg], args]
   }},
-  Get[FileNameJoin[{$SetReplaceRootDirectory, "Kernel", "utilities.m"}]];
+  (* All files are loaded lexicographically starting with A0*. Note, "$" comes after "A" in Wolfram Language.
+     File names starting with digits are not allowed. "_" and "-" are not allowed. *)
+  Get[FileNameJoin[{$SetReplaceRootDirectory, "Kernel", "A0$messages.m"}]];
 ];
 
 End[];

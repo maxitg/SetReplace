@@ -11,13 +11,12 @@ dagQ[graph_] := AcyclicGraphQ[graph] && DirectedGraphQ[graph] && LoopFreeGraphQ[
 
 (* Documentation *)
 SetUsage @ "
-AcyclicGraphTake[gr$, vrts$] gives the intersection in graph gr$ of the in-component of the first vertex in vrts$ \
-with the out-component of the second vertex in vrts$.
+AcyclicGraphTake[graph$, vertexList$] gives the intersection in graph$ of the in-component of the first vertex in \
+vertexList$ with the out-component of the second vertex in vertexList$.
 ";
 
 (* SyntaxInformation *)
-SyntaxInformation[AcyclicGraphTake] =
-  {"ArgumentsPattern" -> {_, _}};
+SyntaxInformation[AcyclicGraphTake] = {"ArgumentsPattern" -> {graph_, vertexList_}};
 
 (* Argument count *)
 AcyclicGraphTake[args___] := 0 /;
