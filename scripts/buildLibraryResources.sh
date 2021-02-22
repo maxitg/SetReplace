@@ -39,7 +39,10 @@ echo "libSetReplace sources hash: $shortSHA"
 
 mkdir -p build
 cd build
-cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
+cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON \
+  -DBUILD_SHARED_LIBS=ON \
+  -DCMAKE_PREFIX_PATH="$(julia -e "using CxxWrap; println(CxxWrap.prefix_path())")" \
+  -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release # Needed for multi-config generators
 cd ..
 

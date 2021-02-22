@@ -63,6 +63,7 @@ set(libSetReplace_headers
     Set.hpp
     Parallelism.hpp
     SetReplace.hpp
+    Julia.hpp
     )
 set(libSetReplace_sources
     Event.cpp
@@ -71,6 +72,7 @@ set(libSetReplace_sources
     Set.cpp
     Parallelism.cpp
     SetReplace.cpp
+    Julia.cpp
     )
 list(TRANSFORM libSetReplace_headers PREPEND "libSetReplace/")
 list(TRANSFORM libSetReplace_sources PREPEND "libSetReplace/")
@@ -81,6 +83,15 @@ target_include_directories(SetReplace PUBLIC
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
 target_compile_options(SetReplace PRIVATE ${SET_REPLACE_COMPILE_OPTIONS})
+
+find_package(JlCxx)
+get_target_property(JlCxx_location JlCxx::cxxwrap_julia LOCATION)
+get_filename_component(JlCxx_location ${JlCxx_location} DIRECTORY)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_location}")
+
+message(STATUS "Found JlCxx at ${JlCxx_location}")
+
+target_link_libraries(SetReplace JlCxx::cxxwrap_julia JlCxx::cxxwrap_julia_stl)
 
 set(SET_REPLACE_LIBRARIES SetReplace)
 

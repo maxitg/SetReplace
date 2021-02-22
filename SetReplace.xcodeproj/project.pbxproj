@@ -29,6 +29,8 @@
 		69CAF8712257B1D0006F9C60 /* Rule.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 69B2D41422244D1F008778A3 /* Rule.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
 		69CAF8722257B1D2006F9C60 /* Set.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 695F486F222443F20058E057 /* Set.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
 		69CAF8762257B23B006F9C60 /* SetReplace.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 69CAF8742257B23B006F9C60 /* SetReplace.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		69E29A9125E3207B002F7430 /* Julia.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 69E29A9025E3207B002F7430 /* Julia.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		69E29A9725E32123002F7430 /* Julia.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 69E29A9625E32123002F7430 /* Julia.cpp */; };
 		69ED0F4123170D5D0014A48E /* IDTypes.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 69ED0F4023170D5D0014A48E /* IDTypes.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
 /* End PBXBuildFile section */
 
@@ -64,6 +66,8 @@
 		69CAF8682257B062006F9C60 /* libSetReplace.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libSetReplace.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		69CAF8732257B23B006F9C60 /* SetReplace.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SetReplace.cpp; sourceTree = "<group>"; };
 		69CAF8742257B23B006F9C60 /* SetReplace.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SetReplace.hpp; sourceTree = "<group>"; };
+		69E29A9025E3207B002F7430 /* Julia.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Julia.hpp; sourceTree = "<group>"; };
+		69E29A9625E32123002F7430 /* Julia.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Julia.cpp; sourceTree = "<group>"; };
 		69ED0F4023170D5D0014A48E /* IDTypes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = IDTypes.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -117,6 +121,8 @@
 			isa = PBXGroup;
 			children = (
 				691C67D32486A44100BC0D82 /* Event.hpp */,
+				69E29A9025E3207B002F7430 /* Julia.hpp */,
+				69E29A9625E32123002F7430 /* Julia.cpp */,
 				691C67D22486A44100BC0D82 /* Event.cpp */,
 				69B2D41122244AFC008778A3 /* Expression.hpp */,
 				6961A1D523184ABC009461C8 /* Expression.cpp */,
@@ -143,6 +149,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				69CAF8762257B23B006F9C60 /* SetReplace.hpp in Headers */,
+				69E29A9125E3207B002F7430 /* Julia.hpp in Headers */,
 				69CAF86F2257B1CB006F9C60 /* Expression.hpp in Headers */,
 				69CAF8702257B1CE006F9C60 /* Match.hpp in Headers */,
 				6919656F253789DE00D35495 /* Parallelism.hpp in Headers */,
@@ -251,6 +258,7 @@
 				69CAF86D2257B162006F9C60 /* Match.cpp in Sources */,
 				69CAF86E2257B162006F9C60 /* Set.cpp in Sources */,
 				691C67D42486A44100BC0D82 /* Event.cpp in Sources */,
+				69E29A9725E32123002F7430 /* Julia.cpp in Sources */,
 				6919656D253789DE00D35495 /* Parallelism.cpp in Sources */,
 				6914D3D42532B1B600B2B197 /* SetReplace.cpp in Sources */,
 			);
@@ -422,8 +430,13 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
-				LIBRARY_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = (
+					/Users/maxitg/.julia/artifacts/0eb6ffcbe0cde10007a2678013611da80643b728/include,
+					"/Applications/Julia-1.5.app/Contents/Resources/julia/include/julia",
+				);
+				LIBRARY_SEARCH_PATHS = "/Applications/Julia-1.5.app/Contents/Resources/julia/lib";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_LDFLAGS = "-Ijulia";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -438,8 +451,13 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
-				LIBRARY_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = (
+					/Users/maxitg/.julia/artifacts/0eb6ffcbe0cde10007a2678013611da80643b728/include,
+					"/Applications/Julia-1.5.app/Contents/Resources/julia/include/julia",
+				);
+				LIBRARY_SEARCH_PATHS = "/Applications/Julia-1.5.app/Contents/Resources/julia/lib";
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				OTHER_LDFLAGS = "-Ijulia";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
