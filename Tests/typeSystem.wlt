@@ -69,16 +69,17 @@
     ),
     "tests" -> {
       (* Translations *)
-      VerificationTest[TypeConvert["Expression"] @ TypeConvert["String"] @ expression[4], expression[4]],
-      VerificationTest[TypeConvert["HalfInteger"] @ evenInteger[4], halfInteger[2]],
-      VerificationTest[TypeConvert["HalfInteger"] @ halfInteger[3], halfInteger[3]],
-      VerificationTest[TypeConvert["EvenInteger"] @ halfInteger[3], evenInteger[6]],
+      VerificationTest[
+        SetReplaceTypeConvert["Expression"] @ SetReplaceTypeConvert["String"] @ expression[4], expression[4]],
+      VerificationTest[SetReplaceTypeConvert["HalfInteger"] @ evenInteger[4], halfInteger[2]],
+      VerificationTest[SetReplaceTypeConvert["HalfInteger"] @ halfInteger[3], halfInteger[3]],
+      VerificationTest[SetReplaceTypeConvert["EvenInteger"] @ halfInteger[3], evenInteger[6]],
 
-      testUnevaluated[TypeConvert["Expression"] @ unknownObject[5], TypeConvert::unconvertibleType],
-      testUnevaluated[TypeConvert["Unknown"] @ expression[4], TypeConvert::unconvertibleType],
-      testUnevaluated[TypeConvert["Expression"] @ halfInteger[3], TypeConvert::noConversionPath],
-      testUnevaluated[TypeConvert["HalfInteger"] @ evenInteger[3], TypeConvert::notEven],
-      testUnevaluated[TypeConvert["EvenInteger"] @ halfInteger[a], TypeConvert::notAnInteger],
+      testUnevaluated[SetReplaceTypeConvert["Expression"] @ unknownObject[5], SetReplaceTypeConvert::unconvertibleType],
+      testUnevaluated[SetReplaceTypeConvert["Unknown"] @ expression[4], SetReplaceTypeConvert::unconvertibleType],
+      testUnevaluated[SetReplaceTypeConvert["Expression"] @ halfInteger[3], SetReplaceTypeConvert::noConversionPath],
+      testUnevaluated[SetReplaceTypeConvert["HalfInteger"] @ evenInteger[3], SetReplaceTypeConvert::notEven],
+      testUnevaluated[SetReplaceTypeConvert["EvenInteger"] @ halfInteger[a], SetReplaceTypeConvert::notAnInteger],
 
       (* Raw Properties *)
       VerificationTest[multipliedHalf[5] @ halfInteger[3], 15],

@@ -2,7 +2,7 @@ Package["SetReplace`"]
 
 PackageImport["GeneralUtilities`"]
 
-PackageExport["TypeConvert"]
+PackageExport["SetReplaceTypeConvert"]
 
 PackageScope["declareTypeTranslation"]
 PackageScope["declareRawProperty"]
@@ -47,22 +47,25 @@ initializeTypeSystemTranslations[] := (
 
   (* Find all strings used in the type names even on deeper levels (e.g., {"HypergraphSubstitutionSystem", 3}). *)
   With[{typeStrings = Cases[VertexList[$typeGraph], _String, All]},
-    If[Length[typeStrings] > 0, FE`Evaluate[FEPrivate`AddSpecialArgCompletion["TypeConvert" -> {typeStrings}]]];
+    If[Length[typeStrings] > 0,
+      FE`Evaluate[FEPrivate`AddSpecialArgCompletion["SetReplaceTypeConvert" -> {typeStrings}]]
+    ];
   ];
 );
 
-(* TypeConvert is a public plumbing function that allows one to convert objects from one type to another for
+(* SetReplaceTypeConvert is a public plumbing function that allows one to convert objects from one type to another for
    optimization or persistence. *)
 
 SetUsage @ "
-TypeConvert[type$][object$] converts an object$ to the requested type$.
+SetReplaceTypeConvert[type$][object$] converts an object$ to the requested type$.
 ";
 
-SyntaxInformation[TypeConvert] = {"ArgumentsPattern" -> {type_}};
+SyntaxInformation[SetReplaceTypeConvert] = {"ArgumentsPattern" -> {type_}};
 
-expr : TypeConvert[args1___][args2___] := ModuleScope[
-  result = Catch[
-    typeConvert[args1][args2], _ ? FailureQ, message[TypeConvert, #, <|"expr" -> HoldForm[expr]|>] &];
+expr : SetReplaceTypeConvert[args1___][args2___] := ModuleScope[
+  result = Catch[setReplaceTypeConvert[args1][args2],
+                 _ ? FailureQ,
+                 message[SetReplaceTypeConvert, #, <|"expr" -> HoldForm[expr]|>] &];
   result /; !FailureQ[result]
 ];
 
@@ -70,7 +73,7 @@ declareMessage[General::unconvertibleType, "The type `type` in `expr` can not be
 
 declareMessage[General::noConversionPath, "Cannot convert an object from `from` to `to` in `expr`."];
 
-typeConvert[toType_][object_] := ModuleScope[
+setReplaceTypeConvert[toType_][object_] := ModuleScope[
   fromType = objectType[object];
   If[!VertexQ[$typeGraph, type[#]], throw[Failure["unconvertibleType", <|"type" -> #|>]]] & /@ {fromType, toType};
   path = FindShortestPath[$typeGraph, type[fromType], type[toType]];
@@ -192,7 +195,7 @@ defineDownValuesForProperty[publicProperty_] := (
     If[path === {},
       throw[Failure["noPropertyPath", <|"type" -> fromType, "property" -> publicProperty|>]];
     ];
-    expectedTypeObject = typeConvert[path[[-2, 1]]][object];
+    expectedTypeObject = setReplaceTypeConvert[path[[-2, 1]]][object];
     propertyFunction = $propertyEvaluationFunctions[DirectedEdge[path[[-2]], path[[-1]]]];
     propertyFunction[args][expectedTypeObject]
   ];
