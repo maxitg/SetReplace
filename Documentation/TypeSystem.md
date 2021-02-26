@@ -15,8 +15,8 @@ can transparently convert objects to the type required to evaluate them.
 
 Most of the time, it is sufficient to rely on these automatic conversions, however, sometimes it might be useful to
 convert an object to a different type manually for persistence or optimization, in which case one can use the
-**`TypeConvert`** function:
+**`SetReplaceTypeConvert`** function:
 
 ```wl
-TypeConvert[newType][object]
+SetReplaceTypeConvert[newType][object]
 ```
