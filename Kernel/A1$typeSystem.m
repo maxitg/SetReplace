@@ -105,7 +105,7 @@ initializeRawProperties[] := Module[{newEdges},
   $typeGraph = EdgeAdd[$typeGraph, newEdges];
   $propertyEvaluationFunctions = Association[Thread[newEdges -> (First /@ $rawProperties)]];
 
-  defineDownValuesForProperty /@ Cases[VertexList[$typeGraph], property[name_] :> name, {1}];
+  defineDownValuesForProperty /@ First /@ VertexList[$typeGraph, _property];
 ];
 
 (* declareCompositeProperty declares an implementation for a property that takes other properties as arguments. The
