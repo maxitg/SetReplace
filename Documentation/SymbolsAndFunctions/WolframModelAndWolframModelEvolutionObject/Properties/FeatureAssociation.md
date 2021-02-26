@@ -2,16 +2,19 @@
 
 # Feature Association
 
-**`"FeatureAssociation"`** computes some features of the [`WolframModel`](/Documentation/SymbolsAndFunctions/
-WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) evolution and returns an
-[`Association`](https://reference.wolfram.com/language/ref/Association.html) whose keys describe each feature computed.
+**`"FeatureAssociation"`** computes some features of
+the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
+evolution and returns
+an [`Association`](https://reference.wolfram.com/language/ref/Association.html) whose keys describe each feature
+computed.
 For now, it computes properties associated with these feature groups:
 
 - [`"CausalGraph"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
 - `"StructurePreservingFinalStateGraph"`: The [`Graph`](https://reference.wolfram.com/language/ref/Graph.html)
-version of the [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/
-Properties/States.md) as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/
-HypergraphToGraph.md) using the `"StructurePreserving"` transformation
+version of
+the [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md)
+as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md) using the
+`"StructurePreserving"` transformation
 
 ```wl
 In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 5]["FeatureAssociation"]
@@ -47,12 +50,13 @@ In[] := BlockRandom[
 
 <img src="/Documentation/Images/FeatureAssociationFeatureSpacePlot.png" width="684.6">
 
-For [Multiway Systems](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/
-MultiwayQ.md) it only computes features associated with the [causal graph](/Documentation/SymbolsAndFunctions/
-WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md), returning
-`Missing["NotExistent", {"MultiwaySystem", "FinalState"}]` for features related to
-`"StructurePreservingFinalStateGraph"`, as there is no [`"FinalState"`](/Documentation/SymbolsAndFunctions/
-WolframModelAndWolframModelEvolutionObject/Properties/States.md) in a Multiway System:
+For [Multiway Systems](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md)
+it only computes features associated with
+the [causal graph](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md),
+returning `Missing["NotExistent", {"MultiwaySystem", "FinalState"}]` for features related to
+`"StructurePreservingFinalStateGraph"`, as there is
+no [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md)
+in a Multiway System:
 
 ```wl
 In[] := WolframModel[
