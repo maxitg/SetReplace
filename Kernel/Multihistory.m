@@ -10,11 +10,10 @@ Multihistory[$$] is an object containing evaluation of a possibly non-determinis
 
 SyntaxInformation[Multihistory] = {"ArgumentsPattern" -> {type_, internalData_}};
 
-(* Multihistory can contain an evaluation of any system, such as set/hypergraph substitution, string substitution, etc.
-   Internally, it has a type specifying what kind of system it is as the first argument, and any data as the second.
-   Generators can create multihistories of any type of their choosing. Properties can take any type as an input.
-   This file contains functions that automate conversion between types.
-   Note that specific types should never appear in this file, as Multihistory infrastructure is not type specific. *)
+(* Multihistory can contain an evaluation of any substitution system, such as multiset, hypergraph, string, etc.
+   Internally, it has a type specifying what kind of system it is as the first argument (including the version), and any
+   data as the second.
+   Note that specific types should never appear in this file, as Multihistory implementation is not type specific. *)
 
 objectType[Multihistory[type_, _]] := type;
 
