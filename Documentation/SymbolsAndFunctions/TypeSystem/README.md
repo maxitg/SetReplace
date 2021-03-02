@@ -8,8 +8,11 @@ various computational systems.
 We have just started working on this new system as part of *SetReplace 0.4 Yellowstone*, and no specific types have been
 implemented yet.
 
-In the future, we will have multiple functions that generate these objects, such as `HypergraphSubstitutionSystem`,
-`MultisetSubstitutionSystem` and `StringSubstitutionSystem`.
+In the future, we will have multiple functions that generate these objects, such as `GenerateMultihistory`,
+`GenerateAllHistories` and `GenerateSingleHistory`.
+
+They will be able to take various computational systems as an argument, such as `MultisetSubstitutionSystem`,
+`HypergraphSubstitutionSystem` and `StringSubstitutionSystem`.
 
 We will also have properties implemented for some of these objects, e.g., `TokenEvenGraph`. These properties
 can transparently convert objects to the type required to evaluate them.
