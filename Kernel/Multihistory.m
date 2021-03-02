@@ -30,7 +30,7 @@ Multihistory /: MakeBoxes[object_Multihistory, format_] := ModuleScope[
               GraphLayout -> "LayeredDigraphEmbedding",
               VertexStyle -> {1 -> SetReplaceStyleData["ExpressionsEventsGraph", "ExpressionVertexStyle"],
                               SetReplaceStyleData["ExpressionsEventsGraph", "EventVertexStyle"]},
-              EdgeStyle -> SetReplaceStyleData["ExpressionsEventsGraph", "EdgeStyle"],
+              EdgeStyle -> Directive[SetReplaceStyleData["ExpressionsEventsGraph", "EdgeStyle"], Arrowheads[0]],
               VertexCoordinates ->
                 {{0, 1}, {0, 0}, {0, -1} . RotationMatrix[Pi / 4], {0, -1} . RotationMatrix[-Pi / 4]},
               VertexSize -> 0.5,
