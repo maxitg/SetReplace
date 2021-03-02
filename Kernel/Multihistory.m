@@ -21,7 +21,7 @@ objectType[Multihistory[type_, _]] := type;
 (* This is temporary and will need to be updated to use a composite property to automatically extract data from a
    Multihistory. Using a composite property will also allow objects to implement custom boxes for themselves. *)
 
-Multihistory /: MakeBoxes[object_Multihistory, format_] := ModuleScope[
+Multihistory /: MakeBoxes[object : Multihistory[_, _], format_] := ModuleScope[
   type = objectType[object];
   BoxForm`ArrangeSummaryBox[
     Multihistory,
@@ -42,4 +42,14 @@ Multihistory /: MakeBoxes[object_Multihistory, format_] := ModuleScope[
     format,
     "Interpretable" -> Automatic
   ]
+];
+
+declareMessage[
+  Multihistory::invalid,
+  "Multihistory object `expr` is invalid. Use GenerateMultihistory, GenerateAllHistories or GenerateSingleHistory " <>
+  "to construct Multihistory objects."];
+
+expr : Multihistory[args___] /; Length[{args}] =!= 2 := ModuleScope[
+  message[Multihistory::invalid, <|"expr" -> HoldForm[expr]|>];
+  None /; False
 ];
