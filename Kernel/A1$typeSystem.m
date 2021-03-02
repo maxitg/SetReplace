@@ -70,7 +70,6 @@ declareTypeTranslation[function_, fromType_, toType_] :=
 
 initializeTypeSystemTranslations[] := (
   $typeGraph = Graph[DirectedEdge @@@ Rest /@ $translations];
-  $SetReplaceTypes = First /@ VertexList[$typeGraph];
   $translationFunctions = Association[Thread[EdgeList[$typeGraph] -> (First /@ $translations)]];
 
   (* Find all strings used in the type names even on deeper levels (e.g., {"HypergraphSubstitutionSystem", 3}). *)
@@ -137,8 +136,7 @@ initializeRawProperties[] := Module[{newEdges},
   $typeGraph = EdgeAdd[$typeGraph, newEdges];
   $propertyEvaluationFunctions = Association[Thread[newEdges -> (First /@ $rawProperties)]];
 
-  $SetReplaceProperties = First /@ VertexList[$typeGraph, _property];
-  defineDownValuesForProperty /@ $SetReplaceProperties;
+  defineDownValuesForProperty /@ First /@ VertexList[$typeGraph, _property];
 ];
 
 (* declareCompositeProperty declares an implementation for a property that takes other properties as arguments. The
@@ -164,10 +162,16 @@ initializeCompositeProperties[] := (
 
 (* This function is called in init.m after all other files are loaded. *)
 
+initializeConstants[] := (
+  $SetReplaceTypes = First /@ VertexList[$typeGraph, _type];
+  $SetReplaceProperties = First /@ VertexList[$typeGraph, _property];
+);
+
 initializeTypeSystem[] := (
   initializeTypeSystemTranslations[];
   initializeRawProperties[];
   initializeCompositeProperties[];
+  initializeConstants[];
 );
 
 (* defineDownValuesForProperty defines both the operator form and the normal form for a property symbol. The DownValues
