@@ -26,7 +26,7 @@ Multihistory /: MakeBoxes[object_Multihistory, format_] := ModuleScope[
   BoxForm`ArrangeSummaryBox[
     Multihistory,
     object,
-    GraphPlot[{0 -> 1, 1 -> 2, 1 -> 3},
+    GraphPlot[{DirectedEdge[0, 1], DirectedEdge[1, 2], DirectedEdge[1, 3]},
               GraphLayout -> "LayeredDigraphEmbedding",
               VertexStyle -> {1 -> SetReplaceStyleData["ExpressionsEventsGraph", "ExpressionVertexStyle"],
                               SetReplaceStyleData["ExpressionsEventsGraph", "EventVertexStyle"]},
