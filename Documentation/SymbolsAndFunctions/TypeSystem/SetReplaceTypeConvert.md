@@ -2,7 +2,7 @@
 
 # SetReplaceTypeConvert
 
-**`SetReplaceTypeConvert`** allows one to convert one type (of, e.g., `Multihistory`) into another:
+**`SetReplaceTypeConvert`** allows one to convert one type (of, e.g., [`Multihistory`](Multihistory.md)) into another:
 
 ```wl
 SetReplaceTypeConvert[newType][object]
