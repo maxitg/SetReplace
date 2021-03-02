@@ -162,10 +162,8 @@ initializeCompositeProperties[] := (
 
 (* This function is called in init.m after all other files are loaded. *)
 
-initializeConstants[] := (
-  $SetReplaceTypes = First /@ VertexList[$typeGraph, _type];
-  $SetReplaceProperties = First /@ VertexList[$typeGraph, _property];
-);
+initializeConstants[] :=
+  {$SetReplaceTypes, $SetReplaceProperties}  = Sort[First /@ VertexList[$typeGraph, #]] & /@ {_type, _property};
 
 initializeTypeSystem[] := (
   initializeTypeSystemTranslations[];

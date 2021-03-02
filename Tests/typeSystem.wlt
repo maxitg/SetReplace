@@ -82,8 +82,8 @@
       (* Type and property lists *)
       (* unknownObject is not here because there are no translations or properties defined for it, so it's invisible to
          the type system. *)
-      VerificationTest[Sort @ $SetReplaceTypes, Sort @ {"String", "Expression", "HalfInteger", "EvenInteger", "Real"}],
-      VerificationTest[Sort @ $SetReplaceProperties, Sort @ {description, multipliedHalf}],
+      VerificationTest[$SetReplaceTypes, Sort @ {"String", "Expression", "HalfInteger", "EvenInteger", "Real"}],
+      VerificationTest[$SetReplaceProperties, Sort @ {description, multipliedHalf}],
 
       (* Type querying *)
       VerificationTest[SetReplaceObjectType[evenInteger[4]], "EvenInteger"],
