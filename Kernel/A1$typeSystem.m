@@ -3,6 +3,10 @@ Package["SetReplace`"]
 PackageImport["GeneralUtilities`"]
 
 PackageExport["SetReplaceTypeConvert"]
+PackageExport["SetReplaceObjectType"]
+PackageExport["SetReplaceObjectQ"]
+PackageExport["$SetReplaceTypes"]
+PackageExport["$SetReplaceProperties"]
 
 PackageScope["declareTypeTranslation"]
 PackageScope["declareRawProperty"]
@@ -12,14 +16,33 @@ PackageScope["throwInvalidPropertyArgumentCount"]
 
 PackageScope["initializeTypeSystem"]
 
-declareMessage[General::unknownObject, "The argument `arg` in `expr` is not a known typed object."];
-
 (* Object classes (like Multihistory) are expected to define their own objectType[...] implementation. This one is
    triggered if no other is found. *)
 
+SetUsage @ "
+SetReplaceObjectType[object$] returns the type of object$, which can then be used in SetReplaceTypeConvert.
+";
+
+SyntaxInformation[SetReplaceObjectType] = {"ArgumentsPattern" -> {object_}};
+
+expr : SetReplaceObjectType[args___] := ModuleScope[
+  result = Catch[objectType[args],
+                 _ ? FailureQ,
+                 message[SetReplaceObjectType, #, <|"expr" -> HoldForm[expr]|>] &];
+  result /; !FailureQ[result]
+];
+
+declareMessage[General::unknownObject, "The argument `arg` in `expr` is not a known typed object."];
+
 objectType[arg_] := throw[Failure["unknownObject", <|"arg" -> arg|>]];
 
-objectQ[object_] := Catch[objectType[object]; True, _ ? FailureQ, False &];
+SetUsage @ "
+SetReplaceObjectQ[expr$] yields True if expr$ is a SetReplace object and False otherwise.
+";
+
+SyntaxInformation[SetReplaceObjectQ] = {"ArgumentsPattern" -> {expr_}};
+
+SetReplaceObjectQ[object_] := Catch[objectType[object]; True, _ ? FailureQ, False &];
 
 (* No declaration is required for a generator to create a new object type. Its job is to create a consistent internal
    structure. *)
@@ -34,6 +57,10 @@ objectQ[object_] := Catch[objectType[object]; True, _ ? FailureQ, False &];
 (* Type translation functions can throw failure objects, in which case a message will be generated with a name
    corresponding to the Failure's type, and the keys passed to the message template. *)
 
+SetUsage @ "
+$SetReplaceTypes gives the list of all types defined in SetReplace.
+";
+
 $translations = {};
 
 declareTypeTranslation[function_, fromType_, toType_] :=
@@ -43,6 +70,7 @@ declareTypeTranslation[function_, fromType_, toType_] :=
 
 initializeTypeSystemTranslations[] := (
   $typeGraph = Graph[DirectedEdge @@@ Rest /@ $translations];
+  $SetReplaceTypes = First /@ VertexList[$typeGraph];
   $translationFunctions = Association[Thread[EdgeList[$typeGraph] -> (First /@ $translations)]];
 
   (* Find all strings used in the type names even on deeper levels (e.g., {"HypergraphSubstitutionSystem", 3}). *)
@@ -63,7 +91,7 @@ SetReplaceTypeConvert[type$][object$] converts an object$ to the requested type$
 SyntaxInformation[SetReplaceTypeConvert] = {"ArgumentsPattern" -> {type_}};
 
 expr : SetReplaceTypeConvert[args1___][args2___] := ModuleScope[
-  result = Catch[setReplaceTypeConvert[args1][args2],
+  result = Catch[typeConvert[args1][args2],
                  _ ? FailureQ,
                  message[SetReplaceTypeConvert, #, <|"expr" -> HoldForm[expr]|>] &];
   result /; !FailureQ[result]
@@ -73,7 +101,7 @@ declareMessage[General::unconvertibleType, "The type `type` in `expr` can not be
 
 declareMessage[General::noConversionPath, "Cannot convert an object from `from` to `to` in `expr`."];
 
-setReplaceTypeConvert[toType_][object_] := ModuleScope[
+typeConvert[toType_][object_] := ModuleScope[
   fromType = objectType[object];
   If[!VertexQ[$typeGraph, type[#]], throw[Failure["unconvertibleType", <|"type" -> #|>]]] & /@ {fromType, toType};
   path = FindShortestPath[$typeGraph, type[fromType], type[toType]];
@@ -92,6 +120,10 @@ setReplaceTypeConvert[toType_][object_] := ModuleScope[
    toProperty will need to be called as toProperty[args___][object_] or toProperty[object_, args___] where object can be
    of any type convertable to the implemented one. *)
 
+SetUsage @ "
+$SetReplaceProperties gives the list of all properties defined in SetReplace.
+";
+
 $rawProperties = {};
 
 declareRawProperty[implementationFunction_, fromType_, toProperty_Symbol] :=
@@ -105,7 +137,8 @@ initializeRawProperties[] := Module[{newEdges},
   $typeGraph = EdgeAdd[$typeGraph, newEdges];
   $propertyEvaluationFunctions = Association[Thread[newEdges -> (First /@ $rawProperties)]];
 
-  defineDownValuesForProperty /@ First /@ VertexList[$typeGraph, _property];
+  $SetReplaceProperties = First /@ VertexList[$typeGraph, _property];
+  defineDownValuesForProperty /@ $SetReplaceProperties;
 ];
 
 (* declareCompositeProperty declares an implementation for a property that takes other properties as arguments. The
@@ -179,7 +212,7 @@ defineDownValuesForProperty[publicProperty_] := (
     result /; !FailureQ[result]
   ];
 
-  expr : publicProperty[object_ ? objectQ, args___] := ModuleScope[
+  expr : publicProperty[object_ ? SetReplaceObjectQ, args___] := ModuleScope[
     result = Catch[propertyImplementation[publicProperty][args][object],
                    _ ? FailureQ,
                    message[publicProperty,
@@ -195,7 +228,7 @@ defineDownValuesForProperty[publicProperty_] := (
     If[path === {},
       throw[Failure["noPropertyPath", <|"type" -> fromType, "property" -> publicProperty|>]];
     ];
-    expectedTypeObject = setReplaceTypeConvert[path[[-2, 1]]][object];
+    expectedTypeObject = typeConvert[path[[-2, 1]]][object];
     propertyFunction = $propertyEvaluationFunctions[DirectedEdge[path[[-2]], path[[-1]]]];
     propertyFunction[args][expectedTypeObject]
   ];
