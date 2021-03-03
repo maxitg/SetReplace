@@ -18,6 +18,7 @@ PackageScope["setSubstitutionSystem"]
 PackageScope["$stepSpecKeys"]
 PackageScope["$maxEvents"]
 PackageScope["$maxGenerationsLocal"]
+PackageScope["$maxDestroyerEvents"]
 PackageScope["$maxFinalVertices"]
 PackageScope["$maxFinalVertexDegree"]
 PackageScope["$maxFinalExpressions"]
@@ -41,6 +42,7 @@ PackageScope["$sameInputSetIsomorphicOutputs"]
 
 $maxEvents = "MaxEvents";
 $maxGenerationsLocal = "MaxGenerationsLocal";
+$maxDestroyerEvents = "MaxDestroyerEvents";
 $maxFinalVertices = "MaxFinalVertices";
 $maxFinalVertexDegree = "MaxFinalVertexDegree";
 $maxFinalExpressions = "MaxFinalExpressions";
@@ -88,6 +90,7 @@ $stepSpecKeys = <|
   (* local means the evolution will keep running until no further matches can be made exceeding the max generation.
     This might result in a different evolution order. *)
   $maxGenerationsLocal -> "MaxGenerations",
+  $maxDestroyerEvents -> "MaxDestroyerEvents",
   (* these are any level-2 expressions in the set, not just atoms. *)
   $maxFinalVertices -> "MaxVertices",
   $maxFinalVertexDegree -> "MaxVertexDegree",
@@ -96,6 +99,7 @@ $stepSpecKeys = <|
 $stepSpecNamesInErrorMessage = <|
   $maxEvents -> "number of replacements",
   $maxGenerationsLocal -> "number of generations",
+  $maxDestroyerEvents -> "number of destroyer events",
   $maxFinalVertices -> "number of vertices",
   $maxFinalVertexDegree -> "vertex degree",
   $maxFinalExpressions -> "number of edges"|>;
@@ -233,7 +237,7 @@ $eventDeduplications = <|
   "SameInputSetIsomorphicOutputs" -> $sameInputSetIsomorphicOutputs
 |>;
 
-parseParameterValue[caller_, name_, value_, association_] /; MemberQ[Keys[association], value] := association[value];
+parseParameterValue[caller_, name_, value_, association_] /; KeyMemberQ[association, value] := association[value];
 
 General::invalidParameterValue = "`1` `2` should be one of `3`.";
 
