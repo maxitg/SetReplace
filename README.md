@@ -204,6 +204,8 @@ ideas. So, if you are interested, please join!
 * [HypergraphPlot](Documentation/SymbolsAndFunctions/HypergraphPlot.md)
 * [RulePlot of WolframModel](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
 * Utility Functions
+  * [CausalDensityDimension](Documentation/SymbolsAndFunctions/UtilityFunctions/CausalDensityDimension.md)
+  * [AcyclicGraphTake](Documentation/SymbolsAndFunctions/UtilityFunctions/AcyclicGraphTake.md)
   * [IndexHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/IndexHypergraph.md)
   * [IsomorphicHypergraphQ](Documentation/SymbolsAndFunctions/UtilityFunctions/IsomorphicHypergraphQ.md)
   * [HypergraphToGraph](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md)
@@ -213,7 +215,7 @@ ideas. So, if you are interested, please join!
   * [GeneralizedGridGraph](Documentation/SymbolsAndFunctions/UtilityFunctions/GeneralizedGridGraph.md)
   * [HypergraphAutomorphismGroup](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphAutomorphismGroup.md)
   * [HypergraphUnifications](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphUnifications.md)
-  * [WolframPhysicsProjectStyleData](Documentation/SymbolsAndFunctions/UtilityFunctions/WolframPhysicsProjectStyleData.md)
+  * [SetReplaceStyleData](Documentation/SymbolsAndFunctions/UtilityFunctions/SetReplaceStyleData.md)
   * [Build Data](Documentation/SymbolsAndFunctions/UtilityFunctions/BuildData.md)
 
 # Physics

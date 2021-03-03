@@ -1,5 +1,8 @@
 Package["SetReplace`"]
 
+(* Some utility functions are used for, e.g., constructing messages, and thus this file should be loaded early.
+   (Files are loaded lexicographically.) *)
+
 PackageScope["fromCounts"]
 PackageScope["multisetIntersection"]
 PackageScope["multisetUnion"]

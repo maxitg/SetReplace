@@ -26,10 +26,16 @@ Block[
     HoldPattern[ReturnFailed[msg_String, args___]] :> ReturnFailed[MessageName[$LHSHead, msg], args],
     HoldPattern[ReturnFailure[msg_String, args___]] :> ReturnFailure[MessageName[$LHSHead, msg], args]
   }},
-  Get[FileNameJoin[{$SetReplaceRootDirectory, "Kernel", "utilities.m"}]];
+  (* All files are loaded lexicographically starting with A0*. Note, "$" comes after "A" in Wolfram Language.
+     File names starting with digits are not allowed. "_" and "-" are not allowed. *)
+  Get[First[FileNames["*", FileNameJoin[{$SetReplaceRootDirectory, "Kernel"}]]]];
+
+  (* Multihistory should be initialized after all Kernel files are loaded. *)
+  SetReplace`PackageScope`initializeTypeSystem[];
 ];
 
 End[];
+
 EndPackage[];
 
 SetAttributes[#, {Protected, ReadProtected}] & /@ Evaluate @ Names @ "SetReplace`*";

@@ -2,100 +2,45 @@ Package["SetReplace`"]
 
 PackageImport["GeneralUtilities`"]
 
-PackageScope["$cppSetReplaceAvailable"]
-
 PackageScope["setSubstitutionSystem$cpp"]
-PackageScope["unloadLibrary"]
 
-(* Interface to the C++ implementation of setSubstitutionSystem. *)
+importLibSetReplaceFunction[
+  "setInitialize" -> cpp$setInitialize,
+  {Integer,                  (* set ID *)
+   {Integer, 1, "Constant"}, (* rules *)
+   {Integer, 1, "Constant"}, (* event selection functions for rules *)
+   {Integer, 1, "Constant"}, (* initial set *)
+   Integer,                  (* event selection function *)
+   {Integer, 1, "Constant"}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
+   Integer,                  (* event deduplication *)
+   Integer},                 (* random seed *)
+  "Void"];
 
-(* this function is defined now, but only run the *next* time Kernel/init.m is called, before all symbols
-are cleared. *)
-unloadLibrary[] := If[StringQ[$libraryFile],
-  Scan[LibraryFunctionUnload, $libraryFunctions];
-  $libraryFunctions = Null;
-  Quiet @ LibraryUnload[$libraryFile];
-];
+importLibSetReplaceFunction[
+  "setReplace" -> cpp$setReplace,
+  {Integer,                   (* set ID *)
+   {Integer, 1, "Constant"}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
+  "Void"];
 
-SetReplace::nolibsetreplace = "libSetReplace (``) could not be found, some functionality will not be available.";
+importLibSetReplaceFunction[
+  "setExpressions" -> cpp$setExpressions,
+  {Integer},     (* set ID *)
+  {Integer, 1}]; (* expressions *)
 
-$libraryFile = $SetReplaceLibraryPath;
+importLibSetReplaceFunction[
+  "setEvents" -> cpp$setEvents,
+  {Integer},     (* set ID *)
+  {Integer, 1}]; (* expressions *)
 
-If[!StringQ[$libraryFile] || !FileExistsQ[$libraryFile],
-  Message[SetReplace::nolibsetreplace, $libraryFile];
-  $libraryFile = $Failed;
-];
+importLibSetReplaceFunction[
+  "maxCompleteGeneration" -> cpp$maxCompleteGeneration,
+  {Integer}, (* set ID *)
+  Integer];  (* generation *)
 
-(* Load libSetReplace functions *)
-$libraryFunctions = {
-  $cpp$setInitialize = If[$libraryFile =!= $Failed,
-    LibraryFunctionLoad[
-      $libraryFile,
-      "setInitialize",
-      {Integer, (* set ID *)
-        {Integer, 1, "Constant"}, (* rules *)
-        {Integer, 1, "Constant"}, (* event selection functions for rules *)
-        {Integer, 1, "Constant"}, (* initial set *)
-        Integer, (* event selection function *)
-        {Integer, 1, "Constant"}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
-        Integer, (* event deduplication *)
-        Integer}, (* random seed *)
-      "Void"]
-  ,
-    $Failed
-  ],
-
-  $cpp$setReplace = If[$libraryFile =!= $Failed,
-    LibraryFunctionLoad[
-      $libraryFile,
-      "setReplace",
-      {Integer, (* set ID *)
-        {Integer, 1, "Constant"}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
-      "Void"]
-  ,
-    $Failed
-  ],
-
-  $cpp$setExpressions = If[$libraryFile =!= $Failed,
-    LibraryFunctionLoad[
-      $libraryFile,
-      "setExpressions",
-      {Integer}, (* set ID *)
-      {Integer, 1}] (* expressions *)
-  ,
-    $Failed
-  ],
-
-  $cpp$setEvents = If[$libraryFile =!= $Failed,
-    LibraryFunctionLoad[
-      $libraryFile,
-      "setEvents",
-      {Integer}, (* set ID *)
-      {Integer, 1}] (* expressions *)
-  ,
-    $Failed
-  ],
-
-  $cpp$maxCompleteGeneration = If[$libraryFile =!= $Failed,
-    LibraryFunctionLoad[
-      $libraryFile,
-      "maxCompleteGeneration",
-      {Integer}, (* set ID *)
-      Integer] (* generation *)
-  ,
-    $Failed
-  ],
-
-  $cpp$terminationReason = If[$libraryFile =!= $Failed,
-    LibraryFunctionLoad[
-      $libraryFile,
-      "terminationReason",
-      {Integer}, (* set ID *)
-      Integer] (* reason *)
-  ,
-    $Failed
-  ]
-};
+importLibSetReplaceFunction[
+  "terminationReason" -> cpp$terminationReason,
+  {Integer}, (* set ID *)
+  Integer];  (* reason *)
 
 (* The following code turns a nested list into a single list, prepending sizes of each sublist. I.e., {{a}, {b, c, d}}
    becomes {2, 1, a, 3, b, c, d}, where the first 2 is the length of the entire list, and 1 and 3 are the lengths of
@@ -157,8 +102,6 @@ ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := ModuleScope[
   newLeft -> newRight
 ];
 
-$cppSetReplaceAvailable = $cpp$setReplace =!= $Failed;
-
 $maxInt64 = 2^63 - 1;
 $maxUInt32 = 2^32 - 1;
 
@@ -203,7 +146,7 @@ $eventDeduplicationCodes = <|
 setSubstitutionSystem$cpp[
         rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrderingFunction_, eventSelectionFunction_,
         eventDeduplication_] /;
-      $cppSetReplaceAvailable := ModuleScope[
+      $libSetReplaceAvailable := ModuleScope[
   canonicalRules = toCanonicalRules[rules];
   setAtoms = Hold /@ Union[Catenate[set]];
   atomsInRules = ruleAtoms /@ canonicalRules;
@@ -220,7 +163,7 @@ setSubstitutionSystem$cpp[
     {K, Length[canonicalRules]}];
   setHandle = CreateManagedLibraryExpression["SetReplace", managedSet];
   setID = ManagedLibraryExpressionID[setHandle, "SetReplace"];
-  $cpp$setInitialize[
+  cpp$setInitialize[
     setID,
     encodeNestedLists[List @@@ mappedRules],
     eventSelectionCodes[eventSelectionFunction, Length[canonicalRules]],
@@ -232,7 +175,7 @@ setSubstitutionSystem$cpp[
   ];
   TimeConstrained[
     CheckAbort[
-      $cpp$setReplace[
+      cpp$setReplace[
         setID,
         stepSpec /@ {
             $maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalVertexDegree, $maxFinalExpressions} /.
@@ -240,12 +183,12 @@ setSubstitutionSystem$cpp[
       If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]],
     timeConstraint,
     If[!returnOnAbortQ, Return[$Aborted], terminationReason = $timeConstraint]];
-  numericAtomLists = decodeAtomLists[$cpp$setExpressions[setID]];
-  events = decodeEvents[$cpp$setEvents[setID]];
+  numericAtomLists = decodeAtomLists[cpp$setExpressions[setID]];
+  events = decodeEvents[cpp$setEvents[setID]];
   maxCompleteGeneration = CheckAbort[
-    Replace[$cpp$maxCompleteGeneration[setID], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]],
+    Replace[cpp$maxCompleteGeneration[setID], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]],
     If[!returnOnAbortQ, Abort[], terminationReason = $Aborted; Missing["Unknown", $Aborted]]];
-  terminationReason = Replace[$terminationReasonCodes[$cpp$terminationReason[setID]], {
+  terminationReason = Replace[$terminationReasonCodes[cpp$terminationReason[setID]], {
     $Aborted -> terminationReason,
     $notTerminated -> $timeConstraint}];
   resultAtoms = Union[Catenate[numericAtomLists]];

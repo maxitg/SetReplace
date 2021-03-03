@@ -1,7 +1,10 @@
 Package["SetReplace`"]
 
+(* Style definitions are used at import in WolframPhysicsProjectStyleData. (Files are loaded lexicographically.) *)
+
 PackageImport["GeneralUtilities`"]
 
+PackageExport["$SetReplacePlotThemes"]
 PackageExport["$WolframPhysicsProjectPlotThemes"]
 
 PackageScope["style"]
@@ -199,10 +202,15 @@ $styleNames = KeySort /@ KeySort @ <|
 $lightTheme = "Light";
 
 SetUsage @ "
-$WolframPhysicsProjectPlotThemes gives the list of plot themes available for the Wolfram Physics Project.
+$SetReplacePlotThemes gives the list of plot themes available in SetReplace.
 ";
 
-$WolframPhysicsProjectPlotThemes = {$lightTheme};
+$SetReplacePlotThemes = {$lightTheme};
+
+(* Backwards compatibility *)
+SetUsage[$WolframPhysicsProjectPlotThemes,
+         "$WolframPhysicsProjectPlotThemes is deprecated. Use $SetReplacePlotThemes."];
+$WolframPhysicsProjectPlotThemes = $SetReplacePlotThemes;
 
 style[$lightTheme] = <|
   (* Evolution object *)
