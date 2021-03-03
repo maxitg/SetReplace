@@ -10,6 +10,7 @@ class CausalGraph::Implementation {
   // the first event is the "fake" initialization event
   std::vector<Event> events_;
   std::vector<EventID> expressionIDsToCreatorEvents_;
+  std::vector<int64_t> expressionIDsToDestroyerEventsCount_;
 
   // needed to return the largest generation in O(1)
   Generation largestGeneration_ = 0;
@@ -34,6 +35,7 @@ class CausalGraph::Implementation {
   std::vector<ExpressionID> addEvent(const RuleID ruleID,
                                      const std::vector<ExpressionID>& inputExpressions,
                                      const int outputExpressionsCount) {
+    updateDestroyerEventsCount(inputExpressions);
     const auto newExpressions = createExpressions(events_.size(), outputExpressionsCount);
     const Generation generation = newEventGeneration(inputExpressions);
     events_.push_back({ruleID, inputExpressions, newExpressions, generation});
@@ -88,11 +90,20 @@ class CausalGraph::Implementation {
     return SeparationType::Spacelike;
   }
 
+  int64_t destroyerEventsCount(const ExpressionID id) { return expressionIDsToDestroyerEventsCount_[id]; }
+
  private:
   std::vector<ExpressionID> createExpressions(const EventID creatorEvent, const int count) {
     const size_t beginIndex = expressionIDsToCreatorEvents_.size();
     expressionIDsToCreatorEvents_.insert(expressionIDsToCreatorEvents_.end(), count, creatorEvent);
+    expressionIDsToDestroyerEventsCount_.insert(expressionIDsToDestroyerEventsCount_.end(), count, 0);
     return idsRange(beginIndex, expressionIDsToCreatorEvents_.size());
+  }
+
+  void updateDestroyerEventsCount(const std::vector<ExpressionID>& inputExpressions) {
+    for (const auto& id : inputExpressions) {
+      ++expressionIDsToDestroyerEventsCount_[id];
+    }
   }
 
   static std::vector<ExpressionID> idsRange(const ExpressionID beginIndex, const ExpressionID endIndex) {
@@ -166,5 +177,9 @@ Generation CausalGraph::largestGeneration() const { return implementation_->larg
 
 SeparationType CausalGraph::expressionsSeparation(const ExpressionID first, const ExpressionID second) const {
   return implementation_->expressionsSeparation(first, second);
+}
+
+int64_t CausalGraph::destroyerEventsCount(const ExpressionID id) const {
+  return implementation_->destroyerEventsCount(id);
 }
 }  // namespace SetReplace
