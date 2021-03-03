@@ -16,11 +16,7 @@ Matcher::OrderingSpec orderingSpec = {
     {Matcher::OrderingFunction::RuleIndex, Matcher::OrderingDirection::Normal}};
 
 TEST(Set, profileSingleInputRule) {
-  Set set({{{{-1, -2}}, {{-1, -3}, {-1, -3}, {-3, -2}}}},
-          {{1, 1}},
-          Set::SystemType::Singleway,
-          orderingSpec,
-          Matcher::EventDeduplication::None);
+  Set set({{{{-1, -2}}, {{-1, -3}, {-1, -3}, {-3, -2}}}}, {{1, 1}}, 1, orderingSpec, Matcher::EventDeduplication::None);
   EXPECT_EQ(set.replace(Set::StepSpecification{1000}, doNotAbort), 1000);
 }
 
@@ -28,7 +24,7 @@ TEST(Set, profileMediumRule) {
   Set set({{{{-1, -2, -3}, {-4, -3, -5}, {-3, -6}},
             {{-6, -7, -8}, {-6, -9, -10}, {-11, -8, -10}, {-5, -2, -9}, {-9, -9}, {-1, -9}, {-7, -5}, {-8, -5}}}},
           {{1, 1, 1}, {1, 1, 1}, {1, 1}},
-          Set::SystemType::Singleway,
+          1,
           orderingSpec,
           Matcher::EventDeduplication::None);
   EXPECT_EQ(set.replace(Set::StepSpecification{5000}, doNotAbort), 5000);
@@ -37,7 +33,7 @@ TEST(Set, profileMediumRule) {
 TEST(Set, profileSequentialRule) {
   Set set({{{{-1, -2, -2}, {-3, -2, -4}}, {{-5, -4, -4}, {-4, -3, -5}, {-3, -5, -1}}}},
           {{1, 1, 1}, {1, 1, 1}},
-          Set::SystemType::Singleway,
+          1,
           orderingSpec,
           Matcher::EventDeduplication::None);
   EXPECT_EQ(set.replace(Set::StepSpecification{10000}, doNotAbort), 10000);
@@ -58,7 +54,7 @@ TEST(Set, profileLargeRule) {
              {-4, -2},
              {-4, -3}}}},
           {{1, 1}, {1, 1}, {1, 1}, {1, 1}, {1, 1}, {1, 1}},
-          Set::SystemType::Singleway,
+          1,
           orderingSpec,
           Matcher::EventDeduplication::None);
   EXPECT_EQ(set.replace(Set::StepSpecification{4}, doNotAbort), 4);
@@ -67,7 +63,7 @@ TEST(Set, profileLargeRule) {
 TEST(Set, profileExponentialMatchCountRule) {
   Set set({{{{-1}, {-1}, {-1}}, {{-1}, {-1}, {-1}, {-1}}}},
           {{1}, {1}, {1}},
-          Set::SystemType::Singleway,
+          1,
           orderingSpec,
           Matcher::EventDeduplication::None);
   EXPECT_EQ(set.replace(Set::StepSpecification{18}, doNotAbort), 18);
@@ -314,7 +310,7 @@ TEST(Set, profileCAEmulator) {
                                                  {2, 2, 8},
                                                  {2, 2}};
 
-  Set set(rules, initialExpressions, Set::SystemType::Singleway, orderingSpec, Matcher::EventDeduplication::None);
+  Set set(rules, initialExpressions, 1, orderingSpec, Matcher::EventDeduplication::None);
   EXPECT_EQ(set.replace(Set::StepSpecification{250}, doNotAbort), 250);
 }
 

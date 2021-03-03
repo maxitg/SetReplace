@@ -8,7 +8,7 @@
 #include "Rule.hpp"
 
 namespace SetReplace {
-Set testSet(const Set::SystemType systemType, const EventSelectionFunction eventSelectionFunction) {
+Set testSet(const int64_t maxDestroyerEvents, const EventSelectionFunction eventSelectionFunction) {
   // Negative atoms refer to patterns (useful for rules)
   std::vector<Rule> rules;
   auto aRule = Rule({{{-1}, {-1, -2}}, {{-2}}, eventSelectionFunction});
@@ -24,14 +24,16 @@ Set testSet(const Set::SystemType systemType, const EventSelectionFunction event
       {Matcher::OrderingFunction::RuleIndex, Matcher::OrderingDirection::Normal}};
   Matcher::EventDeduplication eventDeduplication = Matcher::EventDeduplication::None;
   unsigned int randomSeed = 0;
-  return Set(rules, initialExpressions, systemType, orderingSpec, eventDeduplication, randomSeed);
+  return Set(rules, initialExpressions, maxDestroyerEvents, orderingSpec, eventDeduplication, randomSeed);
 }
 
 constexpr auto doNotAbort = []() { return false; };
 
+const int64_t max64int = std::numeric_limits<int64_t>::max();
+
 TEST(Set, globalSpacelike) {
   // Singleway systems are always spacelike, so it's not necessary to specify a spacelike selection function
-  Set aSet = testSet(Set::SystemType::Singleway, EventSelectionFunction::All);
+  Set aSet = testSet(1, EventSelectionFunction::All);
   Set::StepSpecification stepSpec;
   stepSpec.maxEvents = 2;
   EXPECT_EQ(aSet.replace(stepSpec, doNotAbort), 2);
@@ -51,7 +53,7 @@ TEST(Set, globalSpacelike) {
 }
 
 TEST(Set, matchAllMultiway) {
-  Set aSet = testSet(Set::SystemType::Multiway, EventSelectionFunction::All);
+  Set aSet = testSet(max64int, EventSelectionFunction::All);
   // Unlike the global spacelike case, the edge {5, 6} can now be used twice, so there is an extra event
   EXPECT_EQ(aSet.replace(Set::StepSpecification(), doNotAbort), 6);
   // and two {6}'s in the list of expressions
@@ -66,8 +68,7 @@ TEST(Set, replaceOnce) {
       {Matcher::OrderingFunction::ExpressionIDs, Matcher::OrderingDirection::Normal},
       {Matcher::OrderingFunction::RuleIndex, Matcher::OrderingDirection::Normal}};
 
-  Set set(
-      {{{{-1}}, {{-1, -1}}}}, {{1}}, Set::SystemType::Singleway, orderingSpec, Matcher::EventDeduplication::None, 0);
+  Set set({{{{-1}}, {{-1, -1}}}}, {{1}}, 1, orderingSpec, Matcher::EventDeduplication::None, 0);
   EXPECT_EQ(set.replaceOnce(doNotAbort), 1);
 }
 }  // namespace SetReplace
