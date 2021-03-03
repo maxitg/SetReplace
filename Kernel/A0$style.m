@@ -12,6 +12,15 @@ PackageScope["$styleNames"]
 
 PackageScope["$lightTheme"]
 
+PackageScope["$typeVertexStyle"]
+PackageScope["$typeVertexSize"]
+PackageScope["$propertyVertexStyle"]
+PackageScope["$propertyVertexSize"]
+PackageScope["$methodImplementationVertexStyle"]
+PackageScope["$methodImplementationVertexSize"]
+PackageScope["$typeGraphEdgeStyle"]
+PackageScope["$typeGraphLayout"]
+PackageScope["$typeGraphBackground"]
 PackageScope["$evolutionObjectIcon"]
 PackageScope["$destroyedEdgeStyle"]
 PackageScope["$createdEdgeStyle"]
@@ -81,6 +90,17 @@ combinedOptionsProperties[plotFunction_][options__] := Sequence[
 ];
 
 $styleNames = KeySort /@ KeySort @ <|
+  "TypeGraph" -> <|
+    "TypeVertexStyle" -> $typeVertexStyle,
+    "TypeVertexSize" -> $typeVertexSize,
+    "PropertyVertexStyle" -> $propertyVertexStyle,
+    "PropertyVertexSize" -> $propertyVertexSize,
+    "MethodImplementationVertexStyle" -> $methodImplementationVertexStyle,
+    "MethodImplementationVertexSize" -> $methodImplementationVertexSize,
+    "EdgeStyle" -> $typeGraphEdgeStyle,
+    "GraphLayout" -> $typeGraphLayout,
+    "Background" -> $typeGraphBackground
+  |>,
   "EvolutionObject" -> <|"Icon" -> $evolutionObjectIcon|>,
   "SpatialGraph" -> <|
     "DestroyedEdgeStyle" -> $destroyedEdgeStyle,
@@ -213,6 +233,17 @@ SetUsage[$WolframPhysicsProjectPlotThemes,
 $WolframPhysicsProjectPlotThemes = $SetReplacePlotThemes;
 
 style[$lightTheme] = <|
+  (* Type graph *)
+  $typeVertexStyle -> RGBColor[0.034, 0.30, 0.42],
+  $typeVertexSize -> Medium,
+  $propertyVertexStyle -> RGBColor[0.77, 0.83, 0.82],
+  $propertyVertexSize -> Medium,
+  $methodImplementationVertexStyle -> Black,
+  $methodImplementationVertexSize -> Small,
+  $typeGraphEdgeStyle -> GrayLevel[0.125],
+  $typeGraphLayout -> "SpringElectricalEmbedding",
+  $typeGraphBackground -> None,
+
   (* Evolution object *)
   $evolutionObjectIcon -> $graphIcon,
 
