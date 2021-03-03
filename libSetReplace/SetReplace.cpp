@@ -227,7 +227,7 @@ int setInitialize(WolframLibraryData libData, mint argc, const MArgument* argv, 
   SetID thisSetID;
   std::vector<Rule> rules;
   std::vector<AtomsVector> initialExpressions;
-  Set::SystemType systemType;
+  int64_t maxDestroyerEvents;
   Matcher::OrderingSpec orderingSpec;
   Matcher::EventDeduplication eventDeduplication;
   unsigned int randomSeed;
@@ -235,7 +235,7 @@ int setInitialize(WolframLibraryData libData, mint argc, const MArgument* argv, 
     thisSetID = MArgument_getInteger(argv[0]);
     rules = getRules(libData, MArgument_getMTensor(argv[1]), MArgument_getMTensor(argv[2]));
     initialExpressions = getSet(libData, MArgument_getMTensor(argv[3]));
-    systemType = static_cast<Set::SystemType>(MArgument_getInteger(argv[4]));
+    maxDestroyerEvents = MArgument_getInteger(argv[4]);
     orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[5]));
     eventDeduplication = static_cast<Matcher::EventDeduplication>(MArgument_getInteger(argv[6]));
     randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[7]));
@@ -244,8 +244,8 @@ int setInitialize(WolframLibraryData libData, mint argc, const MArgument* argv, 
   }
 
   try {
-    sets_[thisSetID] =
-        std::make_unique<Set>(rules, initialExpressions, systemType, orderingSpec, eventDeduplication, randomSeed);
+    sets_[thisSetID] = std::make_unique<Set>(
+        rules, initialExpressions, maxDestroyerEvents, orderingSpec, eventDeduplication, randomSeed);
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
