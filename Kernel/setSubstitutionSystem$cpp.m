@@ -173,16 +173,17 @@ $terminationReasonCodes = <|
   7 -> $Aborted
 |>;
 
-systemTypeCode[eventSelectionFunction_] := Boole[multiwayEventSelectionFunctionQ[eventSelectionFunction]];
+(* By definition, a GlobalSpacelike event selection function has 1 as the max. number of destroyer events. *)
+
+maxDestroyerEvents[_, $globalSpacelike] = 1;
+maxDestroyerEvents[Automatic | _ ? MissingQ | Infinity, _] = $maxInt64;
+maxDestroyerEvents[n_, _] := n;
 
 (* 0 -> All
    1 -> Spacelike *)
 
-(* GlobalSpacelike is set to All because all concurrently matched expressions are always spacelike in that case,
-   and All is much faster to evaluate. *)
-
 eventSelectionCodes[eventSelectionFunction_, ruleCount_] :=
-  ConstantArray[eventSelectionFunction /. {$globalSpacelike -> 0, None -> 0, $spacelike -> 1}, ruleCount];
+  ConstantArray[eventSelectionFunction /. {None -> 0, $globalSpacelike -> 1, $spacelike -> 1}, ruleCount];
 
 $orderingFunctionCodes = <|
   $sortedExpressionIDs -> 0,
@@ -224,7 +225,7 @@ setSubstitutionSystem$cpp[
     encodeNestedLists[List @@@ mappedRules],
     eventSelectionCodes[eventSelectionFunction, Length[canonicalRules]],
     encodeNestedLists[mappedSet],
-    systemTypeCode[eventSelectionFunction],
+    maxDestroyerEvents[stepSpec[$maxDestroyerEvents], eventSelectionFunction],
     Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
     Replace[eventDeduplication, $eventDeduplicationCodes],
     RandomInteger[{0, $maxUInt32}]
