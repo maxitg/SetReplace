@@ -20,20 +20,22 @@ objectType[Multihistory[type_, _]] := type;
 (* This is temporary and will need to be updated to use a composite property to automatically extract data from a
    Multihistory. Using a composite property will also allow objects to implement custom boxes for themselves. *)
 
+$genericMultihistoryIcon = GraphPlot[
+  {DirectedEdge[0, 1], DirectedEdge[1, 2], DirectedEdge[1, 3]},
+  GraphLayout -> "LayeredDigraphEmbedding",
+  VertexStyle -> {1 -> style[$lightTheme][$expressionVertexStyle], style[$lightTheme][$causalGraphVertexStyle]},
+  EdgeStyle -> Directive[style[$lightTheme][$causalGraphEdgeStyle], Arrowheads[0]],
+  VertexCoordinates -> {{0, 1}, {0, 0}, {0, -1} . RotationMatrix[Pi / 4], {0, -1} . RotationMatrix[-Pi / 4]},
+  VertexSize -> 0.5,
+  PlotRange -> {{-1.3, 1.3}, {-1.3, 1.3}},
+  Background -> style[$lightTheme][$causalGraphBackground]];
+
 Multihistory /: MakeBoxes[object : Multihistory[_, _], format_] := ModuleScope[
   type = objectType[object];
   BoxForm`ArrangeSummaryBox[
     Multihistory,
     object,
-    GraphPlot[{DirectedEdge[0, 1], DirectedEdge[1, 2], DirectedEdge[1, 3]},
-              GraphLayout -> "LayeredDigraphEmbedding",
-              VertexStyle -> {1 -> SetReplaceStyleData["ExpressionsEventsGraph", "ExpressionVertexStyle"],
-                              SetReplaceStyleData["ExpressionsEventsGraph", "EventVertexStyle"]},
-              EdgeStyle -> Directive[SetReplaceStyleData["ExpressionsEventsGraph", "EdgeStyle"], Arrowheads[0]],
-              VertexCoordinates ->
-                {{0, 1}, {0, 0}, {0, -1} . RotationMatrix[Pi / 4], {0, -1} . RotationMatrix[-Pi / 4]},
-              VertexSize -> 0.5,
-              PlotRange -> {{-1.3, 1.3}, {-1.3, 1.3}}],
+    $genericMultihistoryIcon,
     (* Always displayed *)
     {{BoxForm`SummaryItem[{"Type: ", type}]}},
     (* Displayed on request *)
