@@ -43,3 +43,8 @@ A list of `@instructor`s who might be able to mentor this project.
 
 Has anything been done in the direction of this project? If you can think of any external or internal links, put them
 here.
+
+### Required future *SetReplace* features
+
+Are any *SetReplace* features that don't exist yet required **before** the start of the project? Put them here. This
+includes planned but not yet implemented features.
