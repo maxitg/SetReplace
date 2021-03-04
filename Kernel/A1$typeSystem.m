@@ -160,6 +160,9 @@ initializeCompositeProperties[] := (
   Null; (* TODO: implement *)
 );
 
+(* Some types and, especially, properties might be private. (For example, a property that will generate multihistory
+   boxes.) We don't want to show them to users, so they are hidden from $SetReplaceTypes and $SetReplaceProperties. *)
+
 freeFromInternalSymbolsQ[expr_] :=
   NoneTrue[Context /@ Cases[expr, _Symbol, {0, Infinity}, Heads -> True], StringMatchQ[#, "SetReplace`" ~~ __] &];
 
