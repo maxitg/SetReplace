@@ -160,10 +160,14 @@ initializeCompositeProperties[] := (
   Null; (* TODO: implement *)
 );
 
-(* This function is called in init.m after all other files are loaded. *)
+freeFromInternalSymbolsQ[expr_] :=
+  NoneTrue[Context /@ Cases[expr, _Symbol, {0, Infinity}, Heads -> True], StringMatchQ[#, "SetReplace`" ~~ __] &];
 
 initializeConstants[] :=
-  {$SetReplaceTypes, $SetReplaceProperties}  = Sort[First /@ VertexList[$typeGraph, #]] & /@ {_type, _property};
+  {$SetReplaceTypes, $SetReplaceProperties} =
+    Select[freeFromInternalSymbolsQ] /@ (Sort[First /@ VertexList[$typeGraph, #]] &) /@ {_type, _property};
+
+(* This function is called in init.m after all other files are loaded. *)
 
 initializeTypeSystem[] := (
   initializeTypeSystemTranslations[];
