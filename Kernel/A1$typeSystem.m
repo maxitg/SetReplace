@@ -69,8 +69,8 @@ declareTypeTranslation[function_, fromType_, toType_] :=
 (* This function is called after all declarations to combine translations to a Graph to allow multi-step conversions. *)
 
 initializeTypeSystemTranslations[] := (
-  $typeGraph = Graph[DirectedEdge @@@ Rest /@ $translations];
-  $translationFunctions = Association[Thread[EdgeList[$typeGraph] -> (First /@ $translations)]];
+  $translationFunctions = AssociationThread[(DirectedEdge @@@ Rest /@ $translations) -> (First /@ $translations)];
+  $typeGraph = Graph[Keys[$translationFunctions]];
 
   (* Find all strings used in the type names even on deeper levels (e.g., {"HypergraphSubstitutionSystem", 3}). *)
   With[{typeStrings = Cases[VertexList[$typeGraph], _String, All]},
@@ -133,8 +133,8 @@ declareRawProperty[implementationFunction_, fromType_, toProperty_Symbol] :=
 
 initializeRawProperties[] := Module[{newEdges},
   newEdges = DirectedEdge @@@ Rest /@ $rawProperties;
-  $typeGraph = EdgeAdd[$typeGraph, newEdges];
-  $propertyEvaluationFunctions = Association[Thread[newEdges -> (First /@ $rawProperties)]];
+  $propertyEvaluationFunctions = AssociationThread[newEdges -> (First /@ $rawProperties)];
+  $typeGraph = EdgeAdd[$typeGraph, Keys[$propertyEvaluationFunctions]];
 
   defineDownValuesForProperty /@ First /@ VertexList[$typeGraph, _property];
 ];
