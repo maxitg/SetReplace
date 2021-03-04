@@ -72,11 +72,13 @@
       realDescription[][real_Real] := "I am a real " <> ToString[real] <> ".";
       realDescription[args__][_] := throwInvalidPropertyArgumentCount[0, Length[{args}]];
 
+      Unprotect[$SetReplaceTypeGraph];
       Unprotect[$SetReplaceProperties];
       Unprotect[$SetReplaceTypes];
       initializeTypeSystem[];
       Protect[$SetReplaceTypes];
       Protect[$SetReplaceProperties];
+      Protect[$SetReplaceTypeGraph];
     ),
     "tests" -> {
       (* Type and property lists *)
@@ -84,6 +86,17 @@
          the type system. *)
       VerificationTest[$SetReplaceTypes, Sort @ {"String", "Expression", "HalfInteger", "EvenInteger", "Real"}],
       VerificationTest[$SetReplaceProperties, Sort @ {description, multipliedHalf}],
+
+      VerificationTest[GraphQ @ $SetReplaceTypeGraph],
+      VerificationTest[ContainsOnly[Head /@ VertexList[$SetReplaceTypeGraph],
+                       {SetReplaceType, SetReplaceProperty, SetReplaceMethodImplementation}]],
+      VerificationTest[
+        Cases[
+          EdgeList[$SetReplaceTypeGraph],
+          Except[
+            DirectedEdge[_SetReplaceType | _SetReplaceProperty, _SetReplaceMethodImplementation] |
+              DirectedEdge[_SetReplaceMethodImplementation, _SetReplaceType | _SetReplaceProperty]]],
+        {}],
 
       (* Type querying *)
       VerificationTest[SetReplaceObjectType[evenInteger[4]], "EvenInteger"],
