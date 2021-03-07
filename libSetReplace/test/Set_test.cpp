@@ -8,7 +8,7 @@
 #include "Rule.hpp"
 
 namespace SetReplace {
-Set testSet(const int64_t maxDestroyerEvents, const EventSelectionFunction eventSelectionFunction) {
+Set testSet(const uint64_t maxDestroyerEvents, const EventSelectionFunction eventSelectionFunction) {
   // Negative atoms refer to patterns (useful for rules)
   std::vector<Rule> rules;
   auto aRule = Rule({{{-1}, {-1, -2}}, {{-2}}, eventSelectionFunction});

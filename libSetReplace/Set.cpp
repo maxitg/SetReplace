@@ -112,7 +112,7 @@ class Set::Implementation {
       // The following only make sense for singleway systems.
       destroyedExpressionsCount_ += match->inputExpressions.size();
       updateAtomDegrees(&atomDegrees_, match->inputExpressions, -1);
-    } else if (maxDestroyerEvents_ == std::numeric_limits<int64_t>::max()) {
+    } else if (maxDestroyerEvents_ == static_cast<uint64_t>(std::numeric_limits<int64_t>::max())) {
       matcher_.deleteMatch(match);
     } else {
       // Only remove expressions whose destroyer events count reached the maximum.
@@ -133,6 +133,9 @@ class Set::Implementation {
   int64_t replace(const StepSpecification stepSpec, const std::function<bool()>& shouldAbort) {
     updateStepSpec(stepSpec);
     int64_t count = 0;
+    if (maxDestroyerEvents_ == 0) {
+      return count;
+    }
     while (true) {
       if (replaceOnce(shouldAbort)) {
         ++count;
