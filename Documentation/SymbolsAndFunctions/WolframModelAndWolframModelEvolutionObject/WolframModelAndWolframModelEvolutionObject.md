@@ -332,6 +332,8 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
 All possible keys in that association are:
 
 * `"MaxEvents"`: limit the number of individual replacements (in the [`SetReplace`](../SetReplace.md) function meaning).
+* `"MaxDestroyerEvents"`: limits the number of destroyer events per expression. That is, when the destroyer events count
+  of a given expression reaches the maximum number allowed, no further match will involve said expression.
 * `"MaxGenerations"`: limit the number of generations (steps in [`SetReplaceAll`](../SetReplace.md) meaning), same as
   specifying steps directly as a number in `WolframModel`.
 * `"MaxVertices"`: limit the number of vertices in the *final* state only (the total count throughout evolution might be
@@ -348,6 +350,10 @@ Note also that `"MaxGenerations"` works differently from the other limiters, as 
 attempt to match edges with generations over the limit. Therefore unlike, i.e., `"MaxVertices"`, which would terminate
 the evolution immediately once the limit-violating event is attempted, `"MaxGenerations"` would keep "filling in" events
 for as long as possible until no further matches within allowed generations are possible.
+
+Similarly, the evolution does not terminate when one expression reaches the `"MaxDestroyerEvents"`, but instead the
+expression is removed from future matches. Evolution continues until there are no more expressions whose destroyer
+events count is less than the maximum allowed.
 
 It is also possible to set the step count to `Automatic`, in which case `WolframModel` tries to automatically pick a
 number of steps that showcases the evolution without taking too long. It stops the evolution sooner if the state grows
