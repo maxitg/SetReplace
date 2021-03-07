@@ -42,7 +42,6 @@ PackageScope["$sameInputSetIsomorphicOutputs"]
 
 $maxEvents = "MaxEvents";
 $maxGenerationsLocal = "MaxGenerationsLocal";
-$maxDestroyerEvents = "MaxDestroyerEvents";
 $maxFinalVertices = "MaxFinalVertices";
 $maxFinalVertexDegree = "MaxFinalVertexDegree";
 $maxFinalExpressions = "MaxFinalExpressions";
