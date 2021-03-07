@@ -14,12 +14,12 @@
 
       (* UnknownObject *)
 
-      objectType[obj_unknownObject] := "Unknown";
+      objectType[_unknownObject] := "Unknown";
 
       (* String <-> Expression *)
 
-      objectType[string_String] := "String";
-      objectType[expr_expression] := "Expression";
+      objectType[_String] := "String";
+      objectType[_expression] := "Expression";
 
       declareTypeTranslation[stringToExpression, "String", "Expression"];
       stringToExpression[str_] := expression[ToExpression[str]];
@@ -29,8 +29,8 @@
 
       (* EvenInteger <-> HalfInteger *)
 
-      objectType[halfInteger_halfInteger] := "HalfInteger";
-      objectType[integer_evenInteger] := "EvenInteger";
+      objectType[_halfInteger] := "HalfInteger";
+      objectType[_evenInteger] := "EvenInteger";
 
       (** Translations **)
 
@@ -65,9 +65,38 @@
 
       multipliedNumber[args___][_] /; Length[{args}] != 1 := throwInvalidPropertyArgumentCount[1, Length[{args}]];
 
+      (** Non-translatable type **)
+
+      objectType[_Real] := "Real";
+      declareRawProperty[realDescription, "Real", description];
+      realDescription[][real_Real] := "I am a real " <> ToString[real] <> ".";
+      realDescription[args__][_] := throwInvalidPropertyArgumentCount[0, Length[{args}]];
+
+      Unprotect[$SetReplaceProperties];
+      Unprotect[$SetReplaceTypes];
       initializeTypeSystem[];
+      Protect[$SetReplaceTypes];
+      Protect[$SetReplaceProperties];
     ),
     "tests" -> {
+      (* Type and property lists *)
+      (* unknownObject is not here because there are no translations or properties defined for it, so it's invisible to
+         the type system. *)
+      VerificationTest[$SetReplaceTypes, Sort @ {"String", "Expression", "HalfInteger", "EvenInteger", "Real"}],
+      VerificationTest[$SetReplaceProperties, Sort @ {description, multipliedHalf}],
+
+      (* Type querying *)
+      VerificationTest[SetReplaceObjectType[evenInteger[4]], "EvenInteger"],
+      VerificationTest[SetReplaceObjectType[2.4], "Real"],
+      VerificationTest[SetReplaceObjectType[unknownObject[4]], "Unknown"],
+      testUnevaluated[SetReplaceObjectType[unseenObject[4]], SetReplaceObjectType::unknownObject],
+
+      VerificationTest[SetReplaceObjectQ[evenInteger[4]]],
+      VerificationTest[SetReplaceObjectQ[2.4]],
+      (* unknownObject an object because it returns a type even though it's not in $SetReplaceTypes. *)
+      VerificationTest[SetReplaceObjectQ[unknownObject[4]]],
+      VerificationTest[!SetReplaceObjectQ[unseenObject[4]]],
+
       (* Translations *)
       VerificationTest[
         SetReplaceTypeConvert["Expression"] @ SetReplaceTypeConvert["String"] @ expression[4], expression[4]],
@@ -89,6 +118,7 @@
       VerificationTest[description @ evenInteger[4], "I am an integer 4."],
       VerificationTest[description @ halfInteger[4], "I am an integer 8."],
       VerificationTest[description[] @ halfInteger[4], "I am an integer 8."], (* Operator form with no arguments *)
+      VerificationTest[description @ 2.4, "I am a real 2.4."],
 
       testUnevaluated[multipliedHalf[] @ halfInteger[3], multipliedHalf::invalidPropertyArgumentCount],
       testUnevaluated[multipliedHalf[1, 2, 3] @ halfInteger[3], multipliedHalf::invalidPropertyArgumentCount],
