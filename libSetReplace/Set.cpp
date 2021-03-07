@@ -115,7 +115,7 @@ class Set::Implementation {
     } else if (maxDestroyerEvents_ == std::numeric_limits<int64_t>::max()) {
       matcher_.deleteMatch(match);
     } else {
-      // Only remove expressions whose destroyer events count exceed the maximum.
+      // Only remove expressions whose destroyer events count reached the maximum.
       matcher_.deleteMatch(match);
       std::vector<ExpressionID> inputExpressionsToRemove;
       for (const auto& id : match->inputExpressions) {
@@ -194,10 +194,13 @@ class Set::Implementation {
     addExpressions(causalGraph_.allExpressionIDs(), initialExpressions);
   }
 
-  std::vector<Rule> optimizeRules(std::vector<Rule> rules, int64_t maxDestroyerEvents) {
+  std::vector<Rule> optimizeRules(const std::vector<Rule>& rules, uint64_t maxDestroyerEvents) {
     if (maxDestroyerEvents == 1) {
-      /* EventSelectionFunction is set to All when maxDestroyerEvents is 1 because all concurrently matched
-        expressions are always spacelike, and All is much faster to evaluate. */
+      // The real optimization happens later when we call separationTrackingMethod(1, rules) by setting
+      // SeparationTrackingMethod to None.
+      // EventSelectionFunction is set to All in each rule to prevent breaking: SeparationTrackingMethod::None causes
+      // isSpacelikeSeparated(...) to be always false for any expression pair, thus no new event whose rule is only
+      // applied when expressions are spacelike separated would occur.
       std::vector<Rule> newRules;
       newRules.reserve(rules.size());
       for (const auto& rule : rules) {

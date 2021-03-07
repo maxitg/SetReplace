@@ -35,7 +35,7 @@ class CausalGraph::Implementation {
   std::vector<ExpressionID> addEvent(const RuleID ruleID,
                                      const std::vector<ExpressionID>& inputExpressions,
                                      const int outputExpressionsCount) {
-    updateDestroyerEventsCount(inputExpressions);
+    incrementDestroyerEventsCount(inputExpressions);
     const auto newExpressions = createExpressions(events_.size(), outputExpressionsCount);
     const Generation generation = newEventGeneration(inputExpressions);
     events_.push_back({ruleID, inputExpressions, newExpressions, generation});
@@ -100,7 +100,7 @@ class CausalGraph::Implementation {
     return idsRange(beginIndex, expressionIDsToCreatorEvents_.size());
   }
 
-  void updateDestroyerEventsCount(const std::vector<ExpressionID>& inputExpressions) {
+  void incrementDestroyerEventsCount(const std::vector<ExpressionID>& inputExpressions) {
     for (const auto& id : inputExpressions) {
       ++expressionIDsToDestroyerEventsCount_[id];
     }

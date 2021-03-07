@@ -29,7 +29,7 @@ Set testSet(const int64_t maxDestroyerEvents, const EventSelectionFunction event
 
 constexpr auto doNotAbort = []() { return false; };
 
-const int64_t max64int = std::numeric_limits<int64_t>::max();
+constexpr int64_t max64int = std::numeric_limits<int64_t>::max();
 
 TEST(Set, globalSpacelike) {
   // Singleway systems are always spacelike, so it's not necessary to specify a spacelike selection function
