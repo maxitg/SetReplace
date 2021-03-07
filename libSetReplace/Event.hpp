@@ -87,7 +87,7 @@ class CausalGraph {
 
   /** @brief Number of destroyer events per expression.
    */
-  int64_t destroyerEventsCount(ExpressionID id) const;
+  uint64_t destroyerEventsCount(ExpressionID id) const;
 
  private:
   class Implementation;

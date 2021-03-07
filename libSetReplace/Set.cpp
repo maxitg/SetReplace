@@ -17,7 +17,7 @@ class Set::Implementation {
 
   // Determines the limiting conditions for the evaluation.
   StepSpecification stepSpec_ = {0, 0, 0, 0, 0};  // don't evolve unless asked to.
-  const int64_t maxDestroyerEvents_;
+  const uint64_t maxDestroyerEvents_;
   TerminationReason terminationReason_ = TerminationReason::NotTerminated;
 
   std::unordered_map<ExpressionID, AtomsVector> expressions_;
@@ -40,7 +40,7 @@ class Set::Implementation {
  public:
   Implementation(const std::vector<Rule>& rules,
                  const std::vector<AtomsVector>& initialExpressions,
-                 const int64_t maxDestroyerEvents,
+                 const uint64_t maxDestroyerEvents,
                  const Matcher::OrderingSpec& orderingSpec,
                  const Matcher::EventDeduplication& eventDeduplication,
                  const unsigned int randomSeed)
@@ -165,9 +165,9 @@ class Set::Implementation {
   const std::vector<Event>& events() const { return causalGraph_.events(); }
 
  private:
-  Implementation(std::vector<Rule> rules,
+  Implementation(const std::vector<Rule>& rules,
                  const std::vector<AtomsVector>& initialExpressions,
-                 const int64_t maxDestroyerEvents,
+                 const uint64_t maxDestroyerEvents,
                  const Matcher::OrderingSpec& orderingSpec,
                  const Matcher::EventDeduplication& eventDeduplication,
                  const unsigned int randomSeed,
@@ -373,9 +373,10 @@ class Set::Implementation {
     return smallestSoFar;
   }
 
-  static CausalGraph::SeparationTrackingMethod separationTrackingMethod(const int64_t maxDestroyerEvents,
+  static CausalGraph::SeparationTrackingMethod separationTrackingMethod(const uint64_t maxDestroyerEvents,
                                                                         const std::vector<Rule>& rules) {
     if (maxDestroyerEvents == 1) {
+      // No need of tracking the separation between expressions if these are removed after each destroyer event.
       return CausalGraph::SeparationTrackingMethod::None;
     }
     for (const auto& rule : rules) {
@@ -389,7 +390,7 @@ class Set::Implementation {
 
 Set::Set(const std::vector<Rule>& rules,
          const std::vector<AtomsVector>& initialExpressions,
-         int64_t maxDestroyerEvents,
+         uint64_t maxDestroyerEvents,
          const Matcher::OrderingSpec& orderingSpec,
          const Matcher::EventDeduplication& eventDeduplication,
          unsigned int randomSeed)

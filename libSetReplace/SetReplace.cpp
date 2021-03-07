@@ -227,7 +227,7 @@ int setInitialize(WolframLibraryData libData, mint argc, const MArgument* argv, 
   SetID thisSetID;
   std::vector<Rule> rules;
   std::vector<AtomsVector> initialExpressions;
-  int64_t maxDestroyerEvents;
+  uint64_t maxDestroyerEvents;
   Matcher::OrderingSpec orderingSpec;
   Matcher::EventDeduplication eventDeduplication;
   unsigned int randomSeed;

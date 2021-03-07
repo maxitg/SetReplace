@@ -71,7 +71,7 @@ class Set {
    */
   Set(const std::vector<Rule>& rules,
       const std::vector<AtomsVector>& initialExpressions,
-      int64_t maxDestroyerEvents,
+      uint64_t maxDestroyerEvents,
       const Matcher::OrderingSpec& orderingSpec,
       const Matcher::EventDeduplication& eventIdentification,
       unsigned int randomSeed = 0);

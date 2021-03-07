@@ -10,7 +10,7 @@ class CausalGraph::Implementation {
   // the first event is the "fake" initialization event
   std::vector<Event> events_;
   std::vector<EventID> expressionIDsToCreatorEvents_;
-  std::vector<int64_t> expressionIDsToDestroyerEventsCount_;
+  std::vector<uint64_t> expressionIDsToDestroyerEventsCount_;
 
   // needed to return the largest generation in O(1)
   Generation largestGeneration_ = 0;
@@ -90,7 +90,7 @@ class CausalGraph::Implementation {
     return SeparationType::Spacelike;
   }
 
-  int64_t destroyerEventsCount(const ExpressionID id) { return expressionIDsToDestroyerEventsCount_[id]; }
+  uint64_t destroyerEventsCount(const ExpressionID id) { return expressionIDsToDestroyerEventsCount_[id]; }
 
  private:
   std::vector<ExpressionID> createExpressions(const EventID creatorEvent, const int count) {
@@ -179,7 +179,7 @@ SeparationType CausalGraph::expressionsSeparation(const ExpressionID first, cons
   return implementation_->expressionsSeparation(first, second);
 }
 
-int64_t CausalGraph::destroyerEventsCount(const ExpressionID id) const {
+uint64_t CausalGraph::destroyerEventsCount(const ExpressionID id) const {
   return implementation_->destroyerEventsCount(id);
 }
 }  // namespace SetReplace
