@@ -11,16 +11,24 @@ Add a picture for the project if possible.
 
 ### The project goal
 
-A brief description of what the project is trying to achieve (remember, the summer school is only four weeks long).
+A brief description of what the project is trying to achieve. Remember, the summer school is only four weeks long, and
+in practice, there is only enough time to work for 2-3 of those weeks.
 
 * A specific deliverable of a project (*SetReplace* symbol, research note, etc.).
 * Another deliverable, if any.
+
+## Motivations
+
+An explanation of how the project will fit into the bigger picture. Will this project be a part of a longer-term effort?
+Add links to existing research notes/PRs/issues that are part of that effort.
 
 ### External prerequisites
 
 The things (external to *SetReplace*) the student must know to complete the project successfully. These are the things
 we will expect the student to have experience with before summer school. For example:
 
+* Familiarity with graphs.
+* Familiarity with linear algebra.
 * C++ experience.
 * Basic understanding of path integrals.
 
@@ -34,6 +42,11 @@ documentation/research notes. For example:
   [token-event graphs](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/ExpressionSeparations.md).
 * Familiarity with the
   [`GeneralizedGridGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/GeneralizedGridGraph.md) function.
+
+### Difficulty
+
+Given prerequisites, how difficult do you think the project is? What would be the most challenging about it? Are there
+any risks involved? If the project might end up being impossible, explain that here.
 
 ### Potential instructors
 
