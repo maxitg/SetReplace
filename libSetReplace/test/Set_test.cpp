@@ -61,6 +61,49 @@ TEST(Set, matchAllMultiway) {
             (std::vector<AtomsVector>{{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}, {2}, {4}, {5}, {5}, {6}, {6}}));
 }
 
+Set testSetMaxDestroyerEvents(const uint64_t maxDestroyerEvents, const EventSelectionFunction eventSelectionFunction) {
+  std::vector<Rule> rules;
+  // {{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}}
+  auto aRule = Rule({{{-1, -2}, {-2, -3}}, {{-2, -3}, {-2, -4}, {-3, -4}, {-2, -1}}, eventSelectionFunction});
+  rules.push_back(aRule);
+
+  std::vector<AtomsVector> initialExpressions = {{1, 1}, {1, 1}};
+
+  Matcher::OrderingSpec orderingSpec = {
+      {Matcher::OrderingFunction::SortedExpressionIDs, Matcher::OrderingDirection::Normal},
+      {Matcher::OrderingFunction::ReverseSortedExpressionIDs, Matcher::OrderingDirection::Normal},
+      {Matcher::OrderingFunction::ExpressionIDs, Matcher::OrderingDirection::Normal},
+      {Matcher::OrderingFunction::RuleIndex, Matcher::OrderingDirection::Normal}};
+  Matcher::EventDeduplication eventDeduplication = Matcher::EventDeduplication::None;
+  unsigned int randomSeed = 0;
+  return Set(rules, initialExpressions, maxDestroyerEvents, orderingSpec, eventDeduplication, randomSeed);
+}
+
+TEST(Set, maxDestroyerEvents1) {
+  Set aSetSpacelike = testSetMaxDestroyerEvents(1, EventSelectionFunction::Spacelike);
+  Set aSetAll = testSetMaxDestroyerEvents(1, EventSelectionFunction::All);
+  Set::StepSpecification stepSpec;
+  stepSpec.maxEvents = 5;
+
+  EXPECT_EQ(aSetSpacelike.replace(stepSpec, doNotAbort), aSetAll.replace(stepSpec, doNotAbort));
+  EXPECT_EQ(aSetSpacelike.events()[4].inputExpressions, aSetAll.events()[4].inputExpressions);
+}
+
+TEST(Set, maxDestroyerEventsMultiwaySpacelike) {
+  Set aSet2 = testSetMaxDestroyerEvents(2, EventSelectionFunction::Spacelike);
+  Set aSet3 = testSetMaxDestroyerEvents(3, EventSelectionFunction::Spacelike);
+  Set::StepSpecification stepSpec;
+  stepSpec.maxEvents = 5;
+
+  EXPECT_EQ(aSet2.replace(stepSpec, doNotAbort), aSet3.replace(stepSpec, doNotAbort));
+
+  EXPECT_EQ(aSet2.events()[5].inputExpressions, (std::vector<ExpressionID>{5, 3}));
+  EXPECT_EQ(aSet2.events()[5].outputExpressions, (std::vector<ExpressionID>{18, 19, 20, 21}));
+
+  EXPECT_EQ(aSet3.events()[5].inputExpressions, (std::vector<ExpressionID>{2, 5}));
+  EXPECT_EQ(aSet3.events()[5].outputExpressions, (std::vector<ExpressionID>{18, 19, 20, 21}));
+}
+
 TEST(Set, replaceOnce) {
   Matcher::OrderingSpec orderingSpec = {
       {Matcher::OrderingFunction::SortedExpressionIDs, Matcher::OrderingDirection::Normal},

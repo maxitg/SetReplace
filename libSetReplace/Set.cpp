@@ -106,7 +106,7 @@ class Set::Implementation {
 
     addExpressions(outputExpressionIDs, namedRuleOutputs);
 
-    if (maxDestroyerEvents_ == 1) {  // @TODO: maxDestroyerEvents_ == 0
+    if (maxDestroyerEvents_ == 1) {
       matcher_.removeMatchesInvolvingExpressions(match->inputExpressions);
       atomsIndex_.removeExpressions(match->inputExpressions);
       // The following only make sense for singleway systems.
