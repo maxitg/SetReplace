@@ -116,9 +116,9 @@ $terminationReasonCodes = <|
   7 -> $Aborted
 |>;
 
-(* By definition, a GlobalSpacelike event selection function has 1 as the max. number of destroyer events. *)
+(* GlobalSpacelike is syntactic sugar for "EventSelectionFunction" -> "MultiwaySpacelike", "MaxDestroyerEvents" -> 1 *)
 
-maxDestroyerEvents[_, $globalSpacelike] = 1;
+maxDestroyerEvents[Automatic | _ ? MissingQ, $globalSpacelike] = 1;
 maxDestroyerEvents[Automatic | _ ? MissingQ | Infinity, _] = $maxInt64;
 maxDestroyerEvents[n_, _] := n;
 
@@ -126,7 +126,7 @@ maxDestroyerEvents[n_, _] := n;
    1 -> Spacelike *)
 
 eventSelectionCodes[eventSelectionFunction_, ruleCount_] :=
-  ConstantArray[eventSelectionFunction /. {None -> 0, $globalSpacelike -> 1, $spacelike -> 1}, ruleCount];
+  ConstantArray[eventSelectionFunction /. {None -> 0, ($globalSpacelike | $spacelike) -> 1}, ruleCount];
 
 $orderingFunctionCodes = <|
   $sortedExpressionIDs -> 0,
