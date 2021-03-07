@@ -14,9 +14,12 @@ In the future, we will have multiple functions that generate these objects, such
 They will be able to take various computational systems as an argument, such as `MultisetSubstitutionSystem`,
 `HypergraphSubstitutionSystem` and `StringSubstitutionSystem`.
 
-We will also have properties implemented for some of these objects, e.g., `TokenEvenGraph`. These properties
-can transparently convert objects to the type required to evaluate them.
+We will also have [properties]($SetReplaceProperties.md) implemented for some of these objects, e.g., `TokenEventGraph`.
+These properties can transparently convert objects to the [type]($SetReplaceTypes.md) required to evaluate them.
 
 Most of the time, it is sufficient to rely on these automatic conversions. However, sometimes it might be useful to
 convert an object to a different type manually for persistence or optimization, in which case one can use the
 [`SetReplaceTypeConvert`](SetReplaceTypeConvert.md) function.
+
+[`SetReplaceObjectQ`](SetReplaceObjectQ.md) can be used to find out if an expression is a *SetReplace* object, and
+[`SetReplaceObjectType`](SetReplaceObjectType.md) can be used to determine its type.
