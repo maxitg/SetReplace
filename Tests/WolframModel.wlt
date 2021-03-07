@@ -355,6 +355,41 @@
         {4, 12, "MaxEvents"}
       ],
 
+      (*** MaxDestroyerEvents ***)
+
+      With[{rule = {{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}}, init = {{1, 1}, {1, 1}}},
+        {Table[
+          VerificationTest[
+            Max[Length /@ WolframModel[rule,
+                                        init,
+                                        <|"MaxEvents" -> 50, "MaxDestroyerEvents" -> max|>,
+                                        "EdgeDestroyerEventsIndices",
+                                        "EventSelectionFunction" -> selectionFunction]] <= max
+          ],
+          {max, 0, 10},
+          {selectionFunction, {"GlobalSpacelike", "MultiwaySpacelike", None}}],
+
+          VerificationTest[
+            Evaluate[SameQ @@ Table[
+              WolframModel[rule, init, <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 2|>, "EventSelectionFunction" -> f],
+              {f, {"GlobalSpacelike", "MultiwaySpacelike"}}]]
+          ]}
+      ],
+
+      With[{evolutions = Table[
+                                WolframModel[{{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}},
+                                              {{1, 1}, {1, 1}},
+                                              <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 1|>,
+                                              "EventSelectionFunction" -> selectionFunction],
+                                {selectionFunction, {"GlobalSpacelike", "MultiwaySpacelike", None}}]},
+        VerificationTest[Evaluate[SameQ @@ evolutions]]
+      ],
+
+      testUnevaluated[
+        WolframModel[1 -> 2, {1}, <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> -1|>],
+        {WolframModel::invalidSteps}
+      ],
+
       (*** MaxVertices ***)
 
       Table[With[{method = method, $simpleGrowingRule = {{1, 2}} -> {{1, 3}, {3, 2}}, $simpleGrowingInit = {{1, 1}}}, {
