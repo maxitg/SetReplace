@@ -23,3 +23,20 @@ convert an object to a different type manually for persistence or optimization, 
 
 [`SetReplaceObjectQ`](SetReplaceObjectQ.md) can be used to find out if an expression is a *SetReplace* object, and
 [`SetReplaceObjectType`](SetReplaceObjectType.md) can be used to determine its type.
+
+## Helper Symbols and Functions
+
+* Enumeration:
+  * [`$SetReplaceTypes`]($SetReplaceTypes.md)
+  * [`$SetReplaceProperties`]($SetReplaceProperties.md)
+  * [`$SetReplaceTypeGraph`]($SetReplaceTypeGraph.md) &mdash; a graph showing translations/property implementation paths
+    * Vertex types: [`SetReplaceType`](SetReplaceType.md),
+                    [`SetReplaceProperty`](SetReplaceProperty.md),
+                    [`SetReplaceMethodImplementation`](SetReplaceMethodImplementation.md)
+* Introspection:
+  * [`SetReplaceObjectQ`](SetReplaceObjectQ.md)
+  * [`SetReplaceObjectType`](SetReplaceObjectType.md)
+* Conversion:
+  * [`SetReplaceTypeConvert`](SetReplaceTypeConvert.md) &mdash; change an object from one type to another
+* Types:
+  * [`Multihistory`](Multihistory.md) &mdash; a generic kind of types for computational systems
