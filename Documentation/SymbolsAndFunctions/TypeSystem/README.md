@@ -30,7 +30,7 @@ convert an object to a different type manually for persistence or optimization, 
   * [`$SetReplaceTypes`]($SetReplaceTypes.md)
   * [`$SetReplaceProperties`]($SetReplaceProperties.md)
   * [`$SetReplaceTypeGraph`]($SetReplaceTypeGraph.md) &mdash; a graph showing translations/property implementation paths
-    * Vertex types: [`SetReplaceType`](SetReplaceType.md),
+    * Vertex heads: [`SetReplaceType`](SetReplaceType.md),
                     [`SetReplaceProperty`](SetReplaceProperty.md),
                     [`SetReplaceMethodImplementation`](SetReplaceMethodImplementation.md)
 * Introspection:
