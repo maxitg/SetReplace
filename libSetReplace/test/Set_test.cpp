@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include <unordered_map>
 #include <vector>
 
 #include "Match.hpp"
@@ -84,25 +85,35 @@ TEST(Set, maxDestroyerEvents1) {
   stepSpec.maxEvents = 5;
 
   EXPECT_EQ(aSetSpacelike.replace(stepSpec, doNotAbort), aSetAll.replace(stepSpec, doNotAbort));
+
   for (int i = 0; i <= stepSpec.maxEvents; ++i) {
     EXPECT_EQ(aSetSpacelike.events()[i].inputExpressions, aSetAll.events()[i].inputExpressions);
     EXPECT_EQ(aSetSpacelike.events()[i].outputExpressions, aSetAll.events()[i].outputExpressions);
+    EXPECT_EQ(aSetSpacelike.expressions(), aSetAll.expressions());
   }
+}
+
+std::unordered_map<ExpressionID, uint64_t> getDestroyerEventsCountMap(const std::vector<Event>& events) {
+  std::unordered_map<ExpressionID, uint64_t> destroyerEventsCountMap;
+  for (const auto& event : events) {
+    for (const auto& id : event.inputExpressions) {
+      destroyerEventsCountMap[id] += 1;
+    }
+  }
+  return destroyerEventsCountMap;
 }
 
 TEST(Set, maxDestroyerEventsN) {
   Set::StepSpecification stepSpec;
-  stepSpec.maxEvents = 5;
+  stepSpec.maxEvents = 50;
 
   for (int n = 0; n <= 20; ++n) {
     Set aSetSpacelike = testSetMaxDestroyerEvents(n, EventSelectionFunction::Spacelike);
-    Set aSetAll = testSetMaxDestroyerEvents(n, EventSelectionFunction::All);
+    aSetSpacelike.replace(stepSpec, doNotAbort);
 
-    EXPECT_EQ(aSetSpacelike.replace(stepSpec, doNotAbort), aSetAll.replace(stepSpec, doNotAbort));
-
-    for (int i = 0; i <= stepSpec.maxEvents; ++i) {
-      EXPECT_EQ(aSetSpacelike.events()[i].inputExpressions, aSetAll.events()[i].inputExpressions);
-      EXPECT_EQ(aSetSpacelike.events()[i].outputExpressions, aSetAll.events()[i].outputExpressions);
+    const auto& destroyerEventsCountMap = getDestroyerEventsCountMap(aSetSpacelike.events());
+    for (auto& iterator : destroyerEventsCountMap) {
+      EXPECT_LT(iterator.second, stepSpec.maxEvents);
     }
   }
 }
