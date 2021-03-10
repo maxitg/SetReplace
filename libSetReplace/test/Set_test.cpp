@@ -113,7 +113,7 @@ TEST(Set, maxDestroyerEventsN) {
 
     const auto& destroyerEventsCountMap = getDestroyerEventsCountMap(aSetSpacelike.events());
     for (auto& iterator : destroyerEventsCountMap) {
-      EXPECT_LT(iterator.second, n);
+      EXPECT_LE(iterator.second, n);
     }
   }
 }
