@@ -134,7 +134,8 @@ evolutionVideo[obj_, caller_, boundary_, o : OptionsPattern[]] := ModuleScope[Bl
   PrintTemporary["HypergraphPlotting..."];
 
   frames = Catenate[Function[{state, coordinateLists},
-      {state, Normal[#], Transpose[PlotRange[HypergraphPlot[state, VertexCoordinateRules -> Normal[#]]]]} & /@ coordinateLists] @@@
+      {state, Normal[#], Transpose[PlotRange[HypergraphPlot[state, VertexCoordinateRules -> Normal[#]]]]} & /@
+        coordinateLists] @@@
     Transpose[{states, frameCoordinates}]];
 
   plotRange = CoordinateBounds[Catenate[frames[[All, 3]]], $plotRangePadding];
@@ -143,9 +144,15 @@ evolutionVideo[obj_, caller_, boundary_, o : OptionsPattern[]] := ModuleScope[Bl
   startTime = AbsoluteTime[];
   PrintTemporary["Making video..."];
 
-  result = VideoGenerator[With[{index = Max[1, Round[# $frameRate]]}, HypergraphPlot[frames[[index, 1]], VertexCoordinateRules -> frames[[index, 2]], PlotRange -> plotRange]] &, N[Length[frames] / $frameRate], FrameRate -> $frameRate]
+  result = VideoGenerator[
+    With[{
+        index = Max[1, Round[# $frameRate]]},
+      HypergraphPlot[frames[[index, 1]], VertexCoordinateRules -> frames[[index, 2]], PlotRange -> plotRange]] &,
+    N[Length[frames] / $frameRate], FrameRate -> $frameRate];
 
-  (*result = VideoGenerator[Show[frames[[Max[1, Round[# $frameRate]]]], PlotRange -> plotRange] &, N[Length[frames] / $frameRate], FrameRate -> $frameRate];*)
+  (* result = VideoGenerator[
+    Show[frames[[Max[1, Round[# $frameRate]]]], PlotRange -> plotRange] &,
+    N[Length[frames] / $frameRate], FrameRate -> $frameRate]; *)
 
   Print["Making video: ", AbsoluteTime[] - startTime, " s"];
   result,
