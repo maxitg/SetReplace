@@ -355,6 +355,65 @@
         {4, 12, "MaxEvents"}
       ],
 
+      (*** MaxDestroyerEvents ***)
+      With[{rule = {{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}}, init = {{1, 1}, {1, 1}}},
+        {
+          VerificationTest[
+            WolframModel[
+              rule,
+              init,
+              <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 5|>,
+              "EventSelectionFunction" -> "GlobalSpacelike"],
+            WolframModel[
+              rule,
+              init,
+              <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 1|>,
+              "EventSelectionFunction" -> "GlobalSpacelike"]
+          ],
+
+          VerificationTest[
+            WolframModel[rule, init, <|"MaxEvents" -> 5|>],
+            WolframModel[
+              rule,
+              init,
+              <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 1|>,
+              "EventSelectionFunction" -> "MultiwaySpacelike"]
+          ],
+
+          VerificationTest[
+            WolframModel[
+              rule,
+              init,
+              <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 0|>,
+              "EventSelectionFunction" -> "MultiwaySpacelike"]["GenerationsCount"],
+            {0, 0}
+          ]
+        }
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}},
+          {{1, 1}, {1, 1}},
+          <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 2|>,
+          "EventSelectionFunction" -> "MultiwaySpacelike"]["EdgeDestroyerEventsIndices"],
+        {{1, 2}, {1, 2}, {3, 4}, {3, 5}, {4}, {5}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}},
+          {{1, 1}, {1, 1}},
+          <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 3|>,
+          "EventSelectionFunction" -> "MultiwaySpacelike"]["EdgeDestroyerEventsIndices"],
+        {{1, 2}, {1, 2}, {3, 4, 5}, {3}, {4}, {5}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}}
+      ],
+
+      testUnevaluated[
+        WolframModel[1 -> 2, {1}, <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> -1|>],
+        {WolframModel::invalidSteps}
+      ],
+
       (*** MaxVertices ***)
 
       Table[With[{method = method, $simpleGrowingRule = {{1, 2}} -> {{1, 3}, {3, 2}}, $simpleGrowingInit = {{1, 1}}}, {
