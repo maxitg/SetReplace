@@ -86,10 +86,10 @@ TEST(Set, maxDestroyerEvents1) {
 
   EXPECT_EQ(aSetSpacelike.replace(stepSpec, doNotAbort), aSetAll.replace(stepSpec, doNotAbort));
 
+  EXPECT_EQ(aSetSpacelike.expressions(), aSetAll.expressions());
   for (int i = 0; i <= stepSpec.maxEvents; ++i) {
     EXPECT_EQ(aSetSpacelike.events()[i].inputExpressions, aSetAll.events()[i].inputExpressions);
     EXPECT_EQ(aSetSpacelike.events()[i].outputExpressions, aSetAll.events()[i].outputExpressions);
-    EXPECT_EQ(aSetSpacelike.expressions(), aSetAll.expressions());
   }
 }
 
