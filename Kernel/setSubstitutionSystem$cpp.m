@@ -118,7 +118,7 @@ $terminationReasonCodes = <|
 
 (* GlobalSpacelike is syntactic sugar for "EventSelectionFunction" -> "MultiwaySpacelike", "MaxDestroyerEvents" -> 1 *)
 
-maxDestroyerEvents[Automatic | _ ? MissingQ, $globalSpacelike] = 1;
+maxDestroyerEvents[_, $globalSpacelike] = 1;
 maxDestroyerEvents[Automatic | _ ? MissingQ | Infinity, _] = $maxInt64;
 maxDestroyerEvents[n_, _] := n;
 
