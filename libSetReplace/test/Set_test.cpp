@@ -19,7 +19,6 @@ Set testSet(const uint64_t maxDestroyerEvents, const EventSelectionFunction even
 
   Matcher::OrderingSpec orderingSpec = {
       {Matcher::OrderingFunction::SortedExpressionIDs, Matcher::OrderingDirection::Normal},
-      {Matcher::OrderingFunction::ReverseSortedExpressionIDs, Matcher::OrderingDirection::Normal},
       {Matcher::OrderingFunction::ExpressionIDs, Matcher::OrderingDirection::Normal},
       {Matcher::OrderingFunction::RuleIndex, Matcher::OrderingDirection::Normal}};
   Matcher::EventDeduplication eventDeduplication = Matcher::EventDeduplication::None;
@@ -71,7 +70,6 @@ Set testSetMaxDestroyerEvents(const uint64_t maxDestroyerEvents, const EventSele
 
   Matcher::OrderingSpec orderingSpec = {
       {Matcher::OrderingFunction::SortedExpressionIDs, Matcher::OrderingDirection::Normal},
-      {Matcher::OrderingFunction::ReverseSortedExpressionIDs, Matcher::OrderingDirection::Normal},
       {Matcher::OrderingFunction::ExpressionIDs, Matcher::OrderingDirection::Normal},
       {Matcher::OrderingFunction::RuleIndex, Matcher::OrderingDirection::Normal}};
   Matcher::EventDeduplication eventDeduplication = Matcher::EventDeduplication::None;
@@ -86,7 +84,27 @@ TEST(Set, maxDestroyerEvents1) {
   stepSpec.maxEvents = 5;
 
   EXPECT_EQ(aSetSpacelike.replace(stepSpec, doNotAbort), aSetAll.replace(stepSpec, doNotAbort));
-  EXPECT_EQ(aSetSpacelike.events()[4].inputExpressions, aSetAll.events()[4].inputExpressions);
+  for (int i = 0; i <= stepSpec.maxEvents; ++i) {
+    EXPECT_EQ(aSetSpacelike.events()[i].inputExpressions, aSetAll.events()[i].inputExpressions);
+    EXPECT_EQ(aSetSpacelike.events()[i].outputExpressions, aSetAll.events()[i].outputExpressions);
+  }
+}
+
+TEST(Set, maxDestroyerEventsN) {
+  Set::StepSpecification stepSpec;
+  stepSpec.maxEvents = 5;
+
+  for (int n = 0; n <= 20; ++n) {
+    Set aSetSpacelike = testSetMaxDestroyerEvents(n, EventSelectionFunction::Spacelike);
+    Set aSetAll = testSetMaxDestroyerEvents(n, EventSelectionFunction::All);
+
+    EXPECT_EQ(aSetSpacelike.replace(stepSpec, doNotAbort), aSetAll.replace(stepSpec, doNotAbort));
+
+    for (int i = 0; i <= stepSpec.maxEvents; ++i) {
+      EXPECT_EQ(aSetSpacelike.events()[i].inputExpressions, aSetAll.events()[i].inputExpressions);
+      EXPECT_EQ(aSetSpacelike.events()[i].outputExpressions, aSetAll.events()[i].outputExpressions);
+    }
+  }
 }
 
 TEST(Set, maxDestroyerEventsMultiwaySpacelike) {

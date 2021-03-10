@@ -356,33 +356,57 @@
       ],
 
       (*** MaxDestroyerEvents ***)
-
-      With[{rule = {{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}}, init = {{1, 1}, {1, 1}}},
-        {Table[
+      With[{rule = {{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}}, init = {{1, 1}, {1,1}}},
+        {
           VerificationTest[
-            Max[Length /@ WolframModel[rule,
-                                        init,
-                                        <|"MaxEvents" -> 50, "MaxDestroyerEvents" -> max|>,
-                                        "EdgeDestroyerEventsIndices",
-                                        "EventSelectionFunction" -> selectionFunction]] <= max
+            WolframModel[
+              rule,
+              init,
+              <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 5|>,
+              "EventSelectionFunction" -> "GlobalSpacelike"],
+            WolframModel[
+              rule,
+              init,
+              <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 1|>,
+              "EventSelectionFunction" -> "GlobalSpacelike"]
           ],
-          {max, 0, 10},
-          {selectionFunction, {"GlobalSpacelike", "MultiwaySpacelike", None}}],
 
           VerificationTest[
-            Evaluate[SameQ @@ Table[
-              WolframModel[rule, init, <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 2|>, "EventSelectionFunction" -> f],
-              {f, {"GlobalSpacelike", "MultiwaySpacelike"}}]]
-          ]}
+            WolframModel[rule, init, <|"MaxEvents" -> 5|>],
+            WolframModel[
+              rule,
+              init,
+              <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 1|>,
+              "EventSelectionFunction" -> "MultiwaySpacelike"]
+          ],
+
+          VerificationTest[
+            WolframModel[
+              rule,
+              init,
+              <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 0|>,
+              "EventSelectionFunction" -> "MultiwaySpacelike"]["GenerationsCount"],
+            {0, 0}
+          ]
+        }
       ],
 
-      With[{evolutions = Table[
-                                WolframModel[{{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}},
-                                              {{1, 1}, {1, 1}},
-                                              <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 1|>,
-                                              "EventSelectionFunction" -> selectionFunction],
-                                {selectionFunction, {"GlobalSpacelike", "MultiwaySpacelike", None}}]},
-        VerificationTest[Evaluate[SameQ @@ evolutions]]
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}},
+          {{1, 1}, {1,1}},
+          <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 2|>,
+          "EventSelectionFunction" -> "MultiwaySpacelike"]["EdgeDestroyerEventsIndices"],
+        {{1, 2}, {1, 2}, {3, 4}, {3, 5}, {4}, {5}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}}
+      ],
+
+      VerificationTest[
+        WolframModel[
+          {{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}},
+          {{1, 1}, {1,1}},
+          <|"MaxEvents" -> 5, "MaxDestroyerEvents" -> 3|>,
+          "EventSelectionFunction" -> "MultiwaySpacelike"]["EdgeDestroyerEventsIndices"],
+        {{1, 2}, {1, 2}, {3, 4, 5}, {3}, {4}, {5}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}}
       ],
 
       testUnevaluated[
