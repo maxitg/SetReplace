@@ -23,7 +23,6 @@ class Set {
     DisconnectedInputs,
     NonPositiveAtoms,
     AtomCountOverflow,
-    InvalidSystemType,
     FinalStateStepSpecificationForMultiwaySystem
   };
 
@@ -49,13 +48,6 @@ class Set {
     int64_t maxFinalExpressions = stepLimitDisabled;
   };
 
-  /** @brief All possible functions available to select events. Some of these will cause multiway evolution.
-   */
-  enum class SystemType {
-    Singleway = 0,  // default singleway evolution, a single branch of the multiway system
-    Multiway = 1    // multiway system, expression separations are restricted by event selection functions of rules
-  };
-
   /** @brief Status of evaluation / termination reason if evaluation is finished.
    */
   enum class TerminationReason {
@@ -70,16 +62,16 @@ class Set {
   };
 
   /** @brief Creates a new set with a given set of evolution rules, and initial condition.
-   * @param rules substittion rules used for evolution. Note, these rules cannot be changed.
+   * @param rules substitution rules used for evolution. Note, these rules cannot be changed.
    * @param initialExpressions initial condition. It will be lazily indexed before the first replacement.
-   * @param systemType whether the system is a multiway or a singleway system..
+   * @param maxDestroyerEvents maximum number of allowed destroyer events per expression.
    * @param orderingSpec in which order to apply events.
    * @param eventIdentification defines which events should be treated as identical.
    * @param randomSeed the seed to use for selecting matches in random evaluation case.
    */
   Set(const std::vector<Rule>& rules,
       const std::vector<AtomsVector>& initialExpressions,
-      const SystemType& systemType,
+      uint64_t maxDestroyerEvents,
       const Matcher::OrderingSpec& orderingSpec,
       const Matcher::EventDeduplication& eventIdentification,
       unsigned int randomSeed = 0);

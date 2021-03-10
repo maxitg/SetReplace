@@ -17,7 +17,7 @@ class Set::Implementation {
 
   // Determines the limiting conditions for the evaluation.
   StepSpecification stepSpec_ = {0, 0, 0, 0, 0};  // don't evolve unless asked to.
-  const SystemType systemType_;
+  const uint64_t maxDestroyerEvents_;
   TerminationReason terminationReason_ = TerminationReason::NotTerminated;
 
   std::unordered_map<ExpressionID, AtomsVector> expressions_;
@@ -40,14 +40,14 @@ class Set::Implementation {
  public:
   Implementation(const std::vector<Rule>& rules,
                  const std::vector<AtomsVector>& initialExpressions,
-                 const SystemType& systemType,
+                 const uint64_t maxDestroyerEvents,
                  const Matcher::OrderingSpec& orderingSpec,
                  const Matcher::EventDeduplication& eventDeduplication,
                  const unsigned int randomSeed)
       : Implementation(
             rules,
             initialExpressions,
-            systemType,
+            maxDestroyerEvents,
             orderingSpec,
             eventDeduplication,
             randomSeed,
@@ -98,18 +98,6 @@ class Set::Implementation {
 
     // At this point, we are committed to modifying the set.
 
-    // This goes first, as if the system type is invalid, we want to fail before modifying anything else.
-    if (systemType_ == SystemType::Singleway) {
-      matcher_.removeMatchesInvolvingExpressions(match->inputExpressions);
-      atomsIndex_.removeExpressions(match->inputExpressions);
-      destroyedExpressionsCount_ += match->inputExpressions.size();
-      updateAtomDegrees(&atomDegrees_, match->inputExpressions, -1);
-    } else if (systemType_ == SystemType::Multiway) {
-      matcher_.deleteMatch(match);
-    } else {
-      throw Error::InvalidSystemType;
-    }
-
     // Name newly created atoms as well, now all atoms in the output are explicitly named.
     const auto namedRuleOutputs = nameAnonymousAtoms(explicitRuleOutputs);
 
@@ -118,12 +106,36 @@ class Set::Implementation {
 
     addExpressions(outputExpressionIDs, namedRuleOutputs);
 
+    if (maxDestroyerEvents_ == 1) {
+      matcher_.removeMatchesInvolvingExpressions(match->inputExpressions);
+      atomsIndex_.removeExpressions(match->inputExpressions);
+      // The following only make sense for singleway systems.
+      destroyedExpressionsCount_ += match->inputExpressions.size();
+      updateAtomDegrees(&atomDegrees_, match->inputExpressions, -1);
+    } else if (maxDestroyerEvents_ == static_cast<uint64_t>(std::numeric_limits<int64_t>::max())) {
+      matcher_.deleteMatch(match);
+    } else {
+      // Only remove expressions whose destroyer events count reached the maximum.
+      matcher_.deleteMatch(match);
+      std::vector<ExpressionID> inputExpressionsToRemove;
+      for (const auto& id : match->inputExpressions) {
+        if (causalGraph_.destroyerEventsCount(id) >= maxDestroyerEvents_) {
+          inputExpressionsToRemove.push_back(id);
+        }
+      }
+      matcher_.removeMatchesInvolvingExpressions(inputExpressionsToRemove);
+      atomsIndex_.removeExpressions(inputExpressionsToRemove);
+    }
+
     return 1;
   }
 
   int64_t replace(const StepSpecification stepSpec, const std::function<bool()>& shouldAbort) {
     updateStepSpec(stepSpec);
     int64_t count = 0;
+    if (maxDestroyerEvents_ == 0) {
+      return count;
+    }
     while (true) {
       if (replaceOnce(shouldAbort)) {
         ++count;
@@ -156,17 +168,17 @@ class Set::Implementation {
   const std::vector<Event>& events() const { return causalGraph_.events(); }
 
  private:
-  Implementation(std::vector<Rule> rules,
+  Implementation(const std::vector<Rule>& rules,
                  const std::vector<AtomsVector>& initialExpressions,
-                 const SystemType& systemType,
+                 const uint64_t maxDestroyerEvents,
                  const Matcher::OrderingSpec& orderingSpec,
                  const Matcher::EventDeduplication& eventDeduplication,
                  const unsigned int randomSeed,
                  const GetAtomsVectorFunc& getAtomsVector,
                  const GetExpressionsSeparationFunc& getExpressionsSeparation)
-      : rules_(rules),
-        systemType_(systemType),
-        causalGraph_(static_cast<int>(initialExpressions.size()), separationTrackingMethod(systemType, rules)),
+      : rules_(optimizeRules(rules, maxDestroyerEvents)),
+        maxDestroyerEvents_(maxDestroyerEvents),
+        causalGraph_(static_cast<int>(initialExpressions.size()), separationTrackingMethod(maxDestroyerEvents, rules)),
         atomsIndex_(getAtomsVector),
         matcher_(rules_,
                  &atomsIndex_,
@@ -183,6 +195,24 @@ class Set::Implementation {
       }
     }
     addExpressions(causalGraph_.allExpressionIDs(), initialExpressions);
+  }
+
+  std::vector<Rule> optimizeRules(const std::vector<Rule>& rules, uint64_t maxDestroyerEvents) {
+    if (maxDestroyerEvents == 1) {
+      // The real optimization happens later when we call separationTrackingMethod(1, rules) by setting
+      // SeparationTrackingMethod to None.
+      // EventSelectionFunction is set to All in each rule to prevent breaking: SeparationTrackingMethod::None causes
+      // isSpacelikeSeparated(...) to be always false for any expression pair, thus no new event whose rule is only
+      // applied when expressions are spacelike separated would occur.
+      std::vector<Rule> newRules;
+      newRules.reserve(rules.size());
+      for (const auto& rule : rules) {
+        newRules.push_back(Rule{rule.inputs, rule.outputs, EventSelectionFunction::All});
+      }
+      return newRules;
+    } else {
+      return rules;
+    }
   }
 
   Atom incrementNextAtom() {
@@ -223,7 +253,7 @@ class Set::Implementation {
     unindexedExpressions_.clear();
   }
 
-  bool isMultiway() const { return systemType_ != SystemType::Singleway; }
+  bool isMultiway() const { return maxDestroyerEvents_ > 1; }
 
   TerminationReason willExceedAtomLimits(const std::vector<AtomsVector>& explicitRuleInputs,
                                          const std::vector<AtomsVector>& explicitRuleOutputs) const {
@@ -349,9 +379,10 @@ class Set::Implementation {
     return smallestSoFar;
   }
 
-  static CausalGraph::SeparationTrackingMethod separationTrackingMethod(const SystemType systemType,
+  static CausalGraph::SeparationTrackingMethod separationTrackingMethod(const uint64_t maxDestroyerEvents,
                                                                         const std::vector<Rule>& rules) {
-    if (systemType == SystemType::Singleway) {
+    if (maxDestroyerEvents == 1) {
+      // No need of tracking the separation between expressions if these are removed after each destroyer event.
       return CausalGraph::SeparationTrackingMethod::None;
     }
     for (const auto& rule : rules) {
@@ -365,12 +396,12 @@ class Set::Implementation {
 
 Set::Set(const std::vector<Rule>& rules,
          const std::vector<AtomsVector>& initialExpressions,
-         const SystemType& eventSelectionFunction,
+         uint64_t maxDestroyerEvents,
          const Matcher::OrderingSpec& orderingSpec,
          const Matcher::EventDeduplication& eventDeduplication,
          unsigned int randomSeed)
     : implementation_(std::make_shared<Implementation>(
-          rules, initialExpressions, eventSelectionFunction, orderingSpec, eventDeduplication, randomSeed)) {}
+          rules, initialExpressions, maxDestroyerEvents, orderingSpec, eventDeduplication, randomSeed)) {}
 
 int64_t Set::replaceOnce(const std::function<bool()>& shouldAbort) {
   return implementation_->replaceOnce(shouldAbort, true);

@@ -85,6 +85,10 @@ class CausalGraph {
    */
   SeparationType expressionsSeparation(ExpressionID first, ExpressionID second) const;
 
+  /** @brief Number of destroyer events per expression.
+   */
+  uint64_t destroyerEventsCount(ExpressionID id) const;
+
  private:
   class Implementation;
   std::shared_ptr<Implementation> implementation_;
