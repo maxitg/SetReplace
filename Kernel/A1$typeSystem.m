@@ -226,7 +226,8 @@ initializePublicTypeGraph[] := Module[{extendedGraphEdges},
                    _SetReplaceMethodImplementation -> style[$lightTheme][$methodImplementationVertexSize]},
     EdgeStyle -> style[$lightTheme][$typeGraphEdgeStyle],
     GraphLayout -> style[$lightTheme][$typeGraphLayout],
-    Background -> style[$lightTheme][$typeGraphBackground]]
+    Background -> style[$lightTheme][$typeGraphBackground],
+    PerformanceGoal -> "Quality"]
 ];
 
 (* This function is called in init.m after all other files are loaded. *)
