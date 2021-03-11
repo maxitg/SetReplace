@@ -7,6 +7,11 @@ PackageExport["SetReplaceObjectType"]
 PackageExport["SetReplaceObjectQ"]
 PackageExport["$SetReplaceTypes"]
 PackageExport["$SetReplaceProperties"]
+PackageExport["$SetReplaceTypeGraph"]
+
+PackageExport["SetReplaceType"]
+PackageExport["SetReplaceProperty"]
+PackageExport["SetReplaceMethodImplementation"]
 
 PackageScope["declareTypeTranslation"]
 PackageScope["declareRawProperty"]
@@ -15,6 +20,20 @@ PackageScope["objectType"]
 PackageScope["throwInvalidPropertyArgumentCount"]
 
 PackageScope["initializeTypeSystem"]
+
+(* SetReplaceType and SetReplaceProperty should be public because they are returned by SetReplaceTypeGraph. *)
+
+SetUsage @ "
+SetReplaceType[type$] represents a SetReplace type$.
+";
+
+SyntaxInformation[SetReplaceType] = {"ArgumentsPattern" -> {type_}};
+
+SetUsage @ "
+SetReplaceProperty[property$] represents a SetReplace property$.
+";
+
+SyntaxInformation[SetReplaceProperty] = {"ArgumentsPattern" -> {property_}};
 
 (* Object classes (like Multihistory) are expected to define their own objectType[...] implementation. This one is
    triggered if no other is found. *)
@@ -57,14 +76,10 @@ SetReplaceObjectQ[object_] := Catch[objectType[object]; True, _ ? FailureQ, Fals
 (* Type translation functions can throw failure objects, in which case a message will be generated with a name
    corresponding to the Failure's type, and the keys passed to the message template. *)
 
-SetUsage @ "
-$SetReplaceTypes gives the list of all types defined in SetReplace.
-";
-
 $translations = {};
 
 declareTypeTranslation[function_, fromType_, toType_] :=
-  AppendTo[$translations, {function, type[fromType], type[toType]}];
+  AppendTo[$translations, {function, SetReplaceType[fromType], SetReplaceType[toType]}];
 
 (* This function is called after all declarations to combine translations to a Graph to allow multi-step conversions. *)
 
@@ -102,8 +117,9 @@ declareMessage[General::noConversionPath, "Cannot convert an object from `from` 
 
 typeConvert[toType_][object_] := ModuleScope[
   fromType = objectType[object];
-  If[!VertexQ[$typeGraph, type[#]], throw[Failure["unconvertibleType", <|"type" -> #|>]]] & /@ {fromType, toType};
-  path = FindShortestPath[$typeGraph, type[fromType], type[toType]];
+  If[!VertexQ[$typeGraph, SetReplaceType[#]], throw[Failure["unconvertibleType", <|"type" -> #|>]]] & /@
+    {fromType, toType};
+  path = FindShortestPath[$typeGraph, SetReplaceType[fromType], SetReplaceType[toType]];
   If[path === {} && toType =!= fromType,
     throw[Failure["noConversionPath", <|"from" -> fromType, "to" -> toType|>]];
   ];
@@ -119,14 +135,10 @@ typeConvert[toType_][object_] := ModuleScope[
    toProperty will need to be called as toProperty[args___][object_] or toProperty[object_, args___] where object can be
    of any type convertable to the implemented one. *)
 
-SetUsage @ "
-$SetReplaceProperties gives the list of all properties defined in SetReplace.
-";
-
 $rawProperties = {};
 
 declareRawProperty[implementationFunction_, fromType_, toProperty_Symbol] :=
-  AppendTo[$rawProperties, {implementationFunction, type[fromType], property[toProperty]}];
+  AppendTo[$rawProperties, {implementationFunction, SetReplaceType[fromType], SetReplaceProperty[toProperty]}];
 
 (* This function is called after all declarations to combine implementations to a Graph to allow multi-step conversions
    and to define DownValues for all property symbols. *)
@@ -136,7 +148,7 @@ initializeRawProperties[] := Module[{newEdges},
   $propertyEvaluationFunctions = AssociationThread[newEdges -> (First /@ $rawProperties)];
   $typeGraph = EdgeAdd[$typeGraph, Keys[$propertyEvaluationFunctions]];
 
-  defineDownValuesForProperty /@ First /@ VertexList[$typeGraph, _property];
+  defineDownValuesForProperty /@ First /@ VertexList[$typeGraph, _SetReplaceProperty];
 ];
 
 (* declareCompositeProperty declares an implementation for a property that takes other properties as arguments. The
@@ -166,9 +178,57 @@ initializeCompositeProperties[] := (
 freeFromInternalSymbolsQ[expr_] :=
   NoneTrue[Context /@ Cases[expr, _Symbol, {0, Infinity}, Heads -> True], StringMatchQ[#, "SetReplace`" ~~ __] &];
 
-initializeConstants[] :=
+SetUsage @ "
+$SetReplaceTypes gives the list of all types defined in SetReplace.
+";
+
+SetUsage @ "
+$SetReplaceProperties gives the list of all properties defined in SetReplace.
+";
+
+initializeTypeAndPropertyLists[] :=
   {$SetReplaceTypes, $SetReplaceProperties} =
-    Select[freeFromInternalSymbolsQ] /@ (Sort[First /@ VertexList[$typeGraph, #]] &) /@ {_type, _property};
+    Sort @ Select[freeFromInternalSymbolsQ][First /@ VertexList[$typeGraph, #]] & /@
+      {_SetReplaceType, _SetReplaceProperty};
+
+SetUsage @ "
+$SetReplaceTypeGraph gives the Graph of types and properties implemented in SetReplace.
+";
+
+SetUsage @ "
+SetReplaceMethodImplementation[symbol$] represents an implementation of a SetReplace method, such as a translation or \
+property.
+";
+
+SyntaxInformation[SetReplaceMethodImplementation] = {"SetReplaceMethodImplementation" -> {symbol_}};
+
+typeGraphVertexLabel[kind_, name_] :=
+  If[!freeFromInternalSymbolsQ[name] || kind === SetReplaceMethodImplementation, Placed[#, Tooltip] &, Identity] @
+    If[kind === SetReplaceProperty, ToString[#] <> "[\[Ellipsis]]" &, Identity] @
+      name;
+
+insertImplementationVertex[inputEdge : DirectedEdge[from_, to_]] := ModuleScope[
+  implementationSource = If[MatchQ[to, _SetReplaceProperty], $propertyEvaluationFunctions, $translationFunctions];
+  {DirectedEdge[from, SetReplaceMethodImplementation[implementationSource[inputEdge]]],
+   DirectedEdge[SetReplaceMethodImplementation[implementationSource[inputEdge]], to]}
+];
+
+initializePublicTypeGraph[] := Module[{extendedGraphEdges},
+  extendedGraphEdges = Catenate[insertImplementationVertex /@ EdgeList[$typeGraph]];
+  $SetReplaceTypeGraph = Graph[
+    DirectedEdge @@@ extendedGraphEdges,
+    VertexLabels -> kind_[name_] :> typeGraphVertexLabel[kind, name],
+    VertexStyle -> {_SetReplaceType -> style[$lightTheme][$typeVertexStyle],
+                    _SetReplaceProperty -> style[$lightTheme][$propertyVertexStyle],
+                    _SetReplaceMethodImplementation -> style[$lightTheme][$methodImplementationVertexStyle]},
+    VertexSize -> {_SetReplaceType -> style[$lightTheme][$typeVertexSize],
+                   _SetReplaceProperty -> style[$lightTheme][$propertyVertexSize],
+                   _SetReplaceMethodImplementation -> style[$lightTheme][$methodImplementationVertexSize]},
+    EdgeStyle -> style[$lightTheme][$typeGraphEdgeStyle],
+    GraphLayout -> style[$lightTheme][$typeGraphLayout],
+    Background -> style[$lightTheme][$typeGraphBackground],
+    PerformanceGoal -> "Quality"]
+];
 
 (* This function is called in init.m after all other files are loaded. *)
 
@@ -176,7 +236,8 @@ initializeTypeSystem[] := (
   initializeTypeSystemTranslations[];
   initializeRawProperties[];
   initializeCompositeProperties[];
-  initializeConstants[];
+  initializeTypeAndPropertyLists[];
+  initializePublicTypeGraph[];
 );
 
 (* defineDownValuesForProperty defines both the operator form and the normal form for a property symbol. The DownValues
@@ -232,8 +293,8 @@ defineDownValuesForProperty[publicProperty_] := (
 
   propertyImplementation[publicProperty][args___][object_] := ModuleScope[
     fromType = objectType[object];
-    If[!VertexQ[$typeGraph, type[fromType]], throw[Failure["unknownType", <|"type" -> fromType|>]]];
-    path = FindShortestPath[$typeGraph, type[fromType], property[publicProperty]];
+    If[!VertexQ[$typeGraph, SetReplaceType[fromType]], throw[Failure["unknownType", <|"type" -> fromType|>]]];
+    path = FindShortestPath[$typeGraph, SetReplaceType[fromType], SetReplaceProperty[publicProperty]];
     If[path === {},
       throw[Failure["noPropertyPath", <|"type" -> fromType, "property" -> publicProperty|>]];
     ];
