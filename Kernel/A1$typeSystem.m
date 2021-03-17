@@ -204,7 +204,7 @@ SyntaxInformation[SetReplaceMethodImplementation] = {"SetReplaceMethodImplementa
 
 typeGraphVertexLabel[kind_, name_] :=
   If[!freeFromInternalSymbolsQ[name] || kind === SetReplaceMethodImplementation, Placed[#, Tooltip] &, Identity] @
-    If[kind === SetReplaceProperty, ToString[#] <> "[\[Ellipsis]]" &, Identity] @
+    If[kind === SetReplaceProperty, ToString[#] <> "[\[Ellipsis]]" &, ToString] @
       name;
 
 insertImplementationVertex[inputEdge : DirectedEdge[from_, to_]] := ModuleScope[
