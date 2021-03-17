@@ -41,17 +41,16 @@ multisetSubstitutionSystem[rawRules_,
 
   (* TODO: implement automatic rule hints, such as inputs count and atoms index *)
 
-  expressions = createDynamicArray[init];
-  eventRuleIndices = createDynamicArray[{0}]; (* the first event is the initial event *)
-  eventInputs = createDynamicArray[{{}}];
-  eventOutputs = createDynamicArray[{Range @ Length @ init}];
-  eventGenerations = createDynamicArray[{0}];
-  expressionCreatorEvents = createDynamicArray[ConstantArray[1, Length @ init]];
-  expressionDestroyerEventsCount = createDynamicArray[ConstantArray[0, Length @ init]];
+  expressions = CreateDataStructure["DynamicArray", init];
+  eventRuleIndices = CreateDataStructure["DynamicArray", {0}]; (* the first event is the initial event *)
+  eventInputs = CreateDataStructure["DynamicArray", {{}}];
+  eventOutputs = CreateDataStructure["DynamicArray", {Range @ Length @ init}];
+  eventGenerations = CreateDataStructure["DynamicArray", {0}];
+  expressionCreatorEvents = CreateDataStructure["DynamicArray", ConstantArray[1, Length @ init]];
+  expressionDestroyerEventsCount = CreateDataStructure["DynamicArray", ConstantArray[0, Length @ init]];
   (* destroyerChoices[eventID][expressionID] -> eventID. See libSetReplace/Event.cpp for more information. *)
-  destroyerChoices = createDynamicArray[{CreateDataStructure["HashTable"]}];
-  eventInputsHashSet = CreateDataStructure["HashSet"];
-  eventInputsHashSet["Insert", {}];
+  destroyerChoices = CreateDataStructure["DynamicArray", {CreateDataStructure["HashTable"]}];
+  eventInputsHashSet = CreateDataStructure["HashSet", {{}}];
 
   (* TODO: eventInputsHashSet should be optimized significantly and be used to skip partial scans. Otherwise, past
            expressions are being continuously scanned every step.
@@ -235,14 +234,6 @@ createEvent[rules_, ruleIndex_, matchedExpressions_][expressions_,
     ], Normal[destroyerChoices["Part", inputEvent]]];
   ) &, matchedExpressions];
   destroyerChoices["Append", newDestroyerChoices];
-];
-
-(* Init *)
-
-createDynamicArray[contents_] := ModuleScope[
-  array = CreateDataStructure["DynamicArray"];
-  Scan[array["Append", #] &, contents];
-  array
 ];
 
 (* Parsing *)
