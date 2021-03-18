@@ -43,7 +43,7 @@ $constraintsSpecPattern =
 (* Every generator needs to call this function in order to be usable through GenerateMultihistory and related functions.
    The metadata about selection, ordering and stopping conditions will be used to automatically check the arguments.
    The implementation function can expect event selection and stopping conditions to be passed as associations with
-   all specified keys present and valid according to the constraint (substituted with defaults if necessary).
+   all specified keys present and valid according to the constraint (substituted with defaults if missing).
    Event ordering will be passed as a list of strings from the eventOrderings argument. *)
 
 (* For example,
@@ -101,7 +101,7 @@ declareMessage[General::unknownSystem, "System `system` in `expr` is not recogni
 generateMultihistory[system_, __] := throw[Failure["unknownSystem", <|"system" -> system|>]];
 
 (* Parsing *)
-(* Instead of associations, lists of rules and single rules are allowed. *)
+(* In addition to associations, lists of rules and single rules are allowed. *)
 
 parseConstraints[errorName_][specs_][listOfRules : {___Rule}] :=
   parseConstraints[errorName][specs][listOfRules, Association[listOfRules]];
@@ -109,11 +109,11 @@ parseConstraints[errorName_][specs_][rule_Rule] := parseConstraints[errorName][s
 parseConstraints[errorName_][specs_][associationOrInvalid_] :=
   parseConstraints[errorName][specs][associationOrInvalid, associationOrInvalid];
 parseConstraints[_][specs_][_, argument_Association] /; SubsetQ[Keys[specs], Keys[argument]] :=
-  Association @ KeyValueMap[#1 -> checkParameter[#1, #2[[2]]] @ Lookup[argument, #1, #2[[1]]]& , specs];
-declareMessage[
-  General::invalidEventSelection, "Event selection spec `argument` should be an Association with keys from `choices`."];
+  Association @ KeyValueMap[#1 -> checkParameter[#1, #2[[2]]] @ Lookup[argument, #1, #2[[1]]] &, specs];
+declareMessage[General::invalidEventSelection,
+               "Event selection spec `argument` in `expr` should be an Association with keys from `choices`."];
 declareMessage[General::invalidStoppingCondition,
-               "Stopping condition spec `argument` should be an Association with keys from `choices`."];
+               "Stopping condition spec `argument` in `expr` should be an Association with keys from `choices`."];
 parseConstraints[errorName_][specs_][originalArgument_, _] :=
   throw[Failure[errorName, <|"argument" -> originalArgument, "choices" -> Keys[specs]|>]];
 
@@ -126,7 +126,7 @@ parseTokenDeduplication[value_] :=
 
 parseEventOrdering[supportedFunctions_][argument_List] /; SubsetQ[supportedFunctions, argument] := argument;
 declareMessage[
-  General::invalidEventOrdering, "Event ordering spec `argument` should be a List of values from `choices`."];
+  General::invalidEventOrdering, "Event ordering spec `argument` in `expr` should be a List of values from `choices`."];
 parseEventOrdering[supportedFunctions_][argument_] :=
   throw[Failure["invalidEventOrdering", <|"argument" -> argument, "choices" -> supportedFunctions|>]];
 
