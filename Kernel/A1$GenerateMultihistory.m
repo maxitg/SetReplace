@@ -26,7 +26,7 @@ evaluation to stop immediately. The list of choices can be obtained with Stoppin
 ";
 
 SyntaxInformation[GenerateMultihistory] = {"ArgumentsPattern" ->
-  {system_, eventSelectionSpec_, tokenDeduplicationSpec_, eventOrderingSpec_, stoppingConditionSpec_, init_.}};
+  {system_, eventSelectionSpec_, tokenDeduplicationSpec_, eventOrderingSpec_, stoppingConditionSpec_}};
 
 (* Declaration *)
 
