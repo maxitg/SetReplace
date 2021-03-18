@@ -6,10 +6,10 @@ various computational systems.
 We have just started working on this new system as part of *SetReplace 0.4 Yellowstone*, and no specific types have been
 implemented yet.
 
-In the future, we will have multiple functions that generate these objects, such as `GenerateMultihistory`,
-`GenerateAllHistories` and `GenerateSingleHistory`.
+`Multihistory` objects can be created with functions such as
+[`GenerateMultihistory`](/Documentation/SymbolsAndFunctions/Generators/GenerateMultihistory.md).
 
-They will be able to take various computational systems as an argument, such as `MultisetSubstitutionSystem`,
+These functions will be able to take various computational systems as an argument, such as `MultisetSubstitutionSystem`,
 `HypergraphSubstitutionSystem` and `StringSubstitutionSystem`.
 
 We will also have [properties]($SetReplaceProperties.md) implemented for some of these objects, e.g., `TokenEventGraph`.
