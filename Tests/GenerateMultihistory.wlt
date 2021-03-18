@@ -58,6 +58,14 @@
                                  {},
                                  $defaultStoppingConditions,
                                  0]] & /@ {<|"MaxGeneration" -> 2|>, {"MaxGeneration" -> 2}, "MaxGeneration" -> 2},
+      VerificationTest[
+        GenerateMultihistory[TestSystem[], <|"EventPattern" -> {__} -> {_}|>, None, {}, <||>][0],
+        testSystemImplementation[TestSystem[],
+                                 <|"MaxGeneration" -> Infinity, "MinEventInputs" -> 0, "EventPattern" -> {__} -> {_}|>,
+                                 None,
+                                 {},
+                                 $defaultStoppingConditions,
+                                 0]],
 
       testUnevaluated[
         GenerateMultihistory[TestSystem[], <||>, 2, 3, 4][0], GenerateMultihistory::invalidTokenDeduplication],
@@ -102,11 +110,11 @@
       }] /@ {EventSelectionParameters, EventOrderingFunctions, StoppingConditionParameters},
 
       VerificationTest[EventSelectionParameters[#], {"MaxGeneration", "MinEventInputs", "EventPattern"}] & /@
-        {TestSystem, TestSystem[]},
-      VerificationTest[EventOrderingFunctions[#], {"InputCount", "RuleOrdering"}] & /@ {TestSystem, TestSystem[]},
+        {TestSystem, TestSystem[1, 2]},
+      VerificationTest[EventOrderingFunctions[#], {"InputCount", "RuleOrdering"}] & /@ {TestSystem, TestSystem[1, 2]},
       VerificationTest[
           StoppingConditionParameters[#], {"MaxEvents", "MinCausalDensityDimension", "TokenEventGraphTest"}] & /@
-        {TestSystem, TestSystem[]}
+        {TestSystem, TestSystem[1, 2]}
     }
   |>
 |>
