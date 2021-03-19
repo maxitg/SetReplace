@@ -162,8 +162,6 @@ initializeGenerators[] := (
 
 (* Introspection functions *)
 
-PackageExport["StoppingConditionParameters"]
-
 SetUsage @ "
 EventSelectionParameters[system$] yields the list of event selection parameters that can be used with system$.
 ";
