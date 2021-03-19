@@ -52,7 +52,7 @@ jobs:
               ./performanceTest.wls master HEAD 2
             fi
 
-  wolfram-language-paclet-test-12.3:
+  wolfram-language-paclet-test-12-3:
     docker:
       - image: maxitg/set-replace-wl-ci:12.3.0
         auth:
@@ -223,6 +223,6 @@ workflows:
           requires:
             - macos-build
             - windows-build
-      - wolfram-language-paclet-test-12.3:
+      - wolfram-language-paclet-test-12-3:
           requires:
             - wolfram-language-paclet-test
