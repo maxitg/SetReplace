@@ -68,7 +68,7 @@ jobs:
 
       - run:
           name: Copy libraries
-          command: cp -r /tmp/workspace/* ./LibraryResources/
+          command: mkdir -p ./LibraryResources && cp -r /tmp/workspace/* ./LibraryResources/
 
       - run:
           name: Install
