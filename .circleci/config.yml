@@ -223,3 +223,6 @@ workflows:
           requires:
             - macos-build
             - windows-build
+      - wolfram-language-paclet-test-12.3:
+          requires:
+            - wolfram-language-paclet-test
