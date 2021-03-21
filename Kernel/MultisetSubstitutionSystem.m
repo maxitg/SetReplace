@@ -43,8 +43,9 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
   eventGenerations = CreateDataStructure["DynamicArray", {0}];
   expressionCreatorEvents = CreateDataStructure["DynamicArray", ConstantArray[1, Length @ init]];
   expressionDestroyerEventCounts = CreateDataStructure["DynamicArray", ConstantArray[0, Length @ init]];
-  (* destroyerChoices[eventID][expressionID] -> eventID. See libSetReplace/Event.cpp for more information. *)
-  destroyerChoices = CreateDataStructure["DynamicArray", {CreateDataStructure["HashTable"]}];
+  (* eventDestroyerChoices[expressionID][expressionID] -> eventID. See libSetReplace/Event.cpp for more information. *)
+  expressionDestroyerChoices =
+    CreateDataStructure["DynamicArray", ConstantArray[CreateDataStructure["HashTable"], Length @ init]];
   eventInputsHashSet = CreateDataStructure["HashSet", {{}}];
 
   (* Data structures are modified in-place. If the system runs out of matches, it throws an exception. *)
@@ -58,7 +59,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
           eventGenerations,
           expressionCreatorEvents,
           expressionDestroyerEventCounts,
-          destroyerChoices,
+          expressionDestroyerChoices,
           eventInputsHashSet],
       Replace[maxEvents, Infinity -> 2^63 - 1]];
     "MaxEvents"
@@ -75,7 +76,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
       "EventGenerations" -> eventGenerations,
       "ExpressionCreatorEvents" -> expressionCreatorEvents,
       "ExpressionDestroyerEventCounts" -> expressionDestroyerEventCounts,
-      "DestroyerChoices" -> destroyerChoices,
+      "DestroyerChoices" -> expressionDestroyerChoices,
       "EventInputsHashSet" -> eventInputsHashSet|>]
 ];
 
@@ -90,14 +91,14 @@ evaluateSingleEvent[
     eventGenerations_,
     expressionCreatorEvents_,
     expressionDestroyerEventCounts_,
-    destroyerChoices_,
+    expressionDestroyerChoices_,
     eventInputsHashSet_] := ModuleScope[
   {ruleIndex, matchedExpressions} = findMatch[rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs][
     expressions,
     eventGenerations,
     expressionCreatorEvents,
     expressionDestroyerEventCounts,
-    destroyerChoices,
+    expressionDestroyerChoices,
     eventInputsHashSet];
   createEvent[rules, ruleIndex, matchedExpressions, tokenDeduplication][expressions,
                                                                         eventRuleIndices,
@@ -106,7 +107,7 @@ evaluateSingleEvent[
                                                                         eventGenerations,
                                                                         expressionCreatorEvents,
                                                                         expressionDestroyerEventCounts,
-                                                                        destroyerChoices,
+                                                                        expressionDestroyerChoices,
                                                                         eventInputsHashSet]
 ];
 
@@ -117,7 +118,7 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
     eventGenerations_,
     expressionCreatorEvents_,
     expressionDestroyerEventCounts_,
-    destroyerChoices_,
+    expressionDestroyerChoices_,
     eventInputsHashSet_] := ModuleScope[
   eventInputsCountRange = {minEventInputs, Min[maxEventInputs, expressions["Length"]]};
   subsetCount = With[{n = expressions["Length"], a = eventInputsCountRange[[1]], b = eventInputsCountRange[[2]]},
@@ -143,7 +144,7 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
         AllTrue[expressionDestroyerEventCounts["Part", #] & /@ possibleMatch, # < maxDestroyerEvents &] &&
         AllTrue[possibleMatch, eventGenerations["Part", expressionCreatorEvents["Part", #]] < maxGeneration &] &&
         MatchQ[expressions["Part", #] & /@ possibleMatch, rules[[ruleIndex, 1]]] &&
-        compatibleExpressionsQ[expressionCreatorEvents, destroyerChoices][possibleMatch],
+        compatibleExpressionsQ[expressionDestroyerChoices][possibleMatch],
       Return[{ruleIndex, possibleMatch}, Module]
     ];
   ,
@@ -154,16 +155,14 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
   Throw["Terminated"];
 ];
 
-compatibleExpressionsQ[expressionCreatorEvents_, destroyerChoices_][expressions_] := ModuleScope[
-  AllTrue[
-    Subsets[expressions, {2}], expressionsSeparation[expressionCreatorEvents, destroyerChoices] @@ # === "Compatible" &]
-];
+compatibleExpressionsQ[expressionDestroyerChoices_][expressions_] := 
+  AllTrue[Subsets[expressions, {2}], expressionsSeparation[expressionDestroyerChoices] @@ # === "Spacelike" &];
 
-expressionsSeparation[expressionCreatorEvents_, destroyerChoices_][firstExpression_, secondExpression_] := ModuleScope[
+expressionsSeparation[expressionDestroyerChoices_][firstExpression_, secondExpression_] := ModuleScope[
   If[firstExpression === secondExpression, Return["Identical", Module]];
 
   {firstDestroyerChoices, secondDestroyerChoices} =
-    destroyerChoices["Part", expressionCreatorEvents["Part", #]] & /@ {firstExpression, secondExpression};
+    expressionDestroyerChoices["Part", #] & /@ {firstExpression, secondExpression};
 
   If[firstDestroyerChoices["KeyExistsQ", secondExpression], Return["Past", Module]];
   If[secondDestroyerChoices["KeyExistsQ", firstExpression], Return["Future", Module]];
@@ -188,7 +187,7 @@ createEvent[rules_, ruleIndex_, matchedExpressions_, tokenDeduplication_][expres
                                                                           eventGenerations_,
                                                                           expressionCreatorEvents_,
                                                                           expressionDestroyerEventCounts_,
-                                                                          destroyerChoices_,
+                                                                          expressionDestroyerChoices_,
                                                                           eventInputsHashSet_] := ModuleScope[
   ruleInputContents = expressions["Part", #] & /@ matchedExpressions;
   outputExpressions = Check[
@@ -206,7 +205,7 @@ createEvent[rules_, ruleIndex_, matchedExpressions_, tokenDeduplication_][expres
   eventInputsHashSet["Insert", {ruleIndex, matchedExpressions}];
 
   outputExpressionIndices = createExpressions[tokenDeduplication][
-      expressions, expressionCreatorEvents, expressionDestroyerEventsCount][
+      expressions, eventInputs, expressionCreatorEvents, expressionDestroyerEventCounts, expressionDestroyerChoices][
     outputExpressions, eventRuleIndices["Length"]];
   eventOutputs["Append", outputExpressionIndices];
 
@@ -216,27 +215,40 @@ createEvent[rules_, ruleIndex_, matchedExpressions_, tokenDeduplication_][expres
 
   Scan[
     expressionDestroyerEventCounts["SetPart", #, expressionDestroyerEventCounts["Part", #] + 1] &, matchedExpressions];
-
-  newDestroyerChoices = CreateDataStructure["HashTable"];
-  Scan[(
-    newDestroyerChoices["Insert", # -> eventRuleIndices["Length"]];
-    inputEvent = expressionCreatorEvents["Part", #];
-    KeyValueMap[Function[{expression, chosenEvent},
-      newDestroyerChoices["Insert", expression -> chosenEvent];
-    ], Normal[destroyerChoices["Part", inputEvent]]];
-  ) &, matchedExpressions];
-  destroyerChoices["Append", newDestroyerChoices];
 ];
 
 (* Finds duplicate expressions if any and returns their indices. Else, creates expressions and returns new indices. *)
 
-createExpressions[tokenDeduplication_][expressions_, expressionCreatorEvents_, expressionDestroyerEventCounts_][newExpressionContents_, creatorEvent_] := ModuleScope[
+createExpressions[tokenDeduplication_][
+      expressions_,
+      eventInputs_,
+      expressionCreatorEvents_,
+      expressionDestroyerEventCounts_,
+      expressionDestroyerChoices_][
+    newExpressionContents_, creatorEvent_] := ModuleScope[
   (* TODO: implement the case of tokenDeduplication == None *)
+
+  newExpressionIndices = Range[expressions["Length"] + 1, expressions["Length"] + Length[newExpressionContents]];
 
   expressions["Append", #] & /@ newExpressionContents;
   Do[expressionCreatorEvents["Append", creatorEvent], Length[newExpressionContents]];
   Do[expressionDestroyerEventCounts["Append", 0], Length[newExpressionContents]];
-  Range[expressions["Length"] - Length[newExpressionContents] + 1, expressions["Length"]]
+  
+  Function[{newExpressionIndex},
+    newDestroyerChoices = CreateDataStructure["HashTable"];
+    Scan[(
+      newDestroyerChoices["Insert", # -> creatorEvent];
+      KeyValueMap[
+        Function[{expression, chosenEvent},
+          newDestroyerChoices["Insert", expression -> chosenEvent];
+        ],
+        Normal[expressionDestroyerChoices["Part", #]]]
+    ) &,
+      eventInputs["Part", creatorEvent]];
+    expressionDestroyerChoices["Append", newDestroyerChoices];
+  ] /@ newExpressionIndices;
+
+  newExpressionIndices
 ];
 
 (* Parsing *)
