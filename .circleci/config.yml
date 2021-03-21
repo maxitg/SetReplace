@@ -6,7 +6,7 @@ orbs:
 jobs:
   wolfram-language-paclet-test:
     docker:
-      - image: maxitg/set-replace-wl-ci:12.1.1
+      - image: maxitg/set-replace-wl-ci:12.2.0
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD

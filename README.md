@@ -108,7 +108,7 @@ Exploring the hypergraph models of this variety is the primary purpose of this p
 You only need three things to use *SetReplace*:
 
 * Windows, macOS 10.12+, or Linux.
-* [Wolfram Language 12.1+](https://www.wolfram.com/language/)
+* [Wolfram Language 12.2+](https://www.wolfram.com/language/)
   including [WolframScript](https://www.wolfram.com/wolframscript/). A free version is available
   as [Wolfram Engine](https://www.wolfram.com/engine/).
 * A C++17 compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in
