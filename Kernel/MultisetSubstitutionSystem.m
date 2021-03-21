@@ -37,6 +37,8 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
   init = parseInit[rawInit];
 
   expressions = CreateDataStructure["DynamicArray", init];
+  expressionContentsToIndices = CreateDataStructure["HashTable"];
+  MapThread[insertWholeExpressionToIndex[expressionContentsToIndices], {Range @ Length @ init, init}];
   eventRuleIndices = CreateDataStructure["DynamicArray", {0}]; (* the first event is the initial event *)
   eventInputs = CreateDataStructure["DynamicArray", {{}}];
   eventOutputs = CreateDataStructure["DynamicArray", {Range @ Length @ init}];
@@ -54,6 +56,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
     Do[
       evaluateSingleEvent[rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, tokenDeduplication][
           expressions,
+          expressionContentsToIndices,
           eventRuleIndices,
           eventInputs,
           eventOutputs,
@@ -71,6 +74,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
     <|"Rules" -> rules,
       "ConclusionReason" -> conclusionReason,
       "Expressions" -> expressions,
+      "ExpressionContentsToIndices" -> expressionContentsToIndices,
       "EventRuleIndices" -> eventRuleIndices,
       "EventInputs" -> eventInputs,
       "EventOutputs" -> eventOutputs,
@@ -81,11 +85,19 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
       "EventInputsHashSet" -> eventInputsHashSet|>]
 ];
 
+insertWholeExpressionToIndex[expressionContentsToIndices_][index_, expression_] :=
+  If[expressionContentsToIndices["KeyExistsQ", expression],
+    expressionContentsToIndices["Lookup", expression]["Append", index];
+  ,
+    expressionContentsToIndices["Insert", expression -> CreateDataStructure["DynamicArray", {index}]];
+  ];
+
 (* Evaluation *)
 
 evaluateSingleEvent[
       rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEventInputs_, tokenDeduplication_][
     expressions_,
+    expressionContentsToIndices_,
     eventRuleIndices_,
     eventInputs_,
     eventOutputs_,
@@ -102,6 +114,7 @@ evaluateSingleEvent[
     expressionDestroyerChoices,
     eventInputsHashSet];
   createEvent[rules, ruleIndex, matchedExpressions, tokenDeduplication][expressions,
+                                                                        expressionContentsToIndices,
                                                                         eventRuleIndices,
                                                                         eventInputs,
                                                                         eventOutputs,
@@ -190,6 +203,7 @@ declareMessage[
 declareMessage[General::ruleOutputNotList, "Rule `rule` for inputs `inputs` did not generate a List."];
 
 createEvent[rules_, ruleIndex_, matchedExpressions_, tokenDeduplication_][expressions_,
+                                                                          expressionContentsToIndices_,
                                                                           eventRuleIndices_,
                                                                           eventInputs_,
                                                                           eventOutputs_,
@@ -214,7 +228,12 @@ createEvent[rules_, ruleIndex_, matchedExpressions_, tokenDeduplication_][expres
   eventInputsHashSet["Insert", {ruleIndex, matchedExpressions}];
 
   outputExpressionIndices = createExpressions[tokenDeduplication][
-      expressions, eventInputs, expressionCreatorEvents, expressionDestroyerEventCounts, expressionDestroyerChoices][
+      expressions,
+      expressionContentsToIndices,
+      eventInputs,
+      expressionCreatorEvents,
+      expressionDestroyerEventCounts,
+      expressionDestroyerChoices][
     outputExpressions, eventRuleIndices["Length"]];
   eventOutputs["Append", outputExpressionIndices];
 
@@ -229,6 +248,7 @@ createEvent[rules_, ruleIndex_, matchedExpressions_, tokenDeduplication_][expres
 
 createExpressions[tokenDeduplication_][
       expressions_,
+      expressionContentsToIndices_,
       eventInputs_,
       expressionCreatorEvents_,
       expressionDestroyerEventCounts_,
@@ -239,7 +259,9 @@ createExpressions[tokenDeduplication_][
   newExpressionIndices = Range[expressions["Length"] + 1, expressions["Length"] + Length[newExpressionContents]];
 
   expressions["Append", #] & /@ newExpressionContents;
-  Do[expressionCreatorEvents["Append", creatorEvent], Length[newExpressionContents]];
+  MapThread[insertWholeExpressionToIndex[expressionContentsToIndices], {newExpressionIndices, newExpressionContents}];
+  Do[expressionCreatorEvents["Append", CreateDataStructure["DynamicArray", {creatorEvent}]],
+     Length[newExpressionContents]];
   Do[expressionDestroyerEventCounts["Append", 0], Length[newExpressionContents]];
   
   Function[{newExpressionIndex},
