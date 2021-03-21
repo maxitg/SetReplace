@@ -31,7 +31,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
                                    rawInit_] := ModuleScope[
   rules = parseRules[rawRules];
   {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs} = Values @ rawEventSelection;
-  parseTokenDeduplication[rawTokenDeduplication]; (* Token deduplication is not implemented at the moment *)
+  tokenDeduplication = parseTokenDeduplication[rawTokenDeduplication];
   parseEventOrdering[rawEventOrdering];           (* Event ordering is no implemented at the moment *)
   {maxEvents} = Values @ rawStoppingCondition;
   init = parseInit[rawInit];
@@ -50,7 +50,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
   (* Data structures are modified in-place. If the system runs out of matches, it throws an exception. *)
   conclusionReason = Catch[
     Do[
-      evaluateSingleEvent[rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs][
+      evaluateSingleEvent[rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, tokenDeduplication][
           expressions,
           eventRuleIndices,
           eventInputs,
@@ -60,7 +60,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
           expressionDestroyerEventCounts,
           destroyerChoices,
           eventInputsHashSet],
-        Replace[maxEvents, Infinity -> 2^63 - 1]];
+      Replace[maxEvents, Infinity -> 2^63 - 1]];
     "MaxEvents"
   ];
 
@@ -82,7 +82,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
 (* Evaluation *)
 
 evaluateSingleEvent[
-      rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEventInputs_][
+      rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEventInputs_, tokenDeduplication_][
     expressions_,
     eventRuleIndices_,
     eventInputs_,
@@ -99,15 +99,15 @@ evaluateSingleEvent[
     expressionDestroyerEventCounts,
     destroyerChoices,
     eventInputsHashSet];
-  createEvent[rules, ruleIndex, matchedExpressions][expressions,
-                                                    eventRuleIndices,
-                                                    eventInputs,
-                                                    eventOutputs,
-                                                    eventGenerations,
-                                                    expressionCreatorEvents,
-                                                    expressionDestroyerEventCounts,
-                                                    destroyerChoices,
-                                                    eventInputsHashSet]
+  createEvent[rules, ruleIndex, matchedExpressions, tokenDeduplication][expressions,
+                                                                        eventRuleIndices,
+                                                                        eventInputs,
+                                                                        eventOutputs,
+                                                                        eventGenerations,
+                                                                        expressionCreatorEvents,
+                                                                        expressionDestroyerEventCounts,
+                                                                        destroyerChoices,
+                                                                        eventInputsHashSet]
 ];
 
 (* Matching *)
@@ -181,15 +181,15 @@ declareMessage[
 
 declareMessage[General::ruleOutputNotList, "Rule `rule` for inputs `inputs` did not generate a List."];
 
-createEvent[rules_, ruleIndex_, matchedExpressions_][expressions_,
-                                                     eventRuleIndices_,
-                                                     eventInputs_,
-                                                     eventOutputs_,
-                                                     eventGenerations_,
-                                                     expressionCreatorEvents_,
-                                                     expressionDestroyerEventCounts_,
-                                                     destroyerChoices_,
-                                                     eventInputsHashSet_] := ModuleScope[
+createEvent[rules_, ruleIndex_, matchedExpressions_, tokenDeduplication_][expressions_,
+                                                                          eventRuleIndices_,
+                                                                          eventInputs_,
+                                                                          eventOutputs_,
+                                                                          eventGenerations_,
+                                                                          expressionCreatorEvents_,
+                                                                          expressionDestroyerEventCounts_,
+                                                                          destroyerChoices_,
+                                                                          eventInputsHashSet_] := ModuleScope[
   ruleInputContents = expressions["Part", #] & /@ matchedExpressions;
   outputExpressions = Check[
     Replace[ruleInputContents, rules[[ruleIndex]]],
@@ -200,20 +200,20 @@ createEvent[rules_, ruleIndex_, matchedExpressions_][expressions_,
   If[!ListQ[outputExpressions],
     throw[Failure["ruleOutputNotList", <|"rule" -> rules[[ruleIndex]], "inputs" -> ruleInputContents|>]]
   ];
-  expressions["Append", #] & /@ outputExpressions;
 
   eventRuleIndices["Append", ruleIndex];
   eventInputs["Append", matchedExpressions];
   eventInputsHashSet["Insert", {ruleIndex, matchedExpressions}];
-  eventOutputs["Append", Range[expressions["Length"] - Length[outputExpressions] + 1, expressions["Length"]]];
+
+  outputExpressionIndices = createExpressions[tokenDeduplication][
+      expressions, expressionCreatorEvents, expressionDestroyerEventsCount][
+    outputExpressions, eventRuleIndices["Length"]];
+  eventOutputs["Append", outputExpressionIndices];
 
   inputExpressionCreatorEvents = expressionCreatorEvents["Part", #] & /@ matchedExpressions;
   inputExpressionGenerations = eventGenerations["Part", #] & /@ inputExpressionCreatorEvents;
   eventGenerations["Append", Max[inputExpressionGenerations, -1] + 1];
 
-  Do[expressionCreatorEvents["Append", eventRuleIndices["Length"]], Length[outputExpressions]];
-
-  Do[expressionDestroyerEventCounts["Append", 0], Length[outputExpressions]];
   Scan[
     expressionDestroyerEventCounts["SetPart", #, expressionDestroyerEventCounts["Part", #] + 1] &, matchedExpressions];
 
@@ -228,6 +228,17 @@ createEvent[rules_, ruleIndex_, matchedExpressions_][expressions_,
   destroyerChoices["Append", newDestroyerChoices];
 ];
 
+(* Finds duplicate expressions if any and returns their indices. Else, creates expressions and returns new indices. *)
+
+createExpressions[tokenDeduplication_][expressions_, expressionCreatorEvents_, expressionDestroyerEventCounts_][newExpressionContents_, creatorEvent_] := ModuleScope[
+  (* TODO: implement the case of tokenDeduplication == None *)
+
+  expressions["Append", #] & /@ newExpressionContents;
+  Do[expressionCreatorEvents["Append", creatorEvent], Length[newExpressionContents]];
+  Do[expressionDestroyerEventCounts["Append", 0], Length[newExpressionContents]];
+  Range[expressions["Length"] - Length[newExpressionContents] + 1, expressions["Length"]]
+];
+
 (* Parsing *)
 
 $singleRulePattern = _Rule | _RuleDelayed;
@@ -238,8 +249,8 @@ parseRules[rawRules_] := throw[Failure["invalidMultisetRules", <|"rules" -> rawR
 parseRules[rawRules___] /; !CheckArguments[MultisetSubstitutionSystem[rawRules], 1] := throw[Failure[None, <||>]];
 
 parseTokenDeduplication[None] := None;
-declareMessage[General::tokenDeduplicationNotImplemented,
-               "Token deduplication is not implemented for Multiset Substitution System."];
+parseTokenDeduplication[All] := All;
+declareMessage[General::tokenDeduplicationNotImplemented, "Token deduplication can only be set to None or All."];
 parseTokenDeduplication[_] := throw[Failure["tokenDeduplicationNotImplemented", <||>]];
 
 $supportedEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"};
