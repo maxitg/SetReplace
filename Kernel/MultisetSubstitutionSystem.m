@@ -41,7 +41,8 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
   eventInputs = CreateDataStructure["DynamicArray", {{}}];
   eventOutputs = CreateDataStructure["DynamicArray", {Range @ Length @ init}];
   eventGenerations = CreateDataStructure["DynamicArray", {0}];
-  expressionCreatorEvents = CreateDataStructure["DynamicArray", ConstantArray[1, Length @ init]];
+  expressionCreatorEvents =
+    CreateDataStructure["DynamicArray", ConstantArray[CreateDataStructure["DynamicArray", {1}], Length @ init]];
   expressionDestroyerEventCounts = CreateDataStructure["DynamicArray", ConstantArray[0, Length @ init]];
   (* eventDestroyerChoices[expressionID][expressionID] -> eventID. See libSetReplace/Event.cpp for more information. *)
   expressionDestroyerChoices =
@@ -76,7 +77,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
       "EventGenerations" -> eventGenerations,
       "ExpressionCreatorEvents" -> expressionCreatorEvents,
       "ExpressionDestroyerEventCounts" -> expressionDestroyerEventCounts,
-      "DestroyerChoices" -> expressionDestroyerChoices,
+      "ExpressionDestroyerChoices" -> expressionDestroyerChoices,
       "EventInputsHashSet" -> eventInputsHashSet|>]
 ];
 
@@ -142,7 +143,7 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
   Do[
     If[!eventInputsHashSet["MemberQ", {ruleIndex, possibleMatch}] &&
         AllTrue[expressionDestroyerEventCounts["Part", #] & /@ possibleMatch, # < maxDestroyerEvents &] &&
-        AllTrue[possibleMatch, eventGenerations["Part", expressionCreatorEvents["Part", #]] < maxGeneration &] &&
+        AllTrue[possibleMatch, expressionGeneration[eventGenerations, expressionCreatorEvents][#] < maxGeneration &] &&
         MatchQ[expressions["Part", #] & /@ possibleMatch, rules[[ruleIndex, 1]]] &&
         compatibleExpressionsQ[expressionDestroyerChoices][possibleMatch],
       Return[{ruleIndex, possibleMatch}, Module]
@@ -155,7 +156,15 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
   Throw["Terminated"];
 ];
 
-compatibleExpressionsQ[expressionDestroyerChoices_][expressions_] := 
+expressionGeneration[eventGenerations_, expressionCreatorEvents_][expression_] := ModuleScope[
+  creatorEvents = expressionCreatorEvents["Part", expression];
+  creatorEventGenerations = eventGenerations["Part", #] & /@ Normal[creatorEvents];
+  Min[creatorEventGenerations]
+];
+
+(* TODO: switch to new names for separations *)
+
+compatibleExpressionsQ[expressionDestroyerChoices_][expressions_] :=
   AllTrue[Subsets[expressions, {2}], expressionsSeparation[expressionDestroyerChoices] @@ # === "Spacelike" &];
 
 expressionsSeparation[expressionDestroyerChoices_][firstExpression_, secondExpression_] := ModuleScope[
@@ -209,8 +218,7 @@ createEvent[rules_, ruleIndex_, matchedExpressions_, tokenDeduplication_][expres
     outputExpressions, eventRuleIndices["Length"]];
   eventOutputs["Append", outputExpressionIndices];
 
-  inputExpressionCreatorEvents = expressionCreatorEvents["Part", #] & /@ matchedExpressions;
-  inputExpressionGenerations = eventGenerations["Part", #] & /@ inputExpressionCreatorEvents;
+  inputExpressionGenerations = expressionGeneration[eventGenerations, expressionCreatorEvents] /@ matchedExpressions;
   eventGenerations["Append", Max[inputExpressionGenerations, -1] + 1];
 
   Scan[
