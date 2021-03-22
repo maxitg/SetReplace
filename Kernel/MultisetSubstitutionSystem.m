@@ -44,11 +44,11 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
   eventOutputs = CreateDataStructure["DynamicArray", {Range @ Length @ init}];
   eventGenerations = CreateDataStructure["DynamicArray", {0}];
   expressionCreatorEvents =
-    CreateDataStructure["DynamicArray", ConstantArray[CreateDataStructure["DynamicArray", {1}], Length @ init]];
+    CreateDataStructure["DynamicArray", Table[CreateDataStructure["DynamicArray", {1}], Length @ init]];
   expressionDestroyerEventCounts = CreateDataStructure["DynamicArray", ConstantArray[0, Length @ init]];
   (* eventDestroyerChoices[expressionID][expressionID] -> eventID. See libSetReplace/Event.cpp for more information. *)
   expressionDestroyerChoices =
-    CreateDataStructure["DynamicArray", ConstantArray[CreateDataStructure["HashTable"], Length @ init]];
+    CreateDataStructure["DynamicArray", Table[CreateDataStructure["HashTable"], Length @ init]];
   eventInputsHashSet = CreateDataStructure["HashSet", {{}}];
 
   (* Data structures are modified in-place. If the system runs out of matches, it throws an exception. *)
@@ -170,8 +170,8 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
 ];
 
 expressionGeneration[eventGenerations_, expressionCreatorEvents_][expression_] := ModuleScope[
-  creatorEvents = expressionCreatorEvents["Part", expression];
-  creatorEventGenerations = eventGenerations["Part", #] & /@ Normal[creatorEvents];
+  creatorEvents = Select[# <= eventGenerations["Length"] &] @ Normal @ expressionCreatorEvents["Part", expression];
+  creatorEventGenerations = eventGenerations["Part", #] & /@ creatorEvents;
   Min[creatorEventGenerations]
 ];
 
@@ -254,31 +254,81 @@ createExpressions[tokenDeduplication_][
       expressionDestroyerEventCounts_,
       expressionDestroyerChoices_][
     newExpressionContents_, creatorEvent_] := ModuleScope[
-  (* TODO: implement the case of tokenDeduplication == None *)
+  duplicateExpressionIndices = Switch[tokenDeduplication,
+    None,
+      Missing[],
+    All,
+      findDuplicateExpressions[
+          expressionContentsToIndices, eventInputs, expressionDestroyerChoices][
+        newExpressionContents, creatorEvent]
+  ];
 
-  newExpressionIndices = Range[expressions["Length"] + 1, expressions["Length"] + Length[newExpressionContents]];
+  If[MissingQ[duplicateExpressionIndices],
+    newExpressionIndices = Range[expressions["Length"] + 1, expressions["Length"] + Length[newExpressionContents]];
+    expressions["Append", #] & /@ newExpressionContents;
+    MapThread[insertWholeExpressionToIndex[expressionContentsToIndices], {newExpressionIndices, newExpressionContents}];
+    Do[expressionCreatorEvents["Append", CreateDataStructure["DynamicArray", {creatorEvent}]],
+       Length[newExpressionContents]];
+    Do[expressionDestroyerEventCounts["Append", 0], Length[newExpressionContents]];
+  ,
+    newExpressionIndices = duplicateExpressionIndices;
+    Scan[expressionCreatorEvents["Part", #]["Append", creatorEvent] &, newExpressionIndices];
+  ];
 
-  expressions["Append", #] & /@ newExpressionContents;
-  MapThread[insertWholeExpressionToIndex[expressionContentsToIndices], {newExpressionIndices, newExpressionContents}];
-  Do[expressionCreatorEvents["Append", CreateDataStructure["DynamicArray", {creatorEvent}]],
-     Length[newExpressionContents]];
-  Do[expressionDestroyerEventCounts["Append", 0], Length[newExpressionContents]];
-  
-  Function[{newExpressionIndex},
-    newDestroyerChoices = CreateDataStructure["HashTable"];
-    Scan[(
-      newDestroyerChoices["Insert", # -> creatorEvent];
-      KeyValueMap[
-        Function[{expression, chosenEvent},
-          newDestroyerChoices["Insert", expression -> chosenEvent];
-        ],
-        Normal[expressionDestroyerChoices["Part", #]]]
-    ) &,
-      eventInputs["Part", creatorEvent]];
-    expressionDestroyerChoices["Append", newDestroyerChoices];
-  ] /@ newExpressionIndices;
+  newDestroyerChoices = CreateDataStructure["HashTable"];
+  Scan[(
+    newDestroyerChoices["Insert", # -> creatorEvent];
+    KeyValueMap[
+      Function[{expression, chosenEvent},
+        newDestroyerChoices["Insert", expression -> chosenEvent];
+      ],
+      Normal[expressionDestroyerChoices["Part", #]]]
+  ) &, eventInputs["Part", creatorEvent]];
+
+  If[MissingQ[duplicateExpressionIndices],
+    Do[expressionDestroyerChoices["Append", newDestroyerChoices["Copy"]], Length[newExpressionIndices]];
+  ,
+    Scan[Function[{newExpression},
+      expressionDestroyerChoices["Part", newExpression]["Insert", #] & /@ Normal[Normal[newDestroyerChoices]]
+    ], newExpressionIndices];
+  ];
 
   newExpressionIndices
+];
+
+findDuplicateExpressions[expressionContentsToIndices_, eventInputs_, expressionDestroyerChoices_][
+    newExpressionContents_, creatorEvent_] := ModuleScope[
+  possibleDuplicates =
+    Function[{newExpressionContent},
+      Select[!spacelikeSeparatedQ[expressionDestroyerChoices][Append[eventInputs["Part", creatorEvent], #]] &] @
+        Normal @
+          expressionContentsToIndices["Lookup", newExpressionContent, {} &]
+    ] /@ newExpressionContents;
+  possibleMatches = Tuples @ possibleDuplicates;
+  SelectFirst[sameCompatibilityWithOtherExpressions[eventInputs, expressionDestroyerChoices][#, creatorEvent] &] @
+    possibleMatches
+];
+
+sameCompatibilityWithOtherExpressions[eventInputs_, expressionDestroyerChoices_][match_, creatorEvent_] := ModuleScope[
+  spacelikeToCreatorEvent = Complement[
+    spacelikeExpressionsToEvent[eventInputs, expressionDestroyerChoices][creatorEvent], match];
+  spacelikeToMatchExpressions = Complement[#, match] & /@
+    spacelikeExpressionsToExpression[expressionDestroyerChoices] /@
+      match;
+
+  AllTrue[spacelikeToMatchExpressions, SameQ[#, spacelikeToCreatorEvent] &]
+];
+
+(* TODO: Optimize this and the next functions. *)
+spacelikeExpressionsToEvent[eventInputs_, expressionDestroyerChoices_][event_] := ModuleScope[
+  inputs = Normal @ eventInputs["Part", event];
+  allExpressions = Range @ expressionDestroyerChoices["Length"];
+  Select[spacelikeSeparatedQ[expressionDestroyerChoices][Append[inputs, #]] &] @ allExpressions
+];
+
+spacelikeExpressionsToExpression[expressionDestroyerChoices_][expression_] := ModuleScope[
+  allExpressions = Range @ expressionDestroyerChoices["Length"];
+  Select[spacelikeSeparatedQ[expressionDestroyerChoices][{expression, #}] &] @ allExpressions
 ];
 
 (* Parsing *)
