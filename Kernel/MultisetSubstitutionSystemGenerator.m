@@ -2,8 +2,6 @@ Package["SetReplace`"]
 
 PackageImport["GeneralUtilities`"]
 
-(* TODO: remove GenerateMultihistory from here *)
-PackageExport["GenerateMultihistory"]
 PackageExport["MultisetSubstitutionSystem"]
 
 SetUsage @ "
@@ -15,28 +13,29 @@ MultisetSubstitutionSystem should be used as the first argument in functions suc
 
 SyntaxInformation[MultisetSubstitutionSystem] = {"ArgumentsPattern" -> {rules_}};
 
-MultisetSubstitutionSystem /:
-    expr : GenerateMultihistory[system : MultisetSubstitutionSystem[rules___], args___] /;
-      CheckArguments[system, 1] && CheckArguments[expr, 6] := ModuleScope[
-  result = Catch[multisetSubstitutionSystem[rules, args],
-                 _ ? FailureQ,
-                 message[GenerateMultihistory, #, <|"expr" -> HoldForm[expr]|>] &];
-  result /; !FailureQ[result]
-];
+declareMultihistoryGenerator[
+  generateMultisetSubstitutionSystem,
+  MultisetSubstitutionSystem,
+  <|"MaxGeneration" -> {Infinity, "NonNegativeIntegerOrInfinity"},
+    "MaxDestroyerEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"},
+    "MinEventInputs" -> {0, "NonNegativeIntegerOrInfinity"},
+    "MaxEventInputs" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
+  {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
+  <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>];
 
 (* TODO: allow using multihistory objects as inputs *)
 
-multisetSubstitutionSystem[rawRules_,
-                           rawEventSelection_,
-                           rawTokenDeduplication_,
-                           rawEventOrdering_,
-                           rawStoppingCondition_,
-                           rawInit_] := ModuleScope[
+generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules_],
+                                   rawEventSelection_,
+                                   rawTokenDeduplication_,
+                                   rawEventOrdering_,
+                                   rawStoppingCondition_,
+                                   rawInit_] := ModuleScope[
   rules = parseRules[rawRules];
-  {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs} = parseEventSelection[rawEventSelection];
+  {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs} = Values @ rawEventSelection;
   parseTokenDeduplication[rawTokenDeduplication]; (* TODO: implement token deduplication *)
   parseEventOrdering[rawEventOrdering];           (* TODO: implement event ordering *)
-  {maxEvents} = parseStoppingCondition[rawStoppingCondition];
+  {maxEvents} = Values @ rawStoppingCondition;
   init = parseInit[rawInit];
 
   (* TODO: implement automatic rule hints, such as inputs count and atoms index *)
@@ -238,29 +237,11 @@ createEvent[rules_, ruleIndex_, matchedExpressions_][expressions_,
 
 (* Parsing *)
 
-declareMessage[
-  General::nonNegativeIntegerParameter, "`name` should be a non-negative integer or Infinity instead of `value`."];
-checkNonNegativeIntegerParameter[name_, value_] :=
-  If[MatchQ[value,(_Integer ? (# >= 0 &)) | Infinity],
-    value
-  ,
-    throw[Failure["nonNegativeIntegerParameter", <|"name" -> name, "value" -> value|>]]
-  ];
-
 $singleRulePattern = _Rule | _RuleDelayed;
 parseRules[rawRules : $singleRulePattern] := {rawRules};
 parseRules[rawRules : {$singleRulePattern...}] := rawRules;
 declareMessage[General::invalidMultisetRules, "Rules `rules` must be a Rule, a RuleDelayed or a List of them."];
 parseRules[rawRules_] := throw[Failure["invalidMultisetRules", <|"rules" -> rawRules|>]];
-
-$eventSelectionDefaults =
-  {"MaxGeneration" -> Infinity, "MaxDestroyerEvents" -> Infinity, "MinEventInputs" -> 0, "MaxEventInputs" -> Infinity};
-parseEventSelection[rawEventSelection_Association] /; SubsetQ[Keys[$eventSelectionDefaults], Keys[rawEventSelection]] :=
-  checkNonNegativeIntegerParameter[#, Lookup[rawEventSelection, ##]] & @@@ $eventSelectionDefaults;
-declareMessage[General::invalidEventSelection,
-               "Event selection parameters `value` should be an Association with some or all keys from `choices`."];
-parseEventSelection[rawEventSelection_] :=
-  throw[Failure["invalidEventSelection", <|"value" -> rawEventSelection, "choices" -> Keys[$eventSelectionDefaults]|>]];
 
 parseTokenDeduplication[None] := None;
 declareMessage[General::tokenDeduplicationNotImplemented,
@@ -273,24 +254,6 @@ declareMessage[General::eventOrderingNotImplemented,
                "Only " <> $supportedEventOrdering <> " event ordering is implemented at this time."];
 parseEventOrdering[_] := throw[Failure["eventOrderingNotImplemented", <||>]];
 
-$stoppingConditionKeys = {"MaxEvents"};
-parseStoppingCondition[rawStoppingCondition_Association] /;
-    SubsetQ[$stoppingConditionKeys, Keys[rawStoppingCondition]] :=
-  checkNonNegativeIntegerParameter[#, Lookup[rawStoppingCondition, #, Infinity]] & /@ $stoppingConditionKeys;
-declareMessage[General::invalidStoppingConditions,
-               "Stopping conditions `value` should be an Association with some or all keys from `choices`."];
-parseStoppingCondition[rawStoppingCondition_] :=
-  throw[Failure["invalidStoppingConditions", <|"value" -> rawStoppingCondition, "choices" -> $stoppingConditionKeys|>]];
-
 parseInit[init_List] := init;
 declareMessage[General::multisetInitNotList, "Multiset Substitution System init `init` should be a List."];
 parseInit[init_] := throw[Failure["multisetInitNotList", <|"init" -> init|>]];
-
-(* Syntax autocompletion *)
-
-With[{eventSelectionKeys = Keys[$eventSelectionDefaults],
-      orderingFunctions = $supportedEventOrdering,
-      stoppingConditionKeys = $stoppingConditionKeys},
-  FE`Evaluate[FEPrivate`AddSpecialArgCompletion[
-    "GenerateMultihistory" -> {0, eventSelectionKeys, 0, orderingFunctions, stoppingConditionKeys, 0}]];
-];
