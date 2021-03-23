@@ -23,8 +23,6 @@ declareMultihistoryGenerator[
   {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
   <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>];
 
-(* TODO: allow using multihistory objects as inputs *)
-
 generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules_],
                                    rawEventSelection_,
                                    rawTokenDeduplication_,
@@ -33,12 +31,10 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules_],
                                    rawInit_] := ModuleScope[
   rules = parseRules[rawRules];
   {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs} = Values @ rawEventSelection;
-  parseTokenDeduplication[rawTokenDeduplication]; (* TODO: implement token deduplication *)
-  parseEventOrdering[rawEventOrdering];           (* TODO: implement event ordering *)
+  parseTokenDeduplication[rawTokenDeduplication]; (* Token deduplication is not implemented at the moment *)
+  parseEventOrdering[rawEventOrdering];           (* Event ordering is no implemented at the moment *)
   {maxEvents} = Values @ rawStoppingCondition;
   init = parseInit[rawInit];
-
-  (* TODO: implement automatic rule hints, such as inputs count and atoms index *)
 
   expressions = CreateDataStructure["DynamicArray", init];
   eventRuleIndices = CreateDataStructure["DynamicArray", {0}]; (* the first event is the initial event *)
@@ -51,17 +47,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules_],
   destroyerChoices = CreateDataStructure["DynamicArray", {CreateDataStructure["HashTable"]}];
   eventInputsHashSet = CreateDataStructure["HashSet", {{}}];
 
-  (* TODO: eventInputsHashSet should be optimized significantly and be used to skip partial scans. Otherwise, past
-           expressions are being continuously scanned every step.
-           Essentially, we need to replace eventInputsHashSet with a data structure containing negative matching
-           results. *)
-
-  (* TODO: return partial evolution at abort *)
-
-  (* TODO: add max match instantiations to allow the same match to be evaluated multiple times in case the right-hand
-           side of the rule is non-deterministic *)
-
-  (* Data structures are modified in-place. If the system runs out of matches, it throws and exception. *)
+  (* Data structures are modified in-place. If the system runs out of matches, it throws an exception. *)
   conclusionReason = Catch[
     Do[
       evaluateSingleEvent[rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs][
@@ -133,21 +119,31 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
     expressionDestroyerEventsCount_,
     destroyerChoices_,
     eventInputsHashSet_] := ModuleScope[
-  (* TODO: skip expressions with exceeded destroyer count & generation from the scan *)
-  (* TODO: stop enumerating a subset once a pair of elements in it is not spacelike *)
   eventInputsCountRange = {minEventInputs, Min[maxEventInputs, expressions["Length"]]};
   subsetCount = With[{n = expressions["Length"], a = eventInputsCountRange[[1]], b = eventInputsCountRange[[2]]},
     (* Sum[Binomial[n, k], {k, a, b}] *)
     Binomial[n, a] * Hypergeometric2F1[1, a - n, 1 + a, -1] -
       Binomial[n, 1 + b] * Hypergeometric2F1[1, 1 + b - n, 2 + b, -1]
   ];
+
+  (* Matching is currently rather inefficient, because it enumerates all subsets no matter what.
+     Three things need to happen to make it faster:
+     1. We need to do some rule introspection to determine what to search for. For example, for some rules, we can
+        automatically determine the number of input expressions, in which case we don't have to enumerate all subsets
+        anymore. We can also make an atoms index for some rules (like we do in Matcher of libSetReplace). In this case,
+        we can avoid searching entire subtrees if we see some expressions as non-intersecting.
+     2. We need to skip expressions from matching based on metadata. For example, we shouldn't continue matching groups
+        that are not compatible or have exceeding generations or destroyer event count.
+     3. We need to save partial searching results. They can probably be saved as non-intersecting ranges. Note that they
+        have to be ranges because adding new expressions will introduce gaps in the sequence of matches ordered
+        according to some (but not all) ordering functions. This new data structure will replace eventInputsHashSet. *)
   ScopeVariable[subsetIndex, possibleMatch, ruleIndex];
   Do[
     If[!eventInputsHashSet["MemberQ", {ruleIndex, possibleMatch}] &&
         AllTrue[expressionDestroyerEventsCount["Part", #] & /@ possibleMatch, # < maxDestroyerEvents &] &&
         AllTrue[possibleMatch, eventGenerations["Part", expressionCreatorEvents["Part", #]] < maxGeneration &] &&
         MatchQ[expressions["Part", #] & /@ possibleMatch, rules[[ruleIndex, 1]]] &&
-        spacelikeSeparatedQ[expressionCreatorEvents, destroyerChoices][possibleMatch],
+        compatibleExpressionsQ[expressionCreatorEvents, destroyerChoices][possibleMatch],
       Return[{ruleIndex, possibleMatch}, Module]
     ];
   ,
@@ -158,11 +154,9 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
   Throw["Terminated"];
 ];
 
-(* TODO: switch to new names for separations *)
-
-spacelikeSeparatedQ[expressionCreatorEvents_, destroyerChoices_][expressions_] := ModuleScope[
+compatibleExpressionsQ[expressionCreatorEvents_, destroyerChoices_][expressions_] := ModuleScope[
   AllTrue[
-    Subsets[expressions, {2}], expressionsSeparation[expressionCreatorEvents, destroyerChoices] @@ # === "Spacelike" &]
+    Subsets[expressions, {2}], expressionsSeparation[expressionCreatorEvents, destroyerChoices] @@ # === "Compatible" &]
 ];
 
 expressionsSeparation[expressionCreatorEvents_, destroyerChoices_][firstExpression_, secondExpression_] := ModuleScope[
@@ -171,16 +165,15 @@ expressionsSeparation[expressionCreatorEvents_, destroyerChoices_][firstExpressi
   {firstDestroyerChoices, secondDestroyerChoices} =
     destroyerChoices["Part", expressionCreatorEvents["Part", #]] & /@ {firstExpression, secondExpression};
 
-  If[firstDestroyerChoices["KeyExistsQ", secondExpression] || secondDestroyerChoices["KeyExistsQ", firstExpression],
-    Return["Timelike", Module];
-  ];
+  If[firstDestroyerChoices["KeyExistsQ", secondExpression], Return["Past", Module]];
+  If[secondDestroyerChoices["KeyExistsQ", firstExpression], Return["Future", Module]];
 
   KeyValueMap[Function[{expression, chosenEvent},
     If[secondDestroyerChoices["KeyExistsQ", expression] && secondDestroyerChoices["Lookup", expression] =!= chosenEvent,
-      Return["Branchlike", Module];
+      Return["Inconsistent", Module];
     ];
   ], Normal @ firstDestroyerChoices];
-  "Spacelike"
+  "Compatible"
 ];
 
 declareMessage[
