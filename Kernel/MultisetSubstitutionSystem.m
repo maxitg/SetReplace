@@ -23,7 +23,7 @@ declareMultihistoryGenerator[
   {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
   <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>];
 
-generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules_],
+generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
                                    rawEventSelection_,
                                    rawTokenDeduplication_,
                                    rawEventOrdering_,
@@ -235,6 +235,7 @@ parseRules[rawRules : $singleRulePattern] := {rawRules};
 parseRules[rawRules : {$singleRulePattern...}] := rawRules;
 declareMessage[General::invalidMultisetRules, "Rules `rules` must be a Rule, a RuleDelayed or a List of them."];
 parseRules[rawRules_] := throw[Failure["invalidMultisetRules", <|"rules" -> rawRules|>]];
+parseRules[rawRules___] /; !CheckArguments[MultisetSubstitutionSystem[rawRules], 1] := throw[Failure[None, <||>]];
 
 parseTokenDeduplication[None] := None;
 declareMessage[General::tokenDeduplicationNotImplemented,
