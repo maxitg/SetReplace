@@ -78,7 +78,7 @@ If[!FileExistsQ[#],
 printFileLineError[FileLine[file_, line_] -> error_] := Print[file <> ":" <> IntegerString[line] <> "\t" <> error];
 
 importAsHeldExpression[file_] := Module[{exprs},
-  exprs = Quiet @ (Take[#, 1] &) @ ToExpression[Import[file, "Text"], InputForm, Hold];
+  exprs = Quiet @ ToExpression[Import[file, "Text"], StandardForm, Hold];
   If[!$allowParallelization, exprs = exprs /. HoldPattern[ParallelMap] -> Map];
   If[FailureQ[exprs],
     WriteString["stdout", $redColor <> "There were syntax errors in \"" <> file <> "\"" <> $endColor, ":"];
