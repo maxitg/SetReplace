@@ -76,12 +76,39 @@
             <|"MaxGeneration" -> 1|>,
             <||>,
             {{{2}, {2}, 1}, {{2}, {2}, {2}}},
-            {{1, 1, v2_}, {1, 1, 1}, {{2}, 1, {2}}, {v2_, v2_, {2}}}},
+            {{1, 1, v2_ ? AtomQ}, {1, 1, 1}, {{2}, 1, {2}}, {v2_ ? AtomQ, v2_ ? AtomQ, {2}}}},
            {ToPatternRules[{{1, 1, 1}} -> {{1, 1, 1, 1}}],
             <|"MaxGeneration" -> 2|>,
             <||>,
             {Table[{0, 0, 0}, 3]},
-            {ConstantArray[{0, 0, 0}, 4]}}},
+            {ConstantArray[{0, 0, 0}, 4]}},
+           (* Potential variable collision between different rule inputs and outputs *)
+           {ToPatternRules[{{{1, 1}, {2, 3}} -> {{2, 1}, {2, 2}, {2, 3}, {4, 2}}, {{1, 2}, {1, 2}} -> {{3, 2}}}],
+            <||>,
+            <|"MaxEvents" -> 1|>,
+            {{1, 0}, {6, 1}, {1, 0}, {1, 1}, {1, 0}, {7, 1}, {3, 0}, {3, 3}, {3, 1}, {8, 3}, {4, 0}, {4, 4}, {4, 0},
+             {9, 4}, {2, 2}, {2, 2}, {2, 0}, {10, 2}, {2, 1}, {2, 2}, {2, 0}, {11, 2}, {5, 1}, {5, 5}, {5, 2}, {12, 5}},
+            {{_Symbol, 0}}},
+           {ToPatternRules[{{1, 2} -> {}, {1} -> {2}}], <||>, <|"MaxEvents" -> 1|>, {{1}}, {_ ? AtomQ}},
+           {{0} :> {1, 2}, <||>, <|"MaxEvents" -> 2|>, {0}, {1, 2}},
+           (* there is only one created expression because the empty set {} can only be matched once *)
+           {{} :> {0}, <||>, <|"MaxEvents" -> 2|>, {}, {0}},
+           {{x_, y_} /; OddQ[x + y] :> {x + y},
+            <|"MaxEventInputs" -> 2, "MaxDestroyerEvents" -> 1|>,
+            <||>,
+            Range[10],
+            {3, 7, 11, 15, 19}},
+           {{x_, y_} /; Mod[x + y, 2] == 0 :> {x + y},
+            <|"MaxEventInputs" -> 2, "MaxDestroyerEvents" -> 1|>,
+            <||>,
+            Range[10],
+            {4, 6, 12, 14, 14, 18, 28, 46}},
+           {{x_, y_} /; x >= 8 :> {x - 8, y + 8},
+            <|"MaxGeneration" -> 20, "MaxEventInputs" -> 2, "MaxDestroyerEvents" -> 1|>,
+            <||>,
+            Range[10],
+            {__ ? (Not @* Negative)}}
+          },
 
         VerificationTest[
           eventCount @ GenerateMultihistory[
@@ -100,12 +127,23 @@
             2^7 - 1},
            {{{_}} :> {}, <||>, {{1}, {2}, {3}, {4}, {5}}, 1, 5},
            {{{x_}} :> {{x}}, <|"MaxGeneration" -> 0|>, {{1}, {2}, {3}, {4}, {5}}, 0, 0},
-           {{{{_}} :> {}, {{x_, _}} :> {{x}}}, <|"MaxGeneration" -> 2|>, {{1, 2}, {2}, {3}, {4}, {5}}, 2, 6}}
+           {{{{_}} :> {}, {{x_, _}} :> {{x}}}, <|"MaxGeneration" -> 2|>, {{1, 2}, {2}, {3}, {4}, {5}}, 2, 6}},
+
+        (* Test invalid patterns *)
+        VerificationTest[
+            eventCount @ GenerateMultihistory[
+              MultisetSubstitutionSystem[#],
+              <|"MaxGeneration" -> 1|>,
+              None,
+              anEventOrdering,
+              <||>] @ {{1}},
+            0,
+            {Pattern::patvar, Pattern::patvar}] & /@
+          {{{{Pattern[1, _], v2_}} :> {}, {{Pattern[2, _], v1_}} :> Module[{v2}, {v2}]},
+           {{{Pattern[Pattern[a, _], _], v2_}} :> {}, {{Pattern[2, _], v1_}} :> Module[{v2}, {v2}]}}
       }]
     }
   |>
-
-  (* TODO: add symbolicEvolution tests *)
 
   (* TODO: add fancy tests for new generalized rules *)
 |>
