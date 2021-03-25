@@ -107,7 +107,18 @@
             <|"MaxGeneration" -> 20, "MaxEventInputs" -> 2, "MaxDestroyerEvents" -> 1|>,
             <||>,
             Range[10],
-            {__ ? (Not @* Negative)}}
+            {__ ? (Not @* Negative)}},
+           {{x___} /; Plus[x] == 5 :> {Length[{x}]}, <|"MaxGeneration" -> 2|>, <||>, {1, 2, 3, 5}, {1, 2, 3, 3}},
+           {{x_, y_} /; x < y :> Module[{z = Hash[{x, y}]}, {z}],
+            <|"MaxEventInputs" -> 2, "MaxDestroyerEvents" -> 1|>,
+            <||>,
+            {1, 2, 3, 4},
+            {Hash[{1, 2}], Hash[{3, 4}], Hash[{Hash[{1, 2}], Hash[{3, 4}]}]}},
+           {{x__, y__} /; OrderedQ[Catenate[{x, y}]] :> {Catenate[{x, y}]},
+            <|"MaxEventInputs" -> 3|>,
+            <||>,
+            {{1}, {2}, {3}},
+            {{1, 2}, {1, 3}, {2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}}
           },
 
         VerificationTest[
@@ -144,6 +155,4 @@
       }]
     }
   |>
-
-  (* TODO: add fancy tests for new generalized rules *)
 |>
