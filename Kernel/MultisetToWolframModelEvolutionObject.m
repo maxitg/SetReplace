@@ -2,12 +2,10 @@ Package["SetReplace`"]
 
 PackageImport["GeneralUtilities`"]
 
-(* TODO: fix $SetReplaceTypeGraph labels for types that are lists *)
-
 declareTypeTranslation[
-  toWolframModelEvolutionObject2, {MultisetSubstitutionSystem, 0}, {WolframModelEvolutionObject, 2}];
+  toWolframModelEvolutionObject, {MultisetSubstitutionSystem, 0}, {WolframModelEvolutionObject, 2}];
 
-toWolframModelEvolutionObject2[Multihistory[_, data_]] := WolframModelEvolutionObject[<|
+toWolframModelEvolutionObject[Multihistory[_, data_]] := WolframModelEvolutionObject[<|
   "Version" -> 2,
   "Rules" -> Normal @ checkNotMissing[data["Rules"]],
   "MaxCompleteGeneration" -> Missing[],
