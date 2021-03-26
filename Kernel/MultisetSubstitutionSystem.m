@@ -42,7 +42,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
   eventOutputs = CreateDataStructure["DynamicArray", {Range @ Length @ init}];
   eventGenerations = CreateDataStructure["DynamicArray", {0}];
   expressionCreatorEvents = CreateDataStructure["DynamicArray", ConstantArray[1, Length @ init]];
-  expressionDestroyerEventsCount = CreateDataStructure["DynamicArray", ConstantArray[0, Length @ init]];
+  expressionDestroyerEventCounts = CreateDataStructure["DynamicArray", ConstantArray[0, Length @ init]];
   (* destroyerChoices[eventID][expressionID] -> eventID. See libSetReplace/Event.cpp for more information. *)
   destroyerChoices = CreateDataStructure["DynamicArray", {CreateDataStructure["HashTable"]}];
   eventInputsHashSet = CreateDataStructure["HashSet", {{}}];
@@ -57,7 +57,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
           eventOutputs,
           eventGenerations,
           expressionCreatorEvents,
-          expressionDestroyerEventsCount,
+          expressionDestroyerEventCounts,
           destroyerChoices,
           eventInputsHashSet],
         Replace[maxEvents, Infinity -> 2^63 - 1]];
@@ -74,7 +74,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
       "EventOutputs" -> eventOutputs,
       "EventGenerations" -> eventGenerations,
       "ExpressionCreatorEvents" -> expressionCreatorEvents,
-      "ExpressionDestroyerEventsCount" -> expressionDestroyerEventsCount,
+      "ExpressionDestroyerEventCounts" -> expressionDestroyerEventCounts,
       "DestroyerChoices" -> destroyerChoices,
       "EventInputsHashSet" -> eventInputsHashSet|>]
 ];
@@ -89,14 +89,14 @@ evaluateSingleEvent[
     eventOutputs_,
     eventGenerations_,
     expressionCreatorEvents_,
-    expressionDestroyerEventsCount_,
+    expressionDestroyerEventCounts_,
     destroyerChoices_,
     eventInputsHashSet_] := ModuleScope[
   {ruleIndex, matchedExpressions} = findMatch[rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs][
     expressions,
     eventGenerations,
     expressionCreatorEvents,
-    expressionDestroyerEventsCount,
+    expressionDestroyerEventCounts,
     destroyerChoices,
     eventInputsHashSet];
   createEvent[rules, ruleIndex, matchedExpressions][expressions,
@@ -105,7 +105,7 @@ evaluateSingleEvent[
                                                     eventOutputs,
                                                     eventGenerations,
                                                     expressionCreatorEvents,
-                                                    expressionDestroyerEventsCount,
+                                                    expressionDestroyerEventCounts,
                                                     destroyerChoices,
                                                     eventInputsHashSet]
 ];
@@ -116,7 +116,7 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
     expressions_,
     eventGenerations_,
     expressionCreatorEvents_,
-    expressionDestroyerEventsCount_,
+    expressionDestroyerEventCounts_,
     destroyerChoices_,
     eventInputsHashSet_] := ModuleScope[
   eventInputsCountRange = {minEventInputs, Min[maxEventInputs, expressions["Length"]]};
@@ -140,7 +140,7 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
   ScopeVariable[subsetIndex, possibleMatch, ruleIndex];
   Do[
     If[!eventInputsHashSet["MemberQ", {ruleIndex, possibleMatch}] &&
-        AllTrue[expressionDestroyerEventsCount["Part", #] & /@ possibleMatch, # < maxDestroyerEvents &] &&
+        AllTrue[expressionDestroyerEventCounts["Part", #] & /@ possibleMatch, # < maxDestroyerEvents &] &&
         AllTrue[possibleMatch, eventGenerations["Part", expressionCreatorEvents["Part", #]] < maxGeneration &] &&
         MatchQ[expressions["Part", #] & /@ possibleMatch, rules[[ruleIndex, 1]]] &&
         compatibleExpressionsQ[expressionCreatorEvents, destroyerChoices][possibleMatch],
@@ -187,7 +187,7 @@ createEvent[rules_, ruleIndex_, matchedExpressions_][expressions_,
                                                      eventOutputs_,
                                                      eventGenerations_,
                                                      expressionCreatorEvents_,
-                                                     expressionDestroyerEventsCount_,
+                                                     expressionDestroyerEventCounts_,
                                                      destroyerChoices_,
                                                      eventInputsHashSet_] := ModuleScope[
   ruleInputContents = expressions["Part", #] & /@ matchedExpressions;
@@ -213,9 +213,9 @@ createEvent[rules_, ruleIndex_, matchedExpressions_][expressions_,
 
   Do[expressionCreatorEvents["Append", eventRuleIndices["Length"]], Length[outputExpressions]];
 
-  Do[expressionDestroyerEventsCount["Append", 0], Length[outputExpressions]];
+  Do[expressionDestroyerEventCounts["Append", 0], Length[outputExpressions]];
   Scan[
-    expressionDestroyerEventsCount["SetPart", #, expressionDestroyerEventsCount["Part", #] + 1] &, matchedExpressions];
+    expressionDestroyerEventCounts["SetPart", #, expressionDestroyerEventCounts["Part", #] + 1] &, matchedExpressions];
 
   newDestroyerChoices = CreateDataStructure["HashTable"];
   Scan[(
