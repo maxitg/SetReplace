@@ -43,7 +43,11 @@
            {{v, i}},
            {{v, 1}, {v, 2}, {v, 1, 1}, {v, 1, 2}, {v, f, 1}, {v, f, 2}}},
           (* single history compatible merging *) (* TODO: this does not work, probably due to different ordering *)
-          {{{{a_}, {a_, b_}} :> {{a, b}, {b}}, {{a_}, {a_}} :> {{a, a, a}}}, <|"MaxEventInputs" -> 2|>, {{a1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1}, {b1, b2}, {b2, m1}, {m1, m2}}, {{a1, a2}, {a2}, {b1, b2}, {b2}, {a2, a3}, {a3}, {b2, m1}, {m1}, {a3, m1}, {m1}, {m1, m2}, {m2}, {m1, m2}, {m2}, {m2, m2, m2}}}
+          {{{{a_}, {a_, b_}} :> {{a, b}, {b}}, {{a_}, {a_}} :> {{a, a, a}}},
+           <|"MaxEventInputs" -> 2|>,
+           {{a1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1}, {b1, b2}, {b2, m1}, {m1, m2}},
+           {{a1, a2}, {a2}, {b1, b2}, {b2}, {a2, a3}, {a3}, {b2, m1}, {m1}, {a3, m1}, {m1}, {m1, m2}, {m2}, {m1, m2},
+            {m2}, {m2, m2, m2}}}
         },
 
         (* non-overlapping systems produce the same behavior *)

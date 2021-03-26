@@ -17,7 +17,8 @@
             rule, selection, stopping, init, expectedMaxEventGeneration, expectedEventCount, expectedConclusionReason},
           VerificationTest[
             Through[{maxEventGeneration, eventCount, conclusionReason} @
-              GenerateMultihistory[MultisetSubstitutionSystem[rule], selection, None, anEventOrdering, stopping] @ init],
+              GenerateMultihistory[
+                MultisetSubstitutionSystem[rule], selection, None, anEventOrdering, stopping] @ init],
             {expectedMaxEventGeneration, expectedEventCount, expectedConclusionReason}]
         ] @@@ {
           (* Terminated is returned if MaxGeneration is reached because MaxGeneration is not a stopping condition *)
@@ -68,7 +69,7 @@
            {{0, 1}, {1, 2}, {2, 3}, {3, 4}},
            0, 0, "Terminated"}
         },
-        
+
         VerificationTest[
             destroyerEventCounts @ GenerateMultihistory[
               MultisetSubstitutionSystem[ToPatternRules[{{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}}]],

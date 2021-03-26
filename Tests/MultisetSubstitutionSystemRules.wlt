@@ -17,7 +17,7 @@
               allExpressions @ GenerateMultihistory[
                 MultisetSubstitutionSystem[rules], selection, None, anEventOrdering, stopping] @ init,
               Join[init, expectedCreatedExpressions],
-              SameTest -> MatchQ]] @@@ 
+              SameTest -> MatchQ]] @@@
           {{{1} -> {1}, <||>, <|"MaxEvents" -> 1|>, {1}, {1}},
            (* 1 does not match any lists, {1} should be used for matching a single 1 *)
            {1 -> 2, <||>, <|"MaxEvents" -> 1|>, {1, 2, 3}, {}},
