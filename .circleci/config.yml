@@ -42,23 +42,7 @@ jobs:
 
       - run:
           name: Test
-          command: |
-            if [ $CIRCLE_NODE_INDEX -eq 2 ]
-            then
-              testsToRun=matching
-            elif [ $CIRCLE_NODE_INDEX -eq 3 ]
-            then
-              testsToRun=WolframModel
-            else
-              testsToRun=$(circleci tests glob "Tests/*.wlt" \
-                | sed "/Tests\/performance.wlt/d" \
-                | sed "/Tests\/matching.wlt/d" \
-                | sed "/Tests\/WolframModel.wlt/d" \
-                | circleci tests split --total=2 --split-by=filesize \
-                | sed "s/\.wlt//" \
-                | sed "s/Tests\///")
-            fi
-            ./.circleci/test.sh $testsToRun
+          command: ./.circleci/test.sh  # This assumes parallelism: 4 and would not run all tests otherwise
 
       - run:
           name: Performance Test
@@ -67,6 +51,32 @@ jobs:
             then
               ./performanceTest.wls master HEAD 2
             fi
+
+  wolfram-language-paclet-test-prerelease:
+    docker:
+      - image: maxitg/set-replace-wl-ci:12.3.0
+        auth:
+          username: maxitg
+          password: $DOCKERHUB_PASSWORD
+    parallelism: 4
+
+    steps:
+      - checkout
+
+      - attach_workspace:
+          at: /tmp/workspace
+
+      - run:
+          name: Copy libraries
+          command: mkdir -p ./LibraryResources && cp -r /tmp/workspace/* ./LibraryResources/
+
+      - run:
+          name: Install
+          command: ./install.wls
+
+      - run:
+          name: Test
+          command: ./.circleci/test.sh
 
   cpp-test:
     docker:
@@ -213,3 +223,6 @@ workflows:
           requires:
             - macos-build
             - windows-build
+      - wolfram-language-paclet-test-prerelease:
+          requires:
+            - wolfram-language-paclet-test
