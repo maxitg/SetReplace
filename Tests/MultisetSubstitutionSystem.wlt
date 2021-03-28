@@ -311,8 +311,7 @@
         {{{b_, _}, {_, b_}} :> {}, {{1, 2}, {3, 4}, {4, 5}, {2, 3}, {a, b}, {b, c}, {5, 6}}, {4, 1}},
         {ToPatternRules[{{{1, 2}, {2, 3}} -> {{1, 3}, {2, 4}, {4, 3}}, {{1, 1}, {2, 1}} -> {{1, 1}}}],
          {{2, 2}, {1, 4}, {4, 2}, {1, 2}, {3, 5}, {5, 2}},
-         {1, 3}}
-      },
+         {1, 3}}},
 
       Function[{rule, inits, lastExpressions},
         VerificationTest[
@@ -332,8 +331,7 @@
          {{x, y}, {x, z}, {y, x}, {y, z}, {z, x}, {z, y}}},
         {{{{1, 2, x_}, {1, 3, z_}} :> {{1, x, z}}, {{1, 2, x_}, {1, 2, z_}} :> {{2, x, z}}},
          Permutations[{{1, 2, x}, {1, 2, y}, {1, 3, z}}],
-         {{2, x, y}, {1, x, z}, {2, y, x}, {1, y, z}, {1, x, z}, {1, y, z}}}
-      }
+         {{2, x, y}, {1, x, z}, {2, y, x}, {1, y, z}, {1, x, z}, {1, y, z}}}}
     }
   |>,
   "Multiset System Selection and Stopping" -> <|
@@ -343,6 +341,7 @@
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
 
       (* These will not be necessary once we have properties. *)
+      allExpressions[Multihistory[_, data_]] := Normal @ data["Expressions"];
       eventCount[Multihistory[_, data_]] := data["EventRuleIndices"]["Length"] - 1;
       maxEventGeneration[Multihistory[_, data_]] := Max @ Normal @ data["EventGenerations"];
       conclusionReason[Multihistory[_, data_]] := data["ConclusionReason"];
@@ -404,9 +403,20 @@
            <|"MaxEventInputs" -> 2, "MaxDestroyerEvents" -> 0|>,
            <||>,
            {{0, 1}, {1, 2}, {2, 3}, {3, 4}},
-           0, 0, "Terminated"}
-          (* TODO: add tests for MinEventInputs and MaxEventInputs *)
-        },
+           0, 0, "Terminated"}},
+
+        With[{init = {1, 2, 3, 4, 5, 2/3, 5/3, 7/3}},
+          VerificationTest[
+            allExpressions @ GenerateMultihistory[
+              MultisetSubstitutionSystem[{n___} /; Plus[n] == 5 && OrderedQ[{n}] :> {{n}}],
+              <|"MinEventInputs" -> #1, "MaxEventInputs" -> #2, "MaxGeneration" -> 1|>,
+              None,
+              anEventOrdering,
+              <||>] @ init,
+            Join[init, #3],
+            SameTest -> MatchQ]
+        ] & @@@
+          {{1, 2, {{5}, {1, 4}, {2, 3}}}, {2, 3, {{1, 4}, {2, 3}, {1, 5/3, 7/3}, {2/3, 2, 7/3}}}, {2, 0, {}}},
 
         VerificationTest[
             destroyerEventCounts @ GenerateMultihistory[
