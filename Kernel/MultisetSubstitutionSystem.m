@@ -178,7 +178,7 @@ expressionGeneration[eventGenerations_, expressionCreatorEvents_][expression_] :
 (* TODO: switch to new names for separations *)
 
 compatibleExpressionsQ[expressionDestroyerChoices_][expressions_] :=
-  AllTrue[Subsets[expressions, {2}], expressionsSeparation[expressionDestroyerChoices] @@ # === "Spacelike" &];
+  AllTrue[Subsets[expressions, {2}], expressionsSeparation[expressionDestroyerChoices] @@ # === "Compatible" &];
 
 expressionsSeparation[expressionDestroyerChoices_][firstExpression_, secondExpression_] := ModuleScope[
   If[firstExpression === secondExpression, Return["Identical", Module]];
@@ -300,7 +300,7 @@ findDuplicateExpressions[expressionContentsToIndices_, eventInputs_, expressionD
     newExpressionContents_, creatorEvent_] := ModuleScope[
   possibleDuplicates =
     Function[{newExpressionContent},
-      Select[!spacelikeSeparatedQ[expressionDestroyerChoices][Append[eventInputs["Part", creatorEvent], #]] &] @
+      Select[!compatibleExpressionsQ[expressionDestroyerChoices][Append[eventInputs["Part", creatorEvent], #]] &] @
         Normal @
           expressionContentsToIndices["Lookup", newExpressionContent, {} &]
     ] /@ newExpressionContents;
@@ -323,12 +323,12 @@ sameCompatibilityWithOtherExpressions[eventInputs_, expressionDestroyerChoices_]
 spacelikeExpressionsToEvent[eventInputs_, expressionDestroyerChoices_][event_] := ModuleScope[
   inputs = Normal @ eventInputs["Part", event];
   allExpressions = Range @ expressionDestroyerChoices["Length"];
-  Select[spacelikeSeparatedQ[expressionDestroyerChoices][Append[inputs, #]] &] @ allExpressions
+  Select[compatibleExpressionsQ[expressionDestroyerChoices][Append[inputs, #]] &] @ allExpressions
 ];
 
 spacelikeExpressionsToExpression[expressionDestroyerChoices_][expression_] := ModuleScope[
   allExpressions = Range @ expressionDestroyerChoices["Length"];
-  Select[spacelikeSeparatedQ[expressionDestroyerChoices][{expression, #}] &] @ allExpressions
+  Select[compatibleExpressionsQ[expressionDestroyerChoices][{expression, #}] &] @ allExpressions
 ];
 
 (* Parsing *)
