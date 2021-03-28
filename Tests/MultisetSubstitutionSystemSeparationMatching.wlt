@@ -42,13 +42,27 @@
            <||>,
            {{v, i}},
            {{v, 1}, {v, 2}, {v, 1, 1}, {v, 1, 2}, {v, f, 1}, {v, f, 2}}},
-          (* single history compatible merging *) (* TODO: this does not work, probably due to different ordering *)
+          (* single-history spacelike merging *)
           {{{{a_}, {a_, b_}} :> {{a, b}, {b}}, {{a_}, {a_}} :> {{a, a, a}}},
+           <|"MaxDestroyerEvents" -> 1, "MaxEventInputs" -> 2|>,
+           {{a1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1}, {b1, b2}, {b2, m1}, {m1, m2}},
+           {{a1, a2}, {a2}, {a2, a3}, {a3}, {a3, m1}, {m1}, {b1, b2}, {b2}, {b2, m1}, {m1}, {m1, m2}, {m2}, {m1, m2},
+            {m2}, {m2, m2, m2}}},
+          (* multihistory spacelike merging *)
+          {{{{a_}, {a_, b_}} :> {{b}}, {{a_}, {a_}} :> {{a, a, a}}},
            <|"MaxEventInputs" -> 2|>,
            {{a1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1}, {b1, b2}, {b2, m1}, {m1, m2}},
-           {{a1, a2}, {a2}, {b1, b2}, {b2}, {a2, a3}, {a3}, {b2, m1}, {m1}, {a3, m1}, {m1}, {m1, m2}, {m2}, {m1, m2},
-            {m2}, {m2, m2, m2}}}
-        },
+           {{a2}, {a3}, {m1}, {b2}, {m1}, {m2}, {m2}, {m1, m1, m1}, {m1, m1, m1}}},
+          (* no single-history branchlike merging *)
+          {{{{a_}, {a_, b_}} :> {{a, b}, {b}}, {{a_}, {a_}} :> {{a, a, a}}},
+           <|"MaxDestroyerEvents" -> 1, "MaxEventInputs" -> 2|>,
+           {{o1}, {o1, a1}, {o1, b1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1, b2}, {b2, m1}, {m1, m2}},
+           {{o1, a1}, {a1}, {a1, a2}, {a2}, {a2, a3}, {a3}, {a3, m1}, {m1}, {m1, m2}, {m2}}},
+          (* no multihistory branchlike merging *)
+          {{{{a_}, {a_, b_}} :> {{b}}, {{a_}, {a_}} :> {{a, a, a}}},
+           <|"MaxEventInputs" -> 2|>,
+           {{o1}, {o1, a1}, {o1, b1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1, b2}, {b2, m1}, {m1, m2}},
+           {{a1}, {b1}, {a2}, {a3}, {m1}, {b2}, {m1}, {m2}, {m2}}}},
 
         (* non-overlapping systems produce the same behavior *)
         VerificationTest[
@@ -69,53 +83,3 @@
     }
   |>
 |>
-
-(* TODO: port remaining tests *)
-
-(*{
-      (* singleway spatial merging *)
-      VerificationTest[
-        WolframModel[{{{1}, {1, 2}} -> {{1, 2}, {2}}, {{1}, {1}} -> {{1, 1, 1}}},
-                     {{a1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1}, {b1, b2}, {b2, m1}, {m1, m2}},
-                     Infinity,
-                     "AllEventsEdgesList",
-                     "EventSelectionFunction" -> "GlobalSpacelike"],
-        {{a1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1}, {b1, b2}, {b2, m1}, {m1, m2}, {a1, a2}, {a2}, {b1, b2}, {b2},
-         {a2, a3}, {a3}, {b2, m1}, {m1}, {a3, m1}, {m1}, {m1, m2}, {m2}, {m1, m2}, {m2}, {m2, m2, m2}}
-      ],
-
-      (* multiway spatial merging *)
-      VerificationTest[
-        WolframModel[{{{1}, {1, 2}} -> {{2}}, {{1}, {1}} -> {{1, 1, 1}}},
-                     {{a1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1}, {b1, b2}, {b2, m1}, {m1, m2}},
-                     Infinity,
-                     "AllEventsEdgesList",
-                     "EventSelectionFunction" -> #],
-        {{a1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1}, {b1, b2}, {b2, m1}, {m1, m2}, {a2}, {b2}, {a3}, {m1}, {m1}, {m2},
-         {m2}, ##2}
-      ] & @@@ {
-        {None, {m1, m1, m1}, {m1, m1, m1}, {m2, m2, m2}, {m2, m2, m2}},
-        {"MultiwaySpacelike", {m1, m1, m1}, {m1, m1, m1}}},
-
-      (* no singleway branchial merging *)
-      VerificationTest[
-        WolframModel[{{{1}, {1, 2}} -> {{1, 2}, {2}}, {{1}, {1}} -> {{1, 1, 1}}},
-                     {{o1}, {o1, a1}, {o1, b1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1, b2}, {b2, m1}, {m1, m2}},
-                     Infinity,
-                     "AllEventsEdgesList",
-                     "EventSelectionFunction" -> "GlobalSpacelike"],
-        {{o1}, {o1, a1}, {o1, b1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1, b2}, {b2, m1}, {m1, m2}, {o1, a1}, {a1}, {a1, a2},
-         {a2}, {a2, a3}, {a3}, {a3, m1}, {m1}, {m1, m2}, {m2}}
-      ],
-
-      (* multiway branchial merging *)
-      VerificationTest[
-        WolframModel[{{{1}, {1, 2}} -> {{2}}, {{1}, {1}} -> {{1, 1, 1}}},
-                     {{o1}, {o1, a1}, {o1, b1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1, b2}, {b2, m1}, {m1, m2}},
-                     Infinity,
-                     "AllEventsEdgesList",
-                     "EventSelectionFunction" -> #],
-        {{o1}, {o1, a1}, {o1, b1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1, b2}, {b2, m1}, {m1, m2}, {a1}, {b1}, {a2}, {b2},
-         {a3}, {m1}, {m1}, {m2}, {m2}, ##2}
-      ] & @@@ {{None, {m1, m1, m1}, {m1, m1, m1}, {m2, m2, m2}, {m2, m2, m2}}, {"MultiwaySpacelike"}}
-}*)
