@@ -122,7 +122,7 @@
           1,
           Method -> #],
         {{1, 1}}
-      ] & /@ $methods,
+      ] & /@ {"LowLevel", "Symbolic"},
 
       VerificationTest[
         Normal @

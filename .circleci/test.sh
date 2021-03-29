@@ -2,13 +2,13 @@
 set -eo pipefail
 
 if [ "$CIRCLE_NODE_INDEX" -eq 2 ]; then
-  testsToRun=matching
+  testsToRun=hypergraphMatching
 elif [ "$CIRCLE_NODE_INDEX" -eq 3 ]; then
   testsToRun=WolframModel
 else
   mapfile -t testsToRun < <(circleci tests glob "Tests/*.wlt" |
     sed "/Tests\/performance.wlt/d" |
-    sed "/Tests\/matching.wlt/d" |
+    sed "/Tests\/hypergraphMatching.wlt/d" |
     sed "/Tests\/WolframModel.wlt/d" |
     circleci tests split --total=2 --split-by=filesize |
     sed "s/\.wlt//" |
