@@ -18,8 +18,7 @@
 
       $methods = {"Symbolic", "LowLevel", MultisetSubstitutionSystem};
 
-      matchingFunction[method_String] :=
-        SetReplace[#Init, ToPatternRules[#HypergraphRule], Method -> method] === {} &;
+      matchingFunction[method_String] := SetReplace[#Init, ToPatternRules[#HypergraphRule], Method -> method] === {} &;
 
       matchingFunction[MultisetSubstitutionSystem] =
         (#["EventRuleIndices"]["Length"] > 1 &) @
@@ -30,8 +29,7 @@
                                  {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
                                  <||>] @ #Init &;
 
-      graphFromHyperedges[edges_] := Graph[
-        UndirectedEdge @@@ Flatten[Partition[#, 2, 1] & /@ edges, 1]];
+      graphFromHyperedges[edges_] := Graph[UndirectedEdge @@@ Flatten[Partition[#, 2, 1] & /@ edges, 1]];
 
       randomConnectedGraphs[edgeCount_, edgeLength_, graphCount_] := (
         #[[All, 1]] & @ Select[#[[2]] &] @ Map[
@@ -58,8 +56,7 @@
         randomSameGraphMatchTestsWithFunction[edgeCount, edgeLength, graphCount, matchingFunction[method]];
 
       (* Here we generate pairs of different graphs, and check they are not being matched *)
-      randomDistinctGraphMatchTestsWithFunction[
-            edgeCount_, edgeLength_, graphCount_, testFunction_] := ModuleScope[
+      randomDistinctGraphMatchTestsWithFunction[edgeCount_, edgeLength_, graphCount_, testFunction_] := ModuleScope[
         tests = Select[!IsomorphicGraphQ @@ (graphFromHyperedges /@ #) &]
           @ Partition[
             Select[SimpleGraphQ @* graphFromHyperedges]
@@ -79,8 +76,7 @@
 
       (* Here we make initial condition degenerate, and check it still matches, i.e.,
          {{0, 0}} should still match {{0, 1}} *)
-      randomDegenerateGraphMatchTestsWithFunction[
-            edgeCount_, edgeLength_, graphCount_, testFunction_] := ModuleScope[
+      randomDegenerateGraphMatchTestsWithFunction[edgeCount_, edgeLength_, graphCount_, testFunction_] := ModuleScope[
         tests = randomConnectedGraphs[edgeCount, edgeLength, graphCount];
         Map[
           With[{set1 = #[[1]], identifiedVertex1 = #[[2]], identifiedVertex2 = #[[3]], set2 = #[[4]]},
@@ -122,7 +118,7 @@
           1,
           Method -> #],
         {{1, 1}}
-      ] & /@ $methods,
+      ] & /@ {"LowLevel", "Symbolic"},
 
       VerificationTest[
         Normal @

@@ -72,6 +72,9 @@
       realDescription[][real_Real] := "I am a real " <> ToString[real] <> ".";
       realDescription[args__][_] := throwInvalidPropertyArgumentCount[0, Length[{args}]];
 
+      originalTypes = $SetReplaceTypes;
+      originalProperties = $SetReplaceProperties;
+
       Unprotect[$SetReplaceTypeGraph];
       Unprotect[$SetReplaceProperties];
       Unprotect[$SetReplaceTypes];
@@ -84,8 +87,9 @@
       (* Type and property lists *)
       (* unknownObject is not here because there are no translations or properties defined for it, so it's invisible to
          the type system. *)
-      VerificationTest[$SetReplaceTypes, Sort @ {"String", "Expression", "HalfInteger", "EvenInteger", "Real"}],
-      VerificationTest[$SetReplaceProperties, Sort @ {description, multipliedHalf}],
+      VerificationTest[
+        $SetReplaceTypes, Sort @ Join[originalTypes, {"String", "Expression", "HalfInteger", "EvenInteger", "Real"}]],
+      VerificationTest[$SetReplaceProperties, Sort @ Join[originalProperties, {description, multipliedHalf}]],
 
       VerificationTest[GraphQ @ $SetReplaceTypeGraph],
       VerificationTest[ContainsOnly[Head /@ VertexList[$SetReplaceTypeGraph],

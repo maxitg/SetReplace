@@ -8,14 +8,12 @@
     "tests" -> {
       With[{anEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}}, {
         (* Symbol Leak *)
-
         testSymbolLeak[
           GenerateMultihistory[
               MultisetSubstitutionSystem[{a_, b_} :> {a + b}], <|"MaxEventInputs" -> 2|>, None, anEventOrdering, <||>] @
             {1, 2, 3}],
 
         (* Rules *)
-
         testUnevaluated[
             GenerateMultihistory[MultisetSubstitutionSystem[##2], <||>, None, anEventOrdering, <||>] @ {1}, {#}] & @@@
           {{MultisetSubstitutionSystem::argx},
@@ -24,13 +22,21 @@
            {GenerateMultihistory::ruleOutputNotList, {1} -> 2}},
 
         (* Init *)
-
         testUnevaluated[
           GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], <||>, None, anEventOrdering, <||>] @ 1,
           {GenerateMultihistory::multisetInitNotList}],
 
-        (* Parameters *)
+        (* Ordering not yet supported *)
+        testUnevaluated[
+          GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], {}, None, {"RuleIndex"}, {}] @ {1},
+          {GenerateMultihistory::eventOrderingNotImplemented}],
 
+        (* Token deduplication not yet supported *)
+        testUnevaluated[
+          GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], {}, All, anEventOrdering, {}] @ {1},
+          {GenerateMultihistory::tokenDeduplicationNotImplemented}],
+
+        (* Parameters *)
         testUnevaluated[
             GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], <|# -> -1|>, None, anEventOrdering, <||>] @
               {1},
@@ -64,7 +70,7 @@
               Join[init, expectedCreatedExpressions],
               SameTest -> MatchQ]] @@@
           {{{1} -> {1}, <||>, <|"MaxEvents" -> 1|>, {1}, {1}},
-           (* 1 does not match any lists, {1} should be used for matching a single 1 *)
+           (* 1 does not match any lists, {1} should be used for matching a single 1 as an expression *)
            {1 -> 2, <||>, <|"MaxEvents" -> 1|>, {1, 2, 3}, {}},
            {{1} -> {2}, <|"MaxGeneration" -> 1|>, <||>, {1, 2, 3}, {2}},
            {{2} -> {5}, <|"MaxGeneration" -> 1|>, <||>, {1, 2, 3}, {5}},
@@ -209,7 +215,7 @@
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
 
-      (* These will not be necessary once we have properties. *)
+      (* This will not be necessary once we have properties. *)
       allExpressions[Multihistory[_, data_]] := Normal @ data["Expressions"];
     ),
     "tests" -> {
@@ -227,17 +233,17 @@
           (* multihistory branching *)
           {{{1} -> {2}, {1} -> {3}}, <||>, {1}, {2, 3}},
           {{{1} -> {2}, {1} -> {3}}, <|"MaxDestroyerEvents" -> 1|>, {1}, {2}},
-          (* matching inconsistent expressions *)
+          (* no branchlike-expressions matching *)
           {{{1} -> {2}, {1} -> {3}, {2, 3} -> {4}}, <||>, {1}, {2, 3}},
-          (* matching past/future expressions *)
+          (* no timelike-expressions matching *)
           {{{1} -> {2}, {2} -> {3}, {2, 3} -> {4}}, <||>, {1}, {2, 3}},
-          (* matching compatible expressions *)
+          (* spacelike-expressions matching *)
           {{{1} -> {2, 3}, {2, 3} -> {4}}, <||>, {1}, {2, 3, 4}},
-          (* instantiating the same match multiple times *)
+          (* no instantiating the same match multiple times *)
           {{1} -> {2}, <||>, {1}, {2}},
           (* no matching rules that don't match *)
           {{a_, a_} :> {0}, <||>, {1, 2}, {}},
-          (* mixed compatible/inconsistent matching *)
+          (* no mixed spacelike/branchlike matching *)
           {{{{v, i}} -> {{v, 1}, {v, 2}},
             {{v, 1}} -> {{v, 1, 1}, {v, 1, 2}},
             {{v, 1, 1}, {v, 2}} -> {{v, f, 1}},
