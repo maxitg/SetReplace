@@ -32,7 +32,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
   rules = parseRules[rawRules];
   {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs} = Values @ rawEventSelection;
   parseTokenDeduplication[rawTokenDeduplication]; (* Token deduplication is not implemented at the moment *)
-  parseEventOrdering[rawEventOrdering];           (* Event ordering is no implemented at the moment *)
+  parseEventOrdering[rawEventOrdering];           (* Event ordering is not implemented at the moment *)
   {maxEvents} = Values @ rawStoppingCondition;
   init = parseInit[rawInit];
 
@@ -62,6 +62,8 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
           eventInputsHashSet],
         Replace[maxEvents, Infinity -> 2^63 - 1]];
     "MaxEvents"
+  ,
+    $$conclusionReason
   ];
 
   Multihistory[
@@ -151,7 +153,7 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
     {possibleMatch, Permutations[First @ Subsets[Range @ expressions["Length"], eventInputsCountRange, {subsetIndex}]]},
     {ruleIndex, Range @ Length @ rules}
   ];
-  Throw["Terminated"];
+  Throw["Terminated", $$conclusionReason];
 ];
 
 spacelikeExpressionsQ[expressionCreatorEvents_, destroyerChoices_][expressions_] := ModuleScope[
