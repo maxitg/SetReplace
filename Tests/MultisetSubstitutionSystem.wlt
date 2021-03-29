@@ -227,17 +227,17 @@
           (* multihistory branching *)
           {{{1} -> {2}, {1} -> {3}}, <||>, {1}, {2, 3}},
           {{{1} -> {2}, {1} -> {3}}, <|"MaxDestroyerEvents" -> 1|>, {1}, {2}},
-          (* matching inconsistent expressions *)
+          (* matching branchlike expressions *)
           {{{1} -> {2}, {1} -> {3}, {2, 3} -> {4}}, <||>, {1}, {2, 3}},
-          (* matching past/future expressions *)
+          (* matching timelike expressions *)
           {{{1} -> {2}, {2} -> {3}, {2, 3} -> {4}}, <||>, {1}, {2, 3}},
-          (* matching compatible expressions *)
+          (* matching spacelike expressions *)
           {{{1} -> {2, 3}, {2, 3} -> {4}}, <||>, {1}, {2, 3, 4}},
           (* instantiating the same match multiple times *)
           {{1} -> {2}, <||>, {1}, {2}},
           (* no matching rules that don't match *)
           {{a_, a_} :> {0}, <||>, {1, 2}, {}},
-          (* mixed compatible/inconsistent matching *)
+          (* mixed spacelike/branchlike matching *)
           {{{{v, i}} -> {{v, 1}, {v, 2}},
             {{v, 1}} -> {{v, 1, 1}, {v, 1, 2}},
             {{v, 1, 1}, {v, 2}} -> {{v, f, 1}},

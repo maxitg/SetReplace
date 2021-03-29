@@ -133,7 +133,7 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
         anymore. We can also make an atoms index for some rules (like we do in Matcher of libSetReplace). In this case,
         we can avoid searching entire subtrees if we see some expressions as non-intersecting.
      2. We need to skip expressions from matching based on metadata. For example, we shouldn't continue matching groups
-        that are not compatible or have exceeding generations or destroyer event count.
+        that are not spacelike or have exceeding generations or destroyer event count.
      3. We need to save partial searching results. They can probably be saved as non-intersecting ranges. Note that they
         have to be ranges because adding new expressions will introduce gaps in the sequence of matches ordered
         according to some (but not all) ordering functions. This new data structure will replace eventInputsHashSet. *)
@@ -143,7 +143,7 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
         AllTrue[expressionDestroyerEventCounts["Part", #] & /@ possibleMatch, # < maxDestroyerEvents &] &&
         AllTrue[possibleMatch, eventGenerations["Part", expressionCreatorEvents["Part", #]] < maxGeneration &] &&
         MatchQ[expressions["Part", #] & /@ possibleMatch, rules[[ruleIndex, 1]]] &&
-        compatibleExpressionsQ[expressionCreatorEvents, destroyerChoices][possibleMatch],
+        spacelikeExpressionsQ[expressionCreatorEvents, destroyerChoices][possibleMatch],
       Return[{ruleIndex, possibleMatch}, Module]
     ];
   ,
@@ -154,9 +154,9 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
   Throw["Terminated"];
 ];
 
-compatibleExpressionsQ[expressionCreatorEvents_, destroyerChoices_][expressions_] := ModuleScope[
+spacelikeExpressionsQ[expressionCreatorEvents_, destroyerChoices_][expressions_] := ModuleScope[
   AllTrue[
-    Subsets[expressions, {2}], expressionsSeparation[expressionCreatorEvents, destroyerChoices] @@ # === "Compatible" &]
+    Subsets[expressions, {2}], expressionsSeparation[expressionCreatorEvents, destroyerChoices] @@ # === "Spacelike" &]
 ];
 
 expressionsSeparation[expressionCreatorEvents_, destroyerChoices_][firstExpression_, secondExpression_] := ModuleScope[
@@ -165,15 +165,16 @@ expressionsSeparation[expressionCreatorEvents_, destroyerChoices_][firstExpressi
   {firstDestroyerChoices, secondDestroyerChoices} =
     destroyerChoices["Part", expressionCreatorEvents["Part", #]] & /@ {firstExpression, secondExpression};
 
-  If[firstDestroyerChoices["KeyExistsQ", secondExpression], Return["Past", Module]];
-  If[secondDestroyerChoices["KeyExistsQ", firstExpression], Return["Future", Module]];
+  If[firstDestroyerChoices["KeyExistsQ", secondExpression] || secondDestroyerChoices["KeyExistsQ", firstExpression],
+    Return["Timelike", Module]
+  ];
 
   KeyValueMap[Function[{expression, chosenEvent},
     If[secondDestroyerChoices["KeyExistsQ", expression] && secondDestroyerChoices["Lookup", expression] =!= chosenEvent,
-      Return["Inconsistent", Module];
+      Return["Branchlike", Module];
     ];
   ], Normal @ firstDestroyerChoices];
-  "Compatible"
+  "Spacelike"
 ];
 
 declareMessage[
