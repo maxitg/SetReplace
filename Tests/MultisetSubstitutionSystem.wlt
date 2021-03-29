@@ -8,14 +8,12 @@
     "tests" -> {
       With[{anEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}}, {
         (* Symbol Leak *)
-
         testSymbolLeak[
           GenerateMultihistory[
               MultisetSubstitutionSystem[{a_, b_} :> {a + b}], <|"MaxEventInputs" -> 2|>, None, anEventOrdering, <||>] @
             {1, 2, 3}],
 
         (* Rules *)
-
         testUnevaluated[
             GenerateMultihistory[MultisetSubstitutionSystem[##2], <||>, None, anEventOrdering, <||>] @ {1}, {#}] & @@@
           {{MultisetSubstitutionSystem::argx},
@@ -24,13 +22,21 @@
            {GenerateMultihistory::ruleOutputNotList, {1} -> 2}},
 
         (* Init *)
-
         testUnevaluated[
           GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], <||>, None, anEventOrdering, <||>] @ 1,
           {GenerateMultihistory::multisetInitNotList}],
 
-        (* Parameters *)
+        (* Ordering not yet supported *)
+        testUnevaluated[
+          GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], {}, None, {"RuleIndex"}, {}] @ {1},
+          {GenerateMultihistory::eventOrderingNotImplemented}],
 
+        (* Token deduplication not yet supported *)
+        testUnevaluated[
+          GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], {}, All, anEventOrdering, {}] @ {1},
+          {GenerateMultihistory::tokenDeduplicationNotImplemented}],
+
+        (* Parameters *)
         testUnevaluated[
             GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], <|# -> -1|>, None, anEventOrdering, <||>] @
               {1},
