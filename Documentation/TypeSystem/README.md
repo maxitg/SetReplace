@@ -1,5 +1,3 @@
-###### [Symbols and Functions](/README.md#symbols-and-functions) >
-
 # Type System
 
 The basis of *SetReplace* is the type system used for [`Multihistory`](Multihistory.md) objects describing evolutions of

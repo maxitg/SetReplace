@@ -1,4 +1,4 @@
-###### [Symbols and Functions](/README.md#symbols-and-functions) > [Type System](README.md)
+###### [Type System](README.md)
 
 # $SetReplaceTypes
 
