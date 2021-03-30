@@ -3,17 +3,15 @@
 The basis of *SetReplace* is the type system used for [`Multihistory`](Multihistory.md) objects describing evolutions of
 various computational systems.
 
-We have just started working on this new system as part of *SetReplace 0.4 Yellowstone*, and no specific types have been
-implemented yet.
-
 `Multihistory` objects can be created with functions such as
 [`GenerateMultihistory`](/Documentation/SymbolsAndFunctions/Generators/GenerateMultihistory.md).
 
-These functions will be able to take various computational systems as an argument, such as `MultisetSubstitutionSystem`,
-`HypergraphSubstitutionSystem` and `StringSubstitutionSystem`.
+These functions take various [computational systems](/Documentation/SymbolsAndFunctions/Systems/README.md) such as
+[`MultisetSubstitutionSystem`](/Documentation/SymbolsAndFunctions/Systems/MultisetSubstitutionSystem.md) as an argument.
 
 We will also have [properties]($SetReplaceProperties.md) implemented for some of these objects, e.g., `TokenEventGraph`.
-These properties can transparently convert objects to the [type]($SetReplaceTypes.md) required to evaluate them.
+These properties can transparently convert objects to the [type](/Documentation/SymbolsAndFunctions/Types/README.md)
+required to evaluate them.
 
 Most of the time, it is sufficient to rely on these automatic conversions. However, sometimes it might be useful to
 convert an object to a different type manually for persistence or optimization, in which case one can use the

@@ -6,5 +6,5 @@
 
 ```wl
 In[] := $SetReplaceTypes
-Out[] = {}
+Out[] = {{MultisetSubstitutionSystem, 0}, {WolframModelEvolutionObject, 2}}
 ```
