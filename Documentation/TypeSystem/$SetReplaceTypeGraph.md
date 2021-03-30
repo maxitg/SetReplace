@@ -3,8 +3,8 @@
 # $SetReplaceTypeGraph
 
 **`$SetReplaceTypeGraph`** gives the [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) showing
-[types](/Documentation/Types/README.md) and [properties]($SetReplaceProperties.md) defined in *SetReplace* (including
-internal ones) and possible computation paths between them:
+[types](/Documentation/Types/README.md) and [properties](/Documentation/Properties/README.md) defined in *SetReplace*
+(including internal ones) and possible computation paths between them:
 
 ```wl
 In[] := $SetReplaceTypeGraph

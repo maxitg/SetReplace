@@ -1,5 +1,3 @@
-###### [Symbols and Functions](/README.md#symbols-and-functions) >
-
 # Generators
 
 Generators are functions that generate [`Multihistory`](TODO) objects for
