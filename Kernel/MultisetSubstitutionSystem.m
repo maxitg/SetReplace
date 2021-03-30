@@ -48,7 +48,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
   eventInputsHashSet = CreateDataStructure["HashSet", {{}}];
 
   (* Data structures are modified in-place. If the system runs out of matches, it throws an exception. *)
-  conclusionReason = Catch[
+  terminationReason = Catch[
     Do[
       evaluateSingleEvent[rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs][
           expressions,
@@ -63,13 +63,13 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
         Replace[maxEvents, Infinity -> 2^63 - 1]];
     "MaxEvents"
   ,
-    $$conclusionReason
+    $$terminationReason
   ];
 
   Multihistory[
     {MultisetSubstitutionSystem, 0},
     <|"Rules" -> rules,
-      "ConclusionReason" -> conclusionReason,
+      "TerminationReason" -> terminationReason,
       "Expressions" -> expressions,
       "EventRuleIndices" -> eventRuleIndices,
       "EventInputs" -> eventInputs,
@@ -153,7 +153,7 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
     {possibleMatch, Permutations[First @ Subsets[Range @ expressions["Length"], eventInputsCountRange, {subsetIndex}]]},
     {ruleIndex, Range @ Length @ rules}
   ];
-  Throw["Terminated", $$conclusionReason];
+  Throw["Complete", $$terminationReason];
 ];
 
 spacelikeExpressionsQ[expressionCreatorEvents_, destroyerChoices_][expressions_] := ModuleScope[

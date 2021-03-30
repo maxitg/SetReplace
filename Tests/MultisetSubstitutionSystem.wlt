@@ -350,29 +350,29 @@
       allExpressions[Multihistory[_, data_]] := Normal @ data["Expressions"];
       eventCount[Multihistory[_, data_]] := data["EventRuleIndices"]["Length"] - 1;
       maxEventGeneration[Multihistory[_, data_]] := Max @ Normal @ data["EventGenerations"];
-      conclusionReason[Multihistory[_, data_]] := data["ConclusionReason"];
+      terminationReason[Multihistory[_, data_]] := data["TerminationReason"];
       destroyerEventCounts[Multihistory[_, data_]] := Normal @ data["ExpressionDestroyerEventCounts"];
     ),
     "tests" -> {
       With[{anEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}}, {
         Function[{
-            rule, selection, stopping, init, expectedMaxEventGeneration, expectedEventCount, expectedConclusionReason},
+            rule, selection, stopping, init, expectedMaxEventGeneration, expectedEventCount, expectedTerminationReason},
           VerificationTest[
-            Through[{maxEventGeneration, eventCount, conclusionReason} @
+            Through[{maxEventGeneration, eventCount, terminationReason} @
               GenerateMultihistory[
                 MultisetSubstitutionSystem[rule], selection, None, anEventOrdering, stopping] @ init],
-            {expectedMaxEventGeneration, expectedEventCount, expectedConclusionReason}]
+            {expectedMaxEventGeneration, expectedEventCount, expectedTerminationReason}]
         ] @@@ {
-          (* Terminated is returned if MaxGeneration is reached because MaxGeneration is not a stopping condition *)
-          {{_} :> {Unique[]}, <|"MaxGeneration" -> 2|>, <||>, {1}, 2, 2, "Terminated"},
-          {{_} :> {Unique[]}, <|"MaxGeneration" -> 0|>, <||>, {1}, 0, 0, "Terminated"},
+          (* Complete is returned if MaxGeneration is reached because MaxGeneration is not a stopping condition *)
+          {{_} :> {Unique[]}, <|"MaxGeneration" -> 2|>, <||>, {1}, 2, 2, "Complete"},
+          {{_} :> {Unique[]}, <|"MaxGeneration" -> 0|>, <||>, {1}, 0, 0, "Complete"},
           {{_} :> {Unique[]}, <|"MaxGeneration" -> 3|>, <|"MaxEvents" -> 2|>, {1}, 2, 2, "MaxEvents"},
           {{_} :> {Unique[]}, <||>, <|"MaxEvents" -> 0|>, {1}, 0, 0, "MaxEvents"},
           {ToPatternRules[{{0, 1}} -> {{0, 2}, {2, 1}}],
            <|"MaxGeneration" -> 3, "MaxEventInputs" -> 1|>,
            <||>,
            {{0, 1}},
-           3, 7, "Terminated"},
+           3, 7, "Complete"},
           {ToPatternRules[{{0, 1}} -> {{0, 2}, {2, 1}}], <|"MaxEventInputs" -> 1|>, <|"MaxEvents" -> 6|>, {{0, 1}},
            3, 6, "MaxEvents"},
           {ToPatternRules[{{0, 1}} -> {{0, 2}, {2, 1}}],
@@ -384,32 +384,32 @@
            <|"MaxGeneration" -> 2, "MaxEventInputs" -> 1|>,
            <|"MaxEvents" -> 6|>,
            {{0, 1}},
-           2, 3, "Terminated"},
+           2, 3, "Complete"},
           {ToPatternRules[{{0, 1}, {1, 2}} -> {{0, 2}}],
            <|"MaxEventInputs" -> 2, "MaxDestroyerEvents" -> 1|>,
            <||>,
            {{0, 1}, {1, 2}, {2, 3}, {3, 4}},
-           2, 3, "Terminated"},
+           2, 3, "Complete"},
           {ToPatternRules[{{0, 1}, {1, 2}} -> {{0, 2}}],
            <|"MaxEventInputs" -> 2, "MaxDestroyerEvents" -> 2|>,
            <||>,
            {{0, 1}, {1, 2}, {2, 3}, {3, 4}},
-           2, 6, "Terminated"},
+           2, 6, "Complete"},
           {ToPatternRules[{{0, 1}, {1, 2}} -> {{0, 2}}],
            <|"MaxEventInputs" -> 2, "MaxDestroyerEvents" -> 3|>,
            <||>,
            {{0, 1}, {1, 2}, {2, 3}, {3, 4}},
-           3, 10, "Terminated"},
+           3, 10, "Complete"},
           {ToPatternRules[{{0, 1}, {1, 2}} -> {{0, 2}}],
            <|"MaxEventInputs" -> 2|>,
            <||>,
            {{0, 1}, {1, 2}, {2, 3}, {3, 4}},
-           3, 12, "Terminated"},
+           3, 12, "Complete"},
           {ToPatternRules[{{0, 1}, {1, 2}} -> {{0, 2}}],
            <|"MaxEventInputs" -> 2, "MaxDestroyerEvents" -> 0|>,
            <||>,
            {{0, 1}, {1, 2}, {2, 3}, {3, 4}},
-           0, 0, "Terminated"}},
+           0, 0, "Complete"}},
 
         With[{init = {1, 2, 3, 4, 5, 2/3, 5/3, 7/3}},
           VerificationTest[
