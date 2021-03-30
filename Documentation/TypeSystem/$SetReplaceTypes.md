@@ -2,8 +2,7 @@
 
 # $SetReplaceTypes
 
-**`$SetReplaceTypes`** gives the list of all [types](/Documentation/SymbolsAndFunctions/Types/README.md) defined in
-*SetReplace*:
+**`$SetReplaceTypes`** gives the list of all [types](/Documentation/Types/README.md) defined in *SetReplace*:
 
 ```wl
 In[] := $SetReplaceTypes

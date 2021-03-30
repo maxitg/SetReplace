@@ -2,11 +2,10 @@
 
 # Multihistory
 
-**`Multihistory`** is a head used for [types](/Documentation/SymbolsAndFunctions/Types/README.md) representing an
-evaluation history of a computational system.
+**`Multihistory`** is a head used for [types](/Documentation/Types/README.md) representing an evaluation history of a
+computational system.
 
-For example, for
-a [`MultisetSubstitutionSystem`](/Documentation/SymbolsAndFunctions/Systems/MultisetSubstitutionSystem.md),
+For example, for a [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md),
 
 ```wl
 In[] := GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
