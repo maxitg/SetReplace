@@ -18,5 +18,5 @@ In[] := GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
 
 <img src="/Documentation/Images/MultisetMultihistory.png" width="472.2">
 
-You will be able to use `properties`[$SetReplaceProperties.md] to extract information about multihistories, but we have
-not implemented any properties yet.
+You will be able to use [`properties`]($SetReplaceProperties.md) to extract information about multihistories, but we
+have not implemented any properties yet.
