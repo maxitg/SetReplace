@@ -1935,10 +1935,16 @@
             KeySelect[#["FeatureAssociation"], StringMatchQ[#, "CausalGraph" ~~ __] &]
           ] & /@ evolutionObjects,
 
-          (* List spec *)
+          (* List spec for StructurePreservingFinalStateGraph *)
           VerificationTest[
             #["FeatureAssociation", {"StructurePreservingFinalStateGraph"}],
             KeySelect[#["FeatureAssociation"], StringMatchQ[#, "StructurePreservingFinalStateGraph" ~~ __] &]
+          ] & /@ evolutionObjects,
+
+          (* List spec for ObjectProperties *)
+          VerificationTest[
+            #["FeatureAssociation", {"ObjectProperties"}],
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "ObjectProperties" ~~ __] &]
           ] & /@ evolutionObjects,
 
           (* All spec *)

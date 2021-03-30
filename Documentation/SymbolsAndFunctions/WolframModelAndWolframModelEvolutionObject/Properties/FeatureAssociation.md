@@ -15,6 +15,10 @@ version of
 the [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md)
 as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md) using the
 `"StructurePreserving"` transformation
+- `"ObjectProperties"`: A list of properties of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) 
+that return a numeric value. Right now the list of properties is: "EventsCount", "TotalGenerationsCount", 
+"PartialGenerationsCount", "AllEventsCount",  "AllEventsDistinctElementsCount", "AllEventsEdgesCount", 
+"CompleteGenerationsCount".
 
 ```wl
 In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 5]["FeatureAssociation"]
@@ -26,7 +30,15 @@ Out[] = <|
  "StructurePreservingFinalStateGraphVertexCount" -> 115,
  "StructurePreservingFinalStateGraphEdgeCount" -> 138,
  "StructurePreservingFinalStateGraphVertexConnectivity" -> 2,
- "StructurePreservingFinalStateGraphVertexDegreesQuantiles" -> {2, 2, 2, 2, 8}|>
+ "StructurePreservingFinalStateGraphVertexDegreesQuantiles" -> {2, 2, 2, 2, 8},
+ "ObjectPropertiesEventsCount" -> 22,
+ "ObjectPropertiesTotalGenerationsCount" -> 5,
+ "ObjectPropertiesPartialGenerationsCount" -> 0,
+ "ObjectPropertiesAllEventsCount" -> 22,
+ "ObjectPropertiesAllEventsDistinctElementsCount" -> 23,
+ "ObjectPropertiesAllEventsEdgesCount" -> 90,
+ "ObjectPropertiesCompleteGenerationsCount" -> 5
+|>
 ```
 
 The list of features computed for each graph `g` in a feature group is:

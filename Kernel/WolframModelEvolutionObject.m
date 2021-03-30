@@ -967,10 +967,14 @@ graphFeatureAssociation[g_Graph] := <|
     "VertexDegreesQuantiles" -> vertexDegreeQuantiles[g]
 |>;
 
+getNumericObjectProperties[obj_, caller_, boundary_] := <|# -> propertyEvaluate[True, boundary][obj, caller, #] & /@
+  {"EventsCount", "TotalGenerationsCount", "PartialGenerationsCount", "AllEventsCount",
+    "AllEventsDistinctElementsCount", "AllEventsEdgesCount", "CompleteGenerationsCount"}|>
+
 General::invalidFeatureSpec = "Feature specification `1` should be one of `2`, a list of them, or All.";
 General::unknownFeatureGroup = "Feature group `1` should be one of `2`";
 
-fromFeaturesSpec[caller_, All] := {"CausalGraph", "StructurePreservingFinalStateGraph"}
+fromFeaturesSpec[caller_, All] := {"CausalGraph", "StructurePreservingFinalStateGraph", "ObjectProperties"}
 fromFeaturesSpec[caller_, featuresSpecs_List] := featuresSpecs
 fromFeaturesSpec[caller_, featuresSpecs_String] := {featuresSpecs}
 fromFeaturesSpec[caller_, wrongInput_] := (Message[caller::invalidFeatureSpec,
@@ -992,6 +996,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
         {_ ? NumberQ -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}]},
         Infinity]
     ],
+    "ObjectProperties" -> getNumericObjectProperties[obj, caller, boundary],
     other_ :> (Message[caller::unknownFeatureGroup, other, fromFeaturesSpec[caller, All]]; Throw[$Failed])
   }, {1}]]
 ]
