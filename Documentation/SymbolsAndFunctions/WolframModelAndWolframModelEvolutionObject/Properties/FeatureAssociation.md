@@ -16,8 +16,8 @@ the [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframMo
 as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md) using the
 `"StructurePreserving"` transformation
 - `"ObjectProperties"`: A list of properties of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
-that return a numeric value. Right now the list of properties is: "EventsCount", "TotalGenerationsCount",
-"PartialGenerationsCount", "AllEventsCount",  "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
+that return a numeric value. Right now the list of properties is: "EventsCount",
+"PartialGenerationsCount", "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
 "CompleteGenerationsCount".
 
 ```wl
@@ -32,9 +32,7 @@ Out[] = <|
  "StructurePreservingFinalStateGraphVertexConnectivity" -> 2,
  "StructurePreservingFinalStateGraphVertexDegreesQuantiles" -> {2, 2, 2, 2, 8},
  "ObjectPropertiesEventsCount" -> 22,
- "ObjectPropertiesTotalGenerationsCount" -> 5,
  "ObjectPropertiesPartialGenerationsCount" -> 0,
- "ObjectPropertiesAllEventsCount" -> 22,
  "ObjectPropertiesAllEventsDistinctElementsCount" -> 23,
  "ObjectPropertiesAllEventsEdgesCount" -> 90,
  "ObjectPropertiesCompleteGenerationsCount" -> 5

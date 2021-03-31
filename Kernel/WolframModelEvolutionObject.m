@@ -968,8 +968,8 @@ graphFeatureAssociation[g_Graph] := <|
 |>;
 
 getNumericObjectProperties[obj_, caller_, boundary_] := <|# -> propertyEvaluate[True, boundary][obj, caller, #] & /@
-  {"EventsCount", "TotalGenerationsCount", "PartialGenerationsCount", "AllEventsCount",
-    "AllEventsDistinctElementsCount", "AllEventsEdgesCount", "CompleteGenerationsCount"}|>
+  {"EventsCount", "PartialGenerationsCount", "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
+    "CompleteGenerationsCount"}|>
 
 General::invalidFeatureSpec = "Feature specification `1` should be one of `2`, a list of them, or All.";
 General::unknownFeatureGroup = "Feature group `1` should be one of `2`";
