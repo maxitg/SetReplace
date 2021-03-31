@@ -1,7 +1,7 @@
 # Type System
 
-The basis of *SetReplace* is the type system used for [`Multihistory`](/Documentation/Types/Multihistory.md) objects
-describing evolutions of various computational systems.
+The basis of *SetReplace* is the type system used for [`Multihistory`](/Documentation/Types/Multihistory/README.md)
+objects describing evolutions of various computational systems.
 
 `Multihistory` objects can be created with functions such as
 [`GenerateMultihistory`](/Documentation/Generators/GenerateMultihistory.md).

@@ -1,4 +1,4 @@
 # Types
 
 * Types:
-  * [`Multihistory`](Multihistory.md) &mdash; a generic kind of types for computational systems
+  * [`Multihistory`](Multihistory/README.md) &mdash; a generic kind of types for computational systems
