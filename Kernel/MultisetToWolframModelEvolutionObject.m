@@ -10,7 +10,7 @@ toWolframModelEvolutionObject[Multihistory[_, data_]] := WolframModelEvolutionOb
   "Rules" -> Normal @ checkNotMissing[data["Rules"]],
   "MaxCompleteGeneration" -> Missing[],
   "TerminationReason" -> Switch[data["TerminationReason"],
-    "Completed", "FixedPoint",
+    "Complete", "FixedPoint",
     "MaxEvents", "MaxEvents",
     _, throw[Failure["corruptMultisetMultihistory", <||>]]],
   "AtomLists" -> Normal @ checkNotMissing[data["Expressions"]],
