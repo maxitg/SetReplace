@@ -9,8 +9,9 @@ by [`"FeatureAssociation"`](/Documentation/SymbolsAndFunctions/WolframModelAndWo
 
 ```wl
 In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 5]["FeatureVector"]
-Out[] = {22, 42, 1, 2, 2, 2, 6, 6, 115, 138, 2, 2, 2, 2, 2, 8, 22, 5, 0, 22, 23, 90, 5}
 ```
+
+<img src="/Documentation/Images/FeatureVectorExample-01.png" width="513.0">
 
 For the list of features
 see [`FeatureAssociation`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FeatureAssociation.md).

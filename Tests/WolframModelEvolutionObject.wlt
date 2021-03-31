@@ -1923,28 +1923,30 @@
         {
           VerificationTest[And @@ StringQ /@ Keys[#["FeatureAssociation"]]] & /@ evolutionObjects,
 
-          VerificationTest[And @@ (NumberQ[#] || MissingQ[#] &) /@ Flatten[Values[#["FeatureAssociation"]]]] &
+          VerificationTest[And @@ (NumberQ[#] || MissingQ[#]  || GraphQ[#] || BooleanQ[#]  || StringQ[#] &)
+            /@ Flatten[Values[#["FeatureAssociation"]]]] &
             /@ evolutionObjects,
 
-          VerificationTest[SameQ @@ (Replace[#, _?(NumberQ[#] || MissingQ[#] &) -> 1, Infinity] &
+          VerificationTest[SameQ @@ (Replace[#, _?(NumberQ[#] || MissingQ[#] || GraphQ[#] || BooleanQ[#] || StringQ[#]
+            &) -> 1, Infinity] &
             [#["FeatureAssociation"]] & /@ evolutionObjects)],
 
           (* String spec *)
           VerificationTest[
             #["FeatureAssociation", "CausalGraph"],
-            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "CausalGraph" ~~ __] &]
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "CausalGraph" ~~ ___] &]
           ] & /@ evolutionObjects,
 
           (* List spec for StructurePreservingFinalStateGraph *)
           VerificationTest[
             #["FeatureAssociation", {"StructurePreservingFinalStateGraph"}],
-            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "StructurePreservingFinalStateGraph" ~~ __] &]
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "StructurePreservingFinalStateGraph" ~~ ___] &]
           ] & /@ evolutionObjects,
 
           (* List spec for ObjectProperties *)
           VerificationTest[
             #["FeatureAssociation", {"ObjectProperties"}],
-            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "ObjectProperties" ~~ __] &]
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "ObjectProperties" ~~ ___] &]
           ] & /@ evolutionObjects,
 
           (* All spec *)
