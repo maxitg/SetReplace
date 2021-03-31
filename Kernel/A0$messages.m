@@ -26,6 +26,7 @@ message::messageNotFound = "Message `` could not be found. Messages need to be d
 message::missingArgs = "Arguments `2` missing for message `1`.";
 
 Attributes[message] = {HoldFirst};
+message[MessageName[_, None], _] := Null; (* This is helpful for returning unevaluated without printing any messages. *)
 message[messageName_, args_ ? AssociationQ] := ModuleScope[
   (* Look for the specific message first, e.g., symb::msg. If not found, look for General::msg.
      General:: messages should be possible to generate for any symbol. *)
