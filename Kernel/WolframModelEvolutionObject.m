@@ -957,16 +957,6 @@ nestedToSingleAssociation[association_] :=
   Join @@ (Function[parentKey, KeyMap[StringJoin[parentKey, #] &, association[parentKey]]] /@ Keys[association])
 nestedToSingleAssociation[<||>] := <||>
 
-vertexDegreeQuantiles[g_Graph] := Quantile[VertexDegree[g], {0, 0.25, 0.50, 0.75, 1}]
-vertexDegreeQuantiles[g_Graph] /; VertexCount[g] == 0 := {0, 0, 0, 0, 0} (* Edge case for empty graphs *)
-
-graphFeatureAssociation[g_Graph] := <|
-    "VertexCount" -> VertexCount[g],
-    "EdgeCount" -> EdgeCount[g],
-    "VertexConnectivity" -> VertexConnectivity[UndirectedGraph[g]],
-    "VertexDegreesQuantiles" -> vertexDegreeQuantiles[g]
-|>;
-
 getNumericObjectProperties[obj_, caller_, boundary_] := <|# -> propertyEvaluate[True, boundary][obj, caller, #] & /@
   {"EventsCount", "PartialGenerationsCount", "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
     "CompleteGenerationsCount", "TerminationReason", "GenerationComplete"}|>
