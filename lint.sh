@@ -9,10 +9,6 @@ lsfilesOptions=(
   --others           # untracked files
   --exclude-standard # exclude .gitignore
   '*'
-  ':(exclude)*.png'
-  ':(exclude)Dependencies/*'
-  ':(exclude)libSetReplace/WolframHeaders/*'
-  ':(exclude)*.xcodeproj/*' # Xcode manages these automatically
 )
 
 formatInPlace=0
@@ -55,7 +51,12 @@ fi
 exitStatus=0
 
 for file in "${filesToLint[@]}"; do
-  if [[ "$file" == *.cpp || "$file" == *.hpp || "$file" == *.h ]]; then
+  if [[ "$file" == *.png || \
+    "$file" == Dependencies/* || \
+    "$file" == libSetReplace/WolframHeaders/* || \
+    "$file" == *.xcodeproj/* ]]; then
+    :
+  elif [[ "$file" == *.cpp || "$file" == *.hpp || "$file" == *.h ]]; then
     cppFiles+=("$file")
   elif grep -rIl '^#![[:blank:]]*/usr/bin/env bash' "$file" >/dev/null; then
     # Some bash files don't use .sh extension, so find by shebang
@@ -132,7 +133,7 @@ widthLimit=120
 checkLineWidthOutput=$(
   for file in "${remainingFiles[@]}" "${bashFiles[@]}"; do
     ./scripts/checkLineWidth.sh "$file" "$widthLimit"
-  done
+  done || true
 )
 if [ -n "$checkLineWidthOutput" ]; then
   exitStatus=1
