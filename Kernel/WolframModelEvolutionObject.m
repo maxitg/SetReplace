@@ -959,12 +959,12 @@ nestedToSingleAssociation[<||>] := <||>
 
 getNumericObjectProperties[obj_, caller_, boundary_] := <|# -> propertyEvaluate[True, boundary][obj, caller, #] & /@
   {"EventsCount", "PartialGenerationsCount", "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
-    "CompleteGenerationsCount", "TerminationReason", "GenerationComplete"}|>
+    "CompleteGenerationsCount", "TerminationReason", "CausalGraph"}|>
 
 General::invalidFeatureSpec = "Feature specification `1` should be one of `2`, a list of them, or All.";
 General::unknownFeatureGroup = "Feature group `1` should be one of `2`";
 
-fromFeaturesSpec[caller_, All] := {"CausalGraph", "StructurePreservingFinalStateGraph", "ObjectProperties"}
+fromFeaturesSpec[caller_, All] := {"StructurePreservingFinalStateGraph", "ObjectProperties"}
 fromFeaturesSpec[caller_, featuresSpecs_List] := featuresSpecs
 fromFeaturesSpec[caller_, featuresSpecs_String] := {featuresSpecs}
 fromFeaturesSpec[caller_, wrongInput_] := (Message[caller::invalidFeatureSpec,
@@ -976,12 +976,11 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     "FeatureAssociation",
     featuresSpecs_ : All] := With[{featureGroupList = fromFeaturesSpec[caller, featuresSpecs]},
   nestedToSingleAssociation @ AssociationThread[featureGroupList -> Replace[featureGroupList, {
-    "CausalGraph" ->  <| "" -> propertyEvaluate[True, boundary][obj, caller, "CausalGraph"] |>,
     "StructurePreservingFinalStateGraph" -> If[!propertyEvaluate[True, boundary][obj, caller, "MultiwayQ"],
-      <| "" -> HypergraphToGraph[#, "StructurePreserving"] & @
-        propertyEvaluate[True, boundary][obj, caller, "FinalState"] |>
+      <|"" -> HypergraphToGraph[#, "StructurePreserving"] & @
+        propertyEvaluate[True, boundary][obj, caller, "FinalState"]|>
     ,
-      <| "" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}] |>
+      <|"" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}]|>
     ],
     "ObjectProperties" -> getNumericObjectProperties[obj, caller, boundary],
     other_ :> (Message[caller::unknownFeatureGroup, other, fromFeaturesSpec[caller, All]]; Throw[$Failed])

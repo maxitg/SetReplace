@@ -10,22 +10,20 @@ an [`Association`](https://reference.wolfram.com/language/ref/Association.html) 
 computed.
 For now, it computes properties associated with these feature groups:
 
-- [`"CausalGraph"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
 - `"StructurePreservingFinalStateGraph"`: The [`Graph`](https://reference.wolfram.com/language/ref/Graph.html)
 version of
 the [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md)
 as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md) using the
 `"StructurePreserving"` transformation
 - `"ObjectProperties"`: A list of properties of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
-that return a numeric value. Right now the list of properties is: "EventsCount",
-"PartialGenerationsCount", "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
-"CompleteGenerationsCount", "TerminationReason", "GenerationComplete".
+that return a numeric value. Right now the list of properties is: [`"CausalGraph"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md), "EventsCount", "PartialGenerationsCount", "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
+"CompleteGenerationsCount", "TerminationReason".
 
 ```wl
-In[] :=  WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 5]["FeatureAssociation"]
+In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 5]["FeatureAssociation"]
 ```
 
-<img src="/Documentation/Images/FeatureAssociationExample-01.png" width="621.0">"
+<img src="/Documentation/Images/FeatureAssociationExampleSingleHistory.png" width="621.0">"
 
 This property is useful for applying machine learning to Wolfram Models explorations:
 
@@ -52,4 +50,4 @@ In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{1, 
   "EventSelectionFunction" -> "MultiwaySpacelike"]["FeatureAssociation"]
 ```
 
-<img src="/Documentation/Images/FeatureAssociationExample-02.png" width="555.0">
+<img src="/Documentation/Images/FeatureAssociationExampleMultihistory.png" width="555.0">

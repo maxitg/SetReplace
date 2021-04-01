@@ -11,7 +11,7 @@ by [`"FeatureAssociation"`](/Documentation/SymbolsAndFunctions/WolframModelAndWo
 In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 5]["FeatureVector"]
 ```
 
-<img src="/Documentation/Images/FeatureVectorExample-01.png" width="513.0">
+<img src="/Documentation/Images/FeatureVectorExampleSingleHistory.png" width="513.0">
 
 For the list of features
 see [`FeatureAssociation`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FeatureAssociation.md).
