@@ -18,11 +18,16 @@ lsfilesOptions=(
 mapfile -t filesToLint < <(LC_ALL=C comm -13 <(git ls-files --deleted) <(git ls-files "${lsfilesOptions[@]}"))
 
 formatInPlace=0
+formatOnly=0
 
 for arg in "$@"; do
   case $arg in
   -i)
     formatInPlace=1
+    shift
+    ;;
+  -f)
+    formatOnly=1
     shift
     ;;
   *)
@@ -84,20 +89,16 @@ for file in "${bashFiles[@]}"; do
   fi
 done
 
-for file in "${markdownFiles[@]}"; do
-  if [ $formatInPlace -eq 1 ]; then
-    markdownlint -f "$file" || :
-  else
-    markdownlint "$file" || exitStatus=1
-  fi
-done
-
 for file in "${remainingFiles[@]}"; do
   formatWithCommand ./scripts/whitespaceFormat.sh "$file"
 done
 
 if [ $exitStatus -eq 1 ]; then
   echo "Found formatting errors. Run ./lint.sh -i to automatically fix by applying the printed patch."
+fi
+
+if [ $formatOnly -eq 1 ]; then
+  exit $exitStatus
 fi
 
 # Linting
@@ -108,6 +109,14 @@ done
 
 for file in "${bashFiles[@]}"; do
   shellcheck "$file" || exitStatus=1
+done
+
+for file in "${markdownFiles[@]}"; do
+  if [ $formatInPlace -eq 1 ]; then
+    markdownlint -f "$file" || :
+  else
+    markdownlint "$file" || exitStatus=1
+  fi
 done
 
 widthLimit=120
