@@ -6,7 +6,7 @@
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
     ),
     "tests" -> {
-      With[{anEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}}, {
+      With[{anEventOrdering = {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"}}, {
         (* Symbol Leak *)
         testSymbolLeak[
           GenerateMultihistory[
@@ -62,7 +62,7 @@
       lastEventGeneration[Multihistory[_, data_]] := data["EventGenerations"]["Part", -1];
     ),
     "tests" -> {
-      With[{anEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}}, {
+      With[{anEventOrdering = {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"}}, {
         Function[{rules, selection, stopping, init, expectedCreatedExpressions},
             VerificationTest[
               allExpressions @ GenerateMultihistory[
@@ -219,7 +219,7 @@
       allExpressions[Multihistory[_, data_]] := Normal @ data["Expressions"];
     ),
     "tests" -> {
-      With[{anEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}}, {
+      With[{anEventOrdering = {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"}}, {
         Function[{rule, selection, init, expectedCreatedExpressions},
           VerificationTest[
             allExpressions @ GenerateMultihistory[
@@ -309,7 +309,7 @@
             GenerateMultihistory[MultisetSubstitutionSystem[rule],
                                  <||>,
                                  None,
-                                 {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
+                                 {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"},
                                  <|"MaxEvents" -> 1|>] @ init,
           lastEventInputsOutput]
       ] @@@ {
@@ -325,7 +325,7 @@
             GenerateMultihistory[MultisetSubstitutionSystem[rule],
                                  <||>,
                                  None,
-                                 {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
+                                 {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"},
                                  <|"MaxEvents" -> 1|>] /@ inits,
           lastExpressions]
       ] @@@ {
@@ -354,7 +354,7 @@
       destroyerEventCounts[Multihistory[_, data_]] := Normal @ data["ExpressionDestroyerEventCounts"];
     ),
     "tests" -> {
-      With[{anEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}}, {
+      With[{anEventOrdering = {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"}}, {
         Function[{
             rule, selection, stopping, init, expectedMaxEventGeneration, expectedEventCount, expectedTerminationReason},
           VerificationTest[
