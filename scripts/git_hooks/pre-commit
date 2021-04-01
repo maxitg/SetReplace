@@ -4,6 +4,8 @@ stagedFiles=$(git diff --name-only --cached | sort)
 sourceFiles=$(find libSetReplace libSetReplace/test -maxdepth 1 -type f -name "*pp" | sort)
 targetFiles=$(comm -12 <(echo "$stagedFiles") <(echo "$sourceFiles"))
 
+echo "sdfsfsdf"  
+
 for file in $targetFiles; do
   ./lint.sh -f -i "$file"
   git add "$file"
