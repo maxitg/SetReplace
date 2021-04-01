@@ -16,7 +16,9 @@ the [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframMo
 as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md) using the
 `"StructurePreserving"` transformation
 - `"ObjectProperties"`: A list of properties of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
-that return a numeric value. Right now the list of properties is: [`"CausalGraph"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md), "EventsCount", "PartialGenerationsCount", "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
+that return a numeric value. Right now the list of properties is: [`"CausalGraph"`](/Documentation/SymbolsAndFunctions/
+WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md), "EventsCount",
+"PartialGenerationsCount", "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
 "CompleteGenerationsCount", "TerminationReason".
 
 ```wl
