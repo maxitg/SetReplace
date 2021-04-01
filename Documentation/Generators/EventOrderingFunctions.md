@@ -7,7 +7,7 @@
 
 ```wl
 In[] := EventOrderingFunctions[MultisetSubstitutionSystem]
-Out[] = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}
+Out[] = {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"}
 ```
 
 The individual values returned correspond to partial sorting criteria supported by the system. They are used in the
@@ -91,4 +91,4 @@ different token counts.
 
 For example, the rule `{a___} :> {Plus[a]}` will match `{6, 7}` before `{1, 2, 3}` with this ordering function.
 
-### SortedInputExpressions
+### SortedInputTokenIndices
