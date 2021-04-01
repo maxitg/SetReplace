@@ -44,7 +44,8 @@ multihistory is generated regardless of the event ordering, so, the event orderi
 this reason, there is no argument for the event ordering `GenerateFullMultihistory`.
 
 However, if we evaluate a single history instead, we can get different histories for different orders (different orders
-are made here by rearranging the order of the init as `MultisetSubstitutionSystem` only supports a single ordering
+are made here by rearranging the order of the init as
+[`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) only supports a single ordering
 function at the moment):
 
 ```wl
@@ -89,6 +90,40 @@ As few tokens as possible will be matched. This is particularly useful for syste
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) where a single rule can match
 different token counts.
 
-For example, the rule `{a___} :> {Plus[a]}` will match `{6, 7}` before `{1, 2, 3}` with this ordering function.
+For example, the [multiset](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a___}` will match `{6, 7}`
+before `{1, 2, 3}` with this ordering function.
 
 ### SortedInputTokenIndices
+
+As events are instantiated according to the ordering function, each token in a
+[`Multihistory`](/Documentation/Types/Multihistory/README.md) has an index corresponding to when that token was first
+created.
+
+`"SortedInputTokenIndices"` ordering function sorts the tokens in a particular match by index and then selects the
+lexicographically smallest result. This corresponds to effectively
+`{"MinInputTokenIndex", "SecondMinInputTokenIndex", ...}`. If one of the sorted index lists is a prefix of another, they
+are considered equal by this ordering function ([`"InputCount"`](#inputcount) will need to be used to resolve the
+ambiguity).
+
+In other words, this ordering function attempts to match the oldest token possible. And if multiple matches remain after
+that, it attempts to match the oldest of the remaining tokens, etc.
+
+For example, the [multiset](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a_, b_, c_}` will match
+tokens with indices `{7, 1, 6}` before `{3, 2}` (since `1 < 2`), and `{4, 6, 2}` before `{5, 2, 6}` (since `2 == 2` and
+`4 < 5`).
+
+### InputTokenIndices
+
+This function is similar to [`"SortedInputTokenIndices"`](#sortedinputtokenindices), except tokens are not sorted before
+being lexicographically compared. This corresponds to greedily matching the first rule input to a token with the
+smallest index, then following with the second input, etc.
+
+For example, the [multiset](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a_, b_, c_}` will match
+tokens with indices `{3, 2}` before `{7, 1, 6}` (since `3 < 7`), and `{3, 1, 2}` before `{3, 4}` (since `3 == 3` and
+`1 < 4`). Similar to [`"SortedInputTokenIndices"`](#sortedinputtokenindices), `{1, 4}` and `{1, 4, 2}` will be consider
+equal by this function, and will be passed to the next one.
+
+### RuleIndex
+
+This function attempts to use a rule with the smallest index for multi-rule systems. Only if there are no matches for
+the first rule, the second rule will be attempted, etc. Has no effect in single-rule systems.
