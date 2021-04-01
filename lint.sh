@@ -15,10 +15,9 @@ lsfilesOptions=(
   ':(exclude)*.xcodeproj/*' # Xcode manages these automatically
 )
 
-mapfile -t filesToLint < <(LC_ALL=C comm -13 <(git ls-files --deleted) <(git ls-files "${lsfilesOptions[@]}"))
-
 formatInPlace=0
 formatOnly=0
+filesToLint=()
 
 for arg in "$@"; do
   case $arg in
@@ -31,17 +30,27 @@ for arg in "$@"; do
     shift
     ;;
   *)
-    echo "Argument $arg is not recognized."
-    echo
-    echo "Usage: ./lint.sh [-i]"
-    echo "Analyze the C++ code with clang-format and cpplint."
-    echo
-    echo "Options:"
-    echo "  -i  Inplace edit files with clang-format."
-    exit 1
+    if [ ! -f "$arg" ]; then
+      echo "Argument $arg is not recognized."
+      echo
+      echo "Usage: ./lint.sh [-i] [-f] [file1] [file2] ..."
+      echo "Analyze files with clang-format, cpplint, shfmt, shellcheck, markdownlint and custom scripts."
+      echo "If no files are passed as arguments, all files are analyzed."
+      echo
+      echo "Options:"
+      echo "  -i  Edit files in place if possible."
+      echo "  -f  Only perform formatting and skip linting. Always succeeds if used with -i."
+      exit 1
+    else
+      filesToLint+=("$arg")
+    fi
     ;;
   esac
 done
+
+if [ ${#filesToLint[@]} -eq 0 ]; then
+  mapfile -t filesToLint < <(LC_ALL=C comm -13 <(git ls-files --deleted) <(git ls-files "${lsfilesOptions[@]}"))
+fi
 
 exitStatus=0
 
