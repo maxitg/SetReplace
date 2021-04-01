@@ -33,7 +33,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
        {1, 2, 3, 4}
 ```
 
-<img src="/Documentation/Images/SameStateMultipleMatches.png" width="444.6">
+<img src="/Documentation/Images/SameStateMultipleMatches.png" width="478.2">
 
 Event ordering functions control the order in which these matches will be instantiated.
 
