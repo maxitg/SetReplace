@@ -4,7 +4,8 @@
 
 **`"FeatureAssociation"`** computes some features that can be handled by
 [`FeatureExtraction`](https://reference.wolfram.com/language/ref/FeatureExtraction.html)
-of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
+of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/
+WolframModelAndWolframModelEvolutionObject.md)
 evolution and returns
 an [`Association`](https://reference.wolfram.com/language/ref/Association.html) whose keys describe each feature
 computed.
@@ -15,11 +16,18 @@ version of
 the [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md)
 as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md) using the
 `"StructurePreserving"` transformation
-- `"ObjectProperties"`: A list of properties of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
+- `"ObjectProperties"`: A list of properties of the [`WolframModel`](/Documentation/SymbolsAndFunctions/
+WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
 that return a numeric value. Right now the list of properties is: [`"CausalGraph"`](/Documentation/SymbolsAndFunctions/
-WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md), "EventsCount",
-"PartialGenerationsCount", "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
-"CompleteGenerationsCount", "TerminationReason".
+WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md), ["EventsCount"](/Documentation/
+SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EventCounts.md),
+["PartialGenerationsCount"](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/
+Properties/GenerationCounts.md), ["AllEventsDistinctElementsCount"](/Documentation/SymbolsAndFunctions/
+WolframModelAndWolframModelEvolutionObject/Properties/TotalElementCounts.md), ["AllEventsEdgesCount"](/Documentation/
+SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TotalElementCounts.md),
+["CompleteGenerationsCount"](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/
+GenerationCounts.md), ["TerminationReason"](/Documentation/SymbolsAndFunctions/
+WolframModelAndWolframModelEvolutionObject/Properties/TerminationReason.md).
 
 ```wl
 In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 5]["FeatureAssociation"]

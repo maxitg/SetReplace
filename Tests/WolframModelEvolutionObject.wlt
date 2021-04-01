@@ -1923,12 +1923,12 @@
         {
           VerificationTest[And @@ StringQ /@ Keys[#["FeatureAssociation"]]] & /@ evolutionObjects,
 
-          VerificationTest[And @@ (NumberQ[#] || MissingQ[#]  || GraphQ[#] || StringQ[#] &) /@
+          VerificationTest[And @@ (NumberQ[#] || MissingQ[#] || GraphQ[#] || StringQ[#] &) /@
             Flatten[Values[#["FeatureAssociation"]]]] & /@ evolutionObjects,
 
           VerificationTest[SameQ @@
-            (Replace[#, _?(NumberQ[#] || MissingQ[#] || GraphQ[#] || StringQ[#] &) -> 1, Infinity] &
-              [#["FeatureAssociation"]] & /@ evolutionObjects)],
+            (Replace[#, _?(NumberQ[#] || MissingQ[#] || GraphQ[#] || StringQ[#] &) -> 1, Infinity] &[
+              #["FeatureAssociation"]] & /@ evolutionObjects)],
 
           (* String spec *)
           VerificationTest[
