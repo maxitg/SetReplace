@@ -5,6 +5,6 @@ sourceFiles=$(find libSetReplace libSetReplace/test -maxdepth 1 -type f -name "*
 targetFiles=$(comm -12 <(echo "$stagedFiles") <(echo "$sourceFiles"))
 
 for file in $targetFiles; do
-  clang-format -i "$file"
+  ./lint.sh -f -i "$file"
   git add "$file"
 done
