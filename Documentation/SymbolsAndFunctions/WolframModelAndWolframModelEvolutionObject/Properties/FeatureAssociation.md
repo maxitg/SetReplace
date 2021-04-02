@@ -4,8 +4,7 @@
 
 **`"FeatureAssociation"`** computes some features that can be handled by
 [`FeatureExtraction`](https://reference.wolfram.com/language/ref/FeatureExtraction.html)
-of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/
-WolframModelAndWolframModelEvolutionObject.md)
+of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
 evolution and returns
 an [`Association`](https://reference.wolfram.com/language/ref/Association.html) whose keys describe each feature
 computed.
