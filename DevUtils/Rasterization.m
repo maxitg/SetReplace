@@ -185,7 +185,7 @@ exportImageToMarkdown[relativePath_, image_, OptionsPattern[]] := Scope[
   If[
     Or[
       filename === "",
-      Not @ UpperCaseQ @ StringTake[filename, 1],
+      Not @ UpperCaseQ @ StringTake[filename, 1] && StringTake[filename, 1] =!= "$",
       StringContainsQ[filename, " "],
       Not @ StringEndsQ[filename, ".png", IgnoreCase -> True]
     ],
