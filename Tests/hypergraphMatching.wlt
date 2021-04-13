@@ -26,7 +26,7 @@
             GenerateMultihistory[MultisetSubstitutionSystem[ToPatternRules[#HypergraphRule]],
                                  <||>,
                                  None,
-                                 {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
+                                 {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"},
                                  <||>] @ #Init &;
 
       graphFromHyperedges[edges_] := Graph[UndirectedEdge @@@ Flatten[Partition[#, 2, 1] & /@ edges, 1]];
@@ -127,7 +127,7 @@
               GenerateMultihistory[MultisetSubstitutionSystem[ToPatternRules[{{1, 2}, {2, 3}} -> {{1, 3}}]],
                                    <||>,
                                    None,
-                                   {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
+                                   {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"},
                                    <|"MaxEvents" -> 1|>][{{1, 2}, {2, 1}}],
         {{1, 2}, {2, 1}, {1, 1}}
       ],

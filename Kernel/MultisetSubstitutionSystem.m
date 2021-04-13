@@ -20,7 +20,7 @@ declareMultihistoryGenerator[
     "MaxDestroyerEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"},
     "MinEventInputs" -> {0, "NonNegativeIntegerOrInfinity"},
     "MaxEventInputs" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
-  {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
+  {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"},
   <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>];
 
 generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
@@ -245,7 +245,7 @@ declareMessage[General::tokenDeduplicationNotImplemented,
                "Token deduplication is not implemented for Multiset Substitution System."];
 parseTokenDeduplication[_] := throw[Failure["tokenDeduplicationNotImplemented", <||>]];
 
-$supportedEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"};
+$supportedEventOrdering = {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"};
 parseEventOrdering[ordering : $supportedEventOrdering] := ordering;
 declareMessage[General::eventOrderingNotImplemented,
                "Only " <> $supportedEventOrdering <> " event ordering is implemented at this time."];
