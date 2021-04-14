@@ -287,7 +287,7 @@
            "InstantiationCounts" *)
         VerificationTest[
           With[{
-              serializeMultihistory = (Normal /@ # &) /@ Normal /@ KeyDrop[Last@#, "InstantiationCounts"] &,
+              serializeMultihistory = (Normal /@ # &) /@ Normal /@ KeyDrop[Last @ #, "InstantiationCounts"] &,
               multihistories = GenerateMultihistory[
                 MultisetSubstitutionSystem[
                   {{v1_, v2_}, {v2_, v3_, v4_}} :>

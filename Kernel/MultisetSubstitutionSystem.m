@@ -49,7 +49,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
      sides of rules such as {a__, b__}. `All` means no further instantiations are possible. *)
   instantiationCounts = CreateDataStructure["HashTable"];
   (* This stores possible instantiations for particular ordered sequences of input expressions. The instantiations are
-     stored at the time of matching, and are deleted once all possible instantiations are turned into events. This
+     stored at the time of matching and are deleted once all possible instantiations are turned into events. This
      avoids the need to evaluate the same right-hand sides of rules multiple times. *)
   instantiations = CreateDataStructure["HashTable"];
 
@@ -150,14 +150,14 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
         that are not spacelike or have exceeding generations or destroyer event count.
      3. We need to save partial searching results. They can probably be saved as non-intersecting ranges. Note that they
         have to be ranges because adding new expressions will introduce gaps in the sequence of matches ordered
-        according to some (but not all) ordering functions. This new data structure will replace
-        instantiationCounts, which currently uses too much memory by storing each tried match individually. *)
+        according to some (but not all) ordering functions. This new data structure will replace instantiationCounts
+        which currently uses unnecessarily large amount of memory by storing each tried match individually. *)
   ScopeVariable[subsetIndex, possibleMatch, ruleIndex];
   Do[
     If[instantiationCounts["Lookup", {ruleIndex, possibleMatch}, 0 &] =!= All &&
         AllTrue[expressionDestroyerEventCounts["Part", #] & /@ possibleMatch, # < maxDestroyerEvents &] &&
         AllTrue[possibleMatch, eventGenerations["Part", expressionCreatorEvents["Part", #]] < maxGeneration &] &&
-        cacheMatchIfExists[rules][
+        createInstantiationsIfPossible[rules][
             expressions, expressionCreatorEvents, destroyerChoices, instantiationCounts, instantiations][
           ruleIndex, possibleMatch],
       Return[{ruleIndex, possibleMatch}, Module]
@@ -171,18 +171,21 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
 ];
 
 declareMessage[General::ruleInstantiationMessage,
-               "Messages encountered while instantiating the output for rule `rule` and inputs `inputs`."];
+               "Messages encountered while instantiating the rule `rule` for inputs `inputs`."];
 declareMessage[General::ruleOutputNotList, "Rule `rule` for inputs `inputs` did not generate a List."];
 
-cacheMatchIfExists[rules_][
+(* This checks if possibleMatch matches the rules and that its expressions are spacelike separated. If so, it generates
+   the instantiations, and returns True. If the match is not possible, adds All to instantiationCounts to avoid checking
+   the same potential match in the future. *)
+createInstantiationsIfPossible[rules_][
       expressions_, expressionCreatorEvents_, destroyerChoices_, instantiationCounts_, instantiations_][
     ruleIndex_, possibleMatch_] := ModuleScope[
+  ruleInputContents = expressions["Part", #] & /@ possibleMatch;
   Check[
     outputs = instantiations["Lookup",
-                                   {ruleIndex, possibleMatch},
-                                   ReplaceList[expressions["Part", #] & /@ possibleMatch, rules[[ruleIndex]]] &];
+                             {ruleIndex, possibleMatch},
+                             ReplaceList[expressions["Part", #] & /@ possibleMatch, rules[[ruleIndex]]] &];
   ,
-    ruleInputContents = expressions["Part", #] & /@ possibleMatch;
     throw[Failure[
       "ruleInstantiationMessage",
       <|"rule" -> rules[[ruleIndex]], "inputs" -> ruleInputContents|>]];
@@ -191,6 +194,7 @@ cacheMatchIfExists[rules_][
     throw[Failure["ruleOutputNotList", <|"rule" -> rules[[ruleIndex]], "inputs" -> ruleInputContents|>]]
   ] & /@ outputs;
   If[instantiations["KeyExistsQ", {ruleIndex, possibleMatch}],
+    (* We already checked by this point that additional instantiations remain *)
     True
   ,
     If[Length[outputs] > 0 && spacelikeExpressionsQ[expressionCreatorEvents, destroyerChoices][possibleMatch],
@@ -249,8 +253,7 @@ createEvent[rules_, ruleIndex_, matchedExpressions_][expressions_,
     "Insert",
     {ruleIndex, matchedExpressions} ->
       If[currentInstantiationIndex === possibleMatchCount, All, currentInstantiationIndex]];
-  If[currentInstantiationIndex === possibleMatchCount,
-    instantiations["KeyDrop", {ruleIndex, matchedExpressions}]];
+  If[currentInstantiationIndex === possibleMatchCount, instantiations["KeyDrop", {ruleIndex, matchedExpressions}]];
   eventOutputs["Append", Range[expressions["Length"] - Length[outputExpressions] + 1, expressions["Length"]]];
 
   inputExpressionCreatorEvents = expressionCreatorEvents["Part", #] & /@ matchedExpressions;
