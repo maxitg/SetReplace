@@ -180,7 +180,12 @@
             <|"MaxGeneration" -> 1, "MinEventInputs" -> 3, "MaxEventInputs" -> 3|>,
             <||>,
             {1, 2, 3},
-            {{1}, {2, 3}, {1, 2}, {3}}}},
+            {{1}, {2, 3}, {1, 2}, {3}}},
+           {{Longest[a__], b__} /; OrderedQ[{a, b}] :> {{a}, {b}},
+            <|"MaxGeneration" -> 1, "MinEventInputs" -> 3, "MaxEventInputs" -> 3|>,
+            <||>,
+            {1, 2, 3},
+            {{1, 2}, {3}, {1}, {2, 3}}}},
 
         VerificationTest[
           eventCount @ GenerateMultihistory[
