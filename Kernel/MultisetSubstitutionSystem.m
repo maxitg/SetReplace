@@ -47,7 +47,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
   destroyerChoices = CreateDataStructure["DynamicArray", {CreateDataStructure["HashTable"]}];
   (* The counts a sequence of event inputs was turned into a match. This might be larger than 1 in left-hand sides of
      rules such as {a__, b__}. If set to All, it means no more matches can be made to these expressions. *)
-  eventInputsMatchCount = CreateDataStructure["HashTable"];
+  instantiationCounts = CreateDataStructure["HashTable"];
   (* In case the same sequence of input expressions can produce multiple matches, this stores the possible outputs *)
   eventInputsToOutputs = CreateDataStructure["HashTable"];
 
@@ -63,7 +63,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
           expressionCreatorEvents,
           expressionDestroyerEventCounts,
           destroyerChoices,
-          eventInputsMatchCount,
+          instantiationCounts,
           eventInputsToOutputs],
         Replace[maxEvents, Infinity -> 2^63 - 1]];
     "MaxEvents"
@@ -83,7 +83,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
       "ExpressionCreatorEvents" -> expressionCreatorEvents,
       "ExpressionDestroyerEventCounts" -> expressionDestroyerEventCounts,
       "DestroyerChoices" -> destroyerChoices,
-      "EventInputsMatchCount" -> eventInputsMatchCount,
+      "InstantiationCounts" -> instantiationCounts,
       "EventInputsToOutputs" -> eventInputsToOutputs|>]
 ];
 
@@ -99,7 +99,7 @@ evaluateSingleEvent[
     expressionCreatorEvents_,
     expressionDestroyerEventCounts_,
     destroyerChoices_,
-    eventInputsMatchCount_,
+    instantiationCounts_,
     eventInputsToOutputs_] := ModuleScope[
   {ruleIndex, matchedExpressions} = findMatch[rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs][
     expressions,
@@ -107,7 +107,7 @@ evaluateSingleEvent[
     expressionCreatorEvents,
     expressionDestroyerEventCounts,
     destroyerChoices,
-    eventInputsMatchCount,
+    instantiationCounts,
     eventInputsToOutputs];
   createEvent[rules, ruleIndex, matchedExpressions][expressions,
                                                     eventRuleIndices,
@@ -117,7 +117,7 @@ evaluateSingleEvent[
                                                     expressionCreatorEvents,
                                                     expressionDestroyerEventCounts,
                                                     destroyerChoices,
-                                                    eventInputsMatchCount,
+                                                    instantiationCounts,
                                                     eventInputsToOutputs]
 ];
 
@@ -129,7 +129,7 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
     expressionCreatorEvents_,
     expressionDestroyerEventCounts_,
     destroyerChoices_,
-    eventInputsMatchCount_,
+    instantiationCounts_,
     eventInputsToOutputs_] := ModuleScope[
   eventInputsCountRange = {minEventInputs, Min[maxEventInputs, expressions["Length"]]};
   subsetCount = With[{n = expressions["Length"], a = eventInputsCountRange[[1]], b = eventInputsCountRange[[2]]},
@@ -149,14 +149,14 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
      3. We need to save partial searching results. They can probably be saved as non-intersecting ranges. Note that they
         have to be ranges because adding new expressions will introduce gaps in the sequence of matches ordered
         according to some (but not all) ordering functions. This new data structure will replace
-        eventInputsMatchCount, which currently uses too much memory by storing each tried match individually. *)
+        instantiationCounts, which currently uses too much memory by storing each tried match individually. *)
   ScopeVariable[subsetIndex, possibleMatch, ruleIndex];
   Do[
-    If[eventInputsMatchCount["Lookup", {ruleIndex, possibleMatch}, 0 &] =!= All &&
+    If[instantiationCounts["Lookup", {ruleIndex, possibleMatch}, 0 &] =!= All &&
         AllTrue[expressionDestroyerEventCounts["Part", #] & /@ possibleMatch, # < maxDestroyerEvents &] &&
         AllTrue[possibleMatch, eventGenerations["Part", expressionCreatorEvents["Part", #]] < maxGeneration &] &&
         cacheMatchIfExists[rules][
-            expressions, expressionCreatorEvents, destroyerChoices, eventInputsMatchCount, eventInputsToOutputs][
+            expressions, expressionCreatorEvents, destroyerChoices, instantiationCounts, eventInputsToOutputs][
           ruleIndex, possibleMatch],
       Return[{ruleIndex, possibleMatch}, Module]
     ];
@@ -173,7 +173,7 @@ declareMessage[General::ruleInstantiationMessage,
 declareMessage[General::ruleOutputNotList, "Rule `rule` for inputs `inputs` did not generate a List."];
 
 cacheMatchIfExists[rules_][
-      expressions_, expressionCreatorEvents_, destroyerChoices_, eventInputsMatchCount_, eventInputsToOutputs_][
+      expressions_, expressionCreatorEvents_, destroyerChoices_, instantiationCounts_, eventInputsToOutputs_][
     ruleIndex_, possibleMatch_] := ModuleScope[
   Check[
     outputs = eventInputsToOutputs["Lookup",
@@ -195,7 +195,7 @@ cacheMatchIfExists[rules_][
       eventInputsToOutputs["Insert", {ruleIndex, possibleMatch} -> outputs];
       True
     ,
-      eventInputsMatchCount["Insert", {ruleIndex, possibleMatch} -> All];
+      instantiationCounts["Insert", {ruleIndex, possibleMatch} -> All];
       False
     ]
   ]
@@ -232,18 +232,18 @@ createEvent[rules_, ruleIndex_, matchedExpressions_][expressions_,
                                                      expressionCreatorEvents_,
                                                      expressionDestroyerEventCounts_,
                                                      destroyerChoices_,
-                                                     eventInputsMatchCount_,
+                                                     instantiationCounts_,
                                                      eventInputsToOutputs_] := ModuleScope[
   ruleInputContents = expressions["Part", #] & /@ matchedExpressions;
   possibleOutputs = eventInputsToOutputs["Lookup", {ruleIndex, matchedExpressions}];
   possibleMatchCount = Length[possibleOutputs];
-  currentInstantiationIndex = eventInputsMatchCount["Lookup", {ruleIndex, matchedExpressions}, 0 &] + 1;
+  currentInstantiationIndex = instantiationCounts["Lookup", {ruleIndex, matchedExpressions}, 0 &] + 1;
   outputExpressions = possibleOutputs[[currentInstantiationIndex]];
   expressions["Append", #] & /@ outputExpressions;
 
   eventRuleIndices["Append", ruleIndex];
   eventInputs["Append", matchedExpressions];
-  eventInputsMatchCount[
+  instantiationCounts[
     "Insert",
     {ruleIndex, matchedExpressions} ->
       If[currentInstantiationIndex === possibleMatchCount, All, currentInstantiationIndex]];
