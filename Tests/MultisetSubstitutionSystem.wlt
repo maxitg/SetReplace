@@ -282,12 +282,12 @@
            {{a1}, {b1}, {a2}, {a3}, {m1}, {b2}, {m1}, {m2}, {m2}}}},
 
         (* non-overlapping systems produce the same behavior *)
-        (* "EventInputsMatchCount" stores the sequences of expressions that were tried but do not match.
-           "MaxDestroyerEvents" prevents them from being tried in the first place, thus changing
-           "EventInputsMatchCount" *)
+        (* "InstantiationCounts" stores the sequences of expressions that were tried but do not match.
+           "MaxDestroyerEvents" prevents some of these sequences to be tried in the first place, thus changing
+           "InstantiationCounts" *)
         VerificationTest[
           With[{
-              serializeMultihistory = (Normal /@ # &) /@ Normal /@ KeyDrop[Last@#, "EventInputsMatchCount"] &,
+              serializeMultihistory = (Normal /@ # &) /@ Normal /@ KeyDrop[Last@#, "InstantiationCounts"] &,
               multihistories = GenerateMultihistory[
                 MultisetSubstitutionSystem[
                   {{v1_, v2_}, {v2_, v3_, v4_}} :>
