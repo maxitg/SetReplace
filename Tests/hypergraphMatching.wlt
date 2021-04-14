@@ -23,11 +23,12 @@
       matchingFunction[MultisetSubstitutionSystem] =
         (#["EventRuleIndices"]["Length"] > 1 &) @
           Last @
-            GenerateMultihistory[MultisetSubstitutionSystem[ToPatternRules[#HypergraphRule]],
-                                 <||>,
-                                 None,
-                                 {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"},
-                                 <||>] @ #Init &;
+            GenerateMultihistory[
+              MultisetSubstitutionSystem[ToPatternRules[#HypergraphRule]],
+              <||>,
+              None,
+              {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"},
+              <||>] @ #Init &;
 
       graphFromHyperedges[edges_] := Graph[UndirectedEdge @@@ Flatten[Partition[#, 2, 1] & /@ edges, 1]];
 
@@ -124,11 +125,12 @@
         Normal @
           (#["Expressions"] &) @
             Last @
-              GenerateMultihistory[MultisetSubstitutionSystem[ToPatternRules[{{1, 2}, {2, 3}} -> {{1, 3}}]],
-                                   <||>,
-                                   None,
-                                   {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"},
-                                   <|"MaxEvents" -> 1|>][{{1, 2}, {2, 1}}],
+              GenerateMultihistory[
+                MultisetSubstitutionSystem[ToPatternRules[{{1, 2}, {2, 3}} -> {{1, 3}}]],
+                <||>,
+                None,
+                {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"},
+                <|"MaxEvents" -> 1|>][{{1, 2}, {2, 1}}],
         {{1, 2}, {2, 1}, {1, 1}}
       ],
 
