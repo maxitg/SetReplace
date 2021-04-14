@@ -111,16 +111,16 @@ evaluateSingleEvent[
     destroyerChoices,
     instantiationCounts,
     instantiations];
-  createEvent[rules, ruleIndex, matchedExpressions][expressions,
-                                                    eventRuleIndices,
-                                                    eventInputs,
-                                                    eventOutputs,
-                                                    eventGenerations,
-                                                    expressionCreatorEvents,
-                                                    expressionDestroyerEventCounts,
-                                                    destroyerChoices,
-                                                    instantiationCounts,
-                                                    instantiations]
+  createEvent[ruleIndex, matchedExpressions][expressions,
+                                             eventRuleIndices,
+                                             eventInputs,
+                                             eventOutputs,
+                                             eventGenerations,
+                                             expressionCreatorEvents,
+                                             expressionDestroyerEventCounts,
+                                             destroyerChoices,
+                                             instantiationCounts,
+                                             instantiations]
 ];
 
 (* Matching *)
@@ -230,16 +230,16 @@ expressionsSeparation[expressionCreatorEvents_, destroyerChoices_][firstExpressi
   "Spacelike"
 ];
 
-createEvent[rules_, ruleIndex_, matchedExpressions_][expressions_,
-                                                     eventRuleIndices_,
-                                                     eventInputs_,
-                                                     eventOutputs_,
-                                                     eventGenerations_,
-                                                     expressionCreatorEvents_,
-                                                     expressionDestroyerEventCounts_,
-                                                     destroyerChoices_,
-                                                     instantiationCounts_,
-                                                     instantiations_] := ModuleScope[
+createEvent[ruleIndex_, matchedExpressions_][expressions_,
+                                             eventRuleIndices_,
+                                             eventInputs_,
+                                             eventOutputs_,
+                                             eventGenerations_,
+                                             expressionCreatorEvents_,
+                                             expressionDestroyerEventCounts_,
+                                             destroyerChoices_,
+                                             instantiationCounts_,
+                                             instantiations_] := ModuleScope[
   ruleInputContents = expressions["Part", #] & /@ matchedExpressions;
   possibleOutputs = instantiations["Lookup", {ruleIndex, matchedExpressions}];
   possibleMatchCount = Length[possibleOutputs];
