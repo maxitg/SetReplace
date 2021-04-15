@@ -246,7 +246,7 @@ $supportedEventOrdering =
   {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"};
 parseEventOrdering[ordering : $supportedEventOrdering] := ordering;
 declareMessage[General::eventOrderingNotImplemented,
-               "Only " <> $supportedEventOrdering <> " event ordering is implemented at this time."];
+               "Only " <> ToString[$supportedEventOrdering] <> " event ordering is implemented at this time."];
 parseEventOrdering[_] := throw[Failure["eventOrderingNotImplemented", <||>]];
 
 parseInit[init_List] := init;
