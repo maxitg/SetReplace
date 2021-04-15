@@ -6,8 +6,7 @@
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
     ),
     "tests" -> {
-      With[{anEventOrdering =
-          {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"}}, {
+      With[{anEventOrdering = EventOrderingFunctions[MultisetSubstitutionSystem]}, {
         (* Symbol Leak *)
         testSymbolLeak[
           GenerateMultihistory[
@@ -63,8 +62,7 @@
       lastEventGeneration[Multihistory[_, data_]] := data["EventGenerations"]["Part", -1];
     ),
     "tests" -> {
-      With[{anEventOrdering =
-          {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"}}, {
+      With[{anEventOrdering = EventOrderingFunctions[MultisetSubstitutionSystem]}, {
         Function[{rules, selection, stopping, init, expectedCreatedExpressions},
             VerificationTest[
               allExpressions @ GenerateMultihistory[
@@ -230,8 +228,7 @@
       allExpressions[Multihistory[_, data_]] := Normal @ data["Expressions"];
     ),
     "tests" -> {
-      With[{anEventOrdering =
-          {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"}}, {
+      With[{anEventOrdering = EventOrderingFunctions[MultisetSubstitutionSystem]}, {
         Function[{rule, selection, init, expectedCreatedExpressions},
           VerificationTest[
             allExpressions @ GenerateMultihistory[
@@ -320,13 +317,11 @@
     "tests" -> {
       Function[{rule, init, lastEventInputsOutput},
         VerificationTest[
-          lastEventInputs @
-            GenerateMultihistory[
-              MultisetSubstitutionSystem[rule],
-              <||>,
-              None,
-              {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"},
-              <|"MaxEvents" -> 1|>] @ init,
+          lastEventInputs @ GenerateMultihistory[MultisetSubstitutionSystem[rule],
+                                                 <||>,
+                                                 None,
+                                                 EventOrderingFunctions[MultisetSubstitutionSystem],
+                                                 <|"MaxEvents" -> 1|>] @ init,
           lastEventInputsOutput]
       ] @@@ {
         {{{2, 3, 4} -> {X}, {3} -> {X}}, {1, 2, 3, 4, 5}, {3}},
@@ -337,13 +332,11 @@
 
       Function[{rule, inits, lastExpressions},
         VerificationTest[
-          lastExpression @*
-            GenerateMultihistory[
-              MultisetSubstitutionSystem[rule],
-              <||>,
-              None,
-              {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"},
-              <|"MaxEvents" -> 1|>] /@ inits,
+          lastExpression @* GenerateMultihistory[MultisetSubstitutionSystem[rule],
+                                                 <||>,
+                                                 None,
+                                                 EventOrderingFunctions[MultisetSubstitutionSystem],
+                                                 <|"MaxEvents" -> 1|>] /@ inits,
           lastExpressions]
       ] @@@ {
         {{{{1, 2}, {2, 3}} -> {1}, {{4, 5}, {5, 6}} -> {2}},
@@ -371,8 +364,7 @@
       destroyerEventCounts[Multihistory[_, data_]] := Normal @ data["ExpressionDestroyerEventCounts"];
     ),
     "tests" -> {
-      With[{anEventOrdering =
-          {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"}}, {
+      With[{anEventOrdering = EventOrderingFunctions[MultisetSubstitutionSystem]}, {
         Function[{
             rule, selection, stopping, init, expectedMaxEventGeneration, expectedEventCount, expectedTerminationReason},
           VerificationTest[
