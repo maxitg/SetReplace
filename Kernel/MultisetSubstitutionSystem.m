@@ -39,6 +39,8 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
     {maxEvents} = Values @ rawStoppingCondition;
     init = parseInit[rawInit];
 
+    (* "HashTable" is causing memory leaks, so we are using Data`UnorderedAssociation instead. *)
+
     expressions = CreateDataStructure["DynamicArray", init];
     eventRuleIndices = CreateDataStructure["DynamicArray", {0}]; (* the first event is the initial event *)
     eventInputs = CreateDataStructure["DynamicArray", {{}}];
@@ -50,11 +52,10 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
     destroyerChoices = CreateDataStructure["DynamicArray", {CreateDataStructure["HashTable"]}];
     (* The numbers of times ordered sequences of event inputs were instantiated. This might be larger than 1 in
        left-hand sides of rules such as {a__, b__}. `All` means no further instantiations are possible. *)
-    instantiationCounts = CreateDataStructure["HashTable"];
+    instantiationCounts = Data`UnorderedAssociation[];
     (* This stores possible instantiations for particular ordered sequences of input expressions. The instantiations are
        stored at the time of matching and are deleted once all possible instantiations are turned into events. This
-       avoids the need to evaluate the same right-hand sides of rules multiple times.
-       "HashTable" is causing a memory leak, so we are using Data`UnorderedAssociation instead. *)
+       avoids the need to evaluate the same right-hand sides of rules multiple times. *)
     instantiations = Data`UnorderedAssociation[];
 
     (* Data structures are modified in-place. If the system runs out of matches, it throws an exception. *)
@@ -115,7 +116,7 @@ findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEvent
         which currently uses unnecessarily large amount of memory by storing each tried match individually. *)
   ScopeVariable[subsetIndex, possibleMatch, ruleIndex];
   Do[
-    If[instantiationCounts["Lookup", {ruleIndex, possibleMatch}, 0 &] =!= All &&
+    If[Lookup[instantiationCounts, Key[{ruleIndex, possibleMatch}], 0] =!= All &&
         AllTrue[expressionDestroyerEventCounts["Part", #] & /@ possibleMatch, # < maxDestroyerEvents &] &&
         AllTrue[possibleMatch, eventGenerations["Part", expressionCreatorEvents["Part", #]] < maxGeneration &] &&
         createInstantiationsIfPossible[rules][ruleIndex, possibleMatch],
@@ -158,7 +159,7 @@ createInstantiationsIfPossible[rules_][ruleIndex_, possibleMatch_] := ModuleScop
       instantiations[{ruleIndex, possibleMatch}] = outputs;
       True
     ,
-      instantiationCounts["Insert", {ruleIndex, possibleMatch} -> All];
+      instantiationCounts[{ruleIndex, possibleMatch}] = All;
       False
     ]
   ]
@@ -191,16 +192,14 @@ createEvent[ruleIndex_, matchedExpressions_] := ModuleScope[
   ruleInputContents = expressions["Part", #] & /@ matchedExpressions;
   possibleOutputs = instantiations[{ruleIndex, matchedExpressions}];
   possibleMatchCount = Length[possibleOutputs];
-  currentInstantiationIndex = instantiationCounts["Lookup", {ruleIndex, matchedExpressions}, 0 &] + 1;
+  currentInstantiationIndex = Lookup[instantiationCounts, Key[{ruleIndex, matchedExpressions}], 0] + 1;
   outputExpressions = possibleOutputs[[currentInstantiationIndex]];
   expressions["Append", #] & /@ outputExpressions;
 
   eventRuleIndices["Append", ruleIndex];
   eventInputs["Append", matchedExpressions];
-  instantiationCounts[
-    "Insert",
-    {ruleIndex, matchedExpressions} ->
-      If[currentInstantiationIndex === possibleMatchCount, All, currentInstantiationIndex]];
+  instantiationCounts[{ruleIndex, matchedExpressions}] =
+    If[currentInstantiationIndex === possibleMatchCount, All, currentInstantiationIndex];
   (* Need a nested list because KeyDropFrom interprets {ruleIndex, matchedExpressions} as two keys otherwise. *)
   If[currentInstantiationIndex === possibleMatchCount,
     KeyDropFrom[instantiations, Key[{ruleIndex, matchedExpressions}]]
