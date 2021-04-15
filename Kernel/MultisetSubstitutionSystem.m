@@ -48,8 +48,8 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
     expressionDestroyerEventCounts = CreateDataStructure["DynamicArray", ConstantArray[0, Length @ init]];
     (* destroyerChoices[eventID][expressionID] -> eventID. See libSetReplace/Event.cpp for more information. *)
     destroyerChoices = CreateDataStructure["DynamicArray", {CreateDataStructure["HashTable"]}];
-    (* The numbers of times ordered sequences of event inputs were instantiated. This might be larger than 1 in left-hand
-       sides of rules such as {a__, b__}. `All` means no further instantiations are possible. *)
+    (* The numbers of times ordered sequences of event inputs were instantiated. This might be larger than 1 in
+       left-hand sides of rules such as {a__, b__}. `All` means no further instantiations are possible. *)
     instantiationCounts = CreateDataStructure["HashTable"];
     (* This stores possible instantiations for particular ordered sequences of input expressions. The instantiations are
        stored at the time of matching and are deleted once all possible instantiations are turned into events. This
@@ -139,10 +139,9 @@ declareMessage[General::ruleOutputNotList, "Rule `rule` for inputs `inputs` did 
 createInstantiationsIfPossible[rules_][ruleIndex_, possibleMatch_] := ModuleScope[
   ruleInputContents = expressions["Part", #] & /@ possibleMatch;
   Check[
-    outputs = instantiations[{ruleIndex, possibleMatch}];
-    If[MissingQ[outputs],
-      outputs = ReplaceList[expressions["Part", #] & /@ possibleMatch, rules[[ruleIndex]]]
-    ];
+    outputs = Lookup[instantiations,
+                     Key[{ruleIndex, possibleMatch}],
+                     ReplaceList[expressions["Part", #] & /@ possibleMatch, rules[[ruleIndex]]]];
   ,
     throw[Failure[
       "ruleInstantiationMessage",
@@ -151,7 +150,7 @@ createInstantiationsIfPossible[rules_][ruleIndex_, possibleMatch_] := ModuleScop
   If[!ListQ[#],
     throw[Failure["ruleOutputNotList", <|"rule" -> rules[[ruleIndex]], "inputs" -> ruleInputContents|>]]
   ] & /@ outputs;
-  If[!MissingQ[instantiations[{ruleIndex, possibleMatch}]],
+  If[KeyExistsQ[instantiations, {ruleIndex, possibleMatch}],
     (* We already checked by this point that additional instantiations remain *)
     True
   ,
@@ -203,7 +202,9 @@ createEvent[ruleIndex_, matchedExpressions_] := ModuleScope[
     {ruleIndex, matchedExpressions} ->
       If[currentInstantiationIndex === possibleMatchCount, All, currentInstantiationIndex]];
   (* Need a nested list because KeyDropFrom interprets {ruleIndex, matchedExpressions} as two keys otherwise. *)
-  If[currentInstantiationIndex === possibleMatchCount, KeyDropFrom[instantiations, {{ruleIndex, matchedExpressions}}]];
+  If[currentInstantiationIndex === possibleMatchCount,
+    KeyDropFrom[instantiations, Key[{ruleIndex, matchedExpressions}]]
+  ];
   eventOutputs["Append", Range[expressions["Length"] - Length[outputExpressions] + 1, expressions["Length"]]];
 
   inputExpressionCreatorEvents = expressionCreatorEvents["Part", #] & /@ matchedExpressions;
