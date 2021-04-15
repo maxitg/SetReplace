@@ -38,7 +38,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 Event ordering functions control the order in which these matches will be instantiated.
 
 The importance of that order depends on the system, the rules, and the parameters of the evaluation. For example, in the
-example below, full multihistory is generated up to generation 1. In this case, the same multihistory is generated
+example above, full multihistory is generated up to generation 1. In this case, the same multihistory is generated
 regardless of the event ordering, so, the event ordering does not matter all that much. For this reason, there is no
 argument for the event ordering `GenerateFullMultihistory`.
 
