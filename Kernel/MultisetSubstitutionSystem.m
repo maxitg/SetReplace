@@ -49,7 +49,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
     expressionCreatorEvents = CreateDataStructure["DynamicArray", ConstantArray[1, Length @ init]];
     expressionDestroyerEventCounts = CreateDataStructure["DynamicArray", ConstantArray[0, Length @ init]];
     (* destroyerChoices[eventID][expressionID] -> eventID. See libSetReplace/Event.cpp for more information. *)
-    destroyerChoices = CreateDataStructure["DynamicArray", {CreateDataStructure["HashTable"]}];
+    destroyerChoices = CreateDataStructure["DynamicArray", {Data`UnorderedAssociation[]}];
     (* The numbers of times ordered sequences of event inputs were instantiated. This might be larger than 1 in
        left-hand sides of rules such as {a__, b__}. `All` means no further instantiations are possible. *)
     instantiationCounts = Data`UnorderedAssociation[];
@@ -176,15 +176,15 @@ expressionsSeparation[firstExpression_, secondExpression_] := ModuleScope[
   {firstDestroyerChoices, secondDestroyerChoices} =
     destroyerChoices["Part", expressionCreatorEvents["Part", #]] & /@ {firstExpression, secondExpression};
 
-  If[firstDestroyerChoices["KeyExistsQ", secondExpression] || secondDestroyerChoices["KeyExistsQ", firstExpression],
+  If[KeyExistsQ[firstDestroyerChoices, secondExpression] || KeyExistsQ[secondDestroyerChoices, firstExpression],
     Return["Timelike", Module]
   ];
 
   KeyValueMap[Function[{expression, chosenEvent},
-    If[secondDestroyerChoices["KeyExistsQ", expression] && secondDestroyerChoices["Lookup", expression] =!= chosenEvent,
+    If[KeyExistsQ[secondDestroyerChoices, expression] && secondDestroyerChoices[expression] =!= chosenEvent,
       Return["Branchlike", Module];
     ];
-  ], Normal @ firstDestroyerChoices];
+  ], firstDestroyerChoices];
   "Spacelike"
 ];
 
@@ -216,13 +216,13 @@ createEvent[ruleIndex_, matchedExpressions_] := ModuleScope[
   Scan[
     expressionDestroyerEventCounts["SetPart", #, expressionDestroyerEventCounts["Part", #] + 1] &, matchedExpressions];
 
-  newDestroyerChoices = CreateDataStructure["HashTable"];
+  newDestroyerChoices = Data`UnorderedAssociation[];
   Scan[(
-    newDestroyerChoices["Insert", # -> eventRuleIndices["Length"]];
+    newDestroyerChoices[#] = eventRuleIndices["Length"];
     inputEvent = expressionCreatorEvents["Part", #];
     KeyValueMap[Function[{expression, chosenEvent},
-      newDestroyerChoices["Insert", expression -> chosenEvent];
-    ], Normal[destroyerChoices["Part", inputEvent]]];
+      newDestroyerChoices[expression] = chosenEvent;
+    ], destroyerChoices["Part", inputEvent]];
   ) &, matchedExpressions];
   destroyerChoices["Append", newDestroyerChoices];
 ];
