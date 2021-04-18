@@ -6,7 +6,7 @@
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
     ),
     "tests" -> {
-      With[{anEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}}, {
+      With[{anEventOrdering = EventOrderingFunctions[MultisetSubstitutionSystem]}, {
         (* Symbol Leak *)
         testSymbolLeak[
           GenerateMultihistory[
@@ -62,7 +62,7 @@
       lastEventGeneration[Multihistory[_, data_]] := data["EventGenerations"]["Part", -1];
     ),
     "tests" -> {
-      With[{anEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}}, {
+      With[{anEventOrdering = EventOrderingFunctions[MultisetSubstitutionSystem]}, {
         Function[{rules, selection, stopping, init, expectedCreatedExpressions},
             VerificationTest[
               allExpressions @ GenerateMultihistory[
@@ -173,7 +173,17 @@
             <|"MaxEventInputs" -> 3|>,
             <||>,
             {{1}, {2}, {3}},
-            {{1, 2}, {1, 3}, {2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}}},
+            {{1, 2}, {1, 3}, {2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}}},
+           {{a__, b__} /; OrderedQ[{a, b}] :> {{a}, {b}},
+            <|"MaxGeneration" -> 1, "MinEventInputs" -> 3, "MaxEventInputs" -> 3|>,
+            <||>,
+            {1, 2, 3},
+            {{1}, {2, 3}, {1, 2}, {3}}},
+           {{Longest[a__], b__} /; OrderedQ[{a, b}] :> {{a}, {b}},
+            <|"MaxGeneration" -> 1, "MinEventInputs" -> 3, "MaxEventInputs" -> 3|>,
+            <||>,
+            {1, 2, 3},
+            {{1, 2}, {3}, {1}, {2, 3}}}},
 
         VerificationTest[
           eventCount @ GenerateMultihistory[
@@ -195,15 +205,14 @@
            {{{{_}} :> {}, {{x_, _}} :> {{x}}}, <|"MaxGeneration" -> 2|>, {{1, 2}, {2}, {3}, {4}, {5}}, 2, 6}},
 
         (* Test invalid patterns *)
-        VerificationTest[
+        testUnevaluated[
             eventCount @ GenerateMultihistory[
               MultisetSubstitutionSystem[#],
               <|"MaxGeneration" -> 1|>,
               None,
               anEventOrdering,
               <||>] @ {{1}},
-            0,
-            {Pattern::patvar, Pattern::patvar}] & /@
+            {Pattern::patvar, GenerateMultihistory::ruleInstantiationMessage}] & /@
           {{{{Pattern[1, _], v2_}} :> {}, {{Pattern[2, _], v1_}} :> Module[{v2}, {v2}]},
            {{{Pattern[Pattern[a, _], _], v2_}} :> {}, {{Pattern[2, _], v1_}} :> Module[{v2}, {v2}]}}
       }]
@@ -219,7 +228,7 @@
       allExpressions[Multihistory[_, data_]] := Normal @ data["Expressions"];
     ),
     "tests" -> {
-      With[{anEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}}, {
+      With[{anEventOrdering = EventOrderingFunctions[MultisetSubstitutionSystem]}, {
         Function[{rule, selection, init, expectedCreatedExpressions},
           VerificationTest[
             allExpressions @ GenerateMultihistory[
@@ -275,9 +284,12 @@
            {{a1}, {b1}, {a2}, {a3}, {m1}, {b2}, {m1}, {m2}, {m2}}}},
 
         (* non-overlapping systems produce the same behavior *)
+        (* "InstantiationCounts" stores the sequences of expressions that were tried but do not match.
+           "MaxDestroyerEvents" prevents some of these sequences to be tried in the first place, thus changing
+           "InstantiationCounts" *)
         VerificationTest[
           With[{
-              serializeMultihistory = (Normal /@ # &) /@ Normal /@ Last @ # &,
+              serializeMultihistory = (Normal /@ # &) /@ Normal /@ KeyDrop[Last @ #, "InstantiationCounts"] &,
               multihistories = GenerateMultihistory[
                 MultisetSubstitutionSystem[
                   {{v1_, v2_}, {v2_, v3_, v4_}} :>
@@ -305,12 +317,11 @@
     "tests" -> {
       Function[{rule, init, lastEventInputsOutput},
         VerificationTest[
-          lastEventInputs @
-            GenerateMultihistory[MultisetSubstitutionSystem[rule],
-                                 <||>,
-                                 None,
-                                 {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
-                                 <|"MaxEvents" -> 1|>] @ init,
+          lastEventInputs @ GenerateMultihistory[MultisetSubstitutionSystem[rule],
+                                                 <||>,
+                                                 None,
+                                                 EventOrderingFunctions[MultisetSubstitutionSystem],
+                                                 <|"MaxEvents" -> 1|>] @ init,
           lastEventInputsOutput]
       ] @@@ {
         {{{2, 3, 4} -> {X}, {3} -> {X}}, {1, 2, 3, 4, 5}, {3}},
@@ -321,12 +332,11 @@
 
       Function[{rule, inits, lastExpressions},
         VerificationTest[
-          lastExpression @*
-            GenerateMultihistory[MultisetSubstitutionSystem[rule],
-                                 <||>,
-                                 None,
-                                 {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
-                                 <|"MaxEvents" -> 1|>] /@ inits,
+          lastExpression @* GenerateMultihistory[MultisetSubstitutionSystem[rule],
+                                                 <||>,
+                                                 None,
+                                                 EventOrderingFunctions[MultisetSubstitutionSystem],
+                                                 <|"MaxEvents" -> 1|>] /@ inits,
           lastExpressions]
       ] @@@ {
         {{{{1, 2}, {2, 3}} -> {1}, {{4, 5}, {5, 6}} -> {2}},
@@ -354,7 +364,7 @@
       destroyerEventCounts[Multihistory[_, data_]] := Normal @ data["ExpressionDestroyerEventCounts"];
     ),
     "tests" -> {
-      With[{anEventOrdering = {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"}}, {
+      With[{anEventOrdering = EventOrderingFunctions[MultisetSubstitutionSystem]}, {
         Function[{
             rule, selection, stopping, init, expectedMaxEventGeneration, expectedEventCount, expectedTerminationReason},
           VerificationTest[
