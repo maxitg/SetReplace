@@ -1923,22 +1923,29 @@
         {
           VerificationTest[And @@ StringQ /@ Keys[#["FeatureAssociation"]]] & /@ evolutionObjects,
 
-          VerificationTest[And @@ (NumberQ[#] || MissingQ[#] &) /@ Flatten[Values[#["FeatureAssociation"]]]] &
-            /@ evolutionObjects,
+          VerificationTest[And @@ (NumberQ[#] || MissingQ[#] || GraphQ[#] || StringQ[#] &) /@
+            Flatten[Values[#["FeatureAssociation"]]]] & /@ evolutionObjects,
 
-          VerificationTest[SameQ @@ (Replace[#, _?(NumberQ[#] || MissingQ[#] &) -> 1, Infinity] &
-            [#["FeatureAssociation"]] & /@ evolutionObjects)],
+          VerificationTest[SameQ @@
+            (Replace[#, _?(NumberQ[#] || MissingQ[#] || GraphQ[#] || StringQ[#] &) -> 1, Infinity] &[
+              #["FeatureAssociation"]] & /@ evolutionObjects)],
 
           (* String spec *)
           VerificationTest[
-            #["FeatureAssociation", "CausalGraph"],
-            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "CausalGraph" ~~ __] &]
+            #["FeatureAssociation", "ObjectProperties"],
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "ObjectProperties" ~~ ___] &]
           ] & /@ evolutionObjects,
 
-          (* List spec *)
+          (* List spec for StructurePreservingFinalStateGraph *)
           VerificationTest[
             #["FeatureAssociation", {"StructurePreservingFinalStateGraph"}],
-            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "StructurePreservingFinalStateGraph" ~~ __] &]
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "StructurePreservingFinalStateGraph" ~~ ___] &]
+          ] & /@ evolutionObjects,
+
+          (* List spec for ObjectProperties *)
+          VerificationTest[
+            #["FeatureAssociation", {"ObjectProperties"}],
+            KeySelect[#["FeatureAssociation"], StringMatchQ[#, "ObjectProperties" ~~ ___] &]
           ] & /@ evolutionObjects,
 
           (* All spec *)
@@ -1968,7 +1975,8 @@
       With[{evolutionObjects =
           WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, ##] & @@@
             {{0}, {3, "EventSelectionFunction" -> "MultiwaySpacelike"}, {3}, {8}}},
-        VerificationTest[And @@ (NumberQ[#] || MissingQ[#] &) /@ #["FeatureVector"]] & /@ evolutionObjects
+        VerificationTest[And @@ (NumberQ[#] || GraphQ[#] || StringQ[#] || MissingQ[#] &) /@
+          #["FeatureVector"]] & /@ evolutionObjects
       ],
 
       (* ExpressionsSeparation *)

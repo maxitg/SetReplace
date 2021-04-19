@@ -2,41 +2,34 @@
 
 # Feature Association
 
-**`"FeatureAssociation"`** computes some features of
-the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
+**`"FeatureAssociation"`** computes some features that can be handled by
+[`FeatureExtraction`](https://reference.wolfram.com/language/ref/FeatureExtraction.html)
+of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
 evolution and returns
 an [`Association`](https://reference.wolfram.com/language/ref/Association.html) whose keys describe each feature
 computed.
 For now, it computes properties associated with these feature groups:
 
-- [`"CausalGraph"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
 - `"StructurePreservingFinalStateGraph"`: The [`Graph`](https://reference.wolfram.com/language/ref/Graph.html)
 version of
 the [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md)
 as given by [`HypergraphToGraph`](/Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md) using the
 `"StructurePreserving"` transformation
+- `"ObjectProperties"`: A list of properties of the [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
+that return a numeric value. Right now the list of properties is:
+[`"CausalGraph"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md),
+[`"EventsCount"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EventCounts.md),
+[`"PartialGenerationsCount"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/GenerationCounts.md),
+[`"AllEventsDistinctElementsCount"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TotalElementCounts.md),
+[`"AllEventsEdgesCount"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TotalElementCounts.md),
+[`"CompleteGenerationsCount"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/GenerationCounts.md),
+[`"TerminationReason"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TerminationReason.md).
 
 ```wl
 In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 0}, {0, 0}}, 5]["FeatureAssociation"]
-Out[] = <|
- "CausalGraphVertexCount" -> 22,
- "CausalGraphEdgeCount" -> 42,
- "CausalGraphVertexConnectivity" -> 1,
- "CausalGraphVertexDegreesQuantiles" -> {2, 2, 2, 6, 6},
- "StructurePreservingFinalStateGraphVertexCount" -> 115,
- "StructurePreservingFinalStateGraphEdgeCount" -> 138,
- "StructurePreservingFinalStateGraphVertexConnectivity" -> 2,
- "StructurePreservingFinalStateGraphVertexDegreesQuantiles" -> {2, 2, 2, 2, 8}|>
 ```
 
-The list of features computed for each graph `g` in a feature group is:
-
-- [`VertexCount`](https://reference.wolfram.com/language/ref/VertexCount.html): The number of vertices in the graph.
-- [`EdgeCount`](https://reference.wolfram.com/language/ref/EdgeCount.html): The number of edges in the graph.
-- [`VertexConnectivity`](https://reference.wolfram.com/language/ref/VertexConnectivity.html): The smallest number of
-vertices whose deletion from `g` disconnects `g`. This is computed on the undirected version of the given graph.
-- [`VertexDegree`](https://reference.wolfram.com/language/ref/VertexDegree.html) Quantiles: The quantiles 0, 0.25, 0.50,
-0.75, 1 of the vertex degrees distribution.
+<img src="/Documentation/Images/FeatureAssociationExampleSingleHistory.png" width="621.0">"
 
 This property is useful for applying machine learning to Wolfram Models explorations:
 
@@ -59,23 +52,8 @@ no [`"FinalState"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframMod
 in a Multiway System:
 
 ```wl
-In[] := WolframModel[
-  {{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}},
-  {{1, 1}, {1, 0}, {1, 1}},
-  3,
+In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{1, 1}, {1, 0}, {1, 1}}, 3,
   "EventSelectionFunction" -> "MultiwaySpacelike"]["FeatureAssociation"]
-Out[] = <|
-  "CausalGraphVertexCount" -> 4054,
-  "CausalGraphEdgeCount" -> 7824,
-  "CausalGraphVertexConnectivity" -> 0,
-  "CausalGraphVertexDegreesQuantiles" -> {1, 2, 2, 2, 260},
-  "StructurePreservingFinalStateGraphVertexCount" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-  "StructurePreservingFinalStateGraphEdgeCount" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-  "StructurePreservingFinalStateGraphVertexConnectivity" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-  "StructurePreservingFinalStateGraphVertexDegreesQuantiles" -> {
-    Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-    Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-    Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-    Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
-    Missing["NotExistent", {"MultiwaySystem", "FinalState"}]}|>
 ```
+
+<img src="/Documentation/Images/FeatureAssociationExampleMultihistory.png" width="555.0">
