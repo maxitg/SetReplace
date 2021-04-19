@@ -7,17 +7,17 @@
 
 ```wl
 In[] := EventOrderingFunctions[MultisetSubstitutionSystem]
-Out[] = {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex"}
+Out[] = {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"}
 ```
 
 The individual values returned correspond to partial sorting criteria supported by the system. They are used in the
-order they are passed to [generators](README.md). The first criterion is applied first. If there are ambiguities
-remaining, the second criterion is used, etc.
+order they are passed to [generators](README.md). The first criterion is applied first. If ambiguities are remaining,
+the second criterion is used, etc.
 
-Note that in some cases systems can impose additional restrictions on which combinations of ordering functions can be
+Note that in some cases, systems can impose additional restrictions on which combinations of ordering functions can be
 used.
 
-## Guide to Ordering Functions
+## Ordering Functions
 
 Given a state of a computational system, multiple matches are sometimes possible simultaneously. For example, in the
 system below one can match any pair of numbers, many of which overlapping:
@@ -37,10 +37,10 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 Event ordering functions control the order in which these matches will be instantiated.
 
-The importance of that order depends on the system, the rules, and the parameters of the evaluation. For example, in the
+The importance of that order depends on the system, the rules, and the evaluation parameters. For example, in the
 example above, full multihistory is generated up to generation 1. In this case, the same multihistory is generated
-regardless of the event ordering, so, the event ordering does not matter all that much. For this reason, there is no
-argument for the event ordering `GenerateFullMultihistory`.
+regardless of the event ordering, so the event ordering does not matter all that much. For this reason, there is no
+argument for the event ordering in `GenerateFullMultihistory` (not yet implemented).
 
 However, if we evaluate a single history instead, we can get different histories for different orders (different orders
 are made here by rearranging the order of the init as
@@ -61,7 +61,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 <img src="/Documentation/Images/DifferentOrdersDifferentHistories.png" width="484.2">
 
 This system, however, is [confluent](https://en.wikipedia.org/wiki/Confluence_(abstract_rewriting)), so, even if the
-histories are different, the final state will always be the same assuming the system is evolved to completion.
+histories are different, the final state will always be the same, assuming the system is evolved to completion.
 
 However, it is not the case for all systems. For example, see what happens if we change `+` to `-`:
 
@@ -78,10 +78,8 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/DifferentOrdersDifferentFinalStates.png" width="484.2">
 
-For this reason, generators such as `GenerateSingleHistory` require specification of the ordering function as one of the
-arguments, as, without it, the evaluation will be ambiguous.
-
-## List of Ordering Functions
+For this reason, generators such as `GenerateSingleHistory` (not yet implemented) require specification of the ordering
+function as one of the arguments, as, without it, the evaluation will be ambiguous.
 
 ### InputCount
 
@@ -101,8 +99,8 @@ created.
 `"SortedInputTokenIndices"` ordering function sorts the tokens in a particular match by index and then selects the
 lexicographically smallest result. This corresponds to effectively
 `{"MinInputTokenIndex", "SecondMinInputTokenIndex", ...}`. If one of the sorted index lists is a prefix of another, they
-are considered equal by this ordering function ([`"InputCount"`](#inputcount) will need to be used to resolve the
-ambiguity).
+are considered equal by this ordering function. [`"InputCount"`](#inputcount) will need to be used to resolve the
+ambiguity.
 
 In other words, this ordering function attempts to match the oldest token possible. And if multiple matches remain after
 that, it attempts to match the oldest of the remaining tokens, etc.
@@ -125,4 +123,18 @@ equal by this function, and will be passed to the next one.
 ### RuleIndex
 
 This function attempts to use a rule with the smallest index for multi-rule systems. Only if there are no matches for
-the first rule, the second rule will be attempted, etc. Has no effect in single-rule systems.
+the first rule, the second rule will be attempted, etc. It does not affect single-rule systems.
+
+### InstantiationIndex
+
+In some cases, even the same sequence of input tokens can lead to different outputs. For example, the
+[`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a__, b__}` can match
+tokens `{1, 2, 3}` either as `{a} -> {1}`, `{b} -> {2, 3}` or as `{a} -> {1, 2}`, `{b} -> {3}`, yielding different
+outputs in a rule such as `{a__, b__} :> {{a}, {b}}`.
+
+To resolve this ambiguity, `"InstantiationIndex"` ordering function can be used. The specific order of instantiations
+depends on the system. In [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md), the
+order is the same as in [`ReplaceList`](https://reference.wolfram.com/language/ref/ReplaceList.html).
+
+If used in front of all other ordering functions, it attempts to only do a single instantiation for each sequence of
+tokens unless there are no other matches available.
