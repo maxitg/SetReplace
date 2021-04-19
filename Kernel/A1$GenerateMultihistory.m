@@ -52,7 +52,7 @@ $constraintsSpecPattern =
      MultisetSubstitutionSystem,
      <|"MaxGeneration" -> {Infinity, "NonNegativeIntegerOrInfinity"},
        "MinEventInputs" -> {0, "NonNegativeIntegerOrInfinity"}|>,
-     {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
+     {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"},
      <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>] *)
 
 declareMultihistoryGenerator[implementationFunction_,
