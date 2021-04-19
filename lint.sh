@@ -29,14 +29,14 @@ for arg in "$@"; do
     if [ ! -f "$arg" ]; then
       echo "Argument $arg is not recognized."
       echo
-      echo "Usage: ./lint.sh [-i] [-f] [file1] [file2] ..."
+      echo "Usage: ./lint.sh [-i] [-f] [FILE]..."
       echo "Analyze files with clang-format, cpplint, shfmt, shellcheck, markdownlint and custom scripts."
       echo "If no files are passed as arguments, all files are analyzed."
       echo
       echo "Options:"
       echo "  -i  Edit files in place if possible."
-      echo "  -f  Only perform formatting and skip linting. Always succeeds if used with -i."
-      exit 1
+      echo "  -f  Only perform formatting and skip linting. Always fixes all found errors if used with -i."
+      exit 2
     else
       filesToLint+=("$arg")
     fi
@@ -133,7 +133,7 @@ widthLimit=120
 checkLineWidthOutput=$(
   for file in "${remainingFiles[@]}" "${bashFiles[@]}"; do
     ./scripts/checkLineWidth.sh "$file" "$widthLimit"
-  done || true
+  done || :
 )
 if [ -n "$checkLineWidthOutput" ]; then
   exitStatus=1
