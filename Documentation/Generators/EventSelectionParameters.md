@@ -74,4 +74,51 @@ Out[] = "Complete"
 
 ## MaxDestroyerEvents
 
+`"MaxDestroyerEvents"` controls the number of (inconsistent) events that are allowed to take the same token as an input.
+If `"MaxDestroyerEvents"` is set to one, a single-history system will be generated similar to `GenerateSingleHistory`:
+
+```wl
+In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
+  SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
+    GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
+                         "MaxDestroyerEvents" -> 1,
+                         None,
+                         EventOrderingFunctions[MultisetSubstitutionSystem],
+                         {}] @ {1, 2, 3}
+```
+
+<img src="/Documentation/Images/MaxDestroyerEvents1.png" width="322.2">
+
+If unset (i.e., set to [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html)), it will generate a full
+multihistory (similar to `GenerateFullMultihistory`) subject to other selection and stopping parameters:
+
+```wl
+In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
+  SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
+    GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
+                         {"MaxDestroyerEvents" -> Infinity, "MaxGeneration" -> 1, "MaxEventInputs" -> 2},
+                         None,
+                         EventOrderingFunctions[MultisetSubstitutionSystem],
+                         {}] @ {1, 2, 3}
+```
+
+<img src="/Documentation/Images/MaxDestroyerEventsInfinity.png" width="478.2">
+
+If set to a finite number, it will generate a partial multihistory:
+
+```wl
+In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
+  SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
+    GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
+                         {"MaxDestroyerEvents" -> 5, "MaxEventInputs" -> 2},
+                         None,
+                         EventOrderingFunctions[MultisetSubstitutionSystem],
+                         {}] @ {1, 2, 3}
+```
+
+<img src="/Documentation/Images/MaxDestroyerEvents5.png" width="478.2">
+
+Note that in this case, like in the case of a single history, changing [ordering functions](EventOrderingFunctions.md)
+will change the result.
+
 ## MinEventInputs and MaxEventInputs

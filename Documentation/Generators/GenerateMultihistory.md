@@ -4,4 +4,4 @@
 
 ## Event Selection Parameters
 
-## Stopping Conditions
+## Stopping Parameters

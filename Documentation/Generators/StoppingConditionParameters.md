@@ -1,3 +1,3 @@
 ###### [Generators](README.md)
 
-# StoppingConditionParameters
+# StoppingParameters
