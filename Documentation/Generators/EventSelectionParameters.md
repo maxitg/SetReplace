@@ -30,8 +30,8 @@ generations. In the following example, the tokens and events are labeled with th
 
 ```wl
 In[] := #["ExpressionsEventsGraph",
-          VertexLabels -> Placed["Name", After, Replace[
-            {{"Expression", n_} :> #["ExpressionGenerations"][[n]], {"Event", n_} :> #["EventGenerations"][[n]]}]]] & @
+          VertexLabels -> Placed["Name", After, Replace[{{"Expression", n_} :> #["ExpressionGenerations"][[n]],
+                                                         {"Event", n_} :> #["EventGenerations"][[n]]}]]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[MultisetSubstitutionSystem[{a__} /; Total[{a}] == 5 :> {Total[{a}] - 1, Total[{a}] + 1}],
                          {},
@@ -60,7 +60,7 @@ Since `"MaxGeneration"` is a selection parameter rather than a [stopping conditi
 will continue evaluation even after encountering matches exceeding the generations constraint, which might also result
 in a different [event ordering](EventOrderingFunctions.md) than if using, e.g.,
 [`"MaxEvents"`](StoppingConditionParameters.md#maxevents). For this reason, `"MaxGenerations"` (like other selection
-parameters) does not have a corresponding termination reason as it cannot cause a termination by itself.
+parameters) does not have a corresponding termination reason.
 
 ```wl
 In[] := #[[2, "TerminationReason"]] & @
