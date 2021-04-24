@@ -42,8 +42,8 @@ In[] := #["ExpressionsEventsGraph",
 
 <img src="/Documentation/Images/TokenEventGraphGenerations.png" width="444.6">
 
-Restricting the number of generations to one will prevent the last two events from occuring. Note, however, that another
-event is created instead:
+Restricting the number of generations to one will prevent the last two events from occurring. Note, however, that
+another event is created instead:
 
 ```wl
 In[] := #["ExpressionsEventsGraph"] & @ SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
@@ -122,3 +122,49 @@ Note that in this case, like in the case of a single history, changing [ordering
 will change the result.
 
 ## MinEventInputs and MaxEventInputs
+
+These parameters control the min and max numbers of input tokens allowed per event. There are two use cases for these
+parameters. The first is controlling the number of inputs in systems where rules with variable numbers of inputs are
+possible, such as [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md). Compare, for
+example, `"MinEventInputs" -> 0` (default):
+
+```wl
+In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
+  SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
+    GenerateMultihistory[MultisetSubstitutionSystem[{a___} :> {Total[{a}]}],
+                         {"MinEventInputs" -> 0},
+                         None,
+                         EventOrderingFunctions[MultisetSubstitutionSystem],
+                         {"MaxEvents" -> 10}] @ {1, 2, 3}
+```
+
+<img src="/Documentation/Images/MinEventInputs0.png" width="367.8">
+
+and `"MinEventInputs" -> 2`:
+
+```wl
+In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
+  SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
+    GenerateMultihistory[MultisetSubstitutionSystem[{a___} :> {Total[{a}]}],
+                         {"MinEventInputs" -> 2},
+                         None,
+                         EventOrderingFunctions[MultisetSubstitutionSystem],
+                         {"MaxEvents" -> 10}] @ {1, 2, 3}
+```
+
+The other use case is optimization. By default, systems like
+[`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) consider all subsets of tokens to
+find matches, which can be slow, especially to determine if the generation is complete, as it requires going through all
+subsets to determine no more matches are possible. However, if the range of match sizes is known ahead of time, it can
+be used to make the evaluation faster. Compare:
+
+```wl
+In[] := First @ AbsoluteTiming @
+    GenerateMultihistory[MultisetSubstitutionSystem[{a___} /; Length[{a}] == 4 :> {Total[{a}]}],
+                         #,
+                         None,
+                         EventOrderingFunctions[MultisetSubstitutionSystem],
+                         {"MaxEvents" -> 20}] @ {1, 2, 3, 4} & /@
+  {{}, {"MinEventInputs" -> 4, "MaxEventInputs" -> 4}}
+Out[] = {0.682851, 0.011029}
+```
