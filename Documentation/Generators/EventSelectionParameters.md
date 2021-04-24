@@ -152,6 +152,8 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
                          {"MaxEvents" -> 10}] @ {1, 2, 3}
 ```
 
+<img src="/Documentation/Images/MinEventInputs2.png" width="478.2">
+
 The other use case is optimization. By default, systems like
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) consider all subsets of tokens to
 find matches, which can be slow, especially to determine if the generation is complete, as it requires going through all
