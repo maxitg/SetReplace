@@ -16,7 +16,7 @@ for the corresponding arguments of [generators](README.md).
 ## Stopping Conditions
 
 Stopping conditions control when the evaluation should be terminated. Unlike the
-[`event selection parameters`](EventSelectionParameters.md), the termination will occur immediately after one of these
+[event selection parameters](EventSelectionParameters.md), the termination will occur immediately after one of these
 conditions is reached, even if further evaluation would be possible given a different
 [event ordering](EventOrderingFunctions.md).
 
