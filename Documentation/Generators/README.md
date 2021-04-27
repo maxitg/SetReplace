@@ -38,7 +38,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemPartialMultihistory.png" width="478.2">
 
-[`MultisetSubstitutionSystem`](/Documentation/Images/MultisetSubstitutionSystemExample.png) above is what defines the
+[`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) above is what defines the
 kind of system we were using (other examples are `HypergraphSubstitutionSystem`, `StringSubstitutionSystem`, etc.).
 However, the evaluation parameters of these systems have many similarities (e.g., all of them have
 `"MaxDestroyerEvents"` parameter and support both single- (deterministic) and multi- (nondeterministic) histories). To
