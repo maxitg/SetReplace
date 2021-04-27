@@ -7,7 +7,7 @@ components which we call tokens. Rewrites (which we call events) replace some of
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) is one of the simplest examples. In
 it, states are just sets of arbitrary expressions (tokens), and events replace subsets of tokens with other subsets. For
 example, a system `{a_, b_} :> {a + b}` would add pairs of numbers until only one number remains. In the
-[Graph](https://reference.wolfram.com/language/ref/Graph.html) below, tokens and events are shown in light blue and
+[`Graph`](https://reference.wolfram.com/language/ref/Graph.html) below, tokens and events are shown in light blue and
 orange:
 
 ```wl
