@@ -30,9 +30,9 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 <img src="/Documentation/Images/MultisetSubstitutionSystemExample.png" width="444.6">
 
 Arbitrary Wolfram Language patterns are supported including
-[conditions](https://reference.wolfram.com/language/ref/Condition.html) (`{a_ /; a > 0, b_}` or
-`{a_, b_} /; a + b == 3`) and [sequences](https://reference.wolfram.com/language/ref/BlankSequence.html) that match
-multiple tokens at once in any order (`{a__}`). Any code is supported on the right-hand side as long as it always
+[conditions](https://reference.wolfram.com/language/ref/Condition.html) such as `{a_ /; a > 0, b_}` and
+`{a_, b_} /; a + b == 3` and [sequences](https://reference.wolfram.com/language/ref/BlankSequence.html) that match
+multiple tokens at once in any order, e.g., `{a__}`. Any code is supported on the right-hand side as long as it always
 generates a list. For example:
 
 ```wl
@@ -47,6 +47,9 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 ```
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemConditionsAndSequences.png" width="478.2">
+
+Note, however, that the system cannot recognize if the code on the right-hand side is nondeterministic, so only the
+first output will be used for each assignment of pattern variables.
 
 `MultisetSubstitutionSystem` supports
 [`"MaxGeneration"`](/Documentation/Generators/EventSelectionParameters.md#maxgeneration),
