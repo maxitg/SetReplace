@@ -53,7 +53,7 @@ for [event selection](/Documentation/Generators/EventSelectionParameters.md). It
 [`"MaxEvents"`](/Documentation/Generators/StoppingConditionParameters.md#maxevents) as a
 [stopping condition](/Documentation/Generators/StoppingConditionParameters.md). Only a single
 [event ordering](/Documentation/Generators/EventOrderingFunctions.md)
-(`{"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"}`) is implemented at
+`{"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"}` is implemented at
 the moment.
 
 `MultisetSubstitutionSystem` produces
@@ -61,10 +61,10 @@ the moment.
 
 ## Current Limitations
 
-* The current version does not do any introspection of the rules, so it is slow since it has to enumerate all subsets of
-tokens in the multihistory for every new event.
-[`"MaxEventInputs"`](/Documentation/Generators/EventOrderingFunctions.md#mineventinputs-and-maxeventinputs) can be used
-as a workaround.
+* The current version does no introspection of the rules, so it is slow since it has to enumerate all subsets of tokens
+in the multihistory for every new event.
+[`"MaxEventInputs"`](/Documentation/Generators/EventSelectionParameters.md#mineventinputs-and-maxeventinputs) can be
+used as a workaround.
 * Token deduplication is not implemented. The only value supported is
 [`None`](https://reference.wolfram.com/language/ref/None.html).
 * Only `{"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"}` is
