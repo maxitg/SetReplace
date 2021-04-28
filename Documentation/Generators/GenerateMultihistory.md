@@ -34,5 +34,8 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 Everything that can be generated with more specialized `GenerateSingleHistory` and `GenerateFullMultihistory` can be
 reproduced with `GenerateMultihistory` as well. This can be done by setting `"MaxDestroyerEvents" -> 1` to emulate
-`GenerateSingleHistory` and setting `"MaxDestroyerEvents" -> Infinity` and leaving the stopping condition empty to
-emulate `GenerateFullMultihistory`.
+`GenerateSingleHistory` and setting `"MaxDestroyerEvents" -> Infinity` and leaving the
+[stopping condition](StoppingConditionParameters.md) empty to emulate `GenerateFullMultihistory`.
+
+However, by setting `"MaxDestroyerEvents"` to finite values larger than 1, one can generate multihistories not possible
+with other generators.
