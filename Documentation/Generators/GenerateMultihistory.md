@@ -24,3 +24,15 @@ In[] := multihistory = GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} 
 ```
 
 <img src="/Documentation/Images/MultisetMultihistory.png" width="472.2">
+
+```wl
+In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
+  SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @ multihistory
+```
+
+<img src="/Documentation/Images/GenerateMultihistoryExample.png" width="478.2">
+
+Everything that can be generated with more specialized `GenerateSingleHistory` and `GenerateFullMultihistory` can be
+reproduced with `GenerateMultihistory` as well. This can be done by setting `"MaxDestroyerEvents" -> 1` to emulate
+`GenerateSingleHistory` and setting `"MaxDestroyerEvents" -> Infinity` and leaving the stopping condition empty to
+emulate `GenerateFullMultihistory`.
