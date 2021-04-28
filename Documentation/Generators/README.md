@@ -1,8 +1,8 @@
 # Generators
 
-The purpose of *SetReplace* is evaluation of nondeterministic computational systems. In order to support multiple such
-systems, they are treated within a unified framework. In this framework, the states of these systems are split into
-components which we call tokens. Rewrites (which we call events) replace some of these tokens with others.
+The purpose of *SetReplace* is the evaluation of nondeterministic computational systems. We have a unified framework to
+support multiple such systems. In this framework, we split the states of these systems into components which we call
+tokens. Rewrites (which we call events) replace some of these tokens with others.
 
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) is one of the simplest examples. In
 it, states are just sets of arbitrary expressions (tokens), and events replace subsets of tokens with other subsets. For
@@ -22,7 +22,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemExample.png" width="444.6">
 
-Even though the system above is non-deterministic (any pair of numbers can be chosen at each step), the graph is not: it
+Even though the system above is nondeterministic (it can choose any pair of numbers at each step), the graph is not: it
 shows only a single possible evaluation. We can, however, generate graphs showing multiple possible evaluations
 simultaneously as well:
 
@@ -43,11 +43,12 @@ kind of system we were using (other examples are `HypergraphSubstitutionSystem`,
 However, the evaluation parameters of these systems have many similarities (e.g., all of them have
 `"MaxDestroyerEvents"` parameter and support both single- (deterministic) and multi- (nondeterministic) histories). To
 separate the specific systems from the specification of evaluation parameters, we use another function,
-[`GenerateMultihistory`](/Documentation/Generators/GenerateMultihistory.md) to specify these parameters. This function
-is an example of a **generator**.
+[`GenerateMultihistory`](GenerateMultihistory.md) to specify these parameters. This function is an example of a
+**generator**.
 
-Other generators such as `GenerateSingleHistory` and `GenerateFullMultihistory` are simpler to use (as they have fewer
-arguments), however, they are special purpose and are more limited in what they can do.
+[`GenerateMultihistory`](GenerateMultihistory.md) is the universal generator. It can generate everything that the
+specialized `GenerateSingleHistory` and `GenerateFullMultihistory` can produce. However, it is more verbose, which can
+make the code harder to read.
 
 ## Symbols
 

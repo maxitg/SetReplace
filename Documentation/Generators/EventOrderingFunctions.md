@@ -19,8 +19,8 @@ used.
 
 ## Ordering Functions
 
-Given a state of a computational system, multiple matches are sometimes possible simultaneously. For example, in the
-system below one can match any pair of numbers, many of which overlapping:
+Multiple matches are sometimes possible to the same state of a computational system. For example, in the system below
+one can match any pair of numbers, many of which overlapping:
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
@@ -39,8 +39,8 @@ Event ordering functions control the order in which these matches will be instan
 
 The importance of that order depends on the system, the rules, and the evaluation parameters. For example, in the
 example above, full multihistory is generated up to generation 1. In this case, the same multihistory is generated
-regardless of the event ordering, so the event ordering does not matter all that much. For this reason, there is no
-argument for the event ordering in `GenerateFullMultihistory` (not yet implemented).
+regardless of the event ordering, so the event ordering is not important. For this reason, there is no argument for the
+event ordering in `GenerateFullMultihistory` (not yet implemented).
 
 However, if we evaluate a single history instead, we can get different histories for different orders (different orders
 are made here by rearranging the order of the init as
@@ -60,8 +60,8 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/DifferentOrdersDifferentHistories.png" width="484.2">
 
-This system, however, is [confluent](https://en.wikipedia.org/wiki/Confluence_(abstract_rewriting)), so, even if the
-histories are different, the final state will always be the same, assuming the system is evolved to completion.
+This system, however, is [confluent](https://en.wikipedia.org/wiki/Confluence_(abstract_rewriting)). So, the final state
+will always be the same even if the histories are different, assuming the system is evaluated to completion.
 
 However, it is not the case for all systems. For example, see what happens if we change `+` to `-`:
 
@@ -103,7 +103,7 @@ are considered equal by this ordering function. [`"InputCount"`](#inputcount) wi
 ambiguity.
 
 In other words, this ordering function attempts to match the oldest token possible. And if multiple matches remain after
-that, it attempts to match the oldest of the remaining tokens, etc.
+that it attempts to match the oldest of the remaining tokens, etc.
 
 For example, the [multiset](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a_, b_, c_}` will match
 tokens with indices `{7, 1, 6}` before `{3, 2}` (since `1 < 2`), and `{4, 6, 2}` before `{5, 2, 6}` (since `2 == 2` and

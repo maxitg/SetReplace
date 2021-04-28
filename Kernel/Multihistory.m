@@ -5,7 +5,7 @@ PackageImport["GeneralUtilities`"]
 PackageExport["Multihistory"]
 
 SetUsage @ "
-Multihistory[$$] is an object containing evaluation of a possibly non-deterministic computational system.
+Multihistory[$$] is an object containing evaluation of a possibly nondeterministic computational system.
 ";
 
 SyntaxInformation[Multihistory] = {"ArgumentsPattern" -> {type_, internalData_}};
