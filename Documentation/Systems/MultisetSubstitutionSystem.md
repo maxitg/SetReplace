@@ -1,18 +1,19 @@
 # MultisetSubstitutionSystem
 
-States in the **`MultisetSubstitutionSystem`** are unordered multisets of tokens, which are arbitrary Wolfram Language
+States of the **`MultisetSubstitutionSystem`** are unordered multisets of tokens, which are arbitrary Wolfram Language
 expressions. Events take submultisets of these and replace them with other multisets.
 [`SubsetReplace`](https://reference.wolfram.com/language/ref/SubsetReplace.html) evaluates this system, for example.
 
-The left-hand sides of rules are written as Wolfram Language patterns. The first level of these patterns can be matched
-in any order, should match to a [`List`](https://reference.wolfram.com/language/ref/List.html), and is matched to the
-multiset of tokens, so `{n__Integer, s_String}` and `{s_String, n__Integer}` are equivalent, aside from their effect on
-the [event ordering](/Documentation/Generators/EventOrderingFunctions.md).
+The left-hand sides of rules are written as Wolfram Language patterns. The first level of these patterns should match to
+a [`List`](https://reference.wolfram.com/language/ref/List.html), and is matched to a multiset of tokens, so
+`{n__Integer, s_String}` and `{s_String, n__Integer}` are equivalent aside from their effect on the
+[event ordering](/Documentation/Generators/EventOrderingFunctions.md) and can match, e.g., `{1, 2, "s"}`, `{"x", 2, 3}`
+and `{"q", 1}`.
 
-The right-hand sides determine the result of the replacement (similar to how
-[`Replace`](https://reference.wolfram.com/language/ref/Replace.html) works). The top level of the output must be a
-[`List`](https://reference.wolfram.com/language/ref/List.html), and it is converted to multiset of tokens to be inserted
-to the output state.
+The right-hand sides determine the result of the replacement similar to
+[`Replace`](https://reference.wolfram.com/language/ref/Replace.html). The top level of the output must be a
+[`List`](https://reference.wolfram.com/language/ref/List.html), and it is converted to a multiset of tokens to be
+inserted into the output state.
 
 For example, to make a system that adds pairs of numbers:
 
