@@ -58,6 +58,6 @@ make the code harder to read.
 * Generators:
   * [`GenerateMultihistory`](GenerateMultihistory.md) &mdash; the most customizable and explicit generator
 * Parameters:
-  * [`EventSelectionParameters`](EventSelectionParameters.md) &mdash; determine which events to include
+  * [`EventSelectionParameters`](EventSelectionParameters.md) &mdash; determines which events to include
   * [`EventOrderingFunctions`](EventOrderingFunctions.md) &mdash; determines the order of events
   * [`StoppingConditionParameters`](StoppingConditionParameters.md) &mdash; determines when the stop evaluation
