@@ -60,4 +60,4 @@ make the code harder to read.
 * Parameters:
   * [`EventSelectionParameters`](EventSelectionParameters.md) &mdash; determines which events to include
   * [`EventOrderingFunctions`](EventOrderingFunctions.md) &mdash; determines the order of events
-  * [`StoppingConditionParameters`](StoppingConditionParameters.md) &mdash; determines when the stop evaluation
+  * [`StoppingConditionParameters`](StoppingConditionParameters.md) &mdash; determines when to stop evaluation
