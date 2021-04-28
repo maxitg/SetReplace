@@ -1,14 +1,22 @@
 # Generators
 
-The purpose of *SetReplace* is the evaluation of nondeterministic computational systems. We have a unified framework to
-support multiple such systems. In this framework, we split the states of these systems into components which we call
-tokens. Rewrites (which we call events) replace some of these tokens with others.
+Generators are functions that create [`Multihistory`](/Documentation/Types/Multihistory/README.md) objects. They take
+rules for a [computational system](/Documentation/Systems/README.md) and additional parameters specifying how to perform
+the evaluation.
 
-[`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) is one of the simplest examples. In
-it, states are just sets of arbitrary expressions (tokens), and events replace subsets of tokens with other subsets. For
-example, a system `{a_, b_} :> {a + b}` would add pairs of numbers until only one number remains. In the
-[`Graph`](https://reference.wolfram.com/language/ref/Graph.html) below, tokens and events are shown in light blue and
-orange:
+In *SetReplace*, we split the states of [computational systems](/Documentation/Systems/README.md) into components which
+we call tokens. Rewrites (which we call events) replace some of these tokens with others. Crucially, *SetReplace* can
+evaluate multiple branches of nondeterministic systems simultaneously. That is done by applying different events to the
+same tokens and keeping events and tokens instead of states in
+[`Multihistory`](/Documentation/Types/Multihistory/README.md) objects. We can reconstruct the states from that
+information afterwords.
+
+Most systems, however, cannot be evaluated completely. And there are multiple groups of parameters to control how to
+perform a partial evaluation. One needs to decide [which events to include](EventSelectionParameters.md), in
+[which order](EventOrderingFunctions.md), and [when to terminate the evaluation](StoppingConditionParameters.md).
+
+For example, in a [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) we can generate
+a single history (no nondeterministic branching):
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
@@ -22,9 +30,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemExample.png" width="444.6">
 
-Even though the system above is nondeterministic (it can choose any pair of numbers at each step), the graph is not: it
-shows only a single possible evaluation. We can, however, generate graphs showing multiple possible evaluations
-simultaneously as well:
+or multiple histories:
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
@@ -38,13 +44,10 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemPartialMultihistory.png" width="478.2">
 
-[`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) above is what defines the
-kind of system we were using (other examples are `HypergraphSubstitutionSystem`, `StringSubstitutionSystem`, etc.).
-However, the evaluation parameters of these systems have many similarities (e.g., all of them have
-`"MaxDestroyerEvents"` parameter and support both single- (deterministic) and multi- (nondeterministic) histories). To
-separate the specific systems from the specification of evaluation parameters, we use another function,
-[`GenerateMultihistory`](GenerateMultihistory.md) to specify these parameters. This function is an example of a
-**generator**.
+The same generators support multiple systems. In addition to
+[`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md), other examples include
+`HypergraphSubstitutionSystem`, `StringSubstitutionSystem`, etc. Many of these systems have shared evaluation
+parameters.
 
 [`GenerateMultihistory`](GenerateMultihistory.md) is the universal generator. It can generate everything that the
 specialized `GenerateSingleHistory` and `GenerateFullMultihistory` can produce. However, it is more verbose, which can
