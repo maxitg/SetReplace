@@ -1,6 +1,6 @@
 ###### [Generators](README.md)
 
-# EventOrderingFunctions
+# Event Ordering Functions
 
 Multiple matches are sometimes possible to the same state of a computational system. For example, in the system below
 one can match any pair of numbers, many of which overlapping:

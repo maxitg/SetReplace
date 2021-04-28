@@ -1,10 +1,10 @@
 ###### [Generators](README.md)
 
-# EventSelectionParameters
+# Event Selection Parameters
 
-Selection parameters control which matches will be instantiated during the evolution. Unlike the
+Event selection parameters control which matches will be instantiated during the evaluation. Unlike the
 [stopping conditions](StoppingConditionParameters.md), these constraints are local. In other words, the evaluation does
-not terminate if any of these constraints are encountered. Instead, only particular matches will be skipped.
+not terminate if any of these constraints are encountered. Only particular matches are skipped instead.
 
 **`EventSelectionParameters`** allows one to obtain the list of event selection parameters that can be used with a
 [computational system](/Documentation/Systems/README.md):
@@ -23,7 +23,7 @@ from the initial state. More precisely, the generation of the tokens in the init
 generation of an event is defined as the maximum of the generations of its inputs plus one. The generation of a token is
 the same as the generation of its creator event.
 
-A neat feature of the `TokenEventGraph` property is that it arranges tokens and events on layers corresponding to their
+A neat feature of the `TokenEventGraph` property is that it arranges tokens and events in layers corresponding to their
 generations. In the following example, the tokens and events are labeled with their generation numbers:
 
 ```wl
@@ -154,9 +154,9 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 The other use case is optimization. By default, systems like
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) consider all subsets of tokens to
-find matches, which can be slow, especially to determine if the generation is complete, as it requires going through all
-subsets to determine no more matches are possible. However, if the range of match sizes is known ahead of time, it can
-be used to make the evaluation faster. Compare:
+find matches, which can be slow, especially to finalize the complete evaluation, as it requires going through all
+subsets to find out that no more matches are possible. However, if the range of match sizes is known ahead of time, it
+can be used to make the evaluation faster. Compare:
 
 ```wl
 In[] := First @ AbsoluteTiming @
