@@ -46,9 +46,9 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 <img src="/Documentation/Images/MultisetSubstitutionSystemConditionsAndSequences.png" width="478.2">
 
 `MultisetSubstitutionSystem` supports
-[`"MaxGeneration"`](/Documentation/Generators/EventOrderingFunctions.md#maxgeneration),
-[`"MaxDestroyerEvents"`](/Documentation/Generators/EventOrderingFunctions.md#maxdestroyerevents),
-[`"MinEventInputs"` and `"MaxEventInputs"`](/Documentation/Generators/EventOrderingFunctions.md#mineventinputs-and-maxeventinputs)
+[`"MaxGeneration"`](/Documentation/Generators/EventSelectionParameters.md#maxgeneration),
+[`"MaxDestroyerEvents"`](/Documentation/Generators/EventSelectionParameters.md#maxdestroyerevents),
+[`"MinEventInputs"` and `"MaxEventInputs"`](/Documentation/Generators/EventSelectionParameters.md#mineventinputs-and-maxeventinputs)
 for [event selection](/Documentation/Generators/EventSelectionParameters.md). It supports
 [`"MaxEvents"`](/Documentation/Generators/StoppingConditionParameters.md#maxevents) as a
 [stopping condition](/Documentation/Generators/StoppingConditionParameters.md). Only a single
