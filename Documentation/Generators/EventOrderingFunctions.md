@@ -125,7 +125,7 @@ the first rule, the second rule will be attempted, etc. It does not affect singl
 
 In some cases, even the same sequence of input tokens can lead to different outputs. For example, the
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a__, b__}` (note
-[`BlankSequence`](https://reference.wolfram.com/language/ref/BlankSequence.html)s) can match tokens `{1, 2, 3}` as
+[`BlankSequence`](https://reference.wolfram.com/language/ref/BlankSequence.html)'s) can match tokens `{1, 2, 3}` as
 either `{a} -> {1}`, `{b} -> {2, 3}` or `{a} -> {1, 2}`, `{b} -> {3}`, yielding different outputs in a rule such as
 `{a__, b__} :> {{a}, {b}}`.
 
