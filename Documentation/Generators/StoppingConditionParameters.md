@@ -1,12 +1,11 @@
 # Stopping Condition Parameters
 
-Stopping conditions control when the evaluation should be terminated. Unlike the
-[event selection parameters](EventSelectionParameters.md), the termination will occur immediately after one of these
-conditions is reached, even if a further evaluation would be possible given a different
+Stopping condition controls when the evaluation should be terminated. Unlike the
+[event selection parameters](EventSelectionParameters.md), the termination occurs immediately once one of these
+conditions is reached, even if a further evaluation would be possible with a different
 [event ordering](EventOrderingFunctions.md).
 
-**`StoppingConditionParameters`** allows one to obtain the list of parameters that determine when the evaluation of a
-[computational system](/Documentation/Systems/README.md) should be terminated:
+**`StoppingConditionParameters`** allows one to obtain the list of parameters available for a particular system:
 
 ```wl
 In[] := StoppingConditionParameters[MultisetSubstitutionSystem]
