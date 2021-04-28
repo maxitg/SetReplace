@@ -1,5 +1,3 @@
-###### [Generators](README.md)
-
 # Stopping Condition Parameters
 
 Stopping conditions control when the evaluation should be terminated. Unlike the

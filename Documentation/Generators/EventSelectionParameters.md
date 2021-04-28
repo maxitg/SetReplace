@@ -1,5 +1,3 @@
-###### [Generators](README.md)
-
 # Event Selection Parameters
 
 Event selection parameters control which matches will be instantiated during the evaluation. Unlike the

@@ -1,5 +1,3 @@
-###### [Type System](README.md)
-
 # SetReplaceObjectType
 
 **`SetReplaceObjectType`** yields [the type](/Documentation/Types/README.md) of an object. Note that the type

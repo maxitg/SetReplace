@@ -1,5 +1,3 @@
-###### [Generators](README.md)
-
 # GenerateMultihistory
 
 **`GenerateMultihistory`** is the most verbose and configurable generator. It can create both single histories, full

@@ -1,5 +1,3 @@
-###### [Type System](README.md)
-
 # SetReplaceObjectQ
 
 **`SetReplaceObjectQ`** yields [`True`](https://reference.wolfram.com/language/ref/True.html) for *SetReplace* objects

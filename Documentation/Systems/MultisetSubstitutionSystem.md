@@ -1,5 +1,3 @@
-###### [Systems](README.md)
-
 # MultisetSubstitutionSystem
 
 States in the **`MultisetSubstitutionSystem`** are unordered multisets of tokens, which are arbitrary Wolfram Language

@@ -1,5 +1,3 @@
-###### [Types](README.md)
-
 # Multihistory
 
 **`Multihistory`** is a head used for [types](README.md) representing an evaluation history of a

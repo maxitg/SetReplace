@@ -1,5 +1,3 @@
-###### [Type System](README.md)
-
 # SetReplaceTypeConvert
 
 **`SetReplaceTypeConvert`** allows one to convert one [type](/Documentation/Types/README.md) (of, e.g.,

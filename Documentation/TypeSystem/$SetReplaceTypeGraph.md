@@ -1,5 +1,3 @@
-###### [Type System](README.md)
-
 # $SetReplaceTypeGraph
 
 **`$SetReplaceTypeGraph`** gives the [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) showing

@@ -1,5 +1,3 @@
-###### [Generators](README.md)
-
 # Event Ordering Functions
 
 Multiple matches are sometimes possible to the same state of a computational system. For example, in the system below

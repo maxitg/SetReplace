@@ -1,5 +1,3 @@
-###### [Types](../README.md) > [Multihistory](README.md)
-
 # {MultisetSubstitutionSystem, 0}
 
 **`{MultisetSubstitutionSystem, 0}`** is a [`Multihistory`](README.md) type currently returned by
