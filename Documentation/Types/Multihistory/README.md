@@ -2,7 +2,8 @@
 
 # Multihistory
 
-**`Multihistory`** is a head used for [types](README.md) representing an evaluation history of a computational system.
+**`Multihistory`** is a head used for [types](README.md) representing an evaluation history of a
+[computational system](/Documentation/Systems/README.md).
 
 For example, for a [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md),
 
@@ -10,7 +11,7 @@ For example, for a [`MultisetSubstitutionSystem`](/Documentation/Systems/Multise
 In[] := GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
                              {},
                              None,
-                             {"InputCount", "SortedInputExpressions", "UnsortedInputExpressions", "RuleIndex"},
+                             EventOrderingFunctions[MultisetSubstitutionSystem],
                              {"MaxEvents" -> 10}] @ {1, 2, 3}
 ```
 
@@ -18,3 +19,5 @@ In[] := GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
 
 You will be able to use [`properties`](/Documentation/Properties/README.md) to extract information about multihistories,
 but we have not implemented any properties yet.
+
+* [`{MultisetSubstitutionSystem, 0}`](Multihistory/MultisetSubstitutionSystem0.md)
