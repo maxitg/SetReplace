@@ -30,7 +30,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemExample.png" width="444.6">
 
-or multiple histories:
+or multiple histories. Note different events (orange) using the same tokens (light blue):
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
