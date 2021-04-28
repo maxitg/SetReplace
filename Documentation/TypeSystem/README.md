@@ -20,8 +20,6 @@ convert an object to a different type manually for persistence or optimization, 
 [`SetReplaceObjectQ`](SetReplaceObjectQ.md) can be used to find out if an expression is a *SetReplace* object, and
 [`SetReplaceObjectType`](SetReplaceObjectType.md) can be used to determine its type.
 
-## Helper Symbols and Functions
-
 * Enumeration:
   * [`$SetReplaceTypes`]($SetReplaceTypes.md)
   * [`$SetReplaceProperties`]($SetReplaceProperties.md)

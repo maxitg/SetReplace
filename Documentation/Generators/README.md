@@ -50,8 +50,8 @@ separate the specific systems from the specification of evaluation parameters, w
 specialized `GenerateSingleHistory` and `GenerateFullMultihistory` can produce. However, it is more verbose, which can
 make the code harder to read.
 
-## Symbols
-
+* Introspection:
+  * [`$SetReplaceSystems`]($SetReplaceSystems.md) &mdash; yields the list of all implemented systems
 * Generators:
   * [`GenerateMultihistory`](GenerateMultihistory.md) &mdash; the most customizable and explicit generator
 * Parameters:
