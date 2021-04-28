@@ -1,8 +1,9 @@
 # Systems
 
-*SetReplace* supports multiple computational systems. They are all treated within a unified framework, i.e., their
-[multihistories](/Documentation/Types/Multihistory/README.md) can be created with
-[generators](/Documentation/Generators/README.md) using similar parameters, and their
-[properties](/Documentation/Properties/README.md) are computed in a simliar way.
+*SetReplace* supports multiple computational systems. The system-specific functions such as
+[`MultisetSubstitutionSystem`](MultisetSubstitutionSystem.md) do not perform the evaluation themselves. Instead, one
+uses them to specify the rules for the [generators](/Documentation/Generators/README.md).
+
+These functions typically take a single argument for the system-specific rules:
 
 * [`MultisetSubstitutionSystem`](MultisetSubstitutionSystem.md)
