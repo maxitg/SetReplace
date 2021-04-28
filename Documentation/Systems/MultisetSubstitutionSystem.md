@@ -7,7 +7,7 @@ expressions. Events take submultisets of these and replace them with other multi
 The left-hand sides of rules are written as Wolfram Language patterns. The first level of these patterns should match to
 a [`List`](https://reference.wolfram.com/language/ref/List.html), and is matched to a multiset of tokens, so
 `{n__Integer, s_String}` and `{s_String, n__Integer}` are equivalent aside from their effect on the
-[event ordering](/Documentation/Generators/EventOrderingFunctions.md) and can match, e.g., `{1, 2, "s"}`, `{"x", 2, 3}`
+[event ordering](/Documentation/Generators/EventOrderingFunctions.md) and can match, e.g., `{1, 2, "s"}`, `{2, "x", 3}`
 and `{"q", 1}`.
 
 The right-hand sides determine the result of the replacement similar to
