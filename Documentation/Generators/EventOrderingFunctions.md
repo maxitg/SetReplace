@@ -88,9 +88,9 @@ before `{1, 2, 3}` with this ordering function.
 
 ## SortedInputTokenIndices
 
-As events are instantiated according to the ordering function, each token in a
-[`Multihistory`](/Documentation/Types/Multihistory/README.md) has an index corresponding to when that token was first
-created.
+As events are instantiated, each token in a [`Multihistory`](/Documentation/Types/Multihistory/README.md) has an index
+corresponding to when that token was first created. (If tokens are created simultaneously, indices correspond to the
+order in the rule output or in the initial state.)
 
 `"SortedInputTokenIndices"` ordering function sorts the tokens in a particular match by index and then selects the
 lexicographically smallest result. This corresponds to effectively
@@ -124,13 +124,14 @@ the first rule, the second rule will be attempted, etc. It does not affect singl
 ## InstantiationIndex
 
 In some cases, even the same sequence of input tokens can lead to different outputs. For example, the
-[`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a__, b__}` can match
-tokens `{1, 2, 3}` either as `{a} -> {1}`, `{b} -> {2, 3}` or as `{a} -> {1, 2}`, `{b} -> {3}`, yielding different
-outputs in a rule such as `{a__, b__} :> {{a}, {b}}`.
+[`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a__, b__}` (note
+[`BlankSequence`](https://reference.wolfram.com/language/ref/BlankSequence.html)s) can match tokens `{1, 2, 3}` as
+either `{a} -> {1}`, `{b} -> {2, 3}` or `{a} -> {1, 2}`, `{b} -> {3}`, yielding different outputs in a rule such as
+`{a__, b__} :> {{a}, {b}}`.
 
 To resolve this ambiguity, `"InstantiationIndex"` ordering function can be used. The specific order of instantiations
 depends on the system. In [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md), the
 order is the same as in [`ReplaceList`](https://reference.wolfram.com/language/ref/ReplaceList.html).
 
-If used in front of all other ordering functions, it attempts to only do a single instantiation for each sequence of
-tokens unless there are no other matches available.
+If this ordering is used first, the system only does a single instantiation for each sequence of tokens unless there are
+no other matches available.
