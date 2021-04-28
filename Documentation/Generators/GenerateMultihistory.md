@@ -2,8 +2,8 @@
 
 # GenerateMultihistory
 
-**`GenerateMultihistory`** is the most verbose and the most configurable generator. It can generate both single
-histories, full multihistories, as well as partial ones. It, however, requires one to specify all groups of parameters
+**`GenerateMultihistory`** is the most verbose and configurable generator. It can create both single histories, full
+multihistories, as well as partial ones. It, however, requires one to specify all groups of parameters
 ([system](/Documentation/Systems/README.md), [event selection](EventSelectionParameters.md), deduplication,
 [event ordering](EventOrderingFunctions.md) and [stopping conditions](StoppingConditionParameters.md)), nothing is
 implied automatically:

@@ -2,23 +2,6 @@
 
 # EventOrderingFunctions
 
-**`EventOrderingFunctions`** allows one to obtain the list of event ordering functions that can be used with a
-[computational system](/Documentation/Systems/README.md):
-
-```wl
-In[] := EventOrderingFunctions[MultisetSubstitutionSystem]
-Out[] = {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"}
-```
-
-The individual values returned correspond to partial sorting criteria supported by the system. They are used in the
-order they are passed to [generators](README.md). The first criterion is applied first. If ambiguities are remaining,
-the second criterion is used, etc.
-
-Note that in some cases, systems can impose additional restrictions on which combinations of ordering functions can be
-used.
-
-## Ordering Functions
-
 Multiple matches are sometimes possible to the same state of a computational system. For example, in the system below
 one can match any pair of numbers, many of which overlapping:
 
@@ -81,7 +64,22 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 For this reason, generators such as `GenerateSingleHistory` (not yet implemented) require specification of the ordering
 function as one of the arguments, as, without it, the evaluation will be ambiguous.
 
-### InputCount
+**`EventOrderingFunctions`** allows one to obtain the list of event ordering functions that can be used with a
+[computational system](/Documentation/Systems/README.md):
+
+```wl
+In[] := EventOrderingFunctions[MultisetSubstitutionSystem]
+Out[] = {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"}
+```
+
+The individual values returned correspond to partial sorting criteria supported by the system. They are used in the
+order they are passed to [generators](README.md). The first criterion is applied first. If ambiguities are remaining,
+the second criterion is used, etc.
+
+Note that in some cases, systems can impose additional restrictions on which combinations of ordering functions can be
+used.
+
+## InputCount
 
 As few tokens as possible will be matched. This is particularly useful for systems such as
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) where a single rule can match
@@ -90,7 +88,7 @@ different token counts.
 For example, the [multiset](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a___}` will match `{6, 7}`
 before `{1, 2, 3}` with this ordering function.
 
-### SortedInputTokenIndices
+## SortedInputTokenIndices
 
 As events are instantiated according to the ordering function, each token in a
 [`Multihistory`](/Documentation/Types/Multihistory/README.md) has an index corresponding to when that token was first
@@ -109,7 +107,7 @@ For example, the [multiset](/Documentation/Systems/MultisetSubstitutionSystem.md
 tokens with indices `{7, 1, 6}` before `{3, 2}` (since `1 < 2`), and `{4, 6, 2}` before `{5, 2, 6}` (since `2 == 2` and
 `4 < 5`).
 
-### InputTokenIndices
+## InputTokenIndices
 
 This function is similar to [`"SortedInputTokenIndices"`](#sortedinputtokenindices), except tokens are not sorted before
 being lexicographically compared. This corresponds to greedily matching the first rule input to a token with the
@@ -120,12 +118,12 @@ tokens with indices `{3, 2}` before `{7, 1, 6}` (since `3 < 7`), and `{3, 1, 2}`
 `1 < 4`). Similar to [`"SortedInputTokenIndices"`](#sortedinputtokenindices), `{1, 4}` and `{1, 4, 2}` will be consider
 equal by this function, and will be passed to the next one.
 
-### RuleIndex
+## RuleIndex
 
 This function attempts to use a rule with the smallest index for multi-rule systems. Only if there are no matches for
 the first rule, the second rule will be attempted, etc. It does not affect single-rule systems.
 
-### InstantiationIndex
+## InstantiationIndex
 
 In some cases, even the same sequence of input tokens can lead to different outputs. For example, the
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a__, b__}` can match
