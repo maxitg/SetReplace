@@ -5,7 +5,7 @@
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
       Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
 
-      (* These will not be necessary once we have properties. *)
+      (* This will not be necessary once we have properties. *)
       allExpressions[Multihistory[_, data_]] := Normal @ data["MultisetMultihistory"][[2]]["Expressions"];
     ),
     "tests" -> {
@@ -15,21 +15,18 @@
           GenerateMultihistory[AtomicStateSystem[a_ :> a + 1], {}, None, anEventOrdering, {"MaxEvents" -> 5}] @ 0],
 
         (* Rules *)
-        testUnevaluated[
-            GenerateMultihistory[AtomicStateSystem[##2], {}, None, anEventOrdering, {}] @ 1, {#}] & @@@
+        testUnevaluated[GenerateMultihistory[AtomicStateSystem[##2], {}, None, anEventOrdering, {}] @ 1, {#}] & @@@
           {{AtomicStateSystem::argx},
            {AtomicStateSystem::argx, 1, 2},
            {GenerateMultihistory::invalidAtomicStateRules, 1}},
 
         (* Ordering not yet supported *)
-        testUnevaluated[
-          GenerateMultihistory[AtomicStateSystem[1 -> 2], {}, None, {"RuleIndex"}, {}] @ 1,
-          {GenerateMultihistory::atomicStateEventOrderingNotImplemented}],
+        testUnevaluated[GenerateMultihistory[AtomicStateSystem[1 -> 2], {}, None, {"RuleIndex"}, {}] @ 1,
+                        {GenerateMultihistory::atomicStateEventOrderingNotImplemented}],
 
         (* Token deduplication not yet supported *)
-        testUnevaluated[
-          GenerateMultihistory[AtomicStateSystem[1 -> 2], {}, All, anEventOrdering, {}] @ 1,
-          {GenerateMultihistory::atomicStateTokenDeduplicationNotImplemented}],
+        testUnevaluated[GenerateMultihistory[AtomicStateSystem[1 -> 2], {}, All, anEventOrdering, {}] @ 1,
+                        {GenerateMultihistory::atomicStateTokenDeduplicationNotImplemented}],
 
         (* Parameters *)
         testUnevaluated[

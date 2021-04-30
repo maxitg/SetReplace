@@ -6,7 +6,7 @@ PackageExport["AtomicStateSystem"]
 
 SetUsage @ "
 AtomicStateSystem[{pattern$1 :> output$1, pattern$2 :> output$2, $$}] is a rewriting system that matches pattern$i to \
-the entire states and replaces them with output$i.
+entire states and replaces them with output$i.
 AtomicStateSystem should be used as the first argument in functions such as GenerateMultihistory.
 ";
 
@@ -63,6 +63,8 @@ toMultisetRules[atomicRules___] /; !CheckArguments[AtomicStateSystem[atomicRules
 
 toAtomicStateMultihistory[rules_][multisetMultihistory_] :=
   Multihistory[{AtomicStateSystem, 0}, <|"Rules" -> rules, "MultisetMultihistory" -> multisetMultihistory|>];
+
+(* Conversion to Multiset Multihistory *)
 
 declareTypeTranslation[toMultisetMultihistory, {AtomicStateSystem, 0}, {MultisetSubstitutionSystem, 0}];
 
