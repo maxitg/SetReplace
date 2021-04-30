@@ -114,6 +114,12 @@ tokens with indices `{3, 2}` before `{7, 1, 6}` (since `3 < 7`), and `{3, 1, 2}`
 `1 < 4`). Similar to [`"SortedInputTokenIndices"`](#sortedinputtokenindices), `{1, 4}` and `{1, 4, 2}` will be consider
 equal by this function, and will be passed to the next one.
 
+## InputIndex
+
+This is equivalent to [`"SortedInputTokenIndices"`](#sortedinputtokenindices) and
+[`"InputTokenIndices"`](#inputtokenindices) in systems that only take a single token as an input, such as
+[`AtomicStateSystem`](/Documentation/Systems/AtomicStateSystem.md).
+
 ## RuleIndex
 
 This function attempts to use rules in the same order they are specified in the argument for the computational system.

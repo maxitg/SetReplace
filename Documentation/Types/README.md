@@ -8,4 +8,5 @@ generation of data (such as the data about the evaluation of a
 The usual form for the type spec is `{system, version}`, e.g., `{MultisetSubstitutionSystem, 0}`.
 
 * [`Multihistory`](Multihistory/README.md) &mdash; a generic kind of types for computational systems:
+  * [`{AtomicStateSystem, 0}`](AtomicStateSystem0.md)
   * [`{MultisetSubstitutionSystem, 0}`](Multihistory/MultisetSubstitutionSystem0.md)
