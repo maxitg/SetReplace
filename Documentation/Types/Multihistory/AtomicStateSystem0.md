@@ -11,6 +11,6 @@ In[] := GenerateMultihistory[
 
 <img src="/Documentation/Images/AtomicStateMultihistory.png" width="424.2">
 
-Internally, `AtomicStateSystem` is implemented by running a special case of the
-[`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md), and its multihistory contains a
-corresponding [`{MultisetSubstitutionSystem, 0}`](MultisetSubstitutionSystem0.md), and it can be converted to it.
+Internally, `{AtomicStateSystem, 0}` is implemented by running a special case of the
+[`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md). `{AtomicStateSystem, 0}` contains
+a corresponding [`{MultisetSubstitutionSystem, 0}`](MultisetSubstitutionSystem0.md) and can be converted to it.
