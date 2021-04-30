@@ -237,16 +237,16 @@ parseRules[rawRules_] := throw[Failure["invalidMultisetRules", <|"rules" -> rawR
 parseRules[rawRules___] /; !CheckArguments[MultisetSubstitutionSystem[rawRules], 1] := throw[Failure[None, <||>]];
 
 parseTokenDeduplication[None] := None;
-declareMessage[General::tokenDeduplicationNotImplemented,
+declareMessage[General::multisetTokenDeduplicationNotImplemented,
                "Token deduplication is not implemented for Multiset Substitution System."];
-parseTokenDeduplication[_] := throw[Failure["tokenDeduplicationNotImplemented", <||>]];
+parseTokenDeduplication[_] := throw[Failure["multisetTokenDeduplicationNotImplemented", <||>]];
 
 $supportedEventOrdering =
   {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"};
 parseEventOrdering[ordering : $supportedEventOrdering] := ordering;
-declareMessage[General::eventOrderingNotImplemented,
+declareMessage[General::multisetEventOrderingNotImplemented,
                "Only " <> ToString[$supportedEventOrdering] <> " event ordering is implemented at this time."];
-parseEventOrdering[_] := throw[Failure["eventOrderingNotImplemented", <||>]];
+parseEventOrdering[_] := throw[Failure["multisetEventOrderingNotImplemented", <||>]];
 
 parseInit[init_List] := init;
 declareMessage[General::multisetInitNotList, "Multiset Substitution System init `init` should be a List."];

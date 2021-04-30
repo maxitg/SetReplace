@@ -8,6 +8,8 @@ PackageExport["EventSelectionParameters"]
 PackageExport["EventOrderingFunctions"]
 PackageExport["StoppingConditionParameters"]
 
+PackageScope["generateMultihistory"]
+
 PackageScope["declareMultihistoryGenerator"]
 PackageScope["initializeGenerators"]
 
