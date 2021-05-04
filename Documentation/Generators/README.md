@@ -9,7 +9,7 @@ we call tokens. Rewrites (which we call events) replace some of these tokens wit
 evaluate multiple branches of nondeterministic systems simultaneously. That is done by applying different events to the
 same tokens and keeping events and tokens instead of states in
 [`Multihistory`](/Documentation/Types/Multihistory/README.md) objects. We can reconstruct the states from that
-information afterwords.
+information afterwards.
 
 Most systems, however, cannot be evaluated completely. And there are multiple groups of parameters to control how to
 perform a partial evaluation. One needs to decide [which events to include](EventSelectionParameters.md), in

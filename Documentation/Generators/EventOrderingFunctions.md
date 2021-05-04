@@ -1,7 +1,7 @@
 # Event Ordering Functions
 
-Multiple matches are sometimes possible to the same state of a computational system. For example, in the system below
-one can match any pair of numbers, many of which overlapping:
+Multiple matches to the same state of a computational system are sometimes possible. For example, the system below can
+match any pair of numbers, many of which overlap:
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
@@ -24,7 +24,7 @@ regardless of the event ordering, so the event ordering is not important. For th
 event ordering in `GenerateFullMultihistory` (not yet implemented).
 
 However, if we evaluate a single history instead, we can get different histories for different orders (different orders
-are made here by rearranging the order of the init as
+are made here by rearranging the order of the initial state, as
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) only supports a single ordering
 function at the moment):
 
@@ -44,7 +44,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 This system, however, is [confluent](https://en.wikipedia.org/wiki/Confluence_(abstract_rewriting)). So, the final state
 will always be the same even if the histories are different, assuming the system is evaluated to completion.
 
-However, it is not the case for all systems. For example, see what happens if we change `+` to `-`:
+However, this is not the case for all systems. For example, see what happens if we change `+` to `-`:
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & /@
@@ -74,14 +74,11 @@ The individual values returned correspond to partial sorting criteria supported 
 order they are passed to [generators](README.md). The first criterion is applied first. If ambiguities are remaining,
 the second criterion is used, etc.
 
-Note that in some cases, systems can impose additional restrictions on which combinations of ordering functions can be
-used.
-
 ## InputCount
 
 As few tokens as possible will be matched. This is particularly useful for systems such as
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) where a single rule can match
-different token counts.
+multiple inputs with different token counts.
 
 For example, the [multiset](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a___}` will match `{6, 7}`
 before `{1, 2, 3}` with this ordering function.
@@ -98,12 +95,13 @@ lexicographically smallest result. This corresponds to effectively
 are considered equal by this ordering function. [`"InputCount"`](#inputcount) will need to be used to resolve the
 ambiguity.
 
-In other words, this ordering function attempts to match the oldest token possible. And if multiple matches remain after
-that it attempts to match the oldest of the remaining tokens, etc.
+In other words, this ordering function attempts to match the oldest token possible. And if multiple matches remain, it
+attempts to use the oldest of the remaining tokens, etc.
 
 For example, the [multiset](/Documentation/Systems/MultisetSubstitutionSystem.md) pattern `{a_, b_, c_}` will match
 tokens with indices `{7, 1, 6}` before `{3, 2}` (since `1 < 2`), and `{4, 6, 2}` before `{5, 2, 6}` (since `2 == 2` and
-`4 < 5`).
+`4 < 5`). However, `{3, 2, 1}` and `{3, 4, 1, 2}` will be considered equal by this ordering function as `{1, 2, 3}` is a
+prefix of `{1, 2, 3, 4}`.
 
 ## InputTokenIndices
 
@@ -118,8 +116,9 @@ equal by this function, and will be passed to the next one.
 
 ## RuleIndex
 
-This function attempts to use a rule with the smallest index for multi-rule systems. Only if there are no matches for
-the first rule, the second rule will be attempted, etc. It does not affect single-rule systems.
+This function attempts to use rules in the same order they are specified in the argument for the computational system.
+Only if there are no matches for the first rule, the second rule will be attempted, etc. It does not affect single-rule
+systems.
 
 ## InstantiationIndex
 
