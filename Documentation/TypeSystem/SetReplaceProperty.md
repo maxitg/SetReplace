@@ -1,5 +1,3 @@
-###### [Type System](README.md)
-
 # SetReplaceProperty
 
 **`SetReplaceProperty`** represents a *SetReplace* property. It has the property symbol as its single argument.

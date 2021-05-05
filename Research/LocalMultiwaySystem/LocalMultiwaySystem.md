@@ -62,8 +62,8 @@ In[] := ResourceFunction["MultiwaySystem"][
 <img src="Images/BasicGlobalMultiway.png" width="497">
 
 Now, what happens if we split the path in this graph into two different branches? In this case, the rules will lead to
-non-deterministic behavior&mdash;multiple choices of substitutions are possible&mdash;so the system explores all
-possible choices at once:
+nondeterministic behavior&mdash;multiple choices of substitutions are possible&mdash;so the system explores all possible
+choices at once:
 
 ```wl
 In[] := ResourceFunction["MultiwaySystem"][

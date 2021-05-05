@@ -1,5 +1,3 @@
-###### [Type System](README.md)
-
 # SetReplaceMethodImplementation
 
 **`SetReplaceMethodImplementation`** represents a (usually internal) implementation of either a translation or a
