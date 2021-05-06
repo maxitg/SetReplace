@@ -1,35 +1,22 @@
-#ifndef LIBSETREPLACE_MATCH_HPP_
-#define LIBSETREPLACE_MATCH_HPP_
+#ifndef LIBSETREPLACE_HYPERGRAPHMATCHER_HPP_
+#define LIBSETREPLACE_HYPERGRAPHMATCHER_HPP_
 
 #include <memory>
 #include <set>
 #include <utility>
 #include <vector>
 
-#include "Expression.hpp"
+#include "AtomsIndex.hpp"
 #include "IDTypes.hpp"
 #include "Rule.hpp"
+#include "TokenEventGraph.hpp"
 
 namespace SetReplace {
-/** @brief Match is a potential event that has not actualized yet.
- */
-struct Match {
-  /** @brief ID for the rule this match corresponds to.
-   */
-  RuleID rule;
-
-  /** @brief Expression matching the rule inputs.
-   */
-  std::vector<ExpressionID> inputExpressions;
-};
-
-using MatchPtr = std::shared_ptr<const Match>;
-
-/** @brief Matcher takes rules, atoms index, and a list of expressions, and returns all possible matches.
+/** @brief HypergraphMatcher takes rules, atoms index, and a list of tokens, and returns all possible matches.
  * @details This contains the lowest-level code, and the main functionality of the library. Uses atomsIndex to discover
- * expressions, thus if an expression is absent from the atomsIndex, it would not appear in any matches.
+ * tokens, thus if an token is absent from the atomsIndex, it would not appear in any matches.
  */
-class Matcher {
+class HypergraphMatcher {
  public:
   /** @brief Type of the error occurred during evaluation.
    */
@@ -41,9 +28,9 @@ class Matcher {
    */
   enum class OrderingFunction {
     First = 0,
-    SortedExpressionIDs = First,
-    ReverseSortedExpressionIDs = 1,
-    ExpressionIDs = 2,
+    SortedInputTokenIndices = First,
+    ReverseSortedInputTokenIndices = 1,
+    InputTokenIndices = 2,
     RuleIndex = 3,
     Any = 4,
     Last = 5
@@ -64,24 +51,23 @@ class Matcher {
   /** @brief Creates a new matcher object.
    * @details This is an O(1) operation, does not do any matching yet.
    */
-  Matcher(const std::vector<Rule>& rules,
-          AtomsIndex* atomsIndex,
-          const GetAtomsVectorFunc& getAtomsVector,
-          const GetExpressionsSeparationFunc& getExpressionsSeparation,
-          const OrderingSpec& orderingSpec,
-          const EventDeduplication& eventDeduplication,
-          unsigned int randomSeed = 0);
+  HypergraphMatcher(const std::vector<Rule>& rules,
+                    AtomsIndex* atomsIndex,
+                    const GetAtomsVectorFunc& getAtomsVector,
+                    const GetTokenSeparationFunc& getTokenSeparation,
+                    const OrderingSpec& orderingSpec,
+                    const EventDeduplication& eventDeduplication,
+                    unsigned int randomSeed = 0);
 
-  /** @brief Finds and adds to the index all matches involving specified expressions.
+  /** @brief Finds and adds to the index all matches involving specified tokens.
    * @details Calls shouldAbort() frequently, and throws Error::Aborted if that returns true. Otherwise might take
    * significant time to evaluate depending on the system.
    */
-  void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
-                                      const std::function<bool()>& shouldAbort);
+  void addMatchesInvolvingTokens(const std::vector<TokenID>& tokenIDs, const std::function<bool()>& shouldAbort);
 
-  /** @brief Removes matches containing specified expression IDs from the index.
+  /** @brief Removes matches containing specified token IDs from the index.
    */
-  void removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs);
+  void removeMatchesInvolvingTokens(const std::vector<TokenID>& tokenIDs);
 
   /** @brief Removes a single match from the index.
    */
@@ -96,14 +82,14 @@ class Matcher {
    */
   MatchPtr nextMatch() const;
 
-  /** @brief Returns the set of expression IDs matched in any match. */
+  /** @brief Returns the set of token IDs matched in any match. */
   std::vector<MatchPtr> allMatches() const;
 
-  /** @brief Yields the explicit atom vectors of the input expressions of a particular match.
+  /** @brief Yields the explicit atom vectors of the input tokens of a particular match.
    */
   std::vector<AtomsVector> matchInputAtomsVectors(const MatchPtr& match) const;
 
-  /** @brief Yields the explicit atom vectors of the output expressions of a particular match.
+  /** @brief Yields the explicit atom vectors of the output tokens of a particular match.
    * @details Newly created atoms are left as patterns.
    */
   std::vector<AtomsVector> matchOutputAtomsVectors(const MatchPtr& match) const;
@@ -114,4 +100,4 @@ class Matcher {
 };
 }  // namespace SetReplace
 
-#endif  // LIBSETREPLACE_MATCH_HPP_
+#endif  // LIBSETREPLACE_HYPERGRAPHMATCHER_HPP_
