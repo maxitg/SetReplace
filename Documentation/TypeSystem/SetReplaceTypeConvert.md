@@ -1,13 +1,14 @@
-###### [Type System](README.md)
-
 # SetReplaceTypeConvert
 
-**`SetReplaceTypeConvert`** allows one to convert one type (of, e.g., [`Multihistory`](Multihistory.md)) into another:
+**`SetReplaceTypeConvert`** allows one to convert one [type](/Documentation/Types/README.md) (of, e.g.,
+[`Multihistory`](/Documentation/Types/Multihistory/README.md)) into another:
 
 ```wl
 SetReplaceTypeConvert[newType][object]
 ```
 
-It can be used for optimization or to explicitly serialize an object that is, e.g., attached to a C++ instance.
+For example, one can convert a [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md)
+[multihistory](/Documentation/Types/Multihistory/README.md) to a legacy
+[`WolframModelEvolutionObject`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md):
 
-However, we have not implemented any types yet, so it's impossible to use this yet.
+<img src="/Documentation/Images/MultihistoryToWolframModelEvolutionObject.png" width="575.4">

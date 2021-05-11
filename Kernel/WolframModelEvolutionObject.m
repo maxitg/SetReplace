@@ -957,20 +957,14 @@ nestedToSingleAssociation[association_] :=
   Join @@ (Function[parentKey, KeyMap[StringJoin[parentKey, #] &, association[parentKey]]] /@ Keys[association])
 nestedToSingleAssociation[<||>] := <||>
 
-vertexDegreeQuantiles[g_Graph] := Quantile[VertexDegree[g], {0, 0.25, 0.50, 0.75, 1}]
-vertexDegreeQuantiles[g_Graph] /; VertexCount[g] == 0 := {0, 0, 0, 0, 0} (* Edge case for empty graphs *)
-
-graphFeatureAssociation[g_Graph] := <|
-    "VertexCount" -> VertexCount[g],
-    "EdgeCount" -> EdgeCount[g],
-    "VertexConnectivity" -> VertexConnectivity[UndirectedGraph[g]],
-    "VertexDegreesQuantiles" -> vertexDegreeQuantiles[g]
-|>;
+getNumericObjectProperties[obj_, caller_, boundary_] := <|# -> propertyEvaluate[True, boundary][obj, caller, #] & /@
+  {"EventsCount", "PartialGenerationsCount", "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
+    "CompleteGenerationsCount", "TerminationReason", "CausalGraph"}|>
 
 General::invalidFeatureSpec = "Feature specification `1` should be one of `2`, a list of them, or All.";
 General::unknownFeatureGroup = "Feature group `1` should be one of `2`";
 
-fromFeaturesSpec[caller_, All] := {"CausalGraph", "StructurePreservingFinalStateGraph"}
+fromFeaturesSpec[caller_, All] := {"StructurePreservingFinalStateGraph", "ObjectProperties"}
 fromFeaturesSpec[caller_, featuresSpecs_List] := featuresSpecs
 fromFeaturesSpec[caller_, featuresSpecs_String] := {featuresSpecs}
 fromFeaturesSpec[caller_, wrongInput_] := (Message[caller::invalidFeatureSpec,
@@ -982,16 +976,13 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     "FeatureAssociation",
     featuresSpecs_ : All] := With[{featureGroupList = fromFeaturesSpec[caller, featuresSpecs]},
   nestedToSingleAssociation @ AssociationThread[featureGroupList -> Replace[featureGroupList, {
-    "CausalGraph" -> graphFeatureAssociation[propertyEvaluate[True, boundary][obj, caller, "CausalGraph"]],
     "StructurePreservingFinalStateGraph" -> If[!propertyEvaluate[True, boundary][obj, caller, "MultiwayQ"],
-      graphFeatureAssociation @ HypergraphToGraph[#, "StructurePreserving"] & @
-        propertyEvaluate[True, boundary][obj, caller, "FinalState"]
+      <|"" -> HypergraphToGraph[#, "StructurePreserving"] & @
+        propertyEvaluate[True, boundary][obj, caller, "FinalState"]|>
     ,
-      Replace[
-        graphFeatureAssociation[Graph[{1 -> 2}]],
-        {_ ? NumberQ -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}]},
-        Infinity]
+      <|"" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}]|>
     ],
+    "ObjectProperties" -> getNumericObjectProperties[obj, caller, boundary],
     other_ :> (Message[caller::unknownFeatureGroup, other, fromFeaturesSpec[caller, All]]; Throw[$Failed])
   }, {1}]]
 ]

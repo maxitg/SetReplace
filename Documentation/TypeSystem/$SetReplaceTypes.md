@@ -1,10 +1,8 @@
-###### [Type System](README.md)
-
 # $SetReplaceTypes
 
-**`$SetReplaceTypes`** gives the list of all types defined in *SetReplace*:
+**`$SetReplaceTypes`** gives the list of all [types](/Documentation/Types/README.md) defined in *SetReplace*:
 
 ```wl
 In[] := $SetReplaceTypes
-Out[] = {}
+Out[] = {{MultisetSubstitutionSystem, 0}, {WolframModelEvolutionObject, 2}}
 ```

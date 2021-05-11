@@ -9,15 +9,11 @@ lsfilesOptions=(
   --others           # untracked files
   --exclude-standard # exclude .gitignore
   '*'
-  ':(exclude)*.png'
-  ':(exclude)Dependencies/*'
-  ':(exclude)libSetReplace/WolframHeaders/*'
-  ':(exclude)*.xcodeproj/*' # Xcode manages these automatically
 )
 
-mapfile -t filesToLint < <(LC_ALL=C comm -13 <(git ls-files --deleted) <(git ls-files "${lsfilesOptions[@]}"))
-
 formatInPlace=0
+formatOnly=0
+filesToLint=()
 
 for arg in "$@"; do
   case $arg in
@@ -25,23 +21,42 @@ for arg in "$@"; do
     formatInPlace=1
     shift
     ;;
+  -f)
+    formatOnly=1
+    shift
+    ;;
   *)
-    echo "Argument $arg is not recognized."
-    echo
-    echo "Usage: ./lint.sh [-i]"
-    echo "Analyze the C++ code with clang-format and cpplint."
-    echo
-    echo "Options:"
-    echo "  -i  Inplace edit files with clang-format."
-    exit 1
+    if [ ! -f "$arg" ]; then
+      echo "Argument $arg is not recognized."
+      echo
+      echo "Usage: ./lint.sh [-i] [-f] [FILE]..."
+      echo "Analyze files with clang-format, cpplint, shfmt, shellcheck, markdownlint and custom scripts."
+      echo "If no files are passed as arguments, all files are analyzed."
+      echo
+      echo "Options:"
+      echo "  -i  Edit files in place if possible."
+      echo "  -f  Only perform formatting and skip linting. Always fixes all found errors if used with -i."
+      exit 2
+    else
+      filesToLint+=("$arg")
+    fi
     ;;
   esac
 done
 
+if [ ${#filesToLint[@]} -eq 0 ]; then
+  mapfile -t filesToLint < <(LC_ALL=C comm -13 <(git ls-files --deleted) <(git ls-files "${lsfilesOptions[@]}"))
+fi
+
 exitStatus=0
 
 for file in "${filesToLint[@]}"; do
-  if [[ "$file" == *.cpp || "$file" == *.hpp || "$file" == *.h ]]; then
+  if [[ "$file" == *.png || \
+    "$file" == Dependencies/* || \
+    "$file" == libSetReplace/WolframHeaders/* || \
+    "$file" == *.xcodeproj/* ]]; then
+    :
+  elif [[ "$file" == *.cpp || "$file" == *.hpp || "$file" == *.h ]]; then
     cppFiles+=("$file")
   elif grep -rIl '^#![[:blank:]]*/usr/bin/env bash' "$file" >/dev/null; then
     # Some bash files don't use .sh extension, so find by shebang
@@ -84,20 +99,16 @@ for file in "${bashFiles[@]}"; do
   fi
 done
 
-for file in "${markdownFiles[@]}"; do
-  if [ $formatInPlace -eq 1 ]; then
-    markdownlint -f "$file" || :
-  else
-    markdownlint "$file" || exitStatus=1
-  fi
-done
-
 for file in "${remainingFiles[@]}"; do
   formatWithCommand ./scripts/whitespaceFormat.sh "$file"
 done
 
 if [ $exitStatus -eq 1 ]; then
   echo "Found formatting errors. Run ./lint.sh -i to automatically fix by applying the printed patch."
+fi
+
+if [ $formatOnly -eq 1 ]; then
+  exit $exitStatus
 fi
 
 # Linting
@@ -110,11 +121,19 @@ for file in "${bashFiles[@]}"; do
   shellcheck "$file" || exitStatus=1
 done
 
+for file in "${markdownFiles[@]}"; do
+  if [ $formatInPlace -eq 1 ]; then
+    markdownlint -f "$file" || :
+  else
+    markdownlint "$file" || exitStatus=1
+  fi
+done
+
 widthLimit=120
 checkLineWidthOutput=$(
   for file in "${remainingFiles[@]}" "${bashFiles[@]}"; do
     ./scripts/checkLineWidth.sh "$file" "$widthLimit"
-  done
+  done || :
 )
 if [ -n "$checkLineWidthOutput" ]; then
   exitStatus=1
