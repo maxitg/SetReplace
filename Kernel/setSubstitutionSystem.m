@@ -8,8 +8,6 @@ PackageExport["$SetReplaceMethods"]
    produce a WolframModelEvolutionObject that contains information about evolution of the network step-by-step.
    All SetReplace* and WolframModel functions use argument checks and implementation done here. *)
 
-PackageScope["$eventOrderingFunctions"]
-
 PackageScope["setReplaceRulesQ"]
 PackageScope["stepCountQ"]
 PackageScope["multiwayEventSelectionFunctionQ"]
@@ -37,6 +35,10 @@ PackageScope["$globalSpacelike"]
 PackageScope["$spacelike"]
 
 PackageScope["$sameInputSetIsomorphicOutputs"]
+
+PackageScope["$eventOrderingFunctions"]
+PackageScope["parseEventOrderingFunction"]
+PackageScope["simpleRuleQ"]
 
 (* Termination reason values *)
 
@@ -185,13 +187,13 @@ setSubstitutionSystem[
 (* EventOrderingFunction is valid *)
 
 $eventOrderingFunctions = <|
-  "OldestEdge" -> {$sortedExpressionIDs, $forward},
+  "OldestEdge" -> {$sortedExpressionIDs, $forward},  (* SortedInputTokenIndices *)
   "LeastOldEdge" -> {$sortedExpressionIDs, $backward},
   "LeastRecentEdge" -> {$reverseSortedExpressionIDs, $forward},
   "NewestEdge" -> {$reverseSortedExpressionIDs, $backward},
-  "RuleOrdering" -> {$expressionIDs, $forward},
+  "RuleOrdering" -> {$expressionIDs, $forward},  (* InputTokenIndices *)
   "ReverseRuleOrdering" -> {$expressionIDs, $backward},
-  "RuleIndex" -> {$ruleIndex, $forward},
+  "RuleIndex" -> {$ruleIndex, $forward},  (* RuleIndex *)
   "ReverseRuleIndex" -> {$ruleIndex, $backward},
   "Random" -> Nothing, (* Random is done automatically in C++ if no more sorting is available *)
   "Any" -> {$any, $forward} (* OrderingDirection here doesn't do anything *)

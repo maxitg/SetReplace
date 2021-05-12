@@ -4,6 +4,26 @@ PackageImport["GeneralUtilities`"]
 
 PackageScope["setSubstitutionSystem$cpp"]
 
+PackageScope["cpp$setInitialize"]
+PackageScope["cpp$setReplace"]
+PackageScope["cpp$setExpressions"]
+PackageScope["cpp$setEvents"]
+PackageScope["cpp$maxCompleteGeneration"]
+PackageScope["cpp$terminationReason"]
+
+PackageScope["encodeNestedLists"]
+PackageScope["$orderingFunctionCodes"]
+
+PackageScope["ruleAtoms"]
+PackageScope["ruleAtomsToIndices"]
+PackageScope["decodeAtomLists"]
+PackageScope["decodeEvents"]
+
+PackageScope["$maxInt64"]
+PackageScope["$maxUInt32"]
+
+PackageScope["$terminationReasonCodes"]
+
 importLibSetReplaceFunction[
   "setInitialize" -> cpp$setInitialize,
   {Integer,                  (* set ID *)
