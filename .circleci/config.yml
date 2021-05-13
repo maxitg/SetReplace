@@ -192,7 +192,9 @@ jobs:
 
       - run:
           name: Install Dependencies
-          command: choco install mingw make cmake.install --installargs '"ADD_CMAKE_TO_PATH=User"'
+          command: |
+            choco install mingw make cmake.install
+            echo "export PATH=\"/c/Program Files/CMake/bin:$PATH\"" >> $BASH_ENV
 
       - run:
           name: Build
