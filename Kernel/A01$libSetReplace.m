@@ -41,7 +41,7 @@ SetReplace::cppRedistributable =
     "BaseStyle -> {\"URL\"}, " <>
     "HyperlinkAction -> \"Recycled\"}, " <>
     "\"HyperlinkTemplate\"]\) " <>
-  "that you have Microsoft Visual C++ Redistributable installed.";
+  "that Microsoft Visual C++ Redistributable is installed.";
 
 importLibSetReplaceFunction[cppFunctionName_ -> symbol_, argumentTypes_, outputType_] := (
   symbol = If[$libraryFile =!= $Failed,
