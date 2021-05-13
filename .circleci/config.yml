@@ -191,13 +191,8 @@ jobs:
       - checkout
 
       - run:
-          name: Install CMake
-          command: |
-            cmakeURL="https://github.com/Kitware/CMake/releases/download/v3.18.6/cmake-3.18.6-win64-x64.zip"
-            curl -L --output cmake.zip $cmakeURL
-            unzip -q cmake.zip
-            cmakeDir=$(dir -1 | findstr -i cmake-*)
-            echo "export PATH=\"$(pwd)/$cmakeDir/bin:$PATH\"" >> $BASH_ENV
+          name: Install Dependencies
+          command: choco install mingw make cmake.install --installargs '"ADD_CMAKE_TO_PATH=User"'
 
       - run:
           name: Build

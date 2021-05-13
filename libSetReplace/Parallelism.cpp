@@ -14,7 +14,6 @@ struct ParallelismBase {
 
   int numHardwareThreads_;
   int threadsInUse_;
-  std::mutex reservationMutex_;
 };
 
 template <HardwareType>
@@ -23,14 +22,13 @@ class Parallelism;
 template <>
 class Parallelism<HardwareType::StdCpu> : private ParallelismBase {
  public:
-  Parallelism() noexcept : ParallelismBase(static_cast<int>(std::thread::hardware_concurrency())) {}
+  Parallelism() noexcept : ParallelismBase(1) {}
 
   [[nodiscard]] bool isAvailable() const { return numHardwareThreads_ >= 2; }
 
   [[nodiscard]] int numThreadsAvailable() const { return isAvailable() ? numHardwareThreads_ - threadsInUse_ : 0; }
 
   [[nodiscard]] int acquireThreads(const int& requestedNumThreads) {
-    std::lock_guard lock(reservationMutex_);
     auto numThreadsToReserve = std::min(requestedNumThreads, numThreadsAvailable());
     if (numThreadsToReserve <= 1) numThreadsToReserve = 0;
     threadsInUse_ += numThreadsToReserve;
@@ -38,7 +36,6 @@ class Parallelism<HardwareType::StdCpu> : private ParallelismBase {
   }
 
   void releaseThreads(const int& numThreadsToReturn) {
-    std::lock_guard lock(reservationMutex_);
     threadsInUse_ -= numThreadsToReturn;
   }
 
