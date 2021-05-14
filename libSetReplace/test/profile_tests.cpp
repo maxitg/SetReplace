@@ -3,73 +3,78 @@
 #include <utility>
 #include <vector>
 
-#include "Set.hpp"
+#include "HypergraphSubstitutionSystem.hpp"
 
 namespace SetReplace {
 
 constexpr auto doNotAbort = []() { return false; };
 
-Matcher::OrderingSpec orderingSpec = {
-    {Matcher::OrderingFunction::SortedExpressionIDs, Matcher::OrderingDirection::Normal},
-    {Matcher::OrderingFunction::ReverseSortedExpressionIDs, Matcher::OrderingDirection::Normal},
-    {Matcher::OrderingFunction::ExpressionIDs, Matcher::OrderingDirection::Normal},
-    {Matcher::OrderingFunction::RuleIndex, Matcher::OrderingDirection::Normal}};
+HypergraphMatcher::OrderingSpec orderingSpec = {
+    {HypergraphMatcher::OrderingFunction::SortedInputTokenIndices, HypergraphMatcher::OrderingDirection::Normal},
+    {HypergraphMatcher::OrderingFunction::ReverseSortedInputTokenIndices, HypergraphMatcher::OrderingDirection::Normal},
+    {HypergraphMatcher::OrderingFunction::InputTokenIndices, HypergraphMatcher::OrderingDirection::Normal},
+    {HypergraphMatcher::OrderingFunction::RuleIndex, HypergraphMatcher::OrderingDirection::Normal}};
 
-TEST(Set, profileSingleInputRule) {
-  Set set({{{{-1, -2}}, {{-1, -3}, {-1, -3}, {-3, -2}}}}, {{1, 1}}, 1, orderingSpec, Matcher::EventDeduplication::None);
-  EXPECT_EQ(set.replace(Set::StepSpecification{1000}, doNotAbort), 1000);
+TEST(HypergraphSubstitutionSystem, profileSingleInputRule) {
+  HypergraphSubstitutionSystem system({{{{-1, -2}}, {{-1, -3}, {-1, -3}, {-3, -2}}}},
+                                      {{1, 1}},
+                                      1,
+                                      orderingSpec,
+                                      HypergraphMatcher::EventDeduplication::None);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{1000}, doNotAbort), 1000);
 }
 
-TEST(Set, profileMediumRule) {
-  Set set({{{{-1, -2, -3}, {-4, -3, -5}, {-3, -6}},
-            {{-6, -7, -8}, {-6, -9, -10}, {-11, -8, -10}, {-5, -2, -9}, {-9, -9}, {-1, -9}, {-7, -5}, {-8, -5}}}},
-          {{1, 1, 1}, {1, 1, 1}, {1, 1}},
-          1,
-          orderingSpec,
-          Matcher::EventDeduplication::None);
-  EXPECT_EQ(set.replace(Set::StepSpecification{5000}, doNotAbort), 5000);
+TEST(HypergraphSubstitutionSystem, profileMediumRule) {
+  HypergraphSubstitutionSystem system(
+      {{{{-1, -2, -3}, {-4, -3, -5}, {-3, -6}},
+        {{-6, -7, -8}, {-6, -9, -10}, {-11, -8, -10}, {-5, -2, -9}, {-9, -9}, {-1, -9}, {-7, -5}, {-8, -5}}}},
+      {{1, 1, 1}, {1, 1, 1}, {1, 1}},
+      1,
+      orderingSpec,
+      HypergraphMatcher::EventDeduplication::None);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{5000}, doNotAbort), 5000);
 }
 
-TEST(Set, profileSequentialRule) {
-  Set set({{{{-1, -2, -2}, {-3, -2, -4}}, {{-5, -4, -4}, {-4, -3, -5}, {-3, -5, -1}}}},
-          {{1, 1, 1}, {1, 1, 1}},
-          1,
-          orderingSpec,
-          Matcher::EventDeduplication::None);
-  EXPECT_EQ(set.replace(Set::StepSpecification{10000}, doNotAbort), 10000);
+TEST(HypergraphSubstitutionSystem, profileSequentialRule) {
+  HypergraphSubstitutionSystem system({{{{-1, -2, -2}, {-3, -2, -4}}, {{-5, -4, -4}, {-4, -3, -5}, {-3, -5, -1}}}},
+                                      {{1, 1, 1}, {1, 1, 1}},
+                                      1,
+                                      orderingSpec,
+                                      HypergraphMatcher::EventDeduplication::None);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{10000}, doNotAbort), 10000);
 }
 
-TEST(Set, profileLargeRule) {
-  Set set({{{{-1, -2}, {-2, -1}, {-1, -3}, {-2, -3}, {-3, -1}, {-3, -2}},
-            {{-1, -2},
-             {-2, -1},
-             {-1, -3},
-             {-2, -3},
-             {-3, -1},
-             {-3, -2},
-             {-1, -4},
-             {-2, -4},
-             {-3, -4},
-             {-4, -1},
-             {-4, -2},
-             {-4, -3}}}},
-          {{1, 1}, {1, 1}, {1, 1}, {1, 1}, {1, 1}, {1, 1}},
-          1,
-          orderingSpec,
-          Matcher::EventDeduplication::None);
-  EXPECT_EQ(set.replace(Set::StepSpecification{4}, doNotAbort), 4);
+TEST(HypergraphSubstitutionSystem, profileLargeRule) {
+  HypergraphSubstitutionSystem system({{{{-1, -2}, {-2, -1}, {-1, -3}, {-2, -3}, {-3, -1}, {-3, -2}},
+                                        {{-1, -2},
+                                         {-2, -1},
+                                         {-1, -3},
+                                         {-2, -3},
+                                         {-3, -1},
+                                         {-3, -2},
+                                         {-1, -4},
+                                         {-2, -4},
+                                         {-3, -4},
+                                         {-4, -1},
+                                         {-4, -2},
+                                         {-4, -3}}}},
+                                      {{1, 1}, {1, 1}, {1, 1}, {1, 1}, {1, 1}, {1, 1}},
+                                      1,
+                                      orderingSpec,
+                                      HypergraphMatcher::EventDeduplication::None);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{4}, doNotAbort), 4);
 }
 
-TEST(Set, profileExponentialMatchCountRule) {
-  Set set({{{{-1}, {-1}, {-1}}, {{-1}, {-1}, {-1}, {-1}}}},
-          {{1}, {1}, {1}},
-          1,
-          orderingSpec,
-          Matcher::EventDeduplication::None);
-  EXPECT_EQ(set.replace(Set::StepSpecification{18}, doNotAbort), 18);
+TEST(HypergraphSubstitutionSystem, profileExponentialMatchCountRule) {
+  HypergraphSubstitutionSystem system({{{{-1}, {-1}, {-1}}, {{-1}, {-1}, {-1}, {-1}}}},
+                                      {{1}, {1}, {1}},
+                                      1,
+                                      orderingSpec,
+                                      HypergraphMatcher::EventDeduplication::None);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{18}, doNotAbort), 18);
 }
 
-TEST(Set, profileCAEmulator) {
+TEST(HypergraphSubstitutionSystem, profileCAEmulator) {
   Rule rule1 = {
       {{-18, -18, -3}, {-3, -19, -3}, {-3, -3, -3, -3, -3}},
       {{-1, -1, -1, -12},
@@ -295,23 +300,24 @@ TEST(Set, profileCAEmulator) {
                           std::move(rule9),
                           std::move(rule10)};
 
-  std::vector<AtomsVector> initialExpressions = {{3, 3, 3, 6},
-                                                 {3, 3, 7, 3},
-                                                 {3, 5, 5},
-                                                 {3, 3, 1},
-                                                 {3, 2, 3},
-                                                 {3, 3, 3, 3, 3, 3},
-                                                 {4, 6, 6},
-                                                 {4, 4, 4, 4, 4, 4},
-                                                 {8, 7, 7},
-                                                 {8, 8, 8, 8, 8, 8},
-                                                 {1, 4, 1},
-                                                 {1, 1, 1, 1, 1},
-                                                 {2, 2, 8},
-                                                 {2, 2}};
+  std::vector<AtomsVector> initialTokens = {{3, 3, 3, 6},
+                                            {3, 3, 7, 3},
+                                            {3, 5, 5},
+                                            {3, 3, 1},
+                                            {3, 2, 3},
+                                            {3, 3, 3, 3, 3, 3},
+                                            {4, 6, 6},
+                                            {4, 4, 4, 4, 4, 4},
+                                            {8, 7, 7},
+                                            {8, 8, 8, 8, 8, 8},
+                                            {1, 4, 1},
+                                            {1, 1, 1, 1, 1},
+                                            {2, 2, 8},
+                                            {2, 2}};
 
-  Set set(rules, initialExpressions, 1, orderingSpec, Matcher::EventDeduplication::None);
-  EXPECT_EQ(set.replace(Set::StepSpecification{250}, doNotAbort), 250);
+  HypergraphSubstitutionSystem system(
+      rules, initialTokens, 1, orderingSpec, HypergraphMatcher::EventDeduplication::None);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{250}, doNotAbort), 250);
 }
 
 }  // namespace SetReplace

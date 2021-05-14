@@ -1,20 +1,21 @@
-#ifndef LIBSETREPLACE_SET_HPP_
-#define LIBSETREPLACE_SET_HPP_
+#ifndef LIBSETREPLACE_HYPERGRAPHSUBSTITUTIONSYSTEM_HPP_
+#define LIBSETREPLACE_HYPERGRAPHSUBSTITUTIONSYSTEM_HPP_
 
 #include <functional>
 #include <limits>
 #include <memory>
 #include <vector>
 
-#include "Event.hpp"
-#include "Expression.hpp"
-#include "Match.hpp"
+#include "AtomsIndex.hpp"
+#include "HypergraphMatcher.hpp"
 #include "Rule.hpp"
+#include "TokenEventGraph.hpp"
 
 namespace SetReplace {
-/** @brief Set is the set of expressions (i.e., the graph, the Universe) that is being evolved.
+/** @brief HypergraphSubstitutionSystem is a kind of the multiset substitution system where tokens are ordered sequences
+ * of atoms.
  */
-class Set {
+class HypergraphSubstitutionSystem {
  public:
   /** @brief Type of the error occurred during evaluation.
    */
@@ -23,29 +24,29 @@ class Set {
     DisconnectedInputs,
     NonPositiveAtoms,
     AtomCountOverflow,
-    FinalStateStepSpecificationForMultiwaySystem
+    FinalStateStepSpecificationForMultihistory
   };
 
   static constexpr int64_t stepLimitDisabled = std::numeric_limits<int64_t>::max();
 
   /** @brief Specification of conditions upon which to stop evaluation.
-   * @details Each of these is UpTo, i.e., the evolution is terminated when the first of these, fixed point, or an abort
-   * is reached.
+   * @details Each of these is UpTo, i.e., the evaluation is terminated when the first of these, fixed point, or an
+   * abort is reached.
    * @var maxEvents Total number of events to produce.
-   * @var maxGenerationsLocal Total number of generations. Local means the expressions of max generation will never even
+   * @var maxGenerationsLocal Total number of generations. Local means the tokens of max generation will never even
    * be matched, which means the evaluation order might be different than if the equivalent number of events is
    * specified, and non-default evaluation order is used.
    * @var maxFinalAtoms The evaluation will be aborted at the first attempt to apply an event, which will cause the
    * number of atoms in the final state to go over the limit.
-   * @var maxFinalAtomDegree Same as above, but for the maximum number of expressions a single atom is involved in.
-   * @var maxFinalExpressions Same as for the atoms above, but for expressions.
+   * @var maxFinalAtomDegree Same as above, but for the maximum number of tokens a single atom is involved in.
+   * @var maxFinalTokens Same as for the atoms above, but for tokens.
    */
   struct StepSpecification {
     int64_t maxEvents = stepLimitDisabled;
     int64_t maxGenerationsLocal = stepLimitDisabled;
     int64_t maxFinalAtoms = stepLimitDisabled;
     int64_t maxFinalAtomDegree = stepLimitDisabled;
-    int64_t maxFinalExpressions = stepLimitDisabled;
+    int64_t maxFinalTokens = stepLimitDisabled;
   };
 
   /** @brief Status of evaluation / termination reason if evaluation is finished.
@@ -56,46 +57,46 @@ class Set {
     MaxGenerationsLocal = 2,
     MaxFinalAtoms = 3,
     MaxFinalAtomDegree = 4,
-    MaxFinalExpressions = 5,
-    FixedPoint = 6,
+    MaxFinalTokens = 5,
+    Complete = 6,
     Aborted = 7
   };
 
-  /** @brief Creates a new set with a given set of evolution rules, and initial condition.
-   * @param rules substitution rules used for evolution. Note, these rules cannot be changed.
-   * @param initialExpressions initial condition. It will be lazily indexed before the first replacement.
-   * @param maxDestroyerEvents maximum number of allowed destroyer events per expression.
+  /** @brief Creates a new hypergraph system with given evaluation rules, and initial condition.
+   * @param rules substitution rules used for evaluation. Note, these rules cannot be changed.
+   * @param initialTokens initial state. It will be lazily indexed before the first replacement.
+   * @param maxDestroyerEvents maximum number of allowed destroyer events per token.
    * @param orderingSpec in which order to apply events.
    * @param eventIdentification defines which events should be treated as identical.
    * @param randomSeed the seed to use for selecting matches in random evaluation case.
    */
-  Set(const std::vector<Rule>& rules,
-      const std::vector<AtomsVector>& initialExpressions,
-      uint64_t maxDestroyerEvents,
-      const Matcher::OrderingSpec& orderingSpec,
-      const Matcher::EventDeduplication& eventIdentification,
-      unsigned int randomSeed = 0);
+  HypergraphSubstitutionSystem(const std::vector<Rule>& rules,
+                               const std::vector<AtomsVector>& initialTokens,
+                               uint64_t maxDestroyerEvents,
+                               const HypergraphMatcher::OrderingSpec& orderingSpec,
+                               const HypergraphMatcher::EventDeduplication& eventIdentification,
+                               unsigned int randomSeed = 0);
 
-  /** @brief Perform a single substitution, create the corresponding event, and output expressions.
-   * @param shouldAbort function that should return true if Wolfram Language abort is in progress.
+  /** @brief Perform a single substitution, create the corresponding event, and output tokens.
+   * @param shouldAbort function that should return true if abort is requested.
    * @return 1 if substitution was made, 0 if no matches were found.
    */
   int64_t replaceOnce(const std::function<bool()>& shouldAbort);
 
-  /** @brief Run replaceOnce() stepSpec.maxEvents times, or until the next expression violates constraints imposed by
+  /** @brief Run replaceOnce() stepSpec.maxEvents times, or until the next token violates constraints imposed by
    * stepSpec.
-   * @param shouldAbort function that should return true if Wolfram Language abort is in progress.
+   * @param shouldAbort function that should return true if abort is requested.
    * @return The number of subtitutions made, could be between 0 and stepSpec.maxEvents.
    */
   int64_t replace(const StepSpecification& stepSpec, const std::function<bool()>& shouldAbort);
 
-  /** @brief List of all expressions in the set, past and present.
+  /** @brief List of all tokens in the system, past and present.
    */
-  std::vector<AtomsVector> expressions() const;
+  std::vector<AtomsVector> tokens() const;
 
   /** @brief Returns the largest generation that has both been reached, and has no matches that would produce
-   * expressions with that or lower generation.
-   * @details Takes O(matches count) + as long as it would take to do the next step (because new expressions need to be
+   * tokens with that or lower generation.
+   * @details Takes O(matches count) + as long as it would take to do the next step (because new tokens need to be
    * indexed).
    */
   Generation maxCompleteGeneration(const std::function<bool()>& shouldAbort);
@@ -115,4 +116,4 @@ class Set {
 };
 }  // namespace SetReplace
 
-#endif  // LIBSETREPLACE_SET_HPP_
+#endif  // LIBSETREPLACE_HYPERGRAPHSUBSTITUTIONSYSTEM_HPP_
