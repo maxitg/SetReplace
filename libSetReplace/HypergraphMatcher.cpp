@@ -1,4 +1,4 @@
-#include "Match.hpp"
+#include "HypergraphMatcher.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -22,7 +22,7 @@ namespace SetReplace {
 namespace {
 class MatchComparator {
  private:
-  const Matcher::OrderingSpec orderingSpec_;
+  const HypergraphMatcher::OrderingSpec orderingSpec_;
 
   template <typename T>
   static int compare(T a, T b) {
@@ -30,16 +30,16 @@ class MatchComparator {
   }
 
  public:
-  explicit MatchComparator(Matcher::OrderingSpec orderingSpec) : orderingSpec_(std::move(orderingSpec)) {}
+  explicit MatchComparator(HypergraphMatcher::OrderingSpec orderingSpec) : orderingSpec_(std::move(orderingSpec)) {}
 
   bool operator()(const MatchPtr& a, const MatchPtr& b) const {
     for (const auto& ordering : orderingSpec_) {
       int comparison = compare(a, b, ordering.first);
       if (comparison != 0) {
         switch (ordering.second) {
-          case Matcher::OrderingDirection::Normal:
+          case HypergraphMatcher::OrderingDirection::Normal:
             break;
-          case Matcher::OrderingDirection::Reverse:
+          case HypergraphMatcher::OrderingDirection::Reverse:
             comparison = -comparison;
             break;
           default:
@@ -51,18 +51,18 @@ class MatchComparator {
     return false;
   }
 
-  static int compare(const MatchPtr& a, const MatchPtr& b, const Matcher::OrderingFunction& ordering) {
+  static int compare(const MatchPtr& a, const MatchPtr& b, const HypergraphMatcher::OrderingFunction& ordering) {
     switch (ordering) {
-      case Matcher::OrderingFunction::SortedExpressionIDs:
+      case HypergraphMatcher::OrderingFunction::SortedInputTokenIndices:
         return compareSortedIDs(a, b, false);
 
-      case Matcher::OrderingFunction::ReverseSortedExpressionIDs:
+      case HypergraphMatcher::OrderingFunction::ReverseSortedInputTokenIndices:
         return compareSortedIDs(a, b, true);
 
-      case Matcher::OrderingFunction::ExpressionIDs:
+      case HypergraphMatcher::OrderingFunction::InputTokenIndices:
         return compareUnsortedIDs(a, b);
 
-      case Matcher::OrderingFunction::RuleIndex:
+      case HypergraphMatcher::OrderingFunction::RuleIndex:
         return compare(a->rule, b->rule);
 
       default:
@@ -70,7 +70,7 @@ class MatchComparator {
     }
   }
 
-  static int compareVectors(const std::vector<ExpressionID>& first, const std::vector<ExpressionID>& second) {
+  static int compareVectors(const std::vector<TokenID>& first, const std::vector<TokenID>& second) {
     const auto mismatchingIterators = std::mismatch(first.begin(), first.end(), second.begin(), second.end());
     if (mismatchingIterators.first != first.end() && mismatchingIterators.second != second.end()) {
       return compare(*mismatchingIterators.first, *mismatchingIterators.second);
@@ -80,21 +80,21 @@ class MatchComparator {
   }
 
   static int compareSortedIDs(const MatchPtr& a, const MatchPtr& b, const bool reverseOrder) {
-    std::vector<ExpressionID> aExpressions(a->inputExpressions.begin(), a->inputExpressions.end());
-    std::vector<ExpressionID> bExpressions(b->inputExpressions.begin(), b->inputExpressions.end());
+    std::vector<TokenID> aTokens(a->inputTokens.begin(), a->inputTokens.end());
+    std::vector<TokenID> bTokens(b->inputTokens.begin(), b->inputTokens.end());
 
     if (!reverseOrder) {
-      std::sort(aExpressions.begin(), aExpressions.end(), std::less<>());
-      std::sort(bExpressions.begin(), bExpressions.end(), std::less<>());
+      std::sort(aTokens.begin(), aTokens.end(), std::less<>());
+      std::sort(bTokens.begin(), bTokens.end(), std::less<>());
     } else {
-      std::sort(aExpressions.begin(), aExpressions.end(), std::greater<>());
-      std::sort(bExpressions.begin(), bExpressions.end(), std::greater<>());
+      std::sort(aTokens.begin(), aTokens.end(), std::greater<>());
+      std::sort(bTokens.begin(), bTokens.end(), std::greater<>());
     }
-    return compareVectors(aExpressions, bExpressions);
+    return compareVectors(aTokens, bTokens);
   }
 
   static int compareUnsortedIDs(const MatchPtr& a, const MatchPtr& b) {
-    return compareVectors(a->inputExpressions, b->inputExpressions);
+    return compareVectors(a->inputTokens, b->inputTokens);
   }
 };
 
@@ -104,8 +104,8 @@ class MatchHasher {
   size_t operator()(const MatchPtr& ptr) const {
     std::size_t result = 0;
     hash_combine(&result, ptr->rule);
-    for (const auto expression : ptr->inputExpressions) {
-      hash_combine(&result, expression);
+    for (const auto token : ptr->inputTokens) {
+      hash_combine(&result, token);
     }
     return result;
   }
@@ -122,24 +122,23 @@ class MatchHasher {
 class MatchEquality {
  public:
   size_t operator()(const MatchPtr& a, const MatchPtr& b) const {
-    if (a->rule != b->rule || a->inputExpressions.size() != b->inputExpressions.size()) {
+    if (a->rule != b->rule || a->inputTokens.size() != b->inputTokens.size()) {
       return false;
     }
 
-    const auto mismatchedIterators = std::mismatch(
-        a->inputExpressions.begin(), a->inputExpressions.end(), b->inputExpressions.begin(), b->inputExpressions.end());
-    return mismatchedIterators.first == a->inputExpressions.end() &&
-           mismatchedIterators.second == b->inputExpressions.end();
+    const auto mismatchedIterators =
+        std::mismatch(a->inputTokens.begin(), a->inputTokens.end(), b->inputTokens.begin(), b->inputTokens.end());
+    return mismatchedIterators.first == a->inputTokens.end() && mismatchedIterators.second == b->inputTokens.end();
   }
 };
 }  // namespace
 
-class Matcher::Implementation {
+class HypergraphMatcher::Implementation {
  private:
   const std::vector<Rule>& rules_;
   AtomsIndex& atomsIndex_;
   const GetAtomsVectorFunc getAtomsVector_;
-  const GetExpressionsSeparationFunc getExpressionsSeparation_;
+  const GetTokenSeparationFunc getTokenSeparation_;
   const OrderingSpec orderingSpec_;
 
   // Matches are arranged in buckets. Each bucket contains matches that are equivalent in terms of the ordering
@@ -154,7 +153,7 @@ class Matcher::Implementation {
   // We cannot directly select a random element from an unordered_map, which is why we use a vector here.
   using Bucket = std::pair<std::unordered_map<MatchPtr, size_t, MatchHasher, MatchEquality>, std::vector<MatchPtr>>;
   std::map<MatchPtr, Bucket, MatchComparator> matchQueue_;
-  std::unordered_map<ExpressionID, std::unordered_set<MatchPtr, MatchHasher, MatchEquality>> expressionToMatches_;
+  std::unordered_map<TokenID, std::unordered_set<MatchPtr, MatchHasher, MatchEquality>> tokensToMatches_;
 
   // A frequent operation here is detection of duplicate matches. Hashing is much faster than searching for
   // duplicates in a std::map, so we separately keep a flat hash table of all matches to speed that up.
@@ -187,14 +186,14 @@ class Matcher::Implementation {
   Implementation(const std::vector<Rule>& rules,
                  AtomsIndex* atomsIndex,
                  GetAtomsVectorFunc getAtomsVector,
-                 GetExpressionsSeparationFunc getExpressionsSeparation,
+                 GetTokenSeparationFunc getTokenSeparation,
                  const OrderingSpec& orderingSpec,
                  const EventDeduplication& eventDeduplication,
                  const unsigned int randomSeed)
       : rules_(rules),
         atomsIndex_(*atomsIndex),
         getAtomsVector_(std::move(getAtomsVector)),
-        getExpressionsSeparation_(std::move(getExpressionsSeparation)),
+        getTokenSeparation_(std::move(getTokenSeparation)),
         orderingSpec_(orderingSpec),
         matchQueue_(MatchComparator(orderingSpec)),
         randomGenerator_(randomSeed),
@@ -203,15 +202,14 @@ class Matcher::Implementation {
         currentError(None) {
     for (const auto& ordering : orderingSpec) {
       if (ordering.first < OrderingFunction::First || ordering.first >= OrderingFunction::Last) {
-        throw Matcher::Error::InvalidOrderingFunction;
+        throw HypergraphMatcher::Error::InvalidOrderingFunction;
       } else if (ordering.second < OrderingDirection::First || ordering.second >= OrderingDirection::Last) {
-        throw Matcher::Error::InvalidOrderingDirection;
+        throw HypergraphMatcher::Error::InvalidOrderingDirection;
       }
     }
   }
 
-  void addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
-                                      const std::function<bool()>& abortRequested) {
+  void addMatchesInvolvingTokens(const std::vector<TokenID>& tokenIDs, const std::function<bool()>& abortRequested) {
     // If one thread errors, alert other threads with this function
     const std::function<bool()> shouldAbort = [this, &abortRequested]() {
       return getCurrentError() != None || abortRequested();
@@ -219,12 +217,13 @@ class Matcher::Implementation {
 
     {
       // Only create threads if there is more than one rule
-      const auto token = Parallelism::acquire(Parallelism::HardwareType::StdCpu, static_cast<int>(rules_.size()));
-      const int& numThreadsToUse = token->numThreads();
+      const auto threadAcquisitionToken =
+          Parallelism::acquire(Parallelism::HardwareType::StdCpu, static_cast<int>(rules_.size()));
+      const int& numThreadsToUse = threadAcquisitionToken->numThreads();
 
       auto addMatchesForRuleRange = [=](RuleID start) {
         for (RuleID i = start; i < static_cast<RuleID>(rules_.size()); i += numThreadsToUse) {
-          addMatchesForRule(expressionIDs, i, shouldAbort);
+          addMatchesForRule(tokenIDs, i, shouldAbort);
         }
       };
 
@@ -240,7 +239,7 @@ class Matcher::Implementation {
       } else {
         // Single-threaded path
         for (RuleID i = 0; i < static_cast<RuleID>(rules_.size()); ++i) {
-          addMatchesForRule(expressionIDs, i, shouldAbort);
+          addMatchesForRule(tokenIDs, i, shouldAbort);
         }
       }
     }
@@ -260,15 +259,15 @@ class Matcher::Implementation {
 
   // Note, deletion changes the ordering of allMatchIterators_, therefore
   // deletion should be done in deterministic order, otherwise, the random replacements will not be deterministic
-  void removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs) {
+  void removeMatchesInvolvingTokens(const std::vector<TokenID>& tokenIDs) {
     // do not use unordered_set, as it make order undeterministic
     // any ordering spec works here, as long as it's complete.
-    OrderingSpec fullOrderingSpec = {{OrderingFunction::ExpressionIDs, OrderingDirection::Normal},
+    OrderingSpec fullOrderingSpec = {{OrderingFunction::InputTokenIndices, OrderingDirection::Normal},
                                      {OrderingFunction::RuleIndex, OrderingDirection::Normal}};
     std::set<MatchPtr, MatchComparator> matchesToDelete((MatchComparator(fullOrderingSpec)));
 
-    for (const auto& expression : expressionIDs) {
-      const auto& matches = expressionToMatches_[expression];
+    for (const auto& token : tokenIDs) {
+      const auto& matches = tokensToMatches_[token];
       matchesToDelete.insert(matches.begin(), matches.end());
     }
 
@@ -282,10 +281,10 @@ class Matcher::Implementation {
   void deleteMatch(const MatchPtr& matchPtr) {
     allMatches_.erase(matchPtr);
 
-    const auto& expressions = matchPtr->inputExpressions;
-    for (const auto expression : expressions) {
-      expressionToMatches_[expression].erase(matchPtr);
-      if (expressionToMatches_[expression].empty()) expressionToMatches_.erase(expression);
+    const auto& tokens = matchPtr->inputTokens;
+    for (const auto token : tokens) {
+      tokensToMatches_[token].erase(matchPtr);
+      if (tokensToMatches_[token].empty()) tokensToMatches_.erase(token);
     }
 
     const auto bucketIt = matchQueue_.find(matchPtr);
@@ -312,12 +311,12 @@ class Matcher::Implementation {
   }
 
   std::vector<AtomsVector> matchInputAtomsVectors(const MatchPtr& match) const {
-    std::vector<AtomsVector> inputExpressions;
-    inputExpressions.reserve(match->inputExpressions.size());
-    for (const auto& expressionID : match->inputExpressions) {
-      inputExpressions.emplace_back(getAtomsVector_(expressionID));
+    std::vector<AtomsVector> inputTokens;
+    inputTokens.reserve(match->inputTokens.size());
+    for (const auto& tokenID : match->inputTokens) {
+      inputTokens.emplace_back(getAtomsVector_(tokenID));
     }
-    return inputExpressions;
+    return inputTokens;
   }
 
   std::vector<AtomsVector> matchOutputAtomsVectors(const MatchPtr& match) const {
@@ -325,14 +324,14 @@ class Matcher::Implementation {
   }
 
  private:
-  void addMatchesForRule(const std::vector<ExpressionID>& expressionIDs,
+  void addMatchesForRule(const std::vector<TokenID>& tokenIDs,
                          const RuleID& ruleID,
                          const std::function<bool()>& shouldAbort) {
-    const auto& ruleInputExpressions = rules_[ruleID].inputs;
-    for (size_t i = 0; i < ruleInputExpressions.size(); ++i) {
-      const Match emptyMatch{ruleID, std::vector<ExpressionID>(ruleInputExpressions.size(), -1)};
+    const auto& ruleInputTokens = rules_[ruleID].inputs;
+    for (size_t i = 0; i < ruleInputTokens.size(); ++i) {
+      const Match emptyMatch{ruleID, std::vector<TokenID>(ruleInputTokens.size(), -1)};
       completeMatchesStartingWithInput(
-          emptyMatch, ruleInputExpressions, rules_[ruleID].eventSelectionFunction, i, expressionIDs, shouldAbort);
+          emptyMatch, ruleInputTokens, rules_[ruleID].eventSelectionFunction, i, tokenIDs, shouldAbort);
     }
   }
 
@@ -340,22 +339,21 @@ class Matcher::Implementation {
                                         const std::vector<AtomsVector>& partiallyMatchedInputs,
                                         const EventSelectionFunction eventSelectionFunction,
                                         const size_t nextInputIdx,
-                                        const std::vector<ExpressionID>& potentialExpressionIDs,
+                                        const std::vector<TokenID>& potentialTokenIDs,
                                         const std::function<bool()>& shouldAbort) {
-    for (const auto expressionID : potentialExpressionIDs) {
+    for (const auto tokenID : potentialTokenIDs) {
       if (getCurrentError() != None) {
         return;
       }
-      if (isExpressionUnused(incompleteMatch, expressionID)) {
-        attemptMatchExpressionToInput(
-            incompleteMatch, partiallyMatchedInputs, eventSelectionFunction, nextInputIdx, expressionID, shouldAbort);
+      if (isTokenUnused(incompleteMatch, tokenID)) {
+        attemptMatchTokenToInput(
+            incompleteMatch, partiallyMatchedInputs, eventSelectionFunction, nextInputIdx, tokenID, shouldAbort);
       }
     }
   }
 
-  static bool isExpressionUnused(const Match& match, const ExpressionID expressionID) {
-    return std::find(match.inputExpressions.begin(), match.inputExpressions.end(), expressionID) ==
-           match.inputExpressions.end();
+  static bool isTokenUnused(const Match& match, const TokenID tokenID) {
+    return std::find(match.inputTokens.begin(), match.inputTokens.end(), tokenID) == match.inputTokens.end();
   }
 
   void setCurrentErrorIfNone(Error newError) const {
@@ -370,12 +368,12 @@ class Matcher::Implementation {
     return currentError;
   }
 
-  void attemptMatchExpressionToInput(const Match& incompleteMatch,
-                                     const std::vector<AtomsVector>& partiallyMatchedInputs,
-                                     const EventSelectionFunction eventSelectionFunction,
-                                     const size_t nextInputIdx,
-                                     const ExpressionID potentialExpressionID,
-                                     const std::function<bool()>& shouldAbort) {
+  void attemptMatchTokenToInput(const Match& incompleteMatch,
+                                const std::vector<AtomsVector>& partiallyMatchedInputs,
+                                const EventSelectionFunction eventSelectionFunction,
+                                const size_t nextInputIdx,
+                                const TokenID potentialTokenID,
+                                const std::function<bool()>& shouldAbort) {
     // If WL wants to abort, abort
     if (shouldAbort()) {
       setCurrentErrorIfNone(Error::Aborted);
@@ -383,22 +381,22 @@ class Matcher::Implementation {
     }
 
     const auto& input = partiallyMatchedInputs[nextInputIdx];
-    const auto& expressionAtoms = getAtomsVector_(potentialExpressionID);
+    const auto& tokenAtoms = getAtomsVector_(potentialTokenID);
 
-    // edges (expressions) of different sizes, cannot match
-    if (input.size() != expressionAtoms.size()) {
+    // tokens (hyperedges) of different sizes, cannot match
+    if (input.size() != tokenAtoms.size()) {
       return;
     }
 
     Match newMatch = incompleteMatch;
-    newMatch.inputExpressions[nextInputIdx] = potentialExpressionID;
+    newMatch.inputTokens[nextInputIdx] = potentialTokenID;
 
     auto newInputs = partiallyMatchedInputs;
-    if (!substituteMissingAtomsIfPossible(input, expressionAtoms, &newInputs)) {
+    if (!substituteMissingAtomsIfPossible(input, tokenAtoms, &newInputs)) {
       return;
     }
     if (eventSelectionFunction == EventSelectionFunction::Spacelike &&
-        !isSpacelikeSeparated(potentialExpressionID, newMatch.inputExpressions)) {
+        !isSpacelikeSeparated(potentialTokenID, newMatch.inputTokens)) {
       return;
     }
 
@@ -407,19 +405,19 @@ class Matcher::Implementation {
       return;
     }
 
-    const auto nextInputIdxAndCandidateExpressions = nextBestInputAndExpressionsToTry(newMatch, newInputs);
+    const auto nextInputIdxAndCandidateTokens = nextBestInputAndTokensToTry(newMatch, newInputs);
     completeMatchesStartingWithInput(newMatch,
                                      newInputs,
                                      eventSelectionFunction,
-                                     nextInputIdxAndCandidateExpressions.first,
-                                     nextInputIdxAndCandidateExpressions.second,
+                                     nextInputIdxAndCandidateTokens.first,
+                                     nextInputIdxAndCandidateTokens.second,
                                      shouldAbort);
   }
 
-  bool isSpacelikeSeparated(const ExpressionID newExpression, const std::vector<ExpressionID>& previousExpressions) {
-    for (const auto& previousExpression : previousExpressions) {
-      if (previousExpression == newExpression || previousExpression < 0) continue;
-      const auto separation = getExpressionsSeparation_(previousExpression, newExpression);
+  bool isSpacelikeSeparated(const TokenID newToken, const std::vector<TokenID>& previousTokens) {
+    for (const auto& previousToken : previousTokens) {
+      if (previousToken == newToken || previousToken < 0) continue;
+      const auto separation = getTokenSeparation_(previousToken, newToken);
       if (separation != SeparationType::Spacelike) {
         return false;
       }
@@ -444,9 +442,9 @@ class Matcher::Implementation {
       bucket.second.push_back(matchPtr);
       bucket.first[matchPtr] = bucket.second.size() - 1;
 
-      const auto& expressions = matchPtr->inputExpressions;
-      for (const auto expression : expressions) {
-        expressionToMatches_[expression].insert(matchPtr);
+      const auto& tokens = matchPtr->inputTokens;
+      for (const auto token : tokens) {
+        tokensToMatches_[token].insert(matchPtr);
       }
     }
 
@@ -456,20 +454,20 @@ class Matcher::Implementation {
   }
 
   static bool isMatchComplete(const Match& match) {
-    return std::find_if(match.inputExpressions.begin(), match.inputExpressions.end(), [](const auto& ex) -> bool {
-             return ex < 0;
-           }) == match.inputExpressions.end();
+    return std::find_if(match.inputTokens.begin(), match.inputTokens.end(), [](const auto& token) -> bool {
+             return token < 0;
+           }) == match.inputTokens.end();
   }
 
-  std::pair<size_t, std::vector<ExpressionID>> nextBestInputAndExpressionsToTry(
+  std::pair<size_t, std::vector<TokenID>> nextBestInputAndTokensToTry(
       const Match& incompleteMatch, const std::vector<AtomsVector>& partiallyMatchedInputs) const {
     int64_t nextInputIdx = -1;
-    std::vector<ExpressionID> nextExpressionsToTry;
+    std::vector<TokenID> nextTokensToTry;
 
-    // For each input, we will see how many expressions in the set contain atoms appearing in this input.
+    // For each input, we will see how many tokens in the hypergraph contain atoms appearing in this input.
     // The fewer there are, the less branching we will have to do.
     for (size_t i = 0; i < partiallyMatchedInputs.size(); ++i) {
-      if (incompleteMatch.inputExpressions[i] != -1) continue;
+      if (incompleteMatch.inputTokens[i] != -1) continue;
 
       std::unordered_set<Atom> appearingAtoms;
       bool allAtomsArePatterns = true;
@@ -484,28 +482,28 @@ class Matcher::Implementation {
       // there is nothing we can do unless we want to enumerate the entire set
       if (allAtomsArePatterns) continue;
 
-      // For each expression, we will count how many of the input atoms appear in it.
-      // We will then only use expressions that have all the required atoms.
-      std::unordered_map<ExpressionID, uint64_t> inputAtomsCountByExpression;
+      // For each token, we will count how many of the input atoms appear in it.
+      // We will then only use tokens that have all the required atoms.
+      std::unordered_map<TokenID, uint64_t> inputAtomsCountByToken;
       for (const auto atom : appearingAtoms) {
-        for (const auto expression : atomsIndex_.expressionsContainingAtom(atom)) {
-          inputAtomsCountByExpression[expression]++;
+        for (const auto token : atomsIndex_.tokensContainingAtom(atom)) {
+          inputAtomsCountByToken[token]++;
         }
       }
 
-      // Here we will collect all expressions that contain all the required atoms.
-      std::vector<ExpressionID> potentialExpressions;
-      for (const auto& expressionAndCount : inputAtomsCountByExpression) {
-        if (expressionAndCount.second == appearingAtoms.size()) {
-          potentialExpressions.push_back(expressionAndCount.first);
+      // Here we will collect all tokens that contain all the required atoms.
+      std::vector<TokenID> potentialTokens;
+      for (const auto& tokenAndCount : inputAtomsCountByToken) {
+        if (tokenAndCount.second == appearingAtoms.size()) {
+          potentialTokens.push_back(tokenAndCount.first);
         }
       }
 
-      // If there are fewer expressions, that is what we'll want to try first.
-      // Note, if there are zero matching expressions, it means the match is not possible, because none of the
-      // expressions contain all the atoms needed.
-      if (nextInputIdx == -1 || potentialExpressions.size() < nextExpressionsToTry.size()) {
-        nextExpressionsToTry = potentialExpressions;
+      // If there are fewer tokens, that is what we'll want to try first.
+      // Note, if there are zero matching tokens, it means the match is not possible, because none of the tokens contain
+      // all the atoms needed.
+      if (nextInputIdx == -1 || potentialTokens.size() < nextTokensToTry.size()) {
+        nextTokensToTry = potentialTokens;
         nextInputIdx = static_cast<int64_t>(i);
       }
     }
@@ -513,12 +511,12 @@ class Matcher::Implementation {
     if (nextInputIdx == -1) {
       // We could not find any potential inputs, which means, all inputs not already matched are fully patterns,
       // and don't have any specific atom references.
-      // That implies rule inputs are not a connected graph, which is not supported at the moment,
+      // That implies rule inputs do not form a connected hypergraph, which is not supported at the moment,
       // and would require custom logic to implement efficiently.
       setCurrentErrorIfNone(DisconnectedInputs);
       return {{}, {}};
     } else {
-      return {nextInputIdx, nextExpressionsToTry};
+      return {nextInputIdx, nextTokensToTry};
     }
   }
 
@@ -539,12 +537,12 @@ class Matcher::Implementation {
   // Ordering spec that is used in newMatches_ set.
   static OrderingSpec newMatchesOrderingSpec(const OrderingSpec& orderingSpec) {
     // newMatches_ is used for deduplication so its contents should be arranged by the input set
-    OrderingSpec newMatchesOrderingSpec = {{OrderingFunction::SortedExpressionIDs, OrderingDirection::Normal}};
+    OrderingSpec newMatchesOrderingSpec = {{OrderingFunction::SortedInputTokenIndices, OrderingDirection::Normal}};
     // We expect the smallest match (according to the user specified spec) to be selected as a canonical
     // one, so we then sort by the user specification
     newMatchesOrderingSpec.insert(newMatchesOrderingSpec.end(), orderingSpec.begin(), orderingSpec.end());
     // Finally, we need to ensure the sorting is deterministic
-    newMatchesOrderingSpec.push_back({OrderingFunction::ExpressionIDs, OrderingDirection::Normal});
+    newMatchesOrderingSpec.push_back({OrderingFunction::InputTokenIndices, OrderingDirection::Normal});
     newMatchesOrderingSpec.push_back({OrderingFunction::RuleIndex, OrderingDirection::Normal});
     return newMatchesOrderingSpec;
   }
@@ -552,13 +550,13 @@ class Matcher::Implementation {
   // Look through matches in newMatches_, and delete the duplicates.
   // The copy remaining must be the smallest according to orderingSpec_
   void removeIdenticalMatches(const std::function<bool()>& abortRequested) {
-    std::unordered_set<ExpressionID> currentInputsSet;
+    std::unordered_set<TokenID> currentInputsSet;
     std::vector<MatchPtr> addedSameInputMatches;
     for (const auto& newMatch : newMatches_) {
       if (!sameInputSet(newMatch, currentInputsSet)) {
         // matches are ordered by their input sets, so if it's different, a batch with the new inputs is starting.
         currentInputsSet.clear();
-        currentInputsSet.insert(newMatch->inputExpressions.begin(), newMatch->inputExpressions.end());
+        currentInputsSet.insert(newMatch->inputTokens.begin(), newMatch->inputTokens.end());
         addedSameInputMatches.clear();
       }
 
@@ -580,11 +578,11 @@ class Matcher::Implementation {
     newMatches_.clear();
   }
 
-  // Checks if the input expression IDs in match are the same as referenceInputExpressions
-  static bool sameInputSet(const MatchPtr& match, const std::unordered_set<ExpressionID>& referenceInputExpressions) {
-    if (match->inputExpressions.size() != referenceInputExpressions.size()) return false;
-    for (const auto& input : match->inputExpressions) {
-      if (!referenceInputExpressions.count(input)) {  // note, expression IDs in a match never repeat
+  // Checks if the input token IDs in the match are the same as referenceInputTokens
+  static bool sameInputSet(const MatchPtr& match, const std::unordered_set<TokenID>& referenceInputTokens) {
+    if (match->inputTokens.size() != referenceInputTokens.size()) return false;
+    for (const auto& input : match->inputTokens) {
+      if (!referenceInputTokens.count(input)) {  // note, token IDs in a match never repeat
         return false;
       }
     }
@@ -600,66 +598,67 @@ class Matcher::Implementation {
     return isomorphic(firstOutputs, secondOutput, abortRequested);
   }
 
-  // Uses Matcher itself to determine if two sets are isomorphic.
-  // Isomorphism in this case refers to a renaming of *pattern* (negative) atoms in one of the sets to
+  // Uses HypergraphMatcher itself to determine if two hypergraphs are isomorphic.
+  // Isomorphism in this case refers to a renaming of *pattern* (negative) atoms in one of the hypergraphs to
   // make it identical to the other one. Positive atoms are not attempted to be renamed.
   // Thus, for example, {{-1, -2}, {-2, -3}} is isomorphic to {{-3, -4}, {-5, -3}},
   // but {{1, -2}, {-2, 3}} is not isomorphic to {{3, -2}, {-2, 1}}.
-  static bool isomorphic(const std::vector<AtomsVector>& firstSet,
-                         const std::vector<AtomsVector>& secondSet,
+  static bool isomorphic(const std::vector<AtomsVector>& firstHypergraph,
+                         const std::vector<AtomsVector>& secondHypergraph,
                          const std::function<bool()>& abortRequested) {
-    if (firstSet.size() != secondSet.size()) return false;
-    if (firstSet.size() == 0) return true;
+    if (firstHypergraph.size() != secondHypergraph.size()) return false;
+    if (firstHypergraph.size() == 0) return true;
 
-    // Matcher does not support disconnected rules, so append the same atom to each expression to ensure connectivity
-    // The atom here is just an arbitrary large number
+    // HypergraphMatcher does not support disconnected rules, so append the same atom to each token to ensure
+    // connectivity. The atom here is just an arbitrary large number, which is unlikely to be reached.
     constexpr Atom connectingAtom = 943106676560858694;
 
-    // We will use the same set as an input to a rule
+    // We will use the same hypergraph as an input to a rule
     const std::vector<Rule> rules = {
-        {appendAtomToEveryExpression(firstSet, connectingAtom), {}, EventSelectionFunction::All}};
+        {appendAtomToEveryToken(firstHypergraph, connectingAtom), {}, EventSelectionFunction::All}};
 
-    // And the second set as an initial condition (with patterns instantiated)
-    // If the two sets are isomorphic, the rule will match. Note, it cannot match to a subset because the number of
-    // expressions is the same, and multiple parts of the rule input cannot match to the same expression.
-    auto connectedSecondSet = appendAtomToEveryExpression(secondSet, connectingAtom);
-    instantiatePatternAtoms(&connectedSecondSet);
+    // And the second hypergraph as an initial state (with patterns instantiated)
+    // If the two hypergraphs are isomorphic, the rule will match. Note, it cannot match to a subhypergraph because the
+    // number of tokens (hyperedges) is the same, and multiple parts of the rule input cannot match to the same token.
+    auto connectedSecondHypergraph = appendAtomToEveryToken(secondHypergraph, connectingAtom);
+    instantiatePatternAtoms(&connectedSecondHypergraph);
     const GetAtomsVectorFunc getAtomsVector =
-        [&connectedSecondSet](const ExpressionID& expressionID) -> const AtomsVector& {
-      return connectedSecondSet.at(expressionID);
+        [&connectedSecondHypergraph](const TokenID& tokenID) -> const AtomsVector& {
+      return connectedSecondHypergraph.at(tokenID);
     };
 
     // We don't need this function, but we need to pass something.
-    const GetExpressionsSeparationFunc getExpressionsSeparation =
-        [](const ExpressionID&, const ExpressionID&) -> SeparationType { return SeparationType::Unknown; };
+    const GetTokenSeparationFunc getTokenSeparation = [](const TokenID&, const TokenID&) -> SeparationType {
+      return SeparationType::Unknown;
+    };
 
     AtomsIndex atomsIndex(getAtomsVector);
-    std::vector<ExpressionID> allExpressionIDs(firstSet.size());
-    for (ExpressionID i = 0; i < static_cast<ExpressionID>(firstSet.size()); ++i) {
-      allExpressionIDs.emplace_back(i);
+    std::vector<TokenID> allTokenIDs(firstHypergraph.size());
+    for (TokenID i = 0; i < static_cast<TokenID>(firstHypergraph.size()); ++i) {
+      allTokenIDs.emplace_back(i);
     }
-    atomsIndex.addExpressions(allExpressionIDs);
+    atomsIndex.addTokens(allTokenIDs);
 
-    Matcher matcher(rules, &atomsIndex, getAtomsVector, getExpressionsSeparation, {}, EventDeduplication::None);
-    // We only need to pass one expression because any expression will need to be included in the match.
-    matcher.addMatchesInvolvingExpressions({0}, abortRequested);
+    HypergraphMatcher matcher(rules, &atomsIndex, getAtomsVector, getTokenSeparation, {}, EventDeduplication::None);
+    // We only need to pass one token because any token will need to be included in the match.
+    matcher.addMatchesInvolvingTokens({0}, abortRequested);
     return !matcher.empty();
   }
 
-  // Finds the largest atom in a set of expressions
+  // Finds the largest atom in a set of tokens
   static Atom largestAtom(const std::vector<AtomsVector>& set) {
     Atom result = std::numeric_limits<Atom>::min();
-    for (const auto& expression : set) {
-      result = std::max(result, *std::max_element(expression.begin(), expression.end()));
+    for (const auto& token : set) {
+      result = std::max(result, *std::max_element(token.begin(), token.end()));
     }
     return result;
   }
 
-  // Appends the same specified atom to every expression in the given set
-  static std::vector<AtomsVector> appendAtomToEveryExpression(const std::vector<AtomsVector>& set, const Atom atom) {
+  // Appends the same specified atom to every token in the given set
+  static std::vector<AtomsVector> appendAtomToEveryToken(const std::vector<AtomsVector>& set, const Atom atom) {
     auto result = set;
-    for (auto& expression : result) {
-      expression.emplace_back(atom);
+    for (auto& token : result) {
+      token.emplace_back(atom);
     }
     return result;
   }
@@ -668,8 +667,8 @@ class Matcher::Implementation {
   static void instantiatePatternAtoms(std::vector<AtomsVector>* set) {
     Atom maxAtom = largestAtom(*set);
     std::unordered_map<Atom, Atom> patternToAtom;
-    for (auto& expression : *set) {
-      for (auto& atom : expression) {
+    for (auto& token : *set) {
+      for (auto& atom : token) {
         if (atom < 0) {
           if (!patternToAtom.count(atom)) {
             patternToAtom[atom] = ++maxAtom;
@@ -680,36 +679,35 @@ class Matcher::Implementation {
     }
   }
 
-  // Returns the result of applying a rule to a set of input expressions.
+  // Returns the result of applying a rule to a set of input tokens.
   // New atoms are not named and are left as patterns.
-  static std::vector<AtomsVector> outputAtomsVectors(const Rule& rule,
-                                                     const std::vector<AtomsVector>& inputExpressions) {
+  static std::vector<AtomsVector> outputAtomsVectors(const Rule& rule, const std::vector<AtomsVector>& inputTokens) {
     auto explicitRuleOutputs = rule.outputs;
-    substituteMissingAtomsIfPossible(rule.inputs, inputExpressions, &explicitRuleOutputs);
+    substituteMissingAtomsIfPossible(rule.inputs, inputTokens, &explicitRuleOutputs);
     return explicitRuleOutputs;
   }
 
-  // Infers atom names by comparing referenceExpressions and referencePattern, and then replaces the infered atoms in
-  // place of patterns in expressionsToInstantiate.
+  // Infers atom names by comparing referenceTokens and referencePattern, and then replaces the infered atoms in place
+  // of patterns in tokensToInstantiate.
   static bool substituteMissingAtomsIfPossible(const std::vector<AtomsVector>& referencePattern,
-                                               const std::vector<AtomsVector>& referenceExpressions,
-                                               std::vector<AtomsVector>* expressionsToInstantiate = nullptr) {
-    if (referencePattern.size() != referenceExpressions.size()) return false;
+                                               const std::vector<AtomsVector>& referenceTokens,
+                                               std::vector<AtomsVector>* tokensToInstantiate = nullptr) {
+    if (referencePattern.size() != referenceTokens.size()) return false;
 
     std::unordered_map<Atom, Atom> match;
     for (size_t i = 0; i < referencePattern.size(); ++i) {
-      if (!substituteMissingAtomsIfPossible(referencePattern[i], referenceExpressions[i], &match)) return false;
+      if (!substituteMissingAtomsIfPossible(referencePattern[i], referenceTokens[i], &match)) return false;
     }
-    instantiateExpressions(expressionsToInstantiate, match);
+    instantiateTokens(tokensToInstantiate, match);
     return true;
   }
 
   static bool substituteMissingAtomsIfPossible(const AtomsVector& pattern,
                                                const AtomsVector& patternMatch,
-                                               std::vector<AtomsVector>* expressionsToInstantiate = nullptr) {
+                                               std::vector<AtomsVector>* tokensToInstantiate = nullptr) {
     std::unordered_map<Atom, Atom> match;
     if (!substituteMissingAtomsIfPossible(pattern, patternMatch, &match)) return false;
-    instantiateExpressions(expressionsToInstantiate, match);
+    instantiateTokens(tokensToInstantiate, match);
     return true;
   }
 
@@ -730,10 +728,10 @@ class Matcher::Implementation {
     return true;
   }
 
-  static void instantiateExpressions(std::vector<AtomsVector>* expressionsToInstantiate,
-                                     const std::unordered_map<Atom, Atom>& match) {
-    if (expressionsToInstantiate) {
-      for (auto& atomsVectorToReplace : *expressionsToInstantiate) {
+  static void instantiateTokens(std::vector<AtomsVector>* tokensToInstantiate,
+                                const std::unordered_map<Atom, Atom>& match) {
+    if (tokensToInstantiate) {
+      for (auto& atomsVectorToReplace : *tokensToInstantiate) {
         for (auto& atomToReplace : atomsVectorToReplace) {
           const auto matchIterator = match.find(atomToReplace);
           if (matchIterator != match.end()) {
@@ -745,38 +743,38 @@ class Matcher::Implementation {
   }
 };
 
-Matcher::Matcher(const std::vector<Rule>& rules,
-                 AtomsIndex* atomsIndex,
-                 const GetAtomsVectorFunc& getAtomsVector,
-                 const GetExpressionsSeparationFunc& getExpressionsSeparation,
-                 const OrderingSpec& orderingSpec,
-                 const EventDeduplication& eventDeduplication,
-                 const unsigned int randomSeed)
+HypergraphMatcher::HypergraphMatcher(const std::vector<Rule>& rules,
+                                     AtomsIndex* atomsIndex,
+                                     const GetAtomsVectorFunc& getAtomsVector,
+                                     const GetTokenSeparationFunc& getTokenSeparation,
+                                     const OrderingSpec& orderingSpec,
+                                     const EventDeduplication& eventDeduplication,
+                                     const unsigned int randomSeed)
     : implementation_(std::make_shared<Implementation>(
-          rules, atomsIndex, getAtomsVector, getExpressionsSeparation, orderingSpec, eventDeduplication, randomSeed)) {}
+          rules, atomsIndex, getAtomsVector, getTokenSeparation, orderingSpec, eventDeduplication, randomSeed)) {}
 
-void Matcher::addMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs,
-                                             const std::function<bool()>& shouldAbort) {
-  implementation_->addMatchesInvolvingExpressions(expressionIDs, shouldAbort);
+void HypergraphMatcher::addMatchesInvolvingTokens(const std::vector<TokenID>& tokenIDs,
+                                                  const std::function<bool()>& shouldAbort) {
+  implementation_->addMatchesInvolvingTokens(tokenIDs, shouldAbort);
 }
 
-void Matcher::removeMatchesInvolvingExpressions(const std::vector<ExpressionID>& expressionIDs) {
-  implementation_->removeMatchesInvolvingExpressions(expressionIDs);
+void HypergraphMatcher::removeMatchesInvolvingTokens(const std::vector<TokenID>& tokenIDs) {
+  implementation_->removeMatchesInvolvingTokens(tokenIDs);
 }
 
-void Matcher::deleteMatch(const MatchPtr matchPtr) { implementation_->deleteMatch(matchPtr); }
+void HypergraphMatcher::deleteMatch(const MatchPtr matchPtr) { implementation_->deleteMatch(matchPtr); }
 
-bool Matcher::empty() const { return implementation_->empty(); }
+bool HypergraphMatcher::empty() const { return implementation_->empty(); }
 
-MatchPtr Matcher::nextMatch() const { return implementation_->nextMatch(); }
+MatchPtr HypergraphMatcher::nextMatch() const { return implementation_->nextMatch(); }
 
-std::vector<MatchPtr> Matcher::allMatches() const { return implementation_->allMatches(); }
+std::vector<MatchPtr> HypergraphMatcher::allMatches() const { return implementation_->allMatches(); }
 
-std::vector<AtomsVector> Matcher::matchInputAtomsVectors(const MatchPtr& match) const {
+std::vector<AtomsVector> HypergraphMatcher::matchInputAtomsVectors(const MatchPtr& match) const {
   return implementation_->matchInputAtomsVectors(match);
 }
 
-std::vector<AtomsVector> Matcher::matchOutputAtomsVectors(const MatchPtr& match) const {
+std::vector<AtomsVector> HypergraphMatcher::matchOutputAtomsVectors(const MatchPtr& match) const {
   return implementation_->matchOutputAtomsVectors(match);
 }
 

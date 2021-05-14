@@ -5,7 +5,7 @@ PackageImport["GeneralUtilities`"]
 PackageScope["setSubstitutionSystem$cpp"]
 
 importLibSetReplaceFunction[
-  "setInitialize" -> cpp$setInitialize,
+  "hypergraphSubstitutionSystemInitialize" -> cpp$setInitialize,
   {Integer,                  (* set ID *)
    {Integer, 1, "Constant"}, (* rules *)
    {Integer, 1, "Constant"}, (* event selection functions for rules *)
@@ -17,28 +17,28 @@ importLibSetReplaceFunction[
   "Void"];
 
 importLibSetReplaceFunction[
-  "setReplace" -> cpp$setReplace,
+  "hypergraphSubstitutionSystemReplace" -> cpp$setReplace,
   {Integer,                   (* set ID *)
    {Integer, 1, "Constant"}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
   "Void"];
 
 importLibSetReplaceFunction[
-  "setExpressions" -> cpp$setExpressions,
+  "hypergraphSubstitutionSystemTokens" -> cpp$setExpressions,
   {Integer},     (* set ID *)
   {Integer, 1}]; (* expressions *)
 
 importLibSetReplaceFunction[
-  "setEvents" -> cpp$setEvents,
+  "hypergraphSubstitutionSystemEvents" -> cpp$setEvents,
   {Integer},     (* set ID *)
   {Integer, 1}]; (* expressions *)
 
 importLibSetReplaceFunction[
-  "maxCompleteGeneration" -> cpp$maxCompleteGeneration,
+  "hypergraphSubstitutionSystemMaxCompleteGeneration" -> cpp$maxCompleteGeneration,
   {Integer}, (* set ID *)
   Integer];  (* generation *)
 
 importLibSetReplaceFunction[
-  "terminationReason" -> cpp$terminationReason,
+  "hypergraphSubstitutionSystemTerminationReason" -> cpp$terminationReason,
   {Integer}, (* set ID *)
   Integer];  (* reason *)
 

@@ -3,10 +3,10 @@
 
 #include <vector>
 
-#include "Expression.hpp"
+#include "AtomsIndex.hpp"
 
 namespace SetReplace {
-/** @brief What kind of expression types the rule should match.
+/** @brief What kind of token types the rule should match.
  */
 enum class EventSelectionFunction {
   All = 0,       // match all events matching the input pattern
