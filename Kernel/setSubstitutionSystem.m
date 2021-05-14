@@ -36,7 +36,6 @@ PackageScope["$spacelike"]
 
 PackageScope["$sameInputSetIsomorphicOutputs"]
 
-PackageScope["$eventOrderingFunctions"]
 PackageScope["parseEventOrderingFunction"]
 PackageScope["simpleRuleQ"]
 
@@ -80,7 +79,7 @@ General::invalidRules =
   "a List of them.";
 
 setSubstitutionSystem[
-    rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+    {rawRules_, rules_}, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !setReplaceRulesQ[rules] &&
   Message[caller::invalidRules, rules];
 
@@ -302,7 +301,7 @@ General::symbNotImplemented =
   "and only for sets of lists (hypergraphs).";
 
 setSubstitutionSystem[
-      rules_ ? setReplaceRulesQ,
+      {rawRules_, rules_ ? setReplaceRulesQ},
       set_List,
       stepSpec_,
       caller_,
@@ -312,7 +311,8 @@ setSubstitutionSystem[
           caller, set, stepSpec, OptionValue[setSubstitutionSystem, {o}, "EventSelectionFunction"]] := ModuleScope[
   method = OptionValue[Method];
   timeConstraint = OptionValue[TimeConstraint];
-  eventOrderingFunction = parseEventOrderingFunction[caller, OptionValue["EventOrderingFunction"]];
+  eventOrdering = OptionValue["EventOrderingFunction"];
+  eventOrderingFunction = parseEventOrderingFunction[caller, eventOrdering];
   eventSelectionFunction = parseParameterValue[
     caller, "EventSelectionFunction", OptionValue["EventSelectionFunction"], $eventSelectionFunctions];
   eventDeduplication = parseParameterValue[
@@ -336,7 +336,9 @@ setSubstitutionSystem[
     If[$libSetReplaceAvailable,
       Return[
         setSubstitutionSystem$cpp[
-          rules, set, stepSpec, returnOnAbortQ, timeConstraint, eventOrderingFunction, eventSelectionFunction,
+          rawRules, set, stepSpec, returnOnAbortQ, timeConstraint,
+          eventOrdering /. Automatic -> {"LeastRecentEdge", "RuleOrdering", "RuleIndex"},
+          eventSelectionFunction,
           eventDeduplication]]
     ]
   ];
