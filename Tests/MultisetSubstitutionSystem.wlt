@@ -29,12 +29,12 @@
         (* Ordering not yet supported *)
         testUnevaluated[
           GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], {}, None, {"RuleIndex"}, {}] @ {1},
-          {GenerateMultihistory::eventOrderingNotImplemented}],
+          {GenerateMultihistory::multisetEventOrderingNotImplemented}],
 
         (* Token deduplication not yet supported *)
         testUnevaluated[
           GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], {}, All, anEventOrdering, {}] @ {1},
-          {GenerateMultihistory::tokenDeduplicationNotImplemented}],
+          {GenerateMultihistory::multisetTokenDeduplicationNotImplemented}],
 
         (* Parameters *)
         testUnevaluated[

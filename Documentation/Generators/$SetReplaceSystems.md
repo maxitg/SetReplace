@@ -5,5 +5,5 @@ used with [GenerateMultihistory](/Documentation/Generators/GenerateMultihistory.
 
 ```wl
 In[] := $SetReplaceSystems
-Out[] = {MultisetSubstitutionSystem}
+Out[] = {AtomicStateSystem, MultisetSubstitutionSystem}
 ```

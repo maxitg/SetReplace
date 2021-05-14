@@ -8,7 +8,7 @@
 In[] := $SetReplaceTypeGraph
 ```
 
-<img src="/Documentation/Images/$SetReplaceTypeGraph.png" width="660.6">
+<img src="/Documentation/Images/$SetReplaceTypeGraph.png" width="816.6">
 
 It is a [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) representation of a directed hypergraph with
 types and properties as vertices and implementations of translations and properties as edges.
