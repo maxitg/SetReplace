@@ -15,6 +15,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/AtomicStateSystemExample.png" width="858.6">
 
-Note that spacelike separation is not possible in the `AtomicStateSystem`. As a result, since events cannot currently
-produce branchlike-separated outputs, events in this system can only generate a single state. Branching can only occur
+Note that spacelike separation is not possible in the `AtomicStateSystem`. As a result, branching due to overlaps of
+different subsets of input tokens cannot occur. And, since events cannot produce branchlike-separated outputs and there
+is currently no way to assign multiple outputs to a single match of a left-hand side of a rule, branching can only occur
 due to multiple rules.
