@@ -175,12 +175,13 @@ class Matcher::Implementation {
    * It is volatile, but not atomic because it is locked before being written to.
    */
   mutable volatile Error currentError;
+  mutable std::shared_mutex currentErrorMutex;
 
   /**
    * This mutex should be used to gain access to the above match structures.
    * Currently only insertMatch is executed concurrently, and therefore it is only used there (for now).
    */
-
+  mutable std::mutex matchMutex;
 
  public:
   Implementation(const std::vector<Rule>& rules,
@@ -227,8 +228,20 @@ class Matcher::Implementation {
         }
       };
 
-      for (RuleID i = 0; i < static_cast<RuleID>(rules_.size()); ++i) {
-        addMatchesForRule(expressionIDs, i, shouldAbort);
+      if (numThreadsToUse > 0) {
+        // Multi-threaded path
+        std::vector<std::thread> threads(numThreadsToUse);
+        for (int i = 0; i < numThreadsToUse; ++i) {
+          threads[i] = std::thread(addMatchesForRuleRange, i);
+        }
+        for (auto& thread : threads) {
+          thread.join();
+        }
+      } else {
+        // Single-threaded path
+        for (RuleID i = 0; i < static_cast<RuleID>(rules_.size()); ++i) {
+          addMatchesForRule(expressionIDs, i, shouldAbort);
+        }
       }
     }
     if (currentError != None) {
@@ -346,12 +359,14 @@ class Matcher::Implementation {
   }
 
   void setCurrentErrorIfNone(Error newError) const {
+    std::unique_lock lock(currentErrorMutex);
     if (currentError == None) {
       currentError = newError;
     }
   }
 
   Error getCurrentError() const {
+    std::shared_lock lock(currentErrorMutex);
     return currentError;
   }
 
@@ -416,6 +431,8 @@ class Matcher::Implementation {
   void insertMatch(const Match& newMatch) {
     // careful, don't create different pointers to the same match!
     const auto matchPtr = std::make_shared<Match>(newMatch);
+
+    std::lock_guard<std::mutex> lock(matchMutex);
 
     if (!allMatches_.insert(matchPtr).second) {
       return;
