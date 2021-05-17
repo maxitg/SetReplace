@@ -66,6 +66,9 @@ echo "Library extension: $libraryExtension"
 # Find the compiled library
 
 compiledLibrary=build/libSetReplace.$libraryExtension
+if [ ! -f $compiledLibrary ]; then
+  compiledLibrary=build/SetReplace.$libraryExtension
+fi
 
 if [ ! -f $compiledLibrary ]; then
   echo "Could not find compiled library"
