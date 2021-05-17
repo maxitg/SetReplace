@@ -18,4 +18,5 @@ In[] := GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
 You will be able to use [`properties`](/Documentation/Properties/README.md) to extract information about multihistories,
 but we have not implemented any properties yet.
 
+* [`{AtomicStateSystem, 0}`](AtomicStateSystem0.md)
 * [`{MultisetSubstitutionSystem, 0}`](MultisetSubstitutionSystem0.md)

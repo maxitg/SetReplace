@@ -439,8 +439,8 @@ in [utilities.m](/Kernel/utilities.m).
 
 *libSetReplace* is the C++ library that implements the `"LowLevel"` method of [`WolframModel`](/Kernel/WolframModel.m).
 It lives in [`libSetReplace`](/libSetReplace) directory, and there is also the [Xcode project](/SetReplace.xcodeproj)
-for it. [`SetReplace.cpp`](/libSetReplace/SetReplace.cpp) and [`SetReplace.hpp`](/libSetReplace/SetReplace.hpp)
-implement the interface with Wolfram Language code.
+for it. [`WolframLanguageAPI.cpp`](/libSetReplace/WolframLanguageAPI.cpp) and
+[`WolframLanguageAPI.hpp`](/libSetReplace/WolframLanguageAPI.hpp) implement the interface with Wolfram Language code.
 
 The C++ implementation keeps an index of all possible rule matches and updates it after every replacement. The
 reindexing algorithm looks only at the local region of the graph close to the rewrite site. Thus time complexity is
@@ -450,10 +450,11 @@ matches might exist in that case. Currently, it also does not work for non-local
 form a connected hypergraph) and rules that are not hypergraph rules (i.e., pattern rules that have non-trivial nesting
 or conditions).
 
-Every time the `"LowLevel"` implementation of [`WolframModel`](/Kernel/WolframModel.m) is called, an instance of
-class [`Set`](/libSetReplace/Set.hpp) is created. [`Set`](/libSetReplace/Set.hpp) in turn uses
-the [`Matcher`](/libSetReplace/Match.hpp) class to perform the matching of set elements to rule
-inputs. [This class](/libSetReplace/Match.cpp) is the core of *SetReplace*.
+Every time the `"LowLevel"` implementation of [`WolframModel`](/Kernel/WolframModel.m) is called, an instance of class
+[`HypergraphSubstitutionSystem`](/libSetReplace/HypergraphSubstitutionSystem.hpp) is created.
+[`HypergraphSubstitutionSystem`](/libSetReplace/HypergraphSubstitutionSystem.hpp) in turn uses
+the [`HypergraphMatcher`](/libSetReplace/HypergraphMatcher.hpp) class to perform the matching of hypergraph tokens to
+rule inputs. [This class](/libSetReplace/HypergraphMatcher.cpp) is the core of *SetReplace*.
 
 #### Compile C++ library with CMake
 

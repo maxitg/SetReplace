@@ -7,8 +7,7 @@
 SetReplaceTypeConvert[newType][object]
 ```
 
-For example, one can convert a [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md)
-[multihistory](/Documentation/Types/Multihistory/README.md) to a legacy
-[`WolframModelEvolutionObject`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md):
+For example, one can convert an [`AtomicStateSystem` multihistory](/Documentation/Types/AtomicStateSystem0.md) to a
+[`MultisetSubstitutionSystem` multihistory](/Documentation/Types/Multihistory/MultisetSubstitutionSystem0.md):
 
-<img src="/Documentation/Images/MultihistoryToWolframModelEvolutionObject.png" width="575.4">
+<img src="/Documentation/Images/AtomicStateToMultisetMultihistory.png" width="562.2">
