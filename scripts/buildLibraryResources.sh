@@ -39,8 +39,8 @@ echo "libSetReplace sources hash: $shortSHA"
 
 mkdir -p build
 cd build
-cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
-cmake --build . -G "Unix Makefiles"
+cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
+cmake --build .
 cd ..
 
 # Set the platform-specific names
