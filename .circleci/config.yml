@@ -194,7 +194,7 @@ jobs:
           name: Install Dependencies
           command: |
             choco install llvm make cmake.install
-            echo "export PATH=\"/c/Program Files/CMake/bin:$PATH\"" >> $BASH_ENV
+            echo "export PATH=\"/c/Program Files/CMake/bin:/c/Program Files/LLVM/bin:$PATH\"" >> $BASH_ENV
 
       - run:
           name: Build
