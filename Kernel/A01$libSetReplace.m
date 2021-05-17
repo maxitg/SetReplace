@@ -41,7 +41,7 @@ SetReplace::cppRedistributable =
     "{\"HyperlinkActive\"}, " <>
     "BaseStyle -> {\"URL\"}, " <>
     "HyperlinkAction -> \"Recycled\"}, " <>
-    "\"HyperlinkTemplate\"]\) " <>
+    "\"HyperlinkTemplate\"]\)" <>
   " is installed.";
 
 importLibSetReplaceFunction[cppFunctionName_ -> symbol_, argumentTypes_, outputType_] := (
