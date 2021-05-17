@@ -32,8 +32,9 @@ $cppRedistributableURL =
   "the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0";
 
 SetReplace::cppRedistributable =
+  "Check that " <>
   "\!\(\*TemplateBox[" <>
-    "{\"Check\", " <>
+    "{\"Microsoft Visual C++ Redistributable\", " <>
     "{URL[\"" <> $cppRedistributableURL <> "\"], None}, " <>
     "\"" <> $cppRedistributableURL <> "\", " <>
     "\"HyperlinkActionRecycled\", " <>
@@ -41,7 +42,7 @@ SetReplace::cppRedistributable =
     "BaseStyle -> {\"URL\"}, " <>
     "HyperlinkAction -> \"Recycled\"}, " <>
     "\"HyperlinkTemplate\"]\) " <>
-  "that Microsoft Visual C++ Redistributable is installed.";
+  " is installed.";
 
 importLibSetReplaceFunction[cppFunctionName_ -> symbol_, argumentTypes_, outputType_] := (
   symbol = If[$libraryFile =!= $Failed,
