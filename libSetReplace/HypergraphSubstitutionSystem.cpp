@@ -1,5 +1,7 @@
 #include "HypergraphSubstitutionSystem.hpp"
 
+#include <time.h>
+
 #include <algorithm>
 #include <limits>
 #include <memory>
@@ -130,16 +132,26 @@ class HypergraphSubstitutionSystem::Implementation {
     return 1;
   }
 
-  int64_t replace(const StepSpecification stepSpec, const std::function<bool()>& shouldAbort) {
+  int64_t replace(const StepSpecification stepSpec,
+                  const std::function<bool()>& shouldAbort,
+                  double const timeConstraint) {
     updateStepSpec(stepSpec);
     int64_t count = 0;
     if (maxDestroyerEvents_ == 0) {
       return count;
     }
+    time_t startTime = time(0);
     while (true) {
       if (replaceOnce(shouldAbort)) {
         ++count;
       } else {
+        return count;
+      }
+
+      // Custom TimeConstraint function
+      double secondsElapsed = difftime(time(0), startTime);
+      if (secondsElapsed > timeConstraint) {
+        terminationReason_ = TerminationReason::TimeConstrained;
         return count;
       }
     }
@@ -402,8 +414,9 @@ int64_t HypergraphSubstitutionSystem::replaceOnce(const std::function<bool()>& s
 }
 
 int64_t HypergraphSubstitutionSystem::replace(const StepSpecification& stepSpec,
-                                              const std::function<bool()>& shouldAbort) {
-  return implementation_->replace(stepSpec, shouldAbort);
+                                              const std::function<bool()>& shouldAbort,
+                                              double const timeConstraint) {
+  return implementation_->replace(stepSpec, shouldAbort, timeConstraint);
 }
 
 std::vector<AtomsVector> HypergraphSubstitutionSystem::tokens() const { return implementation_->tokens(); }

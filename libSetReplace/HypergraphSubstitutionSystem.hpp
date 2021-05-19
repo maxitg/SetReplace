@@ -59,7 +59,8 @@ class HypergraphSubstitutionSystem {
     MaxFinalAtomDegree = 4,
     MaxFinalTokens = 5,
     Complete = 6,
-    Aborted = 7
+    Aborted = 7,
+    TimeConstrained = 8,
   };
 
   /** @brief Creates a new hypergraph system with given evaluation rules, and initial condition.
@@ -86,9 +87,12 @@ class HypergraphSubstitutionSystem {
   /** @brief Run replaceOnce() stepSpec.maxEvents times, or until the next token violates constraints imposed by
    * stepSpec.
    * @param shouldAbort function that should return true if abort is requested.
+   * @param timeConstraint number of seconds before stopping the execution.
    * @return The number of subtitutions made, could be between 0 and stepSpec.maxEvents.
    */
-  int64_t replace(const StepSpecification& stepSpec, const std::function<bool()>& shouldAbort);
+  int64_t replace(const StepSpecification& stepSpec,
+                  const std::function<bool()>& shouldAbort,
+                  const double timeConstraint);
 
   /** @brief List of all tokens in the system, past and present.
    */

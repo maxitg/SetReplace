@@ -19,7 +19,8 @@ importLibSetReplaceFunction[
 importLibSetReplaceFunction[
   "hypergraphSubstitutionSystemReplace" -> cpp$setReplace,
   {Integer,                   (* set ID *)
-   {Integer, 1, "Constant"}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
+   {Integer, 1, "Constant"},  (* {events, generations, atoms, max expressions per atom, expressions} *)
+   Real},                     (* time constraint *)
   "Void"];
 
 importLibSetReplaceFunction[
@@ -104,6 +105,7 @@ ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := ModuleScope[
 
 $maxInt64 = 2^63 - 1;
 $maxUInt32 = 2^32 - 1;
+$maxDouble = 1.7969*^308;
 
 $terminationReasonCodes = <|
   0 -> $notTerminated,
@@ -113,7 +115,8 @@ $terminationReasonCodes = <|
   4 -> $maxFinalVertexDegree,
   5 -> $maxFinalExpressions,
   6 -> $fixedPoint,
-  7 -> $Aborted
+  7 -> $Aborted,
+  8 -> $timeConstraint
 |>;
 
 (* GlobalSpacelike is syntactic sugar for "EventSelectionFunction" -> "MultiwaySpacelike", "MaxDestroyerEvents" -> 1 *)
@@ -173,16 +176,14 @@ setSubstitutionSystem$cpp[
     Replace[eventDeduplication, $eventDeduplicationCodes],
     RandomInteger[{0, $maxUInt32}]
   ];
-  TimeConstrained[
-    CheckAbort[
-      cpp$setReplace[
-        setID,
-        stepSpec /@ {
-            $maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalVertexDegree, $maxFinalExpressions} /.
-          {Infinity | (_ ? MissingQ) -> $maxInt64}],
-      If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]],
-    timeConstraint,
-    If[!returnOnAbortQ, Return[$Aborted], terminationReason = $timeConstraint]];
+  CheckAbort[
+    cpp$setReplace[
+      setID,
+      stepSpec /@ {
+          $maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalVertexDegree, $maxFinalExpressions} /.
+        {Infinity | (_ ? MissingQ) -> $maxInt64},
+      timeConstraint /. Infinity -> $maxDouble],
+    If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]];
   numericAtomLists = decodeAtomLists[cpp$setExpressions[setID]];
   events = decodeEvents[cpp$setEvents[setID]];
   maxCompleteGeneration = CheckAbort[

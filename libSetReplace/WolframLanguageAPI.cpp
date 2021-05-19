@@ -273,7 +273,7 @@ int hypergraphSubstitutionSystemReplace(WolframLibraryData libData,
                                         mint argc,
                                         MArgument* argv,
                                         [[maybe_unused]] MArgument result) {
-  if (argc != 2) {
+  if (argc != 3) {
     return LIBRARY_FUNCTION_ERROR;
   }
 
@@ -285,8 +285,10 @@ int hypergraphSubstitutionSystemReplace(WolframLibraryData libData,
     return LIBRARY_FUNCTION_ERROR;
   }
 
+  const double timeConstraint = MArgument_getReal(argv[2]);
+
   try {
-    hypergraphSubstitutionSystemFromID(systemID).replace(stepSpec, shouldAbort(libData));
+    hypergraphSubstitutionSystemFromID(systemID).replace(stepSpec, shouldAbort(libData), timeConstraint);
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
