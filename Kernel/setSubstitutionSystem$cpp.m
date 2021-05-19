@@ -102,8 +102,8 @@ ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := ModuleScope[
   newLeft -> newRight
 ];
 
-$maxInt64 = 2^63 - 1;
-$maxUInt32 = 2^32 - 1;
+$unset = -1;
+$maxInt32 = 2^31 - 1;
 
 $terminationReasonCodes = <|
   0 -> $notTerminated,
@@ -119,7 +119,7 @@ $terminationReasonCodes = <|
 (* GlobalSpacelike is syntactic sugar for "EventSelectionFunction" -> "MultiwaySpacelike", "MaxDestroyerEvents" -> 1 *)
 
 maxDestroyerEvents[_, $globalSpacelike] = 1;
-maxDestroyerEvents[Automatic | _ ? MissingQ | Infinity, _] = $maxInt64;
+maxDestroyerEvents[Automatic | _ ? MissingQ | Infinity, _] = $unset;
 maxDestroyerEvents[n_, _] := n;
 
 (* 0 -> All
@@ -171,7 +171,7 @@ setSubstitutionSystem$cpp[
     maxDestroyerEvents[stepSpec[$maxDestroyerEvents], eventSelectionFunction],
     Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
     Replace[eventDeduplication, $eventDeduplicationCodes],
-    RandomInteger[{0, $maxUInt32}]
+    RandomInteger[{0, $maxInt32}]
   ];
   TimeConstrained[
     CheckAbort[
@@ -179,7 +179,7 @@ setSubstitutionSystem$cpp[
         setID,
         stepSpec /@ {
             $maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalVertexDegree, $maxFinalExpressions} /.
-          {Infinity | (_ ? MissingQ) -> $maxInt64}],
+          {Infinity | (_ ? MissingQ) -> $unset}],
       If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]],
     timeConstraint,
     If[!returnOnAbortQ, Return[$Aborted], terminationReason = $timeConstraint]];

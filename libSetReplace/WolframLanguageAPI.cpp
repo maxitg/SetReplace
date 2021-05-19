@@ -105,6 +105,8 @@ HypergraphMatcher::OrderingSpec getOrderingSpec(WolframLibraryData libData, MTen
   return result;
 }
 
+constexpr int64_t wlStepLimitDisabled = -1;
+
 HypergraphSubstitutionSystem::StepSpecification getStepSpec(WolframLibraryData libData, MTensor stepsTensor) {
   mint tensorLength = libData->MTensor_getFlattenedLength(stepsTensor);
   constexpr mint specLength = 5;
@@ -115,6 +117,9 @@ HypergraphSubstitutionSystem::StepSpecification getStepSpec(WolframLibraryData l
     std::vector<int64_t> stepSpecElements(specLength);
     for (mint k = 0; k < specLength; ++k) {
       stepSpecElements[k] = static_cast<int64_t>(getData(tensorData, specLength, k));
+      if (stepSpecElements[k] == wlStepLimitDisabled) {
+        stepSpecElements[k] = HypergraphSubstitutionSystem::stepLimitDisabled;
+      }
       if (stepSpecElements[k] < 0) throw LIBRARY_FUNCTION_ERROR;
     }
 
@@ -230,6 +235,9 @@ int hypergraphSubstitutionSystemInitialize(WolframLibraryData libData,
   SystemID thisSystemID;
   std::vector<Rule> rules;
   std::vector<AtomsVector> initialTokens;
+  // WL passes wlStepLimitDisabled (-1) instead of HypergraphSubstitutionSystem::stepLimitDisabled (max int64) for
+  // infinity because passing 64-bit ints is not supported on 32-bit systems in LibraryLink
+  int64_t wlMaxDestroyerEvents;
   uint64_t maxDestroyerEvents;
   HypergraphMatcher::OrderingSpec orderingSpec;
   HypergraphMatcher::EventDeduplication eventDeduplication;
@@ -238,7 +246,9 @@ int hypergraphSubstitutionSystemInitialize(WolframLibraryData libData,
     thisSystemID = MArgument_getInteger(argv[0]);
     rules = getRules(libData, MArgument_getMTensor(argv[1]), MArgument_getMTensor(argv[2]));
     initialTokens = getHypergraph(libData, MArgument_getMTensor(argv[3]));
-    maxDestroyerEvents = MArgument_getInteger(argv[4]);
+    wlMaxDestroyerEvents = MArgument_getInteger(argv[4]);
+    maxDestroyerEvents = wlMaxDestroyerEvents == wlStepLimitDisabled ? HypergraphSubstitutionSystem::stepLimitDisabled
+                                                                     : wlMaxDestroyerEvents;
     orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[5]));
     eventDeduplication = static_cast<HypergraphMatcher::EventDeduplication>(MArgument_getInteger(argv[6]));
     randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[7]));
