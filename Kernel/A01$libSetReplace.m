@@ -30,9 +30,30 @@ If[!StringQ[$libraryFile] || !FileExistsQ[$libraryFile],
 
 $libraryFunctions = {};
 
+$cppRedistributableURL =
+  "https://support.microsoft.com/en-us/topic/" <>
+  "the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0";
+
+SetReplace::cppRedistributable =
+  "Check that " <>
+  "\!\(\*TemplateBox[" <>
+    "{\"Microsoft Visual C++ Redistributable\", " <>
+    "{URL[\"" <> $cppRedistributableURL <> "\"], None}, " <>
+    "\"" <> $cppRedistributableURL <> "\", " <>
+    "\"HyperlinkActionRecycled\", " <>
+    "{\"HyperlinkActive\"}, " <>
+    "BaseStyle -> {\"URL\"}, " <>
+    "HyperlinkAction -> \"Recycled\"}, " <>
+    "\"HyperlinkTemplate\"]\)" <>
+  " is installed.";
+
 importLibSetReplaceFunction[cppFunctionName_ -> symbol_, argumentTypes_, outputType_] := (
   symbol = If[$libraryFile =!= $Failed,
-    LibraryFunctionLoad[$libraryFile, cppFunctionName, argumentTypes, outputType]
+    Check[
+      LibraryFunctionLoad[$libraryFile, cppFunctionName, argumentTypes, outputType],
+      If[$SystemID === "Windows-x86-64", Message[SetReplace::cppRedistributable]]; $Failed,
+      {LibraryFunction::libload}
+    ]
   ,
     $Failed
   ];

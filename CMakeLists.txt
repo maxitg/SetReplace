@@ -55,22 +55,22 @@ message(STATUS "SET_REPLACE_BUILD_TESTING: ${SET_REPLACE_BUILD_TESTING}")
 message(STATUS "SET_REPLACE_COMPILE_OPTIONS: ${SET_REPLACE_COMPILE_OPTIONS}")
 
 set(libSetReplace_headers
-    Event.hpp
-    Rule.hpp
-    IDTypes.hpp
-    Expression.hpp
-    Match.hpp
-    Set.hpp
     Parallelism.hpp
-    SetReplace.hpp
+    IDTypes.hpp
+    Rule.hpp
+    TokenEventGraph.hpp
+    AtomsIndex.hpp
+    HypergraphMatcher.hpp
+    HypergraphSubstitutionSystem.hpp
+    WolframLanguageAPI.hpp
     )
 set(libSetReplace_sources
-    Event.cpp
-    Expression.cpp
-    Match.cpp
-    Set.cpp
     Parallelism.cpp
-    SetReplace.cpp
+    TokenEventGraph.cpp
+    AtomsIndex.cpp
+    HypergraphMatcher.cpp
+    HypergraphSubstitutionSystem.cpp
+    WolframLanguageAPI.cpp
     )
 list(TRANSFORM libSetReplace_headers PREPEND "libSetReplace/")
 list(TRANSFORM libSetReplace_sources PREPEND "libSetReplace/")

@@ -6,4 +6,5 @@ uses them to specify the rules for the [generators](/Documentation/Generators/RE
 
 These functions typically take a single argument for the system-specific rules:
 
+* [`AtomicStateSystem`](AtomicStateSystem.md)
 * [`MultisetSubstitutionSystem`](MultisetSubstitutionSystem.md)
