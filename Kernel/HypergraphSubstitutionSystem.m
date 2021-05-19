@@ -5,7 +5,7 @@ PackageImport["GeneralUtilities`"]
 PackageExport["HypergraphSubstitutionSystem"]
 
 importLibSetReplaceFunction[
-  "setInitialize" -> cpp$setInitialize,
+  "hypergraphSubstitutionSystemInitialize" -> cpp$hypergraphSubstitutionSystemInitialize,
   {Integer,                  (* set ID *)
    {Integer, 1, "Constant"}, (* rules *)
    {Integer, 1, "Constant"}, (* event selection functions for rules *)
@@ -17,7 +17,7 @@ importLibSetReplaceFunction[
   "Void"];
 
 importLibSetReplaceFunction[
-  "setReplace" -> cpp$setReplace,
+  "hypergraphSubstitutionSystemReplace" -> cpp$hypergraphSubstitutionSystemReplace,
   {Integer,                   (* set ID *)
    {Integer, 1, "Constant"}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
   "Void"];
@@ -51,7 +51,7 @@ generateHypergraphSubstitutionSystem[HypergraphSubstitutionSystem[rawRules___],
     terminationReason = Undefined;
     TimeConstrained[
       CheckAbort[
-        cpp$setReplace[
+        cpp$hypergraphSubstitutionSystemReplace[
           objID,
           Replace[{maxEvents, maxGeneration, maxVertices, maxVertexDegree, maxEdges},
                   {Infinity | (_ ? MissingQ) -> $maxInt64},
@@ -90,7 +90,7 @@ hypergraphSubstitutionSystemInit[objID_, rules_, init_, maxDestroyerEvents_, eve
       {K, Length[rules]}];
 
     (* NOTE(daniel): Arguments below have missing functionality *)
-    cpp$setInitialize[
+    cpp$hypergraphSubstitutionSystemInitialize[
       objID,
       encodeNestedLists[List @@@ mappedRules],
       Echo @ ConstantArray[Replace[maxDestroyerEvents, {_ -> 0}], Length @ rules],

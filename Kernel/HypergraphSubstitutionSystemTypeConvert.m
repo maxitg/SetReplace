@@ -3,22 +3,22 @@ Package["SetReplace`"]
 PackageImport["GeneralUtilities`"]
 
 importLibSetReplaceFunction[
-  "setExpressions" -> cpp$setExpressions,
+  "hypergraphSubstitutionSystemTokens" -> cpp$hypergraphSubstitutionSystemTokens,
   {Integer},     (* set ID *)
   {Integer, 1}]; (* expressions *)
 
 importLibSetReplaceFunction[
-  "setEvents" -> cpp$setEvents,
+  "hypergraphSubstitutionSystemEvents" -> cpp$hypergraphSubstitutionSystemEvents,
   {Integer},     (* set ID *)
   {Integer, 1}]; (* expressions *)
 
 importLibSetReplaceFunction[
-  "maxCompleteGeneration" -> cpp$maxCompleteGeneration,
+  "hypergraphSubstitutionSystemMaxCompleteGeneration" -> cpp$hypergraphSubstitutionSystemMaxCompleteGeneration,
   {Integer}, (* set ID *)
   Integer];  (* generation *)
 
 importLibSetReplaceFunction[
-  "terminationReason" -> cpp$terminationReason,
+  "hypergraphSubstitutionSystemTerminationReason" -> cpp$hypergraphSubstitutionSystemTerminationReason,
   {Integer}, (* set ID *)
   Integer];  (* reason *)
 
@@ -33,11 +33,12 @@ toWolframModelEvolutionObject[obj : Multihistory[_, data_]] :=
     objID = ManagedLibraryExpressionID[data["ObjectHandle"], "SetReplace"];
     terminationReason = data["TerminationReason"];
 
-    numericAtomLists = decodeAtomLists[cpp$setExpressions[objID]];
-    events = decodeEvents[cpp$setEvents[objID]];
+    numericAtomLists = decodeAtomLists[cpp$hypergraphSubstitutionSystemTokens[objID]];
+    events = decodeEvents[cpp$hypergraphSubstitutionSystemEvents[objID]];
 
     maxCompleteGeneration = CheckAbort[
-      Replace[cpp$maxCompleteGeneration[objID], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]]
+      Replace[cpp$hypergraphSubstitutionSystemMaxCompleteGeneration[objID],
+              LibraryFunctionError[___] -> Missing["Unknown", $Aborted]]
     ,
       If[!returnOnAbortQ,
         Abort[]
@@ -47,7 +48,7 @@ toWolframModelEvolutionObject[obj : Multihistory[_, data_]] :=
       ]
     ];
 
-    terminationReason = Replace[$terminationReasonCodes[cpp$terminationReason[objID]], {
+    terminationReason = Replace[$terminationReasonCodes[cpp$hypergraphSubstitutionSystemTerminationReason[objID]], {
       $Aborted -> terminationReason,
       $notTerminated -> $timeConstraint}];
 
