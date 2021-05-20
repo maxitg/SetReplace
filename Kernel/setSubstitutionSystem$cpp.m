@@ -13,7 +13,8 @@ importLibSetReplaceFunction[
    Integer,                  (* event selection function *)
    {Integer, 1, "Constant"}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
    Integer,                  (* event deduplication *)
-   Integer},                 (* random seed *)
+   (* random seed, passed as two numbers because LibraryLink does not support unsigned ints *)
+   {Integer, 1, "Constant"}},
   "Void"];
 
 importLibSetReplaceFunction[
@@ -103,7 +104,7 @@ ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := ModuleScope[
 ];
 
 $unset = -1;
-$maxInt32 = 2^31 - 1;
+$maxUInt32 = 2^32 - 1;
 
 $terminationReasonCodes = <|
   0 -> $notTerminated,
@@ -171,7 +172,7 @@ setSubstitutionSystem$cpp[
     maxDestroyerEvents[stepSpec[$maxDestroyerEvents], eventSelectionFunction],
     Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
     Replace[eventDeduplication, $eventDeduplicationCodes],
-    RandomInteger[{0, $maxInt32}]
+    FromDigits[#, 2] & /@ Partition[IntegerDigits[RandomInteger[{0, $maxUInt32}], 2, 32], 16]
   ];
   TimeConstrained[
     CheckAbort[

@@ -105,6 +105,19 @@ HypergraphMatcher::OrderingSpec getOrderingSpec(WolframLibraryData libData, MTen
   return result;
 }
 
+// Seed is passed as two uint16_t because LibraryLink does not support unsigned ints, which becomes a problem on 32-bit
+// architectures
+uint32_t getSeed(WolframLibraryData libData, MTensor seedTensor) {
+  mint tensorLength = libData->MTensor_getFlattenedLength(seedTensor);
+  if (tensorLength != 2) throw LIBRARY_FUNCTION_ERROR;
+  mint* tensorData = libData->MTensor_getIntegerData(seedTensor);
+  uint32_t result = 0;
+  for (mint i = 0; i < tensorLength; ++i) {
+    result = (1 << 16) * result + static_cast<uint32_t>(getData(tensorData, tensorLength, i));
+  }
+  return result;
+}
+
 constexpr int64_t wlStepLimitDisabled = -1;
 
 HypergraphSubstitutionSystem::StepSpecification getStepSpec(WolframLibraryData libData, MTensor stepsTensor) {
@@ -251,7 +264,7 @@ int hypergraphSubstitutionSystemInitialize(WolframLibraryData libData,
                                                                      : wlMaxDestroyerEvents;
     orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[5]));
     eventDeduplication = static_cast<HypergraphMatcher::EventDeduplication>(MArgument_getInteger(argv[6]));
-    randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[7]));
+    randomSeed = getSeed(libData, MArgument_getMTensor(argv[7]));
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
