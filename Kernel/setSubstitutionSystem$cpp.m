@@ -172,7 +172,7 @@ setSubstitutionSystem$cpp[
     maxDestroyerEvents[stepSpec[$maxDestroyerEvents], eventSelectionFunction],
     Catenate[Replace[eventOrderingFunction, $orderingFunctionCodes, {2}]],
     Replace[eventDeduplication, $eventDeduplicationCodes],
-    FromDigits[#, 2] & /@ Partition[IntegerDigits[RandomInteger[{0, $maxUInt32}], 2, 32], 16]
+    IntegerDigits[RandomInteger[{0, $maxUInt32}], 2^16, 2]
   ];
   TimeConstrained[
     CheckAbort[
