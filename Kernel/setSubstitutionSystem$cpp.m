@@ -193,8 +193,11 @@ setSubstitutionSystem$cpp[
   ,
     If[!returnOnAbortQ, Abort[], Missing["Unknown", $Aborted]]
   ];
-  terminationReason = Replace[$terminationReasonCodes[cpp$terminationReason[setID]], {
-    $notTerminated -> $timeConstraint}];
+
+  terminationReason = $terminationReasonCodes[cpp$terminationReason[setID]];
+  If[(terminationReason === $timeConstraint) && !returnOnAbortQ, Abort[]];
+  terminationReason = Replace[terminationReason, $notTerminated -> $timeConstraint];
+
   resultAtoms = Union[Catenate[numericAtomLists]];
   inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
   inverseGlobalMap = Association @ Thread[resultAtoms
