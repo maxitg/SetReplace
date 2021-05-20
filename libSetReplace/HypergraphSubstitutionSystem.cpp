@@ -1,7 +1,5 @@
 #include "HypergraphSubstitutionSystem.hpp"
 
-#include <time.h>
-
 #include <algorithm>
 #include <limits>
 #include <memory>
@@ -58,7 +56,9 @@ class HypergraphSubstitutionSystem::Implementation {
               return causalGraph_.tokenSeparation(first, second);
             }) {}
 
-  int64_t replaceOnce(const std::function<bool()> shouldAbort, bool resetStepSpec = false) {
+  int64_t replaceOnce(const std::function<bool()> shouldAbort,
+                      const std::function<bool()> shouldTimeOut,
+                      bool resetStepSpec = false) {
     if (resetStepSpec) {
       updateStepSpec(StepSpecification{});
     }
@@ -69,10 +69,14 @@ class HypergraphSubstitutionSystem::Implementation {
       return 0;
     }
 
-    indexNewTokens([this, &shouldAbort]() {
+    indexNewTokens([this, &shouldAbort, &shouldTimeOut]() {
       const bool isAborted = shouldAbort();
       if (isAborted) terminationReason_ = TerminationReason::Aborted;
-      return isAborted;
+
+      const bool isTimeConstrained = shouldTimeOut();
+      if (isTimeConstrained) terminationReason_ = TerminationReason::TimeConstrained;
+
+      return isAborted || isTimeConstrained;
     });
     if (matcher_.empty()) {
       if (causalGraph_.largestGeneration() == stepSpec_.maxGenerationsLocal) {
@@ -134,24 +138,28 @@ class HypergraphSubstitutionSystem::Implementation {
 
   int64_t replace(const StepSpecification stepSpec,
                   const std::function<bool()>& shouldAbort,
-                  double const timeConstraint) {
+                  double const timeConstraintSec) {
     updateStepSpec(stepSpec);
     int64_t count = 0;
     if (maxDestroyerEvents_ == 0) {
       return count;
     }
-    time_t startTime = time(0);
+
+    auto timeConstraint = HypergraphSubstitutionSystem::maxTimeConstraint;
+    if (timeConstraintSec > 0) {
+      // https://stackoverflow.com/questions/45884081/terse-conversion-from-double-seconds-to-stdchronosteady-clockduration
+      timeConstraint = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+          std::chrono::duration<double>(timeConstraintSec));
+    }
+    auto startTime = std::chrono::steady_clock::now();
+    const std::function<bool()> shouldTimeOut = [startTime, timeConstraint]() {
+      return (std::chrono::steady_clock::now() - startTime) > timeConstraint;
+    };
+
     while (true) {
-      if (replaceOnce(shouldAbort)) {
+      if (replaceOnce(shouldAbort, shouldTimeOut)) {
         ++count;
       } else {
-        return count;
-      }
-
-      // Custom TimeConstraint function
-      double secondsElapsed = difftime(time(0), startTime);
-      if (secondsElapsed > timeConstraint) {
-        terminationReason_ = TerminationReason::TimeConstrained;
         return count;
       }
     }
@@ -409,14 +417,15 @@ HypergraphSubstitutionSystem::HypergraphSubstitutionSystem(
     : implementation_(std::make_shared<Implementation>(
           rules, initialTokens, maxDestroyerEvents, orderingSpec, eventDeduplication, randomSeed)) {}
 
-int64_t HypergraphSubstitutionSystem::replaceOnce(const std::function<bool()>& shouldAbort) {
-  return implementation_->replaceOnce(shouldAbort, true);
+int64_t HypergraphSubstitutionSystem::replaceOnce(const std::function<bool()>& shouldAbort,
+                                                  const std::function<bool()>& shouldTimeOut) {
+  return implementation_->replaceOnce(shouldAbort, shouldTimeOut, true);
 }
 
 int64_t HypergraphSubstitutionSystem::replace(const StepSpecification& stepSpec,
                                               const std::function<bool()>& shouldAbort,
-                                              double const timeConstraint) {
-  return implementation_->replace(stepSpec, shouldAbort, timeConstraint);
+                                              double const timeConstraintSec) {
+  return implementation_->replace(stepSpec, shouldAbort, timeConstraintSec);
 }
 
 std::vector<AtomsVector> HypergraphSubstitutionSystem::tokens() const { return implementation_->tokens(); }

@@ -31,16 +31,16 @@ HypergraphSubstitutionSystem testSystem(const uint64_t maxDestroyerEvents,
 
 constexpr auto doNotAbort = []() { return false; };
 
-constexpr int64_t max64int = std::numeric_limits<int64_t>::max();
+constexpr auto doNotTimeOut = []() { return false; };
 
-constexpr double maxdouble = std::numeric_limits<double>::max();
+constexpr int64_t max64int = std::numeric_limits<int64_t>::max();
 
 TEST(HypergraphSubstitutionSystem, globalSpacelike) {
   // Singleway systems are always spacelike, so it's not necessary to specify a spacelike selection function
   HypergraphSubstitutionSystem aSystem = testSystem(1, EventSelectionFunction::All);
   HypergraphSubstitutionSystem::StepSpecification stepSpec;
   stepSpec.maxEvents = 2;
-  EXPECT_EQ(aSystem.replace(stepSpec, doNotAbort, maxdouble), 2);
+  EXPECT_EQ(aSystem.replace(stepSpec, doNotAbort), 2);
   EXPECT_EQ(aSystem.maxCompleteGeneration(doNotAbort), 1);
   EXPECT_EQ(aSystem.terminationReason(), HypergraphSubstitutionSystem::TerminationReason::MaxEvents);
   EXPECT_EQ(aSystem.tokens(), (std::vector<AtomsVector>{{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}, {2}, {4}}));
@@ -50,7 +50,7 @@ TEST(HypergraphSubstitutionSystem, globalSpacelike) {
   EXPECT_EQ(aSystem.events()[2].outputTokens, (std::vector<TokenID>{8}));
   EXPECT_EQ(aSystem.events()[2].rule, 0);
 
-  EXPECT_EQ(aSystem.replace(HypergraphSubstitutionSystem::StepSpecification(), doNotAbort, maxdouble), 3);
+  EXPECT_EQ(aSystem.replace(HypergraphSubstitutionSystem::StepSpecification(), doNotAbort), 3);
   // in the global spacelike case, only one of the {5}'s can make it to {6} because there is only one {5, 6} to use.
   EXPECT_EQ(aSystem.tokens(),
             (std::vector<AtomsVector>{{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}, {2}, {4}, {5}, {5}, {6}}));
@@ -59,7 +59,7 @@ TEST(HypergraphSubstitutionSystem, globalSpacelike) {
 TEST(HypergraphSubstitutionSystem, matchAllMultiway) {
   HypergraphSubstitutionSystem aSystem = testSystem(max64int, EventSelectionFunction::All);
   // Unlike the global spacelike case, the token {5, 6} can now be used twice, so there is an extra event
-  EXPECT_EQ(aSystem.replace(HypergraphSubstitutionSystem::StepSpecification(), doNotAbort, maxdouble), 6);
+  EXPECT_EQ(aSystem.replace(HypergraphSubstitutionSystem::StepSpecification(), doNotAbort), 6);
   // and two {6}'s in the list of tokens
   EXPECT_EQ(aSystem.tokens(),
             (std::vector<AtomsVector>{{1}, {1, 2}, {3}, {3, 4}, {2, 5}, {4, 5}, {5, 6}, {2}, {4}, {5}, {5}, {6}, {6}}));
@@ -90,8 +90,7 @@ TEST(HypergraphSubstitutionSystem, maxDestroyerEvents1) {
   HypergraphSubstitutionSystem::StepSpecification stepSpec;
   stepSpec.maxEvents = 5;
 
-  EXPECT_EQ(aSpacelikeSystem.replace(stepSpec, doNotAbort, maxdouble),
-            anAllSystem.replace(stepSpec, doNotAbort, maxdouble));
+  EXPECT_EQ(aSpacelikeSystem.replace(stepSpec, doNotAbort), anAllSystem.replace(stepSpec, doNotAbort));
 
   EXPECT_EQ(aSpacelikeSystem.tokens(), anAllSystem.tokens());
   for (int i = 0; i <= stepSpec.maxEvents; ++i) {
@@ -116,7 +115,7 @@ TEST(HypergraphSubstitutionSystem, maxDestroyerEventsN) {
 
   for (int n = 0; n <= 20; ++n) {
     HypergraphSubstitutionSystem aSpacelikeSystem = testSystemMaxDestroyerEvents(n, EventSelectionFunction::Spacelike);
-    aSpacelikeSystem.replace(stepSpec, doNotAbort, maxdouble);
+    aSpacelikeSystem.replace(stepSpec, doNotAbort);
 
     const auto& destroyerEventsCountMap = getDestroyerEventsCountMap(aSpacelikeSystem.events());
     for (auto& iterator : destroyerEventsCountMap) {
@@ -131,7 +130,7 @@ TEST(HypergraphSubstitutionSystem, maxDestroyerEventsMultiwaySpacelike) {
   HypergraphSubstitutionSystem::StepSpecification stepSpec;
   stepSpec.maxEvents = 5;
 
-  EXPECT_EQ(aSystem2.replace(stepSpec, doNotAbort, maxdouble), aSystem3.replace(stepSpec, doNotAbort, maxdouble));
+  EXPECT_EQ(aSystem2.replace(stepSpec, doNotAbort), aSystem3.replace(stepSpec, doNotAbort));
 
   EXPECT_EQ(aSystem2.events()[5].inputTokens, (std::vector<TokenID>{5, 3}));
   EXPECT_EQ(aSystem2.events()[5].outputTokens, (std::vector<TokenID>{18, 19, 20, 21}));
@@ -150,6 +149,6 @@ TEST(HypergraphSubstitutionSystem, replaceOnce) {
 
   HypergraphSubstitutionSystem system(
       {{{{-1}}, {{-1, -1}}}}, {{1}}, 1, orderingSpec, HypergraphMatcher::EventDeduplication::None, 0);
-  EXPECT_EQ(system.replaceOnce(doNotAbort), 1);
+  EXPECT_EQ(system.replaceOnce(doNotAbort, doNotTimeOut), 1);
 }
 }  // namespace SetReplace

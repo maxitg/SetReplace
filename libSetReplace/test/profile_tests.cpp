@@ -9,7 +9,7 @@ namespace SetReplace {
 
 constexpr auto doNotAbort = []() { return false; };
 
-constexpr double maxdouble = std::numeric_limits<double>::max();
+constexpr auto doNotTimeOut = []() { return false; };
 
 HypergraphMatcher::OrderingSpec orderingSpec = {
     {HypergraphMatcher::OrderingFunction::SortedInputTokenIndices, HypergraphMatcher::OrderingDirection::Normal},
@@ -23,7 +23,7 @@ TEST(HypergraphSubstitutionSystem, profileSingleInputRule) {
                                       1,
                                       orderingSpec,
                                       HypergraphMatcher::EventDeduplication::None);
-  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{1000}, doNotAbort, maxdouble), 1000);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{1000}, doNotAbort), 1000);
 }
 
 TEST(HypergraphSubstitutionSystem, profileMediumRule) {
@@ -34,7 +34,7 @@ TEST(HypergraphSubstitutionSystem, profileMediumRule) {
       1,
       orderingSpec,
       HypergraphMatcher::EventDeduplication::None);
-  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{5000}, doNotAbort, maxdouble), 5000);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{5000}, doNotAbort), 5000);
 }
 
 TEST(HypergraphSubstitutionSystem, profileSequentialRule) {
@@ -43,7 +43,7 @@ TEST(HypergraphSubstitutionSystem, profileSequentialRule) {
                                       1,
                                       orderingSpec,
                                       HypergraphMatcher::EventDeduplication::None);
-  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{10000}, doNotAbort, maxdouble), 10000);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{10000}, doNotAbort), 10000);
 }
 
 TEST(HypergraphSubstitutionSystem, profileLargeRule) {
@@ -64,7 +64,7 @@ TEST(HypergraphSubstitutionSystem, profileLargeRule) {
                                       1,
                                       orderingSpec,
                                       HypergraphMatcher::EventDeduplication::None);
-  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{4}, doNotAbort, maxdouble), 4);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{4}, doNotAbort), 4);
 }
 
 TEST(HypergraphSubstitutionSystem, profileExponentialMatchCountRule) {
@@ -73,7 +73,7 @@ TEST(HypergraphSubstitutionSystem, profileExponentialMatchCountRule) {
                                       1,
                                       orderingSpec,
                                       HypergraphMatcher::EventDeduplication::None);
-  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{18}, doNotAbort, maxdouble), 18);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{18}, doNotAbort), 18);
 }
 
 TEST(HypergraphSubstitutionSystem, profileCAEmulator) {
@@ -319,7 +319,7 @@ TEST(HypergraphSubstitutionSystem, profileCAEmulator) {
 
   HypergraphSubstitutionSystem system(
       rules, initialTokens, 1, orderingSpec, HypergraphMatcher::EventDeduplication::None);
-  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{250}, doNotAbort, maxdouble), 250);
+  EXPECT_EQ(system.replace(HypergraphSubstitutionSystem::StepSpecification{250}, doNotAbort), 250);
 }
 
 }  // namespace SetReplace

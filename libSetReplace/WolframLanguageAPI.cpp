@@ -285,10 +285,10 @@ int hypergraphSubstitutionSystemReplace(WolframLibraryData libData,
     return LIBRARY_FUNCTION_ERROR;
   }
 
-  const double timeConstraint = MArgument_getReal(argv[2]);
+  const double timeConstraintSec = MArgument_getReal(argv[2]);
 
   try {
-    hypergraphSubstitutionSystemFromID(systemID).replace(stepSpec, shouldAbort(libData), timeConstraint);
+    hypergraphSubstitutionSystemFromID(systemID).replace(stepSpec, shouldAbort(libData), timeConstraintSec);
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
