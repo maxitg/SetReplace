@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(SetReplace
     VERSION 0.3.0
     LANGUAGES CXX)
-set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
+set(CMAKE_OSX_ARCHITECTURES arm64)
 message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 
 option(SET_REPLACE_BUILD_TESTING "Enable cpp testing." OFF)
