@@ -186,6 +186,11 @@ setSubstitutionSystem$cpp[
   ,
     If[!returnOnAbortQ, Abort[]]
   ];
+
+  terminationReason = $terminationReasonCodes[cpp$terminationReason[setID]];
+  If[(terminationReason === $timeConstraint) && !returnOnAbortQ, Return @ $Aborted];
+  terminationReason = Replace[terminationReason, $notTerminated -> $timeConstraint];
+
   numericAtomLists = decodeAtomLists[cpp$setExpressions[setID]];
   events = decodeEvents[cpp$setEvents[setID]];
   maxCompleteGeneration = CheckAbort[
@@ -193,10 +198,6 @@ setSubstitutionSystem$cpp[
   ,
     If[!returnOnAbortQ, Abort[], Missing["Unknown", $Aborted]]
   ];
-
-  terminationReason = $terminationReasonCodes[cpp$terminationReason[setID]];
-  If[(terminationReason === $timeConstraint) && !returnOnAbortQ, Abort[]];
-  terminationReason = Replace[terminationReason, $notTerminated -> $timeConstraint];
 
   resultAtoms = Union[Catenate[numericAtomLists]];
   inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
