@@ -182,15 +182,18 @@ setSubstitutionSystem$cpp[
       stepSpec /@ {
           $maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalVertexDegree, $maxFinalExpressions} /.
         {Infinity | (_ ? MissingQ) -> $maxInt64},
-      timeConstraint /. Infinity -> $maxDouble],
-    If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]];
+      timeConstraint /. Infinity -> -1]
+  ,
+    If[!returnOnAbortQ, Abort[]]
+  ];
   numericAtomLists = decodeAtomLists[cpp$setExpressions[setID]];
   events = decodeEvents[cpp$setEvents[setID]];
   maxCompleteGeneration = CheckAbort[
-    Replace[cpp$maxCompleteGeneration[setID], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]],
-    If[!returnOnAbortQ, Abort[], terminationReason = $Aborted; Missing["Unknown", $Aborted]]];
+    Replace[cpp$maxCompleteGeneration[setID], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]]
+  ,
+    If[!returnOnAbortQ, Abort[], Missing["Unknown", $Aborted]]
+  ];
   terminationReason = Replace[$terminationReasonCodes[cpp$terminationReason[setID]], {
-    $Aborted -> terminationReason,
     $notTerminated -> $timeConstraint}];
   resultAtoms = Union[Catenate[numericAtomLists]];
   inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
