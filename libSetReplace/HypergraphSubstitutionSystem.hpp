@@ -30,7 +30,8 @@ class HypergraphSubstitutionSystem {
 
   static constexpr int64_t stepLimitDisabled = std::numeric_limits<int64_t>::max();
 
-  static constexpr std::chrono::steady_clock::duration maxTimeConstraint = std::chrono::steady_clock::duration::max();
+  static constexpr std::chrono::steady_clock::duration timeConstraintDisabled =
+      std::chrono::steady_clock::duration::max();
 
   /** @brief Specification of conditions upon which to stop evaluation.
    * @details Each of these is UpTo, i.e., the evaluation is terminated when the first of these, fixed point, or an
@@ -82,21 +83,20 @@ class HypergraphSubstitutionSystem {
                                unsigned int randomSeed = 0);
 
   /** @brief Perform a single substitution, create the corresponding event, and output tokens.
-   * @param shouldAbort function that should return true if abort is requested.
-   * @param shouldTimeOut function that returns true if the evolution timed out.
+   * @param shouldAbortOrTimeOut function that should return true if abort is requested or the evolution timed out.
    * @return 1 if substitution was made, 0 if no matches were found.
    */
-  int64_t replaceOnce(const std::function<bool()>& shouldAbort, const std::function<bool()>& shouldTimeOut);
+  int64_t replaceOnce(const std::function<bool()>& shouldAbortOrTimeOut);
 
   /** @brief Run replaceOnce() stepSpec.maxEvents times, or until the next token violates constraints imposed by
    * stepSpec.
    * @param shouldAbort function that should return true if abort is requested.
-   * @param timeConstraintSec number of seconds before timing out the evolution.
+   * @param timeConstraint number of seconds before timing out the evolution.
    * @return The number of subtitutions made, could be between 0 and stepSpec.maxEvents.
    */
   int64_t replace(const StepSpecification& stepSpec,
                   const std::function<bool()>& shouldAbort,
-                  double const timeConstraintSec = -1.0);
+                  std::chrono::steady_clock::duration const timeConstraint = timeConstraintDisabled);
 
   /** @brief List of all tokens in the system, past and present.
    */

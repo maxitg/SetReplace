@@ -105,7 +105,6 @@ ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := ModuleScope[
 
 $maxInt64 = 2^63 - 1;
 $maxUInt32 = 2^32 - 1;
-$maxDouble = 1.7969*^308;
 
 $terminationReasonCodes = <|
   0 -> $notTerminated,

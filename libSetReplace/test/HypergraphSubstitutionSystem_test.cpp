@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include <chrono>
 #include <unordered_map>
 #include <vector>
 
@@ -30,8 +31,6 @@ HypergraphSubstitutionSystem testSystem(const uint64_t maxDestroyerEvents,
 }
 
 constexpr auto doNotAbort = []() { return false; };
-
-constexpr auto doNotTimeOut = []() { return false; };
 
 constexpr int64_t max64int = std::numeric_limits<int64_t>::max();
 
@@ -149,6 +148,6 @@ TEST(HypergraphSubstitutionSystem, replaceOnce) {
 
   HypergraphSubstitutionSystem system(
       {{{{-1}}, {{-1, -1}}}}, {{1}}, 1, orderingSpec, HypergraphMatcher::EventDeduplication::None, 0);
-  EXPECT_EQ(system.replaceOnce(doNotAbort, doNotTimeOut), 1);
+  EXPECT_EQ(system.replaceOnce(doNotAbort), 1);
 }
 }  // namespace SetReplace
