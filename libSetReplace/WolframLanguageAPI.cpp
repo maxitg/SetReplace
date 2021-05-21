@@ -296,7 +296,7 @@ int hypergraphSubstitutionSystemReplace(WolframLibraryData libData,
                                         mint argc,
                                         MArgument* argv,
                                         [[maybe_unused]] MArgument result) {
-  if (argc != 2) {
+  if (argc != 3) {
     return LIBRARY_FUNCTION_ERROR;
   }
 
@@ -308,8 +308,15 @@ int hypergraphSubstitutionSystemReplace(WolframLibraryData libData,
     return LIBRARY_FUNCTION_ERROR;
   }
 
+  const double timeConstraintWL = MArgument_getReal(argv[2]);
+  auto timeConstraint = HypergraphSubstitutionSystem::timeConstraintDisabled;
+  if (timeConstraintWL > 0) {
+    timeConstraint = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+        std::chrono::duration<double>(timeConstraintWL));
+  }
+
   try {
-    hypergraphSubstitutionSystemFromID(systemID).replace(stepSpec, shouldAbort(libData));
+    hypergraphSubstitutionSystemFromID(systemID).replace(stepSpec, shouldAbort(libData), timeConstraint);
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
