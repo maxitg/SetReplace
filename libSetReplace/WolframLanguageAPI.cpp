@@ -310,7 +310,7 @@ int hypergraphSubstitutionSystemReplace(WolframLibraryData libData,
 
   const double timeConstraintWL = MArgument_getReal(argv[2]);
   auto timeConstraint = HypergraphSubstitutionSystem::timeConstraintDisabled;
-  if (timeConstraintWL < 0) {
+  if (timeConstraintWL > 0) {
     timeConstraint = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
         std::chrono::duration<double>(timeConstraintWL));
   }
