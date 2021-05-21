@@ -9,8 +9,6 @@ namespace SetReplace {
 
 constexpr auto doNotAbort = []() { return false; };
 
-constexpr auto doNotTimeOut = []() { return false; };
-
 HypergraphMatcher::OrderingSpec orderingSpec = {
     {HypergraphMatcher::OrderingFunction::SortedInputTokenIndices, HypergraphMatcher::OrderingDirection::Normal},
     {HypergraphMatcher::OrderingFunction::ReverseSortedInputTokenIndices, HypergraphMatcher::OrderingDirection::Normal},
