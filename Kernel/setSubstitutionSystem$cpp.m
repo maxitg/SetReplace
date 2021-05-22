@@ -7,7 +7,7 @@ PackageScope["setSubstitutionSystem$cpp"]
 (* GlobalSpacelike is syntactic sugar for "EventSelectionFunction" -> "MultiwaySpacelike", "MaxDestroyerEvents" -> 1 *)
 
 maxDestroyerEvents[_, $globalSpacelike] = 1;
-maxDestroyerEvents[Automatic | _ ? MissingQ | Infinity, _] = $maxInt64;
+maxDestroyerEvents[Automatic | _ ? MissingQ | Infinity, _] = $unset;
 maxDestroyerEvents[n_, _] := n;
 
 (* 0 -> All
@@ -24,18 +24,26 @@ $eventDeduplicationCodes = <|
 setSubstitutionSystem$cpp[
         rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrdering_, eventSelectionFunction_,
         eventDeduplication_] /;
-      $libSetReplaceAvailable := Module[{multihistory, nstepSpec},
+      $libSetReplaceAvailable := Module[{multihistory, nstepSpec, terminationReason},
 
   nstepSpec = KeyMap[$stepSpecKeys, stepSpec];
 
-  multihistory = GenerateMultihistory[
-    HypergraphSubstitutionSystem[rules],
-    Echo @ KeyTake[nstepSpec, {"MaxDestroyerEvents", "MaxGeneration"}],
-    None,  (* TODO(daniel): Add existing deduplication *)
-    eventOrdering,
-    Append["TimeConstraint" -> timeConstraint] @
-      Echo @ KeyTake[nstepSpec, {"MaxEvents", "MaxVertices", "MaxVertexDegree", "MaxEdges"}]
-  ] @ set;
+  CheckAbort[
+    multihistory = GenerateMultihistory[
+      HypergraphSubstitutionSystem[rules],
+      Echo @ KeyTake[nstepSpec, {"MaxDestroyerEvents", "MaxGeneration"}],
+      None,  (* TODO(daniel): Add existing deduplication *)
+      eventOrdering,
+      Append["TimeConstraint" -> timeConstraint] @
+        Echo @ KeyTake[nstepSpec, {"MaxEvents", "MaxVertices", "MaxVertexDegree", "MaxEdges"}]
+    ] @ set;
+  ,
+    If[!returnOnAbortQ, Abort[]]
+  ];
+
+  (* terminationReason = $terminationReasonCodes[cpp$terminationReason[setID]];
+  If[(terminationReason === $timeConstraint) && !returnOnAbortQ, Return @ $Aborted];
+  terminationReason = Replace[terminationReason, $notTerminated -> $timeConstraint]; *)
 
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @ multihistory
 ];

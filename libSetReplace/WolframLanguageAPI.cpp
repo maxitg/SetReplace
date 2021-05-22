@@ -105,6 +105,21 @@ HypergraphMatcher::OrderingSpec getOrderingSpec(WolframLibraryData libData, MTen
   return result;
 }
 
+// Seed is passed as two uint16_t because LibraryLink does not support unsigned ints, which becomes a problem on 32-bit
+// architectures
+uint32_t getSeed(WolframLibraryData libData, MTensor seedTensor) {
+  mint tensorLength = libData->MTensor_getFlattenedLength(seedTensor);
+  if (tensorLength != 2) throw LIBRARY_FUNCTION_ERROR;
+  mint* tensorData = libData->MTensor_getIntegerData(seedTensor);
+  uint32_t result = 0;
+  for (mint i = 0; i < tensorLength; ++i) {
+    result = (1 << 16) * result + static_cast<uint32_t>(getData(tensorData, tensorLength, i));
+  }
+  return result;
+}
+
+constexpr int64_t wlStepLimitDisabled = -1;
+
 HypergraphSubstitutionSystem::StepSpecification getStepSpec(WolframLibraryData libData, MTensor stepsTensor) {
   mint tensorLength = libData->MTensor_getFlattenedLength(stepsTensor);
   constexpr mint specLength = 5;
@@ -115,6 +130,9 @@ HypergraphSubstitutionSystem::StepSpecification getStepSpec(WolframLibraryData l
     std::vector<int64_t> stepSpecElements(specLength);
     for (mint k = 0; k < specLength; ++k) {
       stepSpecElements[k] = static_cast<int64_t>(getData(tensorData, specLength, k));
+      if (stepSpecElements[k] == wlStepLimitDisabled) {
+        stepSpecElements[k] = HypergraphSubstitutionSystem::stepLimitDisabled;
+      }
       if (stepSpecElements[k] < 0) throw LIBRARY_FUNCTION_ERROR;
     }
 
@@ -230,6 +248,9 @@ int hypergraphSubstitutionSystemInitialize(WolframLibraryData libData,
   SystemID thisSystemID;
   std::vector<Rule> rules;
   std::vector<AtomsVector> initialTokens;
+  // WL passes wlStepLimitDisabled (-1) instead of HypergraphSubstitutionSystem::stepLimitDisabled (max int64) for
+  // infinity because passing 64-bit ints is not supported on 32-bit systems in LibraryLink
+  int64_t wlMaxDestroyerEvents;
   uint64_t maxDestroyerEvents;
   HypergraphMatcher::OrderingSpec orderingSpec;
   HypergraphMatcher::EventDeduplication eventDeduplication;
@@ -238,10 +259,12 @@ int hypergraphSubstitutionSystemInitialize(WolframLibraryData libData,
     thisSystemID = MArgument_getInteger(argv[0]);
     rules = getRules(libData, MArgument_getMTensor(argv[1]), MArgument_getMTensor(argv[2]));
     initialTokens = getHypergraph(libData, MArgument_getMTensor(argv[3]));
-    maxDestroyerEvents = MArgument_getInteger(argv[4]);
+    wlMaxDestroyerEvents = MArgument_getInteger(argv[4]);
+    maxDestroyerEvents = wlMaxDestroyerEvents == wlStepLimitDisabled ? HypergraphSubstitutionSystem::stepLimitDisabled
+                                                                     : wlMaxDestroyerEvents;
     orderingSpec = getOrderingSpec(libData, MArgument_getMTensor(argv[5]));
     eventDeduplication = static_cast<HypergraphMatcher::EventDeduplication>(MArgument_getInteger(argv[6]));
-    randomSeed = static_cast<unsigned int>(MArgument_getInteger(argv[7]));
+    randomSeed = getSeed(libData, MArgument_getMTensor(argv[7]));
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
@@ -273,7 +296,7 @@ int hypergraphSubstitutionSystemReplace(WolframLibraryData libData,
                                         mint argc,
                                         MArgument* argv,
                                         [[maybe_unused]] MArgument result) {
-  if (argc != 2) {
+  if (argc != 3) {
     return LIBRARY_FUNCTION_ERROR;
   }
 
@@ -285,8 +308,15 @@ int hypergraphSubstitutionSystemReplace(WolframLibraryData libData,
     return LIBRARY_FUNCTION_ERROR;
   }
 
+  const double timeConstraintWL = MArgument_getReal(argv[2]);
+  auto timeConstraint = HypergraphSubstitutionSystem::timeConstraintDisabled;
+  if (timeConstraintWL > 0) {
+    timeConstraint = std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+        std::chrono::duration<double>(timeConstraintWL));
+  }
+
   try {
-    hypergraphSubstitutionSystemFromID(systemID).replace(stepSpec, shouldAbort(libData));
+    hypergraphSubstitutionSystemFromID(systemID).replace(stepSpec, shouldAbort(libData), timeConstraint);
   } catch (...) {
     return LIBRARY_FUNCTION_ERROR;
   }
