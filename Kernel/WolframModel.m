@@ -158,7 +158,8 @@ expr : WolframModel[
     evolution = If[initialSet =!= $Failed,
       Check[
         setSubstitutionSystem[
-          {rulesSpec, patternRules},
+          rulesSpec,
+          patternRules,
           initialSet,
           steps,
           WolframModel,

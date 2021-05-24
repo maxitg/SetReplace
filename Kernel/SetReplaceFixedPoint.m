@@ -27,7 +27,7 @@ SetReplaceFixedPoint[args___] := 0 /;
 SetReplaceFixedPoint[set_, rules_, o : OptionsPattern[]] /;
     recognizedOptionsQ[expr, SetReplaceFixedPoint, {o}] := ModuleScope[
   result = Check[
-    setSubstitutionSystem[rules, set, <||>, SetReplaceFixedPoint, False, o]
+    setSubstitutionSystem[rules, rules, set, <||>, SetReplaceFixedPoint, False, o]
   ,
     $Failed
   ];

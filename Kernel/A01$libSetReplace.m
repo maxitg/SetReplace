@@ -6,9 +6,6 @@ PackageScope["$libSetReplaceAvailable"]
 PackageScope["unloadLibrary"]
 PackageScope["importLibSetReplaceFunction"]
 
-PackageScope["$maxInt64"]
-PackageScope["$maxUInt32"]
-
 (* All functions loaded from C++ should go in this file. This is the counterpart of libSetReplace/SetReplace.hpp *)
 
 (* this function is defined now, but only run the *next* time Kernel/init.m is called, before all symbols
@@ -61,6 +58,3 @@ importLibSetReplaceFunction[cppFunctionName_ -> symbol_, argumentTypes_, outputT
 );
 
 $libSetReplaceAvailable := FreeQ[$libraryFunctions, $Failed];
-
-$maxInt64 = 2^63 - 1;
-$maxUInt32 = 2^32 - 1;

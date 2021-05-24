@@ -13,14 +13,19 @@ importLibSetReplaceFunction[
    Integer,                  (* event selection function *)
    {Integer, 1, "Constant"}, (* ordering function index, forward / reverse, function, forward / reverse, ... *)
    Integer,                  (* event deduplication *)
-   Integer},                 (* random seed *)
+   (* random seed, passed as two numbers because LibraryLink does not support unsigned ints *)
+   {Integer, 1, "Constant"}},
   "Void"];
 
 importLibSetReplaceFunction[
   "hypergraphSubstitutionSystemReplace" -> cpp$hypergraphSubstitutionSystemReplace,
   {Integer,                   (* set ID *)
-   {Integer, 1, "Constant"}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
+   {Integer, 1, "Constant"},  (* {events, generations, atoms, max expressions per atom, expressions} *)
+   Real},                     (* time constraint *)
   "Void"];
+
+$unset = -1;
+$maxUInt32 = 2^32 - 1;
 
 generateHypergraphSubstitutionSystem[HypergraphSubstitutionSystem[rawRules___],
                                     rawEventSelection_,
@@ -31,14 +36,13 @@ generateHypergraphSubstitutionSystem[HypergraphSubstitutionSystem[rawRules___],
   Module[{
       rules, maxGeneration, maxDestroyerEvents, eventOrdering,
       timeConstraint, maxEvents, maxVertices, maxVertexDegree, maxEdges, init,
-      objHandle, objID, globalIndex, terminationReason
+      objHandle, objID, globalIndex
     },
-    (* TODO(daniel): Check $libSetReplaceAvailable *)
+    (* TODO(daniel): Improve checking of $libSetReplaceAvailable *)
     If[!$libSetReplaceAvailable, Return @ $Failed];
 
     rules = parseRules[rawRules];
     {maxGeneration, maxDestroyerEvents} = Values @ rawEventSelection;
-    parseTokenDeduplication[rawTokenDeduplication];
     eventOrdering = parseEventOrdering[rawEventOrdering];
     {timeConstraint, maxEvents, maxVertices, maxVertexDegree, maxEdges} = Values @ rawStoppingCondition;
     init = parseInit[rawInit];
@@ -46,35 +50,23 @@ generateHypergraphSubstitutionSystem[HypergraphSubstitutionSystem[rawRules___],
     objHandle = CreateManagedLibraryExpression["SetReplace", SetReplace`HypergraphSubstitutionSystemHandle];
     objID = ManagedLibraryExpressionID[objHandle, "SetReplace"];
 
-    globalIndex = hypergraphSubstitutionSystemInit[objID, rules, init, maxDestroyerEvents, eventOrdering];
+    globalIndex = hypergraphSubstitutionSystemInit[
+                    objID, rules, init, maxDestroyerEvents, eventOrdering, rawTokenDeduplication];
 
-    terminationReason = Undefined;
-    TimeConstrained[
-      CheckAbort[
-        cpp$hypergraphSubstitutionSystemReplace[
-          objID,
-          Replace[{maxEvents, maxGeneration, maxVertices, maxVertexDegree, maxEdges},
-                  {Infinity | (_ ? MissingQ) -> $maxInt64},
-                  {1}]]
-      ,
-        (* TODO(daniel): Handle returnOnAbortQ. Perhaps using Block? *)
-        If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]
-      ]
-    ,
-      timeConstraint,
-      If[!returnOnAbortQ, Return[$Aborted], terminationReason = $timeConstraint]
-    ];
+    cpp$hypergraphSubstitutionSystemReplace[
+      objID,
+      {maxEvents, maxGeneration, maxVertices, maxVertexDegree, maxEdges} /. {Infinity | (_ ? MissingQ) -> $unset},
+      timeConstraint /. Infinity -> $unset];
 
     (* NOTE(daniel): We either need to save global index or the initial state to convert it to WMEvolutionObject *)
     Multihistory[
       {HypergraphSubstitutionSystem, 0},
       <|"Rules" -> rawRules,
         "GlobalAtomsIndexMap" -> globalIndex,
-        "ObjectHandle" -> objHandle,
-        "TerminationReason" -> terminationReason|>]
+        "ObjectHandle" -> objHandle|>]
   ];
 
-hypergraphSubstitutionSystemInit[objID_, rules_, init_, maxDestroyerEvents_, eventOrdering_] :=
+hypergraphSubstitutionSystemInit[objID_, rules_, init_, maxDestroyerEvents_, eventOrdering_, tokenDeduplication_] :=
   Module[{setAtoms, atomsInRules, globalAtoms, globalIndex, mappedSet, localIndices, mappedRules},
     setAtoms = Hold /@ Union[Catenate[init]];
     atomsInRules = ruleAtoms /@ rules;
@@ -89,16 +81,15 @@ hypergraphSubstitutionSystemInit[objID_, rules_, init_, maxDestroyerEvents_, eve
         localIndices[[K]]],
       {K, Length[rules]}];
 
-    (* NOTE(daniel): Arguments below have missing functionality *)
     cpp$hypergraphSubstitutionSystemInitialize[
       objID,
       encodeNestedLists[List @@@ mappedRules],
-      Echo @ ConstantArray[Replace[maxDestroyerEvents, {_ -> 0}], Length @ rules],
-      Echo @ encodeNestedLists[mappedSet],
-      Echo @ Replace[maxDestroyerEvents, Infinity -> $maxInt64],
+      ConstantArray[Replace[maxDestroyerEvents, {_ -> 0}], Length @ rules], (* TODO *)
+      encodeNestedLists[mappedSet],
+      Replace[maxDestroyerEvents, Infinity -> $unset],
       Catenate[Replace[eventOrdering, $orderingFunctionCodes, {2}]],
-      0,
-      RandomInteger[{0, $maxUInt32}]
+      $eventDeduplicationCodes[tokenDeduplication],
+      IntegerDigits[RandomInteger[{0, $maxUInt32}], 2^16, 2]
     ];
 
     globalIndex
@@ -119,12 +110,6 @@ parseRules[rawRules_] := throw[Failure["invalidHypergraphRules", <|"rules" -> ra
 parseRules[rawRules___] /; !CheckArguments[HypergraphSubstitutionSystem[rawRules], 1] := throw[Failure[None, <||>]];
 
 (** TokenDeduplication **)
-
-parseTokenDeduplication[None] := None;
-(* NOTE(daniel): Will this clash with other messages? *)
-declareMessage[General::tokenDeduplicationNotImplemented,
-              "Token deduplication is not implemented for Hypergraph Substitution System."];
-parseTokenDeduplication[_] := throw[Failure["tokenDeduplicationNotImplemented", <||>]];
 
 (** EventOrdering **)
 
@@ -156,9 +141,8 @@ parseEventOrdering[ordering_] :=
   With[{parsed = parseEventOrderingFunction[HypergraphSubstitutionSystem, ordering]},
     parsed /; parsed =!= $Failed
   ];
-(* NOTE(daniel): General is used below so that it also works for GenerateSingleHistory or GenerateAllHistory *)
-(*
-declareMessage[General::eventOrderingNotImplemented,
+(* TODO(daniel): Fix this message *)
+(* declareMessage[General::eventOrderingNotImplemented,
               "Only " <> $supportedEventOrdering <> " event ordering is implemented at this time."]; *)
 parseEventOrdering[_] := throw[Failure["eventOrderingNotImplemented", <||>]];
 
@@ -208,14 +192,17 @@ ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := ModuleScope[
   newLeft -> newRight
 ];
 
-(* Decoding *)
+$eventDeduplicationCodes = <|
+  None -> 0,
+  "SameInputSetIsomorphicOutputs" -> 1
+|>;
 
 (* HypergraphSubstitutionSystem *)
 
 SetUsage @ "
 HypergraphSubstitutionSystem[$$] is a rewriting system that replaces hyperedges \
-with elements matching pattern$1, pattern$2, $$ by a list produced by evaluating output$, where pattern$i can be matched in \
-any order.
+with elements matching pattern$1, pattern$2, $$ by a list produced by evaluating output$, where pattern$i can be \
+matched in any order.
 ";
 
 SyntaxInformation[HypergraphSubstitutionSystem] = {"ArgumentsPattern" -> {rules_}};
@@ -223,11 +210,12 @@ SyntaxInformation[HypergraphSubstitutionSystem] = {"ArgumentsPattern" -> {rules_
 declareMultihistoryGenerator[
   generateHypergraphSubstitutionSystem,
   HypergraphSubstitutionSystem,
-  <|"MaxGeneration" -> {Infinity, "NonNegativeIntegerOrInfinity"},
+  <|"MaxGeneration"      -> {Infinity, "NonNegativeIntegerOrInfinity"},
     "MaxDestroyerEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
   Keys @ $eventOrderingFunctions,
-  <|"TimeConstraint" -> {Infinity, "NonNegativeIntegerOrInfinity"},
-    "MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"},
-    "MaxVertices" -> {Infinity, "NonNegativeIntegerOrInfinity"},
+  <|"TimeConstraint"  -> {Infinity, "NonNegativeIntegerOrInfinity"},
+    "MaxEvents"       -> {Infinity, "NonNegativeIntegerOrInfinity"},
+    "MaxVertices"     -> {Infinity, "NonNegativeIntegerOrInfinity"},
     "MaxVertexDegree" -> {Infinity, "NonNegativeIntegerOrInfinity"},
-    "MaxEdges" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>];
+    "MaxEdges"        -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
+  Keys @ $eventDeduplicationCodes];

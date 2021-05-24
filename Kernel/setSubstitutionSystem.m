@@ -226,23 +226,23 @@ parseEventOrderingFunction[caller_, func_] := (
 
 (* String-valued parameter is valid *)
 
-$eventSelectionFunctions = <|
-  "GlobalSpacelike" -> $globalSpacelike,
-  None -> None, (* match-all local multiway *)
-  "MultiwaySpacelike" -> $spacelike (* enumerates all possible "GlobalSpacelike" evolutions *)
-|>;
+$eventSelectionFunctions = {
+  "GlobalSpacelike",
+  None,
+  "MultiwaySpacelike"
+};
 
-$eventDeduplications = <|
-  None -> None,
-  "SameInputSetIsomorphicOutputs" -> $sameInputSetIsomorphicOutputs
-|>;
+$eventDeduplications = {
+  None,
+  "SameInputSetIsomorphicOutputs"
+};
 
-parseParameterValue[caller_, name_, value_, association_] /; KeyMemberQ[association, value] := association[value];
+parseParameterValue[caller_, name_, value_, list_] /; MemberQ[list, value] := value;
 
 General::invalidParameterValue = "`1` `2` should be one of `3`.";
 
-parseParameterValue[caller_, name_, value_, association_] := (
-  Message[caller::invalidParameterValue, name, value, Keys[association]];
+parseParameterValue[caller_, name_, value_, list_] := (
+  Message[caller::invalidParameterValue, name, value, list];
   $Failed
 );
 
@@ -301,7 +301,8 @@ General::symbNotImplemented =
   "and only for sets of lists (hypergraphs).";
 
 setSubstitutionSystem[
-      {rawRules_, rules_ ? setReplaceRulesQ},
+      rawRules_,
+      rules_ ? setReplaceRulesQ,
       set_List,
       stepSpec_,
       caller_,

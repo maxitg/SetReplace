@@ -36,6 +36,7 @@ $implementations = CreateDataStructure["HashTable"];
 $eventSelectionSpecs = CreateDataStructure["HashTable"];    (* generator -> <|key -> {default, constraint}, ...|> *)
 $eventOrderings = CreateDataStructure["HashTable"];         (* generator -> {ordering, ...} *)
 $stoppingConditionSpecs = CreateDataStructure["HashTable"]; (* generator -> <|key -> {default, constraint}, ...|> *)
+$tokenDeduplications = CreateDataStructure["HashTable"];    (* generator -> tokenDeduplication |>*)
 
 $possibleConstraints = None | "NonNegativeIntegerOrInfinity";
 
@@ -61,11 +62,13 @@ declareMultihistoryGenerator[implementationFunction_,
                              systemType_,
                              eventSelectionSpec : $constraintsSpecPattern,
                              eventOrderings : {___String},
-                             stoppingConditionSpec : $constraintsSpecPattern] := (
+                             stoppingConditionSpec : $constraintsSpecPattern,
+                             tokenDeduplication_List] := (
   $implementations["Insert", systemType -> implementationFunction];
   $eventSelectionSpecs["Insert", systemType -> eventSelectionSpec];
   $eventOrderings["Insert", systemType -> eventOrderings];
   $stoppingConditionSpecs["Insert", systemType -> stoppingConditionSpec];
+  $tokenDeduplications["Insert", systemType -> tokenDeduplication];
 );
 
 declareMessage[General::invalidGeneratorDeclaration,
@@ -92,7 +95,7 @@ generateMultihistory[system_ /; $implementations["KeyExistsQ", Head[system]],
   $implementations["Lookup", Head[system]][
     system,
     parseConstraints["invalidEventSelection"][$eventSelectionSpecs["Lookup", Head[system]]][rawEventSelection],
-    parseTokenDeduplication[rawTokenDeduplication],
+    parseTokenDeduplication[$tokenDeduplications["Lookup", Head[system]]][rawTokenDeduplication],
     parseEventOrdering[$eventOrderings["Lookup", Head[system]]][rawEventOrdering],
     parseConstraints["invalidStoppingCondition"][$stoppingConditionSpecs["Lookup", Head[system]]][rawStoppingCondition],
     init
@@ -119,12 +122,11 @@ declareMessage[General::invalidStoppingCondition,
 parseConstraints[errorName_][specs_][originalArgument_, _] :=
   throw[Failure[errorName, <|"argument" -> originalArgument, "choices" -> Keys[specs]|>]];
 
-$tokenDeduplicationValues = {None, All};
-parseTokenDeduplication[value : Alternatives @@ $tokenDeduplicationValues] := value;
+parseTokenDeduplication[supportedFunctions_][argument_] /; MemberQ[supportedFunctions, argument] := argument;
 declareMessage[
-  General::invalidTokenDeduplication, "Token deduplication `value` in `expr` can only be one of `choices`."];
-parseTokenDeduplication[value_] :=
-  throw[Failure["invalidTokenDeduplication", <|"value" -> value, "choices" -> $tokenDeduplicationValues|>]];
+  General::invalidTokenDeduplication, "Token deduplication spec `argument` in `expr` can only be one of `choices`."];
+parseTokenDeduplication[supportedFunctions_][argument_] :=
+  throw[Failure["invalidTokenDeduplication", <|"argument" -> argument, "choices" -> supportedFunctions|>]];
 
 parseEventOrdering[supportedFunctions_][argument_List] /; SubsetQ[supportedFunctions, argument] := argument;
 declareMessage[

@@ -2,6 +2,8 @@ Package["SetReplace`"]
 
 PackageImport["GeneralUtilities`"]
 
+(* WolframModelEvolutionObject *)
+
 importLibSetReplaceFunction[
   "hypergraphSubstitutionSystemTokens" -> cpp$hypergraphSubstitutionSystemTokens,
   {Integer},     (* set ID *)
@@ -31,31 +33,20 @@ toWolframModelEvolutionObject[obj : Multihistory[_, data_]] :=
       resultAtoms, inversePartialGlobalMap, inverseGlobalMap
     },
     objID = ManagedLibraryExpressionID[data["ObjectHandle"], "SetReplace"];
-    terminationReason = data["TerminationReason"];
+
+    maxCompleteGeneration = Replace[cpp$hypergraphSubstitutionSystemMaxCompleteGeneration[objID],
+                                    LibraryFunctionError[___] -> Missing["Unknown", $Aborted]];
+
+    terminationReason = $terminationReasonCodes[cpp$hypergraphSubstitutionSystemTerminationReason[objID]];
+    terminationReason = Replace[terminationReason, $notTerminated -> $timeConstraint];
 
     numericAtomLists = decodeAtomLists[cpp$hypergraphSubstitutionSystemTokens[objID]];
-    events = decodeEvents[cpp$hypergraphSubstitutionSystemEvents[objID]];
-
-    maxCompleteGeneration = CheckAbort[
-      Replace[cpp$hypergraphSubstitutionSystemMaxCompleteGeneration[objID],
-              LibraryFunctionError[___] -> Missing["Unknown", $Aborted]]
-    ,
-      If[!returnOnAbortQ,
-        Abort[]
-      ,
-        terminationReason = $Aborted;
-        Missing["Unknown", $Aborted]
-      ]
-    ];
-
-    terminationReason = Replace[$terminationReasonCodes[cpp$hypergraphSubstitutionSystemTerminationReason[objID]], {
-      $Aborted -> terminationReason,
-      $notTerminated -> $timeConstraint}];
-
     resultAtoms = Union[Catenate[numericAtomLists]];
     inversePartialGlobalMap = Association @ Map[Reverse] @ Normal @ data["GlobalAtomsIndexMap"];
     inverseGlobalMap = AssociationThread[
       resultAtoms -> (Lookup[inversePartialGlobalMap, #, Unique["v", {Temporary}]] & /@ resultAtoms)];
+
+    events = decodeEvents[cpp$hypergraphSubstitutionSystemEvents[objID]];
 
     WolframModelEvolutionObject[Join[
       <|
@@ -108,5 +99,6 @@ $terminationReasonCodes = <|
   4 -> $maxFinalVertexDegree,
   5 -> $maxFinalExpressions,
   6 -> $fixedPoint,
-  7 -> $Aborted
+  7 -> $Aborted,
+  8 -> $timeConstraint
 |>;
