@@ -65,7 +65,7 @@ General::setNotList =
   "The set specification `1` should be a List.";
 
 setSubstitutionSystem[
-    rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+    rawRules_, rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !ListQ[set] &&
   Message[caller::setNotList, set];
 
@@ -79,7 +79,7 @@ General::invalidRules =
   "a List of them.";
 
 setSubstitutionSystem[
-    {rawRules_, rules_}, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+    rawRules_, rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !setReplaceRulesQ[rules] &&
   Message[caller::invalidRules, rules];
 
