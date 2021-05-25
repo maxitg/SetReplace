@@ -20,10 +20,10 @@ if [[ "$(uname -s)" == "Darwin" && "$arch" == "arm64" ]]; then
   libraryResourcesDirName=MacOSX-ARM64
   libraryExtension=dylib
 elif [[ "$(uname -s)" == "Darwin" && "$arch" == "x86_64" ]]; then
-  libraryResourcesDirName=MacOSX-x86-64
-  libraryExtension=dylib
   macOSBuildArm64="OFF"
   macOSBuildX86_64="ON"
+  libraryResourcesDirName=MacOSX-x86-64
+  libraryExtension=dylib
 elif [[ "$(uname -s)" == "Linux" && "$arch" == "x86_64" ]]; then
   libraryResourcesDirName=Linux-x86-64
   libraryExtension=so
