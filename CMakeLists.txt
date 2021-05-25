@@ -2,8 +2,17 @@ cmake_minimum_required(VERSION 3.13)
 project(SetReplace
     VERSION 0.3.0
     LANGUAGES CXX)
-set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
 message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
+
+option(SET_REPLACE_BUILD_OSX_ARM64 "Build for arm64 on macOS" ON)
+option(SET_REPLACE_BUILD_OSX_X86_64 "Build for x86_64 on macOS" ON)
+
+if(SET_REPLACE_BUILD_OSX_ARM64)
+  list(APPEND CMAKE_OSX_ARCHITECTURES arm64)
+endif()
+if(SET_REPLACE_BUILD_OSX_X86_64)
+  list(APPEND CMAKE_OSX_ARCHITECTURES x86_64)
+endif()
 
 option(SET_REPLACE_BUILD_TESTING "Enable cpp testing." OFF)
 include(GNUInstallDirs) # Define CMAKE_INSTALL_xxx: LIBDIR, INCLUDEDIR

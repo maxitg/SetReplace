@@ -4,6 +4,41 @@ set -eo pipefail
 setReplaceRoot=$(dirname "$(cd "$(dirname "$0")" && pwd)")
 cd "$setReplaceRoot"
 
+# Obtain requested architectures
+
+if [[ -n "$1" ]]; then
+  arch="$1"
+else
+  arch="$(uname -m)"
+fi
+
+# Set the platform-specific names
+
+if [[ "$(uname -s)" == "Darwin" && "$arch" == "arm64" ]]; then
+  macOSBuildArm64="ON"
+  macOSBuildX86_64="OFF"
+  libraryResourcesDirName=MacOSX-ARM64
+  libraryExtension=dylib
+elif [[ "$(uname -s)" == "Darwin" && "$arch" == "x86_64" ]]; then
+  libraryResourcesDirName=MacOSX-x86-64
+  libraryExtension=dylib
+  macOSBuildArm64="OFF"
+  macOSBuildX86_64="ON"
+elif [[ "$(uname -s)" == "Linux" && "$arch" == "x86_64" ]]; then
+  libraryResourcesDirName=Linux-x86-64
+  libraryExtension=so
+elif [[ "$OSTYPE" == "msys" && "$(uname -m)" == "x86_64" ]]; then # Windows
+  libraryResourcesDirName=Windows-x86-64
+  libraryExtension=dll
+else
+  echo "Operating system unsupported"
+  exit 1
+fi
+
+libraryDir=LibraryResources/$libraryResourcesDirName
+echo "LibraryResources directory: $setReplaceRoot/$libraryDir"
+echo "Library extension: $libraryExtension"
+
 # Compute the source hash
 
 sourceFiles="$(ls libSetReplace/*pp CMakeLists.txt cmake/* scripts/buildLibraryResources.sh)"
@@ -15,7 +50,8 @@ if command -v shasum &>/dev/null; then
       for fileToHash in $sourceFiles; do
         shasum -a 256 "$fileToHash"
       done
-      uname -sm
+      uname -s
+      echo "$arch"
     )" | shasum -a 256 | cut -d\  -f1
   )"
 elif [[ "$OSTYPE" == "msys" && $(command -v certutil) ]]; then # there is another certutil in macOS
@@ -24,7 +60,8 @@ elif [[ "$OSTYPE" == "msys" && $(command -v certutil) ]]; then # there is anothe
     for fileToHash in $sourceFiles; do
       echo "$(certutil -hashfile "$fileToHash" SHA256 | findstr -v "hash")" "$fileToHash"
     done
-    uname -sm
+    uname -s
+    echo "$arch"
   )" >"$TEMP"/libSetReplaceFilesToHash
   sha=$(certutil -hashfile "$TEMP"/libSetReplaceFilesToHash SHA256 | findstr -v "hash")
 else
@@ -39,29 +76,10 @@ echo "libSetReplace sources hash: $shortSHA"
 
 mkdir -p build
 cd build
-cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
+cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release \
+  -DSET_REPLACE_BUILD_OSX_ARM64="$macOSBuildArm64" -DSET_REPLACE_BUILD_OSX_X86_64="$macOSBuildX86_64"
 cmake --build . --config Release # Needed for multi-config generators
 cd ..
-
-# Set the platform-specific names
-
-if [ "$(uname -sm)" = "Darwin x86_64" ]; then
-  libraryResourcesDirName=MacOSX-x86-64
-  libraryExtension=dylib
-elif [ "$(uname -sm)" = "Linux x86_64" ]; then
-  libraryResourcesDirName=Linux-x86-64
-  libraryExtension=so
-elif [[ "$OSTYPE" == "msys" && "$(uname -m)" == "x86_64" ]]; then # Windows
-  libraryResourcesDirName=Windows-x86-64
-  libraryExtension=dll
-else
-  echo "Operating system unsupported"
-  exit 1
-fi
-
-libraryDir=LibraryResources/$libraryResourcesDirName
-echo "LibraryResources directory: $setReplaceRoot/$libraryDir"
-echo "Library extension: $libraryExtension"
 
 # Find the compiled library
 
