@@ -20,7 +20,8 @@ importLibSetReplaceFunction[
 importLibSetReplaceFunction[
   "hypergraphSubstitutionSystemReplace" -> cpp$setReplace,
   {Integer,                   (* set ID *)
-   {Integer, 1, "Constant"}}, (* {events, generations, atoms, max expressions per atom, expressions} *)
+   {Integer, 1, "Constant"},  (* {events, generations, atoms, max expressions per atom, expressions} *)
+   Real},                     (* time constraint *)
   "Void"];
 
 importLibSetReplaceFunction[
@@ -114,7 +115,8 @@ $terminationReasonCodes = <|
   4 -> $maxFinalVertexDegree,
   5 -> $maxFinalExpressions,
   6 -> $fixedPoint,
-  7 -> $Aborted
+  7 -> $Aborted,
+  8 -> $timeConstraint
 |>;
 
 (* GlobalSpacelike is syntactic sugar for "EventSelectionFunction" -> "MultiwaySpacelike", "MaxDestroyerEvents" -> 1 *)
@@ -174,24 +176,30 @@ setSubstitutionSystem$cpp[
     Replace[eventDeduplication, $eventDeduplicationCodes],
     IntegerDigits[RandomInteger[{0, $maxUInt32}], 2^16, 2]
   ];
-  TimeConstrained[
-    CheckAbort[
-      cpp$setReplace[
-        setID,
-        stepSpec /@ {
-            $maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalVertexDegree, $maxFinalExpressions} /.
-          {Infinity | (_ ? MissingQ) -> $unset}],
-      If[!returnOnAbortQ, Abort[], terminationReason = $Aborted]],
-    timeConstraint,
-    If[!returnOnAbortQ, Return[$Aborted], terminationReason = $timeConstraint]];
+
+  CheckAbort[
+    cpp$setReplace[
+      setID,
+      stepSpec /@ {
+          $maxEvents, $maxGenerationsLocal, $maxFinalVertices, $maxFinalVertexDegree, $maxFinalExpressions} /.
+        {Infinity | (_ ? MissingQ) -> $unset},
+      timeConstraint /. Infinity -> $unset]
+  ,
+    If[!returnOnAbortQ, Abort[]]
+  ];
+
+  terminationReason = $terminationReasonCodes[cpp$terminationReason[setID]];
+  If[(terminationReason === $timeConstraint) && !returnOnAbortQ, Return @ $Aborted];
+  terminationReason = Replace[terminationReason, $notTerminated -> $timeConstraint];
+
   numericAtomLists = decodeAtomLists[cpp$setExpressions[setID]];
   events = decodeEvents[cpp$setEvents[setID]];
   maxCompleteGeneration = CheckAbort[
-    Replace[cpp$maxCompleteGeneration[setID], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]],
-    If[!returnOnAbortQ, Abort[], terminationReason = $Aborted; Missing["Unknown", $Aborted]]];
-  terminationReason = Replace[$terminationReasonCodes[cpp$terminationReason[setID]], {
-    $Aborted -> terminationReason,
-    $notTerminated -> $timeConstraint}];
+    Replace[cpp$maxCompleteGeneration[setID], LibraryFunctionError[___] -> Missing["Unknown", $Aborted]]
+  ,
+    If[!returnOnAbortQ, Abort[], Missing["Unknown", $Aborted]]
+  ];
+
   resultAtoms = Union[Catenate[numericAtomLists]];
   inversePartialGlobalMap = Association[Reverse /@ Normal @ globalIndex];
   inverseGlobalMap = Association @ Thread[resultAtoms

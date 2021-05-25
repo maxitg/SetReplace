@@ -56,7 +56,7 @@ class HypergraphSubstitutionSystem::Implementation {
               return causalGraph_.tokenSeparation(first, second);
             }) {}
 
-  int64_t replaceOnce(const std::function<bool()> shouldAbort, bool resetStepSpec = false) {
+  int64_t replaceOnce(const std::function<bool()> shouldAbortOrTimeOut, bool resetStepSpec = false) {
     if (resetStepSpec) {
       updateStepSpec(StepSpecification{});
     }
@@ -67,11 +67,7 @@ class HypergraphSubstitutionSystem::Implementation {
       return 0;
     }
 
-    indexNewTokens([this, &shouldAbort]() {
-      const bool isAborted = shouldAbort();
-      if (isAborted) terminationReason_ = TerminationReason::Aborted;
-      return isAborted;
-    });
+    indexNewTokens(shouldAbortOrTimeOut);
     if (matcher_.empty()) {
       if (causalGraph_.largestGeneration() == stepSpec_.maxGenerationsLocal) {
         terminationReason_ = TerminationReason::MaxGenerationsLocal;
@@ -130,14 +126,35 @@ class HypergraphSubstitutionSystem::Implementation {
     return 1;
   }
 
-  int64_t replace(const StepSpecification stepSpec, const std::function<bool()>& shouldAbort) {
+  int64_t replace(const StepSpecification stepSpec,
+                  const std::function<bool()>& shouldAbort,
+                  std::chrono::steady_clock::duration const timeConstraint) {
     updateStepSpec(stepSpec);
     int64_t count = 0;
     if (maxDestroyerEvents_ == 0) {
       return count;
     }
+
+    auto startTime = std::chrono::steady_clock::now();
+    const std::function<bool()> shouldTimeOut = [startTime, timeConstraint]() {
+      return (std::chrono::steady_clock::now() - startTime) > timeConstraint;
+    };
+
+    const std::function<bool()> shouldAbortOrTimeOut = [this, &shouldAbort, &shouldTimeOut]() {
+      if (shouldAbort()) {
+        terminationReason_ = TerminationReason::Aborted;
+        return true;
+      }
+      if (shouldTimeOut()) {
+        terminationReason_ = TerminationReason::TimeConstrained;
+        return true;
+      }
+
+      return false;
+    };
+
     while (true) {
-      if (replaceOnce(shouldAbort)) {
+      if (replaceOnce(shouldAbortOrTimeOut)) {
         ++count;
       } else {
         return count;
@@ -402,8 +419,9 @@ int64_t HypergraphSubstitutionSystem::replaceOnce(const std::function<bool()>& s
 }
 
 int64_t HypergraphSubstitutionSystem::replace(const StepSpecification& stepSpec,
-                                              const std::function<bool()>& shouldAbort) {
-  return implementation_->replace(stepSpec, shouldAbort);
+                                              const std::function<bool()>& shouldAbort,
+                                              std::chrono::steady_clock::duration const timeConstraint) {
+  return implementation_->replace(stepSpec, shouldAbort, timeConstraint);
 }
 
 std::vector<AtomsVector> HypergraphSubstitutionSystem::tokens() const { return implementation_->tokens(); }
