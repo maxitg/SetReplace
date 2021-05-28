@@ -3,7 +3,6 @@
 Check[
   Get[FileNameJoin[{DirectoryName[$InputFileName], "DevUtils", "init.m"}]];
   Off[General::stop];
-  If[$VersionNumber < 12.1, Needs["PacletManager`"]];
 ,
   Print["Message occurred during loading of DevUtils. Build failed."];
   Exit[1];
