@@ -15,11 +15,11 @@ fi
 # Set the platform-specific names
 
 if [[ "$(uname -s)" == "Darwin" && "$arch" == "arm64" ]]; then
-  cmakeArchitectureArgs="-DCMAKE_OSX_ARCHITECTURES=arm64"
+  cmakeArchitectureArg="-DCMAKE_OSX_ARCHITECTURES=arm64"
   libraryResourcesDirName=MacOSX-ARM64
   libraryExtension=dylib
 elif [[ "$(uname -s)" == "Darwin" && "$arch" == "x86_64" ]]; then
-  cmakeArchitectureArgs="-DCMAKE_OSX_ARCHITECTURES=x86_64"
+  cmakeArchitectureArg="-DCMAKE_OSX_ARCHITECTURES=x86_64"
   libraryResourcesDirName=MacOSX-x86-64
   libraryExtension=dylib
 elif [[ "$(uname -s)" == "Linux" && "$arch" == "x86_64" ]]; then
@@ -75,7 +75,7 @@ echo "libSetReplace sources hash: $shortSHA"
 mkdir -p build
 cd build
 cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release \
-  ${cmakeArchitectureArgs:+"$cmakeArchitectureArgs"}
+  ${cmakeArchitectureArg:+"$cmakeArchitectureArg"}
 cmake --build . --config Release # Needed for multi-config generators
 cd ..
 
