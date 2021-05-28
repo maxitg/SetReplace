@@ -4,16 +4,6 @@ project(SetReplace
     LANGUAGES CXX)
 message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION}")
 
-option(SET_REPLACE_BUILD_OSX_ARM64 "Build for arm64 on macOS" ON)
-option(SET_REPLACE_BUILD_OSX_X86_64 "Build for x86_64 on macOS" ON)
-
-if(SET_REPLACE_BUILD_OSX_ARM64)
-  list(APPEND CMAKE_OSX_ARCHITECTURES arm64)
-endif()
-if(SET_REPLACE_BUILD_OSX_X86_64)
-  list(APPEND CMAKE_OSX_ARCHITECTURES x86_64)
-endif()
-
 option(SET_REPLACE_BUILD_TESTING "Enable cpp testing." OFF)
 include(GNUInstallDirs) # Define CMAKE_INSTALL_xxx: LIBDIR, INCLUDEDIR
 set(SetReplace_export_file "${PROJECT_BINARY_DIR}/SetReplaceTargets.cmake")
