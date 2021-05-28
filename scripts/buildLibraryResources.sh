@@ -74,7 +74,8 @@ echo "libSetReplace sources hash: $shortSHA"
 
 mkdir -p build
 cd build
-cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release "$cmakeArchitectureArgs"
+cmake .. -DSET_REPLACE_ENABLE_ALLWARNINGS=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release \
+  ${cmakeArchitectureArgs:+"$cmakeArchitectureArgs"}
 cmake --build . --config Release # Needed for multi-config generators
 cd ..
 
