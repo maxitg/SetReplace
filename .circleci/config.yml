@@ -171,13 +171,18 @@ jobs:
             cp -r $cmakeDir/CMake.app/Contents/share/* /usr/local/share/
 
       - run:
-          name: Build
-          command: scripts/buildLibraryResources.sh
+          name: Build arm64
+          command: scripts/buildLibraryResources.sh arm64
+
+      - run:
+          name: Build x86_64
+          command: scripts/buildLibraryResources.sh x86_64
 
       - persist_to_workspace:
           root: LibraryResources
           paths:
             - MacOSX-x86-64
+            - MacOSX-ARM64
 
       - store_artifacts:
           path: ./LibraryResources/
