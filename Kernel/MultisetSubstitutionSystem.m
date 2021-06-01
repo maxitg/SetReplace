@@ -22,7 +22,7 @@ declareMultihistoryGenerator[
     "MaxEventInputs" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
   {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"},
   <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
-  {None}];
+  None];
 
 generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
                                    rawEventSelection_,

@@ -112,10 +112,10 @@ hypergraphSubstitutionSystemInit[objID_,
 
 (** Rules **)
 
-parseRules[rawRules_] /; wolframModelRulesSpecQ[rawRules] :=
-  Module[{patternRules, canonicalRules},
-    patternRules = fromRulesSpec[rawRules];
-    canonicalRules = toCanonicalRules[patternRules];
+(* parseRules[anonymousRules_ ? anonymousRulesQ] := ToPatternRules[anonymousRules]; *)
+parseRules[rawRules_] /; setReplaceRulesQ[rawRules] :=
+  Module[{canonicalRules},
+    canonicalRules = toCanonicalRules[rawRules];
     canonicalRules /; MatchQ[canonicalRules, {___ ? simpleRuleQ}]
   ];
 declareMessage[General::invalidHypergraphRules, "Rules `rules` is not a valid hypergraph substitution rule."];
@@ -126,38 +126,29 @@ parseRules[rawRules___] /; !CheckArguments[HypergraphSubstitutionSystem[rawRules
 
 (** EventOrdering **)
 
-$eventOrderingFunctions = <|
-  "OldestEdge" -> {$sortedExpressionIDs, $forward},  (* SortedInputTokenIndices *)
-  "LeastOldEdge" -> {$sortedExpressionIDs, $backward},
-  "LeastRecentEdge" -> {$reverseSortedExpressionIDs, $forward}, (* ReverseSortedInputTokenIndices *)
-  "NewestEdge" -> {$reverseSortedExpressionIDs, $backward},
-  "RuleOrdering" -> {$expressionIDs, $forward},  (* InputTokenIndices *)
-  "ReverseRuleOrdering" -> {$expressionIDs, $backward},
-  "RuleIndex" -> {$ruleIndex, $forward},  (* RuleIndex *)
-  "ReverseRuleIndex" -> {$ruleIndex, $backward},
-  "Random" -> Nothing, (* Random is done automatically in C++ if no more sorting is available *)
+$eventOrderingFunctions = {
+  "SortedInputTokenIndices" -> {$sortedExpressionIDs, $forward},
+  -"SortedInputTokenIndices" -> {$sortedExpressionIDs, $backward},
+  "ReverseSortedInputTokenIndices" -> {$reverseSortedExpressionIDs, $forward},
+  -"ReverseSortedInputTokenIndices" -> {$reverseSortedExpressionIDs, $backward},
+  "InputTokenIndices" -> {$expressionIDs, $forward},
+  -"InputTokenIndices" -> {$expressionIDs, $backward},
+  "RuleIndex" -> {$ruleIndex, $forward},
+  -"RuleIndex" -> {$ruleIndex, $backward},
   "Any" -> {$any, $forward} (* OrderingDirection here doesn't do anything *)
-|>;
+};
 
-$orderingFunctionCodes = <|
-  $sortedExpressionIDs -> 0,
-  $reverseSortedExpressionIDs -> 1,
-  $expressionIDs -> 2,
-  $ruleIndex -> 3,
-  $any -> 4,
-  $forward -> 0,
-  $backward -> 1
-|>;
+parseEventOrdering[ordering : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+  !FreeQ[ordering, "Random"] :=
+  parseEventOrdering[ordering[[1 ;; FirstPosition[ordering, "Random"][[1]] - 1]]];
 
-(* NOTE(daniel): Does this require a more elaborate check? *)
-parseEventOrdering[ordering_] :=
-  With[{parsed = parseEventOrderingFunction[HypergraphSubstitutionSystem, ordering]},
-    parsed /; parsed =!= $Failed
-  ];
-(* TODO(daniel): Fix this message *)
-(* declareMessage[General::eventOrderingNotImplemented,
-              "Only " <> $supportedEventOrdering <> " event ordering is implemented at this time."]; *)
-parseEventOrdering[_] := throw[Failure["eventOrderingNotImplemented", <||>]];
+parseEventOrdering[ordering : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+    !FreeQ[ordering, "Any"] && FirstPosition[ordering, "Any"][[1]] != Length[ordering] :=
+    parseEventOrdering[ordering[[1 ;; FirstPosition[ordering, "Any"][[1]]]]];
+
+parseEventOrdering[ordering : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+    FreeQ[ordering, "Random"] :=
+  Replace[ordering, $eventOrderingFunctions, {1}];
 
 (** Init **)
 
@@ -204,6 +195,16 @@ ruleAtomsToIndices[left_ :> right_, globalIndex_, localIndex_] := ModuleScope[
     {2}];
   newLeft -> newRight
 ];
+
+$orderingFunctionCodes = <|
+  $sortedExpressionIDs -> 0,
+  $reverseSortedExpressionIDs -> 1,
+  $expressionIDs -> 2,
+  $ruleIndex -> 3,
+  $any -> 4,
+  $forward -> 0,
+  $backward -> 1
+|>;
 
 $eventDeduplicationCodes = <|
   None -> 0,

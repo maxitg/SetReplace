@@ -61,9 +61,9 @@ $constraintsSpecPattern =
 declareMultihistoryGenerator[implementationFunction_,
                              systemType_,
                              eventSelectionSpec : $constraintsSpecPattern,
-                             eventOrderings : {___String},
+                             eventOrderings : {(_String | -_String) ...},
                              stoppingConditionSpec : $constraintsSpecPattern,
-                             tokenDeduplication_List] := (
+                             tokenDeduplication : (None | _List)] := (
   $implementations["Insert", systemType -> implementationFunction];
   $eventSelectionSpecs["Insert", systemType -> eventSelectionSpec];
   $eventOrderings["Insert", systemType -> eventOrderings];
@@ -122,6 +122,7 @@ declareMessage[General::invalidStoppingCondition,
 parseConstraints[errorName_][specs_][originalArgument_, _] :=
   throw[Failure[errorName, <|"argument" -> originalArgument, "choices" -> Keys[specs]|>]];
 
+parseTokenDeduplication[None][argument_] := argument;
 parseTokenDeduplication[supportedFunctions_][argument_] /; MemberQ[supportedFunctions, argument] := argument;
 declareMessage[
   General::invalidTokenDeduplication, "Token deduplication spec `argument` in `expr` can only be one of `choices`."];
@@ -129,6 +130,7 @@ parseTokenDeduplication[supportedFunctions_][argument_] :=
   throw[Failure["invalidTokenDeduplication", <|"argument" -> argument, "choices" -> supportedFunctions|>]];
 
 parseEventOrdering[supportedFunctions_][argument_List] /; SubsetQ[supportedFunctions, argument] := argument;
+(* NOTE(daniel): This message is currently clashing with the one found in setSubstitutionSystem.m *)
 declareMessage[
   General::invalidEventOrdering, "Event ordering spec `argument` in `expr` should be a List of values from `choices`."];
 parseEventOrdering[supportedFunctions_][argument_] :=

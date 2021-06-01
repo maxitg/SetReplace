@@ -19,7 +19,7 @@ declareMultihistoryGenerator[
     "MaxDestroyerEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
   {"InputIndex", "RuleIndex"},
   <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
-  {None}];
+  None];
 
 declareMessage[General::atomicStateTokenDeduplicationNotImplemented,
                "Token deduplication is not implemented for Atomic State System."];

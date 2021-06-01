@@ -23,20 +23,11 @@ PackageScope["$maxFinalExpressions"]
 PackageScope["$fixedPoint"]
 PackageScope["$timeConstraint"]
 
-PackageScope["$sortedExpressionIDs"]
-PackageScope["$reverseSortedExpressionIDs"]
-PackageScope["$expressionIDs"]
-PackageScope["$ruleIndex"]
-PackageScope["$any"]
-PackageScope["$forward"]
-PackageScope["$backward"]
-
 PackageScope["$globalSpacelike"]
 PackageScope["$spacelike"]
 
 PackageScope["$sameInputSetIsomorphicOutputs"]
 
-PackageScope["parseEventOrderingFunction"]
 PackageScope["simpleRuleQ"]
 
 (* Termination reason values *)
@@ -65,7 +56,7 @@ General::setNotList =
   "The set specification `1` should be a List.";
 
 setSubstitutionSystem[
-    rawRules_, rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+    rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !ListQ[set] &&
   Message[caller::setNotList, set];
 
@@ -79,7 +70,7 @@ General::invalidRules =
   "a List of them.";
 
 setSubstitutionSystem[
-    rawRules_, rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
+    rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
   !setReplaceRulesQ[rules] &&
   Message[caller::invalidRules, rules];
 
@@ -185,42 +176,42 @@ setSubstitutionSystem[
 
 (* EventOrderingFunction is valid *)
 
-$eventOrderingFunctions = <|
-  "OldestEdge" -> {$sortedExpressionIDs, $forward},  (* SortedInputTokenIndices *)
-  "LeastOldEdge" -> {$sortedExpressionIDs, $backward},
-  "LeastRecentEdge" -> {$reverseSortedExpressionIDs, $forward},
-  "NewestEdge" -> {$reverseSortedExpressionIDs, $backward},
-  "RuleOrdering" -> {$expressionIDs, $forward},  (* InputTokenIndices *)
-  "ReverseRuleOrdering" -> {$expressionIDs, $backward},
-  "RuleIndex" -> {$ruleIndex, $forward},  (* RuleIndex *)
-  "ReverseRuleIndex" -> {$ruleIndex, $backward},
-  "Random" -> Nothing, (* Random is done automatically in C++ if no more sorting is available *)
-  "Any" -> {$any, $forward} (* OrderingDirection here doesn't do anything *)
-|>;
+$eventOrderingFunctions = {
+  "OldestEdge",
+  "LeastOldEdge",
+  "LeastRecentEdge",
+  "NewestEdge",
+  "RuleOrdering",
+  "ReverseRuleOrdering",
+  "RuleIndex",
+  "ReverseRuleIndex",
+  "Random",
+  "Any"
+};
 
 (* This applies only to C++ due to #158, WL code uses similar order but does not apply "LeastRecentEdge" correctly. *)
-$eventOrderingFunctionDefault = $eventOrderingFunctions /@ {"LeastRecentEdge", "RuleOrdering", "RuleIndex"};
+$eventOrderingFunctionDefault = {"LeastRecentEdge", "RuleOrdering", "RuleIndex"};
 
 parseEventOrderingFunction[caller_, Automatic] := $eventOrderingFunctionDefault;
 
 parseEventOrderingFunction[caller_, s_String] := parseEventOrderingFunction[caller, {s}];
 
-parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+parseEventOrderingFunction[caller_, func : {(Alternatives @@ $eventOrderingFunctions)...}] /;
     !FreeQ[func, "Random"] :=
   parseEventOrderingFunction[caller, func[[1 ;; FirstPosition[func, "Random"][[1]] - 1]]];
 
-parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+parseEventOrderingFunction[caller_, func : {(Alternatives @@ $eventOrderingFunctions)...}] /;
     !FreeQ[func, "Any"] && FirstPosition[func, "Any"][[1]] != Length[func] :=
     parseEventOrderingFunction[caller, func[[1 ;; FirstPosition[func, "Any"][[1]]]]];
 
-parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+parseEventOrderingFunction[caller_, func : {(Alternatives @@ $eventOrderingFunctions)...}] /;
     FreeQ[func, "Random"] :=
-  $eventOrderingFunctions /@ func;
+  func;
 
 General::invalidEventOrdering = "EventOrderingFunction `1` should be one of `2`, or a list of them by priority.";
 
 parseEventOrderingFunction[caller_, func_] := (
-  Message[caller::invalidEventOrdering, func, Keys[$eventOrderingFunctions]];
+  Message[caller::invalidEventOrdering, func, $eventOrderingFunctions];
   $Failed
 );
 
@@ -301,7 +292,6 @@ General::symbNotImplemented =
   "and only for sets of lists (hypergraphs).";
 
 setSubstitutionSystem[
-      rawRules_,
       rules_ ? setReplaceRulesQ,
       set_List,
       stepSpec_,
@@ -337,8 +327,7 @@ setSubstitutionSystem[
     If[$libSetReplaceAvailable,
       Return[
         setSubstitutionSystem$cpp[
-          rawRules, set, stepSpec, returnOnAbortQ, timeConstraint,
-          eventOrdering /. Automatic -> {"LeastRecentEdge", "RuleOrdering", "RuleIndex"},
+          rules, set, stepSpec, returnOnAbortQ, timeConstraint, eventOrderingFunction,
           eventSelectionFunction,
           eventDeduplication]]
     ]
