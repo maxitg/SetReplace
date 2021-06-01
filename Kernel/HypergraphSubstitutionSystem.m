@@ -4,6 +4,8 @@ PackageImport["GeneralUtilities`"]
 
 PackageExport["HypergraphSubstitutionSystem"]
 
+PackageScope["generateHypergraphSubstitutionSystem"]
+
 importLibSetReplaceFunction[
   "hypergraphSubstitutionSystemInitialize" -> cpp$hypergraphSubstitutionSystemInitialize,
   {Integer,                  (* set ID *)
@@ -34,15 +36,15 @@ generateHypergraphSubstitutionSystem[HypergraphSubstitutionSystem[rawRules___],
                                     rawStoppingCondition_,
                                     rawInit_] :=
   Module[{
-      rules, maxGeneration, maxDestroyerEvents, eventOrdering,
+      rules, maxGeneration, maxDestroyerEvents, eventSeparation, eventOrdering,
       timeConstraint, maxEvents, maxVertices, maxVertexDegree, maxEdges, init,
-      objHandle, objID, globalIndex
+      objHandle, objID, globalAtoms
     },
     (* TODO(daniel): Improve checking of $libSetReplaceAvailable *)
     If[!$libSetReplaceAvailable, Return @ $Failed];
 
     rules = parseRules[rawRules];
-    {maxGeneration, maxDestroyerEvents} = Values @ rawEventSelection;
+    {maxGeneration, maxDestroyerEvents, eventSeparation} = Values @ rawEventSelection;
     eventOrdering = parseEventOrdering[rawEventOrdering];
     {timeConstraint, maxEvents, maxVertices, maxVertexDegree, maxEdges} = Values @ rawStoppingCondition;
     init = parseInit[rawInit];
@@ -50,8 +52,13 @@ generateHypergraphSubstitutionSystem[HypergraphSubstitutionSystem[rawRules___],
     objHandle = CreateManagedLibraryExpression["SetReplace", SetReplace`HypergraphSubstitutionSystemHandle];
     objID = ManagedLibraryExpressionID[objHandle, "SetReplace"];
 
-    globalIndex = hypergraphSubstitutionSystemInit[
-                    objID, rules, init, maxDestroyerEvents, eventOrdering, rawTokenDeduplication];
+    globalAtoms = hypergraphSubstitutionSystemInit[objID,
+                                                   rules,
+                                                   init,
+                                                   maxDestroyerEvents,
+                                                   eventOrdering,
+                                                   rawTokenDeduplication,
+                                                   eventSeparation];
 
     cpp$hypergraphSubstitutionSystemReplace[
       objID,
@@ -62,11 +69,17 @@ generateHypergraphSubstitutionSystem[HypergraphSubstitutionSystem[rawRules___],
     Multihistory[
       {HypergraphSubstitutionSystem, 0},
       <|"Rules" -> rawRules,
-        "GlobalAtomsIndexMap" -> globalIndex,
+        "GlobalAtoms" -> globalAtoms,
         "ObjectHandle" -> objHandle|>]
   ];
 
-hypergraphSubstitutionSystemInit[objID_, rules_, init_, maxDestroyerEvents_, eventOrdering_, tokenDeduplication_] :=
+hypergraphSubstitutionSystemInit[objID_,
+                                 rules_,
+                                 init_,
+                                 maxDestroyerEvents_,
+                                 eventOrdering_,
+                                 tokenDeduplication_,
+                                 eventSelection_] :=
   Module[{setAtoms, atomsInRules, globalAtoms, globalIndex, mappedSet, localIndices, mappedRules},
     setAtoms = Hold /@ Union[Catenate[init]];
     atomsInRules = ruleAtoms /@ rules;
@@ -84,7 +97,7 @@ hypergraphSubstitutionSystemInit[objID_, rules_, init_, maxDestroyerEvents_, eve
     cpp$hypergraphSubstitutionSystemInitialize[
       objID,
       encodeNestedLists[List @@@ mappedRules],
-      ConstantArray[Replace[maxDestroyerEvents, {_ -> 0}], Length @ rules], (* TODO *)
+      ConstantArray[eventSelection /. {"Any" -> 0, "Spacelike" -> 1}, Length @ rules],
       encodeNestedLists[mappedSet],
       Replace[maxDestroyerEvents, Infinity -> $unset],
       Catenate[Replace[eventOrdering, $orderingFunctionCodes, {2}]],
@@ -92,7 +105,7 @@ hypergraphSubstitutionSystemInit[objID_, rules_, init_, maxDestroyerEvents_, eve
       IntegerDigits[RandomInteger[{0, $maxUInt32}], 2^16, 2]
     ];
 
-    globalIndex
+    globalAtoms
   ];
 
 (* Parsing *)
@@ -116,7 +129,7 @@ parseRules[rawRules___] /; !CheckArguments[HypergraphSubstitutionSystem[rawRules
 $eventOrderingFunctions = <|
   "OldestEdge" -> {$sortedExpressionIDs, $forward},  (* SortedInputTokenIndices *)
   "LeastOldEdge" -> {$sortedExpressionIDs, $backward},
-  "LeastRecentEdge" -> {$reverseSortedExpressionIDs, $forward},
+  "LeastRecentEdge" -> {$reverseSortedExpressionIDs, $forward}, (* ReverseSortedInputTokenIndices *)
   "NewestEdge" -> {$reverseSortedExpressionIDs, $backward},
   "RuleOrdering" -> {$expressionIDs, $forward},  (* InputTokenIndices *)
   "ReverseRuleOrdering" -> {$expressionIDs, $backward},
@@ -211,9 +224,10 @@ declareMultihistoryGenerator[
   generateHypergraphSubstitutionSystem,
   HypergraphSubstitutionSystem,
   <|"MaxGeneration"      -> {Infinity, "NonNegativeIntegerOrInfinity"},
-    "MaxDestroyerEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
+    "MaxDestroyerEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"},
+    "EventSeparation"    -> {"Spacelike", {"Spacelike", "Any"}}|>,
   Keys @ $eventOrderingFunctions,
-  <|"TimeConstraint"  -> {Infinity, "NonNegativeIntegerOrInfinity"},
+  <|"TimeConstraint"  -> {Infinity, "PositiveNumberOrInfinity"},
     "MaxEvents"       -> {Infinity, "NonNegativeIntegerOrInfinity"},
     "MaxVertices"     -> {Infinity, "NonNegativeIntegerOrInfinity"},
     "MaxVertexDegree" -> {Infinity, "NonNegativeIntegerOrInfinity"},

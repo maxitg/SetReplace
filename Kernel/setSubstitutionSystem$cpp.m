@@ -4,34 +4,39 @@ PackageImport["GeneralUtilities`"]
 
 PackageScope["setSubstitutionSystem$cpp"]
 
-(* GlobalSpacelike is syntactic sugar for "EventSelectionFunction" -> "MultiwaySpacelike", "MaxDestroyerEvents" -> 1 *)
-
-maxDestroyerEvents[_, $globalSpacelike] = 1;
-maxDestroyerEvents[Automatic | _ ? MissingQ | Infinity, _] = $unset;
-maxDestroyerEvents[n_, _] := n;
-
-(* 0 -> All
-   1 -> Spacelike *)
-
-eventSelectionCodes[eventSelectionFunction_, ruleCount_] :=
-  ConstantArray[eventSelectionFunction /. {None -> 0, ($globalSpacelike | $spacelike) -> 1}, ruleCount];
-
 setSubstitutionSystem$cpp[
         rules_, set_, stepSpec_, returnOnAbortQ_, timeConstraint_, eventOrdering_, eventSelectionFunction_,
         eventDeduplication_] /;
-      $libSetReplaceAvailable := Module[{multihistory, nstepSpec},
+      $libSetReplaceAvailable := Module[{multihistory, eventSelection, stoppingCondition},
 
-  nstepSpec = KeyMap[$stepSpecKeys, stepSpec];
-  nstepSpec = KeyMap[Replace["MaxGenerations" -> "MaxGeneration"], nstepSpec];
+  eventSelection = <|
+    "MaxDestroyerEvents" -> stepSpec[$maxDestroyerEvents],
+    "MaxGeneration" -> stepSpec[$maxGenerationsLocal],
+    "EventSeparation" -> Replace[eventSelectionFunction,
+                                 {None -> "Any", ("GlobalSpacelike" | "MultiwaySpacelike") -> "Spacelike"}]
+  |>;
+  eventSelection = DeleteMissing[eventSelection];
+  (* GlobalSpacelike is equivalent to "EventSelectionFunction" -> "MultiwaySpacelike", "MaxDestroyerEvents" -> 1 *)
+  If[eventSelectionFunction === "GlobalSpacelike",
+    eventSelection["MaxDestroyerEvents"] = 1
+  ];
+
+  stoppingCondition = {
+    "TimeConstraint" -> timeConstraint,
+    "MaxEvents" -> stepSpec[$maxEvents],
+    "MaxVertices" -> stepSpec[$maxFinalVertices],
+    "MaxVertexDegree" -> stepSpec[$maxFinalVertexDegree],
+    "MaxEdges" -> stepSpec[maxFinalExpressions]
+  };
+  stoppingCondition = DeleteMissing[stoppingCondition];
 
   CheckAbort[
     multihistory = GenerateMultihistory[
       HypergraphSubstitutionSystem[rules],
-      KeyTake[nstepSpec, {"MaxDestroyerEvents", "MaxGeneration"}],
+      eventSelection,
       eventDeduplication,
       Replace[eventOrdering, s_String :> {s}],
-      Append["TimeConstraint" -> timeConstraint] @
-        KeyTake[nstepSpec, {"MaxEvents", "MaxVertices", "MaxVertexDegree", "MaxEdges"}]
+      stoppingCondition
     ] @ set;
   ,
     If[!returnOnAbortQ, Abort[]]

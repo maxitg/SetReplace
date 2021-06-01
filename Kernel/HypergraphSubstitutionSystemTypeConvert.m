@@ -42,7 +42,7 @@ toWolframModelEvolutionObject[obj : Multihistory[_, data_]] :=
 
     numericAtomLists = decodeAtomLists[cpp$hypergraphSubstitutionSystemTokens[objID]];
     resultAtoms = Union[Catenate[numericAtomLists]];
-    inversePartialGlobalMap = Association @ Map[Reverse] @ Normal @ data["GlobalAtomsIndexMap"];
+    inversePartialGlobalMap = AssociationThread[Range[Length[#]] -> #] &@ data["GlobalAtoms"];
     inverseGlobalMap = AssociationThread[
       resultAtoms -> (Lookup[inversePartialGlobalMap, #, Unique["v", {Temporary}]] & /@ resultAtoms)];
 

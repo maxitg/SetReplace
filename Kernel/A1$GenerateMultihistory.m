@@ -38,7 +38,7 @@ $eventOrderings = CreateDataStructure["HashTable"];         (* generator -> {ord
 $stoppingConditionSpecs = CreateDataStructure["HashTable"]; (* generator -> <|key -> {default, constraint}, ...|> *)
 $tokenDeduplications = CreateDataStructure["HashTable"];    (* generator -> tokenDeduplication |>*)
 
-$possibleConstraints = None | "NonNegativeIntegerOrInfinity";
+$possibleConstraints = None | "NonNegativeIntegerOrInfinity" | "PositiveNumberOrInfinity" | _List;
 
 $constraintsSpecPattern =
   _Association ? (AllTrue[StringQ] @ Keys[#] && MatchQ[Values[#], {{_, $possibleConstraints}...}] &);
@@ -135,11 +135,21 @@ parseEventOrdering[supportedFunctions_][argument_] :=
   throw[Failure["invalidEventOrdering", <|"argument" -> argument, "choices" -> supportedFunctions|>]];
 
 checkParameter[_, None][value_] := value;
+checkParameter[_, choices_List][value_] /; MemberQ[choices, value] := value;
+declareMessage[General::notValidChoiceParameter,
+               "Parameter `name` in `expr` can only be one of `choices`."];
+checkParameter[name_, choices_List][_] :=
+  throw[Failure["notValidChoiceParameter", <|"name" -> name, "choices" -> choices|>]];
 checkParameter[_, "NonNegativeIntegerOrInfinity"][value : (_Integer ? (# >= 0 &)) | Infinity] := value;
 declareMessage[General::notNonNegativeIntegerOrInfinityParameter,
                "Parameter `name` in `expr` is expected to be a non-negative integer or Infinity."];
 checkParameter[name_, "NonNegativeIntegerOrInfinity"][_] :=
   throw[Failure["notNonNegativeIntegerOrInfinityParameter", <|"name" -> name|>]];
+checkParameter[_, "PositiveNumberOrInfinity"][value : _ ? (# > 0 &)] := value;
+declareMessage[General::notPositiveNumberOrInfinityParameter,
+               "Parameter `name` in `expr` is expected to be a positive machine-sized number or Infinity."];
+checkParameter[name_, "PositiveNumberOrInfinity"][_] :=
+  throw[Failure["notPositiveNumberOrInfinityParameter", <|"name" -> name|>]];
 
 (* Initialization *)
 
