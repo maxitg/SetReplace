@@ -215,15 +215,17 @@ class HypergraphMatcher::Implementation {
       return getCurrentError() != None || abortRequested();
     };
 
+    // Only create threads if there is more than one rule
+    const auto threadAcquisitionToken =
+        Parallelism::acquire(Parallelism::HardwareType::StdCpu, static_cast<int>(rules_.size()));
+    const int& numThreadsToUse = threadAcquisitionToken->numThreads();
+    const MatchStorage matchStorage = numThreadsToUse == 0 && eventDeduplication_ == EventDeduplication::None
+                                          ? MatchStorage::Main
+                                          : MatchStorage::NewMatches;
     {
-      // Only create threads if there is more than one rule
-      const auto threadAcquisitionToken =
-          Parallelism::acquire(Parallelism::HardwareType::StdCpu, static_cast<int>(rules_.size()));
-      const int& numThreadsToUse = threadAcquisitionToken->numThreads();
-
       auto addMatchesForRuleRange = [=](RuleID start) {
         for (RuleID i = start; i < static_cast<RuleID>(rules_.size()); i += numThreadsToUse) {
-          addMatchesForRule(tokenIDs, i, shouldAbort);
+          addMatchesForRule(tokenIDs, i, shouldAbort, matchStorage);
         }
       };
 
@@ -239,7 +241,7 @@ class HypergraphMatcher::Implementation {
       } else {
         // Single-threaded path
         for (RuleID i = 0; i < static_cast<RuleID>(rules_.size()); ++i) {
-          addMatchesForRule(tokenIDs, i, shouldAbort);
+          addMatchesForRule(tokenIDs, i, shouldAbort, matchStorage);
         }
       }
     }
@@ -254,7 +256,9 @@ class HypergraphMatcher::Implementation {
       removeIdenticalMatches(abortRequested);
     }
 
-    insertNewMatches();
+    if (matchStorage == MatchStorage::NewMatches) {
+      insertNewMatches();
+    }
     chooseNextMatch();
   }
 
@@ -325,14 +329,17 @@ class HypergraphMatcher::Implementation {
   }
 
  private:
+  enum class MatchStorage { Main, NewMatches };
+
   void addMatchesForRule(const std::vector<TokenID>& tokenIDs,
                          const RuleID& ruleID,
-                         const std::function<bool()>& shouldAbort) {
+                         const std::function<bool()>& shouldAbort,
+                         const MatchStorage matchStorage) {
     const auto& ruleInputTokens = rules_[ruleID].inputs;
     for (size_t i = 0; i < ruleInputTokens.size(); ++i) {
       const Match emptyMatch{ruleID, std::vector<TokenID>(ruleInputTokens.size(), -1)};
       completeMatchesStartingWithInput(
-          emptyMatch, ruleInputTokens, rules_[ruleID].eventSelectionFunction, i, tokenIDs, shouldAbort);
+          emptyMatch, ruleInputTokens, rules_[ruleID].eventSelectionFunction, i, tokenIDs, shouldAbort, matchStorage);
     }
   }
 
@@ -341,14 +348,20 @@ class HypergraphMatcher::Implementation {
                                         const EventSelectionFunction eventSelectionFunction,
                                         const size_t nextInputIdx,
                                         const std::vector<TokenID>& potentialTokenIDs,
-                                        const std::function<bool()>& shouldAbort) {
+                                        const std::function<bool()>& shouldAbort,
+                                        const MatchStorage matchStorage) {
     for (const auto tokenID : potentialTokenIDs) {
       if (getCurrentError() != None) {
         return;
       }
       if (isTokenUnused(incompleteMatch, tokenID)) {
-        attemptMatchTokenToInput(
-            incompleteMatch, partiallyMatchedInputs, eventSelectionFunction, nextInputIdx, tokenID, shouldAbort);
+        attemptMatchTokenToInput(incompleteMatch,
+                                 partiallyMatchedInputs,
+                                 eventSelectionFunction,
+                                 nextInputIdx,
+                                 tokenID,
+                                 shouldAbort,
+                                 matchStorage);
       }
     }
   }
@@ -374,7 +387,8 @@ class HypergraphMatcher::Implementation {
                                 const EventSelectionFunction eventSelectionFunction,
                                 const size_t nextInputIdx,
                                 const TokenID potentialTokenID,
-                                const std::function<bool()>& shouldAbort) {
+                                const std::function<bool()>& shouldAbort,
+                                const MatchStorage matchStorage) {
     // If WL wants to abort, abort
     if (shouldAbort()) {
       setCurrentErrorIfNone(Error::Aborted);
@@ -403,7 +417,11 @@ class HypergraphMatcher::Implementation {
 
     if (isMatchComplete(newMatch)) {
       std::lock_guard<std::mutex> lock(matchMutex);
-      newMatches_.insert(std::make_shared<Match>(newMatch));
+      if (matchStorage == MatchStorage::NewMatches) {
+        newMatches_.insert(std::make_shared<Match>(newMatch));
+      } else {
+        insertMatch(std::make_shared<Match>(newMatch));
+      }
       return;
     }
 
@@ -413,7 +431,8 @@ class HypergraphMatcher::Implementation {
                                      eventSelectionFunction,
                                      nextInputIdxAndCandidateTokens.first,
                                      nextInputIdxAndCandidateTokens.second,
-                                     shouldAbort);
+                                     shouldAbort,
+                                     matchStorage);
   }
 
   bool isSpacelikeSeparated(const TokenID newToken, const std::vector<TokenID>& previousTokens) {
