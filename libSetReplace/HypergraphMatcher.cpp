@@ -254,6 +254,7 @@ class HypergraphMatcher::Implementation {
       removeIdenticalMatches(abortRequested);
     }
 
+    insertNewMatches();
     chooseNextMatch();
   }
 
@@ -401,7 +402,8 @@ class HypergraphMatcher::Implementation {
     }
 
     if (isMatchComplete(newMatch)) {
-      insertMatch(newMatch);
+      std::lock_guard<std::mutex> lock(matchMutex);
+      newMatches_.insert(std::make_shared<Match>(newMatch));
       return;
     }
 
@@ -426,12 +428,19 @@ class HypergraphMatcher::Implementation {
     return true;
   }
 
-  void insertMatch(const Match& newMatch) {
-    // careful, don't create different pointers to the same match!
-    const auto matchPtr = std::make_shared<Match>(newMatch);
+  void insertNewMatches() {
+    std::vector<MatchPtr> sortedMatches(newMatches_.begin(), newMatches_.end());
+    newMatches_.clear();
+    // We should sort them in the same order they would be added if the evaluation was sequential.
+    std::sort(sortedMatches.begin(), sortedMatches.end(), [](MatchPtr first, MatchPtr second) {
+      return first->rule < second->rule;
+    });
+    for (const auto& match : sortedMatches) {
+      insertMatch(match);
+    }
+  }
 
-    std::lock_guard<std::mutex> lock(matchMutex);
-
+  void insertMatch(const MatchPtr matchPtr) {
     if (!allMatches_.insert(matchPtr).second) {
       return;
     }
@@ -446,10 +455,6 @@ class HypergraphMatcher::Implementation {
       for (const auto token : tokens) {
         tokensToMatches_[token].insert(matchPtr);
       }
-    }
-
-    if (eventDeduplication_ == EventDeduplication::SameInputSetIsomorphicOutputs) {
-      newMatches_.insert(matchPtr);
     }
   }
 
@@ -552,17 +557,17 @@ class HypergraphMatcher::Implementation {
   void removeIdenticalMatches(const std::function<bool()>& abortRequested) {
     std::unordered_set<TokenID> currentInputsSet;
     std::vector<MatchPtr> addedSameInputMatches;
-    for (const auto& newMatch : newMatches_) {
-      if (!sameInputSet(newMatch, currentInputsSet)) {
+    for (auto newMatchIt = newMatches_.begin(); newMatchIt != newMatches_.end();) {
+      if (!sameInputSet(*newMatchIt, currentInputsSet)) {
         // matches are ordered by their input sets, so if it's different, a batch with the new inputs is starting.
         currentInputsSet.clear();
-        currentInputsSet.insert(newMatch->inputTokens.begin(), newMatch->inputTokens.end());
+        currentInputsSet.insert((*newMatchIt)->inputTokens.begin(), (*newMatchIt)->inputTokens.end());
         addedSameInputMatches.clear();
       }
 
       bool matchAppearedBefore = false;
       for (const auto& addedMatch : addedSameInputMatches) {
-        if (sameOutcomeAssumingSameInputs(newMatch, addedMatch, abortRequested)) {
+        if (sameOutcomeAssumingSameInputs(*newMatchIt, addedMatch, abortRequested)) {
           matchAppearedBefore = true;
         }
         if (getCurrentError() != None) {
@@ -570,12 +575,12 @@ class HypergraphMatcher::Implementation {
         }
       }
       if (matchAppearedBefore) {
-        deleteMatch(newMatch);
+        newMatchIt = newMatches_.erase(newMatchIt);
       } else {  // same input set, but a different outcome
-        addedSameInputMatches.emplace_back(newMatch);
+        addedSameInputMatches.emplace_back(*newMatchIt);
+        ++newMatchIt;
       }
     }
-    newMatches_.clear();
   }
 
   // Checks if the input token IDs in the match are the same as referenceInputTokens
