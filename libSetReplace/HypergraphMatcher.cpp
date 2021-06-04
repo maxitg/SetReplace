@@ -164,8 +164,9 @@ class HypergraphMatcher::Implementation {
   MatchPtr nextMatch_;
 
   const EventDeduplication eventDeduplication_;
-  // Newly created matches for which the advanced deduplication algorithm has not yet been run.
-  // We sort them by sets they match to, and then by the chosen ordering function,
+  // Newly created matches that have not yet been added to matchQueue_, allMatches_, etc.
+  // This is needed either for event deduplication or to keep the order in which matches are added deterministic.
+  // We sort them for event deduplication purposes by sets they match to, and then by the chosen ordering function,
   // so that each batch with identical inputs can be processed together, and it's obvious which copy should be retained.
   std::set<MatchPtr, MatchComparator> newMatches_;
 
@@ -215,14 +216,15 @@ class HypergraphMatcher::Implementation {
       return getCurrentError() != None || abortRequested();
     };
 
-    // Only create threads if there is more than one rule
-    const auto threadAcquisitionToken =
-        Parallelism::acquire(Parallelism::HardwareType::StdCpu, static_cast<int>(rules_.size()));
-    const int& numThreadsToUse = threadAcquisitionToken->numThreads();
-    const MatchStorage matchStorage = numThreadsToUse == 0 && eventDeduplication_ == EventDeduplication::None
-                                          ? MatchStorage::Main
-                                          : MatchStorage::NewMatches;
+    MatchStorage matchStorage;
     {
+      // Only create threads if there is more than one rule
+      const auto threadAcquisitionToken =
+          Parallelism::acquire(Parallelism::HardwareType::StdCpu, static_cast<int>(rules_.size()));
+      const int& numThreadsToUse = threadAcquisitionToken->numThreads();
+      matchStorage = numThreadsToUse == 0 && eventDeduplication_ == EventDeduplication::None ? MatchStorage::Main
+                                                                                             : MatchStorage::NewMatches;
+
       auto addMatchesForRuleRange = [=](RuleID start) {
         for (RuleID i = start; i < static_cast<RuleID>(rules_.size()); i += numThreadsToUse) {
           addMatchesForRule(tokenIDs, i, shouldAbort, matchStorage);
@@ -448,10 +450,11 @@ class HypergraphMatcher::Implementation {
   }
 
   void insertNewMatches() {
-    std::vector<MatchPtr> sortedMatches(newMatches_.begin(), newMatches_.end());
+    std::vector<MatchPtr> sortedMatches(std::make_move_iterator(newMatches_.begin()),
+                                        std::make_move_iterator(newMatches_.end()));
     newMatches_.clear();
     // We should sort them in the same order they would be added if the evaluation was sequential.
-    std::sort(sortedMatches.begin(), sortedMatches.end(), [](MatchPtr first, MatchPtr second) {
+    std::sort(sortedMatches.begin(), sortedMatches.end(), [](const MatchPtr& first, const MatchPtr& second) {
       return first->rule < second->rule;
     });
     for (const auto& match : sortedMatches) {
@@ -588,6 +591,7 @@ class HypergraphMatcher::Implementation {
       for (const auto& addedMatch : addedSameInputMatches) {
         if (sameOutcomeAssumingSameInputs(*newMatchIt, addedMatch, abortRequested)) {
           matchAppearedBefore = true;
+          break;
         }
         if (getCurrentError() != None) {
           return;
