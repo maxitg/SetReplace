@@ -164,8 +164,9 @@ class HypergraphMatcher::Implementation {
   MatchPtr nextMatch_;
 
   const EventDeduplication eventDeduplication_;
-  // Newly created matches for which the advanced deduplication algorithm has not yet been run.
-  // We sort them by sets they match to, and then by the chosen ordering function,
+  // Newly created matches that have not yet been added to matchQueue_, allMatches_, etc.
+  // This is needed either for event deduplication or to keep the order in which matches are added deterministic.
+  // We sort them for event deduplication purposes by sets they match to, and then by the chosen ordering function,
   // so that each batch with identical inputs can be processed together, and it's obvious which copy should be retained.
   std::set<MatchPtr, MatchComparator> newMatches_;
 
@@ -215,15 +216,18 @@ class HypergraphMatcher::Implementation {
       return getCurrentError() != None || abortRequested();
     };
 
+    MatchStorage matchStorage;
     {
       // Only create threads if there is more than one rule
       const auto threadAcquisitionToken =
           Parallelism::acquire(Parallelism::HardwareType::StdCpu, static_cast<int>(rules_.size()));
       const int& numThreadsToUse = threadAcquisitionToken->numThreads();
+      matchStorage = numThreadsToUse == 0 && eventDeduplication_ == EventDeduplication::None ? MatchStorage::Main
+                                                                                             : MatchStorage::NewMatches;
 
       auto addMatchesForRuleRange = [=](RuleID start) {
         for (RuleID i = start; i < static_cast<RuleID>(rules_.size()); i += numThreadsToUse) {
-          addMatchesForRule(tokenIDs, i, shouldAbort);
+          addMatchesForRule(tokenIDs, i, shouldAbort, matchStorage);
         }
       };
 
@@ -239,7 +243,7 @@ class HypergraphMatcher::Implementation {
       } else {
         // Single-threaded path
         for (RuleID i = 0; i < static_cast<RuleID>(rules_.size()); ++i) {
-          addMatchesForRule(tokenIDs, i, shouldAbort);
+          addMatchesForRule(tokenIDs, i, shouldAbort, matchStorage);
         }
       }
     }
@@ -254,6 +258,9 @@ class HypergraphMatcher::Implementation {
       removeIdenticalMatches(abortRequested);
     }
 
+    if (matchStorage == MatchStorage::NewMatches) {
+      insertNewMatches();
+    }
     chooseNextMatch();
   }
 
@@ -324,14 +331,17 @@ class HypergraphMatcher::Implementation {
   }
 
  private:
+  enum class MatchStorage { Main, NewMatches };
+
   void addMatchesForRule(const std::vector<TokenID>& tokenIDs,
                          const RuleID& ruleID,
-                         const std::function<bool()>& shouldAbort) {
+                         const std::function<bool()>& shouldAbort,
+                         const MatchStorage matchStorage) {
     const auto& ruleInputTokens = rules_[ruleID].inputs;
     for (size_t i = 0; i < ruleInputTokens.size(); ++i) {
       const Match emptyMatch{ruleID, std::vector<TokenID>(ruleInputTokens.size(), -1)};
       completeMatchesStartingWithInput(
-          emptyMatch, ruleInputTokens, rules_[ruleID].eventSelectionFunction, i, tokenIDs, shouldAbort);
+          emptyMatch, ruleInputTokens, rules_[ruleID].eventSelectionFunction, i, tokenIDs, shouldAbort, matchStorage);
     }
   }
 
@@ -340,14 +350,20 @@ class HypergraphMatcher::Implementation {
                                         const EventSelectionFunction eventSelectionFunction,
                                         const size_t nextInputIdx,
                                         const std::vector<TokenID>& potentialTokenIDs,
-                                        const std::function<bool()>& shouldAbort) {
+                                        const std::function<bool()>& shouldAbort,
+                                        const MatchStorage matchStorage) {
     for (const auto tokenID : potentialTokenIDs) {
       if (getCurrentError() != None) {
         return;
       }
       if (isTokenUnused(incompleteMatch, tokenID)) {
-        attemptMatchTokenToInput(
-            incompleteMatch, partiallyMatchedInputs, eventSelectionFunction, nextInputIdx, tokenID, shouldAbort);
+        attemptMatchTokenToInput(incompleteMatch,
+                                 partiallyMatchedInputs,
+                                 eventSelectionFunction,
+                                 nextInputIdx,
+                                 tokenID,
+                                 shouldAbort,
+                                 matchStorage);
       }
     }
   }
@@ -373,7 +389,8 @@ class HypergraphMatcher::Implementation {
                                 const EventSelectionFunction eventSelectionFunction,
                                 const size_t nextInputIdx,
                                 const TokenID potentialTokenID,
-                                const std::function<bool()>& shouldAbort) {
+                                const std::function<bool()>& shouldAbort,
+                                const MatchStorage matchStorage) {
     // If WL wants to abort, abort
     if (shouldAbort()) {
       setCurrentErrorIfNone(Error::Aborted);
@@ -401,7 +418,12 @@ class HypergraphMatcher::Implementation {
     }
 
     if (isMatchComplete(newMatch)) {
-      insertMatch(newMatch);
+      std::lock_guard<std::mutex> lock(matchMutex);
+      if (matchStorage == MatchStorage::NewMatches) {
+        newMatches_.insert(std::make_shared<Match>(newMatch));
+      } else {
+        insertMatch(std::make_shared<Match>(newMatch));
+      }
       return;
     }
 
@@ -411,7 +433,8 @@ class HypergraphMatcher::Implementation {
                                      eventSelectionFunction,
                                      nextInputIdxAndCandidateTokens.first,
                                      nextInputIdxAndCandidateTokens.second,
-                                     shouldAbort);
+                                     shouldAbort,
+                                     matchStorage);
   }
 
   bool isSpacelikeSeparated(const TokenID newToken, const std::vector<TokenID>& previousTokens) {
@@ -426,12 +449,20 @@ class HypergraphMatcher::Implementation {
     return true;
   }
 
-  void insertMatch(const Match& newMatch) {
-    // careful, don't create different pointers to the same match!
-    const auto matchPtr = std::make_shared<Match>(newMatch);
+  void insertNewMatches() {
+    std::vector<MatchPtr> sortedMatches(std::make_move_iterator(newMatches_.begin()),
+                                        std::make_move_iterator(newMatches_.end()));
+    newMatches_.clear();
+    // We should sort them in the same order they would be added if the evaluation was sequential.
+    std::sort(sortedMatches.begin(), sortedMatches.end(), [](const MatchPtr& first, const MatchPtr& second) {
+      return first->rule < second->rule;
+    });
+    for (const auto& match : sortedMatches) {
+      insertMatch(match);
+    }
+  }
 
-    std::lock_guard<std::mutex> lock(matchMutex);
-
+  void insertMatch(const MatchPtr matchPtr) {
     if (!allMatches_.insert(matchPtr).second) {
       return;
     }
@@ -446,10 +477,6 @@ class HypergraphMatcher::Implementation {
       for (const auto token : tokens) {
         tokensToMatches_[token].insert(matchPtr);
       }
-    }
-
-    if (eventDeduplication_ == EventDeduplication::SameInputSetIsomorphicOutputs) {
-      newMatches_.insert(matchPtr);
     }
   }
 
@@ -552,30 +579,31 @@ class HypergraphMatcher::Implementation {
   void removeIdenticalMatches(const std::function<bool()>& abortRequested) {
     std::unordered_set<TokenID> currentInputsSet;
     std::vector<MatchPtr> addedSameInputMatches;
-    for (const auto& newMatch : newMatches_) {
-      if (!sameInputSet(newMatch, currentInputsSet)) {
+    for (auto newMatchIt = newMatches_.begin(); newMatchIt != newMatches_.end();) {
+      if (!sameInputSet(*newMatchIt, currentInputsSet)) {
         // matches are ordered by their input sets, so if it's different, a batch with the new inputs is starting.
         currentInputsSet.clear();
-        currentInputsSet.insert(newMatch->inputTokens.begin(), newMatch->inputTokens.end());
+        currentInputsSet.insert((*newMatchIt)->inputTokens.begin(), (*newMatchIt)->inputTokens.end());
         addedSameInputMatches.clear();
       }
 
       bool matchAppearedBefore = false;
       for (const auto& addedMatch : addedSameInputMatches) {
-        if (sameOutcomeAssumingSameInputs(newMatch, addedMatch, abortRequested)) {
+        if (sameOutcomeAssumingSameInputs(*newMatchIt, addedMatch, abortRequested)) {
           matchAppearedBefore = true;
+          break;
         }
         if (getCurrentError() != None) {
           return;
         }
       }
       if (matchAppearedBefore) {
-        deleteMatch(newMatch);
+        newMatchIt = newMatches_.erase(newMatchIt);
       } else {  // same input set, but a different outcome
-        addedSameInputMatches.emplace_back(newMatch);
+        addedSameInputMatches.emplace_back(*newMatchIt);
+        ++newMatchIt;
       }
     }
-    newMatches_.clear();
   }
 
   // Checks if the input token IDs in the match are the same as referenceInputTokens

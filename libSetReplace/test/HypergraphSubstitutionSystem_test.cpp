@@ -149,4 +149,16 @@ TEST(HypergraphSubstitutionSystem, replaceOnce) {
       {{{{-1}}, {{-1, -1}}}}, {{1}}, 1, orderingSpec, HypergraphMatcher::EventDeduplication::None, 0);
   EXPECT_EQ(system.replaceOnce(doNotAbort), 1);
 }
+
+TEST(HypergraphSubstitutionSystem, multiruleSeeding) {
+  std::array<int, 2> replacedTokenCounts = {0, 0};
+  constexpr int trialCount = 100;
+  for (int i = 0; i < trialCount; ++i) {
+    HypergraphSubstitutionSystem system(
+        {{{{1, 2}}, {}}, {{{2, 3}}, {}}}, {{1, 2}, {2, 3}}, 1, {}, HypergraphMatcher::EventDeduplication::None, 123);
+    system.replaceOnce(doNotAbort);
+    ++replacedTokenCounts[system.events()[1].inputTokens[0]];
+  }
+  EXPECT_EQ(std::max(replacedTokenCounts[0], replacedTokenCounts[1]), trialCount);
+}
 }  // namespace SetReplace
