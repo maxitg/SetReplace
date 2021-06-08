@@ -2,8 +2,6 @@ Package["SetReplaceDevUtils`"]
 
 PackageImport["GeneralUtilities`"]
 
-PackageImport["PacletManager`"] (* for PacletFind, PacletInstall in versions prior to 12.1 *)
-
 PackageExport["$GitLinkAvailableQ"]
 PackageExport["GitSHAWithDirtyStar"]
 PackageExport["InstallGitLink"]

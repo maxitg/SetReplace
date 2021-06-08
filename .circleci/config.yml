@@ -6,7 +6,7 @@ orbs:
 jobs:
   wolfram-language-paclet-test:
     docker:
-      - image: maxitg/set-replace-wl-ci:12.2.0
+      - image: maxitg/set-replace-wl-ci:12.3.0
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
@@ -51,32 +51,6 @@ jobs:
             then
               ./performanceTest.wls master HEAD 2
             fi
-
-  wolfram-language-paclet-test-prerelease:
-    docker:
-      - image: maxitg/set-replace-wl-ci:12.3.0
-        auth:
-          username: maxitg
-          password: $DOCKERHUB_PASSWORD
-    parallelism: 4
-
-    steps:
-      - checkout
-
-      - attach_workspace:
-          at: /tmp/workspace
-
-      - run:
-          name: Copy libraries
-          command: mkdir -p ./LibraryResources && cp -r /tmp/workspace/* ./LibraryResources/
-
-      - run:
-          name: Install
-          command: ./install.wls
-
-      - run:
-          name: Test
-          command: ./.circleci/test.sh
 
   cpp-test:
     docker:
@@ -228,6 +202,3 @@ workflows:
           requires:
             - macos-build
             - windows-build
-      - wolfram-language-paclet-test-prerelease:
-          requires:
-            - wolfram-language-paclet-test

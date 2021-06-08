@@ -29,7 +29,7 @@ Out[] = {5, 3, 6, 3}
 ```
 
 Note that this is similar to [`SubsetReplace`](https://reference.wolfram.com/language/ref/SubsetReplace.html) function
-of Wolfram Language (introduced in version 12.1, it replaces all non-overlapping subsets at once by default):
+of Wolfram Language (it replaces all non-overlapping subsets at once by default):
 
 ```wl
 In[] := SubsetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> a + b]
@@ -110,7 +110,7 @@ You only need three things to use *SetReplace*:
 * Windows, macOS 10.12+, or Linux.
 * Windows only &mdash;
   [Microsoft Visual C++ Redistributable 2015+](https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0).
-* [Wolfram Language 12.2+](https://www.wolfram.com/language/)
+* [Wolfram Language 12.3+](https://www.wolfram.com/language/)
   including [WolframScript](https://www.wolfram.com/wolframscript/). A free version is available
   as [Wolfram Engine](https://www.wolfram.com/engine/).
 * A C++17 compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in
