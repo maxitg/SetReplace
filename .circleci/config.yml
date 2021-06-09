@@ -54,7 +54,7 @@ jobs:
 
   cpp-test:
     docker:
-      - image: alpine:3.12.1
+      - image: alpine:3.13.5
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
@@ -98,7 +98,7 @@ jobs:
 
   cpp-32-test:
     docker:
-      - image: i386/alpine:3.12.1
+      - image: i386/alpine:3.13.5
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
