@@ -51,9 +51,9 @@ fi
 exitStatus=0
 
 for file in "${filesToLint[@]}"; do
-  if [[ "$file" == *.png || \
-    "$file" == Dependencies/* || \
-    "$file" == libSetReplace/WolframHeaders/* || \
+  if [[ "$file" == *.png ||
+    "$file" == Dependencies/* ||
+    "$file" == libSetReplace/WolframHeaders/* ||
     "$file" == *.xcodeproj/* ]]; then
     :
   elif [[ "$file" == *.cpp || "$file" == *.hpp || "$file" == *.h ]]; then

@@ -54,7 +54,7 @@ jobs:
 
   cpp-test:
     docker:
-      - image: alpine:3.12.1
+      - image: alpine:3.13.5
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
@@ -65,7 +65,8 @@ jobs:
       - run:
           name: Install Required Tools
           command: |
-            apk add --no-cache bash git g++ make cmake clang py-pip shellcheck shfmt grep npm
+            apk add --no-cache bash git g++ make cmake clang py-pip shellcheck grep npm
+            apk add --no-cache shfmt --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
             pip install cpplint
             npm install -g markdownlint-cli
 
@@ -98,7 +99,7 @@ jobs:
 
   cpp-32-test:
     docker:
-      - image: i386/alpine:3.12.1
+      - image: i386/alpine:3.13.5
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
