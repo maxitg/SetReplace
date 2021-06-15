@@ -33,7 +33,10 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
     expressionDestroyerEventCounts, destroyerChoices, instantiationCounts, instantiations},
   Module[{rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, maxEvents, init, terminationReason},
     rules = parseRules[rawRules];
+    ruleInputCountRanges = inputCountRange /@ rules;
     {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs} = Values @ rawEventSelection;
+    minEventInputs = Max[minEventInputs, Min[ruleInputCountRanges[[All, 1]]]];
+    maxEventInputs = Min[maxEventInputs, Max[ruleInputCountRanges[[All, 2]]]];
     parseTokenDeduplication[rawTokenDeduplication]; (* Token deduplication is not implemented at the moment *)
     parseEventOrdering[rawEventOrdering];           (* Event ordering is not implemented at the moment *)
     {maxEvents} = Values @ rawStoppingCondition;
@@ -235,6 +238,28 @@ parseRules[rawRules : {$singleRulePattern...}] := rawRules;
 declareMessage[General::invalidMultisetRules, "Rules `rules` must be a Rule, a RuleDelayed or a List of them."];
 parseRules[rawRules_] := throw[Failure["invalidMultisetRules", <|"rules" -> rawRules|>]];
 parseRules[rawRules___] /; !CheckArguments[MultisetSubstitutionSystem[rawRules], 1] := throw[Failure[None, <||>]];
+
+$singleTokenPattern = Verbatim[Pattern][_, Verbatim[Blank[]]];
+$tokenSequencePattern = Verbatim[Pattern][_, Verbatim[BlankSequence[]]];
+$tokenNullSequencePattern = Verbatim[Pattern][_, Verbatim[BlankNullSequence[]]];
+
+inputCountRange[input_ :> _] := inputCountRange[input];
+
+inputCountRange[input_List] /;
+  Count[input, Except[$singleTokenPattern | $tokenSequencePattern | $tokenNullSequencePattern]] =!= 0 := {0, Infinity};
+
+inputCountRange[input_List] := {
+  Count[input, $singleTokenPattern | $tokenSequencePattern],
+  If[Count[input, $tokenSequencePattern] =!= 0 || Count[input, $tokenNullSequencePattern] =!= 0,
+    Infinity
+  ,
+    Count[input, $singleTokenPattern]
+  ]
+};
+
+inputCountRange[Verbatim[Condition][input_List, _]] := inputCountRange[input];
+
+inputCountRange[_] := {0, Infinity};
 
 parseTokenDeduplication[None] := None;
 declareMessage[General::multisetTokenDeduplicationNotImplemented,
