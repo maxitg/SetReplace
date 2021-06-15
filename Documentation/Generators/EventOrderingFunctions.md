@@ -7,7 +7,7 @@ match any pair of numbers, many of which overlap:
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}],
-                         {"MaxGeneration" -> 1, "MaxEventInputs" -> 2},
+                         "MaxGeneration" -> 1,
                          None,
                          EventOrderingFunctions[MultisetSubstitutionSystem],
                          {}] @
@@ -32,7 +32,7 @@ function at the moment):
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & /@
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] /@
     GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}],
-                         {"MaxDestroyerEvents" -> 1},
+                         "MaxDestroyerEvents" -> 1,
                          None,
                          EventOrderingFunctions[MultisetSubstitutionSystem],
                          {}] /@
@@ -50,7 +50,7 @@ However, this is not the case for all systems. For example, see what happens if 
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & /@
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] /@
     GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a - b}],
-                         {"MaxDestroyerEvents" -> 1},
+                         "MaxDestroyerEvents" -> 1,
                          None,
                          EventOrderingFunctions[MultisetSubstitutionSystem],
                          {}] /@

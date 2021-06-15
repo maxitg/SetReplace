@@ -10,7 +10,7 @@
         (VertexCount @ #["ExpressionsEventsGraph"] &) @
           SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
             GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
-                                 {"MaxGeneration" -> 1, "MaxEventInputs" -> 2},
+                                 {"MaxGeneration" -> 1},
                                  None,
                                  EventOrderingFunctions[MultisetSubstitutionSystem],
                                  {}] @
@@ -21,7 +21,7 @@
         (#["EventsCount"] &) @
           SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
             GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
-                                 {"MaxEventInputs" -> 2},
+                                 {},
                                  None,
                                  EventOrderingFunctions[MultisetSubstitutionSystem],
                                  {"MaxEvents" -> 10}] @

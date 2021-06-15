@@ -66,7 +66,7 @@ Check[
         {8, 7, 7}, {8, 8, 8, 8, 8, 8}, {1, 4, 1}, {1, 1, 1, 1, 1}, {2, 2, 8}, {2, 2}},
       64],
     "Multiset addition" -> GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
-                                                {"MaxGeneration" -> 2, "MinEventInputs" -> 2, "MaxEventInputs" -> 2},
+                                                "MaxGeneration" -> 2,
                                                 None,
                                                 EventOrderingFunctions[MultisetSubstitutionSystem],
                                                 {}][{1, 2, 3, 4}]

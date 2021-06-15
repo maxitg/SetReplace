@@ -22,7 +22,7 @@ a single history (no nondeterministic branching):
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}],
-                         {"MaxDestroyerEvents" -> 1, "MaxEventInputs" -> 2},
+                         "MaxDestroyerEvents" -> 1,
                          None,
                          EventOrderingFunctions[MultisetSubstitutionSystem],
                          {}] @ {1, 2, 3, 4}
@@ -36,7 +36,7 @@ or multiple histories. Note different events (orange) using the same tokens (lig
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}],
-                         {"MaxDestroyerEvents" -> 2, "MaxEventInputs" -> 2},
+                         "MaxDestroyerEvents" -> 2,
                          None,
                          EventOrderingFunctions[MultisetSubstitutionSystem],
                          {}] @ {1, 2, 3, 4}

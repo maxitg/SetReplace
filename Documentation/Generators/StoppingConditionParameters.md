@@ -24,7 +24,7 @@ This is the most basic stopping condition. It stops the evaluation once the give
 In[] := #["ExpressionsEventsGraph"] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}],
-                         {"MaxEventInputs" -> 2},
+                         {},
                          None,
                          EventOrderingFunctions[MultisetSubstitutionSystem],
                          {"MaxEvents" -> 9}] @ {1, 2, 3, 4}
