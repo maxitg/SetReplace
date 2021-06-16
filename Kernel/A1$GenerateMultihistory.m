@@ -4,6 +4,7 @@ PackageImport["GeneralUtilities`"]
 
 PackageExport["GenerateMultihistory"]
 PackageExport["GenerateAllHistories"]
+PackageExport["GenerateFullEventSet"]
 PackageExport["GenerateSingleHistory"]
 PackageExport["$SetReplaceSystems"]
 PackageExport["EventSelectionParameters"]
@@ -43,6 +44,14 @@ of the evaluation of a specified system$ up to maxGeneration$.
 "]];
 
 SyntaxInformation[GenerateAllHistories] = {"ArgumentsPattern" -> {system_, maxGeneration_}};
+
+SetUsage[Evaluate["
+GenerateFullEventSet[system$, maxGeneration$][init$] yields a complete event set (Petri net) object enumerating all
+events that can occur within maxGenerations$ starting from init$ tokens.
+" <> $usageSetReplaceSystems <> "
+"]];
+
+SyntaxInformation[GenerateFullEventSet] = {"ArgumentsPattern" -> {system_, maxGeneration_}};
 
 SetUsage[Evaluate["
 GenerateSingleHistory[system$, eventOrderingSpec$, eventCount$][init$] yields a Multihistory object containing \
@@ -149,6 +158,28 @@ parseMaxGeneration[maxGeneration_, system_] := parseConstraints["invalidEventSel
   $eventSelectionSpecs["Lookup", Head[system]]]["MaxGeneration" -> maxGeneration];
 
 generateAllHistories[system_, __] := throw[Failure["unknownSystem", <|"system" -> system|>]];
+
+(* GenerateFullEventSet *)
+
+expr : (generator : GenerateFullEventSet[args___])[init___] /;
+    CheckArguments[generator, 2] && CheckArguments[expr, 1] := ModuleScope[
+  result = Catch[generateFullEventSet[args, init],
+                 _ ? FailureQ,
+                 message[GenerateFullEventSet, #, <|"expr" -> HoldForm[expr]|>] &];
+  result /; !FailureQ[result]
+];
+
+generateFullEventSet[system_ /; $implementations["KeyExistsQ", Head[system]], maxGeneration_, init_] := ModuleScope[
+  $implementations["Lookup", Head[system]][
+    system,
+    parseMaxGeneration[maxGeneration, system],
+    $$eventSet,
+    "Any",
+    parseConstraints["invalidStoppingCondition"][$stoppingConditionSpecs["Lookup", Head[system]]][{}],
+    init]
+];
+
+generateFullEventSet[system_, __] := throw[Failure["unknownSystem", <|"system" -> system|>]];
 
 (* GenerateSingleHistory *)
 
