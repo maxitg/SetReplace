@@ -3,6 +3,8 @@ Package["SetReplace`"]
 PackageImport["GeneralUtilities`"]
 
 PackageExport["GenerateMultihistory"]
+PackageExport["GenerateFullMultihistory"]
+PackageExport["GenerateSingleHistory"]
 PackageExport["$SetReplaceSystems"]
 PackageExport["EventSelectionParameters"]
 PackageExport["EventOrderingFunctions"]
@@ -13,22 +15,43 @@ PackageScope["generateMultihistory"]
 PackageScope["declareMultihistoryGenerator"]
 PackageScope["initializeGenerators"]
 
-SetUsage @ "
+$usageSetReplaceSystems = "* A list of all supported systems can be obtained with $SetReplaceSystems.";
+$usageEventOrderingSpec =
+"* eventOrderingSpec$ can be set to 'UniformRandom', 'Any', or a list of partial event ordering functions. The list of \
+supported functions can be obtained with EventOrderingFunctions[Head[system$]].";
+
+SetUsage[Evaluate["
 GenerateMultihistory[system$, eventSelectionSpec$, tokenDeduplicationSpec$, eventOrderingSpec$, \
 stoppingConditionSpec$][init$] yields a Multihistory object of the evaluation of a specified system$.
-* A list of all supported systems can be obtained with $SetReplaceSystems.
+" <> $usageSetReplaceSystems <> "
 * eventSelectionSpec$ is an Association defining constraints on the events that will be generated. The keys that can \
 be used depend on the system$, some examples include 'MaxGeneration' and 'MaxDestroyerEvents'. A list for a particular \
 system can be obtained with EventSelectionParameters[Head[system$]].
 * tokenDeduplicationSpec$ can be set to None or All.
-* eventOrderingSpec$ can be set to 'UniformRandom', 'Any', or a list of partial event ordering functions. The list of \
-supported functions can be obtained with EventOrderingFunctions[Head[system$]].
+" <> $usageEventOrderingSpec <> "
 * stoppingConditionSpec$ is an Association specifying conditions (e.g., 'MaxEvents') that, if satisfied, will cause \
 the evaluation to stop immediately. The list of choices can be obtained with StoppingConditionParameters[Head[system$]].
-";
+"]];
 
 SyntaxInformation[GenerateMultihistory] = {"ArgumentsPattern" ->
   {system_, eventSelectionSpec_, tokenDeduplicationSpec_, eventOrderingSpec_, stoppingConditionSpec_}};
+
+SetUsage[Evaluate["
+GenerateFullMultihistory[system$, maxGeneration$][init$] yields a complete Multihistory object of the evaluation of a \
+specified system$ up to maxGeneration$.
+" <> $usageSetReplaceSystems <> "
+"]];
+
+SyntaxInformation[GenerateFullMultihistory] = {"ArgumentsPattern" -> {system_, maxGeneration_}};
+
+SetUsage[Evaluate["
+GenerateSingleHistory[system$, eventOrderingSpec$, eventCount$][init$] yields a Multihistory object containing \
+eventCount$ events of an evaluation of a single history of the specified system$ using eventOrderingSpec$.
+" <> $usageSetReplaceSystems <> "
+" <> $usageEventOrderingSpec <> "
+"]];
+
+SyntaxInformation[GenerateSingleHistory] = {"ArgumentsPattern" -> {system_, eventOrderingSpec_, eventCount_}};
 
 (* Declaration *)
 
@@ -73,7 +96,7 @@ declareMessage[General::invalidGeneratorDeclaration,
 declareMultihistoryGenerator[args___] :=
   message[SetReplace, Failure["invalidGeneratorDeclaration", <|"args" -> {args}|>]];
 
-(* Generator call *)
+(* GenerateMultihistory *)
 
 expr : (generator : GenerateMultihistory[args___])[init___] /;
     CheckArguments[generator, 5] && CheckArguments[expr, 1] := ModuleScope[
@@ -102,6 +125,58 @@ generateMultihistory[system_ /; $implementations["KeyExistsQ", Head[system]],
 declareMessage[General::unknownSystem, "System `system` in `expr` is not recognized."];
 generateMultihistory[system_, __] := throw[Failure["unknownSystem", <|"system" -> system|>]];
 
+(* GenerateFullMultihistory *)
+
+expr : (generator : GenerateFullMultihistory[args___])[init___] /;
+    CheckArguments[generator, 2] && CheckArguments[expr, 1] := ModuleScope[
+  result = Catch[generateFullMultihistory[args, init],
+                 _ ? FailureQ,
+                 message[GenerateFullMultihistory, #, <|"expr" -> HoldForm[expr]|>] &];
+  result /; !FailureQ[result]
+];
+
+generateFullMultihistory[system_ /; $implementations["KeyExistsQ", Head[system]], maxGeneration_, init_] := ModuleScope[
+  $implementations["Lookup", Head[system]][
+    system,
+    parseMaxGeneration[maxGeneration, system],
+    None,
+    "Any",
+    parseConstraints["invalidStoppingCondition"][$stoppingConditionSpecs["Lookup", Head[system]]][{}],
+    init]
+];
+
+parseMaxGeneration[maxGeneration_, system_] := parseConstraints["invalidEventSelection"][
+  $eventSelectionSpecs["Lookup", Head[system]]]["MaxGeneration" -> maxGeneration];
+
+generateFullMultihistory[system_, __] := throw[Failure["unknownSystem", <|"system" -> system|>]];
+
+(* GenerateSingleHistory *)
+
+expr : (generator : GenerateSingleHistory[args___])[init___] /;
+    CheckArguments[generator, 3] && CheckArguments[expr, 1] := ModuleScope[
+  result = Catch[generateSingleHistory[args, init],
+                 _ ? FailureQ,
+                 message[GenerateSingleHistory, #, <|"expr" -> HoldForm[expr]|>] &];
+  result /; !FailureQ[result]
+];
+
+generateSingleHistory[
+    system_ /; $implementations["KeyExistsQ", Head[system]], rawEventOrdering_, maxEvents_, init_] := ModuleScope[
+  $implementations["Lookup", Head[system]][
+    system,
+    parseConstraints["invalidEventSelection"][$eventSelectionSpecs["Lookup", Head[system]]][
+      {"MaxDestroyerEvents" -> 1}],
+    None,
+    parseEventOrdering[$eventOrderings["Lookup", Head[system]]][rawEventOrdering],
+    parseMaxEvents[maxEvents, system],
+    init]
+];
+
+parseMaxEvents[maxEvents_, system_] := parseConstraints["invalidStoppingCondition"][
+  $stoppingConditionSpecs["Lookup", Head[system]]]["MaxEvents" -> maxEvents];
+
+generateSingleHistory[system_, __] := throw[Failure["unknownSystem", <|"system" -> system|>]];
+
 (* Parsing *)
 (* In addition to associations, lists of rules and single rules are allowed. *)
 
@@ -127,6 +202,7 @@ parseTokenDeduplication[value_] :=
   throw[Failure["invalidTokenDeduplication", <|"value" -> value, "choices" -> $tokenDeduplicationValues|>]];
 
 parseEventOrdering[supportedFunctions_][argument_List] /; SubsetQ[supportedFunctions, argument] := argument;
+parseEventOrdering[_][argument : "Any"] := argument;
 declareMessage[
   General::invalidEventOrdering, "Event ordering spec `argument` in `expr` should be a List of values from `choices`."];
 parseEventOrdering[supportedFunctions_][argument_] :=

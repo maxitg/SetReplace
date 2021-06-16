@@ -326,7 +326,7 @@ parseTokenDeduplication[_] := throw[Failure["multisetTokenDeduplicationNotImplem
 
 $supportedEventOrdering =
   {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"};
-parseEventOrdering[ordering : $supportedEventOrdering] := ordering;
+parseEventOrdering[ordering : ($supportedEventOrdering | "Any")] := ordering;
 declareMessage[General::multisetEventOrderingNotImplemented,
                "Only " <> ToString[$supportedEventOrdering] <> " event ordering is implemented at this time."];
 parseEventOrdering[_] := throw[Failure["multisetEventOrderingNotImplemented", <||>]];
