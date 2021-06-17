@@ -3,7 +3,7 @@ Package["SetReplace`"]
 PackageImport["GeneralUtilities`"]
 
 PackageExport["GenerateMultihistory"]
-PackageExport["GenerateFullMultihistory"]
+PackageExport["GenerateAllHistories"]
 PackageExport["GenerateSingleHistory"]
 PackageExport["$SetReplaceSystems"]
 PackageExport["EventSelectionParameters"]
@@ -37,12 +37,12 @@ SyntaxInformation[GenerateMultihistory] = {"ArgumentsPattern" ->
   {system_, eventSelectionSpec_, tokenDeduplicationSpec_, eventOrderingSpec_, stoppingConditionSpec_}};
 
 SetUsage[Evaluate["
-GenerateFullMultihistory[system$, maxGeneration$][init$] yields a complete Multihistory object of the evaluation of a \
-specified system$ up to maxGeneration$.
+GenerateAllHistories[system$, maxGeneration$][init$] yields a Multihistory object representing all possible histories \
+of the evaluation of a specified system$ up to maxGeneration$.
 " <> $usageSetReplaceSystems <> "
 "]];
 
-SyntaxInformation[GenerateFullMultihistory] = {"ArgumentsPattern" -> {system_, maxGeneration_}};
+SyntaxInformation[GenerateAllHistories] = {"ArgumentsPattern" -> {system_, maxGeneration_}};
 
 SetUsage[Evaluate["
 GenerateSingleHistory[system$, eventOrderingSpec$, eventCount$][init$] yields a Multihistory object containing \
@@ -125,17 +125,17 @@ generateMultihistory[system_ /; $implementations["KeyExistsQ", Head[system]],
 declareMessage[General::unknownSystem, "System `system` in `expr` is not recognized."];
 generateMultihistory[system_, __] := throw[Failure["unknownSystem", <|"system" -> system|>]];
 
-(* GenerateFullMultihistory *)
+(* GenerateAllHistories *)
 
-expr : (generator : GenerateFullMultihistory[args___])[init___] /;
+expr : (generator : GenerateAllHistories[args___])[init___] /;
     CheckArguments[generator, 2] && CheckArguments[expr, 1] := ModuleScope[
-  result = Catch[generateFullMultihistory[args, init],
+  result = Catch[generateAllHistories[args, init],
                  _ ? FailureQ,
-                 message[GenerateFullMultihistory, #, <|"expr" -> HoldForm[expr]|>] &];
+                 message[GenerateAllHistories, #, <|"expr" -> HoldForm[expr]|>] &];
   result /; !FailureQ[result]
 ];
 
-generateFullMultihistory[system_ /; $implementations["KeyExistsQ", Head[system]], maxGeneration_, init_] := ModuleScope[
+generateAllHistories[system_ /; $implementations["KeyExistsQ", Head[system]], maxGeneration_, init_] := ModuleScope[
   $implementations["Lookup", Head[system]][
     system,
     parseMaxGeneration[maxGeneration, system],
@@ -148,7 +148,7 @@ generateFullMultihistory[system_ /; $implementations["KeyExistsQ", Head[system]]
 parseMaxGeneration[maxGeneration_, system_] := parseConstraints["invalidEventSelection"][
   $eventSelectionSpecs["Lookup", Head[system]]]["MaxGeneration" -> maxGeneration];
 
-generateFullMultihistory[system_, __] := throw[Failure["unknownSystem", <|"system" -> system|>]];
+generateAllHistories[system_, __] := throw[Failure["unknownSystem", <|"system" -> system|>]];
 
 (* GenerateSingleHistory *)
 

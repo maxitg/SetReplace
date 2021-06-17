@@ -21,7 +21,7 @@ Event ordering functions control the order in which these matches will be instan
 The importance of that order depends on the system, the rules, and the evaluation parameters. For example, in the
 example above, full multihistory is generated up to generation 1. In this case, the same multihistory is generated
 regardless of the event ordering, so the event ordering is not important. For this reason, there is no argument for the
-event ordering in `GenerateFullMultihistory` (not yet implemented).
+event ordering in `GenerateAllHistories` (not yet implemented).
 
 However, if we evaluate a single history instead, we can get different histories for different orders (different orders
 are made here by rearranging the order of the initial state, as
