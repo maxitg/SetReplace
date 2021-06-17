@@ -42,7 +42,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
     tokenDeduplication = parseTokenDeduplication[rawTokenDeduplication];
     parseEventOrdering[rawEventOrdering];           (* Event ordering is not implemented at the moment *)
     {maxEvents} = Values @ rawStoppingCondition;
-    init = If[tokenDeduplication === All, DeleteDuplicates, Identity] @ parseInit[rawInit];
+    init = If[tokenDeduplication === "EventSet", DeleteDuplicates, Identity] @ parseInit[rawInit];
 
     (* "HashTable" is causing memory leaks, so we are using Data`UnorderedAssociation instead. *)
 
@@ -137,7 +137,7 @@ findMatch[
           Permutations[First @ Subsets[Range @ expressions["Length"], eventInputsCountRange, {subsetIndex}]]},
         {ruleIndex, Range @ Length @ rules}
       ],
-    All,
+    "EventSet",
       Do[
         (* Deal with the case of base 1 *)
         tryMatch[ruleIndex, IntegerDigits[possibleMatchIndex, Max[2, expressions["Length"]], inputCount] + 1]
@@ -178,7 +178,7 @@ createInstantiationsIfPossible[rules_, tokenDeduplication_][ruleIndex_, possible
     (* We already checked by this point that additional instantiations remain *)
     True
   ,
-    If[Length[outputs] > 0 && (tokenDeduplication === All || spacelikeExpressionsQ[possibleMatch]),
+    If[Length[outputs] > 0 && (tokenDeduplication === "EventSet" || spacelikeExpressionsQ[possibleMatch]),
       instantiations[{ruleIndex, possibleMatch}] = outputs;
       True
     ,
@@ -239,8 +239,8 @@ createEvent[ruleIndex_, matchedExpressions_, tokenDeduplication_] := ModuleScope
   eventGenerations["Append", currentEventGeneration];
 
   Do[expressionCreatorEvents["Append", eventRuleIndices["Length"]], Length[newExpressions]];
-  (* For tokenDeduplication === All, we don't care about destroyer choices, but we do care about generations, so we
-     pick creator events with the lowest generations. *)
+  (* For tokenDeduplication === "EventSet", we don't care about destroyer choices, but we do care about generations, so
+     we pick creator events with the lowest generations. *)
   If[eventGenerations["Part", expressionCreatorEvents["Part", #]] > currentEventGeneration,
       expressionCreatorEvents["Part", #] = eventRuleIndices["Length"]
   ] & /@ outputExpressionIndices;
@@ -299,8 +299,9 @@ inputCountRange[Verbatim[Condition][input_List, _]] := inputCountRange[input];
 
 inputCountRange[_] := {0, Infinity};
 
-parseTokenDeduplication[value : (None | All)] := value;
-declareMessage[General::invalidTokenDeduplication, "Only None and All token deduplication specs are supported."];
+parseTokenDeduplication[value : (None | "EventSet")] := value;
+declareMessage[
+  General::invalidTokenDeduplication, "Only None and \"EventSet\" token deduplication specs are supported."];
 parseTokenDeduplication[_] := throw[Failure["invalidTokenDeduplication", <||>]];
 
 $supportedEventOrdering =

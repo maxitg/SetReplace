@@ -173,7 +173,7 @@ generateFullEventSet[system_ /; $implementations["KeyExistsQ", Head[system]], ma
   $implementations["Lookup", Head[system]][
     system,
     parseMaxGeneration[maxGeneration, system],
-    $$eventSet,
+    "EventSet",
     "Any",
     parseConstraints["invalidStoppingCondition"][$stoppingConditionSpecs["Lookup", Head[system]]][{}],
     init]
