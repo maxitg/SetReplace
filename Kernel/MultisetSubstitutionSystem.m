@@ -245,17 +245,18 @@ $tokenNullSequencePattern = Verbatim[Pattern][_, _BlankNullSequence];
 
 inputCountRange[(input_ :> _) | (input_ -> _)] := inputCountRange[input];
 
-inputCountRange[input_List] /;
-  Count[input, Except[$singleTokenPattern | $tokenSequencePattern | $tokenNullSequencePattern]] =!= 0 := {0, Infinity};
+inputCountRange[input_List] := Total[sequencePatternLengthRange /@ input];
+inputCountRange[Verbatim[Condition][input_, _]] := inputCountRange[input];
+inputCountRange[_] := {0, Infinity};
 
-inputCountRange[input_List] := {
-  Count[input, $singleTokenPattern | $tokenSequencePattern],
-  If[Count[input, $tokenSequencePattern] =!= 0 || Count[input, $tokenNullSequencePattern] =!= 0,
-    Infinity
-  ,
-    Count[input, $singleTokenPattern]
-  ]
-};
+sequencePatternLengthRange[_ ? Internal`PatternFreeQ] := {1, 1};
+sequencePatternLengthRange[Verbatim[Pattern][_, _Blank]] := {1, 1};
+sequencePatternLengthRange[Verbatim[Pattern][_, _BlankSequence]] := {1, Infinity};
+sequencePatternLengthRange[Verbatim[Pattern][_, _BlankNullSequence]] := {0, Infinity};
+
+(* Add ranges for all other symbols from https://reference.wolfram.com/language/guide/Patterns.html *)
+
+sequencePatternLengthRange[_] := {0, Infinity};
 
 inputCountRange[Verbatim[Condition][input_List, _]] := inputCountRange[input];
 
