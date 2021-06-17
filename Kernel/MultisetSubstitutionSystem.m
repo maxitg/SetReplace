@@ -62,7 +62,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
        stored at the time of matching and are deleted once all possible instantiations are turned into events. This
        avoids the need to evaluate the same right-hand sides of rules multiple times. *)
     instantiations = Data`UnorderedAssociation[];
-    expressionIndices = Data`UnorderedAssociation[Thread[Range[expressions["Length"]] -> Normal[expressions]]];
+    expressionIndices = Data`UnorderedAssociation[Thread[Normal[expressions] -> Range[expressions["Length"]]]];
 
     (* Data structures are modified in-place. If the system runs out of matches, it throws an exception. *)
     terminationReason = Catch[
@@ -219,17 +219,20 @@ createEvent[ruleIndex_, matchedExpressions_, tokenDeduplication_] := ModuleScope
   possibleMatchCount = Length[possibleOutputs];
   currentInstantiationIndex = Lookup[instantiationCounts, Key[{ruleIndex, matchedExpressions}], 0] + 1;
   outputExpressions = possibleOutputs[[currentInstantiationIndex]];
+  pastExpressionsCount = expressions["Length"];
   nextIndex = expressions["Length"] + 1;
   outputExpressionIndices = If[tokenDeduplication === "EventSet",
-    Lookup[expressionIndices, #, nextIndex++] &
+    Lookup[
+      expressionIndices,
+      Key[#],
+      expressions["Append", #];
+      expressionIndices[#] = nextIndex++] &
   ,
-    nextIndex++ &
+    (expressions["Append", #];
+     nextIndex++) &
   ] /@ outputExpressions;
-  newExpressions = Pick[outputExpressions, # > expressions["Length"] & /@ outputExpressionIndices];
-  If[tokenDeduplication === "EventSet",
-    MapIndexed[(expressionIndices[#1] = #2[[1]] + expressions["Length"]) &, newExpressions]
-  ];
-  expressions["Append", #] & /@ newExpressions;
+
+  newExpressions = expressions["Part", #] & /@ Range[pastExpressionsCount + 1, expressions["Length"]];
 
   eventRuleIndices["Append", ruleIndex];
   eventInputs["Append", matchedExpressions];
