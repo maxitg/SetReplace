@@ -83,12 +83,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
         "EventRuleIndices" -> eventRuleIndices,
         "EventInputs" -> eventInputs,
         "EventOutputs" -> eventOutputs,
-        "EventGenerations" -> eventGenerations,
-        "ExpressionCreatorEvents" -> expressionCreatorEvents,
-        "ExpressionDestroyerEventCounts" -> expressionDestroyerEventCounts,
-        "DestroyerChoices" -> destroyerChoices,
-        "InstantiationCounts" -> instantiationCounts,
-        "Instantiations" -> instantiations|>]
+        "EventGenerations" -> eventGenerations|>]
 ]];
 
 (* Evaluation *)
@@ -138,7 +133,8 @@ findMatch[
         tryMatch[ruleIndex, possibleMatch]
       ,
         {subsetIndex, 1, Min[subsetCount, 2 ^ 63 - 1]},
-        {possibleMatch, Permutations[First @ Subsets[Range @ expressions["Length"], eventInputsCountRange, {subsetIndex}]]},
+        {possibleMatch,
+          Permutations[First @ Subsets[Range @ expressions["Length"], eventInputsCountRange, {subsetIndex}]]},
         {ruleIndex, Range @ Length @ rules}
       ],
     All,
@@ -147,7 +143,9 @@ findMatch[
         tryMatch[ruleIndex, IntegerDigits[possibleMatchIndex, Max[2, expressions["Length"]], inputCount] + 1]
       ,
         {inputCount, minEventInputs, maxEventInputs},
-        {possibleMatchIndex, 0, If[expressions["Length"] === 0 && inputCount === 0, 0, expressions["Length"]^inputCount - 1]},
+        {possibleMatchIndex,
+          0,
+          If[expressions["Length"] === 0 && inputCount === 0, 0, expressions["Length"]^inputCount - 1]},
         {ruleIndex, Range @ Length @ rules}
       ]
   ];
