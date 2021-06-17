@@ -71,18 +71,13 @@ PackSetReplace[OptionsPattern[]] := ModuleScope[
 
   fileInputs = {kernelDir, libraryDir, pacletInfoFile, tempBuildInfoFile};
 
-  pacletCreatorFunction = If[$VersionNumber >= 12.1,
-    Symbol["System`CreatePacletArchive"]
-  ,
-    Symbol["PacletManager`PackPaclet"]
-  ];
-  pacletFileName = pacletCreatorFunction[fileInputs, outputDirectory];
+  pacletFileName = CreatePacletArchive[fileInputs, outputDirectory];
 
   If[StringQ[pacletFileName],
     If[verbose,
       Print["Paclet file written to ", pacletFileName]
     ];
-    Return @ If[$VersionNumber >= 12.1, PacletObject[File[pacletFileName]], <|"Location" -> pacletFileName|>]
+    Return @ PacletObject[File[pacletFileName]]
   ,
     If[verbose, Print["Pack failed."]];
     ReturnFailed["packfailed", sourceDirectory, outputDirectory]

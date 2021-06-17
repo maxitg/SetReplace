@@ -20,7 +20,7 @@ rotationDirection[pt1_, pt2_, pt3_] :=
   (pt2[[1]] - pt1[[1]]) (pt3[[2]] - pt2[[2]]) - (pt2[[2]] - pt1[[2]]) (pt3[[1]] - pt2[[1]]);
 
 convexHullPolygon[points_] := ModuleScope[
-  (* Sort is broken for symbolic values in Wolfram Language 12.2 *)
+  (* Sort uses lexicographic rather than numeric ordering, so it might not work if the points are not numeric. *)
   numericPoints = N[points];
   stack = CreateDataStructure["Stack"];
   (* find a bottommost point, if multiple, find the leftmost one *)

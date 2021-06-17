@@ -6,7 +6,7 @@ orbs:
 jobs:
   wolfram-language-paclet-test:
     docker:
-      - image: maxitg/set-replace-wl-ci:12.2.0
+      - image: maxitg/set-replace-wl-ci:12.3.0
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
@@ -52,35 +52,9 @@ jobs:
               ./performanceTest.wls master HEAD 2
             fi
 
-  wolfram-language-paclet-test-prerelease:
-    docker:
-      - image: maxitg/set-replace-wl-ci:12.3.0
-        auth:
-          username: maxitg
-          password: $DOCKERHUB_PASSWORD
-    parallelism: 4
-
-    steps:
-      - checkout
-
-      - attach_workspace:
-          at: /tmp/workspace
-
-      - run:
-          name: Copy libraries
-          command: mkdir -p ./LibraryResources && cp -r /tmp/workspace/* ./LibraryResources/
-
-      - run:
-          name: Install
-          command: ./install.wls
-
-      - run:
-          name: Test
-          command: ./.circleci/test.sh
-
   cpp-test:
     docker:
-      - image: alpine:3.12.1
+      - image: alpine:3.13.5
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
@@ -91,7 +65,8 @@ jobs:
       - run:
           name: Install Required Tools
           command: |
-            apk add --no-cache bash git g++ make cmake clang py-pip shellcheck shfmt grep npm
+            apk add --no-cache bash git g++ make cmake clang py-pip shellcheck grep npm
+            apk add --no-cache shfmt --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
             pip install cpplint
             npm install -g markdownlint-cli
 
@@ -124,7 +99,7 @@ jobs:
 
   cpp-32-test:
     docker:
-      - image: i386/alpine:3.12.1
+      - image: i386/alpine:3.13.5
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
@@ -228,6 +203,3 @@ workflows:
           requires:
             - macos-build
             - windows-build
-      - wolfram-language-paclet-test-prerelease:
-          requires:
-            - wolfram-language-paclet-test
