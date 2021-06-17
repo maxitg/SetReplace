@@ -122,26 +122,25 @@ declareMessage[General::invalidStoppingCondition,
 parseConstraints[errorName_][specs_][originalArgument_, _] :=
   throw[Failure[errorName, <|"argument" -> originalArgument, "choices" -> Keys[specs]|>]];
 
-parseTokenDeduplication[None][argument_] := argument;
-parseTokenDeduplication[supportedFunctions_][argument_] /; MemberQ[supportedFunctions, argument] := argument;
+parseTokenDeduplication[None][None] := None;
+parseTokenDeduplication[supportedDeduplications_][argument_] /; MemberQ[supportedDeduplications, argument] := argument;
 declareMessage[
   General::invalidTokenDeduplication, "Token deduplication spec `argument` in `expr` can only be one of `choices`."];
-parseTokenDeduplication[supportedFunctions_][argument_] :=
-  throw[Failure["invalidTokenDeduplication", <|"argument" -> argument, "choices" -> supportedFunctions|>]];
+parseTokenDeduplication[supportedDeduplications_][argument_] :=
+  throw[Failure["invalidTokenDeduplication", <|"argument" -> argument, "choices" -> supportedDeduplications|>]];
 
-parseEventOrdering[supportedFunctions_][argument_List] /; SubsetQ[supportedFunctions, argument] := argument;
-(* NOTE(daniel): This message is currently clashing with the one found in setSubstitutionSystem.m *)
+parseEventOrdering[supportedOrderings_][argument_List] /; SubsetQ[supportedOrderings, argument] := argument;
 declareMessage[
   General::invalidEventOrdering, "Event ordering spec `argument` in `expr` should be a List of values from `choices`."];
-parseEventOrdering[supportedFunctions_][argument_] :=
-  throw[Failure["invalidEventOrdering", <|"argument" -> argument, "choices" -> supportedFunctions|>]];
+parseEventOrdering[supportedOrderings_][argument_] :=
+  throw[Failure["invalidEventOrdering", <|"argument" -> argument, "choices" -> supportedOrderings|>]];
 
 checkParameter[_, None][value_] := value;
 checkParameter[_, choices_List][value_] /; MemberQ[choices, value] := value;
-declareMessage[General::notValidChoiceParameter,
+declareMessage[General::invalidChoiceParameter,
                "Parameter `name` in `expr` can only be one of `choices`."];
 checkParameter[name_, choices_List][_] :=
-  throw[Failure["notValidChoiceParameter", <|"name" -> name, "choices" -> choices|>]];
+  throw[Failure["invalidChoiceParameter", <|"name" -> name, "choices" -> choices|>]];
 checkParameter[_, "NonNegativeIntegerOrInfinity"][value : (_Integer ? (# >= 0 &)) | Infinity] := value;
 declareMessage[General::notNonNegativeIntegerOrInfinityParameter,
                "Parameter `name` in `expr` is expected to be a non-negative integer or Infinity."];
