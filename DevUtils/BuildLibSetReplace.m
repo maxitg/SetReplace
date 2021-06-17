@@ -76,7 +76,7 @@ BuildLibSetReplace[OptionsPattern[]] := ModuleScope[
   finalHash = Base36Hash[{sourceHashes, hashedOptions}];
 
   (* derive final paths *)
-  libraryFileName = StringJoin["libSetReplace-", finalHash, ".", System`Dump`LibraryExtension[]];
+  libraryFileName = StringJoin["libSetReplace-", finalHash, ".", Internal`DynamicLibraryExtension[]];
   libraryPath = FileNameJoin[{libraryTargetDirectory, libraryFileName}];
 
   calculateBuildData[] := Association[
