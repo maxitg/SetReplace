@@ -245,9 +245,9 @@ $patternLanguageSymbols = {
   HoldPattern, OrderlessPatternSequence, KeyValuePattern, Condition, PatternTest, Optional};
 
 $singleTokenPattern =
-  Except[(Alternatives @@ Verbatim /@ $patternLanguageSymbols)[___]] | Verbatim[Pattern][_, Verbatim[Blank[]]];
-$tokenSequencePattern = Verbatim[Pattern][_, Verbatim[BlankSequence[]]];
-$tokenNullSequencePattern = Verbatim[Pattern][_, Verbatim[BlankNullSequence[]]];
+  Except[(Alternatives @@ Verbatim /@ $patternLanguageSymbols)[___]] | Verbatim[Pattern][_, _Blank];
+$tokenSequencePattern = Verbatim[Pattern][_, _BlankSequence];
+$tokenNullSequencePattern = Verbatim[Pattern][_, _BlankNullSequence];
 
 inputCountRange[(input_ :> _) | (input_ -> _)] := inputCountRange[input];
 
