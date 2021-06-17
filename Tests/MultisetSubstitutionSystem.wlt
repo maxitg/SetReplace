@@ -178,7 +178,12 @@
             <|"MaxGeneration" -> 1, "MinEventInputs" -> 3, "MaxEventInputs" -> 3|>,
             <||>,
             {1, 2, 3},
-            {{1, 2}, {3}, {1}, {2, 3}}}},
+            {{1, 2}, {3}, {1}, {2, 3}}},
+           {{a_Integer, b_Integer} :> {a + b},
+            <|"MaxGeneration" -> 1|>,
+            <||>,
+            {1, 2, 3, "x"},
+            {3, 3, 4, 4, 5, 5}}},
 
         VerificationTest[
           eventCount @ GenerateMultihistory[
