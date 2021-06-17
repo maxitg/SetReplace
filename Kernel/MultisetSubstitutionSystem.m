@@ -78,6 +78,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
     Multihistory[
       {MultisetSubstitutionSystem, 0},
       <|"Rules" -> rules,
+        "Scope" -> If[tokenDeduplication === "EventSet", "EventSet", "Histories"],
         "TerminationReason" -> terminationReason,
         "Expressions" -> expressions,
         "EventRuleIndices" -> eventRuleIndices,
