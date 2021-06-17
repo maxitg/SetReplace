@@ -50,7 +50,7 @@ The same generators support multiple systems. In addition to
 parameters.
 
 [`GenerateMultihistory`](GenerateMultihistory.md) is the universal generator. It can generate everything that the
-specialized `GenerateSingleHistory` and `GenerateFullMultihistory` can produce. However, it is more verbose, which can
+specialized `GenerateSingleHistory` and `GenerateAllHistories` can produce. However, it is more verbose, which can
 make the code harder to read.
 
 * Introspection:

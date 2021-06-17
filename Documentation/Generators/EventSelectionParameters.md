@@ -86,7 +86,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 <img src="/Documentation/Images/MaxDestroyerEvents1.png" width="322.2">
 
 If unset (i.e., set to [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html)), it will generate a full
-multihistory (similar to `GenerateFullMultihistory`) subject to other selection and stopping parameters:
+multihistory (similar to `GenerateAllHistories`) subject to other selection and stopping parameters:
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
