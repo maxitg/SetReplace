@@ -219,9 +219,15 @@ createEvent[ruleIndex_, matchedExpressions_, tokenDeduplication_] := ModuleScope
   currentInstantiationIndex = Lookup[instantiationCounts, Key[{ruleIndex, matchedExpressions}], 0] + 1;
   outputExpressions = possibleOutputs[[currentInstantiationIndex]];
   nextIndex = expressions["Length"] + 1;
-  outputExpressionIndices = Lookup[expressionIndices, #, nextIndex++] & /@ outputExpressions;
+  outputExpressionIndices = If[tokenDeduplication === "EventSet",
+    Lookup[expressionIndices, #, nextIndex++] &
+  ,
+    nextIndex++ &
+  ] /@ outputExpressions;
   newExpressions = Pick[outputExpressions, # > expressions["Length"] & /@ outputExpressionIndices];
-  MapIndexed[(expressionIndices[#1] = #2[[1]] + expressions["Length"]) &, newExpressions];
+  If[tokenDeduplication === "EventSet",
+    MapIndexed[(expressionIndices[#1] = #2[[1]] + expressions["Length"]) &, newExpressions]
+  ];
   expressions["Append", #] & /@ newExpressions;
 
   eventRuleIndices["Append", ruleIndex];
