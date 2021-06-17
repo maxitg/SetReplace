@@ -249,7 +249,7 @@ $singleTokenPattern =
 $tokenSequencePattern = Verbatim[Pattern][_, Verbatim[BlankSequence[]]];
 $tokenNullSequencePattern = Verbatim[Pattern][_, Verbatim[BlankNullSequence[]]];
 
-inputCountRange[input_ :> _] := inputCountRange[input];
+inputCountRange[(input_ :> _) | (input_ -> _)] := inputCountRange[input];
 
 inputCountRange[input_List] /;
   Count[input, Except[$singleTokenPattern | $tokenSequencePattern | $tokenNullSequencePattern]] =!= 0 := {0, Infinity};
