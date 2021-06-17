@@ -84,7 +84,8 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
         "EventRuleIndices" -> eventRuleIndices,
         "EventInputs" -> eventInputs,
         "EventOutputs" -> eventOutputs,
-        "EventGenerations" -> eventGenerations|>]
+        "EventGenerations" -> eventGenerations,
+        "ExpressionDestroyerEventCounts" -> expressionDestroyerEventCounts|>]
 ]];
 
 (* Evaluation *)
