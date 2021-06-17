@@ -183,7 +183,12 @@
             <|"MaxGeneration" -> 1|>,
             <||>,
             {1, 2, 3, "x"},
-            {3, 3, 4, 4, 5, 5}}},
+            {3, 3, 4, 4, 5, 5}},
+           {{PatternSequence[a_, b_], c_} :> {a + b + c},
+            <|"MaxGeneration" -> 1, "MaxEventInputs" -> 3|>,
+            <||>,
+            {1, 2, 3},
+            {6, 6, 6, 6, 6, 6}}},
 
         VerificationTest[
           eventCount @ GenerateMultihistory[

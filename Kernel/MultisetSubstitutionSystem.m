@@ -239,13 +239,7 @@ declareMessage[General::invalidMultisetRules, "Rules `rules` must be a Rule, a R
 parseRules[rawRules_] := throw[Failure["invalidMultisetRules", <|"rules" -> rawRules|>]];
 parseRules[rawRules___] /; !CheckArguments[MultisetSubstitutionSystem[rawRules], 1] := throw[Failure[None, <||>]];
 
-(* https://reference.wolfram.com/language/guide/Patterns.html *)
-$patternLanguageSymbols = {
-  Pattern, Alternatives, Repeated, RepeatedNull, Except, Longest, Shortest, OptionsPattern, PatternSequence, Verbatim,
-  HoldPattern, OrderlessPatternSequence, KeyValuePattern, Condition, PatternTest, Optional};
-
-$singleTokenPattern =
-  Except[(Alternatives @@ Verbatim /@ $patternLanguageSymbols)[___]] | Verbatim[Pattern][_, _Blank];
+$singleTokenPattern = _ ? Internal`PatternFreeQ | Verbatim[Pattern][_, _Blank];
 $tokenSequencePattern = Verbatim[Pattern][_, _BlankSequence];
 $tokenNullSequencePattern = Verbatim[Pattern][_, _BlankNullSequence];
 
