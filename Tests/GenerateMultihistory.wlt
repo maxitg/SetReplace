@@ -15,7 +15,8 @@
         {"InputCount", "RuleOrdering"},
         <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"},
           "MinCausalDensityDimension" -> {2., None},
-          "TokenEventGraphTest" -> {True &, None}|>];
+          "TokenEventGraphTest" -> {True &, None}|>,
+        None];
 
       $originalSetReplaceSystem = $SetReplaceSystems;
       Unprotect[$SetReplaceSystems];
@@ -70,9 +71,8 @@
       testUnevaluated[
         GenerateMultihistory[TestSystem[], <||>, 2, 3, 4][0], GenerateMultihistory::invalidTokenDeduplication],
       VerificationTest[
-          GenerateMultihistory[TestSystem[], <||>, #, {}, <||>][0],
-          testSystemImplementation[TestSystem[], $defaultEventSelection, #, {}, $defaultStoppingConditions, 0]] & /@
-        {None, All},
+          GenerateMultihistory[TestSystem[], <||>, None, {}, <||>][0],
+          testSystemImplementation[TestSystem[], $defaultEventSelection, None, {}, $defaultStoppingConditions, 0]],
 
       testUnevaluated[
         GenerateMultihistory[TestSystem[], <||>, None, 3, 4][0], GenerateMultihistory::invalidEventOrdering],
