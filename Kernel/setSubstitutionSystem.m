@@ -208,10 +208,11 @@ parseEventOrderingFunction[caller_, func : {(Alternatives @@ $eventOrderingFunct
     FreeQ[func, "Random"] :=
   func;
 
-General::invalidEventOrdering = "EventOrderingFunction `1` should be one of `2`, or a list of them by priority.";
+General::invalidEventOrderingFunction =
+  "EventOrderingFunction `1` should be one of `2`, or a list of them by priority.";
 
 parseEventOrderingFunction[caller_, func_] := (
-  Message[caller::invalidEventOrdering, func, $eventOrderingFunctions];
+  Message[caller::invalidEventOrderingFunction, func, $eventOrderingFunctions];
   $Failed
 );
 
