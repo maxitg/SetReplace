@@ -40,7 +40,7 @@ setSubstitutionSystem$cpp[
       "MaxEvents" -> stepSpec[$maxEvents],
       "MaxVertices" -> stepSpec[$maxFinalVertices],
       "MaxVertexDegree" -> stepSpec[$maxFinalVertexDegree],
-      "MaxEdges" -> stepSpec[maxFinalExpressions]
+      "MaxEdges" -> stepSpec[$maxFinalExpressions]
     };
     stoppingCondition = DeleteMissing[stoppingCondition];
 
