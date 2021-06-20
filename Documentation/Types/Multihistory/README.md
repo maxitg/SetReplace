@@ -19,4 +19,5 @@ You will be able to use [`properties`](/Documentation/Properties/README.md) to e
 but we have not implemented any properties yet.
 
 * [`{AtomicStateSystem, 0}`](AtomicStateSystem0.md)
+* [`{HypergraphSubstitutionSystem, 0}`](HypergraphSubstitutionSystem0.md)
 * [`{MultisetSubstitutionSystem, 0}`](MultisetSubstitutionSystem0.md)
