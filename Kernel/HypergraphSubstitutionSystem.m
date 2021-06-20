@@ -101,7 +101,7 @@ hypergraphSubstitutionSystemInit[objID_,
       encodeNestedLists[mappedSet],
       Replace[maxDestroyerEvents, Infinity -> $unset],
       Catenate[Replace[eventOrdering, $orderingFunctionCodes, {2}]],
-      $eventDeduplicationCodes[tokenDeduplication],
+      $tokenDeduplicationCodes[tokenDeduplication],
       IntegerDigits[RandomInteger[{0, $maxUInt32}], 2^16, 2]
     ];
 
@@ -206,7 +206,7 @@ $orderingFunctionCodes = <|
   $backward -> 1
 |>;
 
-$eventDeduplicationCodes = <|
+$tokenDeduplicationCodes = <|
   None -> 0,
   "SameInputSetIsomorphicOutputs" -> 1
 |>;
@@ -233,4 +233,4 @@ declareMultihistoryGenerator[
     "MaxVertices"     -> {Infinity, "NonNegativeIntegerOrInfinity"},
     "MaxVertexDegree" -> {Infinity, "NonNegativeIntegerOrInfinity"},
     "MaxEdges"        -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
-  Keys @ $eventDeduplicationCodes];
+  Keys @ $tokenDeduplicationCodes];
