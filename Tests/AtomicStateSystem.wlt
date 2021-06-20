@@ -26,7 +26,7 @@
 
         (* Token deduplication not yet supported *)
         testUnevaluated[GenerateMultihistory[AtomicStateSystem[1 -> 2], {}, All, anEventOrdering, {}] @ 1,
-                        {GenerateMultihistory::atomicStateTokenDeduplicationNotImplemented}],
+                        {GenerateMultihistory::invalidTokenDeduplication}],
 
         (* Parameters *)
         testUnevaluated[
