@@ -14,7 +14,8 @@ In[] := multi = GenerateMultihistory[HypergraphSubstitutionSystem[{{a_, b_}, {a_
 
 <img src="/Documentation/Images/HypergraphMultihistory.png" width="607.8">
 
-It uses the hypergraph related C++ code found in the [libSetReplace](/libSetReplace/), same as what [WolframModel](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md) uses when the option
+It uses the hypergraph related C++ code found in the [libSetReplace](/libSetReplace/), same as what **WolframModel**
+uses when the option
 [Method -> "LowLevel"](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/Method.md)
 is called.
 
