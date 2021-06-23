@@ -245,7 +245,7 @@ $tokenNullSequencePattern = Verbatim[Pattern][_, _BlankNullSequence];
 
 inputCountRange[(input_ :> _) | (input_ -> _)] := inputCountRange[input];
 
-inputCountRange[input_List] := Total[sequencePatternLengthRange /@ input];
+inputCountRange[input_List] := Total[Append[sequencePatternLengthRange /@ input, {0, 0}]];
 inputCountRange[Verbatim[Condition][input_, _]] := inputCountRange[input];
 inputCountRange[_] := {0, Infinity};
 
