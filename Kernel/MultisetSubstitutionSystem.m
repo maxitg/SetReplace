@@ -249,8 +249,12 @@ inputCountRange[input_List] := Total[sequencePatternLengthRange /@ input];
 inputCountRange[Verbatim[Condition][input_, _]] := inputCountRange[input];
 inputCountRange[_] := {0, Infinity};
 
-(* TODO: the following line is not correct *)
-sequencePatternLengthRange[_ ? Internal`PatternFreeQ] := {1, 1};
+(* https://reference.wolfram.com/language/guide/Patterns.html *)
+$patternLanguageSymbols = {
+  Pattern, Alternatives, Repeated, RepeatedNull, Except, Longest, Shortest, OptionsPattern, PatternSequence, Verbatim,
+  HoldPattern, OrderlessPatternSequence, KeyValuePattern, Condition, PatternTest, Optional};
+
+sequencePatternLengthRange[Except[(Alternatives @@ Verbatim /@ $patternLanguageSymbols)[___]]] := {1, 1};
 sequencePatternLengthRange[Verbatim[Pattern][_, _Blank]] := {1, 1};
 sequencePatternLengthRange[Verbatim[Pattern][_, _BlankSequence]] := {1, Infinity};
 sequencePatternLengthRange[Verbatim[Pattern][_, _BlankNullSequence]] := {0, Infinity};
