@@ -251,8 +251,7 @@ inputCountRange[Verbatim[Except][_, p_]] := inputCountRange[p];
 inputCountRange[Verbatim[Verbatim][p_List]] := ConstantArray[Length[p], 2];
 inputCountRange[_] := {0, Infinity};
 
-(* We need to hold the pattern from now on because sequencePatternLengthRange may be called recursively from inside
-   HoldPattern. *)
+(* We need to hold the pattern from now on because sequencePatternLengthRange may be called from inside HoldPattern. *)
 
 Attributes[sequencePatternLengthRange] := {HoldFirst};
 
@@ -298,7 +297,7 @@ sequencePatternLengthRange[Verbatim[Shortest][___]] := {Infinity, 0};
 sequencePatternLengthRange[_OptionsPattern] := {0, Infinity};
 
 sequencePatternLengthRange[(Verbatim[PatternSequence] | Verbatim[OrderlessPatternSequence])[ps___]] :=
-  Total[ReleaseHold @ Map[sequencePatternLengthRange, Hold[{ps}], {2}]];
+  Total[Append[ReleaseHold @ Map[sequencePatternLengthRange, Hold[{ps}], {2}], {0, 0}]];
 
 sequencePatternLengthRange[_Verbatim] := {1, 1};
 
