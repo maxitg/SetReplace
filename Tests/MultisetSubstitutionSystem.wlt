@@ -186,6 +186,7 @@
             {3, 3, 4, 4, 5, 5}},
            {{PatternSequence[a_, b_], c_} :> {a + b + c}, "MaxGeneration" -> 1, {}, {1, 2, 3}, {6, 6, 6, 6, 6, 6}},
            {{x_ | Repeated[x_, {2}]} :> {2 x}, "MaxGeneration" -> 1, {}, {1, 1, 1}, ConstantArray[2, 9]},
+           {{Alternatives[]} :> {}, {}, {}, Range[1000], {}}, (* empty Alternatives does not match to anything *)
            {{x_ ..} :> {x + 1}, "MaxGeneration" -> 1, {}, {1, 1}, ConstantArray[2, 4]},
            {{Repeated[x_, 2]} :> {x + 1}, "MaxGeneration" -> 1, {}, {1, 1, 1}, ConstantArray[2, 9]},
            {{Repeated[x_, {2, 3}]} :> {x + 1}, "MaxGeneration" -> 1, {}, {1, 1, 1}, ConstantArray[2, 12]},
