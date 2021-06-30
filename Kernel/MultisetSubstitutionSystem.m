@@ -323,12 +323,9 @@ sequencePatternLengthRangeHeld[Verbatim[PatternTest][___]] := {Infinity, 0};
 sequencePatternLengthRangeHeld[Verbatim[Optional][p_, _]] := {0, Max @ sequencePatternLengthRangeHeld[p]};
 sequencePatternLengthRangeHeld[Verbatim[Optional][___]] := {Infinity, 0};
 
-(* Since we have enumerated all pattern constructs above, this case does not correspond to a pattern. *)
-sequencePatternLengthRangeHeld[_] := {1, 1};
-
-inputCountRange[Verbatim[Condition][input_List, _]] := inputCountRange[input];
-
-inputCountRange[_] := {0, Infinity};
+(* Since we have enumerated all pattern constructs above, this case does not correspond to a pattern.
+   However, the completeness of checks above needs to be checked for every new WL version. *)
+sequencePatternLengthRangeHeld[_] := If[$VersionNumber <= 12.3, {1, 1}, {0, Infinity}];
 
 parseTokenDeduplication[None] := None;
 declareMessage[General::multisetTokenDeduplicationNotImplemented,

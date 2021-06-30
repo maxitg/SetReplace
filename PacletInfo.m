@@ -3,7 +3,7 @@
 Paclet[
   Name -> "SetReplace",
   Version -> "0.3",
-  MathematicaVersion -> "12.3+", (* Check MultisetSubstitutionSystem understands all new patterns before upgrading. *)
+  MathematicaVersion -> "12.3+",
   Description -> "SetReplace implements WolframModel and other functions used in the Wolfram Physics Project.",
   Creator -> "Wolfram Research",
   URL -> "https://github.com/maxitg/SetReplace",
