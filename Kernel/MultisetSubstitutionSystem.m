@@ -98,6 +98,7 @@ evaluateSingleEvent[
 (* Matching *)
 
 findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEventInputs_] := ModuleScope[
+  If[minEventInputs === Infinity || minEventInputs > maxEventInputs, Throw["Complete", $$terminationReason]];
   eventInputsCountRange = {minEventInputs, Min[maxEventInputs, expressions["Length"]]};
   subsetCount = With[{n = expressions["Length"], a = eventInputsCountRange[[1]], b = eventInputsCountRange[[2]]},
     (* Sum[Binomial[n, k], {k, a, b}] *)
@@ -245,23 +246,85 @@ $tokenNullSequencePattern = Verbatim[Pattern][_, _BlankNullSequence];
 
 inputCountRange[(input_ :> _) | (input_ -> _)] := inputCountRange[input];
 
-inputCountRange[input_List] := Total[Append[sequencePatternLengthRange /@ input, {0, 0}]];
-inputCountRange[Verbatim[Condition][input_, _]] := inputCountRange[input];
+inputCountRange[Verbatim[HoldPattern][input_List]] :=
+  Total[Append[ReleaseHold @ Map[sequencePatternLengthRangeHeld, Hold[input], {2}], {0, 0}]];
+inputCountRange[input_List] := inputCountRange[HoldPattern[input]];
+inputCountRange[Verbatim[Alternatives][patterns__]] := MinMax[inputCountRange /@ {patterns}];
+inputCountRange[(Verbatim[Condition] | Verbatim[PatternTest])[input_, _]] := inputCountRange[input];
+inputCountRange[Verbatim[Pattern][_, obj_]] := inputCountRange[obj];
+inputCountRange[Verbatim[Except][_, p_]] := inputCountRange[p];
+inputCountRange[Verbatim[Verbatim][p_List]] := ConstantArray[Length[p], 2];
 inputCountRange[_] := {0, Infinity};
 
-(* https://reference.wolfram.com/language/guide/Patterns.html *)
-$patternLanguageSymbols = {
-  Pattern, Alternatives, Repeated, RepeatedNull, Except, Longest, Shortest, OptionsPattern, PatternSequence, Verbatim,
-  HoldPattern, OrderlessPatternSequence, KeyValuePattern, Condition, PatternTest, Optional};
+(* We need to hold the pattern from now on because sequencePatternLengthRangeHeld may be called recursively from inside
+   HoldPattern. *)
 
-sequencePatternLengthRange[Except[(Alternatives @@ Verbatim /@ $patternLanguageSymbols)[___]]] := {1, 1};
-sequencePatternLengthRange[Verbatim[Pattern][_, _Blank]] := {1, 1};
-sequencePatternLengthRange[Verbatim[Pattern][_, _BlankSequence]] := {1, Infinity};
-sequencePatternLengthRange[Verbatim[Pattern][_, _BlankNullSequence]] := {0, Infinity};
+sequencePatternLengthRange[p_] := sequencePatternLengthRangeHeld[p];
 
-(* TODO: Add ranges for all other symbols from https://reference.wolfram.com/language/guide/Patterns.html *)
+Attributes[sequencePatternLengthRangeHeld] := {HoldFirst};
 
-sequencePatternLengthRange[_] := {0, Infinity};
+(* Here we enumerate all possible WL pattern constructs from https://reference.wolfram.com/language/guide/Patterns.html.
+   If a pattern construct has incorrect syntax, we return {Infinity, 0}, which means nothing can be matched. *)
+
+sequencePatternLengthRangeHeld[Verbatim[Pattern][_, obj_]] := sequencePatternLengthRangeHeld[obj];
+sequencePatternLengthRangeHeld[Verbatim[Pattern][___]] := {Infinity, 0};
+
+sequencePatternLengthRangeHeld[_Blank] := {1, 1};
+sequencePatternLengthRangeHeld[_BlankSequence] := {1, Infinity};
+sequencePatternLengthRangeHeld[_BlankNullSequence] := {0, Infinity};
+sequencePatternLengthRangeHeld[Verbatim[Alternatives][p__]] :=
+  MinMax[ReleaseHold @ Map[sequencePatternLengthRangeHeld, Hold[{p}], {2}]];
+sequencePatternLengthRangeHeld[Verbatim[Alternatives][]] := {Infinity, 0}; (* this does not match to anything *)
+
+zeroPreferenceProduct[0, _] := 0;
+zeroPreferenceProduct[_, 0] := 0;
+zeroPreferenceProduct[a_, b_] := a * b;
+zeroPreferenceProduct[{a_, b_}, {c_, d_}] := {zeroPreferenceProduct[a, c], zeroPreferenceProduct[b, d]};
+
+sequencePatternLengthRangeHeld[Verbatim[Repeated][p_]] := {sequencePatternLengthRangeHeld[p], Infinity};
+sequencePatternLengthRangeHeld[Verbatim[RepeatedNull][_]] := {0, Infinity};
+sequencePatternLengthRangeHeld[Verbatim[Repeated][p_, max_]] :=
+  zeroPreferenceProduct[{1, max}, sequencePatternLengthRangeHeld[p]];
+sequencePatternLengthRangeHeld[Verbatim[RepeatedNull][p_, max_]] :=
+  {0, zeroPreferenceProduct[max, Max @ sequencePatternLengthRangeHeld[p]]};
+sequencePatternLengthRangeHeld[(Verbatim[Repeated] | Verbatim[RepeatedNull])[p_, {min_, max_}]] :=
+  zeroPreferenceProduct[{min, max}, sequencePatternLengthRangeHeld[p]];
+sequencePatternLengthRangeHeld[(Verbatim[Repeated] | Verbatim[RepeatedNull])[p_, {n_}]] :=
+  zeroPreferenceProduct[{n, n}, sequencePatternLengthRangeHeld[p]];
+sequencePatternLengthRangeHeld[Verbatim[Repeated][___]] := {Infinity, 0};
+sequencePatternLengthRangeHeld[Verbatim[RepeatedNull][___]] := {Infinity, 0};
+
+(* Variable-length sequences are not allowed as a second argument to Except. *)
+sequencePatternLengthRangeHeld[_Except] := {1, 1};
+
+sequencePatternLengthRangeHeld[Verbatim[Longest][p_]] := sequencePatternLengthRangeHeld[p];
+sequencePatternLengthRangeHeld[Verbatim[Longest][___]] := {Infinity, 0};
+sequencePatternLengthRangeHeld[Verbatim[Shortest][p_]] := sequencePatternLengthRangeHeld[p];
+sequencePatternLengthRangeHeld[Verbatim[Shortest][___]] := {Infinity, 0};
+
+sequencePatternLengthRangeHeld[_OptionsPattern] := {0, Infinity};
+
+sequencePatternLengthRangeHeld[(Verbatim[PatternSequence] | Verbatim[OrderlessPatternSequence])[ps___]] :=
+  Total[ReleaseHold @ Map[sequencePatternLengthRangeHeld, Hold[{ps}], {2}]];
+
+sequencePatternLengthRangeHeld[_Verbatim] := {1, 1};
+
+sequencePatternLengthRangeHeld[Verbatim[HoldPattern][p_]] := sequencePatternLengthRangeHeld[p];
+sequencePatternLengthRangeHeld[Verbatim[HoldPattern][___]] := {Infinity, 0};
+
+sequencePatternLengthRangeHeld[_KeyValuePattern] := {1, 1};
+
+sequencePatternLengthRangeHeld[Verbatim[Condition][p_, _]] := sequencePatternLengthRangeHeld[p];
+sequencePatternLengthRangeHeld[Verbatim[Condition][___]] := {Infinity, 0};
+
+sequencePatternLengthRangeHeld[Verbatim[PatternTest][p_, _]] := sequencePatternLengthRangeHeld[p];
+sequencePatternLengthRangeHeld[Verbatim[PatternTest][___]] := {Infinity, 0};
+
+sequencePatternLengthRangeHeld[Verbatim[Optional][p_, _]] := {0, Max @ sequencePatternLengthRangeHeld[p]};
+sequencePatternLengthRangeHeld[Verbatim[Optional][___]] := {Infinity, 0};
+
+(* Since we have enumerated all pattern constructs above, this case does not correspond to a pattern. *)
+sequencePatternLengthRangeHeld[_] := {1, 1};
 
 inputCountRange[Verbatim[Condition][input_List, _]] := inputCountRange[input];
 
