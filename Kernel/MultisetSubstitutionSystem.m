@@ -13,34 +13,27 @@ MultisetSubstitutionSystem should be used as the first argument in functions suc
 
 SyntaxInformation[MultisetSubstitutionSystem] = {"ArgumentsPattern" -> {rules_}};
 
-declareMultihistoryGenerator[
-  generateMultisetSubstitutionSystem,
+declareSystem[
   MultisetSubstitutionSystem,
-  <|"MaxGeneration" -> {Infinity, "NonNegativeIntegerOrInfinity"},
-    "MaxDestroyerEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"},
-    "MinEventInputs" -> {0, "NonNegativeIntegerOrInfinity"},
-    "MaxEventInputs" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
-  {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"},
-  <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>];
+  generateMultisetSubstitutionSystem,
+  _List,
+  <|"MaxGeneration" -> {Infinity, _ ? (# >= 0 &)},
+    "MaxDestroyerEvents" -> {Infinity, _ ? (# >= 0 &)},
+    "MinEventInputs" -> {0, _ ? (# >= 0 &)},
+    "MaxEventInputs" -> {Infinity, _ ? (# >= 0 &)},
+    "MaxEvents" -> {Infinity, _ ? (# >= 0 &)}|>,
+  True];
 
-generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
-                                   rawEventSelection_,
-                                   rawTokenDeduplication_,
-                                   rawEventOrdering_,
-                                   rawStoppingCondition_,
-                                   rawInit_] := Block[{
+generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___], init_, parameters_] := Block[{
     expressions, eventRuleIndices, eventInputs, eventOutputs, eventGenerations, expressionCreatorEvents,
     expressionDestroyerEventCounts, destroyerChoices, instantiationCounts, instantiations},
-  Module[{rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, maxEvents, init, terminationReason},
+  Module[{rules, ruleInputCountRanges, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, maxEvents,
+          terminationReason},
     rules = parseRules[rawRules];
     ruleInputCountRanges = inputCountRange /@ rules;
-    {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs} = Values @ rawEventSelection;
+    {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, maxEvents} = Values @ parameters;
     minEventInputs = Max[minEventInputs, Min[ruleInputCountRanges[[All, 1]]]];
     maxEventInputs = Min[maxEventInputs, Max[ruleInputCountRanges[[All, 2]]]];
-    parseTokenDeduplication[rawTokenDeduplication]; (* Token deduplication is not implemented at the moment *)
-    parseEventOrdering[rawEventOrdering];           (* Event ordering is not implemented at the moment *)
-    {maxEvents} = Values @ rawStoppingCondition;
-    init = parseInit[rawInit];
 
     (* "HashTable" is causing memory leaks, so we are using Data`UnorderedAssociation instead. *)
 
