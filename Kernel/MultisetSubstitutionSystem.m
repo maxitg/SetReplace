@@ -311,19 +311,3 @@ sequencePatternLengthRange[Verbatim[Optional][___]] := {Infinity, 0};
 (* Since we have enumerated all pattern constructs above, this case does not correspond to a pattern.
    However, the completeness of checks above needs to be checked for every new WL version. *)
 sequencePatternLengthRange[_] := If[$VersionNumber <= 12.3, {1, 1}, {0, Infinity}];
-
-parseTokenDeduplication[None] := None;
-declareMessage[General::multisetTokenDeduplicationNotImplemented,
-               "Token deduplication is not implemented for Multiset Substitution System."];
-parseTokenDeduplication[_] := throw[Failure["multisetTokenDeduplicationNotImplemented", <||>]];
-
-$supportedEventOrdering =
-  {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"};
-parseEventOrdering[ordering : ($supportedEventOrdering | "Any")] := ordering;
-declareMessage[General::multisetEventOrderingNotImplemented,
-               "Only " <> ToString[$supportedEventOrdering] <> " event ordering is implemented at this time."];
-parseEventOrdering[_] := throw[Failure["multisetEventOrderingNotImplemented", <||>]];
-
-parseInit[init_List] := init;
-declareMessage[General::multisetInitNotList, "Multiset Substitution System init `init` should be a List."];
-parseInit[init_] := throw[Failure["multisetInitNotList", <|"init" -> init|>]];
