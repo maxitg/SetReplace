@@ -5,11 +5,7 @@
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md):
 
 ```wl
-In[] := GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
-                             {},
-                             None,
-                             EventOrderingFunctions[MultisetSubstitutionSystem],
-                             {"MaxEvents" -> 10}] @ {1, 2, 3}
+In[] := GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}], {1, 2, 3}, MaxEvents -> 10]
 ```
 
 <img src="/Documentation/Images/MultisetMultihistory.png" width="472.2">
@@ -21,4 +17,5 @@ separations of expressions and other values used for optimization.
 
 There are no properties implemented for it yet, however, it can be
 [converted](/Documentation/TypeSystem/SetReplaceTypeConvert.md) to a
-[WolframModelEvolutionObject](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md).
+[WolframModelEvolutionObject](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
+for backwards compatibility.
