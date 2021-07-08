@@ -16,7 +16,7 @@ SyntaxInformation[MultisetSubstitutionSystem] = {"ArgumentsPattern" -> {rules_}}
 declareSystem[MultisetSubstitutionSystem,
               generateMultisetSubstitutionSystem,
               _List,
-              {"MaxGeneration", "MaxDestroyerEvents", "MinEventInputs", "MaxEventInputs", "MaxEvents"},
+              {MaxGeneration, MaxDestroyerEvents, MinEventInputs, MaxEventInputs, MaxEvents},
               True];
 
 generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___], init_, parameters_] := Block[{

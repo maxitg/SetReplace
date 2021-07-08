@@ -27,17 +27,17 @@ $systemParameterDependencies = <||>; (* system -> logical expressions on paramet
 (* Parameters in the fourth argument should be declared with declareSystemParameter. Their values are guaranteed to
    match the pattern from the declaration. Further, the logical expression in the last argument will check if all
    required parameters are specified. Some parameters may require others to be specified, e.g.,
-   Implies["MaxDestroyerEvents" || "MaxEvents", "EventOrder"] means that if "MaxDestroyerEvents" or "MaxEvents" is
-   specified, "EventOrder" must be specified as well. The implementation function can expect all specified parameters
-   present (substituted with defaults if missing) and all values satisfying the constraints (substituted with defaults
-   if missing). *)
+   Implies[MaxDestroyerEvents || MaxEvents, EventOrder] means that if MaxDestroyerEvents or MaxEvents is specified, \
+   EventOrder must be specified as well. The implementation function can expect all specified parameters present \
+   (substituted with defaults if missing) and all values satisfying the constraints (substituted with defaults if \
+   missing). *)
 
 (* For example,
    declareSystem[MultisetSubstitutionSystem,
                  generateMultisetSubstitutionSystem,
                  _List,
-                 {"MaxGeneration", "MinEventInputs", "MaxDestroyerEvents", "MaxEvents", "EventOrder"},
-                 Implies["MaxDestroyerEvents" || "MaxEvents", "EventOrder"]] *)
+                 {MaxGeneration, MinEventInputs, MaxDestroyerEvents, MaxEvents, EventOrder},
+                 Implies[MaxDestroyerEvents || MaxEvents, EventOrder]] *)
 
 (* The implementation function is then called as
    generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rules], init, parameters] *)
@@ -78,12 +78,12 @@ $generatorProperties = <||>;          (* generator -> property *)
 
    declareSystemGenerator[EvaluateSingleHistory,
                           evaluateSingleHistory,
-                          <|"MaxDestroyerEvents" -> 1|>,
+                          <|MaxDestroyerEvents -> 1|>,
                           FinalState,
                           "yields a single history object."]
 
    Note that the constraint in the last argument of declareSystemGenerator still needs to be specified, which means
-   "EventOrder" is now a required parameter. *)
+   EventOrder is now a required parameter. *)
 
 (* evaluateSingleHistory is a PackageScope symbol that will throw exceptions instead of returning unevaluated.
    It cannot be used in operator form. *)
@@ -114,11 +114,15 @@ $parameterPatterns = <||>;
    to be supported and define values for them. To declare a new parameter, one needs to specify a default value (which
    usually disables whatever the parameter is doing) and a pattern the parameter value should match. *)
 
-(* declareSystemParameter["MaxGeneration", Infinity, _ ? (GreaterEqualThan[0])] *)
+(* declareSystemParameter[MaxGeneration,
+                          Infinity,
+                          _ ? (GreaterEqualThan[0]),
+                          "is a parameter specifying the maximum generations of tokens that will be created."] *)
 
-declareSystemParameter[name_, defaultValue_, pattern_] := (
+declareSystemParameter[name_, defaultValue_, pattern_, usage_] := (
   $parameterDefaults[name] = defaultValue;
   $parameterPatterns[name] = pattern;
+  SetUsage @ Evaluate[ToString[name] <> " " <> usage];
 );
 
 (* Initialization *)
@@ -141,31 +145,23 @@ declareMessage[
 declareMessage[
   General::unknownGeneratorParameters, "Parameters `parameters` are set by `generator` but is not declared."];
 
-initializeSystemGenerators[] := Module[{parameterKeys, maxParameterCount},
+initializeSystemGenerators[] := (
   $SetReplaceSystems = Sort @ Keys @ $systemImplementations;
   $SetReplaceGenerators = Sort @ Keys @ $generatorParameters;
-  parameterKeys = Keys[$parameterDefaults];
-  With[{missingParameters = Complement[$systemParameters[#], parameterKeys]},
+  With[{missingParameters = Complement[$systemParameters[#], Keys[$parameterDefaults]]},
     If[missingParameters =!= {},
       message[SetReplace, Failure["unknownSystemParameters", <|"parameters" -> missingParameters, "system" -> #|>]];
     ];
   ] & /@ $SetReplaceSystems;
-  With[{missingParameters = Complement[Keys @ $generatorParameters[#], parameterKeys]},
+  With[{missingParameters = Complement[Keys @ $generatorParameters[#], Keys[$parameterDefaults]]},
     If[missingParameters =!= {},
       message[
         SetReplace, Failure["unknownGeneratorParameters", <|"parameters" -> missingParameters, "generator" -> #|>]];
     ];
   ] & /@ $SetReplaceGenerators;
-  maxParameterCount = Length @ parameterKeys;
-  (* This has quadratic complexity in parameter count. But it does not seem to be possible to define the same set of
-     completion strings for a range of arguments. *)
-  With[{
-      completionSpec = Join[{0}, Table[parameterKeys, maxParameterCount + 1]]},
-    FE`Evaluate[FEPrivate`AddSpecialArgCompletion[# -> completionSpec]] & /@ ToString /@ $SetReplaceGenerators;
-  ];
   Scan[(SyntaxInformation[#] = {"ArgumentsPattern" -> {system_, init_., parameters___}}) &, $SetReplaceGenerators];
   defineGeneratorImplementation /@ Keys @ $generatorParameters;
-];
+);
 
 declareMessage[General::argNotInit, "The init `arg` in `expr` should match `pattern`."];
 declareMessage[General::unknownSystem, "`system` is not a recognized SetReplace system."];

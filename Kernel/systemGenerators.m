@@ -18,6 +18,6 @@ declareSystemGenerator[
 declareSystemGenerator[
   GenerateSingleHistory,
   generateSingleHistory,
-  <|"MaxDestroyerEvents" -> 1|>,
+  <|MaxDestroyerEvents -> 1|>,
   Identity,
   "yields a single history of the evaluation of a specified system$ starting from an initial state init$."];

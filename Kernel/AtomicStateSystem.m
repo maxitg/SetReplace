@@ -12,14 +12,13 @@ AtomicStateSystem should be used as the first argument in functions such as Gene
 
 SyntaxInformation[AtomicStateSystem] = {"ArgumentsPattern" -> {rules_}};
 
-declareSystem[
-  AtomicStateSystem, generateAtomicStateSystem, _, {"MaxGeneration", "MaxDestroyerEvents", "MaxEvents"}, True];
+declareSystem[AtomicStateSystem, generateAtomicStateSystem, _, {MaxGeneration, MaxDestroyerEvents, MaxEvents}, True];
 
 generateAtomicStateSystem[AtomicStateSystem[rules___], init_, parameters_] := ModuleScope[
   toAtomicStateMultihistory[rules] @ generateMultihistory[
     MultisetSubstitutionSystem[toMultisetRules[rules]],
     {init},
-    Join[parameters, <|"MinEventInputs" -> 1, "MaxEventInputs" -> 1|>]]
+    Join[parameters, <|MinEventInputs -> 1, MaxEventInputs -> 1|>]]
 ];
 
 (* Parsing *)
