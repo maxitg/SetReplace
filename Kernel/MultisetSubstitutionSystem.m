@@ -17,11 +17,11 @@ declareSystem[
   MultisetSubstitutionSystem,
   generateMultisetSubstitutionSystem,
   _List,
-  <|"MaxGeneration" -> {Infinity, _ ? (# >= 0 &)},
-    "MaxDestroyerEvents" -> {Infinity, _ ? (# >= 0 &)},
-    "MinEventInputs" -> {0, _ ? (# >= 0 &)},
-    "MaxEventInputs" -> {Infinity, _ ? (# >= 0 &)},
-    "MaxEvents" -> {Infinity, _ ? (# >= 0 &)}|>,
+  <|"MaxGeneration" -> {Infinity, _ ? (GreaterEqualThan[0])},
+    "MaxDestroyerEvents" -> {Infinity, _ ? (GreaterEqualThan[0])},
+    "MinEventInputs" -> {0, _ ? (GreaterEqualThan[0])},
+    "MaxEventInputs" -> {Infinity, _ ? (GreaterEqualThan[0])},
+    "MaxEvents" -> {Infinity, _ ? (GreaterEqualThan[0])}|>,
   True];
 
 generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___], init_, parameters_] := Block[{

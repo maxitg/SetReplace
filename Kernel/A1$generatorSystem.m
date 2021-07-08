@@ -29,14 +29,17 @@ $systemParameterDependencies = <||>; (* system -> logical expressions on paramet
    The implementation function can expect all specified parameters present (substituted with defaults if missing) and
    all values satisfying the constraints (substituted with defaults if missing). *)
 
+(* _List is the pattern that the init should satisfy. *)
+
 (* autoList is a special head useful for, e.g., "EventOrder". It takes a pattern as its argument. It allows a list with
    echo element matching that pattern. Alternatively, it can accept a single value matching the pattern, in which case a
    list around it will be created automatically and passed to the system generator. *)
 
 (* For example,
-   declareMultihistoryGenerator[
+   declareSystem[
      MultisetSubstitutionSystem,
      generateMultisetSubstitutionSystem,
+     _List,
      <|"MaxGeneration" -> {Infinity, _ ? (# >= 0 &)},
        "MinEventInputs" -> {0, _ ? (# >= 0 &)},
        "MaxDestroyerEvents" -> {Infinity, _ ? (# >= 0 &)}
@@ -65,8 +68,9 @@ declareMultihistoryGenerator[args___] :=
 
 (* Generator declaration *)
 
-$generatorParameters = <||>; (* generator -> <|parameter -> value, ...|> *)
-$generatorProperties = <||>; (* generator -> property *)
+$generatorPackageScopeSymbols = <||>; (* generator (public symbol) -> package-scope symbol *)
+$generatorParameters = <||>;          (* generator -> <|parameter -> value, ...|> *)
+$generatorProperties = <||>;          (* generator -> property *)
 
 (* Generators are functions that are called to produce EventSet objects. They take the form
    symbol[system, init, params]. They also define a fixed set of parameter values. These parameter values cannot be
@@ -74,14 +78,18 @@ $generatorProperties = <||>; (* generator -> property *)
 
 (* For example,
 
-   declareGenerator[EvaluateSingleHistory, <|"MaxDestroyerEvents" -> 1|>, FinalState]
+   declareGenerator[EvaluateSingleHistory, evaluateSingleHistory, <|"MaxDestroyerEvents" -> 1|>, FinalState]
 
-   Note that the constraint in the last argument of declareMultihistoryGenerator still needs to be specified, which
+   Note that the constraint in the last argument of declareGenerator still needs to be specified, which
    means "EventOrder" is now a required parameter. *)
 
-declareGenerator[symbol_, parameterValues_, property_ : Identity] := (
-  $generatorParameters[symbol] = parameterValues;
-  $generatorProperties[symbol] = property;
+(* evaluateSingleHistory is a PackageScope symbol that will throw exceptions instead of returning unevaluated.
+   It cannot be used in operator form. *)
+
+declareGenerator[publicSymbol_, packageScopeSymbol_, parameterValues_, property_ : Identity] := (
+  $generatorPackageScopeSymbols[publicSymbol] = packageScopeSymbol;
+  $generatorParameters[publicSymbol] = parameterValues;
+  $generatorProperties[publicSymbol] = property;
 );
 
 (* Initialization *)
@@ -117,10 +125,10 @@ initializeSystemGenerators[] := Module[{parameterKeys, maxParameterCount},
 declareMessage[General::argNotInit, "The init `arg` in `expr` should match `pattern`."];
 declareMessage[General::unknownSystem, "`system` is not a recognized SetReplace system."];
 
-defineGeneratorImplementation[generator_] := (
+defineGeneratorImplementation[generator_] := With[{packageScopeGenerator = $generatorPackageScopeSymbols[generator]},
   expr : generator[system_, init_, parameters___] /;
       MatchQ[init, Lookup[$systemInitPatterns, Head[system], _]] := ModuleScope[
-    result = Catch[implementation[generator][system, init, parameters],
+    result = Catch[packageScopeGenerator[system, init, parameters],
                    _ ? FailureQ,
                    message[generator, #, <|"expr" -> HoldForm[expr]|>] &];
     result /; !FailureQ[result]
@@ -135,23 +143,23 @@ defineGeneratorImplementation[generator_] := (
 
   expr : generator[] /; CheckArguments[expr, {1, Infinity}] := $Failed;
 
-  implementation[generator][system_, init_, parameters___] /;
+  packageScopeGenerator[system_, init_, parameters___] /;
       MatchQ[init, Lookup[$systemInitPatterns, Head[system], _]] := ModuleScope[
     implementation = $systemImplementations[Head[system]];
     If[MissingQ[implementation], throw[Failure["unknownSystem", <|"system" -> system|>]]];
     $generatorProperties[generator] @
       $systemImplementations[Head[system]][system, init, parseParameters[generator, Head[system]][parameters]]
   ];
-  implementation[generator][___] := throw[Failure[None, <||>]];
+  packageScopeGenerator[___] := throw[Failure[None, <||>]];
 
   implementationOperator[generator][system_][init_] /; MatchQ[init, $systemInitPatterns[Head[system]]] :=
-    implementation[generator][system, init, <||>];
+    packageScopeGenerator[system, init, <||>];
   implementationOperator[generator][system_, parameters_, moreParameters___][init_] /;
       MatchQ[init, $systemInitPatterns[Head[system]]] && !MatchQ[parameters, $systemInitPatterns[Head[system]]] :=
-    implementation[generator][system, init, parameters, moreParameters];
+    packageScopeGenerator[system, init, parameters, moreParameters];
   implementationOperator[generator][system_, ___][arg_] :=
     throw[Failure["argNotInit", <|"arg" -> arg, "pattern" -> $systemInitPatterns[Head[system]]|>]];
-);
+];
 
 parseParameters[generator_, system_][parameters___] :=
   addMissingParameters[generator, system] @

@@ -12,41 +12,20 @@ AtomicStateSystem should be used as the first argument in functions such as Gene
 
 SyntaxInformation[AtomicStateSystem] = {"ArgumentsPattern" -> {rules_}};
 
-declareMultihistoryGenerator[
-  generateAtomicStateSystem,
+declareSystem[
   AtomicStateSystem,
-  <|"MaxGeneration" -> {Infinity, "NonNegativeIntegerOrInfinity"},
-    "MaxDestroyerEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
-  {"InputIndex", "RuleIndex"},
-  <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>];
+  generateAtomicStateSystem,
+  _,
+  <|"MaxGeneration" -> {Infinity, _ ? (GreaterEqualThan[0])},
+    "MaxDestroyerEvents" -> {Infinity, _ ? (GreaterEqualThan[0])},
+    "MaxEvents" -> {Infinity, _ ? (GreaterEqualThan[0])}|>,
+  True];
 
-declareMessage[General::atomicStateTokenDeduplicationNotImplemented,
-               "Token deduplication is not implemented for Atomic State System."];
-
-$supportedEventOrdering = {"InputIndex", "RuleIndex"};
-
-declareMessage[General::atomicStateEventOrderingNotImplemented,
-               "Only " <> ToString[$supportedEventOrdering] <> " event ordering is implemented at this time."];
-
-generateAtomicStateSystem[AtomicStateSystem[rules___], (* BlankNullSequence is needed to catch invalid arg counts *)
-                          eventSelection_,
-                          tokenDeduplication_,
-                          eventOrdering_,
-                          stoppingCondition_,
-                          init_] := ModuleScope[
-  If[tokenDeduplication =!= None, throw[Failure["atomicStateTokenDeduplicationNotImplemented", <||>]]];
-  If[eventOrdering =!= {"InputIndex", "RuleIndex"}, throw[Failure["atomicStateEventOrderingNotImplemented", <||>]]];
-
+generateAtomicStateSystem[AtomicStateSystem[rules___], init_, parameters_] := ModuleScope[
   toAtomicStateMultihistory[rules] @ generateMultihistory[
     MultisetSubstitutionSystem[toMultisetRules[rules]],
-    <|"MaxGeneration" -> eventSelection["MaxGeneration"],
-      "MaxDestroyerEvents" -> eventSelection["MaxDestroyerEvents"],
-      "MinEventInputs" -> 1,
-      "MaxEventInputs" -> 1|>,
-    None,
-    {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"},
-    stoppingCondition,
-    {init}]
+    {init},
+    Join[parameters, <|"MinEventInputs" -> 1, "MaxEventInputs" -> 1|>]]
 ];
 
 (* Parsing *)

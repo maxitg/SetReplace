@@ -5,5 +5,8 @@ PackageImport["GeneralUtilities`"]
 PackageExport["GenerateMultihistory"]
 PackageExport["GenerateSingleHistory"]
 
-declareGenerator[GenerateMultihistory, <||>, Identity];
-declareGenerator[GenerateSingleHistory, <|"MaxDestroyerEvents" -> 1|>, Identity];
+PackageScope["generateMultihistory"]
+PackageScope["generateSingleHistory"]
+
+declareGenerator[GenerateMultihistory, generateMultihistory, <||>, Identity];
+declareGenerator[GenerateSingleHistory, generateSingleHistory, <|"MaxDestroyerEvents" -> 1|>, Identity];
