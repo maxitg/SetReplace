@@ -1,7 +1,7 @@
 # GenerateSingleHistory
 
 **`GenerateSingleHistory`** generates single histories, which it achieves by setting
-[`MaxDestroyerEvents`](MaxDestroyerEvents.md) to one. Note that for non-deterministic systems the history generated may
+[`MaxDestroyerEvents`](MaxDestroyerEvents.md) to one. Note that for nondeterministic systems the history generated may
 depend on the event order.
 
 For example, for a [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md):
