@@ -10,12 +10,13 @@ multiple branches of nondeterministic systems simultaneously. That is done by ap
 tokens and keeping events and tokens instead of states in [`Multihistory`](/Documentation/Types/Multihistory/README.md)
 objects. We can reconstruct the states from that information afterwards.
 
-Most systems, however, cannot be evaluated completely. And there are multiple groups of parameters to control how to
-perform a partial evaluation. One needs to decide [which events to include](EventSelectionParameters.md), in
-[which order](EventOrderingFunctions.md), and [when to terminate the evaluation](StoppingConditionParameters.md).
+There are parameters that control how this evaluation is done. Some of them control which events to select, which is
+essential in cases where the system does not terminate. Other parameters might control how to deduplicate identical
+tokens, etc. Different generators correspond to different settings of parameters. Additional parameters can also be
+specified similar to options.
 
-For example, in a [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md) we can generate
-a single history (no nondeterministic branching):
+For example, [`GenerateSingleHistory`](GenerateSingleHistory.md) corresponds to
+[`"MaxDestroyerEvents" -> 1`](MaxDestroyerEvents.md) and thus does produce nondeterministic branching:
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
@@ -25,7 +26,8 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemExample.png" width="444.6">
 
-or multiple histories. Note different events (orange) using the same tokens (light blue):
+We can also use a more generate [`GenerateMultihistory`](GenerateMultihistory.md) and specify
+[`"MaxDestroyerEvents"`](MaxDestroyerEvents.md) manually.
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
@@ -41,15 +43,16 @@ The same generators support multiple systems. In addition to
 `HypergraphSubstitutionSystem`, `StringSubstitutionSystem`, etc. Many of these systems have shared evaluation
 parameters.
 
-[`GenerateMultihistory`](GenerateMultihistory.md) is the universal generator. It can generate everything that the
-specialized `GenerateSingleHistory` and `GenerateAllHistories` can produce. However, it is more verbose, which can
-make the code harder to read.
-
 * Introspection:
   * [`$SetReplaceSystems`]($SetReplaceSystems.md) &mdash; yields the list of all implemented systems
+  * [`$SetReplaceGenerators`]($SetReplaceGenerators.md) &mdash; yields the list of all generators
+  * [`SetReplaceSystemParameters`](SetReplaceSystemParameters.md) &mdash; yields the list of parameters for a system
 * Generators:
-  * [`GenerateMultihistory`](GenerateMultihistory.md) &mdash; the most customizable and explicit generator
+  * [`GenerateMultihistory`](GenerateMultihistory.md) &mdash; the universal generator for multihistories
+  * [`GenerateSingleHistory`](GenerateSingleHistory.md) &mdash; sets `"MaxDestroyerEvents" -> 1`
 * Parameters:
-  * [`EventSelectionParameters`](EventSelectionParameters.md) &mdash; determines which events to include
-  * [`EventOrderingFunctions`](EventOrderingFunctions.md) &mdash; determines the order of events
-  * [`StoppingConditionParameters`](StoppingConditionParameters.md) &mdash; determines when to stop evaluation
+  * [`"MaxDestroyerEvents"`](MaxDestroyerEvents.md) &mdash; allows one to switch between single and multihistories
+  * [`"MinEventInputs"`](MinEventInputs.md)
+  * [`"MaxEventInputs"`](MaxEventInputs.md)
+  * [`"MaxEvents"`](MaxEvents.md)
+  * [`"MaxGeneration"`](MaxGeneration.md)
