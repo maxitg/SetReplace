@@ -16,7 +16,7 @@ tokens, etc. Different generators correspond to different settings of parameters
 specified similar to options.
 
 For example, [`GenerateSingleHistory`](GenerateSingleHistory.md) corresponds to
-[`"MaxDestroyerEvents" -> 1`](MaxDestroyerEvents.md) and thus does produce nondeterministic branching:
+[`MaxDestroyerEvents -> 1`](MaxDestroyerEvents.md) and thus does produce nondeterministic branching:
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
@@ -27,13 +27,13 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 <img src="/Documentation/Images/MultisetSubstitutionSystemExample.png" width="444.6">
 
 We can also use a more generate [`GenerateMultihistory`](GenerateMultihistory.md) and specify
-[`"MaxDestroyerEvents"`](MaxDestroyerEvents.md) manually.
+[`MaxDestroyerEvents`](MaxDestroyerEvents.md) manually.
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[
-      MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}], {1, 2, 3, 4}, "MaxDestroyerEvents" -> 2]
+      MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}], {1, 2, 3, 4}, MaxDestroyerEvents -> 2]
 ```
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemPartialMultihistory.png" width="478.2">
@@ -43,16 +43,39 @@ The same generators support multiple systems. In addition to
 `HypergraphSubstitutionSystem`, `StringSubstitutionSystem`, etc. Many of these systems have shared evaluation
 parameters.
 
+All generators take the form
+
+```wl
+Generator[System[rules], init, parameters...]
+```
+
+or, in operator form,
+
+```wl
+Generator[System[rules], parameters...] @ init
+```
+
+Note, however, that the first form takes precedence and, if parameters can be interpreted as an init, the second form
+may not evaluate as expected.
+
+`parameters` can be specified either as a [`Sequence`](https://reference.wolfram.com/language/ref/Sequence.html) of
+[`Rule`](https://reference.wolfram.com/language/ref/Rule.html)s, a
+[`List`](https://reference.wolfram.com/language/ref/List.html) of
+[`Rule`](https://reference.wolfram.com/language/ref/Rule.html)s or an
+[`Association`](https://reference.wolfram.com/language/ref/Association.html). Keys supported
+in such [`Rule`](https://reference.wolfram.com/language/ref/Rule.html)s depend on the system and can be looked up with
+[`SetReplaceSystemParameters`](SetReplaceSystemParameters.md).
+
 * Introspection:
   * [`$SetReplaceSystems`]($SetReplaceSystems.md) &mdash; yields the list of all implemented systems
   * [`$SetReplaceGenerators`]($SetReplaceGenerators.md) &mdash; yields the list of all generators
   * [`SetReplaceSystemParameters`](SetReplaceSystemParameters.md) &mdash; yields the list of parameters for a system
 * Generators:
   * [`GenerateMultihistory`](GenerateMultihistory.md) &mdash; the universal generator for multihistories
-  * [`GenerateSingleHistory`](GenerateSingleHistory.md) &mdash; sets `"MaxDestroyerEvents" -> 1`
+  * [`GenerateSingleHistory`](GenerateSingleHistory.md) &mdash; sets `MaxDestroyerEvents -> 1`
 * Parameters:
-  * [`"MaxDestroyerEvents"`](MaxDestroyerEvents.md) &mdash; allows one to switch between single and multihistories
-  * [`"MinEventInputs"`](MinEventInputs.md)
-  * [`"MaxEventInputs"`](MaxEventInputs.md)
-  * [`"MaxEvents"`](MaxEvents.md)
-  * [`"MaxGeneration"`](MaxGeneration.md)
+  * [`MaxDestroyerEvents`](MaxDestroyerEvents.md) &mdash; allows one to switch between single and multihistories
+  * [`MinEventInputs`](MinEventInputs.md)
+  * [`MaxEventInputs`](MaxEventInputs.md)
+  * [`MaxEvents`](MaxEvents.md)
+  * [`MaxGeneration`](MaxGeneration.md)
