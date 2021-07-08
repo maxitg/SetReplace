@@ -13,16 +13,11 @@ MultisetSubstitutionSystem should be used as the first argument in functions suc
 
 SyntaxInformation[MultisetSubstitutionSystem] = {"ArgumentsPattern" -> {rules_}};
 
-declareSystem[
-  MultisetSubstitutionSystem,
-  generateMultisetSubstitutionSystem,
-  _List,
-  <|"MaxGeneration" -> {Infinity, _ ? (GreaterEqualThan[0])},
-    "MaxDestroyerEvents" -> {Infinity, _ ? (GreaterEqualThan[0])},
-    "MinEventInputs" -> {0, _ ? (GreaterEqualThan[0])},
-    "MaxEventInputs" -> {Infinity, _ ? (GreaterEqualThan[0])},
-    "MaxEvents" -> {Infinity, _ ? (GreaterEqualThan[0])}|>,
-  True];
+declareSystem[MultisetSubstitutionSystem,
+              generateMultisetSubstitutionSystem,
+              _List,
+              {"MaxGeneration", "MaxDestroyerEvents", "MinEventInputs", "MaxEventInputs", "MaxEvents"},
+              True];
 
 generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___], init_, parameters_] := Block[{
     expressions, eventRuleIndices, eventInputs, eventOutputs, eventGenerations, expressionCreatorEvents,
