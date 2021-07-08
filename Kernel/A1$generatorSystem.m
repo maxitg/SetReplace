@@ -76,7 +76,11 @@ $generatorProperties = <||>;          (* generator -> property *)
 
 (* For example,
 
-   declareSystemGenerator[EvaluateSingleHistory, evaluateSingleHistory, <|"MaxDestroyerEvents" -> 1|>, FinalState]
+   declareSystemGenerator[EvaluateSingleHistory,
+                          evaluateSingleHistory,
+                          <|"MaxDestroyerEvents" -> 1|>,
+                          FinalState,
+                          "yields a single history object."]
 
    Note that the constraint in the last argument of declareSystemGenerator still needs to be specified, which means
    "EventOrder" is now a required parameter. *)
@@ -84,10 +88,21 @@ $generatorProperties = <||>;          (* generator -> property *)
 (* evaluateSingleHistory is a PackageScope symbol that will throw exceptions instead of returning unevaluated.
    It cannot be used in operator form. *)
 
-declareSystemGenerator[publicSymbol_, packageScopeSymbol_, parameterValues_, property_ : Identity] := (
+systemUsage = "* A list of all supported systems can be obtained with $SetReplaceSystems.";
+initUsage = "* init$ is the initial state, the format of which depends on the system$.";
+parametersUsage = "* parameters$ is either a Sequence, a List or an Association of key-value rules. A list of " <>
+                  "parameters can be obtained with SetReplaceSystemParameters[system$].";
+
+declareSystemGenerator[publicSymbol_, packageScopeSymbol_, parameterValues_, property_ : Identity, usage_] := (
   $generatorPackageScopeSymbols[publicSymbol] = packageScopeSymbol;
   $generatorParameters[publicSymbol] = parameterValues;
   $generatorProperties[publicSymbol] = property;
+  SetUsage @ Evaluate @ StringRiffle[
+    {ToString[publicSymbol] <> "[system$, init$, parameters$] " <> usage,
+     systemUsage,
+     initUsage,
+     parametersUsage},
+    "\n"];
 );
 
 (* Parameter declaration *)
