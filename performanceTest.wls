@@ -83,7 +83,8 @@ Check[
   ];
 
   Attributes[meanAroundTiming] = {HoldAll};
-  meanAroundTiming[expr_] := MeanAround @ Table[First @ AbsoluteTiming[expr], $measurementsCount];
+  meanAroundTiming[expr_, resultsFunction_] :=
+    MeanAround @ Table[First @ AbsoluteTiming[resultsFunction @ expr], $measurementsCount];
 
   runTests[repo_, sha_, tests_, resultsFunction_] := ModuleScope[
     Print["Testing ", sha];
@@ -93,7 +94,7 @@ Check[
     result = ParallelEvaluate[
       Get[FileNameJoin[{$setReplaceRoot, "Kernel", "init.m"}]];
       Check[
-        meanAroundTiming @@@ resultsFunction @ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]]
+        meanAroundTiming[#, resultsFunction] & @@@ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]]
       ,
         $Failed
       ]
