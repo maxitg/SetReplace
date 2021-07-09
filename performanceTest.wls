@@ -87,7 +87,7 @@ Check[
   Attributes[meanAroundTiming] = {HoldAll};
   meanAroundTiming[expr_] := MeanAround @ Table[First @ AbsoluteTiming[expr], $measurementsCount];
 
-  runTests[repo_, sha_, tests_] := ModuleScope[
+  runTests[repo_, sha_, tests_, resultsFunction_] := ModuleScope[
     Print["Testing ", sha];
     GitCheckoutReference[repo, sha];
     CloseKernels[];
@@ -95,7 +95,7 @@ Check[
     result = ParallelEvaluate[
       Get[FileNameJoin[{$setReplaceRoot, "Kernel", "init.m"}]];
       Check[
-        meanAroundTiming @@@ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]]
+        meanAroundTiming @@@ resultsFunction @ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]]
       ,
         $Failed
       ]
@@ -133,7 +133,8 @@ Check[
   $symbolicRef = RunProcess[{"git", "symbolic-ref", "--short", "HEAD"}];
   $originalRef = If[$symbolicRef["ExitCode"] === 0, StringExtract[$symbolicRef["StandardOutput"], 1], $currentSHA];
 
-  {$oldResults, $newResults} = runTests[$gitRepo, #, tests] & /@ {$oldSHA, $newSHA};
+  $oldResults = runTests[$gitRepo, $oldSHA, tests, Quiet];
+  $newResults = runTests[$gitRepo, $newSHA, tests, Identity];
   RunProcess[{"git", "checkout", "-q", $originalRef}];
 
   (* We need to return to the original branch before exiting. *)
