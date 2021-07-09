@@ -9,7 +9,6 @@ PackageExport["SetReplaceSystemParameters"]
 PackageScope["declareSystem"]
 PackageScope["declareSystemGenerator"]
 PackageScope["declareSystemParameter"]
-PackageScope["autoList"]
 PackageScope["initializeSystemGenerators"]
 
 (* System declaration *)
@@ -55,14 +54,14 @@ declareSystem[systemType_,
 
 declareMessage[General::unsatisfiableParameterDependencies,
                "Internal error. Parameter constraints `constraints` for `system` are not satisfyable."];
-declareMultihistoryGenerator[systemType_, _, _, _List, dependencies_] :=
+declareSystem[systemType_, _, _, _List, dependencies_] :=
   message[SetReplace,
           Failure["unsatisfiableParameterDependencies", <|"constraints" -> dependencies, "system" -> systemType|>]];
 
-declareMessage[General::invalidGeneratorDeclaration,
-               "Internal error. Multihistory generator is declared incorrectly with arguments `args`."];
-declareMultihistoryGenerator[args___] :=
-  message[SetReplace, Failure["invalidGeneratorDeclaration", <|"args" -> {args}|>]];
+declareMessage[General::invalidSystemDeclaration,
+               "Internal error. System is declared incorrectly with arguments `args`."];
+declareSystem[args___] :=
+  message[SetReplace, Failure["invalidSystemDeclaration", <|"args" -> {args}|>]];
 
 (* Generator declaration *)
 
@@ -106,6 +105,11 @@ declareSystemGenerator[publicSymbol_, packageScopeSymbol_, parameterValues_, pro
     "\n"];
 );
 
+declareMessage[General::invalidSystemGeneratorDeclaration,
+               "Internal error. Generator is declared incorrectly with arguments `args`."];
+declareSystemGenerator[args___] :=
+  message[SetReplace, Failure["invalidSystemGeneratorDeclaration", <|"args" -> {args}|>]];
+
 (* Parameter declaration *)
 
 $parameterDefaults = <||>;
@@ -126,6 +130,11 @@ declareSystemParameter[name_, defaultValue_, pattern_, usage_] := (
   SyntaxInformation[name] = {"ArgumentsPattern" -> {}};
   SetUsage @ Evaluate[ToString[name] <> " " <> usage];
 );
+
+declareMessage[General::invalidSystemParameterDeclaration,
+               "Internal error. Parameter is declared incorrectly with arguments `args`."];
+declareSystemParameter[args___] :=
+  message[SetReplace, Failure["invalidSystemParameterDeclaration", <|"args" -> {args}|>]];
 
 (* Initialization *)
 
