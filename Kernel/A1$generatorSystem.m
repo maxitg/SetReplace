@@ -97,6 +97,7 @@ declareSystemGenerator[publicSymbol_, packageScopeSymbol_, parameterValues_, pro
   $generatorPackageScopeSymbols[publicSymbol] = packageScopeSymbol;
   $generatorParameters[publicSymbol] = parameterValues;
   $generatorProperties[publicSymbol] = property;
+  SyntaxInformation[publicSymbol] = {"ArgumentsPattern" -> {system_, init_., parameters___}};
   SetUsage @ Evaluate @ StringRiffle[
     {ToString[publicSymbol] <> "[system$, init$, parameters$] " <> usage,
      systemUsage,
@@ -122,6 +123,7 @@ $parameterPatterns = <||>;
 declareSystemParameter[name_, defaultValue_, pattern_, usage_] := (
   $parameterDefaults[name] = defaultValue;
   $parameterPatterns[name] = pattern;
+  SyntaxInformation[name] = {"ArgumentsPattern" -> {}};
   SetUsage @ Evaluate[ToString[name] <> " " <> usage];
 );
 
@@ -159,7 +161,6 @@ initializeSystemGenerators[] := (
         SetReplace, Failure["unknownGeneratorParameters", <|"parameters" -> missingParameters, "generator" -> #|>]];
     ];
   ] & /@ $SetReplaceGenerators;
-  Scan[(SyntaxInformation[#] = {"ArgumentsPattern" -> {system_, init_., parameters___}}) &, $SetReplaceGenerators];
   defineGeneratorImplementation /@ Keys @ $generatorParameters;
 );
 
