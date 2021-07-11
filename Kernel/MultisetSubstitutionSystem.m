@@ -273,7 +273,7 @@ zeroPreferenceProduct[_, 0] := 0;
 zeroPreferenceProduct[a_, b_] := a * b;
 zeroPreferenceProduct[{a_, b_}, {c_, d_}] := {zeroPreferenceProduct[a, c], zeroPreferenceProduct[b, d]};
 
-sequencePatternLengthRange[Verbatim[Repeated][p_]] := {sequencePatternLengthRange[p], Infinity};
+sequencePatternLengthRange[Verbatim[Repeated][p_]] := {Min @ sequencePatternLengthRange[p], Infinity};
 sequencePatternLengthRange[Verbatim[RepeatedNull][_]] := {0, Infinity};
 sequencePatternLengthRange[Verbatim[Repeated][p_, max_]] :=
   zeroPreferenceProduct[{1, max}, sequencePatternLengthRange[p]];
