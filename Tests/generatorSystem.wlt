@@ -3,100 +3,155 @@
     "init" -> (
       Attributes[Global`testUnevaluated] = Attributes[Global`testSymbolLeak] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
-      Global`testSymbolLeak[args___] := SetReplace`PackageScope`testSymbolLeak[VerificationTest, args];
       Global`declareSystem = SetReplace`PackageScope`declareSystem;
       Global`declareSystemGenerator = SetReplace`PackageScope`declareSystemGenerator;
       Global`declareSystemParameter = SetReplace`PackageScope`declareSystemParameter;
       Global`initializeSystemGenerators = SetReplace`PackageScope`initializeSystemGenerators;
 
-      (* Echo system *)
+      declareSystemParameter[maxSomething, Infinity, _?(GreaterEqualThan[0]), "is a max param."];
+      declareSystemParameter[minSomething, 0, _?(GreaterEqualThan[0]), "is a min param."];
+      declareSystemParameter[pickNumber, None, None | 0 | 1 | 2, "is a pick param."];
 
-      declareSystem[echoSystem, List, _, {}, True];
-
-      (* UnknownObject *)
+      declareSystem[echoSystem, List, _Integer, {maxSomething, pickNumber}, True];
+      declareSystem[needSomethingForPicking,
+                    List,
+                    _Integer,
+                    {minSomething, maxSomething, pickNumber},
+                    Implies[pickNumber, minSomething || maxSomething]];
+      declareSystem[minXorMax, List, _Integer, {minSomething, maxSomething}, Xor[minSomething, maxSomething]];
+      declareSystem[listInit, List, _List, {minSomething, maxSomething, pickNumber}, True];
+      declareSystem[realSystem, List, _, {MaxDestroyerEvents, MaxEvents, MaxGeneration}, True];
 
       declareSystemGenerator[identityGenerator, internalIdentityGenerator, <||>, Identity, "does nothing."];
+      declareSystemGenerator[pick2Generator, internalPick2Generator, <|pickNumber -> 2|>, picked, "picks 2."];
 
-      Unprotect[$SetReplaceSystems];
-      Unprotect[$SetReplaceGenerators];
+      Unprotect[$SetReplaceSystems, $SetReplaceGenerators, GenerateSingleHistory, GenerateMultihistory];
       initializeSystemGenerators[];
-      Protect[$SetReplaceGenerators];
-      Protect[$SetReplaceSystems];
+      Protect[$SetReplaceSystems, $SetReplaceGenerators, GenerateSingleHistory, GenerateMultihistory];
     ),
     "tests" -> {
-      (* Type and property lists *)
-      (* unknownObject is not here because there are no translations or properties defined for it, so it's invisible to
-         the type system. *)
+      (* Internal errors *)
+      VerificationTest[declareSystem[invalidSystem, List, _, {minSomething}, minSomething && !minSomething],
+                       _,
+                       {SetReplace::unsatisfiableParameterDependencies},
+                       SameTest -> MatchQ],
+      VerificationTest[declareSystem[invalidSystem, List, _, {minSomething}],
+                       _,
+                       {SetReplace::invalidSystemDeclaration},
+                       SameTest -> MatchQ],
+      VerificationTest[declareSystemGenerator[invalidGenerator, internalInvalidGenerator, <||>, Identity],
+                       _,
+                       {SetReplace::invalidSystemGeneratorDeclaration},
+                       SameTest -> MatchQ],
+      VerificationTest[declareSystemParameter[invalidParameter, 0, _],
+                       _,
+                       {SetReplace::invalidSystemParameterDeclaration},
+                       SameTest -> MatchQ],
+
+      (* Zero args *)
+      testUnevaluated[identityGenerator[], {identityGenerator::argm}],
+
+      (* One arg *)
+      testUnevaluated[identityGenerator[0], {}],
+      testUnevaluated[identityGenerator[echoSystem[0]], {}],
+
+      (* Two args *)
+      testUnevaluated[identityGenerator[0, 0], {identityGenerator::unknownSystem}],
       VerificationTest[
-        $SetReplaceTypes, Sort @ Join[originalTypes, {"String", "Expression", "HalfInteger", "EvenInteger", "Real"}]],
-      VerificationTest[$SetReplaceProperties, Sort @ Join[originalProperties, {description, multipliedHalf}]],
+        identityGenerator[echoSystem[0], 0], {echoSystem[0], 0, <|maxSomething -> Infinity, pickNumber -> None|>}],
+      testUnevaluated[identityGenerator[echoSystem[0], "test"], {}], (* parameters are not yet parsed at this stage *)
 
-      VerificationTest[GraphQ @ $SetReplaceTypeGraph],
-      VerificationTest[ContainsOnly[Head /@ VertexList[$SetReplaceTypeGraph],
-                       {SetReplaceType, SetReplaceProperty, SetReplaceMethodImplementation}]],
+      (* Parameters *)
+      testUnevaluated[identityGenerator[echoSystem[0], 0, abc], {identityGenerator::invalidGeneratorParameterSpec}],
+      testUnevaluated[identityGenerator[echoSystem[0], 0, {abc}], {identityGenerator::invalidGeneratorParameterSpec}],
+      testUnevaluated[identityGenerator[echoSystem[0], 0, abc -> 4], {identityGenerator::unknownParameter}],
+      testUnevaluated[identityGenerator[echoSystem[0], maxSomething -> 4], {}], (* no init, treated as an operator *)
+      VerificationTest[identityGenerator[echoSystem[0], 0, maxSomething -> 4],
+                       {echoSystem[0], 0, <|maxSomething -> 4, pickNumber -> None|>}],
+      testUnevaluated[identityGenerator[echoSystem[0], 0, maxSomething -> -1], {identityGenerator::invalidParameter}],
+      testUnevaluated[identityGenerator[echoSystem[0], 0, minSomething -> 4], {identityGenerator::unknownParameter}],
+
       VerificationTest[
-        Cases[
-          EdgeList[$SetReplaceTypeGraph],
-          Except[
-            DirectedEdge[_SetReplaceType | _SetReplaceProperty, _SetReplaceMethodImplementation] |
-              DirectedEdge[_SetReplaceMethodImplementation, _SetReplaceType | _SetReplaceProperty]]],
-        {}],
+          identityGenerator[echoSystem[0], 0, ##], {echoSystem[0], 0, <|maxSomething -> 4, pickNumber -> 0|>}] & @@@ {
+        {maxSomething -> 4, pickNumber -> 0},
+        {{maxSomething -> 4}, pickNumber -> 0},
+        {maxSomething -> 4, {pickNumber -> 0}},
+        {<|maxSomething -> 4|>, {{pickNumber -> 0}}}
+      },
 
-      (* Type querying *)
-      VerificationTest[SetReplaceObjectType[evenInteger[4]], "EvenInteger"],
-      VerificationTest[SetReplaceObjectType[2.4], "Real"],
-      VerificationTest[SetReplaceObjectType[unknownObject[4]], "Unknown"],
-      testUnevaluated[SetReplaceObjectType[unseenObject[4]], SetReplaceObjectType::unknownObject],
+      VerificationTest[identityGenerator[echoSystem[0], 0, pickNumber -> 0, pickNumber -> 1],
+                       {echoSystem[0], 0, <|maxSomething -> Infinity, pickNumber -> 1|>}],
+      testUnevaluated[identityGenerator[echoSystem[0], 0, pickNumber -> 0, pickNumber -> 1, 3],
+                      {identityGenerator::invalidGeneratorParameterSpec}],
 
-      VerificationTest[SetReplaceObjectQ[evenInteger[4]]],
-      VerificationTest[SetReplaceObjectQ[2.4]],
-      (* unknownObject an object because it returns a type even though it's not in $SetReplaceTypes. *)
-      VerificationTest[SetReplaceObjectQ[unknownObject[4]]],
-      VerificationTest[!SetReplaceObjectQ[unseenObject[4]]],
-
-      (* Translations *)
       VerificationTest[
-        SetReplaceTypeConvert["Expression"] @ SetReplaceTypeConvert["String"] @ expression[4], expression[4]],
-      VerificationTest[SetReplaceTypeConvert["HalfInteger"] @ evenInteger[4], halfInteger[2]],
-      VerificationTest[SetReplaceTypeConvert["HalfInteger"] @ halfInteger[3], halfInteger[3]],
-      VerificationTest[SetReplaceTypeConvert["EvenInteger"] @ halfInteger[3], evenInteger[6]],
+        pick2Generator[echoSystem[0], 0], picked[{echoSystem[0], 0, <|maxSomething -> Infinity, pickNumber -> 2|>}]],
+      testUnevaluated[pick2Generator[echoSystem[0], 0, pickNumber -> 1], {pick2Generator::forbiddenParameter}],
+      VerificationTest[pick2Generator[echoSystem[0], 0, maxSomething -> 2],
+                       picked[{echoSystem[0], 0, <|maxSomething -> 2, pickNumber -> 2|>}]],
 
-      testUnevaluated[SetReplaceTypeConvert["Expression"] @ unknownObject[5], SetReplaceTypeConvert::unconvertibleType],
-      testUnevaluated[SetReplaceTypeConvert["Unknown"] @ expression[4], SetReplaceTypeConvert::unconvertibleType],
-      testUnevaluated[SetReplaceTypeConvert["Expression"] @ halfInteger[3], SetReplaceTypeConvert::noConversionPath],
-      testUnevaluated[SetReplaceTypeConvert["HalfInteger"] @ evenInteger[3], SetReplaceTypeConvert::notEven],
-      testUnevaluated[SetReplaceTypeConvert["EvenInteger"] @ halfInteger[a], SetReplaceTypeConvert::notAnInteger],
+      VerificationTest[
+        identityGenerator[needSomethingForPicking[0], 0],
+        {needSomethingForPicking[0], 0, <|minSomething -> 0, maxSomething -> Infinity, pickNumber -> None|>}],
+      testUnevaluated[
+        identityGenerator[needSomethingForPicking[0], 0, pickNumber -> 2], {identityGenerator::missingParameters}],
+      VerificationTest[
+        identityGenerator[needSomethingForPicking[0], 0, pickNumber -> 2, minSomething -> 2],
+        {needSomethingForPicking[0], 0, <|minSomething -> 2, maxSomething -> Infinity, pickNumber -> 2|>}],
+      VerificationTest[
+        identityGenerator[needSomethingForPicking[0], 0, pickNumber -> 2, maxSomething -> 2],
+        {needSomethingForPicking[0], 0, <|minSomething -> 0, maxSomething -> 2, pickNumber -> 2|>}],
 
-      (* Raw Properties *)
-      VerificationTest[multipliedHalf[5] @ halfInteger[3], 15],
-      VerificationTest[multipliedHalf[5] @ evenInteger[4], 10],
-      VerificationTest[multipliedHalf[halfInteger[3], 4], 12],
-      VerificationTest[multipliedHalf[evenInteger[4], 4], 8],
-      VerificationTest[description @ evenInteger[4], "I am an integer 4."],
-      VerificationTest[description @ halfInteger[4], "I am an integer 8."],
-      VerificationTest[description[] @ halfInteger[4], "I am an integer 8."], (* Operator form with no arguments *)
-      VerificationTest[description @ 2.4, "I am a real 2.4."],
+      testUnevaluated[pick2Generator[needSomethingForPicking[0], 0], {pick2Generator::missingParameters}],
+      VerificationTest[
+        pick2Generator[needSomethingForPicking[0], 0, minSomething -> 2],
+        picked[{needSomethingForPicking[0], 0, <|minSomething -> 2, maxSomething -> Infinity, pickNumber -> 2|>}]],
 
-      testUnevaluated[multipliedHalf[] @ halfInteger[3], multipliedHalf::invalidPropertyArgumentCount],
-      testUnevaluated[multipliedHalf[1, 2, 3] @ halfInteger[3], multipliedHalf::invalidPropertyArgumentCount],
-      testUnevaluated[multipliedHalf @ halfInteger[3], multipliedHalf::invalidPropertyArgumentCount],
-      testUnevaluated[multipliedHalf[halfInteger[3], 4, 5], multipliedHalf::invalidPropertyArgumentCount],
-      testUnevaluated[description[1] @ halfInteger[4], description::invalidPropertyArgumentCount],
-      testUnevaluated[description[halfInteger[3], 3], description::invalidPropertyArgumentCount],
+      testUnevaluated[pick2Generator[minXorMax[0], 0], {pick2Generator::incompatibleSystem}],
+      testUnevaluated[pick2Generator[minXorMax[0], 0, pickNumber -> 2], {pick2Generator::incompatibleSystem}],
+      testUnevaluated[identityGenerator[minXorMax[0], 0], {identityGenerator::missingParameters}],
+      VerificationTest[identityGenerator[minXorMax[0], 0, minSomething -> 2],
+                       {minXorMax[0], 0, <|minSomething -> 2, maxSomething -> Infinity|>}],
+      testUnevaluated[identityGenerator[minXorMax[0], 0, minSomething -> 2, maxSomething -> 3],
+                      {identityGenerator::incompatibleParameters}],
 
-      testUnevaluated[multipliedHalf[4, 4, 5][], multipliedHalf::invalidPropertyOperatorArgument],
-      testUnevaluated[multipliedHalf[4, 4, 5][halfInteger[4], 2, 3], multipliedHalf::invalidPropertyOperatorArgument],
-      testUnevaluated[description[][], description::invalidPropertyOperatorArgument],
+      (* Operator form *)
+      testUnevaluated[identityGenerator[echoSystem[0]] @ "test", {identityGenerator::argNotInit}],
+      testUnevaluated[identityGenerator[echoSystem[0], maxSomething -> 2] @ "test", {identityGenerator::argNotInit}],
+      VerificationTest[
+        identityGenerator[echoSystem[0]] @ 0, {echoSystem[0], 0, <|maxSomething -> Infinity, pickNumber -> None|>}],
+      testUnevaluated[identityGenerator[echoSystem[0]][], {identityGenerator::argx}],
+      testUnevaluated[identityGenerator[echoSystem[0]][0, 1], {identityGenerator::argx}],
+      VerificationTest[identityGenerator[echoSystem[0], maxSomething -> 2] @ 0,
+                       {echoSystem[0], 0, <|maxSomething -> 2, pickNumber -> None|>}],
+      VerificationTest[identityGenerator[echoSystem[0], {maxSomething -> 2}] @ 0,
+                       {echoSystem[0], 0, <|maxSomething -> 2, pickNumber -> None|>}],
+      VerificationTest[identityGenerator[echoSystem[0], <|maxSomething -> 2|>] @ 0,
+                       {echoSystem[0], 0, <|maxSomething -> 2, pickNumber -> None|>}],
+      VerificationTest[identityGenerator[echoSystem[0], maxSomething -> 2, pickNumber -> 2] @ 0,
+                       {echoSystem[0], 0, <|maxSomething -> 2, pickNumber -> 2|>}],
+      VerificationTest[
+        identityGenerator[listInit[0], {maxSomething -> 2}] @ 0,
+        {listInit[0], {maxSomething -> 2}, <|minSomething -> 0, maxSomething -> Infinity, pickNumber -> None|>}[0]],
+      VerificationTest[
+        identityGenerator[listInit[0], {maxSomething -> 2}, minSomething -> 1] @ {0},
+        {listInit[0], {maxSomething -> 2}, <|minSomething -> 1, maxSomething -> Infinity, pickNumber -> None|>}[{0}]],
+      VerificationTest[identityGenerator[listInit[0], minSomething -> 1, {maxSomething -> 2}] @ {0},
+                       {listInit[0], {0}, <|minSomething -> 1, maxSomething -> 2, pickNumber -> None|>}],
 
-      testUnevaluated[multipliedHalf[4] @ cookie, multipliedHalf::unknownObject],
-      testUnevaluated[multipliedHalf[4, 4, 5] @ cookie, multipliedHalf::unknownObject],
-      testUnevaluated[description[] @ cookie, description::unknownObject],
-      testUnevaluated[multipliedHalf[5] @ expression[3], multipliedHalf::noPropertyPath],
-      testUnevaluated[multipliedHalf[5] @ evenInteger[3], multipliedHalf::notEven],
-      testUnevaluated[multipliedHalf[evenInteger[3], 4], multipliedHalf::notEven],
-      testUnevaluated[multipliedHalf[x] @ halfInteger[3], multipliedHalf::nonIntegerFactor],
-      testUnevaluated[multipliedHalf @ cookie, {}], (* should not throw a message because it might be an operator *)
-      testUnevaluated[description @ cookie, {}]
+      (* Existing generators *)
+      VerificationTest[
+        GenerateMultihistory[realSystem[0], 0],
+        {realSystem[0], 0, <|MaxDestroyerEvents -> Infinity, MaxEvents -> Infinity, MaxGeneration -> Infinity|>}],
+      VerificationTest[
+        GenerateSingleHistory[realSystem[0], 0],
+        {realSystem[0], 0, <|MaxDestroyerEvents -> 1, MaxEvents -> Infinity, MaxGeneration -> Infinity|>}],
+
+      (* Introspection *)
+      VerificationTest[
+        SubsetQ[$SetReplaceSystems, {echoSystem, needSomethingForPicking, minXorMax, listInit, realSystem}]],
+      VerificationTest[SubsetQ[$SetReplaceGenerators, {identityGenerator, pick2Generator}]],
+      VerificationTest[SetReplaceSystemParameters[listInit], {minSomething, maxSomething, pickNumber}]
     }
   |>
 |>
