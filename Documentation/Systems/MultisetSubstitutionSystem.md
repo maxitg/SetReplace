@@ -21,7 +21,7 @@ For example, to make a system that adds pairs of numbers:
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}],
-                         {"MaxDestroyerEvents" -> 1, "MaxEventInputs" -> 2},
+                         "MaxDestroyerEvents" -> 1,
                          None,
                          EventOrderingFunctions[MultisetSubstitutionSystem],
                          {}] @ {1, 2, 3, 4}

@@ -33,7 +33,10 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
     expressionDestroyerEventCounts, destroyerChoices, instantiationCounts, instantiations},
   Module[{rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, maxEvents, init, terminationReason},
     rules = parseRules[rawRules];
+    ruleInputCountRanges = inputCountRange /@ rules;
     {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs} = Values @ rawEventSelection;
+    minEventInputs = Max[minEventInputs, Min[ruleInputCountRanges[[All, 1]]]];
+    maxEventInputs = Min[maxEventInputs, Max[ruleInputCountRanges[[All, 2]]]];
     parseTokenDeduplication[rawTokenDeduplication]; (* Token deduplication is not implemented at the moment *)
     parseEventOrdering[rawEventOrdering];           (* Event ordering is not implemented at the moment *)
     {maxEvents} = Values @ rawStoppingCondition;
@@ -95,6 +98,7 @@ evaluateSingleEvent[
 (* Matching *)
 
 findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEventInputs_] := ModuleScope[
+  If[minEventInputs === Infinity || minEventInputs > maxEventInputs, Throw["Complete", $$terminationReason]];
   eventInputsCountRange = {minEventInputs, Min[maxEventInputs, expressions["Length"]]};
   subsetCount = With[{n = expressions["Length"], a = eventInputsCountRange[[1]], b = eventInputsCountRange[[2]]},
     (* Sum[Binomial[n, k], {k, a, b}] *)
@@ -235,6 +239,85 @@ parseRules[rawRules : {$singleRulePattern...}] := rawRules;
 declareMessage[General::invalidMultisetRules, "Rules `rules` must be a Rule, a RuleDelayed or a List of them."];
 parseRules[rawRules_] := throw[Failure["invalidMultisetRules", <|"rules" -> rawRules|>]];
 parseRules[rawRules___] /; !CheckArguments[MultisetSubstitutionSystem[rawRules], 1] := throw[Failure[None, <||>]];
+
+inputCountRange[(input_ :> _) | (input_ -> _)] := inputCountRange[input];
+inputCountRange[Verbatim[HoldPattern][input_List]] :=
+  Total[Append[ReleaseHold @ Map[sequencePatternLengthRange, Hold[input], {2}], {0, 0}]];
+inputCountRange[input_List] := inputCountRange[HoldPattern[input]];
+inputCountRange[Verbatim[Alternatives][patterns__]] := MinMax[inputCountRange /@ {patterns}];
+inputCountRange[(Verbatim[Condition] | Verbatim[PatternTest])[input_, _]] := inputCountRange[input];
+inputCountRange[Verbatim[Pattern][_, obj_]] := inputCountRange[obj];
+inputCountRange[Verbatim[Except][_, p_]] := inputCountRange[p];
+inputCountRange[Verbatim[Verbatim][p_List]] := ConstantArray[Length[p], 2];
+inputCountRange[_] := {0, Infinity};
+
+(* We need to hold the pattern from now on because sequencePatternLengthRange may be called from inside HoldPattern. *)
+
+Attributes[sequencePatternLengthRange] := {HoldFirst};
+
+(* Here we enumerate all possible WL pattern constructs from https://reference.wolfram.com/language/guide/Patterns.html.
+   If a pattern construct has incorrect syntax, we return {Infinity, 0}, which means nothing can be matched. *)
+
+sequencePatternLengthRange[Verbatim[Pattern][_, obj_]] := sequencePatternLengthRange[obj];
+sequencePatternLengthRange[Verbatim[Pattern][___]] := {Infinity, 0};
+
+sequencePatternLengthRange[_Blank] := {1, 1};
+sequencePatternLengthRange[_BlankSequence] := {1, Infinity};
+sequencePatternLengthRange[_BlankNullSequence] := {0, Infinity};
+sequencePatternLengthRange[Verbatim[Alternatives][p__]] :=
+  MinMax[ReleaseHold @ Map[sequencePatternLengthRange, Hold[{p}], {2}]];
+sequencePatternLengthRange[Verbatim[Alternatives][]] := {Infinity, 0}; (* this does not match to anything *)
+
+zeroPreferenceProduct[0, _] := 0;
+zeroPreferenceProduct[_, 0] := 0;
+zeroPreferenceProduct[a_, b_] := a * b;
+zeroPreferenceProduct[{a_, b_}, {c_, d_}] := {zeroPreferenceProduct[a, c], zeroPreferenceProduct[b, d]};
+
+sequencePatternLengthRange[Verbatim[Repeated][p_]] := {Min @ sequencePatternLengthRange[p], Infinity};
+sequencePatternLengthRange[Verbatim[RepeatedNull][_]] := {0, Infinity};
+sequencePatternLengthRange[Verbatim[Repeated][p_, max_]] :=
+  zeroPreferenceProduct[{1, max}, sequencePatternLengthRange[p]];
+sequencePatternLengthRange[Verbatim[RepeatedNull][p_, max_]] :=
+  {0, zeroPreferenceProduct[max, Max @ sequencePatternLengthRange[p]]};
+sequencePatternLengthRange[(Verbatim[Repeated] | Verbatim[RepeatedNull])[p_, {min_, max_}]] :=
+  zeroPreferenceProduct[{min, max}, sequencePatternLengthRange[p]];
+sequencePatternLengthRange[(Verbatim[Repeated] | Verbatim[RepeatedNull])[p_, {n_}]] :=
+  zeroPreferenceProduct[{n, n}, sequencePatternLengthRange[p]];
+sequencePatternLengthRange[Verbatim[Repeated][___]] := {Infinity, 0};
+sequencePatternLengthRange[Verbatim[RepeatedNull][___]] := {Infinity, 0};
+
+(* Variable-length sequences are not allowed as a second argument to Except. *)
+sequencePatternLengthRange[_Except] := {1, 1};
+
+sequencePatternLengthRange[Verbatim[Longest][p_]] := sequencePatternLengthRange[p];
+sequencePatternLengthRange[Verbatim[Longest][___]] := {Infinity, 0};
+sequencePatternLengthRange[Verbatim[Shortest][p_]] := sequencePatternLengthRange[p];
+sequencePatternLengthRange[Verbatim[Shortest][___]] := {Infinity, 0};
+
+sequencePatternLengthRange[_OptionsPattern] := {0, Infinity};
+
+sequencePatternLengthRange[(Verbatim[PatternSequence] | Verbatim[OrderlessPatternSequence])[ps___]] :=
+  Total[Append[ReleaseHold @ Map[sequencePatternLengthRange, Hold[{ps}], {2}], {0, 0}]];
+
+sequencePatternLengthRange[_Verbatim] := {1, 1};
+
+sequencePatternLengthRange[Verbatim[HoldPattern][p_]] := sequencePatternLengthRange[p];
+sequencePatternLengthRange[Verbatim[HoldPattern][___]] := {Infinity, 0};
+
+sequencePatternLengthRange[_KeyValuePattern] := {1, 1};
+
+sequencePatternLengthRange[Verbatim[Condition][p_, _]] := sequencePatternLengthRange[p];
+sequencePatternLengthRange[Verbatim[Condition][___]] := {Infinity, 0};
+
+sequencePatternLengthRange[Verbatim[PatternTest][p_, _]] := sequencePatternLengthRange[p];
+sequencePatternLengthRange[Verbatim[PatternTest][___]] := {Infinity, 0};
+
+sequencePatternLengthRange[Verbatim[Optional][p_, _]] := {0, Max @ sequencePatternLengthRange[p]};
+sequencePatternLengthRange[Verbatim[Optional][___]] := {Infinity, 0};
+
+(* Since we have enumerated all pattern constructs above, this case does not correspond to a pattern.
+   However, the completeness of checks above needs to be checked for every new WL version. *)
+sequencePatternLengthRange[_] := If[$VersionNumber <= 12.3, {1, 1}, {0, Infinity}];
 
 parseTokenDeduplication[None] := None;
 declareMessage[General::multisetTokenDeduplicationNotImplemented,

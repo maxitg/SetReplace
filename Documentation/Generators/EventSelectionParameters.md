@@ -44,7 +44,7 @@ another event is created instead:
 ```wl
 In[] := #["ExpressionsEventsGraph"] & @ SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
   GenerateMultihistory[MultisetSubstitutionSystem[{a__} /; Total[{a}] == 5 :> {Total[{a}] - 1, Total[{a}] + 1}],
-                       {"MaxGeneration" -> 1},
+                       "MaxGeneration" -> 1,
                        None,
                        EventOrderingFunctions[MultisetSubstitutionSystem],
                        "MaxEvents" -> 3] @ {1, 2, 3}
@@ -61,7 +61,7 @@ parameters) does not have a corresponding termination reason.
 ```wl
 In[] := #[[2, "TerminationReason"]] & @
   GenerateMultihistory[MultisetSubstitutionSystem[{a__} /; Total[{a}] == 5 :> {Total[{a}] - 1, Total[{a}] + 1}],
-                       {"MaxGeneration" -> 1},
+                       "MaxGeneration" -> 1,
                        None,
                        EventOrderingFunctions[MultisetSubstitutionSystem],
                        "MaxEvents" -> 3] @ {1, 2, 3}
@@ -92,7 +92,7 @@ multihistory (similar to `GenerateFullMultihistory`) subject to other selection 
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
-                         {"MaxDestroyerEvents" -> Infinity, "MaxGeneration" -> 1, "MaxEventInputs" -> 2},
+                         {"MaxDestroyerEvents" -> Infinity, "MaxGeneration" -> 1},
                          None,
                          EventOrderingFunctions[MultisetSubstitutionSystem],
                          {}] @ {1, 2, 3}
@@ -106,7 +106,7 @@ If set to a finite number, it will generate a partial multihistory:
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
-                         {"MaxDestroyerEvents" -> 5, "MaxEventInputs" -> 2},
+                         "MaxDestroyerEvents" -> 5,
                          None,
                          EventOrderingFunctions[MultisetSubstitutionSystem],
                          {}] @ {1, 2, 3}
