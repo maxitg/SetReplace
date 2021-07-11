@@ -92,7 +92,7 @@ initUsage = "* init$ is the initial state, the format of which depends on the sy
 parametersUsage = "* parameters$ is either a Sequence, a List or an Association of key-value rules. A list of " <>
                   "parameters can be obtained with SetReplaceSystemParameters[system$].";
 
-declareSystemGenerator[publicSymbol_, packageScopeSymbol_, parameterValues_, property_ : Identity, usage_] := (
+declareSystemGenerator[publicSymbol_, packageScopeSymbol_, parameterValues_, property_, usage_] := (
   $generatorPackageScopeSymbols[publicSymbol] = packageScopeSymbol;
   $generatorParameters[publicSymbol] = parameterValues;
   $generatorProperties[publicSymbol] = property;
@@ -152,9 +152,9 @@ MultisetSubstitutionSystem.
 ";
 
 declareMessage[
-  General::unknownSystemParameters, "Parameters `parameters` are implemented by `system` but is not declared."];
+  General::unknownSystemParameters, "Parameters `parameters` are implemented by `system` but are not declared."];
 declareMessage[
-  General::unknownGeneratorParameters, "Parameters `parameters` are set by `generator` but is not declared."];
+  General::unknownGeneratorParameters, "Parameters `parameters` are set by `generator` but are not declared."];
 
 initializeSystemGenerators[] := (
   $SetReplaceSystems = Sort @ Keys @ $systemImplementations;
