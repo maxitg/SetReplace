@@ -1,8 +1,9 @@
 # GenerateMultihistory
 
-**`GenerateMultihistory`** is the most configurable multihistory generator. With no parameters, it attempts to generate
-all possible histories starting from the initial state. However, it can be configured to generate partial multihistories
-and even single histories, although, [`GenerateSingleHistory`](GenerateSingleHistory.md) is more convenient for that.
+**`GenerateMultihistory`** is the most configurable multihistory generator. With no parameters specified, it attempts to
+generate all possible histories starting from the initial state. However, it can be configured to generate partial
+multihistories and even single histories, although [`GenerateSingleHistory`](GenerateSingleHistory.md) is more
+convenient for that.
 
 For example, for a [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md):
 

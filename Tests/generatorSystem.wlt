@@ -10,7 +10,7 @@
 
       declareSystemParameter[maxEventSize, Infinity, _ ? (GreaterEqualThan[0]), "is a max parameter for a test value."];
       declareSystemParameter[minEventSize, 0, _ ? (GreaterEqualThan[0]), "is a min parameter for a test value."];
-      declareSystemParameter[eventType, None, None | 0 | 1 | 2, "is an optional choice between 0, 1, and 2."];
+      declareSystemParameter[eventType, None, None | 0 | 1 | 2, "is a choice parameter between None, 0, 1, and 2."];
 
       declareSystem[genericSystem, List, _Integer, {maxEventSize, eventType}, True];
       declareSystem[systemWithParameterDependencies,
@@ -57,6 +57,7 @@
 
       (* Two args *)
       testUnevaluated[genericGenerator[0, 0], {genericGenerator::unknownSystem}],
+      testUnevaluated[genericGenerator[genericSystem, 0], {genericGenerator::noRules}],
       testUnevaluated[genericGenerator[genericSystem[], "test"], {}], (* parameters are not yet parsed at this stage *)
       VerificationTest[
         genericGenerator[genericSystem[], 0], {genericSystem[], 0, <|maxEventSize -> Infinity, eventType -> None|>}],

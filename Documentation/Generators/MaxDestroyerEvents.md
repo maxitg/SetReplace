@@ -1,8 +1,8 @@
 # MaxDestroyerEvents
 
-`MaxDestroyerEvents` is an event-selection parameter that controls the number of (inconsistent) events that are allowed
-to take the same token as an input. [`GenerateSingleHistory`](GenerateSingleHistory.md) limits the evaluation to a
-single history by setting `MaxDestroyerEvents` to one.
+`MaxDestroyerEvents` is an event-selection parameter that controls the number of inconsistent events allowed to take the
+same token as an input. [`GenerateSingleHistory`](GenerateSingleHistory.md) limits the evaluation to a single history by
+setting `MaxDestroyerEvents` to one.
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
@@ -13,7 +13,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 <img src="/Documentation/Images/MaxDestroyerEvents1.png" width="322.2">
 
 If unset (which defaults to [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html)), it will generate a
-full multihistory subject to other selection and stopping parameters:
+full multihistory object subject to other selection and stopping parameters:
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
@@ -34,4 +34,4 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MaxDestroyerEvents5.png" width="478.2">
 
-Note that in this case, like in the case of a single history, the result depends on the event order.
+Note that results generally depend on the event order in this case, similar to single histories.

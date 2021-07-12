@@ -16,7 +16,7 @@ PackageScope["initializeSystemGenerators"]
 $systemImplementations = <||>;       (* system -> implementationFunction *)
 $systemInitPatterns = <||>;          (* system -> pattern *)
 $systemParameters = <||>;            (* system -> {parameter, ...} *)
-$systemParameterDependencies = <||>; (* system -> logical expressions on parameter keys *)
+$systemParameterDependencies = <||>; (* system -> logical expression on parameter keys *)
 
 (* Every system implementation needs to call this function in order to be usable through GenerateMultihistory and other
    generators. *)
@@ -24,22 +24,21 @@ $systemParameterDependencies = <||>; (* system -> logical expressions on paramet
 (* The third argument is the pattern that the init should satisfy. *)
 
 (* Parameters in the fourth argument should be declared with declareSystemParameter. Their values are guaranteed to
-   match the pattern from the declaration. Further, the logical expression in the last argument will check if all
+   match the pattern from that declaration. Further, the logical expression in the last argument will check if all
    required parameters are specified. Some parameters may require others to be specified, e.g.,
-   Implies[MaxDestroyerEvents || MaxEvents, EventOrder] means that if MaxDestroyerEvents or MaxEvents is specified, \
-   EventOrder must be specified as well. The implementation function can expect all specified parameters present \
-   (substituted with defaults if missing) and all values satisfying the constraints (substituted with defaults if \
+   Implies[MaxDestroyerEvents || MaxEvents, EventOrder] means that if MaxDestroyerEvents or MaxEvents is specified,
+   EventOrder must be specified as well. The implementation function can expect all specified parameters present
+   (substituted with defaults if missing) and all values will satisfy the constraints (substituted with defaults if
    missing). *)
 
-(* For example,
-   declareSystem[MultisetSubstitutionSystem,
+(* declareSystem[MultisetSubstitutionSystem,
                  generateMultisetSubstitutionSystem,
                  _List,
                  {MaxGeneration, MinEventInputs, MaxDestroyerEvents, MaxEvents, EventOrder},
                  Implies[MaxDestroyerEvents || MaxEvents, EventOrder]] *)
 
 (* The implementation function is then called as
-   generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rules], init, parameters] *)
+   generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rules], init, <|MaxGeneration -> value, ...|>] *)
 
 declareSystem[systemType_,
               implementationFunction_,
@@ -53,7 +52,7 @@ declareSystem[systemType_,
 );
 
 declareMessage[General::unsatisfiableParameterDependencies,
-               "Internal error. Parameter constraints `constraints` for `system` are not satisfyable."];
+               "Internal error. Parameter constraints `constraints` for `system` are not satisfiable."];
 declareSystem[systemType_, _, _, _List, dependencies_] :=
   message[SetReplace,
           Failure["unsatisfiableParameterDependencies", <|"constraints" -> dependencies, "system" -> systemType|>]];
@@ -69,17 +68,15 @@ $generatorPackageScopeSymbols = <||>; (* generator (public symbol) -> package-sc
 $generatorParameters = <||>;          (* generator -> <|parameter -> value, ...|> *)
 $generatorProperties = <||>;          (* generator -> property *)
 
-(* Generators are functions that are called to produce EventSet objects. They take the form
+(* Generators are functions that are called to produce Multihistory objects. They take the form
    symbol[system, init, params]. They also define a fixed set of parameter values. These parameter values cannot be
    changed in params. Generators can also compute a property at the end of the evaluation. *)
 
-(* For example,
-
-   declareSystemGenerator[EvaluateSingleHistory,
+(* declareSystemGenerator[EvaluateSingleHistory,
                           evaluateSingleHistory,
                           <|MaxDestroyerEvents -> 1|>,
                           FinalState,
-                          "yields a single history object."]
+                          "yields a single-history object."]
 
    Note that the constraint in the last argument of declareSystemGenerator still needs to be specified, which means
    EventOrder is now a required parameter. *)
@@ -87,10 +84,10 @@ $generatorProperties = <||>;          (* generator -> property *)
 (* evaluateSingleHistory is a PackageScope symbol that will throw exceptions instead of returning unevaluated.
    It cannot be used in operator form. *)
 
-systemUsage = "* A list of all supported systems can be obtained with $SetReplaceSystems.";
-initUsage = "* init$ is the initial state, the format of which depends on the system$.";
-parametersUsage = "* parameters$ is either a Sequence, a List or an Association of key-value rules. A list of " <>
-                  "parameters can be obtained with SetReplaceSystemParameters[system$].";
+$systemUsage = "* A list of all supported systems can be obtained with $SetReplaceSystems.";
+$initUsage = "* init$ is the initial state, the format of which depends on the system$.";
+$parametersUsage = "* parameters$ is either a Sequence, a List or an Association of key-value rules. A list of " <>
+                   "parameter keys can be obtained with SetReplaceSystemParameters[system$].";
 
 declareSystemGenerator[publicSymbol_, packageScopeSymbol_, parameterValues_, property_, usage_] := (
   $generatorPackageScopeSymbols[publicSymbol] = packageScopeSymbol;
@@ -98,10 +95,7 @@ declareSystemGenerator[publicSymbol_, packageScopeSymbol_, parameterValues_, pro
   $generatorProperties[publicSymbol] = property;
   SyntaxInformation[publicSymbol] = {"ArgumentsPattern" -> {system_, init_., parameters___}};
   SetUsage @ Evaluate @ StringRiffle[
-    {ToString[publicSymbol] <> "[system$, init$, parameters$] " <> usage,
-     systemUsage,
-     initUsage,
-     parametersUsage},
+    {ToString[publicSymbol] <> "[system$, init$, parameters$] " <> usage, $systemUsage, $initUsage, $parametersUsage},
     "\n"];
 );
 
@@ -115,9 +109,9 @@ declareSystemGenerator[args___] :=
 $parameterDefaults = <||>;
 $parameterPatterns = <||>;
 
-(* Parameters are like protocols. Systems can declare that they implement them. Some generators require some parameters
-   to be supported and define values for them. To declare a new parameter, one needs to specify a default value (which
-   usually disables whatever the parameter is doing) and a pattern the parameter value should match. *)
+(* Both systems and generators use parameters. Systems declare parameters they implement. Generators set fixed values
+   for a subset of parameters. To declare a new parameter, one needs to specify a default value (which usually disables
+   whatever the parameter is doing) and a pattern the parameter value should match. *)
 
 (* declareSystemParameter[MaxGeneration,
                           Infinity,
@@ -138,11 +132,8 @@ declareSystemParameter[args___] :=
 
 (* Initialization *)
 
-(* It would be best to only show autocompletions for specific-system keys, but it does not seem to be possible because
-   dependent argument completions are only supported in WL if the main argument is a string. *)
-
 SetUsage @ "
-$SetReplaceSystems gives the list of all computational systems that can be used with GenerateEventSet and related \
+$SetReplaceSystems gives the list of all computational systems that can be used with GenerateMultihistory and related \
 functions.
 ";
 
@@ -152,9 +143,8 @@ MultisetSubstitutionSystem.
 ";
 
 declareMessage[
-  General::unknownSystemParameters, "Parameters `parameters` are implemented by `system` but are not declared."];
-declareMessage[
-  General::unknownGeneratorParameters, "Parameters `parameters` are set by `generator` but are not declared."];
+  General::unknownSystemParameters, "Parameters `parameters` are implemented by `system` but not declared."];
+declareMessage[General::unknownGeneratorParameters, "Parameters `parameters` are set by `generator` but not declared."];
 
 initializeSystemGenerators[] := (
   $SetReplaceSystems = Sort @ Keys @ $systemImplementations;
@@ -175,6 +165,7 @@ initializeSystemGenerators[] := (
 
 declareMessage[General::argNotInit, "The init `arg` in `expr` should match `pattern`."];
 declareMessage[General::unknownSystem, "`system` is not a recognized SetReplace system."];
+declareMessage[General::noRules, "Rules need to be specified as `system`[\[Ellipsis]] in `expr`."];
 
 defineGeneratorImplementation[generator_] := With[{packageScopeGenerator = $generatorPackageScopeSymbols[generator]},
   expr : generator[system_, init_, parameters___] /;
@@ -195,13 +186,18 @@ defineGeneratorImplementation[generator_] := With[{packageScopeGenerator = $gene
   expr : generator[] /; CheckArguments[expr, {1, Infinity}] := $Failed;
 
   packageScopeGenerator[system_, init_, parameters___] /;
-      MatchQ[init, Lookup[$systemInitPatterns, Head[system], _]] := ModuleScope[
-    implementation = $systemImplementations[Head[system]];
-    If[MissingQ[implementation], throw[Failure["unknownSystem", <|"system" -> system|>]]];
+      MatchQ[init, Lookup[$systemInitPatterns, Head[system], _]] := (
+    If[MissingQ[$systemImplementations[Head[system]]],
+      If[MissingQ[$systemImplementations[system]],
+        throw[Failure["unknownSystem", <|"system" -> system|>]]
+      ,
+        throw[Failure["noRules", <|"system" -> system|>]]
+      ];
+    ];
     checkSystemGeneratorCompatibility[Head[system], generator];
     $generatorProperties[generator] @
       $systemImplementations[Head[system]][system, init, parseParameters[generator, Head[system]][parameters]]
-  ];
+  );
   packageScopeGenerator[___] := throw[Failure[None, <||>]];
 
   implementationOperator[generator][system_][init_] /; MatchQ[init, $systemInitPatterns[Head[system]]] :=
@@ -259,33 +255,34 @@ checkParameterValueMatchesPattern[key_, value_] /; !MatchQ[value, $parameterPatt
   throw[Failure[
     "invalidParameter", <|"parameter" -> key, "value" -> value, "pattern" -> $parameterPatterns[key]|>]];
 
-simplifyParameterCondition[generator_, system_, specifiedKeys_] :=
-  FullSimplify[
-    $systemParameterDependencies[system] /.
-      Alternatives @@ Join[specifiedKeys, Keys @ $generatorParameters[generator]] -> True];
-compatibleParametersQ[generator_, system_, specifiedKeys_] :=
-  FullSimplify[
-    $systemParameterDependencies[system] /.
-      Alternatives @@ Join[specifiedKeys, Keys @ $generatorParameters[generator]] -> True /.
-        Alternatives @@ $systemParameters[system] -> False]
-compatibleParametersQ[___] := False
-
 declareMessage[General::incompatibleParameters,
                "Parameters in `expr` are incompatible. Specified parameters should satisfy `condition`."];
 checkParameterCompleteness[generator_, system_][keys_] /;
     simplifyParameterCondition[generator, system, keys] === False :=
   throw[Failure["incompatibleParameters", <|"condition" -> $systemParameterDependencies[system]|>]];
 
+simplifyParameterCondition[generator_, system_, specifiedKeys_] :=
+  FullSimplify[
+    $systemParameterDependencies[system] /.
+      Alternatives @@ Join[specifiedKeys, Keys @ $generatorParameters[generator]] -> True];
+
 declareMessage[General::missingParameters, "`missingParameters` should be explicitly specified in `expr`."];
 checkParameterCompleteness[generator_, system_][keys_] /; !compatibleParametersQ[generator, system, keys] :=
   throw[Failure["missingParameters", <|"missingParameters" -> simplifyParameterCondition[generator, system, keys]|>]];
+
+compatibleParametersQ[generator_, system_, specifiedKeys_] :=
+  FullSimplify[
+    $systemParameterDependencies[system] /.
+      Alternatives @@ Join[specifiedKeys, Keys @ $generatorParameters[generator]] -> True /.
+        Alternatives @@ $systemParameters[system] -> False];
+compatibleParametersQ[___] := False;
 
 addMissingParameters[generator_, system_][parameters_] :=
   Join[KeyTake[$parameterDefaults, $systemParameters[system]], parameters, $generatorParameters[generator]];
 
 (* Introspection functions *)
 
-SetUsage @ "SetReplaceSystemParameters[system$] yields the list of parameters supported by system$.";
+SetUsage @ "SetReplaceSystemParameters[system$] yields the list of parameters supported by the system$.";
 
 SyntaxInformation[SetReplaceSystemParameters] = {"ArgumentsPattern" -> {system_}};
 

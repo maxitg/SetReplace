@@ -8,15 +8,15 @@ In *SetReplace*, we split the states of [computational systems](/Documentation/S
 we call tokens. Rewrites (which we call events) replace some of these tokens with others. *SetReplace* can evaluate
 multiple branches of nondeterministic systems simultaneously. That is done by applying different events to the same
 tokens and keeping events and tokens instead of states in [`Multihistory`](/Documentation/Types/Multihistory/README.md)
-objects. We can reconstruct the states from that information afterwards.
+objects. We can reconstruct the states from that information afterward.
 
 There are parameters that control how this evaluation is done. Some of them control which events to select, which is
-essential in cases where the system does not terminate. Other parameters might control how to deduplicate identical
-tokens, etc. Different generators correspond to different settings of parameters. Additional parameters can also be
-specified similar to options.
+essential when the system does not terminate. Other parameters might control how to deduplicate identical tokens, etc.
+Different generators correspond to different settings of parameters. Additional parameters can be specified with a
+syntax similar to options.
 
 For example, [`GenerateSingleHistory`](GenerateSingleHistory.md) corresponds to
-[`MaxDestroyerEvents -> 1`](MaxDestroyerEvents.md) and thus does produce nondeterministic branching:
+[`MaxDestroyerEvents -> 1`](MaxDestroyerEvents.md) and thus does not produce nondeterministic branching:
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
@@ -26,7 +26,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemExample.png" width="444.6">
 
-We can also use a more generate [`GenerateMultihistory`](GenerateMultihistory.md) and specify
+We can also use a more general [`GenerateMultihistory`](GenerateMultihistory.md) and specify
 [`MaxDestroyerEvents`](MaxDestroyerEvents.md) manually.
 
 ```wl
@@ -40,8 +40,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 The same generators support multiple systems. In addition to
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md), other examples include
-`HypergraphSubstitutionSystem`, `StringSubstitutionSystem`, etc. Many of these systems have shared evaluation
-parameters.
+`HypergraphSubstitutionSystem`, `StringSubstitutionSystem`, etc. Many of these systems have shared parameters.
 
 All generators take the form
 
@@ -55,7 +54,7 @@ or, in operator form,
 Generator[System[rules], parameters...] @ init
 ```
 
-Note, however, that the first form takes precedence and, if parameters can be interpreted as an init, the second form
+Note, however, that the first form takes precedence, and if parameters can be interpreted as an init, the second form
 may not evaluate as expected.
 
 `parameters` can be specified either as a [`Sequence`](https://reference.wolfram.com/language/ref/Sequence.html) of
@@ -78,4 +77,4 @@ in such [`Rule`](https://reference.wolfram.com/language/ref/Rule.html)s depend o
   * [`MinEventInputs`](MinEventInputs.md)
   * [`MaxEventInputs`](MaxEventInputs.md)
   * [`MaxEvents`](MaxEvents.md)
-  * [`MaxGeneration`](MaxGeneration.md)
+  * [`MaxGeneration`](MaxGeneration.md) &mdash; controls the depth of the evaluation

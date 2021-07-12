@@ -11,7 +11,7 @@ declareSystemParameter[#, #2, _ ? (GreaterEqualThan[0]), #3] & @@@ {
   {MaxGeneration,
    Infinity,
    "is an event-selection parameter specifying the maximum generation of created tokens.\n" <>
-   "* Tokens in init$ are assumed to have a generation 0.\n" <>
+   "* Tokens in init$ are assumed to have generation 0.\n" <>
    "* A generation of an event and its output tokens is defined as the largest generation of its inputs plus one."},
   {MaxDestroyerEvents,
    Infinity,

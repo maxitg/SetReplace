@@ -1,7 +1,7 @@
 # GenerateSingleHistory
 
 **`GenerateSingleHistory`** generates single histories, which it achieves by setting
-[`MaxDestroyerEvents`](MaxDestroyerEvents.md) to one. Note that for nondeterministic systems the history generated may
+[`MaxDestroyerEvents`](MaxDestroyerEvents.md) to one. Note that for nondeterministic systems, the history generated may
 depend on the event order.
 
 For example, for a [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md):
@@ -21,5 +21,5 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 <img src="/Documentation/Images/GenerateSingleHistoryExample.png" width="478.2">
 
 Note that single histories are not necessarily single-path systems. Multiple rewriting events can be possible starting
-from a given state. However, only one event can take any given token as an input, which ensures that all generated
-events do not conflict with each other (i.e., there are no branchlike-separated events).
+from a given state. However, only one event can take any given token as an input, ensuring that all generated events do
+not conflict with each other (i.e., there are no branchlike-separated events).

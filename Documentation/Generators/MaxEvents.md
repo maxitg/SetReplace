@@ -11,4 +11,4 @@ In[] := #["ExpressionsEventsGraph"] & @
 
 <img src="/Documentation/Images/MaxEventsExample.png" width="478.2">
 
-Compare to [`MaxGeneration`](MaxGeneration.md) which controls the depth of the evaluation instead.
+Compare to [`MaxGeneration`](MaxGeneration.md), which controls the depth of the evaluation instead.
