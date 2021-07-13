@@ -8,5 +8,5 @@ generation of data (such as the data about the evaluation of a
 Multihistory types are named after systems that produce them, e.g., `SetReplaceType[MultisetSubstitutionSystem, 1]`.
 
 * [`Multihistory`](Multihistory/README.md) &mdash; a generic kind of types for computational systems:
-  * [`AtomicStateSystem`](AtomicStateSystem0.md)
+  * [`AtomicStateSystem`](Multihistory/AtomicStateSystem0.md)
   * [`MultisetSubstitutionSystem`](Multihistory/MultisetSubstitutionSystem0.md)
