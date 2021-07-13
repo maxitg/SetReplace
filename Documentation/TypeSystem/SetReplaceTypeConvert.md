@@ -7,7 +7,8 @@
 SetReplaceTypeConvert[newType][object]
 ```
 
-For example, one can convert an [`AtomicStateSystem` multihistory](/Documentation/Types/AtomicStateSystem0.md) to a
+For example, one can convert an
+[`AtomicStateSystem` multihistory](/Documentation/Types/Multihistory/AtomicStateSystem0.md) to a
 [`MultisetSubstitutionSystem` multihistory](/Documentation/Types/Multihistory/MultisetSubstitutionSystem0.md):
 
 <img src="/Documentation/Images/AtomicStateToMultisetMultihistory.png" width="517.8">
