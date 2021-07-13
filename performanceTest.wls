@@ -106,6 +106,7 @@ Check[
     result
   ];
 
+  speedupDelta[0, new_] := Infinity;
   speedupDelta[old_, new_] := (old - new) / old;
 
   $gitRepo = GitOpen[$SetReplaceRoot];
@@ -151,10 +152,13 @@ Check[
 
   differenceString[meanAround_] := With[{
       magnitude = QuantityMagnitude[meanAround, "Percent"]},
-    If[5 * magnitude[[2]] < Abs[magnitude[[1]]], If[magnitude[[1]] > 0, $greenColor, $redColor], $whiteColor] <>
-    FirstCase[
-      MakeBoxes[magnitude, StandardForm],
-      TemplateBox[{value_, error_}, "Around", ___] :> value <> " \[PlusMinus] " <> error <> " %"] <>
+    (* Due to a weed in WL, MeanAround does not return Around if all values in the list are the same. *)
+    magnitudeMean = If[Head[magnitude] === Around, magnitude["Value"], magnitude];
+    magnitudeUncertainty = If[Head[magnitude] === Around, magnitude["Uncertainty"], 0];
+    If[5 * magnitudeUncertainty < Abs[magnitudeMean], If[magnitudeMean > 0, $greenColor, $redColor], $whiteColor] <>
+    FirstCase[MakeBoxes[magnitude, StandardForm],
+              TemplateBox[{value_, error_}, "Around", ___] :> value <> " \[PlusMinus] " <> error <> " %",
+              ToString[magnitudeMean] <> " \[PlusMinus] 0 %"] <>
     $endColor
   ];
 
