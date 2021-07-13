@@ -18,7 +18,7 @@
 
       (* String <-> Expression *)
 
-      objectType[_String] := "String";
+      objectType[_String] := SetReplaceType["String"];
       objectType[_expression] := "Expression";
 
       declareTypeTranslation[stringToExpression, "String", "Expression"];
@@ -72,6 +72,15 @@
       realDescription[][real_Real] := "I am a real " <> ToString[real] <> ".";
       realDescription[args__][_] := throwInvalidPropertyArgumentCount[0, Length[{args}]];
 
+      (** Versioned types **)
+
+      objectType[versionedObject[1, _]] := SetReplaceType["Versioned", 1];
+      objectType[versionedObject[2, {_}]] := SetReplaceType["Versioned", 2];
+      declareTypeTranslation[
+        versionedObject[2, {#[[2]]}] &, SetReplaceType["Versioned", 1], SetReplaceType["Versioned", 2]];
+      declareTypeTranslation[#[[2, 1]] &, SetReplaceType["Versioned", 2], "String"];
+      declareTypeTranslation[versionedObject[1, #] &, "String", SetReplaceType["Versioned", 1]];
+
       originalTypes = $SetReplaceTypes;
       originalProperties = $SetReplaceProperties;
 
@@ -89,7 +98,9 @@
          the type system. *)
       VerificationTest[
         $SetReplaceTypes,
-        Sort @ Join[originalTypes, SetReplaceType /@ {"String", "Expression", "HalfInteger", "EvenInteger", "Real"}]],
+        Sort @ Join[originalTypes,
+                    SetReplaceType /@ {"String", "Expression", "HalfInteger", "EvenInteger", "Real"},
+                    SetReplaceType["Versioned", #] & /@ {1, 2}]],
       VerificationTest[$SetReplaceProperties, Sort @ Join[originalProperties, {description, multipliedHalf}]],
 
       VerificationTest[GraphQ @ $SetReplaceTypeGraph],
@@ -157,7 +168,16 @@
       testUnevaluated[multipliedHalf[evenInteger[3], 4], multipliedHalf::notEven],
       testUnevaluated[multipliedHalf[x] @ halfInteger[3], multipliedHalf::nonIntegerFactor],
       testUnevaluated[multipliedHalf @ cookie, {}], (* should not throw a message because it might be an operator *)
-      testUnevaluated[description @ cookie, {}]
+      testUnevaluated[description @ cookie, {}],
+
+      (* Versions *)
+      VerificationTest[
+        SetReplaceObjectType @ SetReplaceTypeConvert["Versioned"] @ "abc", SetReplaceType["Versioned", 2]],
+      VerificationTest[SetReplaceObjectType @ SetReplaceTypeConvert[SetReplaceType["Versioned", 1]] @ "abc",
+                       SetReplaceType["Versioned", 1]],
+      VerificationTest[
+        SetReplaceTypeConvert[SetReplaceType["String"]] @ SetReplaceTypeConvert[SetReplaceType["Versioned", 1]] @ "abc",
+        "abc"]
     }
   |>
 |>
