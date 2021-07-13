@@ -58,14 +58,14 @@ SetReplaceObjectType[object$] returns the type of object$, which can then be use
 SyntaxInformation[SetReplaceObjectType] = {"ArgumentsPattern" -> {object_}};
 
 expr : SetReplaceObjectType[args___] := ModuleScope[
-  result = Catch[objectType[args],
+  result = Catch[SetReplaceType[objectType[args]],
                  _ ? FailureQ,
                  message[SetReplaceObjectType, #, <|"expr" -> HoldForm[expr]|>] &];
   result /; !FailureQ[result]
 ];
 
-(* Object classes (like Multihistory) are expected to define their own objectType[...] implementation. objectType[...]
-   is expected to return SetReplaceType[name, version]. This call is triggered if no other is found. *)
+(* Object classes (like Multihistory) are expected to define their own objectType[...] implementation. This call is
+   triggered if no other is found. *)
 
 declareMessage[General::unknownObject, "The argument `arg` in `expr` is not a known typed object."];
 
