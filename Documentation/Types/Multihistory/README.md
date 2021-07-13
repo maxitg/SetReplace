@@ -1,6 +1,6 @@
 # Multihistory
 
-**`Multihistory`** is a head used for [types](README.md) representing an evaluation history of a
+**`Multihistory`** is a head used for [types](/Documentation/Types/README.md) representing an evaluation history of a
 [computational system](/Documentation/Systems/README.md).
 
 For example, for a [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md),
