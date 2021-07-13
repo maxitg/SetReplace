@@ -27,17 +27,21 @@ SetReplaceType[name$, version$] represents a SetReplace type.
 
 SyntaxInformation[SetReplaceType] = {"ArgumentsPattern" -> {name_, version_.}};
 
-SetReplaceType /: MakeBoxes[expr : SetReplaceType[name_], StandardForm] := With[{nameBoxes = MakeBoxes @ name},
+SetReplaceType /: MakeBoxes[expr : SetReplaceType[name_], form : StandardForm | TraditionalForm] := With[{
+    nameBoxes = MakeBoxes[name, form]},
   InterpretationBox[nameBoxes, expr, Selectable -> False]
 ];
 
-SetReplaceType /: MakeBoxes[expr : SetReplaceType[name_, version_Integer ? (# >= 0 &)], StandardForm] := With[{
-    nameBoxes = MakeBoxes @ name,
+SetReplaceType /: MakeBoxes[
+      expr : SetReplaceType[name_, version_Integer ? (# >= 0 &)], form : StandardForm | TraditionalForm] := With[{
+    nameBoxes = MakeBoxes[name, form],
     versionString = "v" <> ToString @ version},
   With[{boxes = RowBox[{nameBoxes, "\[ThickSpace]", StyleBox[versionString, FontColor -> Gray]}]},
     InterpretationBox[boxes, expr, Selectable -> False]
   ]
 ];
+
+SetReplaceType[type_SetReplaceType] := type;
 
 (* SetReplaceProperty should be public because they are returned by SetReplaceTypeGraph. *)
 
@@ -61,7 +65,7 @@ expr : SetReplaceObjectType[args___] := ModuleScope[
 ];
 
 (* Object classes (like Multihistory) are expected to define their own objectType[...] implementation. objectType[...]
-   must return SetReplaceType[name, version]. This call is triggered if no other is found. *)
+   is expected to return SetReplaceType[name, version]. This call is triggered if no other is found. *)
 
 declareMessage[General::unknownObject, "The argument `arg` in `expr` is not a known typed object."];
 
@@ -216,7 +220,7 @@ SyntaxInformation[SetReplaceMethodImplementation] = {"SetReplaceMethodImplementa
 
 typeGraphVertexLabel[kind_, name_] :=
   If[!freeFromInternalSymbolsQ[name] || kind === SetReplaceMethodImplementation, Placed[#, Tooltip] &, Identity] @
-    If[kind === SetReplaceProperty, ToString[#] <> "[\[Ellipsis]]" &, ToString] @
+    If[kind === SetReplaceProperty, ToString[#] <> "[\[Ellipsis]]" &, Identity] @
       name;
 
 insertImplementationVertex[inputEdge : DirectedEdge[from_, to_]] := ModuleScope[
@@ -229,7 +233,7 @@ initializePublicTypeGraph[] := Module[{extendedGraphEdges},
   extendedGraphEdges = Catenate[insertImplementationVertex /@ EdgeList[$typeGraph]];
   $SetReplaceTypeGraph = Graph[
     DirectedEdge @@@ extendedGraphEdges,
-    VertexLabels -> kind_[name_] :> typeGraphVertexLabel[kind, name],
+    VertexLabels -> kind_[name_] | name : kind_[_, _] :> typeGraphVertexLabel[kind, name],
     VertexStyle -> {_SetReplaceType -> style[$lightTheme][$typeVertexStyle],
                     _SetReplaceProperty -> style[$lightTheme][$propertyVertexStyle],
                     _SetReplaceMethodImplementation -> style[$lightTheme][$methodImplementationVertexStyle]},
