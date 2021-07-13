@@ -21,22 +21,31 @@ PackageScope["throwInvalidPropertyArgumentCount"]
 
 PackageScope["initializeTypeSystem"]
 
-(* SetReplaceType and SetReplaceProperty should be public because they are returned by SetReplaceTypeGraph. *)
-
 SetUsage @ "
-SetReplaceType[type$] represents a SetReplace type$.
+SetReplaceType[name$, version$] represents a SetReplace type.
 ";
 
-SyntaxInformation[SetReplaceType] = {"ArgumentsPattern" -> {type_}};
+SyntaxInformation[SetReplaceType] = {"ArgumentsPattern" -> {name_, version_.}};
+
+SetReplaceType /: MakeBoxes[expr : SetReplaceType[name_], StandardForm] := With[{nameBoxes = MakeBoxes @ name},
+  InterpretationBox[nameBoxes, expr, Selectable -> False]
+];
+
+SetReplaceType /: MakeBoxes[expr : SetReplaceType[name_, version_Integer ? (# >= 0 &)], StandardForm] := With[{
+    nameBoxes = MakeBoxes @ name,
+    versionString = "v" <> ToString @ version},
+  With[{boxes = RowBox[{nameBoxes, "\[ThickSpace]", StyleBox[versionString, FontColor -> Gray]}]},
+    InterpretationBox[boxes, expr, Selectable -> False]
+  ]
+];
+
+(* SetReplaceProperty should be public because they are returned by SetReplaceTypeGraph. *)
 
 SetUsage @ "
 SetReplaceProperty[property$] represents a SetReplace property$.
 ";
 
 SyntaxInformation[SetReplaceProperty] = {"ArgumentsPattern" -> {property_}};
-
-(* Object classes (like Multihistory) are expected to define their own objectType[...] implementation. This one is
-   triggered if no other is found. *)
 
 SetUsage @ "
 SetReplaceObjectType[object$] returns the type of object$, which can then be used in SetReplaceTypeConvert.
@@ -50,6 +59,9 @@ expr : SetReplaceObjectType[args___] := ModuleScope[
                  message[SetReplaceObjectType, #, <|"expr" -> HoldForm[expr]|>] &];
   result /; !FailureQ[result]
 ];
+
+(* Object classes (like Multihistory) are expected to define their own objectType[...] implementation. objectType[...]
+   must return SetReplaceType[name, version]. This call is triggered if no other is found. *)
 
 declareMessage[General::unknownObject, "The argument `arg` in `expr` is not a known typed object."];
 
