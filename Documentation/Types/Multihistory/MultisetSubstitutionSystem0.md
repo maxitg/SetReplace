@@ -1,4 +1,4 @@
-# {MultisetSubstitutionSystem, 0}
+# MultisetSubstitutionSystem Multihistory
 
 [**`MultisetSubstitutionSystem`**](/Documentation/Systems/MultisetSubstitutionSystem.md) [`Multihistory`](README.md)
 object is returned by [generators](/Documentation/Generators/README.md) of the
