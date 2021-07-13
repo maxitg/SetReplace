@@ -155,11 +155,9 @@ Check[
     magnitudeMean = If[Head[magnitude] === Around, magnitude["Value"], magnitude];
     magnitudeUncertainty = If[Head[magnitude] === Around, magnitude["Uncertainty"], 0];
     If[5 * magnitudeUncertainty < Abs[magnitudeMean], If[magnitudeMean > 0, $greenColor, $redColor], $whiteColor] <>
-    Replace[
-      FirstCase[
-        MakeBoxes[magnitude, StandardForm],
-        TemplateBox[{value_, error_}, "Around", ___] :> value <> " \[PlusMinus] " <> error <> " %"],
-      _ ? MissingQ :> ToString[magnitudeMean] <> " \[PlusMinus] 0 %"] <>
+    FirstCase[MakeBoxes[magnitude, StandardForm],
+              TemplateBox[{value_, error_}, "Around", ___] :> value <> " \[PlusMinus] " <> error <> " %",
+              ToString[magnitudeMean] <> " \[PlusMinus] 0 %"] <>
     $endColor
   ];
 
