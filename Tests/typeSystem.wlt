@@ -88,7 +88,8 @@
       (* unknownObject is not here because there are no translations or properties defined for it, so it's invisible to
          the type system. *)
       VerificationTest[
-        $SetReplaceTypes, Sort @ Join[originalTypes, {"String", "Expression", "HalfInteger", "EvenInteger", "Real"}]],
+        $SetReplaceTypes,
+        Sort @ Join[originalTypes, SetReplaceType /@ {"String", "Expression", "HalfInteger", "EvenInteger", "Real"}]],
       VerificationTest[$SetReplaceProperties, Sort @ Join[originalProperties, {description, multipliedHalf}]],
 
       VerificationTest[GraphQ @ $SetReplaceTypeGraph],
@@ -103,9 +104,9 @@
         {}],
 
       (* Type querying *)
-      VerificationTest[SetReplaceObjectType[evenInteger[4]], "EvenInteger"],
-      VerificationTest[SetReplaceObjectType[2.4], "Real"],
-      VerificationTest[SetReplaceObjectType[unknownObject[4]], "Unknown"],
+      VerificationTest[SetReplaceObjectType[evenInteger[4]], SetReplaceType["EvenInteger"]],
+      VerificationTest[SetReplaceObjectType[2.4], SetReplaceType["Real"]],
+      VerificationTest[SetReplaceObjectType[unknownObject[4]], SetReplaceType["Unknown"]],
       testUnevaluated[SetReplaceObjectType[unseenObject[4]], SetReplaceObjectType::unknownObject],
 
       VerificationTest[SetReplaceObjectQ[evenInteger[4]]],
