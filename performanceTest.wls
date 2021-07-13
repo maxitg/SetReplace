@@ -106,6 +106,7 @@ Check[
     result
   ];
 
+  speedupDelta[0, new_] := Infinity;
   speedupDelta[old_, new_] := (old - new) / old;
 
   $gitRepo = GitOpen[$SetReplaceRoot];
