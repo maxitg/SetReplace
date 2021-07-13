@@ -43,7 +43,7 @@ SetReplaceType /: MakeBoxes[
 
 SetReplaceType[type_SetReplaceType] := type;
 
-(* SetReplaceProperty should be public because they are returned by SetReplaceTypeGraph. *)
+(* SetReplaceProperty should be public because it is returned by SetReplaceTypeGraph. *)
 
 SetUsage @ "
 SetReplaceProperty[property$] represents a SetReplace property$.
@@ -205,9 +205,8 @@ $SetReplaceProperties gives the list of all properties defined in SetReplace.
 
 initializeTypeAndPropertyLists[] :=
   {$SetReplaceTypes, $SetReplaceProperties} =
-    Sort @ Select[freeFromInternalSymbolsQ][
-        Replace[SetReplaceProperty[symbol_] :> symbol] /@ VertexList[$typeGraph, #]] & /@
-      {_SetReplaceType, _SetReplaceProperty};
+    Sort @ Select[freeFromInternalSymbolsQ][#2 /@ VertexList[$typeGraph, #]] & @@@
+      {{_SetReplaceType, Identity}, {_SetReplaceProperty, First}};
 
 (* This creates an association pointing from type names to their latest versions. Used in SetReplaceTypeConvert. *)
 
