@@ -5,8 +5,13 @@ left that can match these states, and the arbitrary code on the right that creat
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
-  SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
+<<<<<<< HEAD
+  SetReplaceTypeConvert[WolframModelEvolutionObject] @
     GenerateMultihistory[AtomicStateSystem[{n_ :> n + 1, n_ :> n - 1}], MaxGeneration -> 4][0]
+=======
+  SetReplaceTypeConvert[WolframModelEvolutionObject] @
+    GenerateMultihistory[AtomicStateSystem[{n_ :> n + 1, n_ :> n - 1}], 0, MaxGeneration -> 4]
+>>>>>>> 76631cf5 (Update docs.)
 ```
 
 <img src="/Documentation/Images/AtomicStateSystemExample.png" width="858.6">

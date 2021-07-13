@@ -14,7 +14,7 @@ generations. In the following example, the tokens and events are labeled with th
 In[] := #["ExpressionsEventsGraph",
           VertexLabels -> Placed["Name", After, Replace[{{"Expression", n_} :> #["ExpressionGenerations"][[n]],
                                                          {"Event", n_} :> #["EventGenerations"][[n]]}]]] & @
-  SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
+  SetReplaceTypeConvert[WolframModelEvolutionObject] @
     GenerateMultihistory[MultisetSubstitutionSystem[{a__} /; Total[{a}] == 5 :> {Total[{a}] - 1, Total[{a}] + 1}],
                          MaxEvents -> 3] @ {1, 2, 3}
 ```
@@ -25,7 +25,7 @@ Restricting the number of generations to one will prevent the last two events fr
 another event is created instead:
 
 ```wl
-In[] := #["ExpressionsEventsGraph"] & @ SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
+In[] := #["ExpressionsEventsGraph"] & @ SetReplaceTypeConvert[WolframModelEvolutionObject] @
   GenerateMultihistory[MultisetSubstitutionSystem[{a__} /; Total[{a}] == 5 :> {Total[{a}] - 1, Total[{a}] + 1}],
                        MaxGeneration -> 1, MaxEvents -> 3] @ {1, 2, 3}
 ```

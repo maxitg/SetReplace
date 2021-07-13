@@ -10,4 +10,8 @@ SetReplaceTypeConvert[newType][object]
 For example, one can convert an [`AtomicStateSystem` multihistory](/Documentation/Types/AtomicStateSystem0.md) to a
 [`MultisetSubstitutionSystem` multihistory](/Documentation/Types/Multihistory/MultisetSubstitutionSystem0.md):
 
-<img src="/Documentation/Images/AtomicStateToMultisetMultihistory.png" width="562.2">
+<img src="/Documentation/Images/AtomicStateToMultisetMultihistory.png" width="517.8">
+
+To convert to a specific version of a type, one can use the full type specification:
+
+<img src="/Documentation/Images/AtomicStateToMultisetMultihistoryVersioned.png" width="693.0">
