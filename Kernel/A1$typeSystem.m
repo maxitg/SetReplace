@@ -131,8 +131,9 @@ declareMessage[General::unconvertibleType, "The type `type` in `expr` can not be
 
 declareMessage[General::noConversionPath, "Cannot convert an object from `from` to `to` in `expr`."];
 
-typeConvert[toType_][object_] := ModuleScope[
+typeConvert[toTypeInput_][object_] := ModuleScope[
   fromType = objectType[object];
+  toType = Lookup[$shortcutsToTypes, toTypeInput, toTypeInput];
   If[!VertexQ[$typeGraph, SetReplaceType[#]], throw[Failure["unconvertibleType", <|"type" -> #|>]]] & /@
     {fromType, toType};
   path = FindShortestPath[$typeGraph, SetReplaceType[fromType], SetReplaceType[toType]];
@@ -204,8 +205,13 @@ $SetReplaceProperties gives the list of all properties defined in SetReplace.
 
 initializeTypeAndPropertyLists[] :=
   {$SetReplaceTypes, $SetReplaceProperties} =
-    Sort @ Select[freeFromInternalSymbolsQ][First /@ VertexList[$typeGraph, #]] & /@
+    Sort @ Select[freeFromInternalSymbolsQ][
+        Replace[SetReplaceProperty[symbol_] :> symbol] /@ VertexList[$typeGraph, #]] & /@
       {_SetReplaceType, _SetReplaceProperty};
+
+(* This creates an association pointing from type names to their latest versions. Used in SetReplaceTypeConvert. *)
+
+initializeVersionlessShortcuts[] := $shortcutsToTypes = First /@ MaximalBy[Last] /@ GroupBy[$SetReplaceTypes, First];
 
 SetUsage @ "
 $SetReplaceTypeGraph gives the Graph of types and properties implemented in SetReplace.
@@ -253,6 +259,7 @@ initializeTypeSystem[] := (
   initializeRawProperties[];
   initializeCompositeProperties[];
   initializeTypeAndPropertyLists[];
+  initializeVersionlessShortcuts[];
   initializePublicTypeGraph[];
 );
 
