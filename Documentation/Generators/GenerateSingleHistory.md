@@ -20,6 +20,8 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/GenerateSingleHistoryExample.png" width="478.2">
 
-Note that single histories are not necessarily single-path systems. Multiple rewriting events can be possible starting
-from a given state. However, only one event can take any given token as an input, ensuring that all generated events do
-not conflict with each other (i.e., there are no branchlike-separated events).
+Note that there is a distinction between single-history and single-path systems. Single-path systems are defined as ones
+where there is only one event possible from every state. A Turing machine would be an example of a single-path system.
+On the other hand, single-history systems allow multiple events from a single state, but all these events must be
+consistent, i.e., take non-overlapping inputs. Neither single-path nor single-history systems have branchlike-separated
+events.
