@@ -6,6 +6,7 @@ PackageExport["MaxGeneration"]
 PackageExport["MaxDestroyerEvents"]
 PackageExport["MinEventInputs"]
 PackageExport["MaxEventInputs"]
+PackageExport["MaxEvents"]
 
 declareSystemParameter[#, #2, _ ? (GreaterEqualThan[0]), #3] & @@@ {
   {MaxGeneration,
@@ -22,8 +23,6 @@ declareSystemParameter[#, #2, _ ? (GreaterEqualThan[0]), #3] & @@@ {
 };
 
 (* Stopping-condition parameters *)
-
-PackageExport["MaxEvents"]
 
 declareSystemParameter[
   MaxEvents,

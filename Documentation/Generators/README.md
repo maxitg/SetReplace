@@ -10,10 +10,12 @@ multiple branches of nondeterministic systems simultaneously. That is done by ap
 tokens and keeping events and tokens instead of states in [`Multihistory`](/Documentation/Types/Multihistory/README.md)
 objects. We can reconstruct the states from that information afterward.
 
-There are parameters that control how this evaluation is done. Some of them control which events to select, which is
-essential when the system does not terminate. Other parameters might control how to deduplicate identical tokens, etc.
-Different generators correspond to different settings of parameters. Additional parameters can be specified with a
-syntax similar to options.
+There are parameters that control how this evaluation is done. Some of them control which events to select. Other
+parameters might control how to deduplicate identical tokens, etc. Different generators correspond to different settings
+of parameters. Additional parameters can be specified with a syntax similar to options.
+
+Note that if the system does not terminate, it is necessary to specify some parameters, such as
+[`MaxEvents`](MaxEvents.md) or [`MaxGeneration`](MaxGeneration.md).
 
 For example, [`GenerateSingleHistory`](GenerateSingleHistory.md) corresponds to
 [`MaxDestroyerEvents -> 1`](MaxDestroyerEvents.md) and thus does not produce nondeterministic branching:

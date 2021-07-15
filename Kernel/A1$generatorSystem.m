@@ -6,10 +6,36 @@ PackageExport["$SetReplaceSystems"]
 PackageExport["$SetReplaceGenerators"]
 PackageExport["SetReplaceSystemParameters"]
 
+PackageScope["declareSystemParameter"]
 PackageScope["declareSystem"]
 PackageScope["declareSystemGenerator"]
-PackageScope["declareSystemParameter"]
 PackageScope["initializeSystemGenerators"]
+
+(* Parameter declaration *)
+
+$parameterDefaults = <||>;
+$parameterPatterns = <||>;
+
+(* Both systems and generators use parameters. Systems declare parameters they implement. Generators set fixed values
+   for a subset of parameters. To declare a new parameter, one needs to specify a default value (which usually disables
+   whatever the parameter is doing) and a pattern the parameter value should match. *)
+
+(* declareSystemParameter[MaxGeneration,
+                          Infinity,
+                          _ ? (GreaterEqualThan[0]),
+                          "is a parameter specifying the maximum generations of tokens that will be created."] *)
+
+declareSystemParameter[name_, defaultValue_, pattern_, usage_] := (
+  $parameterDefaults[name] = defaultValue;
+  $parameterPatterns[name] = pattern;
+  SyntaxInformation[name] = {"ArgumentsPattern" -> {}};
+  SetUsage @ Evaluate[ToString[name] <> " " <> usage];
+);
+
+declareMessage[General::invalidSystemParameterDeclaration,
+               "Internal error. Parameter is declared incorrectly with arguments `args`."];
+declareSystemParameter[args___] :=
+  message[SetReplace, Failure["invalidSystemParameterDeclaration", <|"args" -> {args}|>]];
 
 (* System declaration *)
 
@@ -103,32 +129,6 @@ declareMessage[General::invalidSystemGeneratorDeclaration,
                "Internal error. Generator is declared incorrectly with arguments `args`."];
 declareSystemGenerator[args___] :=
   message[SetReplace, Failure["invalidSystemGeneratorDeclaration", <|"args" -> {args}|>]];
-
-(* Parameter declaration *)
-
-$parameterDefaults = <||>;
-$parameterPatterns = <||>;
-
-(* Both systems and generators use parameters. Systems declare parameters they implement. Generators set fixed values
-   for a subset of parameters. To declare a new parameter, one needs to specify a default value (which usually disables
-   whatever the parameter is doing) and a pattern the parameter value should match. *)
-
-(* declareSystemParameter[MaxGeneration,
-                          Infinity,
-                          _ ? (GreaterEqualThan[0]),
-                          "is a parameter specifying the maximum generations of tokens that will be created."] *)
-
-declareSystemParameter[name_, defaultValue_, pattern_, usage_] := (
-  $parameterDefaults[name] = defaultValue;
-  $parameterPatterns[name] = pattern;
-  SyntaxInformation[name] = {"ArgumentsPattern" -> {}};
-  SetUsage @ Evaluate[ToString[name] <> " " <> usage];
-);
-
-declareMessage[General::invalidSystemParameterDeclaration,
-               "Internal error. Parameter is declared incorrectly with arguments `args`."];
-declareSystemParameter[args___] :=
-  message[SetReplace, Failure["invalidSystemParameterDeclaration", <|"args" -> {args}|>]];
 
 (* Initialization *)
 
