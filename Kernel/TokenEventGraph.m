@@ -65,11 +65,13 @@ parseVertexLabels[data_][(ruleSymbol : Rule | RuleDelayed)[pattern_, func_Functi
 generateLabel[data_, func_][MultihistoryToken[n_]] := func[<|
   "Index" :> n,
   "TokenContents" :> data["Expressions"]["Part", n],
-  "RuleIndex" :> ""|>];
+  "RuleIndex" :> "",
+  "Generation" :> data["EventGenerations"]["Part", data["ExpressionCreatorEvents"]["Part", n]]|>];
 
 generateLabel[data_, func_][MultihistoryEvent[n_]] := func[<|
   "Index" :> n,
   "TokenContents" :> "",
-  "RuleIndex" :> data["EventRuleIndices"]["Part", n + 1]|>];
+  "RuleIndex" :> data["EventRuleIndices"]["Part", n + 1],
+  "Generation" :> data["EventGenerations"]["Part", n + 1]|>];
 
 parseVertexLabels[data_][arg_] := arg;
