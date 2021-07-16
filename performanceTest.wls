@@ -82,7 +82,7 @@ Check[
     Exit[1];
   ];
 
-  Attributes[meanAroundTiming] = {HoldAll};
+  Attributes[meanAroundTiming] = {HoldFirst};
   meanAroundTiming[expr_, resultsFunction_] :=
     MeanAround @ Table[First @ AbsoluteTiming[resultsFunction @ expr], $measurementsCount];
 
@@ -94,7 +94,8 @@ Check[
     result = ParallelEvaluate[
       Get[FileNameJoin[{$setReplaceRoot, "Kernel", "init.m"}]];
       Check[
-        meanAroundTiming[#, resultsFunction] & @@@ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]]
+        Function[{test}, meanAroundTiming[test, resultsFunction], HoldFirst] @@@
+          KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]]
       ,
         $Failed
       ]
