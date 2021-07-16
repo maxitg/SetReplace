@@ -5,7 +5,7 @@
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md):
 
 ```wl
-In[] := GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}], {1, 2, 3}, MaxEvents -> 10]
+In[] := GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}], MaxEvents -> 10] @ {1, 2, 3}
 ```
 
 <img src="/Documentation/Images/MultisetMultihistory.png" width="472.2">

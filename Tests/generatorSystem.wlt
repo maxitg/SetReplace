@@ -49,112 +49,87 @@
                        SameTest -> MatchQ],
 
       (* Zero args *)
-      testUnevaluated[genericGenerator[], {genericGenerator::argm}],
+      testUnevaluated[genericGenerator[], {}], (* nothing is evaluated until the init is given *)
 
       (* One arg *)
       testUnevaluated[genericGenerator[0], {}],
       testUnevaluated[genericGenerator[genericSystem[]], {}],
 
       (* Two args *)
-      testUnevaluated[genericGenerator[0, 0], {genericGenerator::unknownSystem}],
-      testUnevaluated[genericGenerator[genericSystem, 0], {genericGenerator::noRules}],
-      testUnevaluated[genericGenerator[genericSystem[], "test"], {}], (* parameters are not yet parsed at this stage *)
+      testUnevaluated[genericGenerator[0, 0][0], {genericGenerator::unknownSystem}],
+      testUnevaluated[genericGenerator[genericSystem, 0][0], {genericGenerator::noRules}],
+      testUnevaluated[genericGenerator[genericSystem[], "test"][0], {genericGenerator::invalidGeneratorParameterSpec}],
       VerificationTest[
-        genericGenerator[genericSystem[], 0], {genericSystem[], 0, <|maxEventSize -> Infinity, eventType -> None|>}],
+        genericGenerator[genericSystem[]][0], {genericSystem[], 0, <|maxEventSize -> Infinity, eventType -> None|>}],
+
+      (* Operator args *)
+      testUnevaluated[genericGenerator[genericSystem[]][##], {genericGenerator::argx}] & @@@ {{0, 1}, {}},
 
       (* Parameters spec *)
-      testUnevaluated[genericGenerator[genericSystem[], 0, abc], {genericGenerator::invalidGeneratorParameterSpec}],
-      testUnevaluated[genericGenerator[genericSystem[], 0, {abc}], {genericGenerator::invalidGeneratorParameterSpec}],
-      testUnevaluated[genericGenerator[genericSystem[], 0, abc -> 4], {genericGenerator::unknownParameter}],
-      testUnevaluated[genericGenerator[genericSystem[], maxEventSize -> 4], {}], (* no init, treated as operator form *)
-      VerificationTest[genericGenerator[genericSystem[], 0, maxEventSize -> 4],
+      testUnevaluated[genericGenerator[genericSystem[], abc][0], {genericGenerator::invalidGeneratorParameterSpec}],
+      testUnevaluated[genericGenerator[genericSystem[], {abc}][0], {genericGenerator::invalidGeneratorParameterSpec}],
+      testUnevaluated[genericGenerator[genericSystem[], abc -> 4][0], {genericGenerator::unknownParameter}],
+      testUnevaluated[genericGenerator[genericSystem[], maxEventSize -> 4], {}],
+      VerificationTest[genericGenerator[genericSystem[], maxEventSize -> 4][0],
                        {genericSystem[], 0, <|maxEventSize -> 4, eventType -> None|>}],
-      testUnevaluated[genericGenerator[genericSystem[], 0, maxEventSize -> -1], {genericGenerator::invalidParameter}],
-      testUnevaluated[genericGenerator[genericSystem[], 0, minEventSize -> 4], {genericGenerator::unknownParameter}],
+      testUnevaluated[genericGenerator[genericSystem[], maxEventSize -> -1][0], {genericGenerator::invalidParameter}],
+      testUnevaluated[genericGenerator[genericSystem[], minEventSize -> 4][0], {genericGenerator::unknownParameter}],
 
       VerificationTest[
-          genericGenerator[genericSystem[], 0, ##], {genericSystem[], 0, <|maxEventSize -> 4, eventType -> 0|>}] & @@@ {
+          genericGenerator[genericSystem[], ##][0], {genericSystem[], 0, <|maxEventSize -> 4, eventType -> 0|>}] & @@@ {
         {maxEventSize -> 4, eventType -> 0},
         {{maxEventSize -> 4}, eventType -> 0},
         {maxEventSize -> 4, {eventType -> 0}},
         {<|maxEventSize -> 4|>, {{eventType -> 0}}}
       },
 
-      VerificationTest[genericGenerator[genericSystem[], 0, eventType -> 0, eventType -> 1],
+      VerificationTest[genericGenerator[genericSystem[], eventType -> 0, eventType -> 1][0],
                        {genericSystem[], 0, <|maxEventSize -> Infinity, eventType -> 1|>}],
-      testUnevaluated[genericGenerator[genericSystem[], 0, eventType -> 0, eventType -> 1, 3],
+      testUnevaluated[genericGenerator[genericSystem[], eventType -> 0, eventType -> 1, 3][0],
                       {genericGenerator::invalidGeneratorParameterSpec}],
 
       (* Generator with predefined parameters *)
-      VerificationTest[typeTwoGenerator[genericSystem[], 0],
+      VerificationTest[typeTwoGenerator[genericSystem[]][0],
                        property[{genericSystem[], 0, <|maxEventSize -> Infinity, eventType -> 2|>}]],
-      testUnevaluated[typeTwoGenerator[genericSystem[], 0, eventType -> 1], {typeTwoGenerator::forbiddenParameter}],
-      VerificationTest[typeTwoGenerator[genericSystem[], 0, maxEventSize -> 2],
+      testUnevaluated[typeTwoGenerator[genericSystem[], eventType -> 1][0], {typeTwoGenerator::forbiddenParameter}],
+      VerificationTest[typeTwoGenerator[genericSystem[], maxEventSize -> 2][0],
                        property[{genericSystem[], 0, <|maxEventSize -> 2, eventType -> 2|>}]],
 
       (* Parameter dependencies *)
       VerificationTest[
-        genericGenerator[systemWithParameterDependencies[], 0],
+        genericGenerator[systemWithParameterDependencies[]][0],
         {systemWithParameterDependencies[], 0, <|minEventSize -> 0, maxEventSize -> Infinity, eventType -> None|>}],
       testUnevaluated[
-        genericGenerator[systemWithParameterDependencies[], 0, eventType -> 2], {genericGenerator::missingParameters}],
+        genericGenerator[systemWithParameterDependencies[], eventType -> 2][0], {genericGenerator::missingParameters}],
       VerificationTest[
-        genericGenerator[systemWithParameterDependencies[], 0, eventType -> 2, minEventSize -> 2],
+        genericGenerator[systemWithParameterDependencies[], eventType -> 2, minEventSize -> 2][0],
         {systemWithParameterDependencies[], 0, <|minEventSize -> 2, maxEventSize -> Infinity, eventType -> 2|>}],
       VerificationTest[
-        genericGenerator[systemWithParameterDependencies[], 0, eventType -> 2, maxEventSize -> 2],
+        genericGenerator[systemWithParameterDependencies[], eventType -> 2, maxEventSize -> 2][0],
         {systemWithParameterDependencies[], 0, <|minEventSize -> 0, maxEventSize -> 2, eventType -> 2|>}],
 
-      testUnevaluated[typeTwoGenerator[systemWithParameterDependencies[], 0], {typeTwoGenerator::missingParameters}],
+      testUnevaluated[typeTwoGenerator[systemWithParameterDependencies[]][0], {typeTwoGenerator::missingParameters}],
       VerificationTest[
-        typeTwoGenerator[systemWithParameterDependencies[], 0, minEventSize -> 2],
+        typeTwoGenerator[systemWithParameterDependencies[], minEventSize -> 2][0],
         property[
           {systemWithParameterDependencies[], 0, <|minEventSize -> 2, maxEventSize -> Infinity, eventType -> 2|>}]],
 
-      testUnevaluated[typeTwoGenerator[minXorMaxSystem[], 0], {typeTwoGenerator::incompatibleSystem}],
-      testUnevaluated[typeTwoGenerator[minXorMaxSystem[], 0, eventType -> 2], {typeTwoGenerator::incompatibleSystem}],
-      testUnevaluated[genericGenerator[minXorMaxSystem[], 0], {genericGenerator::missingParameters}],
-      VerificationTest[genericGenerator[minXorMaxSystem[], 0, minEventSize -> 2],
+      testUnevaluated[typeTwoGenerator[minXorMaxSystem[]][0], {typeTwoGenerator::incompatibleSystem}],
+      testUnevaluated[typeTwoGenerator[minXorMaxSystem[], eventType -> 2][0], {typeTwoGenerator::incompatibleSystem}],
+      testUnevaluated[genericGenerator[minXorMaxSystem[]][0], {genericGenerator::missingParameters}],
+      VerificationTest[genericGenerator[minXorMaxSystem[], minEventSize -> 2][0],
                        {minXorMaxSystem[], 0, <|minEventSize -> 2, maxEventSize -> Infinity|>}],
-      testUnevaluated[genericGenerator[minXorMaxSystem[], 0, minEventSize -> 2, maxEventSize -> 3],
+      testUnevaluated[genericGenerator[minXorMaxSystem[], minEventSize -> 2, maxEventSize -> 3][0],
                       {genericGenerator::incompatibleParameters}],
-
-      (* Operator form *)
-      testUnevaluated[genericGenerator[genericSystem[]] @ "test", {genericGenerator::argNotInit}],
-      testUnevaluated[genericGenerator[genericSystem[], maxEventSize -> 2] @ "test", {genericGenerator::argNotInit}],
-      VerificationTest[
-        genericGenerator[genericSystem[]] @ 0, {genericSystem[], 0, <|maxEventSize -> Infinity, eventType -> None|>}],
-      testUnevaluated[genericGenerator[genericSystem[]][], {genericGenerator::argx}],
-      testUnevaluated[genericGenerator[genericSystem[]][0, 1], {genericGenerator::argx}],
-      VerificationTest[genericGenerator[genericSystem[], maxEventSize -> 2] @ 0,
-                       {genericSystem[], 0, <|maxEventSize -> 2, eventType -> None|>}],
-      VerificationTest[genericGenerator[genericSystem[], {maxEventSize -> 2}] @ 0,
-                       {genericSystem[], 0, <|maxEventSize -> 2, eventType -> None|>}],
-      VerificationTest[genericGenerator[genericSystem[], <|maxEventSize -> 2|>] @ 0,
-                       {genericSystem[], 0, <|maxEventSize -> 2, eventType -> None|>}],
-      VerificationTest[genericGenerator[genericSystem[], maxEventSize -> 2, eventType -> 2] @ 0,
-                       {genericSystem[], 0, <|maxEventSize -> 2, eventType -> 2|>}],
-      VerificationTest[
-        genericGenerator[listStateSystem[], {maxEventSize -> 2}] @ 0,
-        {listStateSystem[],
-         {maxEventSize -> 2},
-         <|minEventSize -> 0, maxEventSize -> Infinity, eventType -> None|>}[0]],
-      VerificationTest[
-        genericGenerator[listStateSystem[], {maxEventSize -> 2}, minEventSize -> 1] @ {0},
-        {listStateSystem[],
-         {maxEventSize -> 2},
-         <|minEventSize -> 1, maxEventSize -> Infinity, eventType -> None|>}[{0}]],
-      VerificationTest[genericGenerator[listStateSystem[], minEventSize -> 1, {maxEventSize -> 2}] @ {0},
-                       {listStateSystem[], {0}, <|minEventSize -> 1, maxEventSize -> 2, eventType -> None|>}],
 
       (* Existing generators *)
       VerificationTest[
-        GenerateMultihistory[realParameterSystem[], 0],
+        GenerateMultihistory[realParameterSystem[]][0],
         {realParameterSystem[],
          0,
          <|MaxDestroyerEvents -> Infinity, MaxEvents -> Infinity, MaxGeneration -> Infinity|>}],
       VerificationTest[
-        GenerateSingleHistory[realParameterSystem[], 0],
+        GenerateSingleHistory[realParameterSystem[]][0],
         {realParameterSystem[], 0, <|MaxDestroyerEvents -> 1, MaxEvents -> Infinity, MaxGeneration -> Infinity|>}],
 
       (* Introspection *)

@@ -16,8 +16,7 @@ In[] := #["ExpressionsEventsGraph",
                                                          {"Event", n_} :> #["EventGenerations"][[n]]}]]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[MultisetSubstitutionSystem[{a__} /; Total[{a}] == 5 :> {Total[{a}] - 1, Total[{a}] + 1}],
-                         {1, 2, 3},
-                         MaxEvents -> 3]
+                         MaxEvents -> 3] @ {1, 2, 3}
 ```
 
 <img src="/Documentation/Images/TokenEventGraphGenerations.png" width="444.6">
@@ -28,8 +27,7 @@ another event is created instead:
 ```wl
 In[] := #["ExpressionsEventsGraph"] & @ SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
   GenerateMultihistory[MultisetSubstitutionSystem[{a__} /; Total[{a}] == 5 :> {Total[{a}] - 1, Total[{a}] + 1}],
-                       {1, 2, 3},
-                       MaxGeneration -> 1, MaxEvents -> 3]
+                       MaxGeneration -> 1, MaxEvents -> 3] @ {1, 2, 3}
 ```
 
 <img src="/Documentation/Images/MaxGeneration.png" width="478.2">
@@ -44,7 +42,6 @@ termination reason.
 ```wl
 In[] := #[[2, "TerminationReason"]] & @
   GenerateMultihistory[MultisetSubstitutionSystem[{a__} /; Total[{a}] == 5 :> {Total[{a}] - 1, Total[{a}] + 1}],
-                       {1, 2, 3},
-                       MaxGeneration -> 1]
+                       MaxGeneration -> 1] @ {1, 2, 3}
 Out[] = "Complete"
 ```

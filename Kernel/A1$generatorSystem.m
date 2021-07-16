@@ -111,17 +111,17 @@ $generatorProperties = <||>;          (* generator -> property *)
    It cannot be used in operator form. *)
 
 $systemUsage = "* A list of all supported systems can be obtained with $SetReplaceSystems.";
-$initUsage = "* init$ is the initial state, the format of which depends on the system$.";
 $parametersUsage = "* parameters$ is either a Sequence, a List or an Association of key-value rules. A list of " <>
                    "parameter keys can be obtained with SetReplaceSystemParameters[system$].";
+$initUsage = "* init$ is the initial state, the format of which depends on the system$.";
 
 declareSystemGenerator[publicSymbol_, packageScopeSymbol_, parameterValues_, property_, usage_] := (
   $generatorPackageScopeSymbols[publicSymbol] = packageScopeSymbol;
   $generatorParameters[publicSymbol] = parameterValues;
   $generatorProperties[publicSymbol] = property;
-  SyntaxInformation[publicSymbol] = {"ArgumentsPattern" -> {system_, init_., parameters___}};
+  SyntaxInformation[publicSymbol] = {"ArgumentsPattern" -> {system_, parameters___}};
   SetUsage @ Evaluate @ StringRiffle[
-    {ToString[publicSymbol] <> "[system$, init$, parameters$] " <> usage, $systemUsage, $initUsage, $parametersUsage},
+    {ToString[publicSymbol] <> "[system$, parameters$][init$] " <> usage, $systemUsage, $parametersUsage, $initUsage},
     "\n"];
 );
 
@@ -168,25 +168,15 @@ declareMessage[General::unknownSystem, "`system` is not a recognized SetReplace 
 declareMessage[General::noRules, "Rules need to be specified as `system`[\[Ellipsis]] in `expr`."];
 
 defineGeneratorImplementation[generator_] := With[{packageScopeGenerator = $generatorPackageScopeSymbols[generator]},
-  expr : generator[system_, init_, parameters___] /;
-      MatchQ[init, Lookup[$systemInitPatterns, Head[system], _]] := ModuleScope[
-    result = Catch[packageScopeGenerator[system, init, parameters],
+  expr : (operator : generator[args1___])[args2___] /;
+      CheckArguments[operator, {1, Infinity}] && CheckArguments[expr, {1, 1}] := ModuleScope[
+    result = Catch[packageScopeGenerator[args1][args2],
                    _ ? FailureQ,
                    message[generator, #, <|"expr" -> HoldForm[expr]|>] &];
     result /; !FailureQ[result]
   ];
 
-  expr : generator[args1___][args2___] /; CheckArguments[expr, {1, 1}] := ModuleScope[
-    result = Catch[implementationOperator[generator][args1][args2],
-                   _ ? FailureQ,
-                   message[generator, #, <|"expr" -> HoldForm[expr]|>] &];
-    result /; !FailureQ[result]
-  ];
-
-  expr : generator[] /; CheckArguments[expr, {1, Infinity}] := $Failed;
-
-  packageScopeGenerator[system_, init_, parameters___] /;
-      MatchQ[init, Lookup[$systemInitPatterns, Head[system], _]] := (
+  packageScopeGenerator[system_, parameters___][init_] := (
     If[MissingQ[$systemImplementations[Head[system]]],
       If[MissingQ[$systemImplementations[system]],
         throw[Failure["unknownSystem", <|"system" -> system|>]]
@@ -194,19 +184,13 @@ defineGeneratorImplementation[generator_] := With[{packageScopeGenerator = $gene
         throw[Failure["noRules", <|"system" -> system|>]]
       ];
     ];
+    If[!MatchQ[init, Lookup[$systemInitPatterns, Head[system]]],
+      throw[Failure["argNotInit", <|"arg" -> arg, "pattern" -> $systemInitPatterns[Head[system]]|>]]
+    ];
     checkSystemGeneratorCompatibility[Head[system], generator];
     $generatorProperties[generator] @
       $systemImplementations[Head[system]][system, init, parseParameters[generator, Head[system]][parameters]]
   );
-  packageScopeGenerator[___] := throw[Failure[None, <||>]];
-
-  implementationOperator[generator][system_][init_] /; MatchQ[init, $systemInitPatterns[Head[system]]] :=
-    packageScopeGenerator[system, init, <||>];
-  implementationOperator[generator][system_, parameters_, moreParameters___][init_] /;
-      MatchQ[init, $systemInitPatterns[Head[system]]] && !MatchQ[parameters, $systemInitPatterns[Head[system]]] :=
-    packageScopeGenerator[system, init, parameters, moreParameters];
-  implementationOperator[generator][system_, ___][arg_] :=
-    throw[Failure["argNotInit", <|"arg" -> arg, "pattern" -> $systemInitPatterns[Head[system]]|>]];
 ];
 
 declareMessage[

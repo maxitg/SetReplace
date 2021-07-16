@@ -7,20 +7,21 @@
     ),
     "tests" -> {
       (* Symbol Leak *)
-      testSymbolLeak[GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}], {1, 2, 3}]],
+      testSymbolLeak[GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}]] @ {1, 2, 3}],
 
       (* Rules *)
-      testUnevaluated[GenerateMultihistory[MultisetSubstitutionSystem[##2], {1}], {#}] & @@@ {
+      testUnevaluated[GenerateMultihistory[MultisetSubstitutionSystem[##2]][{1}], {#}] & @@@ {
         {MultisetSubstitutionSystem::argx},
         {MultisetSubstitutionSystem::argx, 1, 2},
         {GenerateMultihistory::invalidMultisetRules, 1},
         {GenerateMultihistory::ruleOutputNotList, {1} -> 2}},
 
       (* Init *)
-      testUnevaluated[GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], 1], {}],
+      testUnevaluated[
+        GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}]][1], {GenerateMultihistory::argNotInit}],
 
       (* Parameters *)
-      testUnevaluated[GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], {1}, # -> -1],
+      testUnevaluated[GenerateMultihistory[MultisetSubstitutionSystem[{1} -> {2}], # -> -1] @ {1},
                       {GenerateMultihistory::invalidParameter}] & /@
         {MaxGeneration, MaxDestroyerEvents, MinEventInputs, MaxEventInputs, MaxEvents}
     }
@@ -38,7 +39,7 @@
     ),
     "tests" -> {
       Function[{rules, parameters, init, expectedCreatedExpressions},
-          VerificationTest[allExpressions @ GenerateMultihistory[MultisetSubstitutionSystem[rules], init, parameters],
+          VerificationTest[allExpressions @ GenerateMultihistory[MultisetSubstitutionSystem[rules], parameters] @ init,
                            Join[init, expectedCreatedExpressions],
                            SameTest -> MatchQ]] @@@
         {{{1} -> {1}, MaxEvents -> 1, {1}, {1}},
@@ -168,12 +169,12 @@
          {Verbatim[{_, __}] :> {0}, MaxGeneration -> 1, {_, __, 1}, {0}}},
 
       VerificationTest[
-        eventCount @ GenerateMultihistory[MultisetSubstitutionSystem[{{1}} :> {}], {{1}}, MaxGeneration -> 1], 1],
+        eventCount @ GenerateMultihistory[MultisetSubstitutionSystem[{{1}} :> {}], MaxGeneration -> 1] @ {{1}}, 1],
 
       Function[{rules, parameters, init, expectedMaxGeneration, expectedEventCount},
           VerificationTest[
-            Through[{lastEventGeneration, eventCount} @ GenerateMultihistory[
-              MultisetSubstitutionSystem[rules], init, parameters]],
+            Through[{lastEventGeneration, eventCount} @
+              GenerateMultihistory[MultisetSubstitutionSystem[rules], parameters] @ init],
             {expectedMaxGeneration, expectedEventCount}]] @@@
         {{{{a_, b_}} :> Module[{c}, {{a, c}, {c, b}}], MaxGeneration -> 7, {{1, 2}}, 7, 2^7 - 1},
          {{{_}} :> {}, {}, {{1}, {2}, {3}, {4}, {5}}, 1, 5},
@@ -182,7 +183,7 @@
 
       (* Test invalid patterns *)
       testUnevaluated[
-          eventCount @ GenerateMultihistory[MultisetSubstitutionSystem[#], {{1}}, MaxGeneration -> 1],
+          eventCount @ GenerateMultihistory[MultisetSubstitutionSystem[#], MaxGeneration -> 1] @ {{1}},
           {Pattern::patvar, GenerateMultihistory::ruleInstantiationMessage}] & /@
         {{{{Pattern[1, _], v2_}} :> {}, {{Pattern[2, _], v1_}} :> Module[{v2}, {v2}]},
          {{{Pattern[Pattern[a, _], _], v2_}} :> {}, {{Pattern[2, _], v1_}} :> Module[{v2}, {v2}]}}
@@ -199,7 +200,7 @@
     ),
     "tests" -> {
       Function[{rule, parameters, init, expectedCreatedExpressions},
-        VerificationTest[allExpressions @ GenerateMultihistory[MultisetSubstitutionSystem[rule], init, parameters],
+        VerificationTest[allExpressions @ GenerateMultihistory[MultisetSubstitutionSystem[rule], parameters] @ init,
                          Join[init, expectedCreatedExpressions]]
       ] @@@ {
         (* multihistory branching *)
@@ -257,8 +258,7 @@
               MultisetSubstitutionSystem[
                 {{v1_, v2_}, {v2_, v3_, v4_}} :>
                     Module[{v5 = Hash[{{v1, v2}, {v2, v3, v4}}]}, {{v2, v3}, {v3, v4, v5}, {v1, v2, v3, v4}}]],
-                {{1, 2}, {2, 3, 4}},
-                MaxEvents -> 30, MaxDestroyerEvents -> #] & /@ {1, Infinity}},
+                MaxEvents -> 30, MaxDestroyerEvents -> #] @ {{1, 2}, {2, 3, 4}} & /@ {1, Infinity}},
           SameQ @@ serializeMultihistory /@ multihistories]
       ]
     }
@@ -275,7 +275,7 @@
     ),
     "tests" -> {
       Function[{rule, init, lastEventInputsOutput},
-        VerificationTest[lastEventInputs @ GenerateMultihistory[MultisetSubstitutionSystem[rule], init, MaxEvents -> 1],
+        VerificationTest[lastEventInputs @ GenerateMultihistory[MultisetSubstitutionSystem[rule], MaxEvents -> 1][init],
                          lastEventInputsOutput]
       ] @@@ {
         {{{2, 3, 4} -> {X}, {3} -> {X}}, {1, 2, 3, 4, 5}, {3}},
@@ -318,7 +318,7 @@
           rule, parameters, init, expectedMaxEventGeneration, expectedEventCount, expectedTerminationReason},
         VerificationTest[
           Through[{maxEventGeneration, eventCount, terminationReason} @
-            GenerateMultihistory[MultisetSubstitutionSystem[rule], init, parameters]],
+            GenerateMultihistory[MultisetSubstitutionSystem[rule], parameters] @ init],
           {expectedMaxEventGeneration, expectedEventCount, expectedTerminationReason}]
       ] @@@ {
         (* Complete is returned if MaxGeneration is reached because MaxGeneration is not a stopping condition *)
@@ -346,8 +346,7 @@
         VerificationTest[
           allExpressions @ GenerateMultihistory[
             MultisetSubstitutionSystem[{n___} /; Plus[n] == 5 && OrderedQ[{n}] :> {{n}}],
-            init,
-            MinEventInputs -> #1, MaxEventInputs -> #2, MaxGeneration -> 1],
+            MinEventInputs -> #1, MaxEventInputs -> #2, MaxGeneration -> 1] @ init,
           Join[init, #3],
           SameTest -> MatchQ]
       ] & @@@
@@ -356,8 +355,7 @@
       VerificationTest[
           destroyerEventCounts @ GenerateMultihistory[
             MultisetSubstitutionSystem[ToPatternRules[{{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}}]],
-            {{1, 1}, {1, 1}},
-            MaxDestroyerEvents -> #, MaxEvents -> 5],
+            MaxDestroyerEvents -> #, MaxEvents -> 5] @ {{1, 1}, {1, 1}},
           #2,
           SameTest -> MatchQ] & @@@
        {{2, {2, 2, 2, 2, 1, 1, 0..}}, {3, {2, 2, 3, 1, 1, 1, 0..}}}

@@ -8,7 +8,7 @@ For example, for a [`MultisetSubstitutionSystem`](/Documentation/Systems/Multise
 
 ```wl
 In[] := multihistory = GenerateSingleHistory[
-  MultisetSubstitutionSystem[{a_, b_} :> {a + b, a - b, a * b}], {1, 2}, MaxEvents -> 10]
+  MultisetSubstitutionSystem[{a_, b_} :> {a + b, a - b, a * b}], MaxEvents -> 10] @ {1, 2}
 ```
 
 <img src="/Documentation/Images/MultisetMultihistory.png" width="472.2">

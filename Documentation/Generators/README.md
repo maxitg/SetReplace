@@ -23,7 +23,7 @@ For example, [`GenerateSingleHistory`](GenerateSingleHistory.md) corresponds to
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
-    GenerateSingleHistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}], {1, 2, 3, 4}]
+    GenerateSingleHistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}]] @ {1, 2, 3, 4}
 ```
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemExample.png" width="444.6">
@@ -35,7 +35,7 @@ We can also use a more general [`GenerateMultihistory`](GenerateMultihistory.md)
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[
-      MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}], {1, 2, 3, 4}, MaxDestroyerEvents -> 2]
+      MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}], MaxDestroyerEvents -> 2] @ {1, 2, 3, 4}
 ```
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemPartialMultihistory.png" width="478.2">
@@ -47,17 +47,8 @@ The same generators support multiple systems. In addition to
 All generators take the form
 
 ```wl
-Generator[System[rules], init, parameters...]
-```
-
-or, in operator form,
-
-```wl
 Generator[System[rules], parameters...] @ init
 ```
-
-Note, however, that the first form takes precedence, and if parameters can be interpreted as an init, the second form
-may not evaluate as expected.
 
 `parameters` can be specified either as a [`Sequence`](https://reference.wolfram.com/language/ref/Sequence.html) of
 [`Rule`](https://reference.wolfram.com/language/ref/Rule.html)s, a

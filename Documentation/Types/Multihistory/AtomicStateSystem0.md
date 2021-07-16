@@ -5,7 +5,7 @@
 [`AtomicStateSystem`](/Documentation/Systems/AtomicStateSystem.md):
 
 ```wl
-In[] := GenerateMultihistory[AtomicStateSystem[a_ :> a + 1], 0, MaxEvents -> 10]
+In[] := GenerateMultihistory[AtomicStateSystem[a_ :> a + 1], MaxEvents -> 10][0]
 ```
 
 <img src="/Documentation/Images/AtomicStateMultihistory.png" width="424.2">

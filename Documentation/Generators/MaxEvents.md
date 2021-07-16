@@ -6,7 +6,7 @@
 ```wl
 In[] := #["ExpressionsEventsGraph"] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
-    GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}], {1, 2, 3, 4}, MaxEvents -> 9]
+    GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}], MaxEvents -> 9] @ {1, 2, 3, 4}
 ```
 
 <img src="/Documentation/Images/MaxEventsExample.png" width="478.2">

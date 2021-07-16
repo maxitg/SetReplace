@@ -7,7 +7,7 @@ setting `MaxDestroyerEvents` to one.
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
-    GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}], {1, 2, 3}, MaxDestroyerEvents -> 1]
+    GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}], MaxDestroyerEvents -> 1] @ {1, 2, 3}
 ```
 
 <img src="/Documentation/Images/MaxDestroyerEvents1.png" width="322.2">
@@ -19,7 +19,7 @@ full multihistory object subject to other selection and stopping parameters:
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[
-      MultisetSubstitutionSystem[{a_, b_} :> {a + b}], {1, 2, 3}, MaxDestroyerEvents -> Infinity, MaxGeneration -> 1]
+      MultisetSubstitutionSystem[{a_, b_} :> {a + b}], MaxDestroyerEvents -> Infinity, MaxGeneration -> 1] @ {1, 2, 3}
 ```
 
 <img src="/Documentation/Images/MaxDestroyerEventsInfinity.png" width="478.2">
@@ -29,7 +29,7 @@ If set to a finite number, it will generate a partial multihistory:
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
-    GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}], {1, 2, 3}, MaxDestroyerEvents -> 5]
+    GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}], MaxDestroyerEvents -> 5] @ {1, 2, 3}
 ```
 
 <img src="/Documentation/Images/MaxDestroyerEvents5.png" width="478.2">

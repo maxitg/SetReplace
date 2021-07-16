@@ -65,9 +65,9 @@ Check[
       {{3, 3, 3, 6}, {3, 3, 7, 3}, {3, 5, 5}, {3, 3, 1}, {3, 2, 3}, {3, 3, 3, 3, 3, 3}, {4, 6, 6}, {4, 4, 4, 4, 4, 4},
         {8, 7, 7}, {8, 8, 8, 8, 8, 8}, {1, 4, 1}, {1, 1, 1, 1, 1}, {2, 2, 8}, {2, 2}},
       64],
-    "Multiset addition" -> GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
-                                                {1, 2, 3, 4},
-                                                MaxGeneration -> 2, MinEventInputs -> 2, MaxEventInputs -> 2]
+    "Multiset addition" -> GenerateMultihistory[
+      MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
+      MaxGeneration -> 2, MinEventInputs -> 2, MaxEventInputs -> 2] @ {1, 2, 3, 4}
   |>;
 
   $defaultMeasurementsCount = 5;

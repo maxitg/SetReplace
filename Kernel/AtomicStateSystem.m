@@ -17,8 +17,7 @@ declareSystem[AtomicStateSystem, generateAtomicStateSystem, _, {MaxGeneration, M
 generateAtomicStateSystem[AtomicStateSystem[rules___], init_, parameters_] := ModuleScope[
   toAtomicStateMultihistory[rules] @ generateMultihistory[
     MultisetSubstitutionSystem[toMultisetRules[rules]],
-    {init},
-    Join[parameters, <|MinEventInputs -> 1, MaxEventInputs -> 1|>]]
+    Join[parameters, <|MinEventInputs -> 1, MaxEventInputs -> 1|>]] @ {init}
 ];
 
 (* Parsing *)

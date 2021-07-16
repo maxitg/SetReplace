@@ -12,7 +12,7 @@ to reduce the number of matches enumerated. Compare:
 ```wl
 In[] := First @ AbsoluteTiming @
   GenerateMultihistory[
-      MultisetSubstitutionSystem[{a___} /; Length[{a}] == 4 :> {Total[{a}]}], {1, 2, 3, 4}, MaxEvents -> 20, #] & /@
+      MultisetSubstitutionSystem[{a___} /; Length[{a}] == 4 :> {Total[{a}]}], MaxEvents -> 20, #] @ {1, 2, 3, 4} & /@
     {{}, {MinEventInputs -> 4, MaxEventInputs -> 4}}
 Out[] = {0.793215, 0.014419}
 ```

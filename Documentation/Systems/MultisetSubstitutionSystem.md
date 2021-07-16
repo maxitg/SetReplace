@@ -19,7 +19,7 @@ For example, to make a system that adds pairs of numbers:
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
-    GenerateSingleHistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}], {1, 2, 3, 4}]
+    GenerateSingleHistory[MultisetSubstitutionSystem[{a_, b_} /; a < b :> {a + b}]] @ {1, 2, 3, 4}
 ```
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemExample.png" width="444.6">
@@ -35,8 +35,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
   SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @
     GenerateMultihistory[
       MultisetSubstitutionSystem[{a__} /; OrderedQ[{a}] && PrimeQ[Plus[a]] :> First /@ FactorInteger[Plus[a]]],
-      {1, 2, 3, 4},
-      MinEventInputs -> 2, MaxEventInputs -> 4]
+      MinEventInputs -> 2, MaxEventInputs -> 4] @ {1, 2, 3, 4}
 ```
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemConditionsAndSequences.png" width="478.2">
