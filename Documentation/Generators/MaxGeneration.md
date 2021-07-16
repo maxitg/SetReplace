@@ -35,10 +35,11 @@ In[] := #["ExpressionsEventsGraph"] & @ SetReplaceTypeConvert[{WolframModelEvolu
 <img src="/Documentation/Images/MaxGeneration.png" width="478.2">
 
 `MaxGeneration` is an event selection parameter, not a stopping condition. That is, the evolution of the system won't
-stop if a match with a generation greater than the constraint is encountered. Instead, it will ignore those matches and
-instantiate only those that satisfy the generation constraint. This selection of events according to their generation
-will (in most cases) affect the event order, as opposed to using stopping conditions, e.g., `MaxEvents`. For this
-reason, `MaxGenerations` (like other selection parameters) does not have a corresponding termination reason.
+stop if a match (tentative event) with a generation greater than the constraint is encountered. Instead, it will ignore
+those matches and instantiate only those that satisfy the generation constraint. This selection of events according to
+their generation will (in most cases) affect the event order, as opposed to using stopping conditions, e.g.,
+`MaxEvents`. For this reason, `MaxGenerations` (like other selection parameters) does not have a corresponding
+termination reason.
 
 ```wl
 In[] := #[[2, "TerminationReason"]] & @
