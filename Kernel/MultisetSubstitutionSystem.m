@@ -13,34 +13,22 @@ MultisetSubstitutionSystem should be used as the first argument in functions suc
 
 SyntaxInformation[MultisetSubstitutionSystem] = {"ArgumentsPattern" -> {rules_}};
 
-declareMultihistoryGenerator[
-  generateMultisetSubstitutionSystem,
-  MultisetSubstitutionSystem,
-  <|"MaxGeneration" -> {Infinity, "NonNegativeIntegerOrInfinity"},
-    "MaxDestroyerEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"},
-    "MinEventInputs" -> {0, "NonNegativeIntegerOrInfinity"},
-    "MaxEventInputs" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
-  {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"},
-  <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>];
+declareSystem[MultisetSubstitutionSystem,
+              generateMultisetSubstitutionSystem,
+              _List,
+              {MaxGeneration, MaxDestroyerEvents, MinEventInputs, MaxEventInputs, MaxEvents},
+              True];
 
-generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
-                                   rawEventSelection_,
-                                   rawTokenDeduplication_,
-                                   rawEventOrdering_,
-                                   rawStoppingCondition_,
-                                   rawInit_] := Block[{
+generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___], init_, parameters_] := Block[{
     expressions, eventRuleIndices, eventInputs, eventOutputs, eventGenerations, expressionCreatorEvents,
     expressionDestroyerEventCounts, destroyerChoices, instantiationCounts, instantiations},
-  Module[{rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, maxEvents, init, terminationReason},
+  Module[{rules, ruleInputCountRanges, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, maxEvents,
+          terminationReason},
     rules = parseRules[rawRules];
     ruleInputCountRanges = inputCountRange /@ rules;
-    {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs} = Values @ rawEventSelection;
+    {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, maxEvents} = Values @ parameters;
     minEventInputs = Max[minEventInputs, Min[ruleInputCountRanges[[All, 1]]]];
     maxEventInputs = Min[maxEventInputs, Max[ruleInputCountRanges[[All, 2]]]];
-    parseTokenDeduplication[rawTokenDeduplication]; (* Token deduplication is not implemented at the moment *)
-    parseEventOrdering[rawEventOrdering];           (* Event ordering is not implemented at the moment *)
-    {maxEvents} = Values @ rawStoppingCondition;
-    init = parseInit[rawInit];
 
     (* "HashTable" is causing memory leaks, so we are using Data`UnorderedAssociation instead. *)
 
@@ -318,19 +306,3 @@ sequencePatternLengthRange[Verbatim[Optional][___]] := {Infinity, 0};
 (* Since we have enumerated all pattern constructs above, this case does not correspond to a pattern.
    However, the completeness of checks above needs to be checked for every new WL version. *)
 sequencePatternLengthRange[_] := If[$VersionNumber <= 12.3, {1, 1}, {0, Infinity}];
-
-parseTokenDeduplication[None] := None;
-declareMessage[General::multisetTokenDeduplicationNotImplemented,
-               "Token deduplication is not implemented for Multiset Substitution System."];
-parseTokenDeduplication[_] := throw[Failure["multisetTokenDeduplicationNotImplemented", <||>]];
-
-$supportedEventOrdering =
-  {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"};
-parseEventOrdering[ordering : $supportedEventOrdering] := ordering;
-declareMessage[General::multisetEventOrderingNotImplemented,
-               "Only " <> ToString[$supportedEventOrdering] <> " event ordering is implemented at this time."];
-parseEventOrdering[_] := throw[Failure["multisetEventOrderingNotImplemented", <||>]];
-
-parseInit[init_List] := init;
-declareMessage[General::multisetInitNotList, "Multiset Substitution System init `init` should be a List."];
-parseInit[init_] := throw[Failure["multisetInitNotList", <|"init" -> init|>]];
