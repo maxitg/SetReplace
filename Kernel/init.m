@@ -32,7 +32,7 @@ Block[
 
   (* Type system and generators should be initialized after all Kernel files are loaded. *)
   SetReplace`PackageScope`initializeTypeSystem[];
-  SetReplace`PackageScope`initializeGenerators[];
+  SetReplace`PackageScope`initializeSystemGenerators[];
 ];
 
 End[];
