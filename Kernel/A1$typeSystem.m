@@ -28,8 +28,8 @@ SetReplaceType[name$, version$] represents a SetReplace type.
 SyntaxInformation[SetReplaceType] = {"ArgumentsPattern" -> {name_, version_.}};
 
 SetReplaceType /: MakeBoxes[
-      SetReplaceType[type_, version : (_Integer ? (# >= 0 &)) : Null], form : StandardForm | TraditionalForm] := With[{
-    versionString = If[version === Null, "", "v" <> ToString[version]]},
+      SetReplaceType[type_, version : (_Integer ? (# >= 0 &)) : Null], form : StandardForm] := With[{
+    versionString = "v" <> ToString[version]},
   TemplateBox[
     {MakeBoxes[type, form], MakeBoxes[versionString, form]},
     "SetReplaceType",
@@ -39,6 +39,11 @@ SetReplaceType /: MakeBoxes[
     InterpretationFunction -> (RowBox[
       {"SetReplaceType", "[", ToString[type], If[version === Null, Nothing, Splice[{",", ToString[version]}]], "]"}] &),
     Selectable -> False]
+];
+
+SetReplaceType /: MakeBoxes[expr : SetReplaceType[name_], form : TraditionalForm] := With[{
+    nameBoxes = MakeBoxes[name, form]},
+  InterpretationBox[nameBoxes, expr, Selectable -> False]
 ];
 
 SetReplaceType /: MakeBoxes[
