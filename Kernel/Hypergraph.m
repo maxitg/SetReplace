@@ -4,9 +4,9 @@ PackageImport["GeneralUtilities`"]
 
 PackageExport["Hypergraph"]
 PackageExport["HypergraphQ"]
-PackageExport["HypergraphOrderedQ"]
+PackageExport["HypergraphSymmetry"]
 
-SetRelatedSymbolGroup[Hypergraph, HypergraphQ, HypergraphOrderedQ, EdgeList, VertexList];
+SetRelatedSymbolGroup[Hypergraph, HypergraphQ, HypergraphSymmetry, EdgeList, VertexList];
 
 (* HypergraphQ *)
 
@@ -14,113 +14,97 @@ SetUsage @ "HypergraphQ[hg$] yields True if hg$ is a valid Hypergraph object and
 
 SyntaxInformation[HypergraphQ] = {"ArgumentsPattern" -> {expr_}};
 
-HypergraphQ[hypergraph_Hypergraph] := System`Private`HoldNoEntryQ[hypergraph];
+HypergraphQ[expr_Hypergraph] := System`Private`HoldNoEntryQ[expr];
 HypergraphQ[_] = False;
 
-(* HypergraphOrderedQ *)
+(* HypergraphSymmetry *)
 
-SetUsage @ "HypergraphOrderedQ[hg$] yields True if hg$ is a ordered Hypergraph object and False otherwise.";
+$hypergraphSymmetries = {"Ordered", "Unordered", "Cyclic", "Directed"};
 
-SyntaxInformation[HypergraphOrderedQ] = {"ArgumentsPattern" -> {hypergraph_}};
+SetUsage @ "HypergraphSymmetry[hg$] returns the symmetry of the hypergraph hg$.";
 
-HypergraphOrderedQ[HoldPattern[Hypergraph[_, orderedQ_] ? HypergraphQ]] := orderedQ;
-
-HypergraphOrderedQ[_] = False;
+HypergraphSymmetry[HoldPattern[Hypergraph[hyperedges_, symmetry_] ? HypergraphQ]] := symmetry;
 
 (* Hypergraph *)
 
-SetUsage @ "
-Hypergraph[{he$1, he$2, $$}] yields a hypergraph with hyperedges he$j.
-Hypergraph[$$, ord$] returns an ordered hypergraph if ord$ is True, and an unordered hypergraph if False.
-";
+SetUsage[Hypergraph, "
+Hypergraph[{he$1, he$2, $$}] yields an ordered hypergraph with hyperedges he$j.
+Hypergraph[$$, sym$] returns a hypergraph with symmetry sym$.
+* Valid hypergraph symmetries include: " <> listToSentence[$hypergraphSymmetries] <> ".
+"];
 
-SyntaxInformation[Hypergraph] = {"ArgumentsPattern" -> {hyperedges_, orderedQ_.}};
+SyntaxInformation[Hypergraph] = {"ArgumentsPattern" -> {hyperedges_, symmetry_.}};
 
-Hypergraph[hyperedges_, orderedQ : (True | False) : False] ? System`Private`HoldEntryQ :=
-  If[hypergraphQ[hyperedges],
-    System`Private`ConstructNoEntry[Hypergraph, Hyperedge @@@ hyperedges, orderedQ]
-  ,
-    $Failed
-  ];
+Hypergraph /: Information`GetInformation[obj_Hypergraph ? HypergraphQ] :=
+  <|
+    "ObjectType" -> Hypergraph,
+    "Symmetry" -> HypergraphSymmetry,
+    "VertexCount" -> VertexCount[obj],
+    "EdgeCount" -> EdgeCount[obj]
+  |>;
 
-hypergraphQ = MatchQ[{(_List | _Hyperedge) ...}];
+Default[Hypergraph, 2] = "Ordered";
 
-(* EdgeList, EdgeCount, VertexList, VertexCount *)
+((expr : Hypergraph[args___]) ? System`Private`HoldEntryQ) /; CheckArguments[expr, {1, 2}] :=
+  hypergraph[args];
 
-Hypergraph /: EdgeList[HoldPattern[Hypergraph[hyperedgeList_, _] ? HypergraphQ]] :=
-  hyperedgeList;
+hypergraph[hyperedges : {___List}, symmetry : Alternatives @@ $hypergraphSymmetries] :=
+  System`Private`ConstructNoEntry[Hypergraph, hyperedges, symmetry];
 
-Hypergraph /: EdgeCount[hypergraph_Hypergraph ? HypergraphQ] :=
-  Length[EdgeList[hypergraph]];
+Hypergraph::invalidHyperedges = "The argument at position 1 should be ";
 
-Hypergraph /: VertexList[hypergraph_Hypergraph ? HypergraphQ] :=
-  DeleteDuplicates[Catenate[Cases[EdgeList[hypergraph], Hyperedge[x___] :> {x}, {1}]]];
+hypergraph[hyperedges_] := hypergraph[hyperedges, "Ordered"];
 
-Hypergraph /: VertexCount[hypergraph_Hypergraph ? HypergraphQ] :=
-  Length[VertexList[hypergraph]];
+hypergraph[hyperedges_, symmetry : Alternatives @@ $hypergraphSymmetries] :=
+  Failure["HypergraphFailure", <|
+    "MessageTemplate" -> "`1` should be a list of of lists representing hyperedges.",
+    "MessageParameters" -> {hyperedges},
+    "Input" -> hyperedges
+  |>];
+
+hypergraph[hyperedges_, symmetry_] :=
+  Failure["HypergraphFailure", <|
+    "MessageTemplate" -> "`1` should be a supported symmetry: `2`.",
+    "MessageParameters" -> {symmetry, $hypergraphSymmetries},
+    "Input" -> symmetry
+  |>];
+
+(* Accessors *)
+
+Hypergraph /: EdgeList[HoldPattern[Hypergraph[hyperedges_, _] ? HypergraphQ]] := hyperedges;
+
+Hypergraph /: EdgeCount[hg_Hypergraph ? HypergraphQ] := Length[EdgeList[hg]];
+
+Hypergraph /: VertexList[hg_Hypergraph ? HypergraphQ] := DeleteDuplicates[Catenate[EdgeList[hg]]];
+
+Hypergraph /: VertexCount[hg_Hypergraph ? HypergraphQ] := Length[VertexList[hg]];
 
 (* Normal *)
 
-Hypergraph /: Normal[hypergraph_Hypergraph ? HypergraphQ] := List @@@ EdgeList[hypergraph];
+Hypergraph /: Normal[hg_Hypergraph ? HypergraphQ] := EdgeList[hg];
 
 (* SameQ *)
 
 Hypergraph /: SameQ[hg1_Hypergraph, hg2_Hypergraph] := Normal[hg1] === Normal[hg2];
 
-(* HypergraphPlot *)
-
-Hypergraph /: HypergraphPlot[hypergraph_Hypergraph ? HypergraphQ, opts___] := HypergraphPlot[Normal[hypergraph], opts];
-
 (* Boxes *)
 
-Hypergraph /: MakeBoxes[hypergraph_Hypergraph, fmt_] /; HypergraphQ[hypergraph] :=
+Hypergraph /: MakeBoxes[hg_Hypergraph ? HypergraphQ, fmt_] :=
   Module[{collapsed, expanded},
     collapsed = BoxForm`SummaryItem /@ {
-      {"VertexCount: ", VertexCount[hypergraph]},
-      {"EdgeCount: ", EdgeCount[hypergraph]}
+      {"VertexCount: ", VertexCount[hg]},
+      {"EdgeCount: ", EdgeCount[hg]}
     };
     expanded = BoxForm`SummaryItem /@ {
-      {"OrderedQ: ", HypergraphOrderedQ[hypergraph]}
+      {"Symmetry: ", HypergraphSymmetry[hg]}
     };
     BoxForm`ArrangeSummaryBox[
       Hypergraph,
-      hypergraph,
-      HypergraphPlot[hypergraph, ImageSize -> {29, 29}],
+      hg,
+      HypergraphPlot[EdgeList[hg], ImageSize -> {29, 29}],
       collapsed,
       expanded,
       fmt,
       "Interpretable" -> True
     ]
   ];
-
-(* WolframModel *)
-
-Hypergraph /: WolframModel[rule_, hypergraph_Hypergraph, args___] :=
-  WolframModel[rule, Normal[hypergraph], args];
-
-(* HypergraphToGraph *)
-
-Hypergraph /: HypergraphToGraph[hypergraph_Hypergraph, args___] :=
-  HypergraphToGraph[Normal[hypergraph], args];
-
-(*
-(* CanonicalHypergraph *)
-
-(* ::Text:: *)
-(*Does CanonicalHypergraph take into consideration if the hypergraph is ordered?*)
-
-Hypergraph /: (func : ResourceFunction["CanonicalHypergraph"])[hypergraph_Hypergraph ? HypergraphQ] :=
-  Hypergraph[func[Normal[hypergraph]]]
-
-(*AdjacencyTensor*)
-
-AdjacencyTensor = ResourceFunction["AdjacencyTensor"][Normal[#], "OrderedHyperedges" -> HypergraphOrderedQ[#]] &;
-
-Hypergraph /: (func : ResourceFunction["AdjacencyTensor"])[hypergraph_Hypergraph ? HypergraphQ, opts : OptionsPattern[]] :=
-  func[Normal[hypergraph], opts, "OrderedHyperedges" -> HypergraphOrderedQ[hypergraph]]
-
-(*KirchhoffTensor*)
-
-Hypergraph /: (func : ResourceFunction["KirchhoffTensor"])[hypergraph_Hypergraph ? HypergraphQ, opts : OptionsPattern[]] :=
-  func[Normal[hypergraph], opts, "OrderedHyperedges" -> HypergraphOrderedQ[hypergraph]]
-*)
