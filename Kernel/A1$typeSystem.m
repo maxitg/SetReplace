@@ -27,13 +27,22 @@ SetReplaceType[name$, version$] represents a SetReplace type.
 
 SyntaxInformation[SetReplaceType] = {"ArgumentsPattern" -> {name_, version_.}};
 
-SetReplaceType /: MakeBoxes[expr : SetReplaceType[name_], form : StandardForm | TraditionalForm] := With[{
-    nameBoxes = MakeBoxes[name, form]},
-  InterpretationBox[nameBoxes, expr, Selectable -> False]
+SetReplaceType /: MakeBoxes[
+      SetReplaceType[type_, version : (_Integer ? (# >= 0 &)) : Null], form : StandardForm | TraditionalForm] := With[{
+    versionString = If[version === Null, "", "v" <> ToString[version]]},
+  TemplateBox[
+    {MakeBoxes[type, form], MakeBoxes[versionString, form]},
+    "SetReplaceType",
+    DisplayFunction ->
+      style[$lightTheme][If[version === Null, $setReplaceTypeDisplayFunction, $setReplaceTypeDisplayFunctionVersioned]],
+    Editable -> False,
+    InterpretationFunction -> (RowBox[
+      {"SetReplaceType", "[", ToString[type], If[version === Null, Nothing, Splice[{",", ToString[version]}]], "]"}] &),
+    Selectable -> False]
 ];
 
 SetReplaceType /: MakeBoxes[
-      expr : SetReplaceType[name_, version_Integer ? (# >= 0 &)], form : StandardForm | TraditionalForm] := With[{
+      expr : SetReplaceType[name_, version_Integer ? (# >= 0 &)], form : TraditionalForm] := With[{
     nameBoxes = MakeBoxes[name, form],
     versionString = "v" <> ToString @ version},
   With[{boxes = RowBox[{nameBoxes, "\[ThickSpace]", StyleBox[versionString, FontColor -> Gray]}]},

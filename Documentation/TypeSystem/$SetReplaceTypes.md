@@ -6,4 +6,4 @@
 In[] := $SetReplaceTypes
 ```
 
-<img src="/Documentation/Images/$SetReplaceTypes.png" width="532.2">
+<img src="/Documentation/Images/$SetReplaceTypes.png" width="791.4">

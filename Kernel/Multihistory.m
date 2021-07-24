@@ -37,7 +37,7 @@ Multihistory /: MakeBoxes[object : Multihistory[_, _], format_] := ModuleScope[
     object,
     $genericMultihistoryIcon,
     (* Always displayed *)
-    {{BoxForm`SummaryItem[{type}]}},
+    {{BoxForm`SummaryItem[{TraditionalForm[type]}]}},
     (* Displayed on request *)
     {},
     format,

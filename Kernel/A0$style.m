@@ -22,6 +22,8 @@ PackageScope["$typeGraphEdgeStyle"]
 PackageScope["$typeGraphLayout"]
 PackageScope["$typeGraphBackground"]
 PackageScope["$evolutionObjectIcon"]
+PackageScope["$setReplaceTypeDisplayFunction"]
+PackageScope["$setReplaceTypeDisplayFunctionVersioned"]
 PackageScope["$destroyedEdgeStyle"]
 PackageScope["$createdEdgeStyle"]
 PackageScope["$destroyedAndCreatedEdgeStyle"]
@@ -102,6 +104,10 @@ $styleNames = KeySort /@ KeySort @ <|
     "Background" -> $typeGraphBackground
   |>,
   "EvolutionObject" -> <|"Icon" -> $evolutionObjectIcon|>,
+  "SetReplaceType" -> <|
+    "DisplayFunction" -> $setReplaceTypeDisplayFunction,
+    "DisplayFunctionVersioned" -> $setReplaceTypeDisplayFunctionVersioned
+  |>,
   "SpatialGraph" -> <|
     "DestroyedEdgeStyle" -> $destroyedEdgeStyle,
     "CreatedEdgeStyle" -> $createdEdgeStyle,
@@ -246,6 +252,35 @@ style[$lightTheme] = <|
 
   (* Evolution object *)
   $evolutionObjectIcon -> $graphIcon,
+
+  (* SetReplaceType *)
+  $setReplaceTypeDisplayFunction -> (FrameBox[
+    PanelBox[
+      GridBox[
+        {{StyleBox[#1, FontSize -> 13, FontColor -> RGBColor[0.034, 0.3, 0.42], FontWeight -> "SemiBold"]}},
+        BaselinePosition -> {1, 1}],
+      Background -> RGBColor[0.9517, 0.965, 0.971],
+      BaselinePosition -> Baseline,
+      FrameMargins -> {{3, 3}, {1.5, 1.5}}],
+    FrameMargins -> None,
+    FrameStyle -> RGBColor[0.65, 0.65, 0.65],
+    BaselinePosition -> Baseline,
+    RoundingRadius -> 4] &),
+
+  $setReplaceTypeDisplayFunctionVersioned -> (FrameBox[
+    PanelBox[
+      GridBox[{{
+          StyleBox[#1, FontSize -> 13, FontColor -> RGBColor[0.034, 0.3, 0.42], FontWeight -> "SemiBold"],
+          StyleBox[#2, FontColor -> RGBColor[0.517, 0.65, 0.71], FontSize -> 13, FontWeight -> "Plain"]}},
+        GridBoxSpacings -> {"Columns" -> {{0.3}}, "Rows" -> {{0}}},
+        BaselinePosition -> {1, 1}],
+      Background -> RGBColor[0.9517, 0.965, 0.971],
+      BaselinePosition -> Baseline,
+      FrameMargins -> {{3, 3}, {1.5, 1.5}}],
+    FrameMargins -> None,
+    FrameStyle -> RGBColor[0.65, 0.65, 0.65],
+    BaselinePosition -> Baseline,
+    RoundingRadius -> 4] &),
 
   (* Hypergraph diffs *)
   $destroyedEdgeStyle -> Directive[Hue[0.08, 0, 0.42], AbsoluteDashing[{1, 2}]],
