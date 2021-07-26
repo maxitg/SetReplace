@@ -5,8 +5,8 @@ generation of data (such as the data about the evaluation of a
 [nondeterministic system](/Documentation/Systems/README.md)) and computation of
 [properties](/Documentation/Properties/README.md) from that data.
 
-The usual form for the type spec is `{system, version}`, e.g., `{MultisetSubstitutionSystem, 0}`.
+Multihistory types are named after systems that produce them, e.g., `SetReplaceType[MultisetSubstitutionSystem, 0]`.
 
 * [`Multihistory`](Multihistory/README.md) &mdash; a generic kind of types for computational systems:
-  * [`{AtomicStateSystem, 0}`](AtomicStateSystem0.md)
-  * [`{MultisetSubstitutionSystem, 0}`](Multihistory/MultisetSubstitutionSystem0.md)
+  * [`AtomicStateSystem`](Multihistory/AtomicStateSystem0.md)
+  * [`MultisetSubstitutionSystem`](Multihistory/MultisetSubstitutionSystem0.md)

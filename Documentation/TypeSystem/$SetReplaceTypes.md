@@ -4,5 +4,6 @@
 
 ```wl
 In[] := $SetReplaceTypes
-Out[] = {{AtomicStateSystem, 0}, {MultisetSubstitutionSystem, 0}, {WolframModelEvolutionObject, 2}}
 ```
+
+<img src="/Documentation/Images/$SetReplaceTypes.png" width="791.4">

@@ -8,11 +8,10 @@
 In[] := $SetReplaceTypeGraph
 ```
 
-<img src="/Documentation/Images/$SetReplaceTypeGraph.png" width="816.6">
+<img src="/Documentation/Images/$SetReplaceTypeGraph.png" width="787.8">
 
 It is a [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) representation of a directed hypergraph with
 types and properties as vertices and implementations of translations and properties as edges.
 
-All vertices have the form `kind[name]`, where `kind` can be either [`SetReplaceType`](SetReplaceType.md),
-[`SetReplaceProperty`](SetReplaceProperty.md) or [`SetReplaceMethodImplementation`](SetReplaceMethodImplementation.md),
-and `name` is either a type specification or a symbol.
+Vertex heads are either [`SetReplaceType`](SetReplaceType.md), [`SetReplaceProperty`](SetReplaceProperty.md) or
+[`SetReplaceMethodImplementation`](SetReplaceMethodImplementation.md).
