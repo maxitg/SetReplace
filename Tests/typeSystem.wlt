@@ -18,7 +18,7 @@
 
       (* String <-> Expression *)
 
-      objectType[_String] := "String";
+      objectType[_String] := SetReplaceType["String"];
       objectType[_expression] := "Expression";
 
       declareTypeTranslation[stringToExpression, "String", "Expression"];
@@ -72,6 +72,15 @@
       realDescription[][real_Real] := "I am a real " <> ToString[real] <> ".";
       realDescription[args__][_] := throwInvalidPropertyArgumentCount[0, Length[{args}]];
 
+      (** Versioned types **)
+
+      objectType[versionedObject[1, _]] := SetReplaceType["Versioned", 1];
+      objectType[versionedObject[2, {_}]] := SetReplaceType["Versioned", 2];
+      declareTypeTranslation[
+        versionedObject[2, {#[[2]]}] &, SetReplaceType["Versioned", 1], SetReplaceType["Versioned", 2]];
+      declareTypeTranslation[#[[2, 1]] &, SetReplaceType["Versioned", 2], "String"];
+      declareTypeTranslation[versionedObject[1, #] &, "String", SetReplaceType["Versioned", 1]];
+
       originalTypes = $SetReplaceTypes;
       originalProperties = $SetReplaceProperties;
 
@@ -88,7 +97,10 @@
       (* unknownObject is not here because there are no translations or properties defined for it, so it's invisible to
          the type system. *)
       VerificationTest[
-        $SetReplaceTypes, Sort @ Join[originalTypes, {"String", "Expression", "HalfInteger", "EvenInteger", "Real"}]],
+        $SetReplaceTypes,
+        Sort @ Join[originalTypes,
+                    SetReplaceType /@ {"String", "Expression", "HalfInteger", "EvenInteger", "Real"},
+                    SetReplaceType["Versioned", #] & /@ {1, 2}]],
       VerificationTest[$SetReplaceProperties, Sort @ Join[originalProperties, {description, multipliedHalf}]],
 
       VerificationTest[GraphQ @ $SetReplaceTypeGraph],
@@ -103,9 +115,9 @@
         {}],
 
       (* Type querying *)
-      VerificationTest[SetReplaceObjectType[evenInteger[4]], "EvenInteger"],
-      VerificationTest[SetReplaceObjectType[2.4], "Real"],
-      VerificationTest[SetReplaceObjectType[unknownObject[4]], "Unknown"],
+      VerificationTest[SetReplaceObjectType[evenInteger[4]], SetReplaceType["EvenInteger"]],
+      VerificationTest[SetReplaceObjectType[2.4], SetReplaceType["Real"]],
+      VerificationTest[SetReplaceObjectType[unknownObject[4]], SetReplaceType["Unknown"]],
       testUnevaluated[SetReplaceObjectType[unseenObject[4]], SetReplaceObjectType::unknownObject],
 
       VerificationTest[SetReplaceObjectQ[evenInteger[4]]],
@@ -156,7 +168,16 @@
       testUnevaluated[multipliedHalf[evenInteger[3], 4], multipliedHalf::notEven],
       testUnevaluated[multipliedHalf[x] @ halfInteger[3], multipliedHalf::nonIntegerFactor],
       testUnevaluated[multipliedHalf @ cookie, {}], (* should not throw a message because it might be an operator *)
-      testUnevaluated[description @ cookie, {}]
+      testUnevaluated[description @ cookie, {}],
+
+      (* Versions *)
+      VerificationTest[
+        SetReplaceObjectType @ SetReplaceTypeConvert["Versioned"] @ "abc", SetReplaceType["Versioned", 2]],
+      VerificationTest[SetReplaceObjectType @ SetReplaceTypeConvert[SetReplaceType["Versioned", 1]] @ "abc",
+                       SetReplaceType["Versioned", 1]],
+      VerificationTest[
+        SetReplaceTypeConvert[SetReplaceType["String"]] @ SetReplaceTypeConvert[SetReplaceType["Versioned", 1]] @ "abc",
+        "abc"]
     }
   |>
 |>

@@ -60,7 +60,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___], init
     ];
 
     Multihistory[
-      {MultisetSubstitutionSystem, 0},
+      SetReplaceType[MultisetSubstitutionSystem, 0],
       <|"Rules" -> rules,
         "TerminationReason" -> terminationReason,
         "Expressions" -> expressions,

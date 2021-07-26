@@ -32,11 +32,12 @@ toMultisetRules[atomicRules___] /; !CheckArguments[AtomicStateSystem[atomicRules
 (* Conversion to Atomic State Multihistory *)
 (* Not done as a normal translation because it should fail if rules have multiple inputs/outputs. *)
 
-toAtomicStateMultihistory[rules_][multisetMultihistory_] :=
-  Multihistory[{AtomicStateSystem, 0}, <|"Rules" -> rules, "MultisetMultihistory" -> multisetMultihistory|>];
+toAtomicStateMultihistory[rules_][multisetMultihistory_] := Multihistory[
+  SetReplaceType[AtomicStateSystem, 0], <|"Rules" -> rules, "MultisetMultihistory" -> multisetMultihistory|>];
 
 (* Conversion to Multiset Multihistory *)
 
-declareTypeTranslation[toMultisetMultihistory, {AtomicStateSystem, 0}, {MultisetSubstitutionSystem, 0}];
+declareTypeTranslation[
+  toMultisetMultihistory, SetReplaceType[AtomicStateSystem, 0], SetReplaceType[MultisetSubstitutionSystem, 0]];
 
 toMultisetMultihistory[Multihistory[_, data_]] := data["MultisetMultihistory"];

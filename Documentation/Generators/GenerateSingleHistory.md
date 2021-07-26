@@ -11,11 +11,11 @@ In[] := multihistory = GenerateSingleHistory[
   MultisetSubstitutionSystem[{a_, b_} :> {a + b, a - b, a * b}], MaxEvents -> 10] @ {1, 2}
 ```
 
-<img src="/Documentation/Images/MultisetMultihistory.png" width="472.2">
+<img src="/Documentation/Images/MultisetMultihistory.png" width="426.6">
 
 ```wl
 In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & @
-  SetReplaceTypeConvert[{WolframModelEvolutionObject, 2}] @ multihistory
+  SetReplaceTypeConvert[WolframModelEvolutionObject] @ multihistory
 ```
 
 <img src="/Documentation/Images/GenerateSingleHistoryExample.png" width="478.2">

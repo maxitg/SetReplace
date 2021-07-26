@@ -2,8 +2,9 @@ Package["SetReplace`"]
 
 PackageImport["GeneralUtilities`"]
 
-declareTypeTranslation[
-  toWolframModelEvolutionObject, {MultisetSubstitutionSystem, 0}, {WolframModelEvolutionObject, 2}];
+declareTypeTranslation[toWolframModelEvolutionObject,
+                       SetReplaceType[MultisetSubstitutionSystem, 0],
+                       SetReplaceType[WolframModelEvolutionObject, 2]];
 
 toWolframModelEvolutionObject[Multihistory[_, data_]] := WolframModelEvolutionObject[<|
   "Version" -> 2,
