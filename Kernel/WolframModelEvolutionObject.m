@@ -165,11 +165,12 @@ $newParameterlessProperties = Intersection[$propertiesParameterless, Keys[$prope
 
 (* Master options handling *)
 
-General::missingMaxCompleteGeneration = "Cannot drop incomplete generations in an object with missing information.";
+declareMessage[
+  General::missingMaxCompleteGeneration, "Cannot drop incomplete generations in an object with missing information."];
 
 propertyEvaluate[False, boundary_][evolution_, caller_, rest___] :=
   If[MissingQ[evolution["CompleteGenerationsCount"]],
-    Message[caller::missingMaxCompleteGeneration]
+    throw[Failure["missingMaxCompleteGeneration", <||>]];
   ,
     propertyEvaluate[True, boundary][deleteIncompleteGenerations[evolution], caller, rest]
   ];
@@ -177,17 +178,15 @@ propertyEvaluate[False, boundary_][evolution_, caller_, rest___] :=
 propertyEvaluate[False, boundary_][evolution_, caller_, rest___] :=
   propertyEvaluate[True, boundary][deleteIncompleteGenerations[evolution], caller, rest];
 
-propertyEvaluate[includePartialGenerations : Except[True | False], _][evolution_, caller_, ___] := (
-  Message[caller::invalidFiniteOption, "IncludePartialGenerations", includePartialGenerations, {True, False}];
-  Throw[$Failed]
-);
+propertyEvaluate[includePartialGenerations : Except[True | False], _][__] := throw[Failure[
+  "invalidFiniteOption",
+  <|"opt" -> "IncludePartialGenerations", "value" -> includePartialGenerations, "choices" -> {True, False}|>]];
 
 includeBoundaryEventsPattern = None | "Initial" | "Final" | All;
 
-propertyEvaluate[_, boundary : Except[includeBoundaryEventsPattern]][evolution_, caller_, ___] := (
-  Message[caller::invalidFiniteOption, "IncludeBoundaryEvents", boundary, {None, "Initial", "Final", All}];
-  Throw[$Failed]
-);
+propertyEvaluate[_, boundary : Except[includeBoundaryEventsPattern]][__] := throw[Failure[
+  "invalidFiniteOption",
+  <|"opt" -> "IncludeBoundaryEvents", "value" -> boundary, "choices" -> {None, "Initial", "Final", All}|>]];
 
 deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := ModuleScope[
   maxCompleteGeneration = data[$maxCompleteGeneration];
@@ -208,40 +207,39 @@ deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := ModuleScope[
 
 (* Unknown property *)
 
+(* TODO: remove caller from everywhere if not needed *)
+
 propertyEvaluate[masterOptions___][
     obj_WolframModelEvolutionObject, caller_, property : Alternatives @@ Keys[$oldToNewPropertyNames], args___] :=
   propertyEvaluate[masterOptions][obj, caller, $oldToNewPropertyNames[property], args];
 
-General::unknownProperty =
-  "Property \"`1`\" should be one of \"Properties\".";
+declareMessage[General::unknownProperty, "Property \"`property`\" should be one of \"Properties\"."];
 
 propertyEvaluate[___][
     WolframModelEvolutionObject[data_ ? evolutionDataQ],
     caller_,
     s : Except[_Integer],
-    ___] /; !MemberQ[Keys[$propertyArgumentCounts], s] := (
-  Message[caller::unknownProperty, s];
-  Throw[$Failed]
-);
+    ___] /; !MemberQ[Keys[$propertyArgumentCounts], s] := throw[Failure["unknownProperty", <|"property" -> s|>]];
 
 (* Check property argument counts *)
 
-General::pargx =
-  "Property \"`1`\" requested with `2` argument`3`; " <>
-  "`4``5``6``7` argument`8` `9` expected.";
+declareMessage[
+  General::pargx,
+  "Property \"`property`\" requested with `givenArgsCount` argument`givenArgsPluralS`; " <>
+  "`optionalBetween``minCount``optionalAnd``maxCount` argument`expectedArgsPluralS` `expectedAreOrIs` expected."];
 
-makePargxMessage[property_, caller_, givenArgs_, expectedArgs_] := Message[
-  caller::pargx,
-  property,
-  givenArgs,
-  If[givenArgs == 1, "", "s"],
-  If[expectedArgs[[1]] != expectedArgs[[2]], "between ", ""],
-  expectedArgs[[1]],
-  If[expectedArgs[[1]] != expectedArgs[[2]], " and ", ""],
-  If[expectedArgs[[1]] != expectedArgs[[2]], expectedArgs[[2]], ""],
-  If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "s", ""],
-  If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "are", "is"]
-];
+throwPargxFailure[property_, givenArgs_, expectedArgs_] := throw[Failure[
+  "pargx",
+  <|"property" -> property,
+    "givenArgsCount" -> givenArgs,
+    "givenArgsPluralS" -> If[givenArgs == 1, "", "s"],
+    "optionalBetween" -> If[expectedArgs[[1]] != expectedArgs[[2]], "between ", ""],
+    "minCount" -> expectedArgs[[1]],
+    "optionalAnd" -> If[expectedArgs[[1]] != expectedArgs[[2]], " and ", ""],
+    "maxCount" -> If[expectedArgs[[1]] != expectedArgs[[2]], expectedArgs[[2]], ""],
+    "expectedArgsPluralS" -> If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "s", ""],
+    "expectedAreOrIs" -> If[expectedArgs[[1]] != expectedArgs[[2]] || expectedArgs[[1]] != 1, "are", "is"]|>
+]];
 
 propertyEvaluate[___][
     WolframModelEvolutionObject[data_ ? evolutionDataQ],
@@ -250,26 +248,19 @@ propertyEvaluate[___][
     args___] /;
       With[{argumentsCountRange = $propertyArgumentCounts[s]},
         Not[MissingQ[argumentsCountRange]] &&
-        Not[argumentsCountRange[[1]] <= Length[{args}] <= argumentsCountRange[[2]]]] := (
-  makePargxMessage[s, caller, Length[{args}], $propertyArgumentCounts[s]];
-  Throw[$Failed]
-);
+        Not[argumentsCountRange[[1]] <= Length[{args}] <= argumentsCountRange[[2]]]] :=
+  throwPargxFailure[s, Length[{args}], $propertyArgumentCounts[s]];
 
-WolframModelEvolutionObject::invalidNargs = "`1` is called with `2` arguments. " <>
-  "Either 1 argument is expected for implicit \"Generation\", or a property " <>
-  "name is expected as the first argument.";
+declareMessage[
+  WolframModelEvolutionObject::invalidNargs,
+  "`expr` is called with `argCount` arguments. Either 1 argument is expected for implicit \"Generation\", or a " <>
+  "property name is expected as the first argument."];
 
 propertyEvaluate[___][
     WolframModelEvolutionObject[data_ ? evolutionDataQ],
     caller_,
     g_Integer,
-    args__] := (
-  Message[
-    WolframModelEvolutionObject::invalidNargs,
-    HoldForm[WolframModelEvolutionObject[data][g, args]],
-    Length @ {g, args}];
-  Throw[$Failed]
-);
+    args__] := throw[Failure["invalidNargs", <|"argCount" -> Length @ {g, args}|>]];
 
 (* Check options *)
 
@@ -298,47 +289,33 @@ $propertyOptions = <|
 $nonEmptyOptionsPattern = OptionsPattern[] ? (AllTrue[{##}, Length[Flatten[{#}, Infinity]] > 0 &] &);
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
-    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+    WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
     property : Alternatives @@ Keys[$propertyOptions],
-    o : $nonEmptyOptionsPattern] := (
-  Message[
-    caller::optx,
-    First[Last[Complement[{o}, FilterRules[{o}, Options[$propertyOptions[property]]]]]],
-    Defer[obj[property, o]]];
-  Throw[$Failed]
-);
+    o : $nonEmptyOptionsPattern] := throw[Failure[
+  "optx", <|"opt" -> First[Last[Complement[{o}, FilterRules[{o}, Options[$propertyOptions[property]]]]]]|>]];
+
+declareMessage[General::nonopt, StringTemplate[General::nonopt]["`arg`", "`nonoptArgCount`", "`expr`"]];
 
 propertyEvaluate[True, includeBoundaryEventsPattern][
-    obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
-    caller_,
-    property : Alternatives @@ Keys[$propertyOptions],
-    o___] := (
-  Message[caller::nonopt, Last[{o}], 1, Defer[obj[property, o]]];
-  Throw[$Failed]
-);
+    WolframModelEvolutionObject[_ ? evolutionDataQ], caller_, Alternatives @@ Keys[$propertyOptions], o___] :=
+  throw[Failure["nonopt", <|"arg" -> Last[{o}], "nonoptArgCount" -> 1|>]];
 
 (* Convert to positive parameter (i.e., generation) number, similar to, e.g., expr[[-1]] *)
 
-General::parameterNotInteger =
-  "`1` `2` must be an integer.";
+declareMessage[General::parameterNotInteger, "`name` `value` must be an integer."];
 
-General::parameterTooLarge =
-  "`1` `2` requested out of `3` total.";
+declareMessage[General::parameterTooLarge, "`name` `value` requested out of `maxValue` total."];
 
-General::parameterTooSmall =
-  "`1` `2` cannot be smaller than `3`.";
+declareMessage[General::parameterTooSmall, "`name` `value` cannot be smaller than `minValue`."];
 
 toPositiveParameter[min_ : 0, total_, requested_, caller_, name_] := Switch[requested,
   Except[_Integer],
-    Message[caller::parameterNotInteger, name, requested];
-    Throw[$Failed],
+    throw[Failure["parameterNotInteger", <|"name" -> name, "value" -> requested|>]],
   _ ? (# > total || # < - total - 1 + min &),
-    Message[caller::parameterTooLarge, name, requested, total];
-    Throw[$Failed],
+    throw[Failure["parameterTooLarge", <|"name" -> name, "value" -> requested, "maxValue" -> total|>]],
   _ ? (0 <= # < min &),
-    Message[caller::parameterTooSmall, name, requested, min];
-    Throw[$Failed],
+    throw[Failure["parameterTooSmall", <|"name" -> name, "value" -> requested, "minValue" -> min|>]],
   _ ? Negative,
     1 + total + requested,
   _,
@@ -437,8 +414,9 @@ propertyEvaluate[True, includeBoundaryEventsPattern][
 
 (* StateEdgeIndicesAfterEvents (not a property yet) *)
 
-General::multiwayState =
-  "Multiple destroyer events found for edge index `1`. States are not supported for multiway systems.";
+declareMessage[
+  General::multiwayState,
+  "Multiple destroyer events found for edge index `edgeIndex`. States are not supported for multiway systems."];
 
 stateEdgeIndicesAfterEvents[WolframModelEvolutionObject[data_], caller_, events_] := ModuleScope[
   createdExpressions = Catenate[data[$eventOutputs][[events + 1]]];
@@ -446,8 +424,7 @@ stateEdgeIndicesAfterEvents[WolframModelEvolutionObject[data_], caller_, events_
   If[DuplicateFreeQ[destroyedExpressions],
     Sort[Complement[createdExpressions, destroyedExpressions]]
   ,
-    Message[caller::multiwayState, Last[Keys[Sort[Counts[destroyedExpressions]]]]];
-    Throw[$Failed]
+    throw[Failure["multiwayState", <|"edgeIndex" -> Last[Keys[Sort[Counts[destroyedExpressions]]]]|>]]
   ]
 ];
 
@@ -480,28 +457,17 @@ propertyEvaluate[True, boundary: includeBoundaryEventsPattern][
 
 (* FinalStatePlot *)
 
-General::nonHypergraphPlot = "`1` is only supported for states that are hypergraphs.";
+declareMessage[General::nonHypergraphPlot, "`property` is only supported for states that are hypergraphs."];
 
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
     property : "FinalStatePlot",
     o : $nonEmptyOptionsPattern /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] :=
-  Check[
-    Quiet[
-      Check[
-        HypergraphPlot[propertyEvaluate[True, boundary][obj, caller, "FinalState"], o]
-      ,
-        Message[caller::nonHypergraphPlot, property]
-      ,
-        HypergraphPlot::invalidEdges
-      ]
-    ,
-      HypergraphPlot::invalidEdges
-    ]
-  ,
-    Throw[$Failed]
-  ];
+  Catch[
+    hypergraphPlot[propertyEvaluate[True, boundary][obj, caller, "FinalState"], o],
+    Failure["invalidEdges", _],
+    throw[Failure["nonHypergraphPlot", <|"property" -> property|>]] &];
 
 (* AllEventsStatesEdgeIndicesList & AllEventsStatesList *)
 
@@ -565,27 +531,10 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     caller_,
     property : "StatesPlotsList",
     o : $nonEmptyOptionsPattern /; (Complement[{o}, FilterRules[{o}, Options[HypergraphPlot]]] == {})] :=
-  Check[
-    Quiet[
-      Map[
-        Check[
-          Check[
-            HypergraphPlot[#, o]
-          ,
-            Message[caller::nonHypergraphPlot, property]
-          ,
-            HypergraphPlot::invalidEdges
-          ]
-        ,
-          Throw[$Failed]
-        ] &,
-        propertyEvaluate[True, boundary][obj, caller, "StatesList"]]
-    ,
-      HypergraphPlot::invalidEdges
-    ]
-  ,
-    Throw[$Failed]
-  ];
+  Catch[
+    hypergraphPlot[#, o] & /@ propertyEvaluate[True, boundary][obj, caller, "StatesList"],
+    Failure["invalidEdges", _],
+    throw[Failure["nonHypergraphPlot", <|"property" -> property|>]] &];
 
 (* EventsStatesPlotsList *)
 
@@ -599,8 +548,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     Function[{currentState, newEvent}, Module[{alreadyDeletedExpressions},
       alreadyDeletedExpressions = Complement[newEvent[[1]], currentState];
       If[alreadyDeletedExpressions =!= {},
-        Message[caller::multiwayState, alreadyDeletedExpressions[[1]]];
-        Throw[$Failed]
+        throw[Failure["multiwayState", <|"edgeIndex" -> alreadyDeletedExpressions[[1]]|>]]
       ];
       Join[DeleteCases[currentState, Alternatives @@ newEvent[[1]]], newEvent[[2]]]]],
     If[MatchQ[boundary, "Initial" | All],
@@ -613,38 +561,24 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     {Complement[##], Complement[#2, #1], Intersection[##]} &,
     {Append[events[[All, 1]], {}], Prepend[events[[All, 2]], {}]}]];
   allEdges = propertyEvaluate[True, None][obj, caller, "AllEventsEdgesList"];
-  Check[
-    Quiet[
-      MapThread[
-        Check[
-          Check[
-            HypergraphPlot[
-              allEdges[[#]],
-              o,
-              EdgeStyle -> ReplacePart[
-                Table[Automatic, Length[#]],
-                Join[
-                  Thread[Position[#, Alternatives @@ #2][[All, 1]] -> style[$lightTheme][$destroyedEdgeStyle]],
-                  Thread[Position[#, Alternatives @@ #3][[All, 1]] -> style[$lightTheme][$createdEdgeStyle]],
-                  Thread[Position[#, Alternatives @@ #4][[All, 1]] ->
-                    style[$lightTheme][$destroyedAndCreatedEdgeStyle]]]]]
-          ,
-            Message[caller::nonHypergraphPlot, property]
-          ,
-            HypergraphPlot::invalidEdges
-          ]
-        ,
-          Throw[$Failed]
-        ] &,
-        If[MatchQ[boundary, "Initial" | All], Rest /@ # &, # &] @
-          If[MatchQ[boundary, All | "Final"], Most /@ # &, # &] @
-          {stateIndices, destroyedOnlyIndices, createdOnlyIndices, destroyedAndCreatedIndices}]
-    ,
-      HypergraphPlot::invalidEdges
-    ]
-  ,
-    Throw[$Failed]
-  ]
+
+  Catch[
+    MapThread[
+      hypergraphPlot[
+        allEdges[[#]],
+        o,
+        EdgeStyle -> ReplacePart[
+          Table[Automatic, Length[#]],
+          Join[
+            Thread[Position[#, Alternatives @@ #2][[All, 1]] -> style[$lightTheme][$destroyedEdgeStyle]],
+            Thread[Position[#, Alternatives @@ #3][[All, 1]] -> style[$lightTheme][$createdEdgeStyle]],
+            Thread[Position[#, Alternatives @@ #4][[All, 1]] ->
+              style[$lightTheme][$destroyedAndCreatedEdgeStyle]]]]] &,
+      If[MatchQ[boundary, "Initial" | All], Rest /@ # &, # &] @
+        If[MatchQ[boundary, All | "Final"], Most /@ # &, # &] @
+          {stateIndices, destroyedOnlyIndices, createdOnlyIndices, destroyedAndCreatedIndices}],
+    Failure["invalidEdges", _],
+    throw[Failure["nonHypergraphPlot", <|"property" -> property|>]] &]
 ];
 
 (* FinalDistinctElementsCount *)
@@ -926,19 +860,16 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
 
 (* EdgeDestroyerEventIndices *)
 
-eventListToSingleEvent[caller_, {event_}, _] := event;
+eventListToSingleEvent[{event_}, _] := event;
 
-eventListToSingleEvent[caller_, {_, __}, expression_] := (
-  Message[caller::multiwayState, expression];
-  Throw[$Failed]
-);
+eventListToSingleEvent[{_, __}, expression_] := throw[Failure["multiwayState", <|"edgeIndex" -> expression|>]];
 
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[data_ ? evolutionDataQ],
     caller_,
     "EdgeDestroyerEventIndices"] := ModuleScope[
   eventLists = propertyEvaluate[True, "Final"][obj, caller, "EdgeDestroyerEventsIndices"];
-  MapIndexed[eventListToSingleEvent[caller, #, #2[[1]]] &, eventLists]
+  MapIndexed[eventListToSingleEvent[#, #2[[1]]] &, eventLists]
 ];
 
 (* EdgeGenerationsList *)
@@ -961,20 +892,22 @@ getNumericObjectProperties[obj_, caller_, boundary_] := <|# -> propertyEvaluate[
   {"EventsCount", "PartialGenerationsCount", "AllEventsDistinctElementsCount", "AllEventsEdgesCount",
     "CompleteGenerationsCount", "TerminationReason", "CausalGraph"}|>
 
-General::invalidFeatureSpec = "Feature specification `1` should be one of `2`, a list of them, or All.";
-General::unknownFeatureGroup = "Feature group `1` should be one of `2`";
+declareMessage[General::invalidFeatureSpec,
+               "Feature specification `featureSpec` should be one of `choices`, a list of them, or All."];
 
-fromFeaturesSpec[caller_, All] := {"StructurePreservingFinalStateGraph", "ObjectProperties"}
-fromFeaturesSpec[caller_, featuresSpecs_List] := featuresSpecs
-fromFeaturesSpec[caller_, featuresSpecs_String] := {featuresSpecs}
-fromFeaturesSpec[caller_, wrongInput_] := (Message[caller::invalidFeatureSpec,
-  wrongInput, fromFeaturesSpec[caller, All]]; Throw[$Failed])
+declareMessage[General::unknownFeatureGroup, "Feature group `featureGroup` should be one of `choices`"];
+
+fromFeaturesSpec[All] := {"StructurePreservingFinalStateGraph", "ObjectProperties"}
+fromFeaturesSpec[featuresSpecs_List] := featuresSpecs
+fromFeaturesSpec[featuresSpecs_String] := {featuresSpecs}
+fromFeaturesSpec[wrongInput_] :=
+  throw[Failure["invalidFeatureSpec", <|"featureSpec" -> wrongInput, "choices" -> fromFeaturesSpec[caller, All]|>]];
 
 propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
     caller_,
     "FeatureAssociation",
-    featuresSpecs_ : All] := With[{featureGroupList = fromFeaturesSpec[caller, featuresSpecs]},
+    featuresSpecs_ : All] := With[{featureGroupList = fromFeaturesSpec[featuresSpecs]},
   nestedToSingleAssociation @ AssociationThread[featureGroupList -> Replace[featureGroupList, {
     "StructurePreservingFinalStateGraph" -> If[!propertyEvaluate[True, boundary][obj, caller, "MultiwayQ"],
       <|"" -> HypergraphToGraph[#, "StructurePreserving"] & @
@@ -983,7 +916,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
       <|"" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}]|>
     ],
     "ObjectProperties" -> getNumericObjectProperties[obj, caller, boundary],
-    other_ :> (Message[caller::unknownFeatureGroup, other, fromFeaturesSpec[caller, All]]; Throw[$Failed])
+    other_ :> throw[Failure["unknownFeatureGroup", <|"featureGroup" -> other, "choices" -> fromFeaturesSpec[All]|>]]
   }, {1}]]
 ]
 
@@ -1031,7 +964,7 @@ $masterOptions = {
   "IncludeBoundaryEvents" -> None
 };
 
-WolframModelEvolutionObject[data_ ? evolutionDataQ][args__] := ModuleScope[
+expr : WolframModelEvolutionObject[data_ ? evolutionDataQ][args__] := ModuleScope[
   {property, opts} = Replace[
     {args},
     {property__, opts : Longest[$nonEmptyOptionsPattern]} :>
@@ -1042,9 +975,10 @@ WolframModelEvolutionObject[data_ ? evolutionDataQ][args__] := ModuleScope[
       WolframModelEvolutionObject[data],
       WolframModelEvolutionObject,
       Sequence @@ property,
-      ##] & @@ Flatten[FilterRules[opts, Except[$masterOptions]]]
-  ];
-  result /; result =!= $Failed
+      ##] & @@ Flatten[FilterRules[opts, Except[$masterOptions]]],
+    _ ? FailureQ,
+    message[WolframModelEvolutionObject, #, <|"expr" -> HoldForm[expr]|>] &];
+  result /; !FailureQ[result]
 ];
 
 (** Argument Checks **)
