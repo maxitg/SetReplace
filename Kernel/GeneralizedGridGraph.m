@@ -23,32 +23,29 @@ SyntaxInformation[GeneralizedGridGraph] =
 
 FE`Evaluate[FEPrivate`AddSpecialArgCompletion["GeneralizedGridGraph" -> {{"Circular", "Directed"}}]];
 
-GeneralizedGridGraph::dimsNotList = "Dimensions specification `` should be a list.";
-
-GeneralizedGridGraph::invalidDimSpec = "Dimension specification `` is invalid.";
-
 (* Implementation *)
 
-GeneralizedGridGraph[args___] := ModuleScope[
-  result = Catch[generalizedGridGraph[args]];
-  result /; result =!= $Failed
+expr : GeneralizedGridGraph[args___] := ModuleScope[
+  result = Catch[
+    generalizedGridGraph[args], _ ? FailureQ, message[GeneralizedGridGraph, #, <|"expr" -> HoldForm[expr]|>] &];
+  result /; !FailureQ[result]
 ];
 
-generalizedGridGraph[args___] /; !Developer`CheckArgumentCount[GeneralizedGridGraph[args], 1, 1] := Throw[$Failed];
+generalizedGridGraph[args___] /; !Developer`CheckArgumentCount[GeneralizedGridGraph[args], 1, 1] :=
+  throw[Failure[None, <||>]];
+
+generalizedGridGraph[args_, opts___] /; !knownOptionsQ[GeneralizedGridGraph, {opts}] := 0;
 
 generalizedGridGraph[args_, opts___] /;
-    !knownOptionsQ[GeneralizedGridGraph, Defer[GeneralizedGridGraph[args, opts]], {opts}] := Throw[$Failed];
-
-generalizedGridGraph[args_, opts___] /;
-    !supportedOptionQ[GeneralizedGridGraph, "VertexNamingFunction", $vertexNamingFunctions, {opts}] := Throw[$Failed];
+    !supportedOptionQ[GeneralizedGridGraph, "VertexNamingFunction", $vertexNamingFunctions, {opts}] := 0;
 
 generalizedGridGraph[dimensionSpecs_List, opts___] :=
   generalizedGridGraphExplicit[toExplicitDimSpec /@ dimensionSpecs, opts];
 
-generalizedGridGraph[dimensionSpecs : Except[_List], opts___] := (
-  Message[GeneralizedGridGraph::dimsNotList, dimensionSpecs];
-  Throw[$Failed];
-);
+declareMessage[GeneralizedGridGraph::dimsNotList, "Dimensions specification `dimSpec` should be a list."];
+
+generalizedGridGraph[dimensionSpecs : Except[_List], opts___] :=
+  throw[Failure["dimsNotList", <|"dimSpec" -> dimensionSpecs|>]];
 
 toExplicitDimSpec[spec_] := toExplicitDimSpec[spec, spec];
 
@@ -64,10 +61,9 @@ toExplicitDimSpec[_, n_Integer /; n >= 0 -> spec : {($circularString | $directed
   If[MemberQ[spec, $circularString], $$circular, $$linear],
   If[MemberQ[spec, $directedString], $$directed, $$undirected]};
 
-toExplicitDimSpec[originalSpec_, _ -> _List] := (
-  Message[GeneralizedGridGraph::invalidDimSpec, originalSpec];
-  Throw[$Failed];
-);
+declareMessage[GeneralizedGridGraph::invalidDimSpec, "Dimension specification `dimSpec` is invalid."];
+
+toExplicitDimSpec[originalSpec_, _ -> _List] := throw[Failure["invalidDimSpec", <|"dimSpec" -> originalSpec|>]];
 
 generalizedGridGraphExplicit[dimensionSpecs_, opts___] := ModuleScope[
   {edgeStyle, vertexNamingFunction} = OptionValue[GeneralizedGridGraph, {opts}, {EdgeStyle, "VertexNamingFunction"}];
@@ -78,7 +74,7 @@ generalizedGridGraphExplicit[dimensionSpecs_, opts___] := ModuleScope[
   ,
     Nothing
   ];
-  If[GraphQ[#], #, Throw[$Failed]] & @ Graph[
+  If[GraphQ[#], #, throw[Failure[None, <||>]]] & @ Graph[
     renameVertices[vertexNamingFunction] @ Graph[
       (* Reversal is needed to be consistent with "GridEmbedding" *)
       If[!ListQ[#], {}, #] & @ Flatten[Outer[v @@ Reverse[{##}] &, ##] & @@ Reverse[Range /@ dimensionSpecs[[All, 1]]]],
