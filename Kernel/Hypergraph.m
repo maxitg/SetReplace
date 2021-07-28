@@ -19,7 +19,7 @@ HypergraphQ[_] = False;
 
 (* HypergraphSymmetry *)
 
-$hypergraphSymmetries = {"Ordered", "Unordered", "Cyclic", "Directed"};
+$hypergraphSymmetries = {"Ordered", "Unordered", "Cyclic"(*, "Directed"*)};
 
 SetUsage @ "HypergraphSymmetry[hg$] returns the symmetry of the hypergraph hg$.";
 
@@ -38,36 +38,36 @@ SyntaxInformation[Hypergraph] = {"ArgumentsPattern" -> {hyperedges_, symmetry_.}
 Hypergraph /: Information`GetInformation[obj_Hypergraph ? HypergraphQ] :=
   <|
     "ObjectType" -> Hypergraph,
-    "Symmetry" -> HypergraphSymmetry,
+    "Symmetry" -> HypergraphSymmetry[obj],
     "VertexCount" -> VertexCount[obj],
     "EdgeCount" -> EdgeCount[obj]
   |>;
 
-Default[Hypergraph, 2] = "Ordered";
-
 ((expr : Hypergraph[args___]) ? System`Private`HoldEntryQ) /; CheckArguments[expr, {1, 2}] :=
-  hypergraph[args];
+  With[{
+      result = Catch[hypergraph[args],
+                     _ ? FailureQ,
+                     message[Hypergraph, #, <|"expr" -> HoldForm[expr]|>] &]
+    },
+    result /; !FailureQ[result]
+  ];
 
 hypergraph[hyperedges : {___List}, symmetry : Alternatives @@ $hypergraphSymmetries] :=
   System`Private`ConstructNoEntry[Hypergraph, hyperedges, symmetry];
 
-Hypergraph::invalidHyperedges = "The argument at position 1 should be ";
-
 hypergraph[hyperedges_] := hypergraph[hyperedges, "Ordered"];
 
+declareMessage[Hypergraph::invalidHyperedges,
+               "The argument at position 1 in `expr` should be a list of of lists."];
+
 hypergraph[hyperedges_, symmetry : Alternatives @@ $hypergraphSymmetries] :=
-  Failure["HypergraphFailure", <|
-    "MessageTemplate" -> "`1` should be a list of of lists representing hyperedges.",
-    "MessageParameters" -> {hyperedges},
-    "Input" -> hyperedges
-  |>];
+  throw[Failure["invalidHyperedges"]];
+
+declareMessage[Hypergraph::invalidSymmetry,
+               "The argument at position 2 in `expr` should be a supported symmetry: `symmetries`."];
 
 hypergraph[hyperedges_, symmetry_] :=
-  Failure["HypergraphFailure", <|
-    "MessageTemplate" -> "`1` should be a supported symmetry: `2`.",
-    "MessageParameters" -> {symmetry, $hypergraphSymmetries},
-    "Input" -> symmetry
-  |>];
+  throw[Failure["invalidSymmetry", <|"symmetries" -> $hypergraphSymmetries|>]];
 
 (* Accessors *)
 
@@ -89,6 +89,13 @@ Hypergraph /: SameQ[hg1_Hypergraph, hg2_Hypergraph] := Normal[hg1] === Normal[hg
 
 (* Boxes *)
 
+disablePlotQ = TrueQ[EdgeCount[#] > 100] &;
+
+getIcon[hg_] /; (!disablePlotQ[hg] && MemberQ[$edgeTypes, HypergraphSymmetry[hg]]) :=
+  HypergraphPlot[EdgeList[hg], HypergraphSymmetry[hg], ImageSize -> {29, 29}];
+
+getIcon[_] = style[$lightTheme][$evolutionObjectIcon];
+
 Hypergraph /: MakeBoxes[hg_Hypergraph ? HypergraphQ, fmt_] :=
   Module[{collapsed, expanded},
     collapsed = BoxForm`SummaryItem /@ {
@@ -101,7 +108,7 @@ Hypergraph /: MakeBoxes[hg_Hypergraph ? HypergraphQ, fmt_] :=
     BoxForm`ArrangeSummaryBox[
       Hypergraph,
       hg,
-      HypergraphPlot[EdgeList[hg], ImageSize -> {29, 29}],
+      getIcon[hg],
       collapsed,
       expanded,
       fmt,
