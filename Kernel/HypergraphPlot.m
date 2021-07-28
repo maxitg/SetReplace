@@ -5,6 +5,7 @@ PackageImport["GeneralUtilities`"]
 PackageExport["HypergraphPlot"]
 PackageExport["WolframModelPlot"]
 
+PackageScope["hypergraphPlot"]
 PackageScope["correctHypergraphPlotOptionsQ"]
 PackageScope["$edgeTypes"]
 PackageScope["$hyperedgeRenderings"]
@@ -68,13 +69,13 @@ WolframModelPlot = HypergraphPlot;
 (* Evaluation *)
 
 expr : HypergraphPlot[args___] := ModuleScope[
-  result = Catch[hypergraphPlot$parse[args], _ ? FailureQ, message[HypergraphPlot, #, <|"expr" -> HoldForm[expr]|>] &];
+  result = Catch[hypergraphPlot[args], _ ? FailureQ, message[HypergraphPlot, #, <|"expr" -> HoldForm[expr]|>] &];
   result /; !FailureQ[result]
 ];
 
 (* Arguments parsing *)
 
-hypergraphPlot$parse[args___] /; !Developer`CheckArgumentCount[HypergraphPlot[args], 1, 2] := $Failed;
+hypergraphPlot[args___] /; !Developer`CheckArgumentCount[HypergraphPlot[args], 1, 2] := $Failed;
 
 (* allow composite vertices, but not list-vertices *)
 $hypergraphPattern = _List ? (Function[h, AllTrue[h, ListQ[#] && Length[#] > 0 &] && AllTrue[h, Not @* ListQ, 2]]);
@@ -85,20 +86,20 @@ declareMessage[
   "First argument of HypergraphPlot must be a hypergraph, i.e., a list of lists, " <>
   "where elements represent vertices, or a list of such hypergraphs."];
 
-hypergraphPlot$parse[Except[$multiHypergraphPattern], _ : $defaultEdgeType, OptionsPattern[]] :=
+hypergraphPlot[Except[$multiHypergraphPattern], _ : $defaultEdgeType, OptionsPattern[]] :=
   throw[Failure["invalidEdges", <||>]];
 
 declareMessage[General::invalidEdgeType, "Edge type `type` should be one of `allowedTypes`."];
 
-hypergraphPlot$parse[$multiHypergraphPattern,
+hypergraphPlot[$multiHypergraphPattern,
                      edgeType : Except[Alternatives[Alternatives @@ $edgeTypes, OptionsPattern[]]],
                      OptionsPattern[]] :=
   throw[Failure["invalidEdgeType", <|"type" -> edgeType, "allowedTypes" -> $edgeTypes|>]];
 
-hypergraphPlot$parse[
+hypergraphPlot[
   edges : {$hypergraphPattern..}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
     correctHypergraphPlotOptionsQ[HypergraphPlot, edges, {o}] :=
-  hypergraphPlot$parse[#, edgeType, o] & /@ edges;
+  hypergraphPlot[#, edgeType, o] & /@ edges;
 
 parseHighlight[_, _, {}, _] := ConstantArray[Automatic, 3];
 
@@ -120,7 +121,7 @@ parseHighlight[vertices_, edges_, highlightList_, highlightStyle_] := ModuleScop
       True -> Directive[highlightStyle, style[$lightTheme][$highlightedEdgePolygonStyleDirective]], {1}]}
 ];
 
-hypergraphPlot$parse[
+hypergraphPlot[
       edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
         correctHypergraphPlotOptionsQ[HypergraphPlot, edges, {o}] := ModuleScope[
   ScopeVariable[optionValue];
@@ -167,7 +168,7 @@ hypergraphPlot$parse[
         Identity],
       Automatic -> $plotStyleAutomatic[$edgePolygon],
       {0, 1}]|>;
-  hypergraphPlot[
+  hypergraphPlotImplementation[
     edges, edgeType, styles, ##, FilterRules[{o}, $defaultGraphicsOptions]] & @@
       (optionValue /@ {
         "HyperedgeRendering",
@@ -197,7 +198,7 @@ parseStyles[newSpec_, elements_, oldSpec_, oldToNewTransform_] /;
     AllTrue[{oldSpec, newSpec}, MatchQ[#, Except[_List | _Association]] &] :=
   First[parseStyles[{newSpec}, {}, {oldSpec}, oldToNewTransform]];
 
-hypergraphPlot$parse[___] := $Failed;
+hypergraphPlot[___] := $Failed;
 
 correctHypergraphPlotOptionsQ[head_, edges_, opts_] :=
   knownOptionsQ[head, opts] &&
@@ -268,7 +269,7 @@ correctStyleLengthQ[__] := True;
 
 (* Implementation *)
 
-hypergraphPlot[
+hypergraphPlotImplementation[
     edges_,
     edgeType_,
     styles_,
