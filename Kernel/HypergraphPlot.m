@@ -65,38 +65,11 @@ Options[WolframModelPlot] = Options[HypergraphPlot];
 SyntaxInformation[WolframModelPlot] = SyntaxInformation[HypergraphPlot];
 WolframModelPlot = HypergraphPlot;
 
-(* Messages *)
-
-General::invalidEdges =
-  "First argument of HypergraphPlot must be a hypergraph, i.e., a list of lists, " <>
-  "where elements represent vertices, or a list of such hypergraphs.";
-
-General::invalidEdgeType =
-  "Edge type `1` should be one of `2`.";
-
-General::invalidCoordinates =
-  "Coordinates `1` should be a list of rules from vertices to pairs of numbers.";
-
-HypergraphPlot::invalidHighlight =
-  "GraphHighlight value `1` should be a list of vertices and edges.";
-
-General::invalidSize =
-  "`1` `2` should be a non-negative number.";
-
-General::invalidPlotStyle =
-  "PlotStyle `1` should be either a style, or an association <|pattern -> style, ...|>.";
-
-General::invalidStyleLength =
-  "The list of styles `1` should have the same length as the number of `2` `3`.";
-
-General::multigraphElementwiseStyle =
-  "The elementwise style specification `1` is not supported for lists of hypergraphs.";
-
 (* Evaluation *)
 
-func : HypergraphPlot[args___] := ModuleScope[
-  result = hypergraphPlot$parse[args];
-  result /; result =!= $Failed
+expr : HypergraphPlot[args___] := ModuleScope[
+  result = Catch[hypergraphPlot$parse[args], _ ? FailureQ, message[HypergraphPlot, #, <|"expr" -> HoldForm[expr]|>] &];
+  result /; !FailureQ[result]
 ];
 
 (* Arguments parsing *)
@@ -107,22 +80,24 @@ hypergraphPlot$parse[args___] /; !Developer`CheckArgumentCount[HypergraphPlot[ar
 $hypergraphPattern = _List ? (Function[h, AllTrue[h, ListQ[#] && Length[#] > 0 &] && AllTrue[h, Not @* ListQ, 2]]);
 $multiHypergraphPattern = $hypergraphPattern | {$hypergraphPattern...};
 
-hypergraphPlot$parse[edges : Except[$multiHypergraphPattern], edgeType_ : $defaultEdgeType, o : OptionsPattern[]] := (
-  Message[HypergraphPlot::invalidEdges];
-  $Failed
-);
+declareMessage[
+  General::invalidEdges,
+  "First argument of HypergraphPlot must be a hypergraph, i.e., a list of lists, " <>
+  "where elements represent vertices, or a list of such hypergraphs."];
 
-hypergraphPlot$parse[
-    edges : $multiHypergraphPattern,
-    edgeType : Except[Alternatives[Alternatives @@ $edgeTypes, OptionsPattern[]]],
-    o : OptionsPattern[]] := (
-  Message[HypergraphPlot::invalidEdgeType, edgeType, $edgeTypes];
-  $Failed
-);
+hypergraphPlot$parse[Except[$multiHypergraphPattern], _ : $defaultEdgeType, OptionsPattern[]] :=
+  throw[Failure["invalidEdges", <||>]];
+
+declareMessage[General::invalidEdgeType, "Edge type `type` should be one of `allowedTypes`."];
+
+hypergraphPlot$parse[$multiHypergraphPattern,
+                     edgeType : Except[Alternatives[Alternatives @@ $edgeTypes, OptionsPattern[]]],
+                     OptionsPattern[]] :=
+  throw[Failure["invalidEdgeType", <|"type" -> edgeType, "allowedTypes" -> $edgeTypes|>]];
 
 hypergraphPlot$parse[
   edges : {$hypergraphPattern..}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
-    correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}] :=
+    correctHypergraphPlotOptionsQ[HypergraphPlot, edges, {o}] :=
   hypergraphPlot$parse[#, edgeType, o] & /@ edges;
 
 parseHighlight[_, _, {}, _] := ConstantArray[Automatic, 3];
@@ -147,7 +122,7 @@ parseHighlight[vertices_, edges_, highlightList_, highlightStyle_] := ModuleScop
 
 hypergraphPlot$parse[
       edges : $hypergraphPattern, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] /;
-        correctHypergraphPlotOptionsQ[HypergraphPlot, Defer[HypergraphPlot[edges, o]], edges, {o}] := ModuleScope[
+        correctHypergraphPlotOptionsQ[HypergraphPlot, edges, {o}] := ModuleScope[
   ScopeVariable[optionValue];
   optionValue[opt_] := OptionValue[HypergraphPlot, {o}, opt];
   vertices = vertexList[edges];
@@ -224,71 +199,70 @@ parseStyles[newSpec_, elements_, oldSpec_, oldToNewTransform_] /;
 
 hypergraphPlot$parse[___] := $Failed;
 
-correctHypergraphPlotOptionsQ[head_, expr_, edges_, opts_] :=
-  knownOptionsQ[head, expr, opts] &&
+correctHypergraphPlotOptionsQ[head_, edges_, opts_] :=
+  knownOptionsQ[head, opts] &&
   (And @@ (supportedOptionQ[head, ##, opts] & @@@ {
       {"HyperedgeRendering", $hyperedgeRenderings}})) &&
-  correctVertexCoordinatesQ[head, OptionValue[HypergraphPlot, opts, VertexCoordinates]] &&
+  correctVertexCoordinatesQ[OptionValue[HypergraphPlot, opts, VertexCoordinates]] &&
   correctHighlightQ[OptionValue[HypergraphPlot, opts, GraphHighlight]] &&
-  correctSizeQ[head, "Vertex size", OptionValue[HypergraphPlot, opts, VertexSize], {}] &&
-  correctSizeQ[head, "Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"], {Automatic}] &&
-  correctPlotStyleQ[head, OptionValue[HypergraphPlot, opts, PlotStyle]] &&
+  correctSizeQ["Vertex size", OptionValue[HypergraphPlot, opts, VertexSize], {}] &&
+  correctSizeQ["Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"], {Automatic}] &&
+  correctPlotStyleQ[OptionValue[HypergraphPlot, opts, PlotStyle]] &&
   correctStyleLengthQ[
-    head,
     "vertices",
     MatchQ[edges, {$hypergraphPattern..}],
     Length[vertexList[edges]],
     OptionValue[HypergraphPlot, opts, VertexStyle]] &&
   And @@ (correctStyleLengthQ[
-    head,
     "edges",
     MatchQ[edges, {$hypergraphPattern..}],
     Length[edges],
     OptionValue[HypergraphPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"});
 
-correctVertexCoordinatesQ[head_, vertexCoordinates_] :=
-  If[!MatchQ[vertexCoordinates,
-      Automatic |
-      {(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
-    Message[head::invalidCoordinates, vertexCoordinates];
-    False
-  ,
+declareMessage[General::invalidCoordinates,
+               "Coordinates `coordinates` should be a list of rules from vertices to pairs of numbers."];
+
+correctVertexCoordinatesQ[vertexCoordinates_] :=
+  If[MatchQ[vertexCoordinates, Automatic | {(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
     True
+  ,
+    throw[Failure["invalidCoordinates", <|"coordinates" -> vertexCoordinates|>]]
   ];
 
-correctHighlightQ[highlight_] := (
-  If[!ListQ[highlight], Message[HypergraphPlot::invalidHighlight, highlight]];
-  ListQ[highlight]
-);
+declareMessage[
+  HypergraphPlot::invalidHighlight, "GraphHighlight value `highlightValue` should be a list of vertices and edges."];
 
-correctSizeQ[head_, capitalizedName_, size_ ? (# >= 0 &), _] := True;
+correctHighlightQ[highlight_] :=
+  If[ListQ[highlight], True, throw[Failure["invalidHighlight", <|"highlightValue" -> highlight|>]]];
 
-correctSizeQ[head_, capitalizedName_, size_, allowedSpecialValues_] /;
-    MatchQ[size, Alternatives @@ allowedSpecialValues] := True;
+correctSizeQ[_, size_ ? (# >= 0 &), _] := True;
 
-correctSizeQ[head_, capitalizedName_, size_, _] := (
-  Message[head::invalidSize, capitalizedName, size];
-  False
-);
+correctSizeQ[_, size_, allowedSpecialValues_] /; MatchQ[size, Alternatives @@ allowedSpecialValues] := True;
 
-correctPlotStyleQ[head_, style_List] := (
-  Message[head::invalidPlotStyle, style];
-  False
-);
+declareMessage[General::invalidSize, "`capitalizedName` `size` should be a non-negative number."];
 
-correctPlotStyleQ[__] := True;
+correctSizeQ[capitalizedName_, size_, _] :=
+  throw[Failure["invalidSize", <|"capitalizedName" -> capitalizedName, "size" -> size|>]];
+
+declareMessage[General::invalidPlotStyle,
+               "PlotStyle `plotStyle` should be either a style, or an association <|pattern -> style, ...|>."];
+
+correctPlotStyleQ[style_List] := throw[Failure["invalidPlotStyle", <|"plotStyle" -> style|>]];
+
+correctPlotStyleQ[_] := True;
 
 (* Single hypergraph *)
-correctStyleLengthQ[head_, name_, False, correctLength_, styles_List] /; Length[styles] =!= correctLength := (
-  Message[head::invalidStyleLength, styles, name, correctLength];
-  False
-);
+declareMessage[General::invalidStyleLength,
+               "The list of styles `styles` should have the same length `correctLength` as the number of `name`."];
+
+correctStyleLengthQ[name_, False, correctLength_, styles_List] /; Length[styles] =!= correctLength :=
+  throw[Failure["invalidStyleLength", <|"styles" -> styles, "name" -> name, "correctLength" -> correctLength|>]];
 
 (* Multiple hypergraphs *)
-correctStyleLengthQ[head_, name_, True, correctLength_, styles_List] := (
-  Message[head::multigraphElementwiseStyle, styles];
-  False
-);
+declareMessage[General::multigraphElementwiseStyle,
+               "The elementwise style specification `styleSpec` is not supported for lists of hypergraphs."];
+
+correctStyleLengthQ[_, True, _, styles_List] := throw[Failure["multigraphElementwiseStyle", <|"styleSpec" -> styles|>]];
 
 correctStyleLengthQ[__] := True;
 
@@ -305,7 +279,7 @@ hypergraphPlot[
     arrowheadLength_,
     maxImageSize_,
     background_,
-    graphicsOptions_] := Catch[Module[{embedding, graphics, imageSizeScaleFactor, numericArrowheadLength},
+    graphicsOptions_] := Module[{embedding, graphics, imageSizeScaleFactor, numericArrowheadLength},
   embedding = hypergraphEmbedding[edgeType, hyperedgeRendering, vertexCoordinates] @ edges;
   numericArrowheadLength = Replace[
     arrowheadLength,
@@ -322,7 +296,7 @@ hypergraphPlot[
     ,
       ImageSize -> adjustImageSize[maxImageSize, imageSizeScaleFactor]
     ]]
-]];
+];
 
 vertexEmbeddingRange[{}] := 0;
 
@@ -332,10 +306,11 @@ adjustImageSize[w_ ? NumericQ, {wScale_, hScale_}] := w wScale;
 
 adjustImageSize[dims : {w_ ? NumericQ, h_ ? NumericQ}, scale_] := dims scale;
 
-HypergraphPlot::invalidMaxImageSize =
-  "MaxImageSize `1` should either be a single number (width) or a list of two numbers (width and height)";
+declareMessage[
+  HypergraphPlot::invalidMaxImageSize,
+  "MaxImageSize `dims` should either be a single number (width) or a list of two numbers (width and height)"];
 
-adjustImageSize[dims_, _] := (Message[HypergraphPlot::invalidMaxImageSize, dims]; Throw[$Failed]);
+adjustImageSize[dims_, _] := throw[Failure["invalidMaxImageSize", <|"dims" -> dims|>]];
 
 (** Embedding **)
 (** hypergraphEmbedding produces an embedding of vertices and edges. The format is {vertices, edges},
