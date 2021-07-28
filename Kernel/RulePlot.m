@@ -36,43 +36,25 @@ SyntaxInformation[RulePlot] = Join[
 ];
 Protect[RulePlot];
 
-(* Messages *)
-
-RulePlot::patternRules =
-  "RulePlot for pattern rules `1` is not implemented.";
-
-RulePlot::notHypergraphRule =
-  "Rule `1` should be a rule operating on hyperedges (set elements should be lists).";
-
-RulePlot::invalidSpacings =
-  "Spacings `1` should be either a single number, or a two-by-two list.";
-
-RulePlot::invalidAspectRatio =
-  "RulePartsAspectRatio `1` should be a positive number.";
-
-RulePlot::elementwiseStyle = "The elementwise style specification `1` is not supported in RulePlot.";
-
 (* Evaluation *)
 
-WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`CheckArgumentCount[wm, 1, 1]], opts___] :=
-  ModuleScope[
-    result = rulePlot$parse[{args}, {opts}];
-    If[Head[result] === rulePlot$parse,
-      result = $Failed
-    ];
-    result /; result =!= $Failed
-  ];
+WolframModel /: expr : RulePlot[
+    wm : WolframModel[args___] /; Quiet[Developer`CheckArgumentCount[wm, 1, 1]], opts___] := ModuleScope[
+  result = Catch[rulePlot$parse[{args}, {opts}],
+                 _ ? FailureQ,
+                 message[RulePlot, #, <|"expr" -> HoldForm[expr]|>] &];
+  result /; !FailureQ[result]
+];
 
 (* Evolution object *)
 
-WolframModelEvolutionObject /: RulePlot[evo : WolframModelEvolutionObject[data_ ? evolutionDataQ], opts___] :=
-  ModuleScope[
-    result = rulePlot$parse[{evo["Rules"]}, {opts}];
-    If[Head[result] === rulePlot$parse,
-      result = $Failed
-    ];
-    result /; result =!= $Failed
-  ];
+WolframModelEvolutionObject /:
+    expr : RulePlot[evo : WolframModelEvolutionObject[_ ? evolutionDataQ], opts___] := ModuleScope[
+  result = Catch[rulePlot$parse[{evo["Rules"]}, {opts}],
+                 _ ? FailureQ,
+                 message[RulePlot, #, <|"expr" -> HoldForm[expr]|>] &];
+  result /; !FailureQ[result]
+];
 
 (* Arguments parsing *)
 
@@ -90,69 +72,63 @@ rulePlot$parse[{
         {"EdgeType", GraphHighlightStyle, "HyperedgeRendering", VertexCoordinates, VertexLabels, Frame, FrameStyle,
           PlotLegends, Spacings, "RulePartsAspectRatio", PlotStyle, VertexStyle, EdgeStyle, "EdgePolygonStyle",
           VertexSize, "ArrowheadLength", Background}] /;
-    correctOptionsQ[{rulesSpec, o}, {opts}];
+    correctOptionsQ[opts];
 
 hypergraphRulesSpecQ[rulesSpec_List ? wolframModelRulesSpecQ] := Fold[# && hypergraphRulesSpecQ[#2] &, True, rulesSpec];
 
+declareMessage[
+  RulePlot::notHypergraphRule, "Rule `rule` should be a rule operating on hyperedges (set elements should be lists)."];
+
 hypergraphRulesSpecQ[ruleSpec_Rule ? wolframModelRulesSpecQ] :=
-  If[MatchQ[ruleSpec, {___List} -> {___List}],
-    True
-  ,
-    Message[RulePlot::notHypergraphRule, ruleSpec];
-    False
-  ];
+  If[MatchQ[ruleSpec, {___List} -> {___List}], True, throw[Failure["notHypergraphRule", <|"rule" -> ruleSpec|>]]];
 
-hypergraphRulesSpecQ[rulesSpec_Association ? wolframModelRulesSpecQ] := (
-  Message[RulePlot::patternRules, rulesSpec];
-  False
-);
+declareMessage[RulePlot::patternRules, "RulePlot for pattern rules `rules` is not implemented."];
 
-hypergraphRulesSpecQ[rulesSpec_] := (
-  Message[RulePlot::invalidRules, rulesSpec];
-  False
-);
+hypergraphRulesSpecQ[rulesSpec_Association ? wolframModelRulesSpecQ] :=
+  throw[Failure["patternRules", <|"rules" -> rulesSpec|>]];
 
-correctOptionsQ[args_, {opts___}] :=
-  knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], {opts}, $allowedOptions] &&
+hypergraphRulesSpecQ[rulesSpec_] := throw[Failure["invalidRules", <|"rules" -> rulesSpec|>]];
+
+correctOptionsQ[opts___] :=
+  knownOptionsQ[RulePlot, {opts}, $allowedOptions] &&
   supportedOptionQ[RulePlot, Frame, {True, False, Automatic}, {opts}] &&
   correctEdgeTypeQ[OptionValue[RulePlot, {opts}, "EdgeType"]] &&
   correctSpacingsQ[{opts}] &&
   correctRulePartsAspectRatioQ[OptionValue[RulePlot, {opts}, "RulePartsAspectRatio"]] &&
   And @@ (styleNotListQ[OptionValue[RulePlot, {opts}, #]] & /@ {VertexStyle, EdgeStyle, "EdgePolygonStyle"}) &&
-  correctHypergraphPlotOptionsQ[
-    RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[HypergraphPlot]]];
+  correctHypergraphPlotOptionsQ[RulePlot, Automatic, FilterRules[{opts}, Options[HypergraphPlot]]];
 
-correctEdgeTypeQ[edgeType_] :=
-  If[MatchQ[edgeType, Alternatives @@ $edgeTypes],
-    True
-  ,
-    Message[RulePlot::invalidEdgeType, edgeType, $edgeTypes];
-    False
-  ];
+correctEdgeTypeQ[edgeType_] := If[MatchQ[edgeType, Alternatives @@ $edgeTypes],
+  True
+,
+  throw[Failure["invalidEdgeType", <|"type" -> edgeType, "allowedTypes" -> $edgeTypes|>]]
+];
+
+declareMessage[
+  RulePlot::invalidSpacings, "Spacings `spacings` should be either a single number, or a two-by-two list."];
 
 correctSpacingsQ[opts_] := ModuleScope[
   spacings = OptionValue[RulePlot, opts, Spacings];
   correctQ = MatchQ[spacings, Automatic | (_ ? NumericQ) | {Repeated[{Repeated[_ ? NumericQ, {2}]}, {2}]}];
-  If[!correctQ, Message[RulePlot::invalidSpacings, spacings]];
-  correctQ
+  If[!correctQ, throw[Failure["invalidSpacings", <|"spacings" -> spacings|>]]];
+  True
 ];
 
 correctRulePartsAspectRatioQ[Automatic] := True;
 
-correctRulePartsAspectRatioQ[aspectRatio_] :=
-  If[NumericQ[aspectRatio] && aspectRatio > 0,
-    True
-  ,
-    Message[RulePlot::invalidAspectRatio, aspectRatio];
-    False
-  ];
+declareMessage[RulePlot::invalidAspectRatio, "RulePartsAspectRatio `aspectRatio` should be a positive number."];
 
-styleNotListQ[styles_List] := (
-  Message[RulePlot::elementwiseStyle, styles];
-  False
-);
+correctRulePartsAspectRatioQ[aspectRatio_] := If[NumericQ[aspectRatio] && aspectRatio > 0,
+  True
+,
+  throw[Failure["invalidAspectRatio", <|"aspectRatio" -> aspectRatio|>]]
+];
 
-styleNotListQ[styles : Except[_List]] := True;
+declareMessage[RulePlot::elementwiseStyle, "The elementwise style specification `style` is not supported in RulePlot."];
+
+styleNotListQ[styles_List] := throw[Failure["elementwiseStyle", <|"style" -> styles|>]];
+
+styleNotListQ[Except[_List]] := True;
 
 (* Implementation *)
 
