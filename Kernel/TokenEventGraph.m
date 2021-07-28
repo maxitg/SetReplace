@@ -20,7 +20,8 @@ SyntaxInformation[TokenEventGraph] = {
 declareRawProperty[tokenEventGraph, SetReplaceType[MultisetSubstitutionSystem, 0], TokenEventGraph];
 
 (* TODO: check option correctness *)
-tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] := ModuleScope[
+tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] /;
+    knownOptionsQ[TokenEventGraph, {opts}] := ModuleScope[
   inputsToEvents = Catenate[Thread /@ Thread[
     Map[MultihistoryToken, Rest @ Normal[data["EventInputs"]], {2}] ->
       MultihistoryEvent /@ Range[data["EventInputs"]["Length"] - 1]]];
