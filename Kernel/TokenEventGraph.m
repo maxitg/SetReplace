@@ -19,7 +19,6 @@ SyntaxInformation[TokenEventGraph] = {
 
 declareRawProperty[tokenEventGraph, SetReplaceType[MultisetSubstitutionSystem, 0], TokenEventGraph];
 
-(* TODO: check arguments count *)
 (* TODO: check option correctness *)
 tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] := ModuleScope[
   inputsToEvents = Catenate[Thread /@ Thread[
@@ -38,6 +37,10 @@ tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] := ModuleScope[
     VertexLabels -> parseLabelRules[data][OptionValue[VertexLabels]],
     opts]
 ];
+
+declareMessage[TokenEventGraph::unexpectedArguments,
+               "Only Multihistory and options are expected as TokenEventGraph arguments in `expr`"];
+tokenEventGraph[___][_] := throw[Failure["unexpectedArguments", <||>]];
 
 parseVertexStyleRules[data_][Automatic] := parseElementRules[data] @ {
   _MultihistoryToken -> style[$lightTheme][$expressionVertexStyle],
