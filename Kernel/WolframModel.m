@@ -189,7 +189,6 @@ expr : WolframModel[
       overridenOptionValue["IncludePartialGenerations"],
       overridenOptionValue["IncludeBoundaryEvents"]][
       modifiedEvolution,
-      WolframModel,
       #] &;
     result = Catch[
       If[modifiedEvolution =!= $Failed,
