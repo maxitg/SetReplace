@@ -38,8 +38,11 @@ tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] := ModuleScope[
       OptionValue[GraphLayout],
       Automatic :> {
         "LayeredDigraphEmbedding",
-        "VertexLayerPosition" ->
-          (vertexList /. parseElementRules[data][-(2 * "Generation" + Boole["Type" == MultihistoryEvent])])}],
+        "VertexLayerPosition" -> Replace[
+          vertexList,
+          parseElementRules[data][
+            {_MultihistoryToken -> -(2 * "Generation"), _MultihistoryEvent -> -(2 * "Generation" - 1)}],
+          {1}]}],
     Background -> Replace[OptionValue[Background], Automatic -> style[$lightTheme][$tokenEventGraphBackground]],
     opts];
   If[!GraphQ[result], throw[Failure[None, <||>]]];
@@ -68,7 +71,6 @@ parseElementRules[data_][arg_] := parseElementRules[data][_ -> arg];
 parseElementRules[data_][rule : _Rule | _RuleDelayed] := parseElementRules[data][{rule}];
 
 tokenPropertyRules[data_, n_] := <|
-  "Type" -> MultihistoryToken,
   "Index" -> n,
   "Content" :> data["Expressions"]["Part", n],
   "RuleIndex" -> "",
@@ -76,7 +78,6 @@ tokenPropertyRules[data_, n_] := <|
 |>;
 
 eventPropertyRules[data_, n_] := <|
-  "Type" -> MultihistoryEvent,
   "Index" -> n,
   "Content" :>
     Rule @@ (data["Expressions"]["Part", #] & /@ data[#]["Part", n + 1] & /@ {"EventInputs", "EventOutputs"}),
