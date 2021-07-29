@@ -31,10 +31,9 @@ tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] := ModuleScope[
     Join[MultihistoryToken /@ Range @ data["Expressions"]["Length"],
          MultihistoryEvent /@ Range[data["EventInputs"]["Length"] - 1]], (* {} -> {} causes isolated events *)
     Join[inputsToEvents, eventsToOutputs],
-    (* TODO: rename styles in SetReplaceStyleData *)
     (* TODO: implement layout *)
     VertexStyle -> parseVertexStyleRules[data][OptionValue[VertexStyle]],
-    EdgeStyle -> style[$lightTheme][$causalGraphEdgeStyle],
+    EdgeStyle -> style[$lightTheme][$causalEdgeStyle],
     VertexLabels -> parseLabelRules[data][OptionValue[VertexLabels]],
     opts];
   If[!GraphQ[result], throw[Failure[None, <||>]]];
@@ -46,8 +45,8 @@ declareMessage[TokenEventGraph::unexpectedArguments,
 tokenEventGraph[___][_] := throw[Failure["unexpectedArguments", <||>]];
 
 parseVertexStyleRules[data_][Automatic] := parseElementRules[data] @ {
-  _MultihistoryToken -> style[$lightTheme][$expressionVertexStyle],
-  _MultihistoryEvent -> style[$lightTheme][$causalGraphVertexStyle]
+  _MultihistoryToken -> style[$lightTheme][$tokenVertexStyle],
+  _MultihistoryEvent -> style[$lightTheme][$eventVertexStyle]
 };
 parseVertexStyleRules[data_][arg_] := parseElementRules[data][arg];
 
