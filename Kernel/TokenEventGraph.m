@@ -40,7 +40,7 @@ tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] := ModuleScope[
         "LayeredDigraphEmbedding",
         "VertexLayerPosition" -> Replace[
           vertexList,
-          parseElementRules[data][
+          parseElementRules[data, 0, 0][
             {_MultihistoryToken -> -(2 * "Generation"), _MultihistoryEvent -> -(2 * "Generation" - 1)}],
           {1}]}],
     Background -> Replace[OptionValue[Background], Automatic -> style[$lightTheme][$tokenEventGraphBackground]],
@@ -53,22 +53,22 @@ declareMessage[TokenEventGraph::unexpectedArguments,
                "Only Multihistory and options are expected as TokenEventGraph arguments in `expr`"];
 tokenEventGraph[___][_] := throw[Failure["unexpectedArguments", <||>]];
 
-parseVertexStyleRules[data_][Automatic] := parseElementRules[data] @ {
-  _MultihistoryToken -> style[$lightTheme][$tokenVertexStyle],
-  _MultihistoryEvent -> style[$lightTheme][$eventVertexStyle]
-};
-parseVertexStyleRules[data_][arg_] := parseElementRules[data][arg];
+parseVertexStyleRules[data_][Automatic] := parseVertexStyleRules[data] @ {};
 
-parseLabelRules[data_][Automatic] := parseElementRules[data] @ {
+parseVertexStyleRules[data_][arg_] :=
+  parseElementRules[data, style[$lightTheme][$tokenVertexStyle], style[$lightTheme][$eventVertexStyle]][arg];
+
+parseLabelRules[data_][Automatic] := parseLabelRules[data] @ {
   _MultihistoryToken -> Placed[{"Content", Row[{"Index: ", "Index"}]}, {After, Tooltip}],
   _MultihistoryEvent ->
     Placed[{If[Length[data["Rules"]] > 1, "RuleIndex", ""], Row[{"Index: ", "Index"}]}, {After, Tooltip}]
 };
-parseLabelRules[data_][arg_] := parseElementRules[data][arg];
 
-parseElementRules[data_][arg_] := parseElementRules[data][_ -> arg];
+parseLabelRules[data_][arg_] := parseElementRules[data, "", ""][arg];
 
-parseElementRules[data_][rule : _Rule | _RuleDelayed] := parseElementRules[data][{rule}];
+parseElementRules[data_, default__][arg_] := parseElementRules[data, default][_ -> arg];
+
+parseElementRules[data_, default__][rule : _Rule | _RuleDelayed] := parseElementRules[data, default][{rule}];
 
 tokenPropertyRules[data_, n_] := <|
   "Index" -> n,
@@ -85,6 +85,6 @@ eventPropertyRules[data_, n_] := <|
   "Generation" :> data["EventGenerations"]["Part", n + 1]
 |>;
 
-parseElementRules[data_][rules : {(_Rule | _RuleDelayed)..}] :=
-  #1[n_] :> Replace[#1[n], Append[rules /. #2[data, n], _ -> ""]] & @@@
-    {{MultihistoryToken, tokenPropertyRules}, {MultihistoryEvent, eventPropertyRules}};
+parseElementRules[data_, defaultToken_, defaultEvent_][rules : {(_Rule | _RuleDelayed)...}] :=
+  #1[n_] :> Replace[#1[n], Append[rules /. #2[data, n], _ -> #3]] & @@@
+    {{MultihistoryToken, tokenPropertyRules, defaultToken}, {MultihistoryEvent, eventPropertyRules, defaultEvent}};
