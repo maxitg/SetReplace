@@ -90,14 +90,14 @@ hypergraphRulesSpecQ[rulesSpec_Association ? wolframModelRulesSpecQ] :=
 hypergraphRulesSpecQ[rulesSpec_] := throw[Failure["invalidRules", <|"rules" -> rulesSpec|>]];
 
 correctOptionsQ[opts___] := (
-  checkKnownOptions[RulePlot, {opts}, $allowedOptions];
+  checkIfKnownOptions[RulePlot, {opts}, $allowedOptions];
   checkEnumOptionValue[RulePlot, Frame, {True, False, Automatic}, {opts}];
+  checkHypergraphPlotOptions[RulePlot, Automatic, FilterRules[{opts}, Options[HypergraphPlot]]];
   And[
     correctEdgeTypeQ[OptionValue[RulePlot, {opts}, "EdgeType"]],
     correctSpacingsQ[{opts}],
     correctRulePartsAspectRatioQ[OptionValue[RulePlot, {opts}, "RulePartsAspectRatio"]],
-    And @@ (styleNotListQ[OptionValue[RulePlot, {opts}, #]] & /@ {VertexStyle, EdgeStyle, "EdgePolygonStyle"}),
-    correctHypergraphPlotOptionsQ[RulePlot, Automatic, FilterRules[{opts}, Options[HypergraphPlot]]]]
+    And @@ (styleNotListQ[OptionValue[RulePlot, {opts}, #]] & /@ {VertexStyle, EdgeStyle, "EdgePolygonStyle"})]
 );
 
 correctEdgeTypeQ[edgeType_] := If[MatchQ[edgeType, Alternatives @@ $edgeTypes],
