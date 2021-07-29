@@ -34,13 +34,11 @@ expr : GeneralizedGridGraph[args___] := ModuleScope[
 generalizedGridGraph[args___] /; !Developer`CheckArgumentCount[GeneralizedGridGraph[args], 1, 1] :=
   throw[Failure[None, <||>]];
 
-generalizedGridGraph[args_, opts___] /; !knownOptionsQ[GeneralizedGridGraph, {opts}] := 0;
-
-generalizedGridGraph[args_, opts___] /;
-    !supportedOptionQ[GeneralizedGridGraph, "VertexNamingFunction", $vertexNamingFunctions, {opts}] := 0;
-
-generalizedGridGraph[dimensionSpecs_List, opts___] :=
-  generalizedGridGraphExplicit[toExplicitDimSpec /@ dimensionSpecs, opts];
+generalizedGridGraph[dimensionSpecs_List, opts___] := (
+  assertKnownOptions[GeneralizedGridGraph, {opts}];
+  assertEnumOptionValue[GeneralizedGridGraph, "VertexNamingFunction", $vertexNamingFunctions, {opts}];
+  generalizedGridGraphExplicit[toExplicitDimSpec /@ dimensionSpecs, opts]
+);
 
 declareMessage[GeneralizedGridGraph::dimsNotList, "Dimensions specification `dimSpec` should be a list."];
 
