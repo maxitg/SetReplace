@@ -32,8 +32,8 @@ expr : GeneralizedGridGraph[args___] /; Developer`CheckArgumentCount[expr, 1, 1]
 ];
 
 generalizedGridGraph[dimensionSpecs_List, opts___] := (
-  assertKnownOptions[GeneralizedGridGraph, {opts}];
-  assertEnumOptionValue[GeneralizedGridGraph, "VertexNamingFunction", $vertexNamingFunctions, {opts}];
+  checkKnownOptions[GeneralizedGridGraph, {opts}];
+  checkEnumOptionValue[GeneralizedGridGraph, "VertexNamingFunction", $vertexNamingFunctions, {opts}];
   generalizedGridGraphExplicit[toExplicitDimSpec /@ dimensionSpecs, opts]
 );
 
