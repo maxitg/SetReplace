@@ -200,25 +200,26 @@ parseStyles[newSpec_, elements_, oldSpec_, oldToNewTransform_] /;
 
 hypergraphPlot[___] := $Failed;
 
-correctHypergraphPlotOptionsQ[head_, edges_, opts_] :=
-  knownOptionsQ[head, opts] &&
-  (And @@ (supportedOptionQ[head, ##, opts] & @@@ {
-      {"HyperedgeRendering", $hyperedgeRenderings}})) &&
-  correctVertexCoordinatesQ[OptionValue[HypergraphPlot, opts, VertexCoordinates]] &&
-  correctHighlightQ[OptionValue[HypergraphPlot, opts, GraphHighlight]] &&
-  correctSizeQ["Vertex size", OptionValue[HypergraphPlot, opts, VertexSize], {}] &&
-  correctSizeQ["Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"], {Automatic}] &&
-  correctPlotStyleQ[OptionValue[HypergraphPlot, opts, PlotStyle]] &&
-  correctStyleLengthQ[
-    "vertices",
-    MatchQ[edges, {$hypergraphPattern..}],
-    Length[vertexList[edges]],
-    OptionValue[HypergraphPlot, opts, VertexStyle]] &&
-  And @@ (correctStyleLengthQ[
-    "edges",
-    MatchQ[edges, {$hypergraphPattern..}],
-    Length[edges],
-    OptionValue[HypergraphPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"});
+correctHypergraphPlotOptionsQ[head_, edges_, opts_] := (
+  assertKnownOptions[head, opts];
+  assertEnumOptionValue[head, "HyperedgeRendering", $hyperedgeRenderings, opts];
+  And[
+    correctVertexCoordinatesQ[OptionValue[HypergraphPlot, opts, VertexCoordinates]],
+    correctHighlightQ[OptionValue[HypergraphPlot, opts, GraphHighlight]],
+    correctSizeQ["Vertex size", OptionValue[HypergraphPlot, opts, VertexSize], {}],
+    correctSizeQ["Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"], {Automatic}],
+    correctPlotStyleQ[OptionValue[HypergraphPlot, opts, PlotStyle]],
+    correctStyleLengthQ[
+      "vertices",
+      MatchQ[edges, {$hypergraphPattern..}],
+      Length[vertexList[edges]],
+      OptionValue[HypergraphPlot, opts, VertexStyle]],
+    And @@ (correctStyleLengthQ[
+      "edges",
+      MatchQ[edges, {$hypergraphPattern..}],
+      Length[edges],
+      OptionValue[HypergraphPlot, opts, #]] & /@ {EdgeStyle, "EdgePolygonStyle"})]
+);
 
 declareMessage[General::invalidCoordinates,
                "Coordinates `coordinates` should be a list of rules from vertices to pairs of numbers."];
