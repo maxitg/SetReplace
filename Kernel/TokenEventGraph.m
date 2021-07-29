@@ -11,7 +11,7 @@ TokenEventGraph[multihistory$] yields the token-event graph of a multihistory$.
 * Token-event graph is a bipartite graph showing input and output tokens of every event.
 ";
 
-Options[TokenEventGraph] = Options[tokenEventGraph] = Options[Graph];
+Options[TokenEventGraph] = Options[tokenEventGraph] = Normal @ Merge[{Options[Graph], {Background -> Automatic}}, Last];
 
 SyntaxInformation[TokenEventGraph] = {
   "ArgumentsPattern" -> {multihistory_, OptionsPattern[]},
@@ -33,8 +33,9 @@ tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] := ModuleScope[
     Join[inputsToEvents, eventsToOutputs],
     (* TODO: implement layout *)
     VertexStyle -> parseVertexStyleRules[data][OptionValue[VertexStyle]],
-    EdgeStyle -> style[$lightTheme][$causalEdgeStyle],
+    EdgeStyle -> Replace[OptionValue[EdgeStyle], Automatic -> style[$lightTheme][$causalEdgeStyle]],
     VertexLabels -> parseLabelRules[data][OptionValue[VertexLabels]],
+    Background -> Replace[OptionValue[Background], Automatic -> style[$lightTheme][$tokenEventGraphBackground]],
     opts];
   If[!GraphQ[result], throw[Failure[None, <||>]]];
   result
