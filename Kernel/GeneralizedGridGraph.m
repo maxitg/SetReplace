@@ -25,14 +25,11 @@ FE`Evaluate[FEPrivate`AddSpecialArgCompletion["GeneralizedGridGraph" -> {{"Circu
 
 (* Implementation *)
 
-expr : GeneralizedGridGraph[args___] := ModuleScope[
+expr : GeneralizedGridGraph[args___] /; Developer`CheckArgumentCount[expr, 1, 1] := ModuleScope[
   result = Catch[
     generalizedGridGraph[args], _ ? FailureQ, message[GeneralizedGridGraph, #, <|"expr" -> HoldForm[expr]|>] &];
   result /; !FailureQ[result]
 ];
-
-generalizedGridGraph[args___] /; !Developer`CheckArgumentCount[GeneralizedGridGraph[args], 1, 1] :=
-  throw[Failure[None, <||>]];
 
 generalizedGridGraph[dimensionSpecs_List, opts___] := (
   assertKnownOptions[GeneralizedGridGraph, {opts}];

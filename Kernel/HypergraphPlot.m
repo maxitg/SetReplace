@@ -203,8 +203,8 @@ hypergraphPlot[___] := $Failed;
 correctHypergraphPlotOptionsQ[head_, edges_, opts_] := (
   assertKnownOptions[head, opts];
   assertEnumOptionValue[head, "HyperedgeRendering", $hyperedgeRenderings, opts];
+  assertCorrectVertexCoordinates[OptionValue[HypergraphPlot, opts, VertexCoordinates]];
   And[
-    correctVertexCoordinatesQ[OptionValue[HypergraphPlot, opts, VertexCoordinates]],
     correctHighlightQ[OptionValue[HypergraphPlot, opts, GraphHighlight]],
     correctSizeQ["Vertex size", OptionValue[HypergraphPlot, opts, VertexSize], {}],
     correctSizeQ["Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"], {Automatic}],
@@ -224,10 +224,8 @@ correctHypergraphPlotOptionsQ[head_, edges_, opts_] := (
 declareMessage[General::invalidCoordinates,
                "Coordinates `coordinates` should be a list of rules from vertices to pairs of numbers."];
 
-correctVertexCoordinatesQ[vertexCoordinates_] :=
-  If[MatchQ[vertexCoordinates, Automatic | {(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
-    True
-  ,
+assertCorrectVertexCoordinates[vertexCoordinates_] :=
+  If[!MatchQ[vertexCoordinates, Automatic | {(_ -> {Repeated[_ ? NumericQ, {2}]})...}],
     throw[Failure["invalidCoordinates", <|"coordinates" -> vertexCoordinates|>]]
   ];
 
