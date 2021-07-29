@@ -27,12 +27,12 @@ PackageScope["$setReplaceTypeDisplayFunctionVersioned"]
 PackageScope["$destroyedEdgeStyle"]
 PackageScope["$createdEdgeStyle"]
 PackageScope["$destroyedAndCreatedEdgeStyle"]
-PackageScope["$causalGraphVertexStyle"]
-PackageScope["$expressionVertexStyle"]
-PackageScope["$causalGraphInitialVertexStyle"]
-PackageScope["$causalGraphFinalVertexStyle"]
-PackageScope["$causalGraphEdgeStyle"]
-PackageScope["$causalGraphBackground"]
+PackageScope["$eventVertexStyle"]
+PackageScope["$tokenVertexStyle"]
+PackageScope["$initialEventVertexStyle"]
+PackageScope["$finalEventVertexStyle"]
+PackageScope["$causalEdgeStyle"]
+PackageScope["$tokenEventGraphBackground"]
 PackageScope["$vertexSize"]
 PackageScope["$arrowheadLengthFunction"]
 PackageScope["$edgeArrowheadShape"]
@@ -132,20 +132,20 @@ $styleNames = KeySort /@ KeySort @ <|
     combinedOptionsProperties[Graph][VertexStyle -> $vertexStyle, EdgeStyle -> $edgeLineStyle]
   |>,
   "CausalGraph" -> <|
-    "VertexStyle" -> $causalGraphVertexStyle,
-    "InitialVertexStyle" -> $causalGraphInitialVertexStyle,
-    "FinalVertexStyle" -> $causalGraphFinalVertexStyle,
-    "EdgeStyle" -> $causalGraphEdgeStyle,
-    "Background" -> $causalGraphBackground,
-    combinedOptionsProperties[Graph][VertexStyle -> $causalGraphVertexStyle, EdgeStyle -> $causalGraphEdgeStyle]
+    "VertexStyle" -> $eventVertexStyle,
+    "InitialVertexStyle" -> $initialEventVertexStyle,
+    "FinalVertexStyle" -> $finalEventVertexStyle,
+    "EdgeStyle" -> $causalEdgeStyle,
+    "Background" -> $tokenEventGraphBackground,
+    combinedOptionsProperties[Graph][VertexStyle -> $eventVertexStyle, EdgeStyle -> $causalEdgeStyle]
   |>,
   "ExpressionsEventsGraph" -> <|
-    "EventVertexStyle" -> $causalGraphVertexStyle,
-    "ExpressionVertexStyle" -> $expressionVertexStyle,
-    "InitialVertexStyle" -> $causalGraphInitialVertexStyle,
-    "FinalVertexStyle" -> $causalGraphFinalVertexStyle,
-    "EdgeStyle" -> $causalGraphEdgeStyle,
-    "Background" -> $causalGraphBackground
+    "EventVertexStyle" -> $eventVertexStyle,
+    "ExpressionVertexStyle" -> $tokenVertexStyle,
+    "InitialVertexStyle" -> $initialEventVertexStyle,
+    "FinalVertexStyle" -> $finalEventVertexStyle,
+    "EdgeStyle" -> $causalEdgeStyle,
+    "Background" -> $tokenEventGraphBackground
   |>,
   "Rule" -> <|
     "SharedElementHighlight" -> $sharedRuleElementsHighlight,
@@ -190,7 +190,7 @@ $styleNames = KeySort /@ KeySort @ <|
   "EvolutionCausalGraph" -> <|
     "StateVertexStyle" -> $statesGraphVertexStyle,
     "EvolutionEdgeStyle" -> $evolutionCausalGraphEvolutionEdgeStyle,
-    "EventVertexStyle" -> $causalGraphVertexStyle,
+    "EventVertexStyle" -> $eventVertexStyle,
     "CausalEdgeStyle" -> $evolutionCausalGraphCausalEdgeStyle
   |>,
   "BranchialGraph" -> <|
@@ -288,14 +288,14 @@ style[$lightTheme] = <|
   $destroyedAndCreatedEdgeStyle -> Directive[Hue[0.02, 0.94, 0.83], Thick, AbsoluteDashing[{1, 3}]],
 
   (* Causal graph *)
-  $causalGraphVertexStyle -> Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
-  $expressionVertexStyle ->
+  $eventVertexStyle -> Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
+  $tokenVertexStyle ->
     Directive[Hue[0.63, 0.66, 0.81], Opacity[0.1], EdgeForm[Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]]]],
-  $causalGraphInitialVertexStyle ->
+  $initialEventVertexStyle ->
     Directive[RGBColor[{0.259, 0.576, 1}], EdgeForm[{RGBColor[{0.259, 0.576, 1}], Opacity[1]}]],
-  $causalGraphFinalVertexStyle -> Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
-  $causalGraphEdgeStyle -> Hue[0, 1, 0.56],
-  $causalGraphBackground -> None,
+  $finalEventVertexStyle -> Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
+  $causalEdgeStyle -> Hue[0, 1, 0.56],
+  $tokenEventGraphBackground -> None,
 
   (* HypergraphPlot *)
   $vertexSize -> 0.06,
