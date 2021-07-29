@@ -90,8 +90,8 @@ hypergraphRulesSpecQ[rulesSpec_Association ? wolframModelRulesSpecQ] :=
 hypergraphRulesSpecQ[rulesSpec_] := throw[Failure["invalidRules", <|"rules" -> rulesSpec|>]];
 
 correctOptionsQ[opts___] := (
-  assertKnownOptions[RulePlot, {opts}, $allowedOptions];
-  assertEnumOptionValue[RulePlot, Frame, {True, False, Automatic}, {opts}];
+  checkKnownOptions[RulePlot, {opts}, $allowedOptions];
+  checkEnumOptionValue[RulePlot, Frame, {True, False, Automatic}, {opts}];
   And[
     correctEdgeTypeQ[OptionValue[RulePlot, {opts}, "EdgeType"]],
     correctSpacingsQ[{opts}],
