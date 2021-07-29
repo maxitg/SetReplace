@@ -21,20 +21,25 @@ declareRawProperty[tokenEventGraph, SetReplaceType[MultisetSubstitutionSystem, 0
 
 tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] := ModuleScope[
   checkIfKnownOptions[tokenEventGraph, {opts}];
+  tokenCount = data["Expressions"]["Length"];
+  eventCount = data["EventOutputs"]["Length"] - 1;
   inputsToEvents = Catenate[Thread /@ Thread[
-    Map[MultihistoryToken, Rest @ Normal[data["EventInputs"]], {2}] ->
-      MultihistoryEvent /@ Range[data["EventInputs"]["Length"] - 1]]];
+    Map[MultihistoryToken, Rest @ Normal[data["EventInputs"]], {2}] -> MultihistoryEvent /@ Range[eventCount]]];
   eventsToOutputs = Catenate[Thread /@ Thread[
-    MultihistoryEvent /@ Range[data["EventOutputs"]["Length"] - 1] ->
-      Map[MultihistoryToken, Rest @ Normal[data["EventOutputs"]], {2}]]];
+    MultihistoryEvent /@ Range[eventCount] -> Map[MultihistoryToken, Rest @ Normal[data["EventOutputs"]], {2}]]];
+  vertexList = Join[MultihistoryToken /@ Range[tokenCount], MultihistoryEvent /@ Range[eventCount]];
   result = Graph[
-    Join[MultihistoryToken /@ Range @ data["Expressions"]["Length"],
-         MultihistoryEvent /@ Range[data["EventInputs"]["Length"] - 1]], (* {} -> {} causes isolated events *)
+    vertexList,
     Join[inputsToEvents, eventsToOutputs],
-    (* TODO: implement layout *)
     VertexStyle -> parseVertexStyleRules[data][OptionValue[VertexStyle]],
     EdgeStyle -> Replace[OptionValue[EdgeStyle], Automatic -> style[$lightTheme][$causalEdgeStyle]],
     VertexLabels -> parseLabelRules[data][OptionValue[VertexLabels]],
+    GraphLayout -> Replace[
+      OptionValue[GraphLayout],
+      Automatic :> {
+        "LayeredDigraphEmbedding",
+        "VertexLayerPosition" ->
+          (vertexList /. parseElementRules[data][-(2 * "Generation" + Boole["Type" == MultihistoryEvent])])}],
     Background -> Replace[OptionValue[Background], Automatic -> style[$lightTheme][$tokenEventGraphBackground]],
     opts];
   If[!GraphQ[result], throw[Failure[None, <||>]]];
@@ -63,6 +68,7 @@ parseElementRules[data_][arg_] := parseElementRules[data][_ -> arg];
 parseElementRules[data_][rule : _Rule | _RuleDelayed] := parseElementRules[data][{rule}];
 
 tokenPropertyRules[data_, n_] := <|
+  "Type" -> MultihistoryToken,
   "Index" -> n,
   "Content" :> data["Expressions"]["Part", n],
   "RuleIndex" -> "",
@@ -70,6 +76,7 @@ tokenPropertyRules[data_, n_] := <|
 |>;
 
 eventPropertyRules[data_, n_] := <|
+  "Type" -> MultihistoryEvent,
   "Index" -> n,
   "Content" :>
     Rule @@ (data["Expressions"]["Part", #] & /@ data[#]["Part", n + 1] & /@ {"EventInputs", "EventOutputs"}),
