@@ -28,7 +28,8 @@ tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] := ModuleScope[
     MultihistoryEvent /@ Range[data["EventOutputs"]["Length"] - 1] ->
       Map[MultihistoryToken, Rest @ Normal[data["EventOutputs"]], {2}]]];
   result = Graph[
-    (* TODO: add a list of vertices *)
+    Join[MultihistoryToken /@ Range @ data["Expressions"]["Length"],
+         MultihistoryEvent /@ Range[data["EventInputs"]["Length"] - 1]], (* {} -> {} causes isolated events *)
     Join[inputsToEvents, eventsToOutputs],
     (* TODO: rename styles in SetReplaceStyleData *)
     (* TODO: implement layout *)
