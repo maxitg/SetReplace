@@ -19,16 +19,15 @@ SyntaxInformation[TokenEventGraph] = {
 
 declareRawProperty[tokenEventGraph, SetReplaceType[MultisetSubstitutionSystem, 0], TokenEventGraph];
 
-(* TODO: check option correctness *)
-tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] /;
-    knownOptionsQ[TokenEventGraph, {opts}] := ModuleScope[
+tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] := ModuleScope[
+  checkIfKnownOptions[tokenEventGraph, {opts}];
   inputsToEvents = Catenate[Thread /@ Thread[
     Map[MultihistoryToken, Rest @ Normal[data["EventInputs"]], {2}] ->
       MultihistoryEvent /@ Range[data["EventInputs"]["Length"] - 1]]];
   eventsToOutputs = Catenate[Thread /@ Thread[
     MultihistoryEvent /@ Range[data["EventOutputs"]["Length"] - 1] ->
       Map[MultihistoryToken, Rest @ Normal[data["EventOutputs"]], {2}]]];
-  Graph[
+  result = Graph[
     (* TODO: add a list of vertices *)
     Join[inputsToEvents, eventsToOutputs],
     (* TODO: rename styles in SetReplaceStyleData *)
@@ -36,7 +35,9 @@ tokenEventGraph[opts : OptionsPattern[]][Multihistory[_, data_]] /;
     VertexStyle -> parseVertexStyleRules[data][OptionValue[VertexStyle]],
     EdgeStyle -> style[$lightTheme][$causalGraphEdgeStyle],
     VertexLabels -> parseLabelRules[data][OptionValue[VertexLabels]],
-    opts]
+    opts];
+  If[!GraphQ[result], throw[Failure[None, <||>]]];
+  result
 ];
 
 declareMessage[TokenEventGraph::unexpectedArguments,
