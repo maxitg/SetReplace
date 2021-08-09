@@ -771,16 +771,16 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     VertexStyle -> Replace[
       OptionValue[allOptionValues, VertexStyle],
       Automatic :> Join[
-        {{"Event", _} -> style[$lightTheme][$causalGraphVertexStyle],
-         {"Expression", _} -> style[$lightTheme][$expressionVertexStyle]},
+        {{"Event", _} -> style[$lightTheme][$eventVertexStyle],
+         {"Expression", _} -> style[$lightTheme][$tokenVertexStyle]},
         Cases[
           graphVertices,
           v : {"Event", e : 0 | Infinity} :> v -> style[$lightTheme][Switch[e,
-            0, $causalGraphInitialVertexStyle,
-            Infinity, $causalGraphFinalVertexStyle]],
+            0, $initialEventVertexStyle,
+            Infinity, $finalEventVertexStyle]],
           {1}]]],
     EdgeStyle -> Replace[
-      OptionValue[allOptionValues, EdgeStyle], Automatic :> style[$lightTheme][$causalGraphEdgeStyle]],
+      OptionValue[allOptionValues, EdgeStyle], Automatic :> style[$lightTheme][$causalEdgeStyle]],
     VertexLabels -> Replace[
       OptionValue[allOptionValues, VertexLabels], {
         automaticVertexLabelsPattern :> Replace[graphVertices, {
@@ -799,7 +799,7 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
           2 ("TotalGenerationsCount" - "EdgeGenerationsList")} /.
             p_String :> propertyEvaluate[True, boundary][obj, caller, p]]}],
     Background -> Replace[
-      OptionValue[allOptionValues, Background], Automatic :> style[$lightTheme][$causalGraphBackground]],
+      OptionValue[allOptionValues, Background], Automatic :> style[$lightTheme][$tokenEventGraphBackground]],
     allOptionValues]
 ];
 
@@ -825,13 +825,13 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
     VertexStyle -> Replace[
       OptionValue[allOptionValues, VertexStyle],
       Automatic -> Select[Head[#] =!= Rule || MatchQ[#[[1]], Alternatives @@ Keys[eventsToOutputs]] &] @ {
-        style[$lightTheme][$causalGraphVertexStyle],
-        0 -> style[$lightTheme][$causalGraphInitialVertexStyle],
-        Infinity -> style[$lightTheme][$causalGraphFinalVertexStyle]}],
+        style[$lightTheme][$eventVertexStyle],
+        0 -> style[$lightTheme][$initialEventVertexStyle],
+        Infinity -> style[$lightTheme][$finalEventVertexStyle]}],
     EdgeStyle -> Replace[
-      OptionValue[allOptionValues, EdgeStyle], Automatic -> style[$lightTheme][$causalGraphEdgeStyle]],
+      OptionValue[allOptionValues, EdgeStyle], Automatic -> style[$lightTheme][$causalEdgeStyle]],
     Background -> Replace[
-      OptionValue[allOptionValues, Background], Automatic -> style[$lightTheme][$causalGraphBackground]],
+      OptionValue[allOptionValues, Background], Automatic -> style[$lightTheme][$tokenEventGraphBackground]],
     allOptionValues]
 ];
 

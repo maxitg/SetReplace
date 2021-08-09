@@ -23,12 +23,12 @@ objectType[Multihistory[type_, _]] := type;
 $genericMultihistoryIcon = GraphPlot[
   {DirectedEdge[0, 1], DirectedEdge[1, 2], DirectedEdge[1, 3]},
   GraphLayout -> "LayeredDigraphEmbedding",
-  VertexStyle -> {1 -> style[$lightTheme][$expressionVertexStyle], style[$lightTheme][$causalGraphVertexStyle]},
-  EdgeStyle -> Directive[style[$lightTheme][$causalGraphEdgeStyle], Arrowheads[0]],
+  VertexStyle -> {1 -> style[$lightTheme][$tokenVertexStyle], style[$lightTheme][$eventVertexStyle]},
+  EdgeStyle -> Directive[style[$lightTheme][$causalEdgeStyle], Arrowheads[0]],
   VertexCoordinates -> {{0, 1}, {0, 0}, {0, -1} . RotationMatrix[Pi / 4], {0, -1} . RotationMatrix[-Pi / 4]},
   VertexSize -> 0.5,
   PlotRange -> {{-1.3, 1.3}, {-1.3, 1.3}},
-  Background -> style[$lightTheme][$causalGraphBackground]];
+  Background -> style[$lightTheme][$tokenEventGraphBackground]];
 
 Multihistory /: MakeBoxes[object : Multihistory[_, _], format_] := ModuleScope[
   type = objectType[object];
