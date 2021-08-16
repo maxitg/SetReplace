@@ -229,7 +229,7 @@ $WolframModelProperties =
 (* Argument count *)
 
 WolframModel[args___] := 0 /;
-  !Developer`CheckArgumentCount[WolframModel[args], 1, 4] && False;
+  !CheckArguments[WolframModel[args], {1, 4}] && False;
 
 WolframModel[args0___][args1___] := 0 /;
   Length[{args1}] != 1 &&
@@ -285,7 +285,7 @@ WolframModel::invalidState =
 expr : WolframModel[
     rulesSpec_ ? wolframModelRulesSpecQ,
     initSpec : Except[OptionsPattern[]] ? (Not[wolframModelInitSpecQ[#]] &),
-    args___] /; Quiet[Developer`CheckArgumentCount[expr, 1, 4]] := 0 /;
+    args___] /; Quiet[CheckArguments[expr, {1, 4}]] := 0 /;
   Message[WolframModel::invalidState, initSpec];
 
 WolframModel[
@@ -303,7 +303,7 @@ General::invalidRules =
 
 expr : WolframModel[
     rulesSpec_ ? (Not @* wolframModelRulesSpecQ),
-    args___] /; Quiet[Developer`CheckArgumentCount[expr, 2, 4]] := 0 /;
+    args___] /; Quiet[CheckArguments[expr, {2, 4}]] := 0 /;
   Message[WolframModel::invalidRules, rulesSpec];
 
 (* Steps *)
@@ -316,7 +316,7 @@ expr : WolframModel[
     rulesSpec_ ? wolframModelRulesSpecQ,
     initSpec_ ? wolframModelInitSpecQ,
     stepsSpec : Except[OptionsPattern[]] ? (Not[wolframModelStepsSpecQ[#]] &),
-    args___] /; Quiet[Developer`CheckArgumentCount[expr, 1, 4]] := 0 /;
+    args___] /; Quiet[CheckArguments[expr, {1, 4}]] := 0 /;
   Message[WolframModel::invalidSteps, stepsSpec, Values[$stepSpecKeys]];
 
 (* Property *)

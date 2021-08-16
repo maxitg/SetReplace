@@ -25,21 +25,21 @@ FE`Evaluate[FEPrivate`AddSpecialArgCompletion["GeneralizedGridGraph" -> {{"Circu
 
 (* Implementation *)
 
-expr : GeneralizedGridGraph[args___] /; Developer`CheckArgumentCount[expr, 1, 1] := ModuleScope[
+expr : GeneralizedGridGraph[args___] /; CheckArguments[expr, 1] := ModuleScope[
   result = Catch[
     generalizedGridGraph[args], _ ? FailureQ, message[GeneralizedGridGraph, #, <|"expr" -> HoldForm[expr]|>] &];
   result /; !FailureQ[result]
 ];
 
-generalizedGridGraph[dimensionSpecs_List, opts___] := (
-  checkIfKnownOptions[GeneralizedGridGraph, {opts}];
-  checkEnumOptionValue[GeneralizedGridGraph, "VertexNamingFunction", $vertexNamingFunctions, {opts}];
-  generalizedGridGraphExplicit[toExplicitDimSpec /@ dimensionSpecs, opts]
+generalizedGridGraph[dimensionSpecs_List, options___] := (
+  checkIfKnownOptions[GeneralizedGridGraph, {options}];
+  checkEnumOptionValue[GeneralizedGridGraph, "VertexNamingFunction", $vertexNamingFunctions, {options}];
+  generalizedGridGraphExplicit[toExplicitDimSpec /@ dimensionSpecs, options]
 );
 
 declareMessage[GeneralizedGridGraph::dimsNotList, "Dimensions specification `dimSpec` should be a list."];
 
-generalizedGridGraph[dimensionSpecs : Except[_List], opts___] :=
+generalizedGridGraph[dimensionSpecs : Except[_List], options___] :=
   throw[Failure["dimsNotList", <|"dimSpec" -> dimensionSpecs|>]];
 
 toExplicitDimSpec[spec_] := toExplicitDimSpec[spec, spec];
@@ -60,8 +60,8 @@ declareMessage[GeneralizedGridGraph::invalidDimSpec, "Dimension specification `d
 
 toExplicitDimSpec[originalSpec_, _ -> _List] := throw[Failure["invalidDimSpec", <|"dimSpec" -> originalSpec|>]];
 
-generalizedGridGraphExplicit[dimensionSpecs_, opts___] := ModuleScope[
-  {edgeStyle, vertexNamingFunction} = OptionValue[GeneralizedGridGraph, {opts}, {EdgeStyle, "VertexNamingFunction"}];
+generalizedGridGraphExplicit[dimensionSpecs_, options___] := ModuleScope[
+  {edgeStyle, vertexNamingFunction} = OptionValue[GeneralizedGridGraph, {options}, {EdgeStyle, "VertexNamingFunction"}];
   edges = singleDimensionEdges[dimensionSpecs, #] & /@ Range[Length[dimensionSpecs]];
   directionalEdgeStyle = EdgeStyle -> If[
       ListQ[edgeStyle] && Length[edgeStyle] == Length[dimensionSpecs] && AllTrue[edgeStyle, Head[#] =!= Rule &],
@@ -76,7 +76,7 @@ generalizedGridGraphExplicit[dimensionSpecs_, opts___] := ModuleScope[
       Catenate[edges],
       GraphLayout -> graphLayout[dimensionSpecs],
       directionalEdgeStyle],
-    If[directionalEdgeStyle[[2]] === Nothing, {opts}, FilterRules[{opts}, Except[EdgeStyle]]]]
+    If[directionalEdgeStyle[[2]] === Nothing, {options}, FilterRules[{options}, Except[EdgeStyle]]]]
 ];
 
 renameVertices[Automatic][graph_] := IndexGraph[graph];

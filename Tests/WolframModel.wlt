@@ -1610,7 +1610,7 @@
 
       testUnevaluated[
         WolframModel[{{1, 2, 3}} -> {{1, 2, 3}}, {{1, 2, 3}}, 1, "IncludePartialGenerations" -> $$$invalid$$$],
-        {WolframModel::invalidFiniteOption}
+        {WolframModel::invalidOptionChoice}
       ],
 
       testUnevaluated[
@@ -1620,13 +1620,13 @@
           1,
           {"FinalState", "AtomsCountFinal"},
           "IncludePartialGenerations" -> $$$invalid$$$],
-        {WolframModel::invalidFiniteOption}
+        {WolframModel::invalidOptionChoice}
       ],
 
       With[{evolution = WolframModel[{{1, 2, 3}} -> {{1, 2, 3}}, {{1, 2, 3}}, 1]},
         testUnevaluated[
           evolution["AtomsCountFinal", "IncludePartialGenerations" -> $$$invalid$$$],
-          {WolframModelEvolutionObject::invalidFiniteOption}
+          {WolframModelEvolutionObject::invalidOptionChoice}
         ]
       ],
 
@@ -1645,7 +1645,7 @@
 
       testUnevaluated[
         WolframModel[{{1, 2}} -> {{1, 2}}, {{1, 1}}, 1, "EventsCount", "IncludeBoundaryEvents" -> $$$invalid$$$],
-        {WolframModel::invalidFiniteOption}
+        {WolframModel::invalidOptionChoice}
       ],
 
       VerificationTest[

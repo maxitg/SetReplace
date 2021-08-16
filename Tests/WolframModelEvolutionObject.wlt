@@ -255,7 +255,7 @@
       With[{evo = WolframModel[{{1, 2}} -> {{1, 2}}, {{1, 1}}, 1]},
         testUnevaluated[
           evo["EventsCount", "IncludeBoundaryEvents" -> $$$invalid$$$],
-          {WolframModelEvolutionObject::invalidFiniteOption}
+          {WolframModelEvolutionObject::invalidOptionChoice}
         ]
       ],
 

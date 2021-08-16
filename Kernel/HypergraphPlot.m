@@ -14,8 +14,8 @@ PackageScope["hypergraphEmbedding"]
 (* Documentation *)
 
 SetUsage @ "
-HypergraphPlot[hypergraph$, opts$] plots an ordered hypergraph$ represented as a list of vertex lists.
-HypergraphPlot[hypergraph$, 'Cyclic', opts$] plots a 'Cyclic' hypergraph$ instead.
+HypergraphPlot[hypergraph$, options$] plots an ordered hypergraph$ represented as a list of vertex lists.
+HypergraphPlot[hypergraph$, 'Cyclic', options$] plots a 'Cyclic' hypergraph$ instead.
 ";
 
 $plotStyleAutomatic = <|
@@ -127,7 +127,7 @@ hypergraphPlot[edges : $hypergraphPattern,
                o : OptionsPattern[]] := ModuleScope[
   checkHypergraphPlotOptions[HypergraphPlot, edges, {o}];
   ScopeVariable[optionValue];
-  optionValue[opt_] := OptionValue[HypergraphPlot, {o}, opt];
+  optionValue[option_] := OptionValue[HypergraphPlot, {o}, option];
   vertices = vertexList[edges];
   (* these are either single styles or lists, one style for each element *)
   {highlightedVertexStyles, highlightedEdgeLineStyles, highlightedEdgePolygonStyles} =
@@ -202,20 +202,20 @@ parseStyles[newSpec_, elements_, oldSpec_, oldToNewTransform_] /;
 
 hypergraphPlot[___] := $Failed;
 
-checkHypergraphPlotOptions[head_, edges_, opts_] := (
-  checkIfKnownOptions[head, opts];
-  checkEnumOptionValue[head, "HyperedgeRendering", $hyperedgeRenderings, opts];
-  checkVertexCoordinates[OptionValue[HypergraphPlot, opts, VertexCoordinates]];
-  checkHighlight[OptionValue[HypergraphPlot, opts, GraphHighlight]];
-  checkSize["Vertex size", OptionValue[HypergraphPlot, opts, VertexSize], {}];
-  checkSize["Arrowhead length", OptionValue[HypergraphPlot, opts, "ArrowheadLength"], {Automatic}];
-  checkPlotStyle[OptionValue[HypergraphPlot, opts, PlotStyle]];
+checkHypergraphPlotOptions[head_, edges_, options_] := (
+  checkIfKnownOptions[head, options];
+  checkEnumOptionValue[head, "HyperedgeRendering", $hyperedgeRenderings, options];
+  checkVertexCoordinates[OptionValue[HypergraphPlot, options, VertexCoordinates]];
+  checkHighlight[OptionValue[HypergraphPlot, options, GraphHighlight]];
+  checkSize["Vertex size", OptionValue[HypergraphPlot, options, VertexSize], {}];
+  checkSize["Arrowhead length", OptionValue[HypergraphPlot, options, "ArrowheadLength"], {Automatic}];
+  checkPlotStyle[OptionValue[HypergraphPlot, options, PlotStyle]];
   checkStyleLength["vertices",
                    MatchQ[edges, {$hypergraphPattern..}],
                    Length[vertexList[edges]],
-                   OptionValue[HypergraphPlot, opts, VertexStyle]];
+                   OptionValue[HypergraphPlot, options, VertexStyle]];
   checkStyleLength[
-      "edges", MatchQ[edges, {$hypergraphPattern..}], Length[edges], OptionValue[HypergraphPlot, opts, #]] & /@
+      "edges", MatchQ[edges, {$hypergraphPattern..}], Length[edges], OptionValue[HypergraphPlot, options, #]] & /@
     {EdgeStyle, "EdgePolygonStyle"};
 );
 

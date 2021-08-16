@@ -179,14 +179,14 @@ propertyEvaluate[False, boundary_][evolution_, rest___] :=
   propertyEvaluate[True, boundary][deleteIncompleteGenerations[evolution], rest];
 
 propertyEvaluate[includePartialGenerations : Except[True | False], _][__] := throw[Failure[
-  "invalidFiniteOption",
-  <|"opt" -> "IncludePartialGenerations", "value" -> includePartialGenerations, "choices" -> {True, False}|>]];
+  "invalidOptionChoice",
+  <|"option" -> "IncludePartialGenerations", "value" -> includePartialGenerations, "choices" -> {True, False}|>]];
 
 includeBoundaryEventsPattern = None | "Initial" | "Final" | All;
 
 propertyEvaluate[_, boundary : Except[includeBoundaryEventsPattern]][__] := throw[Failure[
-  "invalidFiniteOption",
-  <|"opt" -> "IncludeBoundaryEvents", "value" -> boundary, "choices" -> {None, "Initial", "Final", All}|>]];
+  "invalidOptionChoice",
+  <|"option" -> "IncludeBoundaryEvents", "value" -> boundary, "choices" -> {None, "Initial", "Final", All}|>]];
 
 deleteIncompleteGenerations[WolframModelEvolutionObject[data_]] := ModuleScope[
   maxCompleteGeneration = data[$maxCompleteGeneration];
@@ -876,16 +876,16 @@ $masterOptions = {
 };
 
 expr : WolframModelEvolutionObject[data_ ? evolutionDataQ][args__] := ModuleScope[
-  {property, opts} = Replace[
+  {property, options} = Replace[
     {args},
-    {property__, opts : Longest[$nonEmptyOptionsPattern]} :>
-      {{property}, {opts}}];
+    {property__, options : Longest[$nonEmptyOptionsPattern]} :>
+      {{property}, {options}}];
   result = Catch[
     (propertyEvaluate @@
-        (OptionValue[Join[opts, $masterOptions], #] & /@ {"IncludePartialGenerations", "IncludeBoundaryEvents"}))[
+        (OptionValue[Join[options, $masterOptions], #] & /@ {"IncludePartialGenerations", "IncludeBoundaryEvents"}))[
       WolframModelEvolutionObject[data],
       Sequence @@ property,
-      ##] & @@ Flatten[FilterRules[opts, Except[$masterOptions]]],
+      ##] & @@ Flatten[FilterRules[options, Except[$masterOptions]]],
     _ ? FailureQ,
     message[WolframModelEvolutionObject, #, <|"expr" -> HoldForm[expr]|>] &];
   result /; !FailureQ[result]
@@ -898,7 +898,7 @@ expr : WolframModelEvolutionObject[data_ ? evolutionDataQ][args__] := ModuleScop
 (* Argument count *)
 
 WolframModelEvolutionObject[args___] := 0 /;
-  !Developer`CheckArgumentCount[WolframModelEvolutionObject[args], 1, 1] && False;
+  !CheckArguments[WolframModelEvolutionObject[args], 1] && False;
 
 WolframModelEvolutionObject[data_][] := 0 /;
   Message[WolframModelEvolutionObject::argm, Defer[WolframModelEvolutionObject[data][]], 0, 1];

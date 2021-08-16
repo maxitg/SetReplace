@@ -5,18 +5,17 @@ PackageImport["GeneralUtilities`"]
 PackageScope["checkEnumOptionValue"]
 PackageScope["checkIfKnownOptions"]
 
-declareMessage[General::invalidFiniteOption, "Value `value` of option `opt` should be one of `choices` in `expr`."];
-checkEnumOptionValue[func_, optionToCheck_, validValues_, opts_] := ModuleScope[
-  value = OptionValue[func, {opts}, optionToCheck];
-  supportedQ = MemberQ[validValues, value];
-  If[!supportedQ,
-    throw[Failure["invalidFiniteOption", <|"value" -> value, "opt" -> optionToCheck, "choices" -> validValues|>]]
+declareMessage[General::invalidOptionChoice, "Option value `option` -> `value` in `expr` should be one of `choices`."];
+checkEnumOptionValue[func_, optionToCheck_, validValues_, options_] := With[{
+    value = OptionValue[func, {options}, optionToCheck]},
+  If[!MemberQ[validValues, value],
+    throw[Failure["invalidOptionChoice", <|"value" -> value, "option" -> optionToCheck, "choices" -> validValues|>]]
   ];
 ];
 
 declareMessage[General::optx, StringTemplate[General::optx]["`opt`", "`expr`"]];
-checkIfKnownOptions[func_, opts_, allowedOptions_ : Automatic] := With[{
+checkIfKnownOptions[func_, options_, allowedOptions_ : Automatic] := With[{
     unknownOptions = Complement @@
-      {Flatten[{opts}][[All, 1]], If[allowedOptions === Automatic, Options[func][[All, 1]], allowedOptions]}},
+      {Flatten[{options}][[All, 1]], If[allowedOptions === Automatic, Options[func][[All, 1]], allowedOptions]}},
   If[Length[unknownOptions] > 0, throw[Failure["optx", <|"opt" -> unknownOptions[[1]]|>]]];
 ];
