@@ -52,16 +52,14 @@ Hypergraph /: Information`GetInformation[obj_Hypergraph ? HypergraphQ] :=
     result /; !FailureQ[result]
   ];
 
-hypergraph[hyperedges : {___List}, symmetry : Alternatives @@ $hypergraphSymmetries] :=
+hypergraph[hyperedges : {___List}, symmetry : Alternatives @@ $hypergraphSymmetries : "Ordered"] :=
   System`Private`ConstructNoEntry[Hypergraph, hyperedges, symmetry];
-
-hypergraph[hyperedges_] := hypergraph[hyperedges, "Ordered"];
 
 declareMessage[Hypergraph::invalidHyperedges,
                "The argument at position 1 in `expr` should be a list of of lists."];
 
 hypergraph[hyperedges_, symmetry : Alternatives @@ $hypergraphSymmetries] :=
-  throw[Failure["invalidHyperedges"]];
+  throw[Failure["invalidHyperedges", <||>]];
 
 declareMessage[Hypergraph::invalidSymmetry,
                "The argument at position 2 in `expr` should be a supported symmetry: `symmetries`."];
@@ -91,8 +89,10 @@ Hypergraph /: SameQ[hg1_Hypergraph, hg2_Hypergraph] := Normal[hg1] === Normal[hg
 
 disablePlotQ = TrueQ[EdgeCount[#] > 100] &;
 
+$iconSize = Dynamic[{Automatic, 3.5` CurrentValue["FontCapHeight"]/ AbsoluteCurrentValue[Magnification]}];
+
 getIcon[hg_] /; (!disablePlotQ[hg] && MemberQ[$edgeTypes, HypergraphSymmetry[hg]]) :=
-  HypergraphPlot[EdgeList[hg], HypergraphSymmetry[hg], ImageSize -> {29, 29}];
+  HypergraphPlot[EdgeList[hg], HypergraphSymmetry[hg], ImageSize -> $iconSize];
 
 getIcon[_] = style[$lightTheme][$evolutionObjectIcon];
 
