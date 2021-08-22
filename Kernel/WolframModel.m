@@ -50,6 +50,8 @@ fromRulesSpec[<|"PatternRules" -> rules_|>] := rules;
 
 fromInitSpec[rulesSpec_, initSpec_List] := initSpec;
 
+fromInitSpec[rulesSpec_, hypergraph_Hypergraph] := Normal[hypergraph];
+
 fromInitSpec[rulesSpec_Rule, Automatic] := fromInitSpec[{rulesSpec}, Automatic];
 
 fromInitSpec[rulesSpec_List, Automatic] := Catenate[
@@ -255,6 +257,8 @@ wolframModelRulesSpecQ[_] := False;
 
 wolframModelInitSpecQ[init_ ? ListQ] := True;
 
+wolframModelInitSpecQ[hypergraph_ ? HypergraphQ] := HypergraphSymmetry[hypergraph] === "Ordered";
+
 wolframModelInitSpecQ[Automatic] := True;
 
 wolframModelInitSpecQ[_] := False;
@@ -288,7 +292,7 @@ wolframModelPropertyQ[_] := False;
 (* Init *)
 
 WolframModel::invalidState =
-  "The initial state specification `1` should be a List.";
+  "The initial state specification `1` should be a List or an \"Ordered\" Hypergraph[\[Ellipsis]] object.";
 
 expr : WolframModel[
     rulesSpec_ ? wolframModelRulesSpecQ,
