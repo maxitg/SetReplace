@@ -52,7 +52,9 @@ Hypergraph /: Information`GetInformation[obj_Hypergraph ? HypergraphQ] :=
     result /; !FailureQ[result]
   ];
 
-hypergraph[hyperedges : {___List}, symmetry : Alternatives @@ $hypergraphSymmetries : "Ordered"] :=
+hypergraph[h_] := hypergraph[h, "Ordered"];
+
+hypergraph[hyperedges : {___List}, symmetry : Alternatives @@ $hypergraphSymmetries] :=
   System`Private`ConstructNoEntry[Hypergraph, hyperedges, symmetry];
 
 declareMessage[Hypergraph::invalidHyperedges,

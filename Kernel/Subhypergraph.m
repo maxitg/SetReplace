@@ -69,57 +69,45 @@ expr : WeakSubhypergraph[args0___][args1___] :=
     result /; !FailureQ[result]
   ];
 
-(* Validation *)
-$supportedHypergraphSymmetries = {"Ordered", "Unordered", "Cyclic"};
-
-validHypergraph[hypergraph_ ? HypergraphQ] := MemberQ[$supportedHypergraphSymmetries, HypergraphSymmetry[hypergraph]];
-validHypergraph[hyperedges : {___List}] := True;
-validHypergraph[_] = False;
-
 (* Normal form *)
 
-subhypergraph[h_Hypergraph ? validHypergraph, vertices_List] :=
+subhypergraph[h_ ? HypergraphQ, vertices_List] :=
   Hypergraph[Select[Normal[h], SubsetQ[vertices, #] &], HypergraphSymmetry[h]];
 
-weakSubhypergraph[h_Hypergraph ? validHypergraph, vertices_List] :=
+weakSubhypergraph[h_ ? HypergraphQ, vertices_List] :=
   Hypergraph[Select[Normal[h], ContainsAny[#, vertices] &], HypergraphSymmetry[h]];
 
-subhypergraph[h_List ? validHypergraph, vertices_List] :=
+subhypergraph[h : {___List}, vertices_List] :=
   Normal[subhypergraph[Hypergraph[h], vertices]];
 
-weakSubhypergraph[h_List ? validHypergraph, vertices_List] :=
+weakSubhypergraph[h : {___List}, vertices_List] :=
   Normal[weakSubhypergraph[Hypergraph[h], vertices]];
 
 (* Incorrect arguments messages *)
 
 (** hypergraph **)
-With[{sym = #},
-  declareMessage[sym::invalidHypergraph,
-                 "The argument at position `pos` in `expr` should be a Hypergraph object or a lists of lists."]
-] & /@ {Subhypergraph, WeakSubhypergraph};
-
-subhypergraph[h_ ? (Not @* validHypergraph), _] :=
+subhypergraph[Except[(_ ? HypergraphQ) | {___List}], _] :=
   throw[Failure["invalidHypergraph", <|"pos" -> 1|>]];
 
-weakSubhypergraph[h_ ? (Not @* validHypergraph), _] :=
+weakSubhypergraph[Except[(_ ? HypergraphQ) | {___List}], _] :=
   throw[Failure["invalidHypergraph", <|"pos" -> 1|>]];
 
 (** vertices **)
-With[{sym = #},
-  declareMessage[sym::invalidVertices,
+With[{symbol = #},
+  declareMessage[symbol::invalidVertices,
                  "The argument at position `pos` in `expr` should be a list representing vertices."]
 ] & /@ {Subhypergraph, WeakSubhypergraph};
 
-subhypergraph[_ , v : Except[_List]] :=
+subhypergraph[_ , Except[_List]] :=
   throw[Failure["invalidVertices", <|"pos" -> 2|>]];
 
-weakSubhypergraph[_ , v : Except[_List]] :=
+weakSubhypergraph[_ , Except[_List]] :=
   throw[Failure["invalidVertices", <|"pos" -> 2|>]];
 
 (* operator form *)
-subhypergraph[vertices_List][h_ ? validHypergraph] := subhypergraph[h, vertices];
+subhypergraph[vertices_List][h : (_ ? HypergraphQ) | {___List}] := subhypergraph[h, vertices];
 
-weakSubhypergraph[vertices_List][h_ ? validHypergraph] := weakSubhypergraph[h, vertices];
+weakSubhypergraph[vertices_List][h : (_ ? HypergraphQ) | {___List}] := weakSubhypergraph[h, vertices];
 
 (* Incorrect arguments messages *)
 
@@ -131,20 +119,20 @@ weakSubhypergraph[Except[_List]][_] :=
   throw[Failure["invalidVertices", <|"pos" -> {0, 1}|>]];
 
 (** hypergraph **)
-subhypergraph[args0___][h_ ? (Not @* validHypergraph)] :=
+subhypergraph[___][Except[(_ ? HypergraphQ) | {___List}]] :=
   throw[Failure["invalidHypergraph", <|"pos" -> 1|>]];
 
-weakSubhypergraph[args0___][h_ ? (Not @* validHypergraph)] :=
+weakSubhypergraph[___][Except[(_ ? HypergraphQ) | {___List}]] :=
   throw[Failure["invalidHypergraph", <|"pos" -> 1|>]];
 
 (** length **)
-With[{sym = #},
-  declareMessage[sym::invalidArgumentLength,
+With[{symbol = #},
+  declareMessage[symbol::invalidArgumentLength,
                  "`expr` called with `received` arguments; `expected` argument is expected."]
 ] & /@ {Subhypergraph, WeakSubhypergraph};
 
-subhypergraph[args0___][args1___] /; (Length[{args1}] =!= 1) :=
+subhypergraph[___][args1___] /; (Length[{args1}] =!= 1) :=
   throw[Failure["invalidArgumentLength", <|"received" -> Length[{args1}], "expected" -> 1|>]];
 
-weakSubhypergraph[args0___][args1___] /; (Length[{args1}] =!= 1) :=
+weakSubhypergraph[___][args1___] /; (Length[{args1}] =!= 1) :=
   throw[Failure["invalidArgumentLength", <|"received" -> Length[{args1}], "expected" -> 1|>]];
