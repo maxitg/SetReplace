@@ -14,28 +14,31 @@ IndexHypergraph[hypergraph$, startIndex$] replaces the vertices with integers st
 (* SyntaxInformation *)
 SyntaxInformation[IndexHypergraph] = {"ArgumentsPattern" -> {hypergraph_, startIndex_.}};
 
-(* Argument count *)
-IndexHypergraph[args___] := 0 /;
-  !Developer`CheckArgumentCount[IndexHypergraph[args], 1, 2] && False;
-
 (* main *)
-expr : IndexHypergraph[hypergraph_, startIndex : _ : 1] := ModuleScope[
-  res = Catch[indexHypergraph[HoldForm @ expr, hypergraph, startIndex]];
-  res /; res =!= $Failed
-];
+expr : IndexHypergraph[args___] /; CheckArguments[IndexHypergraph[args], {1, 2}] :=
+  With[{res = Catch[indexHypergraph[args], _ ? FailureQ, message[IndexHypergraph, #, <|"expr" -> HoldForm[expr]|>] &]},
+    res /; !FailureQ[res]
+  ];
 
 (* Normal form *)
-indexHypergraph[_, hypergraph_ ? hypergraphQ, startIndex : _Integer ? IntegerQ] := ModuleScope[
-  vertices = vertexList @ hypergraph;
+indexHypergraph[hg_] := indexHypergraph[hg, 1];
+
+indexHypergraph[hypergraph_ ? HypergraphQ, startIndex : _Integer ? IntegerQ] := ModuleScope[
+  vertices = Sort @ VertexList[hypergraph];
   vertexIndices = Range[0, Length[vertices] - 1] + startIndex;
-  Replace[hypergraph, Thread[vertices -> vertexIndices], {2}]
+  Hypergraph[Replace[EdgeList[hypergraph], Thread[vertices -> vertexIndices], {2}],
+             HypergraphSymmetry[hypergraph]]
 ];
 
-(* Incorrect arguments messages *)
-indexHypergraph[expr_, hypergraph_ ? (Not @* hypergraphQ), ___] :=
-  (Message[IndexHypergraph::invalidHypergraph, 1, HoldForm @ expr];
-  Throw[$Failed]);
+indexHypergraph[hyperedges : {___List}, startIndex : _Integer ? IntegerQ] :=
+  Normal[indexHypergraph[Hypergraph[hyperedges], startIndex]];
 
-indexHypergraph[expr_, _ , _] :=
-  (Message[IndexHypergraph::int, expr, 2];
-  Throw[$Failed]);
+(* Incorrect arguments messages *)
+indexHypergraph[Except[(_ ? HypergraphQ) | {___List}], ___] :=
+  throw[Failure["invalidHypergraph", <|"pos" -> 1|>]];
+
+declareMessage[IndexHypergraph::invalidIndex,
+               "Integer expected at position 2 in `expr`."];
+
+indexHypergraph[_ , _] :=
+  throw[Failure["invalidIndex", <||>]];
