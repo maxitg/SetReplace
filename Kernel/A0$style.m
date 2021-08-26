@@ -253,13 +253,13 @@ style[$lightTheme] = <|
   $destroyedAndCreatedEdgeStyle -> Directive[Hue[0.02, 0.94, 0.83], Thick, AbsoluteDashing[{1, 3}]],
 
   (* Causal graph *)
-  $causalGraphVertexStyle -> Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
+  $causalGraphVertexStyle -> Directive[Hue[0.12, 0.89, 0.97], EdgeForm[{Hue[0.11, 1, 0.82], Opacity[1]}]],
   $expressionVertexStyle ->
-    Directive[Hue[0.63, 0.66, 0.81], Opacity[0.1], EdgeForm[Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]]]],
+    Directive[Hue[0.63, 0.56, 0.81], Opacity[0.35], EdgeForm[Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]]]],
   $causalGraphInitialVertexStyle ->
     Directive[RGBColor[{0.259, 0.576, 1}], EdgeForm[{RGBColor[{0.259, 0.576, 1}], Opacity[1]}]],
   $causalGraphFinalVertexStyle -> Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
-  $causalGraphEdgeStyle -> Hue[0, 1, 0.56],
+  $causalGraphEdgeStyle -> GrayLevel[0.5],
   $causalGraphBackground -> None,
 
   (* HypergraphPlot *)
