@@ -17,7 +17,7 @@
 
       testUnevaluated[
         GeneralizedGridGraph[1, 2],
-        {GeneralizedGridGraph::argx}
+        {GeneralizedGridGraph::nonopt}
       ],
 
       testUnevaluated[
