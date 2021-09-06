@@ -287,15 +287,15 @@ wolframModelOperator[rulesSpec_ ? wolframModelRulesSpecQ, o : OptionsPattern[]][
 (* Rules *)
 
 declareMessage[
-  General::invalidRules,
-  "The rule specification `ruleSpec` should be either a Rule, a List of rules, or <|\"PatternRules\" -> rules|>, " <>
+  General::invalidWolframModelRules,
+  "The rule specification `rules` should be either a Rule, a List of rules, or <|\"PatternRules\" -> rules|>, " <>
   "where rules is either a Rule, RuleDelayed, or a List of them."];
 
 expr : wolframModel[rulesSpec_ ? (Not @* wolframModelRulesSpecQ), args___] :=
-  throw[Failure["invalidRules", <|"ruleSpec" -> rulesSpec|>]];
+  throw[Failure["invalidWolframModelRules", <|"rules" -> rulesSpec|>]];
 
 expr : wolframModelOperator[rulesSpec_ ? (Not @* wolframModelRulesSpecQ), args___] :=
-  throw[Failure["invalidRules", <|"ruleSpec" -> rulesSpec|>]];
+  throw[Failure["invalidWolframModelRules", <|"rules" -> rulesSpec|>]];
 
 (* Steps *)
 

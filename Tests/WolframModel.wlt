@@ -46,17 +46,17 @@
 
       testUnevaluated[
         WolframModel[x, y],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
         WolframModel[x, y, z],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
         WolframModel[x, y, z, w],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
@@ -226,7 +226,7 @@
 
       testUnevaluated[
         WolframModel[<|"PatternRule" -> 1 -> 2|>][{1}],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
@@ -236,7 +236,7 @@
 
       testUnevaluated[
         WolframModel[<|"PatternRules" -> 1 -> 2, "f" -> 2|>][{1}],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
@@ -1025,12 +1025,12 @@
 
       testUnevaluated[
         WolframModel[{1}, 1 -> 2],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
         WolframModel[1, 1 -> 2],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
