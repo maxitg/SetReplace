@@ -138,12 +138,12 @@
 
       testUnevaluated[
         RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> "Invalid"],
-        {RulePlot::invalidFiniteOption}
+        {RulePlot::invalidOptionChoice}
       ],
 
       testUnevaluated[
         RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], "HyperedgeRendering" -> 3],
-        {RulePlot::invalidFiniteOption}
+        {RulePlot::invalidOptionChoice}
       ],
 
       (** VertexCoordinates **)
@@ -218,7 +218,7 @@
 
       testUnevaluated[
         RulePlot[WolframModel[{{1, 2, 3}} -> {{3, 4, 5}}], Frame -> "Invalid"],
-        {RulePlot::invalidFiniteOption}
+        {RulePlot::invalidOptionChoice}
       ],
 
       (** FrameStyle **)

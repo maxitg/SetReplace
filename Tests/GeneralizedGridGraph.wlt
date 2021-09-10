@@ -17,7 +17,7 @@
 
       testUnevaluated[
         GeneralizedGridGraph[1, 2],
-        {GeneralizedGridGraph::argx}
+        {GeneralizedGridGraph::nonopt}
       ],
 
       testUnevaluated[
@@ -33,7 +33,7 @@
 
       testUnevaluated[
         GeneralizedGridGraph[{4, 5}, "VertexNamingFunction" -> "$$$invalid$$$"],
-        {GeneralizedGridGraph::invalidFiniteOption}
+        {GeneralizedGridGraph::invalidOptionChoice}
       ],
 
       testUnevaluated[
