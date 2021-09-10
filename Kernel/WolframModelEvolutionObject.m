@@ -815,7 +815,7 @@ getNumericObjectProperties[obj_, boundary_] := <|# -> propertyEvaluate[True, bou
 declareMessage[General::invalidFeatureSpec,
                "Feature specification `featureSpec` should be one of `choices`, a list of them, or All."];
 
-declareMessage[General::unknownFeatureGroup, "Feature group `featureGroup` should be one of `choices`"];
+declareMessage[General::unknownFeatureGroup, "Feature group `featureGroup` should be one of `choices`."];
 
 fromFeaturesSpec[All] := {"StructurePreservingFinalStateGraph", "ObjectProperties"}
 fromFeaturesSpec[featuresSpecs_List] := featuresSpecs
