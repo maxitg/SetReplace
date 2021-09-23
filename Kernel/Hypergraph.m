@@ -23,6 +23,8 @@ $hypergraphSymmetries = {"Ordered", "Unordered", "Cyclic"(*, "Directed"*)};
 
 SetUsage @ "HypergraphSymmetry[hg$] returns the symmetry of the hypergraph hg$.";
 
+SyntaxInformation[HypergraphSymmetry] = {"ArgumentsPattern" -> {hypergraph_}};
+
 HypergraphSymmetry[HoldPattern[Hypergraph[hyperedges_, symmetry_] ? HypergraphQ]] := symmetry;
 
 (* Hypergraph *)
