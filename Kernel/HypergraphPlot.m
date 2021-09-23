@@ -77,30 +77,21 @@ expr : HypergraphPlot[args___] := ModuleScope[
 
 hypergraphPlot[args___] /; !Developer`CheckArgumentCount[HypergraphPlot[args], 1, 2] := $Failed;
 
-(* allow composite vertices, but not list-vertices *)
-$hypergraphPattern = _List ? (Function[h, AllTrue[h, ListQ[#] && Length[#] > 0 &] && AllTrue[h, Not @* ListQ, 2]]);
-$multiHypergraphPattern = $hypergraphPattern | {$hypergraphPattern...};
+$hypergraphPattern = _List ? (Function[h, VectorQ[h, (ListQ[#] && (# =!= {})) &]]);
 
 declareMessage[
   General::invalidEdges,
-  "First argument of HypergraphPlot must be a hypergraph, i.e., a list of lists, " <>
-  "where elements represent vertices, or a list of such hypergraphs."];
+  "First argument of HypergraphPlot must be a hypergraph, i.e., a list of lists, where elements represent vertices."];
 
-hypergraphPlot[Except[$multiHypergraphPattern], _ : $defaultEdgeType, OptionsPattern[]] :=
+hypergraphPlot[Except[$hypergraphPattern], _ : $defaultEdgeType, OptionsPattern[]] :=
   throw[Failure["invalidEdges", <||>]];
 
 declareMessage[General::invalidEdgeType, "Edge type `type` should be one of `allowedTypes`."];
 
-hypergraphPlot[$multiHypergraphPattern,
-                     edgeType : Except[Alternatives[Alternatives @@ $edgeTypes, OptionsPattern[]]],
-                     OptionsPattern[]] :=
+hypergraphPlot[$hypergraphPattern,
+               edgeType : Except[Alternatives[Alternatives @@ $edgeTypes, OptionsPattern[]]],
+               OptionsPattern[]] :=
   throw[Failure["invalidEdgeType", <|"type" -> edgeType, "allowedTypes" -> $edgeTypes|>]];
-
-hypergraphPlot[
-    edges : {$hypergraphPattern..}, edgeType : Alternatives @@ $edgeTypes : $defaultEdgeType, o : OptionsPattern[]] := (
-  checkHypergraphPlotOptions[HypergraphPlot, edges, {o}];
-  hypergraphPlot[#, edgeType, o] & /@ edges
-);
 
 parseHighlight[_, _, {}, _] := ConstantArray[Automatic, 3];
 
@@ -210,12 +201,8 @@ checkHypergraphPlotOptions[head_, edges_, options_] := (
   checkSize["Vertex size", OptionValue[HypergraphPlot, options, VertexSize], {}];
   checkSize["Arrowhead length", OptionValue[HypergraphPlot, options, "ArrowheadLength"], {Automatic}];
   checkPlotStyle[OptionValue[HypergraphPlot, options, PlotStyle]];
-  checkStyleLength["vertices",
-                   MatchQ[edges, {$hypergraphPattern..}],
-                   Length[vertexList[edges]],
-                   OptionValue[HypergraphPlot, options, VertexStyle]];
-  checkStyleLength[
-      "edges", MatchQ[edges, {$hypergraphPattern..}], Length[edges], OptionValue[HypergraphPlot, options, #]] & /@
+  checkStyleLength["vertices", Length[vertexList[edges]], OptionValue[HypergraphPlot, options, VertexStyle]];
+  checkStyleLength["edges", Length[edges], OptionValue[HypergraphPlot, options, #]] & /@
     {EdgeStyle, "EdgePolygonStyle"};
 );
 
@@ -247,18 +234,11 @@ declareMessage[General::invalidPlotStyle,
 
 checkPlotStyle[style_List] := throw[Failure["invalidPlotStyle", <|"plotStyle" -> style|>]];
 
-(* Single hypergraph *)
 declareMessage[General::invalidStyleLength,
                "The list of styles `styles` should have the same length `correctLength` as the number of `name`."];
 
-checkStyleLength[name_, False, correctLength_, styles_List] /; Length[styles] =!= correctLength :=
+checkStyleLength[name_, correctLength_, styles_List] /; Length[styles] =!= correctLength :=
   throw[Failure["invalidStyleLength", <|"styles" -> styles, "name" -> name, "correctLength" -> correctLength|>]];
-
-(* Multiple hypergraphs *)
-declareMessage[General::multigraphElementwiseStyle,
-               "The elementwise style specification `styleSpec` is not supported for lists of hypergraphs."];
-
-checkStyleLength[_, True, _, styles_List] := throw[Failure["multigraphElementwiseStyle", <|"styleSpec" -> styles|>]];
 
 (* Implementation *)
 
