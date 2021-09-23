@@ -131,7 +131,7 @@ cd ~/PATH-TO-CHECKOUT/SetReplace
 
 Please note that if you do not have GitLink installed, it will be installed for you.
 
-Now that you have installed the _SetReplace_ paclet, you should evaluate `` << SetReplace`  `` every time you start a
+Now that you have installed the _SetReplace_ paclet, you should evaluate `` << SetReplace` `` every time you start a
 fresh Mathematica session. This will load the paclet and bring the various functions into scope, so that you can call
 them.
 

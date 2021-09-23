@@ -12,7 +12,8 @@ In[] := Hypergraph[{{1, 1, 2}}]
 
 <img src="/Documentation/Images/Hypergraph.png" width="484.2">
 
-`Hypergraph` follows the footsteps of [Graph](http://reference.wolfram.com/language/ref/Graph.html), in that the `Hypergraph` symbol acts both as a constructor and as an object.
+`Hypergraph` follows the footsteps of [Graph](http://reference.wolfram.com/language/ref/Graph.html), in that the
+`Hypergraph` symbol acts both as a constructor and as an object.
 
 The second argument of `Hypergraph` specifies the global [symmetry](#hypergraphsymmetry) of its hyperedges.
 
@@ -36,7 +37,8 @@ In[] := AtomQ[Hypergraph[{{1, 1, 1}}]]
 Out[] = True
 ```
 
-Given their atomic nature, [parts](http://reference.wolfram.com/language/ref/Part.html) of a `Hypergraph` object cannot be extracted:
+Given their atomic nature, [parts](http://reference.wolfram.com/language/ref/Part.html) of a `Hypergraph` object
+cannot be extracted:
 
 ```wl
 In[] := Hypergraph[{{1, 1, 1}}][[1]]
@@ -57,7 +59,8 @@ In[] := hg = Hypergraph[{{1, 1, 2}, {2, 5, 4, 3}, {3, 6}}, "Unordered"];
   Out[] = {{1, 1, 2}, {2, 5, 4, 3}, {3, 6}}
   ```
 
-- [`VertexList`](http://reference.wolfram.com/language/ref/VertexList.html)- the list of vertices and in the hypergraph:
+- [`VertexList`](http://reference.wolfram.com/language/ref/VertexList.html)- the list of vertices and in the
+  hypergraph:
 
   ```wl
   In[] := VertexList[hg]
@@ -65,6 +68,7 @@ In[] := hg = Hypergraph[{{1, 1, 2}, {2, 5, 4, 3}, {3, 6}}, "Unordered"];
   ```
 
 - [`HypergraphSymmetry`](#hypergraphsymmetry) - the hypergraph symmetry:
+
   ```wl
   In[]:= HypergraphSymmetry[hg]
   Out[]= "Unordered"
@@ -85,3 +89,10 @@ Out[] = False
 ```
 
 ## HypergraphSymmetry
+
+A (global) hypergraph symmetry specifies the type of permutation under which each hyperedge of the hypergraph is
+considered invariant.
+
+- Ordered:
+- Unordered:
+- Cyclic:
