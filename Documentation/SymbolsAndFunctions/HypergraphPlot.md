@@ -22,8 +22,7 @@ Edges of any arity can be mixed. The binary edges are displayed as non-filled ar
 circles around the vertices:
 
 ```wl
-In[] := HypergraphPlot[{{1, 2, 3}, {3, 4}, {4, 3}, {4, 5,
-   6}, {1}, {6}, {6}}]
+In[] := HypergraphPlot[{{1, 2, 3}, {3, 4}, {4, 3}, {4, 5, 6}, {1}, {6}, {6}}]
 ```
 
 <img src="/Documentation/Images/BinaryAndUnaryEdgesPlot.png" width="478">
@@ -48,21 +47,10 @@ Multiedges are shown in a darker color (because of overlaid partially transparen
 depending on the layout (and are admittedly sometimes hard to understand):
 
 ```wl
-In[] := HypergraphPlot[{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6,
-   6}}]
+In[] := HypergraphPlot[{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6, 6}}]
 ```
 
 <img src="/Documentation/Images/MultiedgesPlot.png" width="478">
-
-`HypergraphPlot` is listable. Multiple hypergraphs can be plotted at the same time:
-
-```wl
-In[] := HypergraphPlot[{{{1, 2, 3}},
-  {{1, 2, 3}, {3, 4, 5}},
-  {{1, 2, 3}, {3, 4, 5}, {5, 6, 7}}}]
-```
-
-<img src="/Documentation/Images/MultiplePlots.png" width="698">
 
 Many [`WolframModel`](WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
 properties, such as [`"FinalStatePlot"`](WolframModelAndWolframModelEvolutionObject/Properties/PlotsOfStates.md)
@@ -216,14 +204,13 @@ In[] := HypergraphPlot[{{1, 2, 2}, {2, 3, 3}, {3, 1, 1}},
 hypergraphs. To demonstrate that, consider the difference:
 
 ```wl
-In[] := HypergraphPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}},
- "MaxImageSize" -> 100]
+In[] := HypergraphPlot[#, "MaxImageSize" -> 100] & /@ {{{1}}, {{1, 1}}, {{1, 2, 3}}}
 ```
 
 <img src="/Documentation/Images/PlotWithMaxImageSize.png" width="254">
 
 ```wl
-In[] := HypergraphPlot[{{{1}}, {{1, 1}}, {{1, 2, 3}}}, ImageSize -> 100]
+In[] := HypergraphPlot[#, ImageSize -> 100] & /@ {{{1}}, {{1, 1}}, {{1, 2, 3}}}
 ```
 
 <img src="/Documentation/Images/PlotWithImageSize.png" width="457">

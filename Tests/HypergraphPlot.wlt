@@ -111,18 +111,8 @@
       ],
 
       VerificationTest[
-        graphicsQ /@ HypergraphPlot[{{}}],
-        {True}
-      ],
-
-      testUnevaluated[
-        HypergraphPlot[{{{}}}],
-        {HypergraphPlot::invalidEdges}
-      ],
-
-      testUnevaluated[
-        HypergraphPlot[{{1, 3}, {}}],
-        {HypergraphPlot::invalidEdges}
+        graphicsQ @ HypergraphPlot[{}],
+        True
       ],
 
       (** Valid EdgeType **)
@@ -658,7 +648,10 @@
 
       (* Multiple hypergraphs *)
       VerificationTest[
-        graphicsQ /@ HypergraphPlot[{{{1, 2, 3}, {3, 4, 5}}, {{3, 4, 5}, {5, 6, 7}}, {{5, 6, 7}, {7, 8, 5}}}, ##],
+        Map[
+          Function[h, graphicsQ @ HypergraphPlot[h, ##]],
+          {{{1, 2, 3}, {3, 4, 5}}, {{3, 4, 5}, {5, 6, 7}}, {{5, 6, 7}, {7, 8, 5}}}
+        ],
         ConstantArray[True, 3]
       ] & @@@ {
         {},
