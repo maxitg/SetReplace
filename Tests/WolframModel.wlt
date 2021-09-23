@@ -140,11 +140,6 @@
       ],
 
       testUnevaluated[
-        WolframModel[1 -> 2, Hypergraph[{{1, 1, 1}}, "Unordered"]],
-        {WolframModel::invalidState}
-      ],
-
-      testUnevaluated[
         WolframModel[1 -> 2, 4, g -> 2],
         {WolframModel::invalidState}
       ],
@@ -269,17 +264,6 @@
       testUnevaluated[
         WolframModel[<|"PatternRules" -> {1 -> 2, a_ :> Module[{b}, b]}|>, {1}, x],
         {WolframModel::invalidSteps}
-      ],
-
-      (** Initial State **)
-
-      (*** Hypergraph ***)
-      VerificationTest[
-        WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}}, {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}},
-                    Hypergraph[{{1, 1, 1}}, "Ordered"],
-                    4],
-        _WolframModelEvolutionObject,
-        SameTest -> MatchQ
       ],
 
       (** Steps **)

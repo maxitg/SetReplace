@@ -36,11 +36,6 @@
         {{10, 9, 8, 7, 6}, {1, 2, 3, 4, 5}}
       ],
 
-      VerificationTest[
-        IndexHypergraph[Hypergraph[{Range[10, 6, -1], Range[-5, -1]}]],
-        Hypergraph[{{10, 9, 8, 7, 6}, {1, 2, 3, 4, 5}}]
-      ],
-
       (* unevaluated *)
 
       (** argument count **)
@@ -68,7 +63,7 @@
       (** second argument **)
       testUnevaluated[
         IndexHypergraph[{{x, y, z}, {y, z, y}}, x],
-        {IndexHypergraph::invalidIndex}
+        {IndexHypergraph::int}
       ]
     }
   |>

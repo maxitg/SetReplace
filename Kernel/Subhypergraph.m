@@ -1,3 +1,6 @@
+(* Subhypergraph *)
+(* Subhypergraph is an utility function that selects hyperedges that only contain vertices from the requested list. *)
+
 Package["SetReplace`"]
 
 PackageImport["GeneralUtilities`"]
@@ -6,6 +9,7 @@ PackageExport["Subhypergraph"]
 PackageExport["WeakSubhypergraph"]
 
 (* Documentation *)
+
 SetUsage @ "
 Subhypergraph[hypergraph$, vertexList$] selects hyperedges from hypergraph$ that are subsets of vertexList$.
 Subhypergraph[vertexList$] represents the operator form for a hypergraph.
@@ -26,113 +30,88 @@ SyntaxInformation[WeakSubhypergraph] =
 
 (* Argument count *)
 Subhypergraph[args___] := 0 /;
-  !CheckArguments[Subhypergraph[args], {1, 2}] && False;
+  !Developer`CheckArgumentCount[Subhypergraph[args], 1, 2] && False;
 
 WeakSubhypergraph[args___] := 0 /;
-  !CheckArguments[WeakSubhypergraph[args], {1, 2}] && False;
+  !Developer`CheckArgumentCount[WeakSubhypergraph[args], 1, 2] && False;
 
 (* main *)
-expr : Subhypergraph[hypergraph_, vertexList_] :=
-  With[{
-      result = Catch[subhypergraph[hypergraph, vertexList],
-                     _ ? FailureQ,
-                     message[Subhypergraph, #, <|"expr" -> HoldForm[expr]|>] &]
-    },
-    result /; !FailureQ[result]
-  ];
+expr : Subhypergraph[hypergraph_, vertexList_] := With[{
+    res = Catch[subhypergraph[HoldForm @ expr, hypergraph, vertexList]]},
+  res /; res =!= $Failed
+];
 
-expr : WeakSubhypergraph[hypergraph_, vertexList_] :=
-  With[{
-      result = Catch[weakSubhypergraph[hypergraph, vertexList],
-                     _ ? FailureQ,
-                     message[WeakSubhypergraph, #, <|"expr" -> HoldForm[expr]|>] &]
-    },
-    result /; !FailureQ[result]
-  ];
+expr : WeakSubhypergraph[hypergraph_, vertexList_] := With[{
+    res = Catch[weakSubhypergraph[HoldForm @ expr, hypergraph, vertexList]]},
+  res /; res =!= $Failed
+];
 
 (* operator form *)
-expr : Subhypergraph[args0___][args1___] :=
-  With[{
-      result = Catch[subhypergraph[args0][args1],
-                     _ ? FailureQ,
-                     message[Subhypergraph, #, <|"expr" -> HoldForm[expr]|>] &]
-    },
-    result /; !FailureQ[result]
-  ];
+expr : Subhypergraph[args0___][args1___] := With[{res = Catch[subhypergraph[HoldForm @ expr][args0][args1]]},
+  res /; res =!= $Failed
+];
 
-expr : WeakSubhypergraph[args0___][args1___] :=
-  With[{
-      result = Catch[weakSubhypergraph[args0][args1],
-                     _ ? FailureQ,
-                     message[WeakSubhypergraph, #, <|"expr" -> HoldForm[expr]|>] &]
-    },
-    result /; !FailureQ[result]
-  ];
+expr : WeakSubhypergraph[args0___][args1___] := With[{res = Catch[weakSubhypergraph[HoldForm @ expr][args0][args1]]},
+  res /; res =!= $Failed
+];
 
 (* Normal form *)
+subhypergraph[_, h_ ? hypergraphQ, vertices_List] := Select[h, SubsetQ[vertices, #] &];
 
-subhypergraph[h_ ? HypergraphQ, vertices_List] :=
-  Hypergraph[Select[Normal[h], SubsetQ[vertices, #] &], HypergraphSymmetry[h]];
-
-weakSubhypergraph[h_ ? HypergraphQ, vertices_List] :=
-  Hypergraph[Select[Normal[h], ContainsAny[#, vertices] &], HypergraphSymmetry[h]];
-
-subhypergraph[h : {___List}, vertices_List] :=
-  Normal[subhypergraph[Hypergraph[h], vertices]];
-
-weakSubhypergraph[h : {___List}, vertices_List] :=
-  Normal[weakSubhypergraph[Hypergraph[h], vertices]];
+weakSubhypergraph[_, h_ ? hypergraphQ, vertices_List] := Select[h, ContainsAny[#, vertices] &];
 
 (* Incorrect arguments messages *)
 
 (** hypergraph **)
-subhypergraph[Except[(_ ? HypergraphQ) | {___List}], _] :=
-  throw[Failure["invalidHypergraph", <|"pos" -> 1|>]];
 
-weakSubhypergraph[Except[(_ ? HypergraphQ) | {___List}], _] :=
-  throw[Failure["invalidHypergraph", <|"pos" -> 1|>]];
+subhypergraph[expr_, h_ ? (Not @* hypergraphQ), _] :=
+  (Message[Subhypergraph::invalidHypergraph, 1, HoldForm @ expr];
+  Throw[$Failed]);
+
+weakSubhypergraph[expr_, h_ ? (Not @* hypergraphQ), _] :=
+  (Message[WeakSubhypergraph::invalidHypergraph, 1, HoldForm @ expr];
+  Throw[$Failed]);
 
 (** vertices **)
-With[{symbol = #},
-  declareMessage[symbol::invalidVertices,
-                 "The argument at position `pos` in `expr` should be a list representing vertices."]
-] & /@ {Subhypergraph, WeakSubhypergraph};
 
-subhypergraph[_ , Except[_List]] :=
-  throw[Failure["invalidVertices", <|"pos" -> 2|>]];
+subhypergraph[expr_, _ , v : Except[_List]] :=
+  (Message[Subhypergraph::invl, 2];
+  Throw[$Failed]);
 
-weakSubhypergraph[_ , Except[_List]] :=
-  throw[Failure["invalidVertices", <|"pos" -> 2|>]];
+weakSubhypergraph[expr_, _ , v : Except[_List]] :=
+  (Message[WeakSubhypergraph::invl, 2];
+  Throw[$Failed]);
 
 (* operator form *)
-subhypergraph[vertices_List][h : (_ ? HypergraphQ) | {___List}] := subhypergraph[h, vertices];
+subhypergraph[_][vertices_List][h_ ? hypergraphQ] := subhypergraph[None, h, vertices];
 
-weakSubhypergraph[vertices_List][h : (_ ? HypergraphQ) | {___List}] := weakSubhypergraph[h, vertices];
+weakSubhypergraph[_][vertices_List][h_ ? hypergraphQ] := weakSubhypergraph[None, h, vertices];
 
 (* Incorrect arguments messages *)
 
 (** vertices **)
-subhypergraph[Except[_List]][_] :=
-  throw[Failure["invalidVertices", <|"pos" -> {0, 1}|>]];
+subhypergraph[expr_][Except[_List]][_] :=
+  (Message[Subhypergraph::invl, {0, 1}];
+  Throw[$Failed]);
 
-weakSubhypergraph[Except[_List]][_] :=
-  throw[Failure["invalidVertices", <|"pos" -> {0, 1}|>]];
+weakSubhypergraph[expr_][Except[_List]][_] :=
+  (Message[WeakSubhypergraph::invl, {0, 1}];
+  Throw[$Failed]);
 
 (** hypergraph **)
-subhypergraph[___][Except[(_ ? HypergraphQ) | {___List}]] :=
-  throw[Failure["invalidHypergraph", <|"pos" -> 1|>]];
+subhypergraph[expr_][args0___][h_ ? (Not @* hypergraphQ)] :=
+  (Message[Subhypergraph::invalidHypergraph, 1, HoldForm @ expr];
+  Throw[$Failed]);
 
-weakSubhypergraph[___][Except[(_ ? HypergraphQ) | {___List}]] :=
-  throw[Failure["invalidHypergraph", <|"pos" -> 1|>]];
+weakSubhypergraph[expr_][args0___][h_ ? (Not @* hypergraphQ)] :=
+  (Message[WeakSubhypergraph::invalidHypergraph, 1, HoldForm @ expr];
+  Throw[$Failed]);
 
 (** length **)
-With[{symbol = #},
-  declareMessage[symbol::invalidArgumentLength,
-                 "`expr` called with `received` arguments; `expected` argument is expected."]
-] & /@ {Subhypergraph, WeakSubhypergraph};
+subhypergraph[expr_][args0___][args1___] /; (Length[{args1}] =!= 1) :=
+  (Message[Subhypergraph::argx, HoldForm @ expr, Length @ {args1}, 1];
+  Throw[$Failed]);
 
-subhypergraph[___][args1___] /; (Length[{args1}] =!= 1) :=
-  throw[Failure["invalidArgumentLength", <|"received" -> Length[{args1}], "expected" -> 1|>]];
-
-weakSubhypergraph[___][args1___] /; (Length[{args1}] =!= 1) :=
-  throw[Failure["invalidArgumentLength", <|"received" -> Length[{args1}], "expected" -> 1|>]];
+weakSubhypergraph[expr_][args0___][args1___] /; (Length[{args1}] =!= 1) :=
+  (Message[WeakSubhypergraph::argx, HoldForm @ expr, Length @ {args1}, 1];
+  Throw[$Failed]);

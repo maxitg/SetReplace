@@ -3,7 +3,6 @@
     "init" -> (
       Attributes[Global`testUnevaluated] = {HoldAll};
       Global`testUnevaluated[args___] := SetReplace`PackageScope`testUnevaluated[VerificationTest, args];
-      $supportedHypergraphSymmetries = {"Ordered", "Unordered", "Cyclic"};
     ),
     "tests" -> {
       (* Subhypergraph / normal form *)
@@ -33,18 +32,6 @@
         {{2, 3, 3}, {2, 3, 4}}
       ],
 
-      VerificationTest[
-        Subhypergraph[Hypergraph[{{1, 1, 1}, {1, 2}, {2, 3, 3}, {2, 3, 4}}], {2, 3, 4}],
-        Hypergraph[{{2, 3, 3}, {2, 3, 4}}]
-      ],
-
-      With[{symmetry = #},
-        VerificationTest[
-          Subhypergraph[Hypergraph[{{7, 5, 5}, {4}, {7, 5}, {7, 6}}, symmetry], {5, 7}],
-          Hypergraph[{{7, 5, 5}, {7, 5}}, symmetry]
-        ]
-      ] & /@ $supportedHypergraphSymmetries,
-
       (** Wrong argument count **)
       testUnevaluated[
         Subhypergraph[{{}}, {}, 3],
@@ -70,7 +57,7 @@
       (** Wrong second argument **)
       testUnevaluated[
         Subhypergraph[{{1, 1, 2}, {2, 3}, {2, 3, 4}}, 1],
-        {Subhypergraph::invalidVertices}
+        {Subhypergraph::invl}
       ],
 
       (* Subhypergraph / operator form *)
@@ -90,28 +77,21 @@
         {{2, 3, 3}, {2, 3, 4}}
       ],
 
-      With[{symmetry = #},
-        VerificationTest[
-          Subhypergraph[{5, 7}][Hypergraph[{{7, 5, 5}, {4}, {7, 5}, {7, 6}}, symmetry]],
-          Hypergraph[{{7, 5, 5}, {7, 5}}, symmetry]
-        ]
-      ] & /@ $supportedHypergraphSymmetries,
-
       (** Wrong argument count **)
       testUnevaluated[
         Subhypergraph[{}][{{}}, {}],
-        {Subhypergraph::invalidArgumentLength}
+        {Subhypergraph::argx}
       ],
 
       (** Wrong zeroth argument **)
       testUnevaluated[
         Subhypergraph[1][{{1, 2}, {2, 3, 4}}],
-        {Subhypergraph::invalidVertices}
+        {Subhypergraph::invl}
       ],
 
       testUnevaluated[
         Subhypergraph[1][{2, 3, 4}],
-        {Subhypergraph::invalidVertices}
+        {Subhypergraph::invl}
       ],
 
       (** Wrong first argument **)
@@ -147,18 +127,6 @@
         {{1, 2}, {2, 3, 3}, {2, 3, 4}}
       ],
 
-      VerificationTest[
-        WeakSubhypergraph[Hypergraph[{{1, 1, 1}, {1, 2}, {2, 3, 3}, {2, 3, 4}}], {2, 3, 4}],
-        Hypergraph[{{1, 2}, {2, 3, 3}, {2, 3, 4}}]
-      ],
-
-      With[{symmetry = #},
-        VerificationTest[
-          WeakSubhypergraph[Hypergraph[{{7, 5, 5}, {4}, {7, 5}, {7, 6}}, symmetry], {5, 7}],
-          Hypergraph[{{7, 5, 5}, {7, 5}, {7, 6}}, symmetry]
-        ]
-      ] & /@ $supportedHypergraphSymmetries,
-
       (** Wrong argument count **)
       testUnevaluated[
         WeakSubhypergraph[{{}}, {}, 3],
@@ -184,7 +152,7 @@
       (** Wrong second argument **)
       testUnevaluated[
         WeakSubhypergraph[{{1, 1, 2}, {2, 3}, {2, 3, 4}}, 1],
-        {WeakSubhypergraph::invalidVertices}
+        {WeakSubhypergraph::invl}
       ],
 
       (* WeakSubhypergraph / operator form *)
@@ -204,28 +172,21 @@
         {{1, 2}, {2, 3, 3}, {2, 3, 4}}
       ],
 
-      With[{symmetry = #},
-        VerificationTest[
-          WeakSubhypergraph[{5, 7}][Hypergraph[{{7, 5, 5}, {4}, {7, 5}, {7, 6}}, symmetry]],
-          Hypergraph[{{7, 5, 5}, {7, 5}, {7, 6}}, symmetry]
-        ]
-      ] & /@ $supportedHypergraphSymmetries,
-
       (** Wrong argument count **)
       testUnevaluated[
         WeakSubhypergraph[{}][{{}}, {}],
-        {WeakSubhypergraph::invalidArgumentLength}
+        {WeakSubhypergraph::argx}
       ],
 
       (** Wrong zeroth argument **)
       testUnevaluated[
         WeakSubhypergraph[1][{{1, 2}, {2, 3, 4}}],
-        {WeakSubhypergraph::invalidVertices}
+        {WeakSubhypergraph::invl}
       ],
 
       testUnevaluated[
         WeakSubhypergraph[1][{2, 3, 4}],
-        {WeakSubhypergraph::invalidVertices}
+        {WeakSubhypergraph::invl}
       ],
 
       (** Wrong first argument **)
