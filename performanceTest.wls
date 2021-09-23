@@ -65,11 +65,9 @@ Check[
       {{3, 3, 3, 6}, {3, 3, 7, 3}, {3, 5, 5}, {3, 3, 1}, {3, 2, 3}, {3, 3, 3, 3, 3, 3}, {4, 6, 6}, {4, 4, 4, 4, 4, 4},
         {8, 7, 7}, {8, 8, 8, 8, 8, 8}, {1, 4, 1}, {1, 1, 1, 1, 1}, {2, 2, 8}, {2, 2}},
       64],
-    "Multiset addition" -> GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
-                                                {"MaxGeneration" -> 2, "MinEventInputs" -> 2, "MaxEventInputs" -> 2},
-                                                None,
-                                                EventOrderingFunctions[MultisetSubstitutionSystem],
-                                                {}][{1, 2, 3, 4}]
+    "Multiset addition" -> GenerateMultihistory[
+      MultisetSubstitutionSystem[{a_, b_} :> {a + b}],
+      MaxGeneration -> 2, MinEventInputs -> 2, MaxEventInputs -> 2] @ {1, 2, 3, 4}
   |>;
 
   $defaultMeasurementsCount = 5;
@@ -84,10 +82,11 @@ Check[
     Exit[1];
   ];
 
-  Attributes[meanAroundTiming] = {HoldAll};
-  meanAroundTiming[expr_] := MeanAround @ Table[First @ AbsoluteTiming[expr], $measurementsCount];
+  Attributes[meanAroundTiming] = {HoldFirst};
+  meanAroundTiming[expr_, resultsFunction_] :=
+    MeanAround @ Table[First @ AbsoluteTiming[resultsFunction @ expr], $measurementsCount];
 
-  runTests[repo_, sha_, tests_] := ModuleScope[
+  runTests[repo_, sha_, tests_, resultsFunction_] := ModuleScope[
     Print["Testing ", sha];
     GitCheckoutReference[repo, sha];
     CloseKernels[];
@@ -95,7 +94,8 @@ Check[
     result = ParallelEvaluate[
       Get[FileNameJoin[{$setReplaceRoot, "Kernel", "init.m"}]];
       Check[
-        meanAroundTiming @@@ KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]]
+        Function[{test}, meanAroundTiming[test, resultsFunction], HoldFirst] @@@
+          KeyMap[ReleaseHold, ReleaseHold @ Map[Hold, tests, {3}]]
       ,
         $Failed
       ]
@@ -106,6 +106,7 @@ Check[
     result
   ];
 
+  speedupDelta[0, new_] := Infinity;
   speedupDelta[old_, new_] := (old - new) / old;
 
   $gitRepo = GitOpen[$SetReplaceRoot];
@@ -133,7 +134,8 @@ Check[
   $symbolicRef = RunProcess[{"git", "symbolic-ref", "--short", "HEAD"}];
   $originalRef = If[$symbolicRef["ExitCode"] === 0, StringExtract[$symbolicRef["StandardOutput"], 1], $currentSHA];
 
-  {$oldResults, $newResults} = runTests[$gitRepo, #, tests] & /@ {$oldSHA, $newSHA};
+  $oldResults = runTests[$gitRepo, $oldSHA, tests, Quiet];
+  $newResults = runTests[$gitRepo, $newSHA, tests, Identity];
   RunProcess[{"git", "checkout", "-q", $originalRef}];
 
   (* We need to return to the original branch before exiting. *)
@@ -151,10 +153,13 @@ Check[
 
   differenceString[meanAround_] := With[{
       magnitude = QuantityMagnitude[meanAround, "Percent"]},
-    If[5 * magnitude[[2]] < Abs[magnitude[[1]]], If[magnitude[[1]] > 0, $greenColor, $redColor], $whiteColor] <>
-    FirstCase[
-      MakeBoxes[magnitude, StandardForm],
-      TemplateBox[{value_, error_}, "Around", ___] :> value <> " \[PlusMinus] " <> error <> " %"] <>
+    (* Due to a weed in WL, MeanAround does not return Around if all values in the list are the same. *)
+    magnitudeMean = If[Head[magnitude] === Around, magnitude["Value"], magnitude];
+    magnitudeUncertainty = If[Head[magnitude] === Around, magnitude["Uncertainty"], 0];
+    If[5 * magnitudeUncertainty < Abs[magnitudeMean], If[magnitudeMean > 0, $greenColor, $redColor], $whiteColor] <>
+    FirstCase[MakeBoxes[magnitude, StandardForm],
+              TemplateBox[{value_, error_}, "Around", ___] :> value <> " \[PlusMinus] " <> error <> " %",
+              ToString[magnitudeMean] <> " \[PlusMinus] 0 %"] <>
     $endColor
   ];
 

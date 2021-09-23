@@ -13,32 +13,22 @@ MultisetSubstitutionSystem should be used as the first argument in functions suc
 
 SyntaxInformation[MultisetSubstitutionSystem] = {"ArgumentsPattern" -> {rules_}};
 
-declareMultihistoryGenerator[
-  generateMultisetSubstitutionSystem,
-  MultisetSubstitutionSystem,
-  <|"MaxGeneration" -> {Infinity, "NonNegativeIntegerOrInfinity"},
-    "MaxDestroyerEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"},
-    "MinEventInputs" -> {0, "NonNegativeIntegerOrInfinity"},
-    "MaxEventInputs" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
-  {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"},
-  <|"MaxEvents" -> {Infinity, "NonNegativeIntegerOrInfinity"}|>,
-  None];
+declareSystem[MultisetSubstitutionSystem,
+              generateMultisetSubstitutionSystem,
+              _List,
+              {MaxGeneration, MaxDestroyerEvents, MinEventInputs, MaxEventInputs, MaxEvents},
+              True];
 
-generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
-                                   rawEventSelection_,
-                                   rawTokenDeduplication_,
-                                   rawEventOrdering_,
-                                   rawStoppingCondition_,
-                                   rawInit_] := Block[{
+generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___], init_, parameters_] := Block[{
     expressions, eventRuleIndices, eventInputs, eventOutputs, eventGenerations, expressionCreatorEvents,
     expressionDestroyerEventCounts, destroyerChoices, instantiationCounts, instantiations},
-  Module[{rules, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, maxEvents, init, terminationReason},
+  Module[{rules, ruleInputCountRanges, maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, maxEvents,
+          terminationReason},
     rules = parseRules[rawRules];
-    {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs} = Values @ rawEventSelection;
-    parseTokenDeduplication[rawTokenDeduplication]; (* Token deduplication is not implemented at the moment *)
-    parseEventOrdering[rawEventOrdering];           (* Event ordering is not implemented at the moment *)
-    {maxEvents} = Values @ rawStoppingCondition;
-    init = parseInit[rawInit];
+    ruleInputCountRanges = inputCountRange /@ rules;
+    {maxGeneration, maxDestroyerEvents, minEventInputs, maxEventInputs, maxEvents} = Values @ parameters;
+    minEventInputs = Max[minEventInputs, Min[ruleInputCountRanges[[All, 1]]]];
+    maxEventInputs = Min[maxEventInputs, Max[ruleInputCountRanges[[All, 2]]]];
 
     (* "HashTable" is causing memory leaks, so we are using Data`UnorderedAssociation instead. *)
 
@@ -70,7 +60,7 @@ generateMultisetSubstitutionSystem[MultisetSubstitutionSystem[rawRules___],
     ];
 
     Multihistory[
-      {MultisetSubstitutionSystem, 0},
+      SetReplaceType[MultisetSubstitutionSystem, 0],
       <|"Rules" -> rules,
         "TerminationReason" -> terminationReason,
         "Expressions" -> expressions,
@@ -96,6 +86,7 @@ evaluateSingleEvent[
 (* Matching *)
 
 findMatch[rules_, maxGeneration_, maxDestroyerEvents_, minEventInputs_, maxEventInputs_] := ModuleScope[
+  If[minEventInputs === Infinity || minEventInputs > maxEventInputs, Throw["Complete", $$terminationReason]];
   eventInputsCountRange = {minEventInputs, Min[maxEventInputs, expressions["Length"]]};
   subsetCount = With[{n = expressions["Length"], a = eventInputsCountRange[[1]], b = eventInputsCountRange[[2]]},
     (* Sum[Binomial[n, k], {k, a, b}] *)
@@ -237,18 +228,81 @@ declareMessage[General::invalidMultisetRules, "Rules `rules` must be a Rule, a R
 parseRules[rawRules_] := throw[Failure["invalidMultisetRules", <|"rules" -> rawRules|>]];
 parseRules[rawRules___] /; !CheckArguments[MultisetSubstitutionSystem[rawRules], 1] := throw[Failure[None, <||>]];
 
-parseTokenDeduplication[None] := None;
-declareMessage[General::multisetTokenDeduplicationNotImplemented,
-               "Token deduplication is not implemented for Multiset Substitution System."];
-parseTokenDeduplication[_] := throw[Failure["multisetTokenDeduplicationNotImplemented", <||>]];
+inputCountRange[(input_ :> _) | (input_ -> _)] := inputCountRange[input];
+inputCountRange[Verbatim[HoldPattern][input_List]] :=
+  Total[Append[ReleaseHold @ Map[sequencePatternLengthRange, Hold[input], {2}], {0, 0}]];
+inputCountRange[input_List] := inputCountRange[HoldPattern[input]];
+inputCountRange[Verbatim[Alternatives][patterns__]] := MinMax[inputCountRange /@ {patterns}];
+inputCountRange[(Verbatim[Condition] | Verbatim[PatternTest])[input_, _]] := inputCountRange[input];
+inputCountRange[Verbatim[Pattern][_, obj_]] := inputCountRange[obj];
+inputCountRange[Verbatim[Except][_, p_]] := inputCountRange[p];
+inputCountRange[Verbatim[Verbatim][p_List]] := ConstantArray[Length[p], 2];
+inputCountRange[_] := {0, Infinity};
 
-$supportedEventOrdering =
-  {"InputCount", "SortedInputTokenIndices", "InputTokenIndices", "RuleIndex", "InstantiationIndex"};
-parseEventOrdering[ordering : $supportedEventOrdering] := ordering;
-declareMessage[General::multisetEventOrderingNotImplemented,
-               "Only " <> ToString[$supportedEventOrdering] <> " event ordering is implemented at this time."];
-parseEventOrdering[_] := throw[Failure["multisetEventOrderingNotImplemented", <||>]];
+(* We need to hold the pattern from now on because sequencePatternLengthRange may be called from inside HoldPattern. *)
 
-parseInit[init_List] := init;
-declareMessage[General::multisetInitNotList, "Multiset Substitution System init `init` should be a List."];
-parseInit[init_] := throw[Failure["multisetInitNotList", <|"init" -> init|>]];
+Attributes[sequencePatternLengthRange] := {HoldFirst};
+
+(* Here we enumerate all possible WL pattern constructs from https://reference.wolfram.com/language/guide/Patterns.html.
+   If a pattern construct has incorrect syntax, we return {Infinity, 0}, which means nothing can be matched. *)
+
+sequencePatternLengthRange[Verbatim[Pattern][_, obj_]] := sequencePatternLengthRange[obj];
+sequencePatternLengthRange[Verbatim[Pattern][___]] := {Infinity, 0};
+
+sequencePatternLengthRange[_Blank] := {1, 1};
+sequencePatternLengthRange[_BlankSequence] := {1, Infinity};
+sequencePatternLengthRange[_BlankNullSequence] := {0, Infinity};
+sequencePatternLengthRange[Verbatim[Alternatives][p__]] :=
+  MinMax[ReleaseHold @ Map[sequencePatternLengthRange, Hold[{p}], {2}]];
+sequencePatternLengthRange[Verbatim[Alternatives][]] := {Infinity, 0}; (* this does not match to anything *)
+
+zeroPreferenceProduct[0, _] := 0;
+zeroPreferenceProduct[_, 0] := 0;
+zeroPreferenceProduct[a_, b_] := a * b;
+zeroPreferenceProduct[{a_, b_}, {c_, d_}] := {zeroPreferenceProduct[a, c], zeroPreferenceProduct[b, d]};
+
+sequencePatternLengthRange[Verbatim[Repeated][p_]] := {Min @ sequencePatternLengthRange[p], Infinity};
+sequencePatternLengthRange[Verbatim[RepeatedNull][_]] := {0, Infinity};
+sequencePatternLengthRange[Verbatim[Repeated][p_, max_]] :=
+  zeroPreferenceProduct[{1, max}, sequencePatternLengthRange[p]];
+sequencePatternLengthRange[Verbatim[RepeatedNull][p_, max_]] :=
+  {0, zeroPreferenceProduct[max, Max @ sequencePatternLengthRange[p]]};
+sequencePatternLengthRange[(Verbatim[Repeated] | Verbatim[RepeatedNull])[p_, {min_, max_}]] :=
+  zeroPreferenceProduct[{min, max}, sequencePatternLengthRange[p]];
+sequencePatternLengthRange[(Verbatim[Repeated] | Verbatim[RepeatedNull])[p_, {n_}]] :=
+  zeroPreferenceProduct[{n, n}, sequencePatternLengthRange[p]];
+sequencePatternLengthRange[Verbatim[Repeated][___]] := {Infinity, 0};
+sequencePatternLengthRange[Verbatim[RepeatedNull][___]] := {Infinity, 0};
+
+(* Variable-length sequences are not allowed as a second argument to Except. *)
+sequencePatternLengthRange[_Except] := {1, 1};
+
+sequencePatternLengthRange[Verbatim[Longest][p_]] := sequencePatternLengthRange[p];
+sequencePatternLengthRange[Verbatim[Longest][___]] := {Infinity, 0};
+sequencePatternLengthRange[Verbatim[Shortest][p_]] := sequencePatternLengthRange[p];
+sequencePatternLengthRange[Verbatim[Shortest][___]] := {Infinity, 0};
+
+sequencePatternLengthRange[_OptionsPattern] := {0, Infinity};
+
+sequencePatternLengthRange[(Verbatim[PatternSequence] | Verbatim[OrderlessPatternSequence])[ps___]] :=
+  Total[Append[ReleaseHold @ Map[sequencePatternLengthRange, Hold[{ps}], {2}], {0, 0}]];
+
+sequencePatternLengthRange[_Verbatim] := {1, 1};
+
+sequencePatternLengthRange[Verbatim[HoldPattern][p_]] := sequencePatternLengthRange[p];
+sequencePatternLengthRange[Verbatim[HoldPattern][___]] := {Infinity, 0};
+
+sequencePatternLengthRange[_KeyValuePattern] := {1, 1};
+
+sequencePatternLengthRange[Verbatim[Condition][p_, _]] := sequencePatternLengthRange[p];
+sequencePatternLengthRange[Verbatim[Condition][___]] := {Infinity, 0};
+
+sequencePatternLengthRange[Verbatim[PatternTest][p_, _]] := sequencePatternLengthRange[p];
+sequencePatternLengthRange[Verbatim[PatternTest][___]] := {Infinity, 0};
+
+sequencePatternLengthRange[Verbatim[Optional][p_, _]] := {0, Max @ sequencePatternLengthRange[p]};
+sequencePatternLengthRange[Verbatim[Optional][___]] := {Infinity, 0};
+
+(* Since we have enumerated all pattern constructs above, this case does not correspond to a pattern.
+   However, the completeness of checks above needs to be checked for every new WL version. *)
+sequencePatternLengthRange[_] := If[$VersionNumber <= 12.3, {1, 1}, {0, Infinity}];

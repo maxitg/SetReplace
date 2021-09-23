@@ -21,22 +21,49 @@ PackageScope["throwInvalidPropertyArgumentCount"]
 
 PackageScope["initializeTypeSystem"]
 
-(* SetReplaceType and SetReplaceProperty should be public because they are returned by SetReplaceTypeGraph. *)
-
 SetUsage @ "
-SetReplaceType[type$] represents a SetReplace type$.
+SetReplaceType[name$, version$] represents a SetReplace type.
 ";
 
-SyntaxInformation[SetReplaceType] = {"ArgumentsPattern" -> {type_}};
+SyntaxInformation[SetReplaceType] = {"ArgumentsPattern" -> {name_, version_.}};
+
+SetReplaceType /: MakeBoxes[
+      SetReplaceType[type_, version : (_Integer ? (# >= 0 &)) : Null], form : StandardForm] := With[{
+    versionString = "v" <> ToString[version]},
+  TemplateBox[
+    {MakeBoxes[type, form], MakeBoxes[versionString, form]},
+    "SetReplaceType",
+    DisplayFunction ->
+      style[$lightTheme][If[version === Null, $setReplaceTypeDisplayFunction, $setReplaceTypeDisplayFunctionVersioned]],
+    Editable -> False,
+    InterpretationFunction -> (RowBox[
+      {"SetReplaceType", "[", ToString[type], If[version === Null, Nothing, Splice[{",", ToString[version]}]], "]"}] &),
+    Selectable -> False]
+];
+
+SetReplaceType /: MakeBoxes[expr : SetReplaceType[name_], form : TraditionalForm] := With[{
+    nameBoxes = MakeBoxes[name, form]},
+  InterpretationBox[nameBoxes, expr, Selectable -> False]
+];
+
+SetReplaceType /: MakeBoxes[
+      expr : SetReplaceType[name_, version_Integer ? (# >= 0 &)], form : TraditionalForm] := With[{
+    nameBoxes = MakeBoxes[name, form],
+    versionString = "v" <> ToString @ version},
+  With[{boxes = RowBox[{nameBoxes, "\[ThickSpace]", StyleBox[versionString, FontColor -> Gray]}]},
+    InterpretationBox[boxes, expr, Selectable -> False]
+  ]
+];
+
+SetReplaceType[type_SetReplaceType] := type;
+
+(* SetReplaceProperty should be public because it is returned by SetReplaceTypeGraph. *)
 
 SetUsage @ "
 SetReplaceProperty[property$] represents a SetReplace property$.
 ";
 
 SyntaxInformation[SetReplaceProperty] = {"ArgumentsPattern" -> {property_}};
-
-(* Object classes (like Multihistory) are expected to define their own objectType[...] implementation. This one is
-   triggered if no other is found. *)
 
 SetUsage @ "
 SetReplaceObjectType[object$] returns the type of object$, which can then be used in SetReplaceTypeConvert.
@@ -45,11 +72,14 @@ SetReplaceObjectType[object$] returns the type of object$, which can then be use
 SyntaxInformation[SetReplaceObjectType] = {"ArgumentsPattern" -> {object_}};
 
 expr : SetReplaceObjectType[args___] := ModuleScope[
-  result = Catch[objectType[args],
+  result = Catch[SetReplaceType[objectType[args]],
                  _ ? FailureQ,
                  message[SetReplaceObjectType, #, <|"expr" -> HoldForm[expr]|>] &];
   result /; !FailureQ[result]
 ];
+
+(* Object classes (like Multihistory) are expected to define their own objectType[...] implementation. This call is
+   triggered if no other is found. *)
 
 declareMessage[General::unknownObject, "The argument `arg` in `expr` is not a known typed object."];
 
@@ -115,8 +145,9 @@ declareMessage[General::unconvertibleType, "The type `type` in `expr` can not be
 
 declareMessage[General::noConversionPath, "Cannot convert an object from `from` to `to` in `expr`."];
 
-typeConvert[toType_][object_] := ModuleScope[
+typeConvert[toTypeInput_][object_] := ModuleScope[
   fromType = objectType[object];
+  toType = Lookup[$shortcutsToTypes, toTypeInput, toTypeInput];
   If[!VertexQ[$typeGraph, SetReplaceType[#]], throw[Failure["unconvertibleType", <|"type" -> #|>]]] & /@
     {fromType, toType};
   path = FindShortestPath[$typeGraph, SetReplaceType[fromType], SetReplaceType[toType]];
@@ -188,8 +219,12 @@ $SetReplaceProperties gives the list of all properties defined in SetReplace.
 
 initializeTypeAndPropertyLists[] :=
   {$SetReplaceTypes, $SetReplaceProperties} =
-    Sort @ Select[freeFromInternalSymbolsQ][First /@ VertexList[$typeGraph, #]] & /@
-      {_SetReplaceType, _SetReplaceProperty};
+    Sort @ Select[freeFromInternalSymbolsQ][#2 /@ VertexList[$typeGraph, #]] & @@@
+      {{_SetReplaceType, Identity}, {_SetReplaceProperty, First}};
+
+(* This creates an association pointing from type names to their latest versions. Used in SetReplaceTypeConvert. *)
+
+initializeVersionlessShortcuts[] := $shortcutsToTypes = First /@ MaximalBy[Last] /@ GroupBy[$SetReplaceTypes, First];
 
 SetUsage @ "
 $SetReplaceTypeGraph gives the Graph of types and properties implemented in SetReplace.
@@ -204,7 +239,7 @@ SyntaxInformation[SetReplaceMethodImplementation] = {"SetReplaceMethodImplementa
 
 typeGraphVertexLabel[kind_, name_] :=
   If[!freeFromInternalSymbolsQ[name] || kind === SetReplaceMethodImplementation, Placed[#, Tooltip] &, Identity] @
-    If[kind === SetReplaceProperty, ToString[#] <> "[\[Ellipsis]]" &, ToString] @
+    If[kind === SetReplaceProperty, ToString[#] <> "[\[Ellipsis]]" &, Identity] @
       name;
 
 insertImplementationVertex[inputEdge : DirectedEdge[from_, to_]] := ModuleScope[
@@ -217,7 +252,7 @@ initializePublicTypeGraph[] := Module[{extendedGraphEdges},
   extendedGraphEdges = Catenate[insertImplementationVertex /@ EdgeList[$typeGraph]];
   $SetReplaceTypeGraph = Graph[
     DirectedEdge @@@ extendedGraphEdges,
-    VertexLabels -> kind_[name_] :> typeGraphVertexLabel[kind, name],
+    VertexLabels -> kind_[name_] | name : kind_[_, _] :> typeGraphVertexLabel[kind, name],
     VertexStyle -> {_SetReplaceType -> style[$lightTheme][$typeVertexStyle],
                     _SetReplaceProperty -> style[$lightTheme][$propertyVertexStyle],
                     _SetReplaceMethodImplementation -> style[$lightTheme][$methodImplementationVertexStyle]},
@@ -237,6 +272,7 @@ initializeTypeSystem[] := (
   initializeRawProperties[];
   initializeCompositeProperties[];
   initializeTypeAndPropertyLists[];
+  initializeVersionlessShortcuts[];
   initializePublicTypeGraph[];
 );
 

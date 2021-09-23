@@ -22,15 +22,17 @@ PackageScope["$typeGraphEdgeStyle"]
 PackageScope["$typeGraphLayout"]
 PackageScope["$typeGraphBackground"]
 PackageScope["$evolutionObjectIcon"]
+PackageScope["$setReplaceTypeDisplayFunction"]
+PackageScope["$setReplaceTypeDisplayFunctionVersioned"]
 PackageScope["$destroyedEdgeStyle"]
 PackageScope["$createdEdgeStyle"]
 PackageScope["$destroyedAndCreatedEdgeStyle"]
-PackageScope["$causalGraphVertexStyle"]
-PackageScope["$expressionVertexStyle"]
-PackageScope["$causalGraphInitialVertexStyle"]
-PackageScope["$causalGraphFinalVertexStyle"]
-PackageScope["$causalGraphEdgeStyle"]
-PackageScope["$causalGraphBackground"]
+PackageScope["$eventVertexStyle"]
+PackageScope["$tokenVertexStyle"]
+PackageScope["$initialEventVertexStyle"]
+PackageScope["$finalEventVertexStyle"]
+PackageScope["$causalEdgeStyle"]
+PackageScope["$tokenEventGraphBackground"]
 PackageScope["$vertexSize"]
 PackageScope["$arrowheadLengthFunction"]
 PackageScope["$edgeArrowheadShape"]
@@ -102,6 +104,10 @@ $styleNames = KeySort /@ KeySort @ <|
     "Background" -> $typeGraphBackground
   |>,
   "EvolutionObject" -> <|"Icon" -> $evolutionObjectIcon|>,
+  "SetReplaceType" -> <|
+    "DisplayFunction" -> $setReplaceTypeDisplayFunction,
+    "DisplayFunctionVersioned" -> $setReplaceTypeDisplayFunctionVersioned
+  |>,
   "SpatialGraph" -> <|
     "DestroyedEdgeStyle" -> $destroyedEdgeStyle,
     "CreatedEdgeStyle" -> $createdEdgeStyle,
@@ -126,20 +132,20 @@ $styleNames = KeySort /@ KeySort @ <|
     combinedOptionsProperties[Graph][VertexStyle -> $vertexStyle, EdgeStyle -> $edgeLineStyle]
   |>,
   "CausalGraph" -> <|
-    "VertexStyle" -> $causalGraphVertexStyle,
-    "InitialVertexStyle" -> $causalGraphInitialVertexStyle,
-    "FinalVertexStyle" -> $causalGraphFinalVertexStyle,
-    "EdgeStyle" -> $causalGraphEdgeStyle,
-    "Background" -> $causalGraphBackground,
-    combinedOptionsProperties[Graph][VertexStyle -> $causalGraphVertexStyle, EdgeStyle -> $causalGraphEdgeStyle]
+    "VertexStyle" -> $eventVertexStyle,
+    "InitialVertexStyle" -> $initialEventVertexStyle,
+    "FinalVertexStyle" -> $finalEventVertexStyle,
+    "EdgeStyle" -> $causalEdgeStyle,
+    "Background" -> $tokenEventGraphBackground,
+    combinedOptionsProperties[Graph][VertexStyle -> $eventVertexStyle, EdgeStyle -> $causalEdgeStyle]
   |>,
   "ExpressionsEventsGraph" -> <|
-    "EventVertexStyle" -> $causalGraphVertexStyle,
-    "ExpressionVertexStyle" -> $expressionVertexStyle,
-    "InitialVertexStyle" -> $causalGraphInitialVertexStyle,
-    "FinalVertexStyle" -> $causalGraphFinalVertexStyle,
-    "EdgeStyle" -> $causalGraphEdgeStyle,
-    "Background" -> $causalGraphBackground
+    "EventVertexStyle" -> $eventVertexStyle,
+    "ExpressionVertexStyle" -> $tokenVertexStyle,
+    "InitialVertexStyle" -> $initialEventVertexStyle,
+    "FinalVertexStyle" -> $finalEventVertexStyle,
+    "EdgeStyle" -> $causalEdgeStyle,
+    "Background" -> $tokenEventGraphBackground
   |>,
   "Rule" -> <|
     "SharedElementHighlight" -> $sharedRuleElementsHighlight,
@@ -184,7 +190,7 @@ $styleNames = KeySort /@ KeySort @ <|
   "EvolutionCausalGraph" -> <|
     "StateVertexStyle" -> $statesGraphVertexStyle,
     "EvolutionEdgeStyle" -> $evolutionCausalGraphEvolutionEdgeStyle,
-    "EventVertexStyle" -> $causalGraphVertexStyle,
+    "EventVertexStyle" -> $eventVertexStyle,
     "CausalEdgeStyle" -> $evolutionCausalGraphCausalEdgeStyle
   |>,
   "BranchialGraph" -> <|
@@ -247,20 +253,49 @@ style[$lightTheme] = <|
   (* Evolution object *)
   $evolutionObjectIcon -> $graphIcon,
 
+  (* SetReplaceType *)
+  $setReplaceTypeDisplayFunction -> (FrameBox[
+    PanelBox[
+      GridBox[
+        {{StyleBox[#1, FontSize -> 13, FontColor -> RGBColor[0.034, 0.3, 0.42], FontWeight -> "SemiBold"]}},
+        BaselinePosition -> {1, 1}],
+      Background -> RGBColor[0.9517, 0.965, 0.971],
+      BaselinePosition -> Baseline,
+      FrameMargins -> {{3, 3}, {1.5, 1.5}}],
+    FrameMargins -> None,
+    FrameStyle -> RGBColor[0.65, 0.65, 0.65],
+    BaselinePosition -> Baseline,
+    RoundingRadius -> 4] &),
+
+  $setReplaceTypeDisplayFunctionVersioned -> (FrameBox[
+    PanelBox[
+      GridBox[{{
+          StyleBox[#1, FontSize -> 13, FontColor -> RGBColor[0.034, 0.3, 0.42], FontWeight -> "SemiBold"],
+          StyleBox[#2, FontColor -> RGBColor[0.517, 0.65, 0.71], FontSize -> 13, FontWeight -> "Plain"]}},
+        GridBoxSpacings -> {"Columns" -> {{0.3}}, "Rows" -> {{0}}},
+        BaselinePosition -> {1, 1}],
+      Background -> RGBColor[0.9517, 0.965, 0.971],
+      BaselinePosition -> Baseline,
+      FrameMargins -> {{3, 3}, {1.5, 1.5}}],
+    FrameMargins -> None,
+    FrameStyle -> RGBColor[0.65, 0.65, 0.65],
+    BaselinePosition -> Baseline,
+    RoundingRadius -> 4] &),
+
   (* Hypergraph diffs *)
   $destroyedEdgeStyle -> Directive[Hue[0.08, 0, 0.42], AbsoluteDashing[{1, 2}]],
   $createdEdgeStyle -> Directive[Hue[0.02, 0.94, 0.83], Thick],
   $destroyedAndCreatedEdgeStyle -> Directive[Hue[0.02, 0.94, 0.83], Thick, AbsoluteDashing[{1, 3}]],
 
   (* Causal graph *)
-  $causalGraphVertexStyle -> Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
-  $expressionVertexStyle ->
+  $eventVertexStyle -> Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
+  $tokenVertexStyle ->
     Directive[Hue[0.63, 0.66, 0.81], Opacity[0.1], EdgeForm[Directive[Hue[0.63, 0.7, 0.5], Opacity[0.7]]]],
-  $causalGraphInitialVertexStyle ->
+  $initialEventVertexStyle ->
     Directive[RGBColor[{0.259, 0.576, 1}], EdgeForm[{RGBColor[{0.259, 0.576, 1}], Opacity[1]}]],
-  $causalGraphFinalVertexStyle -> Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
-  $causalGraphEdgeStyle -> Hue[0, 1, 0.56],
-  $causalGraphBackground -> None,
+  $finalEventVertexStyle -> Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
+  $causalEdgeStyle -> Hue[0, 1, 0.56],
+  $tokenEventGraphBackground -> None,
 
   (* HypergraphPlot *)
   $vertexSize -> 0.06,
