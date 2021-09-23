@@ -35,6 +35,10 @@ Hypergraph[$$, sym$] returns a hypergraph with symmetry sym$.
 
 SyntaxInformation[Hypergraph] = {"ArgumentsPattern" -> {hyperedges_, symmetry_.}};
 
+With[{symmetries = $hypergraphSymmetries},
+  FE`Evaluate[FEPrivate`AddSpecialArgCompletion["Hypergraph" -> {0, symmetries}]]
+];
+
 Hypergraph /: Information`GetInformation[obj_Hypergraph ? HypergraphQ] :=
   <|
     "ObjectType" -> Hypergraph,
@@ -52,7 +56,7 @@ Hypergraph /: Information`GetInformation[obj_Hypergraph ? HypergraphQ] :=
     result /; !FailureQ[result]
   ];
 
-hypergraph[h_] := hypergraph[h, "Ordered"];
+hypergraph[hyperedges_] := hypergraph[hyperedges, "Ordered"];
 
 hypergraph[hyperedges : {___List}, symmetry : Alternatives @@ $hypergraphSymmetries] :=
   System`Private`ConstructNoEntry[Hypergraph, hyperedges, symmetry];
