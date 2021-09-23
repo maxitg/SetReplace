@@ -8,6 +8,7 @@ PackageExport["$WolframModelProperties"]
 (* Generates evolutions of Wolfram Model systems. *)
 
 PackageScope["wolframModelRulesSpecQ"]
+PackageScope["fromRulesSpec"]
 
 SetUsage @ "
 WolframModel[rules$, init$, generationCount$] generates an object representing the evolution of the Wolfram model \
