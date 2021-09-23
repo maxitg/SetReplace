@@ -173,11 +173,11 @@ $warningsFlags = {
 
 $compileOptions = Switch[$OperatingSystem,
   "Windows",
-    {"/std:c++17", "/EHsc"},
+    {"/std:c++17 /O3", "/EHsc"},
   "MacOSX",
-    Join[{"-std=c++17"}, $warningsFlags, {"-mmacosx-version-min=10.12"}], (* for std::shared_mutex support *)
+    Join[{"-std=c++17 -O3"}, $warningsFlags, {"-mmacosx-version-min=10.12"}], (* for std::shared_mutex support *)
   "Unix",
-    Join[{"-std=c++17"}, $warningsFlags]
+    Join[{"-std=c++17 -O3"}, $warningsFlags]
 ];
 
 flushLibrariesIfFull[libraryDirectory_] := Scope[

@@ -46,62 +46,62 @@
 
       testUnevaluated[
         WolframModel[x, y],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
         WolframModel[x, y, z],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
         WolframModel[x, y, z, w],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
         WolframModel[x, y, z, w, a],
-        {WolframModel::argb}
+        {WolframModel::nonopt}
       ],
 
       testUnevaluated[
         WolframModel[x, y, z, w, a, b],
-        {WolframModel::argb}
+        {WolframModel::nonopt}
       ],
 
       testUnevaluated[
         WolframModel[f -> 3],
-        {WolframModel::argb}
-      ],
-
-      testUnevaluated[
-        WolframModel[x, f -> 3],
         {}
       ],
 
       testUnevaluated[
+        WolframModel[x, f -> 3],
+        {WolframModel::optx}
+      ],
+
+      testUnevaluated[
         WolframModel[x, y, f -> 3],
-        {WolframModel::invalidRules}
+        {WolframModel::optx}
       ],
 
       testUnevaluated[
         WolframModel[x, y, z, f -> 3],
-        {WolframModel::invalidRules}
+        {WolframModel::optx}
       ],
 
       testUnevaluated[
         WolframModel[x, y, z, w, f -> 3],
-        {WolframModel::invalidRules}
+        {WolframModel::optx}
       ],
 
       testUnevaluated[
         WolframModel[x, y, z, w, a, f -> 3],
-        {WolframModel::argb}
+        {WolframModel::nonopt}
       ],
 
       testUnevaluated[
         WolframModel[x, y, z, w, a, b, f -> 3],
-        {WolframModel::argb}
+        {WolframModel::nonopt}
       ],
 
       testUnevaluated[
@@ -141,7 +141,7 @@
 
       testUnevaluated[
         WolframModel[1 -> 2, 4, g -> 2],
-        {WolframModel::invalidState}
+        {WolframModel::optx}
       ],
 
       testUnevaluated[
@@ -226,7 +226,7 @@
 
       testUnevaluated[
         WolframModel[<|"PatternRule" -> 1 -> 2|>][{1}],
-        {}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
@@ -236,7 +236,7 @@
 
       testUnevaluated[
         WolframModel[<|"PatternRules" -> 1 -> 2, "f" -> 2|>][{1}],
-        {}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
@@ -1025,12 +1025,12 @@
 
       testUnevaluated[
         WolframModel[{1}, 1 -> 2],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
         WolframModel[1, 1 -> 2],
-        {WolframModel::invalidRules}
+        {WolframModel::invalidWolframModelRules}
       ],
 
       testUnevaluated[
@@ -1610,7 +1610,7 @@
 
       testUnevaluated[
         WolframModel[{{1, 2, 3}} -> {{1, 2, 3}}, {{1, 2, 3}}, 1, "IncludePartialGenerations" -> $$$invalid$$$],
-        {WolframModel::invalidFiniteOption}
+        {WolframModel::invalidOptionChoice}
       ],
 
       testUnevaluated[
@@ -1620,13 +1620,13 @@
           1,
           {"FinalState", "AtomsCountFinal"},
           "IncludePartialGenerations" -> $$$invalid$$$],
-        {WolframModel::invalidFiniteOption}
+        {WolframModel::invalidOptionChoice}
       ],
 
       With[{evolution = WolframModel[{{1, 2, 3}} -> {{1, 2, 3}}, {{1, 2, 3}}, 1]},
         testUnevaluated[
           evolution["AtomsCountFinal", "IncludePartialGenerations" -> $$$invalid$$$],
-          {WolframModelEvolutionObject::invalidFiniteOption}
+          {WolframModelEvolutionObject::invalidOptionChoice}
         ]
       ],
 
@@ -1645,7 +1645,7 @@
 
       testUnevaluated[
         WolframModel[{{1, 2}} -> {{1, 2}}, {{1, 1}}, 1, "EventsCount", "IncludeBoundaryEvents" -> $$$invalid$$$],
-        {WolframModel::invalidFiniteOption}
+        {WolframModel::invalidOptionChoice}
       ],
 
       VerificationTest[
