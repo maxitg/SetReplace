@@ -44,7 +44,17 @@ Hypergraph /: Information`GetInformation[obj_Hypergraph ? HypergraphQ] :=
     "ObjectType" -> Hypergraph,
     "Symmetry" -> HypergraphSymmetry[obj],
     "VertexCount" -> VertexCount[obj],
-    "EdgeCount" -> EdgeCount[obj]
+    "EdgeCount" -> EdgeCount[obj],
+    "Functions" -> Sort @ {
+      EdgeCount,
+      EdgeList,
+      HypergraphSymmetry,
+      Information,
+      Normal,
+      SameQ,
+      VertexCount,
+      VertexList
+    }
   |>;
 
 ((expr : Hypergraph[args___]) ? System`Private`HoldEntryQ) /; CheckArguments[expr, {1, 2}] :=
