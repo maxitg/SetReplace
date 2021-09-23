@@ -36,123 +36,90 @@ SyntaxInformation[RulePlot] = Join[
 ];
 Protect[RulePlot];
 
-(* Messages *)
-
-RulePlot::patternRules =
-  "RulePlot for pattern rules `1` is not implemented.";
-
-RulePlot::notHypergraphRule =
-  "Rule `1` should be a rule operating on hyperedges (set elements should be lists).";
-
-RulePlot::invalidSpacings =
-  "Spacings `1` should be either a single number, or a two-by-two list.";
-
-RulePlot::invalidAspectRatio =
-  "RulePartsAspectRatio `1` should be a positive number.";
-
-RulePlot::elementwiseStyle = "The elementwise style specification `1` is not supported in RulePlot.";
-
 (* Evaluation *)
 
-WolframModel /: func : RulePlot[wm : WolframModel[args___] /; Quiet[Developer`CheckArgumentCount[wm, 1, 1]], opts___] :=
-  ModuleScope[
-    result = rulePlot$parse[{args}, {opts}];
-    If[Head[result] === rulePlot$parse,
-      result = $Failed
-    ];
-    result /; result =!= $Failed
-  ];
+WolframModel /: expr : RulePlot[
+    wm : WolframModel[args___] /; Quiet[CheckArguments[wm, 1]], options___] := ModuleScope[
+  result = Catch[rulePlot$parse[{args}, {options}],
+                 _ ? FailureQ,
+                 message[RulePlot, #, <|"expr" -> HoldForm[expr]|>] &];
+  result /; !FailureQ[result]
+];
 
 (* Evolution object *)
 
-WolframModelEvolutionObject /: RulePlot[evo : WolframModelEvolutionObject[data_ ? evolutionDataQ], opts___] :=
-  ModuleScope[
-    result = rulePlot$parse[{evo["Rules"]}, {opts}];
-    If[Head[result] === rulePlot$parse,
-      result = $Failed
-    ];
-    result /; result =!= $Failed
-  ];
+WolframModelEvolutionObject /:
+    expr : RulePlot[evo : WolframModelEvolutionObject[_ ? evolutionDataQ], options___] := ModuleScope[
+  result = Catch[rulePlot$parse[{evo["Rules"]}, {options}],
+                 _ ? FailureQ,
+                 message[RulePlot, #, <|"expr" -> HoldForm[expr]|>] &];
+  result /; !FailureQ[result]
+];
 
 (* Arguments parsing *)
 
 rulePlot$parse[{
-    rulesSpec_ ? hypergraphRulesSpecQ,
+    rulesSpec_,
     o : OptionsPattern[]},
-    {opts : OptionsPattern[]}] /; recognizedOptionsQ[RulePlot[rulesSpec, o], WolframModel, {o}] :=
-  rulePlot[
-        rulesSpec,
-        ##,
-        FilterRules[{opts}, $defaultBehaviorGraphicsOptions]] & @@
-      OptionValue[
-        RulePlot,
-        {opts},
-        {"EdgeType", GraphHighlightStyle, "HyperedgeRendering", VertexCoordinates, VertexLabels, Frame, FrameStyle,
-          PlotLegends, Spacings, "RulePartsAspectRatio", PlotStyle, VertexStyle, EdgeStyle, "EdgePolygonStyle",
-          VertexSize, "ArrowheadLength", Background}] /;
-    correctOptionsQ[{rulesSpec, o}, {opts}];
-
-hypergraphRulesSpecQ[rulesSpec_List ? wolframModelRulesSpecQ] := Fold[# && hypergraphRulesSpecQ[#2] &, True, rulesSpec];
-
-hypergraphRulesSpecQ[ruleSpec_Rule ? wolframModelRulesSpecQ] :=
-  If[MatchQ[ruleSpec, {___List} -> {___List}],
-    True
-  ,
-    Message[RulePlot::notHypergraphRule, ruleSpec];
-    False
-  ];
-
-hypergraphRulesSpecQ[rulesSpec_Association ? wolframModelRulesSpecQ] := (
-  Message[RulePlot::patternRules, rulesSpec];
-  False
+    {options : OptionsPattern[]}] /; recognizedOptionsQ[RulePlot[rulesSpec, o], WolframModel, {o}] := (
+  checkHypergraphRulesSpec[rulesSpec];
+  checkOptions[options];
+  rulePlot[rulesSpec, ##, FilterRules[{options}, $defaultBehaviorGraphicsOptions]] & @@
+    OptionValue[
+      RulePlot,
+      {options},
+      {"EdgeType", GraphHighlightStyle, "HyperedgeRendering", VertexCoordinates, VertexLabels, Frame, FrameStyle,
+        PlotLegends, Spacings, "RulePartsAspectRatio", PlotStyle, VertexStyle, EdgeStyle, "EdgePolygonStyle",
+        VertexSize, "ArrowheadLength", Background}]
 );
 
-hypergraphRulesSpecQ[rulesSpec_] := (
-  Message[RulePlot::invalidRules, rulesSpec];
-  False
+checkHypergraphRulesSpec[rulesSpec_List ? wolframModelRulesSpecQ] := checkHypergraphRulesSpec /@ rulesSpec;
+
+declareMessage[
+  RulePlot::notHypergraphRule, "Rule `rule` should be a rule operating on hyperedges (set elements should be lists)."];
+
+checkHypergraphRulesSpec[ruleSpec_Rule ? wolframModelRulesSpecQ] :=
+  If[!MatchQ[ruleSpec, {___List} -> {___List}], throw[Failure["notHypergraphRule", <|"rule" -> ruleSpec|>]]];
+
+declareMessage[RulePlot::patternRules, "RulePlot for pattern rules `rules` is not implemented."];
+
+checkHypergraphRulesSpec[rulesSpec_Association ? wolframModelRulesSpecQ] :=
+  throw[Failure["patternRules", <|"rules" -> rulesSpec|>]];
+
+checkHypergraphRulesSpec[rulesSpec_] := throw[Failure["invalidRules", <|"rules" -> rulesSpec|>]];
+
+checkOptions[options___] := (
+  checkIfKnownOptions[RulePlot, {options}, $allowedOptions];
+  checkEnumOptionValue[RulePlot, Frame, {True, False, Automatic}, {options}];
+  checkEdgeType[OptionValue[RulePlot, {options}, "EdgeType"]];
+  checkSpacings[{options}];
+  checkRulePartsAspectRatio[OptionValue[RulePlot, {options}, "RulePartsAspectRatio"]];
+  checkStyleIsList[OptionValue[RulePlot, {options}, #]] & /@ {VertexStyle, EdgeStyle, "EdgePolygonStyle"};
+  checkHypergraphPlotOptions[RulePlot, Automatic, FilterRules[{options}, Options[HypergraphPlot]]];
 );
 
-correctOptionsQ[args_, {opts___}] :=
-  knownOptionsQ[RulePlot, Defer[RulePlot[WolframModel[args], opts]], {opts}, $allowedOptions] &&
-  supportedOptionQ[RulePlot, Frame, {True, False, Automatic}, {opts}] &&
-  correctEdgeTypeQ[OptionValue[RulePlot, {opts}, "EdgeType"]] &&
-  correctSpacingsQ[{opts}] &&
-  correctRulePartsAspectRatioQ[OptionValue[RulePlot, {opts}, "RulePartsAspectRatio"]] &&
-  And @@ (styleNotListQ[OptionValue[RulePlot, {opts}, #]] & /@ {VertexStyle, EdgeStyle, "EdgePolygonStyle"}) &&
-  correctHypergraphPlotOptionsQ[
-    RulePlot, Defer[RulePlot[WolframModel[args], opts]], Automatic, FilterRules[{opts}, Options[HypergraphPlot]]];
-
-correctEdgeTypeQ[edgeType_] :=
-  If[MatchQ[edgeType, Alternatives @@ $edgeTypes],
-    True
-  ,
-    Message[RulePlot::invalidEdgeType, edgeType, $edgeTypes];
-    False
-  ];
-
-correctSpacingsQ[opts_] := ModuleScope[
-  spacings = OptionValue[RulePlot, opts, Spacings];
-  correctQ = MatchQ[spacings, Automatic | (_ ? NumericQ) | {Repeated[{Repeated[_ ? NumericQ, {2}]}, {2}]}];
-  If[!correctQ, Message[RulePlot::invalidSpacings, spacings]];
-  correctQ
+checkEdgeType[edgeType_] := If[!MatchQ[edgeType, Alternatives @@ $edgeTypes],
+  throw[Failure["invalidEdgeType", <|"type" -> edgeType, "allowedTypes" -> $edgeTypes|>]]
 ];
 
-correctRulePartsAspectRatioQ[Automatic] := True;
+declareMessage[
+  RulePlot::invalidSpacings, "Spacings `spacings` should be either a single number, or a two-by-two list."];
 
-correctRulePartsAspectRatioQ[aspectRatio_] :=
-  If[NumericQ[aspectRatio] && aspectRatio > 0,
-    True
-  ,
-    Message[RulePlot::invalidAspectRatio, aspectRatio];
-    False
-  ];
+checkSpacings[options_] := ModuleScope[
+  spacings = OptionValue[RulePlot, options, Spacings];
+  correctQ = MatchQ[spacings, Automatic | (_ ? NumericQ) | {Repeated[{Repeated[_ ? NumericQ, {2}]}, {2}]}];
+  If[!correctQ, throw[Failure["invalidSpacings", <|"spacings" -> spacings|>]]];
+];
 
-styleNotListQ[styles_List] := (
-  Message[RulePlot::elementwiseStyle, styles];
-  False
-);
+declareMessage[RulePlot::invalidAspectRatio, "RulePartsAspectRatio `aspectRatio` should be a positive number."];
 
-styleNotListQ[styles : Except[_List]] := True;
+checkRulePartsAspectRatio[aspectRatio : Except[Automatic]] := If[!NumericQ[aspectRatio] || aspectRatio <= 0,
+  throw[Failure["invalidAspectRatio", <|"aspectRatio" -> aspectRatio|>]]
+];
+
+declareMessage[RulePlot::elementwiseStyle, "The elementwise style specification `style` is not supported in RulePlot."];
+
+checkStyleIsList[styles_List] := throw[Failure["elementwiseStyle", <|"style" -> styles|>]];
 
 (* Implementation *)
 
@@ -175,12 +142,12 @@ rulePlot[
     vertexSize_,
     arrowheadLength_,
     background_,
-    graphicsOpts_] :=
+    graphicsOptions_] :=
   If[PlotLegends === None, Identity, Legended[#, Replace[plotLegends, "Text" -> Placed[StandardForm[rules], Below]]] &][
     rulePlot[
       rules, edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinates, vertexLabels, frameQ, frameStyle,
         spacings, rulePartsAspectRatio, plotStyle, vertexStyle, edgeStyle, edgePolygonStyle, vertexSize,
-        arrowheadLength, background, graphicsOpts]
+        arrowheadLength, background, graphicsOptions]
   ];
 
 rulePlot[
@@ -201,11 +168,11 @@ rulePlot[
     vertexSize_,
     arrowheadLength_,
     background_,
-    graphicsOpts_] :=
+    graphicsOptions_] :=
   rulePlot[
     {rule}, edgeType, graphHighlightStyle, hyperedgeRendering, vertexCoordinates, vertexLabels, frameQ, frameStyle,
       spacings, rulePartsAspectRatio, plotStyle, vertexStyle, edgeStyle, edgePolygonStyle, vertexSize, arrowheadLength,
-      background, graphicsOpts];
+      background, graphicsOptions];
 
 rulePlot[
     rules_List,
@@ -225,7 +192,7 @@ rulePlot[
     vertexSize_,
     arrowheadLength_,
     background_,
-    graphicsOpts_] := ModuleScope[
+    graphicsOptions_] := ModuleScope[
   explicitSpacings = toListSpacings[Replace[spacings, Automatic -> style[$lightTheme][$ruleSidesSpacing]]];
   hypergraphPlots =
     rulePartsPlots[
@@ -245,7 +212,7 @@ rulePlot[
     If[frameQ === True || (frameQ === Automatic && Length[rules] > 1), frameStyle, None]];
   Graphics[
     shapes,
-    graphicsOpts,
+    graphicsOptions,
     Background -> Replace[background, Automatic -> style[$lightTheme][$ruleBackground]],
     PlotRange -> plotRange,
     ImageSizeRaw -> style[$lightTheme][$ruleImageSizePerPlotRange] (plotRange[[1, 2]] - plotRange[[1, 1]])]

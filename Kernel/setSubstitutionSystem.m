@@ -73,9 +73,8 @@ setSubstitutionSystem[
 setReplaceRulesQ[rules_] :=
   MatchQ[rules, {(_Rule | _RuleDelayed)..} | _Rule | _RuleDelayed];
 
-General::invalidRules =
-  "The rule specification `1` should be either a Rule, RuleDelayed, or " ~~
-  "a List of them.";
+declareMessage[
+  General::invalidRules, "The rule specification `rules` should be either a Rule, RuleDelayed, or a List of them."];
 
 setSubstitutionSystem[
     rules_, set_, stepSpec_, caller_, returnOnAbortQ_, o : OptionsPattern[]] := 0 /;
