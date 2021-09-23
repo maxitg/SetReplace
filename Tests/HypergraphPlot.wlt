@@ -115,6 +115,11 @@
         True
       ],
 
+      testUnevaluated[
+        HypergraphPlot[{{1, 3}, {}}],
+        {HypergraphPlot::invalidEdges}
+      ],
+
       (** Valid EdgeType **)
 
       testUnevaluated[
@@ -645,21 +650,6 @@
           And @@ ((AllTrue[sizes[[2, All, #]] / sizes[[1, All, #]], 1.9999 < # < 2.0001 &] &) /@ {1, 2})
         ]
       ],
-
-      (* Multiple hypergraphs *)
-      VerificationTest[
-        Map[
-          Function[h, graphicsQ @ HypergraphPlot[h, ##]],
-          {{{1, 2, 3}, {3, 4, 5}}, {{3, 4, 5}, {5, 6, 7}}, {{5, 6, 7}, {7, 8, 5}}}
-        ],
-        ConstantArray[True, 3]
-      ] & @@@ {
-        {},
-        {GraphHighlight -> {3, {3, 4, 5}}},
-        {VertexSize -> 0.1, "ArrowheadLength" -> 0.2},
-        {EdgeStyle -> Red},
-        {VertexCoordinates -> {3 -> {0, 0}, 4 -> {1, 0}}}
-      },
 
       (* GraphHighlight and style interaction *)
 

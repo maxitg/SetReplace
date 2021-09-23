@@ -77,7 +77,7 @@ expr : HypergraphPlot[args___] := ModuleScope[
 
 hypergraphPlot[args___] /; !Developer`CheckArgumentCount[HypergraphPlot[args], 1, 2] := $Failed;
 
-$hypergraphPattern = _List ? (Function[h, VectorQ[h, ListQ]]);
+$hypergraphPattern = _List ? (Function[h, VectorQ[h, (ListQ[#] && (# =!= {})) &]]);
 
 declareMessage[
   General::invalidEdges,
