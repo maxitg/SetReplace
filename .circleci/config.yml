@@ -42,7 +42,7 @@ jobs:
 
       - run:
           name: Test
-          command: ./.circleci/test.sh  # This assumes parallelism: 4 and would not run all tests otherwise
+          command: ./.circleci/test.sh # This assumes parallelism: 4 and would not run all tests otherwise
 
       - run:
           name: Performance Test
@@ -129,7 +129,7 @@ jobs:
 
   macos-build:
     macos:
-      xcode: 12.2.0
+      xcode: 16.2.0
 
     steps:
       - checkout
@@ -141,9 +141,9 @@ jobs:
             curl -L --output cmake.tar.gz $cmakeURL
             tar xf cmake.tar.gz
             cmakeDir=$(ls | grep cmake-*)
-            mkdir -p /usr/local/bin /usr/local/share
-            cp -r $cmakeDir/CMake.app/Contents/bin/* /usr/local/bin/
-            cp -r $cmakeDir/CMake.app/Contents/share/* /usr/local/share/
+            sudo mkdir -p /usr/local/bin /usr/local/share
+            sudo cp -r $cmakeDir/CMake.app/Contents/bin/* /usr/local/bin/
+            sudo cp -r $cmakeDir/CMake.app/Contents/share/* /usr/local/share/
 
       - run:
           name: Build arm64
