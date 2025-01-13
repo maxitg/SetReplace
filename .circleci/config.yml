@@ -54,7 +54,7 @@ jobs:
 
   cpp-test:
     docker:
-      - image: alpine:3.13.5
+      - image: alpine:3.21.2
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
@@ -65,15 +65,19 @@ jobs:
       - run:
           name: Install Required Tools
           command: |
-            apk add --no-cache bash git g++ make cmake clang py-pip shellcheck grep npm
+            apk add --no-cache bash git g++ make cmake clang clang-extra-tools py-pip shellcheck grep npm
             apk add --no-cache shfmt --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
-            pip install cpplint
             npm install -g markdownlint-cli
+
+            python3 -m venv .venv
+            . .venv/bin/activate
+            pip install cpplint
 
       - run:
           name: Lint
           command: |
             set +eo pipefail
+            . .venv/bin/activate
             ./lint.sh
             if [ $? -ne 0 ]
             then
