@@ -11,7 +11,9 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
  {{1, 1}}, <|"MaxEvents" -> 42|>]
 ```
 
-<img src="/Documentation/Images/EvolutionObjectWithPartialGenerations.png" width="508">
+<img src="/Documentation/Images/EvolutionObjectWithPartialGenerations.png"
+     width="508"
+     alt="Out[] = WolframModelEvolutionObject[... Generations: 4...5, Events: 42 ...]">
 
 with
 
@@ -21,7 +23,9 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
  "IncludePartialGenerations" -> False]
 ```
 
-<img src="/Documentation/Images/EvolutionObjectWithDroppedGenerations.png" width="488">
+<img src="/Documentation/Images/EvolutionObjectWithDroppedGenerations.png"
+     width="488"
+     alt="Out[] = WolframModelEvolutionObject[... Generations: 4, Events: 40 ...]">
 
 One neat use of this is producing a uniformly random evolution for a complete number of generations:
 
@@ -33,4 +37,6 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
  "IncludePartialGenerations" -> False]
 ```
 
-<img src="/Documentation/Images/RandomEvolutionPlotWithDroppedGenerations.png" width="478">
+<img src="/Documentation/Images/RandomEvolutionPlotWithDroppedGenerations.png"
+     width="478"
+     alt="Out[] = ... hypergraph plot showing a result of random evolution after a complete number of generations ...">

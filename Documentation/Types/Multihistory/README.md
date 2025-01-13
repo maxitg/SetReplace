@@ -9,7 +9,9 @@ For example, for a [`MultisetSubstitutionSystem`](/Documentation/Systems/Multise
 In[] := GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}], MaxEvents -> 10] @ {1, 2, 3}
 ```
 
-<img src="/Documentation/Images/MultisetMultihistory.png" width="426.6">
+<img src="/Documentation/Images/MultisetMultihistory.png"
+     width="426.6"
+     alt="Out[] = MultiHistory[... MultisetSubstitutionSystem v0 ...]">
 
 You will be able to use [`properties`](/Documentation/Properties/README.md) to extract information about multihistories,
 but we have not implemented any properties yet.

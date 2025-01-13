@@ -24,7 +24,13 @@ In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
   {{{1, 2}} -> {{2, 3}}, {{2, 3}} -> {{3, 4}}}}
 ```
 
-<img src="/Documentation/Images/SeparationComparison.png" width="512">
+<img src="/Documentation/Images/SeparationComparison.png"
+     width="512"
+     alt="Out[] = {
+       ... {{1, 2}} -> Rule 1 -> {{2, 3}, {3, 4}} ...,
+       ... {{1, 2}} -> Rule 1 -> {{2, 3}}, {{1, 2}} -> Rule 2 -> {{3, 4}} ...,
+       ... {{1, 2}} -> Rule 1 -> {{2, 3}}, {{2, 3}} -> Rule 2 -> {{3, 4}} ...
+     }">
 
 One might be tempted to assume that spacelike separated expressions can always be 'assembled' to produce a possible
 history for a singleway system. For match-all evolution, however, this is not the case. Match-all rules can match two
@@ -41,7 +47,13 @@ In[] := WolframModel[<|
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="/Documentation/Images/MatchAllQuantumSpacelikeMatching.png" width="351">
+<img src="/Documentation/Images/MatchAllQuantumSpacelikeMatching.png"
+     width="351"
+     alt="Out[] = ...
+       {{1, 2}} -> Rule 1 -> {{2, 3}},
+       {{1, 2}} -> Rule 2 -> {{3, 4}},
+       {{2, 3}, {3, 4}} -> Rule 3 -> {{4, 5}, {5, 6}}
+     ...">
 
 Further, branchlike separation takes precedence over spacelike separation, and timelike separation takes precedence over
 both. As such, expressions `{v, f, 1}` and `{v, f, 2}` here are branchlike separated because one of their common
@@ -56,7 +68,14 @@ In[] := WolframModel[<|"PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}},
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="/Documentation/Images/MatchAllSpacelikeBranchlikeMixed.png" width="352">
+<img src="/Documentation/Images/MatchAllSpacelikeBranchlikeMixed.png"
+     width="352"
+     alt="Out[] = ...
+       {{v, i}} -> Rule 1 -> {{v, 1}, {v, 2}},
+       {{v, 1}} -> Rule 2 -> {{v, 1, 1}, {v, 1, 2}},
+       {{v, 1, 1}, {v, 2}} -> Rule 3 -> {{v, f, 1}},
+       {{v, 1, 2}, {v, 2}} -> Rule 4 -> {{v, f, 2}}
+     ...">
 
 Specifically, the general algorithm for computing the separation between two expressions `A` and `B` in an
 expressions-events graph is:
