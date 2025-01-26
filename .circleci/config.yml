@@ -52,6 +52,7 @@ jobs:
 
       - run:
           name: Test
+          no_output_timeout: 20m
           command: ./.circleci/test.sh # This assumes parallelism: 4 and would not run all tests otherwise
 
       - run:
