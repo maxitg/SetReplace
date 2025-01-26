@@ -67,7 +67,7 @@ jobs:
           command: |
             apk add --no-cache bash git g++ make cmake clang clang-extra-tools py-pip shellcheck grep npm
             apk add --no-cache shfmt --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
-            npm install -g markdownlint-cli
+            npm install -g markdownlint-cli@0.37.0
 
             python3 -m venv .venv
             . .venv/bin/activate
