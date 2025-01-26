@@ -6,14 +6,24 @@ orbs:
 jobs:
   wolfram-language-paclet-test:
     docker:
-      - image: maxitg/set-replace-wl-ci:12.3.0
-        auth:
-          username: maxitg
-          password: $DOCKERHUB_PASSWORD
+      - image: wolframresearch/wolframengine:12.3.0
+        user: root
     parallelism: 4
 
     steps:
       - checkout
+
+      - run:
+          name: Install Required Tools
+          command: |
+            apt-get update
+            apt-get install -y g++ git
+
+      - run:
+          name: Activate Wolfram Engine
+          command: |
+            wolframscript -authenticate maxitg@icloud.com "${WOLFRAM_PASSWORD}"
+            wolframscript -activate
 
       - run:
           name: Build
