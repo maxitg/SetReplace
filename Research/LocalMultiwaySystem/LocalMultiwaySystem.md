@@ -49,7 +49,9 @@ Specifically, let's start with a rule that moves a "particle" (a unary expressio
 In[] := RulePlot[WolframModel[{{1}, {1, 2}} -> {{1, 2}, {2}}]]
 ```
 
-<img src="Images/WanderingParticleRule.png" width="446">
+<img src="Images/WanderingParticleRule.png"
+     width="446"
+     alt='Out[] = ... a unary "particle" jumps along {1, 2} from {1} to {2} ...'>
 
 If we run this system on a path graph with 3 vertices, we get a very simple behavior:
 
@@ -59,7 +61,11 @@ In[] := ResourceFunction["MultiwaySystem"][
     2}, {2, 3}}}, 3, "StatesGraph", VertexSize -> 1]
 ```
 
-<img src="Images/BasicGlobalMultiway.png" width="497">
+<img src="Images/BasicGlobalMultiway.png"
+     width="497"
+     alt='Out[] = ...
+       common in all states: {1, 2}, {2, 3}, state graph showing only the "particle": {1} -> {2}, {2} -> {3}
+     ...'>
 
 Now, what happens if we split the path in this graph into two different branches? In this case, the rules will lead to
 nondeterministic behavior&mdash;multiple choices of substitutions are possible&mdash;so the system explores all possible
@@ -72,7 +78,11 @@ In[] := ResourceFunction["MultiwaySystem"][
  GraphLayout -> "LayeredDigraphEmbedding"]
 ```
 
-<img src="Images/BranchingGlobalMultiway.png" width="280">
+<img src="Images/BranchingGlobalMultiway.png"
+     width="280"
+     alt='Out[] ...
+       "tracks": {1, 2}, {2, 3}, {2, 4}, {4, 5}, state graph: {1} -> {2}, {2} -> {3}, {2} -> {4}, {4} -> {5}
+     ...'>
 
 Now the states graph itself splits into two branches, mirroring precisely the input graph.
 
@@ -89,7 +99,12 @@ In[] := ResourceFunction["MultiwaySystem"][
  VertexSize -> 1, GraphLayout -> "LayeredDigraphEmbedding"]
 ```
 
-<img src="Images/IsomorphicBranching.png" width="356">
+<img src="Images/IsomorphicBranching.png"
+     width="356"
+     alt='Out[] = ...
+       "tracks": {1, 2}, {2, 3}, {3, 4}, {2, 5}, {5, 6},
+       state graph: {1} -> {2}, {2} -> {3} | {5}, {3} | {5} -> {4} | {6}
+     ...'>
 
 This is why our original graph uses branches of different lengths (`{{2, 3}}` and `{{2, 4}, {4, 5}}`).
 
@@ -108,7 +123,14 @@ In[] := ResourceFunction["MultiwaySystem"][
       1}, {7, 2}}}]
 ```
 
-<img src="Images/GlobalMultiwayParticle.png" width="687">
+<img src="Images/GlobalMultiwayParticle.png"
+     width="687"
+     alt='Out[] = ...
+       "tracks": {a1, a2}, {a2, a3}, {a3, m1}, {b1, b2}, {b2, m1}, {m1, m2},
+       state graph is grid-like:
+         {a1, b1} -> {a2, b1}, {a1, b1} -> {a1, b2}, {a2, b1} -> {a2, b2}, {a1, b2} -> {a2, b2},
+         <<24>>, {m1, m2} -> {m2, m2}
+     ...'>
 
 Note that even at the first step, the system branches in two different states. However, there is no ambiguity. The two
 events there occur at entirely different places in space. Note also that some events are duplicated. For example, the
@@ -140,7 +162,22 @@ In[] := ResourceFunction["MultiwaySystem"]["WolframModel" -> #1, {#2}, 2,
   {{{{1, 2}} -> {{1, 2, 3}}}, {{1, 2}, {2, 3}}}}
 ```
 
-<img src="Images/GlobalMultiwayEventSeparation.png" width="513">
+<img src="Images/GlobalMultiwayEventSeparation.png"
+     width="513"
+     alt="Out[] = {
+       ...
+         {{1, 2}, {2, 3}, {3, 4}} -> {{1, 2}, {3, 4, 1}},
+         {{1, 2}, {2, 3}, {3, 4}} -> {{1, 2}, {2, 3, 4}},
+         {{1, 2}, {3, 4, 1}} -> {{1, 2}, {2, 3}},
+         {{1, 2}, {2, 3, 4}} -> {{1, 2}, {2, 3}}
+       ...,
+       ...
+         {{1, 2}, {2, 3}} -> {{1, 2}, {3, 1, 4}},
+         {{1, 2}, {2, 3}} -> {{1, 2}, {2, 3, 4}},
+         {{1, 2}, {2, 3, 4}} -> {{1, 2, 3}, {2, 4, 5}},
+         {{1, 2}, {3, 1, 4}} -> {{1, 2, 3}, {2, 4, 5}}
+       ...
+     }">
 
 ## Local Multiway System
 
@@ -220,7 +257,9 @@ In[] := WolframModel[<|"PatternRules" -> {{{1, 2}} -> {{2, 3}},
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="Images/MatchAllTimelikeMatching.png" width="232">
+<img src="Images/MatchAllTimelikeMatching.png"
+     width="232"
+     alt="Out[] = ... {{1, 2}} -> Rule 1 -> {{2, 3}}, {{1, 2}, {2, 3}} -> Rule 2 -> {{1, 2, 3}} ...">
 
 In this case we have two rules, `{{1, 2}} -> {{2, 3}}` and `{{1, 2}, {2, 3}} -> {{1, 2, 3}}`. Note that here `1`, `2`
 and `3` are not patterns but labeled vertices. We have started with an initial condition, which is a single
@@ -252,7 +291,16 @@ In[] := WolframModel[<|"PatternRules" -> {{{1, 2}} -> {{2, 3}},
  VertexLabels -> Placed[Automatic, Before]]
 ```
 
-<img src="Images/MatchAllRepeatingMatching.png" width="307">
+<img src="Images/MatchAllRepeatingMatching.png"
+     width="307"
+     alt="Out[] = ...
+       {{1, 2}} -> Rule 1 -> {{2, 3} (* gen 1 *)},
+       {{1, 2}, {2, 3} (* gen 1 *)} -> Rule 2 -> {{1, 2, 3} (* gen 2 *)},
+       {{1, 2}, {1, 2, 3} (* gen 2 *)} -> Rule 3 -> {{2, 3} (* gen 3 *)},
+       {{1, 2}, {2, 3} (* gen 3 *)} -> Rule 2 -> {{1, 2, 3} (* gen 4 *)},
+       {{1, 2}, {1, 2, 3} (* gen 4 *)} -> Rule 3 -> {{2, 3} (* gen 5 *)},
+       {{1, 2}, {2, 3} (* gen 5 *)} -> Rule 2 -> {{1, 2, 3} (* gen 6 *)}
+     ...">
 
 The match-all system will match branchlike events as well, as can be seen in the following example:
 
@@ -264,7 +312,11 @@ In[] := WolframModel[<|"PatternRules" -> {{{1, 2}} -> {{2, 3}},
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="Images/MatchAllBranchlikeMatching.png" width="225">
+<img src="Images/MatchAllBranchlikeMatching.png"
+     width="225"
+     alt="Out[] = ...
+       {{1, 2}} -> Rule 1 -> {{2, 3}}, {{1, 2}} -> Rule 2 -> {{2, 4}}, {{2, 3}, {2, 4}} -> Rule 3 -> {{2, 3, 4}}
+     ...">
 
 Note in the above there are two possibilities to match `{{1, 2}}`, which are incompatible according to the ordinary
 [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
@@ -312,7 +364,20 @@ In[] := WolframModel[#1, #2, 2, "EventSelectionFunction" -> None][
       FrameStyle -> LightGray] & /@ # &)
 ```
 
-<img src="Images/LocalMultiwayEventSeparation.png" width="397">
+<img src="Images/LocalMultiwayEventSeparation.png"
+     width="397"
+     alt="Out[] = {
+       ...
+         {{1, 2}, {2, 3}} -> Rule 1 -> {{1, 2, 3}},
+         {{2, 3}, {3, 4}} -> Rule 1 -> {{2, 3, 4}},
+         {{1, 2, 3}} -> Rule 2 -> {{1, 3}},
+         {{2, 3, 4}} -> Rule 2 -> {{2, 4}}
+       ...,
+       ...
+         {{1, 2}} -> Rule 1 -> {{1, 2, 4}},
+         {{2, 3}} -> Rule 1 -> {{2, 3, 5}}
+       ...
+     }">
 
 Note that the vertex `{2, 3}` in the first example has an out-degree of 2, which indicates the multiway branching. Also
 note that the second example's events are entirely disconnected, as there are no causal connections between them. In
@@ -348,7 +413,13 @@ In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
   {{{1, 2}} -> {{2, 3}}, {{2, 3}} -> {{3, 4}}}}
 ```
 
-<img src="Images/SeparationComparison.png" width="512">
+<img src="Images/SeparationComparison.png"
+     width="512"
+     alt="Out[] = {
+       ... {{1, 2}} -> Rule 1 -> {{2, 3}, {3, 4}} ...,
+       ... {{1, 2}} -> Rule 1 -> {{2, 3}}, {{1, 2}} -> Rule 2 -> {{3, 4}} ...,
+       ... {{1, 2}} -> Rule 1 -> {{2, 3}}, {{2, 3}} -> Rule 2 -> {{3, 4}} ...
+     }">
 
 In the first example, a single event produces two expressions, `{2, 3}` *and* `{3, 4}`. This corresponds to a spacelike
 separation, as both of these expressions can appear simultaneously in a singleway system. In the second example, there
@@ -370,7 +441,13 @@ In[] := WolframModel[<|
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="Images/MatchAllQuantumSpacelikeMatching.png" width="351">
+<img src="Images/MatchAllQuantumSpacelikeMatching.png"
+     width="351"
+     alt="Out[] = ...
+       {{1, 2}} -> Rule 1 -> {{2, 3}},
+       {{1, 2}} -> Rule 2 -> {{3, 4}},
+       {{2, 3}, {3, 4}} -> Rule 3 -> {{4, 5}, {5, 6}}
+     ...">
 
 In this example, the expression `{1, 2}` first branches into two expressions `{2, 3}` and `{3, 4}`. They are then merged
 by the third event, which creates two expressions, `{4, 5}` and `{5, 6}`. In that case, the final expressions `{4, 5}`
@@ -388,7 +465,14 @@ In[] := WolframModel[<|"PatternRules" -> {{{v, i}} -> {{v, 1}, {v, 2}},
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="Images/MatchAllSpacelikeBranchlikeMixed.png" width="352">
+<img src="Images/MatchAllSpacelikeBranchlikeMixed.png"
+     width="352"
+     alt="Out[] = ...
+       {{v, i}} -> Rule 1 -> {{v, 1}, {v, 2}},
+       {{v, 1}} -> Rule 2 -> {{v, 1, 1}, {v, 1, 2}},
+       {{v, 1, 1}, {v, 2}} -> Rule 3 -> {{v, f, 1}},
+       {{v, 1, 2}, {v, 2}} -> Rule 4 -> {{v, f, 2}}
+     ...">
 
 What is the separation between the expressions `{v, f, 1}` and `{v, f, 2}`? On one hand, they are spacelike separated,
 because one of their common ancestors is the event
@@ -434,7 +518,9 @@ In[] := HypergraphPlot[{{a1}, {a1, a2}, {a2, a3}, {a3, m1}, {b1}, {b1,
    b2}, {b2, m1}, {m1, m2}}, VertexLabels -> Automatic]
 ```
 
-<img src="Images/LocalMultiwayParticleInit.png" width="478">
+<img src="Images/LocalMultiwayParticleInit.png"
+     width="478"
+     alt='Out[] = ... two "particles" are at 2 source vertices a1 and b1 with paths leading to the only sink m2 ...'>
 
 Instead of a mesh of redundant events that the global multiway system produced, we now only have two places where the
 events merge:
@@ -448,7 +534,15 @@ In[] := WolframModel[{{1}, {1, 2}} -> {{1, 2}, {2}},
  VertexLabels -> Automatic, ImageSize -> 400]
 ```
 
-<img src="Images/LocalMultiwayParticle.png" width="526">
+<img src="Images/LocalMultiwayParticle.png"
+     width="526"
+     alt="Out[] = ...
+       {{a1}, {a1, a2}} -> {{a1, a2}, {a2}}, {{b1}, {b1, b2}} -> {{b1, b2}, {b2}},
+       {{a2}, {a2, a3}} -> {{a2, a3}, {a3}}, {{b2}, {b2, m1}} -> {{b2, m1}, {m1}},
+       {{a3}, {a3, m1}} -> {{a3, m1}, {m1}}, {{m1}, {m1, m2}} -> {{m1, m2}, {m2}},
+       {{m1}, {m1, m2}} -> {{m1, m2}, {m2}}, {{m1}, {m1, m2}} -> {{m1, m2}, {m2}},
+       {{m1}, {m1, m2}} -> {{m1, m2}, {m2}}
+     ...">
 
 It is perhaps easier to see in a different layout:
 
@@ -462,7 +556,16 @@ In[] := WolframModel[{{1}, {1, 2}} -> {{1, 2}, {2}},
  GraphLayout -> "SpringElectricalEmbedding", ImageSize -> 600]
 ```
 
-<img src="Images/LocalMultiwayParticleSpringElectrical.png" width="766">
+<img src="Images/LocalMultiwayParticleSpringElectrical.png"
+     width="766"
+     alt='Out[] = ...
+       omitting binary edges except for {m1, m2} and using labels to different expressions with the same contents:
+       {a1} -> {a2}, {a2} -> {a3}, {a3} -> {m1, "from a"}, {b1} -> {b2}, {b2} -> {m1, "from b"},
+       {{m1, "from a"}, {m1m2, "initial"}} -> {{m1m2, "after a"}, {m2, "from a"}},
+       {{m1, "from b"}, {m1m2, "initial"}} -> {{m1m2, "after b"}, {m2, "from b"}},
+       {{m1, "from a"}, {m1m2, "after b"}} -> {{m1m2, "after b then a"}, {m2, "from a after b"}},
+       {{m1, "from b"}, {m1m2, "after a"}} -> {{m1m2, "after a then b"}, {m2, "from b after a"}}
+     ...'>
 
 If we look closely at the events near the merge points, we can see that some redundancy remains. However, it is no
 longer due to the spacelike-separated events, but rather due to the "background" expressions being rewritten during
@@ -496,7 +599,14 @@ In[] := ResourceFunction["MultiwaySystem"][
  EdgeStyle -> Automatic]
 ```
 
-<img src="Images/GlobalMultiwayIsomorphism.png" width="453">
+<img src="Images/GlobalMultiwayIsomorphism.png"
+     width="453"
+     alt="Out[] = ...
+       {{1}} -> {{1, 2, 3}},
+       {{1}} -> {{1, 2}, {1, 3}},
+       {{1, 2, 3}} -> {{1, 2}, {1, 3}},
+       {{1, 2}, {1, 3}} -> {{1, 2, 3, 4}}
+     ...">
 
 The current implementation of the local multiway system does not do that, however:
 
@@ -509,7 +619,17 @@ In[] := WolframModel[{{{1}} -> {{1, 2, 3}},
  VertexLabels -> Automatic]
 ```
 
-<img src="Images/LocalMultiwayNoIsomorphism.png" width="340">
+<img src="Images/LocalMultiwayNoIsomorphism.png"
+     width="340"
+     alt="Out[] = ...
+       {{1}} -> Rule 1 -> {{1, 2, 3}},
+       {{1}} -> Rule 3 -> {{1, 4}, {1, 5}},
+       {{1, 2, 3}} -> Rule 2 -> {{1, 2}, {1, 3}},
+       {{1, 4}, {1, 5}} -> Rule 4 -> {{1, 4, 5, 6}},
+       {{1, 5}, {1, 4}} -> Rule 4 -> {{1, 5, 4, 7}},
+       {{1, 2}, {1, 3}} -> Rule 4 -> {{1, 2, 3, 8}},
+       {{1, 3}, {1, 2}} -> Rule 4 -> {{1, 3, 2, 9}}
+     ...">
 
 It would be interesting to introduce isomorphism testing to the local multiway system, as it will allow for a much
 better understanding of how branches combine at the local level. This isomorphism testing can be done by starting with a
@@ -540,7 +660,15 @@ In[] := Graph[{{1} -> 1, {1} -> 2, 1 -> {1, 2, 3}, {1, 2, 3} -> 3,
       "ExpressionVertexStyle"}, {_Integer, "EventVertexStyle"}})]
 ```
 
-<img src="Images/LocalMultiwayIsomorphism.png" width="199">
+<img src="Images/LocalMultiwayIsomorphism.png"
+     width="199"
+     alt="Out[] = ...
+       {{1}} -> Rule 1 -> {{1, 2, 3}},
+       {{1, 2, 3}} -> Rule 2 -> {{1, 2}, {1, 3}},
+       {{1}} -> Rule 3 -> {{1, 2}, {1, 3}}, (* same expressions as produced by rule 2 *)
+       {{1, 2}, {1, 3}} -> Rule 4 -> {{1, 2, 3, 4}},
+       {{1, 3}, {1, 2}} -> Rule 4 -> {{1, 3, 2, 4}}
+     ...">
 
 However, looking at even this simple example, we can determine that the algorithm described above is not quite right;
 e.g., consider the last two expressions, `{1, 2, 3, 4}` and `{1, 3, 2, 4}`. On the one hand, if we start all the way
