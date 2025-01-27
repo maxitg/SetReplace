@@ -18,6 +18,8 @@ If the build directory were not clean, it would have "\*" at the end.
 In[] := $SetReplaceBuildTime
 ```
 
-<img src="/Documentation/Images/BuildTime.png" width="277">
+<img src="/Documentation/Images/BuildTime.png"
+     width="277"
+     alt="Out[] = ... [Sun 12 Apr 2020 16:06:38 UTC] ...">
 
 These constants are particularly useful for reporting issues with the code.

@@ -12,7 +12,9 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "FinalStatePlot"]
 ```
 
-<img src="/Documentation/Images/FinalStatePlot.png" width="478">
+<img src="/Documentation/Images/FinalStatePlot.png"
+     width="478"
+     alt="Out[] = ... plot of a hypergraph with 320 hyperedges ...">
 
 ```wl
 In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
@@ -21,7 +23,9 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "StatesPlotsList"]
 ```
 
-<img src="/Documentation/Images/StatesListPlot.png" width="746">
+<img src="/Documentation/Images/StatesListPlot.png"
+     width="746"
+     alt="Out[] = {... 7 plots of state hypergraphs for each generation ...}">
 
 These properties take the same options as [`HypergraphPlot`](../../HypergraphPlot.md) (but one has to specify them in a
 call to the evolution object, not `WolframModel`):
@@ -34,4 +38,6 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   VertexLabels -> Automatic]
 ```
 
-<img src="/Documentation/Images/FinalStatePlotWithVertexLabels.png" width="478">
+<img src="/Documentation/Images/FinalStatePlotWithVertexLabels.png"
+     width="478"
+     alt="Out[] = ... plot of a hypergraph with vertices labeled 10 to 57 ...">
