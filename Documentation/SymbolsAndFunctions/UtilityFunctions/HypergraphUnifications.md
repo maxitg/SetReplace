@@ -34,7 +34,9 @@ All unifications can be visualized with **`HypergraphUnificationsPlot`**:
 In[] := HypergraphUnificationsPlot[{{1, 2}, {2, 3}}, {{1, 2}, {2, 3}}]
 ```
 
-<img src="/Documentation/Images/HypergraphUnificationsPlot.png" width="745">
+<img src="/Documentation/Images/HypergraphUnificationsPlot.png"
+     width="745"
+     alt="Out[] = {... 6 plots of unified hypergraphs with different colors used for input subhypergraphs ...}">
 
 Vertex labels here show the vertex names in the input graphs to which the unification is matched.
 
@@ -45,4 +47,8 @@ In[] := HypergraphUnificationsPlot[{{1, 2, 3}, {4, 5, 6}, {1, 4}},
  {{1, 2, 3}, {4, 5, 6}, {1, 4}}, VertexLabels -> Automatic]
 ```
 
-<img src="/Documentation/Images/HypergraphUnificationsPlotWithMultipleArities.png" width="746">
+<img src="/Documentation/Images/HypergraphUnificationsPlotWithMultipleArities.png"
+     width="746"
+     alt="Out[] = {
+       ... 13 plots of unified hypergraphs, where vertices are labeled with pairs of input hypergraphs vertex names ...
+     }">

@@ -19,7 +19,9 @@ In[]:= HypergraphToGraph[
   GraphLayout -> "SpringElectricalEmbedding"]
 ```
 
-<img src="/Documentation/Images/HypergraphToGraphDirectedDistancePreserving.png" width="478">
+<img src="/Documentation/Images/HypergraphToGraphDirectedDistancePreserving.png"
+     width="478"
+     alt="Out[] = Graph[{x -> x, x -> y, x -> z, x -> y, x -> z, y -> z, z -> w}, ...]">
 
 ## **"UndirectedDistancePreserving"**
 
@@ -34,7 +36,9 @@ In[]:= HypergraphToGraph[
   GraphLayout -> "SpringElectricalEmbedding"]
 ```
 
-<img src="/Documentation/Images/HypergraphToGraphUndirectedDistancePreserving.png" width="478">
+<img src="/Documentation/Images/HypergraphToGraphUndirectedDistancePreserving.png"
+     width="478"
+     alt="Out[] = Graph[{x <-> x, x <-> y, x <-> z, x <-> y, x <-> z, y <-> z, z <-> w}, ...]">
 
 ## **"StructurePreserving"**
 
@@ -49,7 +53,14 @@ In[]:= HypergraphToGraph[
   VertexLabels -> Automatic]
 ```
 
-<img src="/Documentation/Images/HypergraphToGraphStructurePreserving.png" width="352">
+<img src="/Documentation/Images/HypergraphToGraphStructurePreserving.png"
+     width="352"
+     alt='Out[] = Graph[
+       {{"Hyperedge", 1, 1} -> {"Vertex", x}, {"Hyperedge", 1, 1} -> {"Hyperedge", 1, 2},
+       {"Hyperedge", 1, 2} -> {"Vertex", x}, {"Hyperedge", 1, 2} -> {"Hyperedge", 1, 3},
+       {"Hyperedge", 1, 3} -> {"Vertex", y}, {"Hyperedge", 1, 3} -> {"Hyperedge", 1, 4},
+       {"Hyperedge", 1, 4} -> {"Vertex", z}, {"Hyperedge", 2, 1} -> {"Vertex", z},
+       {"Hyperedge", 2, 1} -> {"Hyperedge", 2, 2}, {"Hyperedge", 2, 2} -> {"Vertex", w}}, ...]'>
 
 It is important to mention that this conversion does not lose any information, and it is possible to unambiguously
 retrieve the original hypergraph from the resulting [`Graph`](https://reference.wolfram.com/language/ref/Graph.html):

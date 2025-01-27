@@ -12,10 +12,14 @@ In[] := graph = BlockRandom[
 ]
 ```
 
-<img src="/Documentation/Images/AcyclicGraphTakeInput.png" width="478.2">
+<img src="/Documentation/Images/AcyclicGraphTakeInput.png"
+     width="478.2"
+     alt="Out[] = ... directed acyclic graph with 10 vertices and multiple branches ...">
 
 ```wl
 In[] := AcyclicGraphTake[graph, {1, 9}]
 ```
 
-<img src="/Documentation/Images/AcyclicGraphTakeOutput.png" width="232.2">
+<img src="/Documentation/Images/AcyclicGraphTakeOutput.png"
+     width="232.2"
+     alt="Out[] = ... subgraph of the input graph with only vertices between 1 and 9 remaining ...">

@@ -21,7 +21,9 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}},
  <|"MaxEvents" -> 42|>, "EventOrderingFunction" -> "Random"]
 ```
 
-<img src="/Documentation/Images/RandomEvolutionObject.png" width="507">
+<img src="/Documentation/Images/RandomEvolutionObject.png"
+     width="507"
+     alt="Out[] = WolframModelEvolutionObject[... Generations: 1...8, Events: 42 ...]">
 
 Note, in this case, only one generation is complete, and seven are partial. That happens because the states grow with
 each generation, so it becomes more likely for a random choice to pick an edge from a later generation. Thus earlier

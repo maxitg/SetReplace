@@ -10,7 +10,9 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 2}} ->
    {{3, 2}, {3, 2}, {2, 1}, {1, 3}}]]
 ```
 
-<img src="/Documentation/Images/RulePlot.png" width="429">
+<img src="/Documentation/Images/RulePlot.png"
+     width="429"
+     alt="Out[] = ... input subhypergraph -> output subhypergraph ...">
 
 The shared elements between rule sides (vertices `1` and `2` in the example above) are put at the same positions in
 the `RulePlot` and highlighted in a darker shade of blue. Shared edges are highlighted as well:
@@ -19,7 +21,9 @@ the `RulePlot` and highlighted in a darker shade of blue. Shared edges are highl
 In[] := RulePlot[WolframModel[{{1, 2, 3}} -> {{1, 2, 3}, {3, 4, 5}}]]
 ```
 
-<img src="/Documentation/Images/RulePlotWithSharedEdges.png" width="429">
+<img src="/Documentation/Images/RulePlotWithSharedEdges.png"
+     width="429"
+     alt="Out[] = ... Wolfram model rule plot with the shared edge located at the same position on both sides ...">
 
 Multiple rules can be plotted:
 
@@ -29,16 +33,22 @@ In[] := RulePlot[WolframModel[{{{1, 1, 2}} ->
    {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}]]
 ```
 
-<img src="/Documentation/Images/MultipleRulesPlot.png" width="808">
+<img src="/Documentation/Images/MultipleRulesPlot.png"
+     width="808"
+     alt="Out[] = ... grid with 2 boxes showing different rules ...">
 
 Passing
 a [`WolframModelEvolutionObject`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
 plots its [`"Rules"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/Rules.md)
 property:
 
-<img src="/Documentation/Images/RulePlotWolframModelEvolutionObjectInput.png" width="575">
+<img src="/Documentation/Images/RulePlotWolframModelEvolutionObjectInput.png"
+     width="575"
+     alt="In[] := RulePlot[WolframModelEvolutionObject[...]]">
 
-<img src="/Documentation/Images/RulePlot.png" width="429">
+<img src="/Documentation/Images/RulePlot.png"
+     width="429"
+     alt="Out[] = ... input subhypergraph -> output subhypergraph ...">
 
 Sometimes an incorrectly scaled layout might be produced due to the issue discussed above
 in [`VertexCoordinates`](HypergraphPlot.md#vertexcoordinates):
@@ -48,7 +58,9 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
    {{2, 2}, {2, 2}, {2, 5}, {3, 2}}]]
 ```
 
-<img src="/Documentation/Images/IncorrectlyScaledRulePlot.png" width="429">
+<img src="/Documentation/Images/IncorrectlyScaledRulePlot.png"
+     width="429"
+     alt="Out[] = ... rule plot where vertices and arrowheads are too large ...">
 
 `VertexCoordinates` can be used in that case to specify the layout manually:
 
@@ -59,7 +71,9 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
    4 -> {-1, 0}, 5 -> {2, 1}}]
 ```
 
-<img src="/Documentation/Images/RulePlotWithCustomCoordinates.png" width="429">
+<img src="/Documentation/Images/RulePlotWithCustomCoordinates.png"
+     width="429"
+     alt="Out[] = ... rule plot with reduced sizes for vertices and arrowheads ...">
 
 Some of the [`HypergraphPlot`](HypergraphPlot.md) options are supported,
 specifically [`GraphHighlightStyle`](HypergraphPlot.md#graphhighlight-and-graphhighlightstyle)
@@ -77,7 +91,9 @@ In[] := RulePlot[WolframModel[{{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
    {{1, 2}, {1, 2}} -> {{1, 3}, {3, 2}}}], Spacings -> 0.03]
 ```
 
-<img src="/Documentation/Images/RulePlotWithSmallSpacings.png" width="747">
+<img src="/Documentation/Images/RulePlotWithSmallSpacings.png"
+     width="747"
+     alt="Out[] = ... plot of 2 rules with tight spaces between the rules and the frame ...">
 
 **`"RulePartsAspectRatio"`** is used to control the aspect ratio of rule sides. As an example, it can be used to force
 rule parts to be square:
@@ -87,4 +103,6 @@ In[] := RulePlot[WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}],
  "RulePartsAspectRatio" -> 1]
 ```
 
-<img src="/Documentation/Images/SquareRulePlot.png" width="429">
+<img src="/Documentation/Images/SquareRulePlot.png"
+     width="429"
+     alt="Out[] = ... rule plot with square rule parts ...">

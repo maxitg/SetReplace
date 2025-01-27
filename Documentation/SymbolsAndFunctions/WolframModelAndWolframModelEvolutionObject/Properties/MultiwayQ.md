@@ -13,7 +13,12 @@ In[] := EchoFunction[#["ExpressionsEventsGraph"] &][
                "EventSelectionFunction" -> "MultiwaySpacelike"]]["MultiwayQ"]
 ```
 
-<img src="/Documentation/Images/MultiwayExpressionsEventsGraphEchoed.png" width="451">
+<img src="/Documentation/Images/MultiwayExpressionsEventsGraphEchoed.png"
+     width="451"
+     alt=">> ...
+       {{1, 2} (* init *), {2, 3} (* init *)} -> {{1, 2} (* from event 1 *), {2, 3} (* from event 1 *), {3, 5}},
+       {{2, 3} (* init *), {3, 4} (* init *)} -> {{2, 3} (* from event 2 *), {3, 4} (* from event 2 *), {4, 6}}
+     ...">
 
 ```wl
 Out[] = True
@@ -28,7 +33,9 @@ In[] := EchoFunction[#["ExpressionsEventsGraph"] &][WolframModel[
   {{1, 2}} -> {{1, 3}, {3, 2}}, {{1, 1}}, 2, "EventSelectionFunction" -> "MultiwaySpacelike"]]["MultiwayQ"]
 ```
 
-<img src="/Documentation/Images/SinglewayExpressionsEventsGraphEchoed.png" width="415">
+<img src="/Documentation/Images/SinglewayExpressionsEventsGraphEchoed.png"
+     width="415"
+     alt=">> ... {{1, 1}} -> {{1, 2}, {2, 1}}, {{1, 2}} -> {{1, 3}, {3, 2}}, {{2, 1}} -> {{2, 4}, {4, 1}} ...">
 
 ```wl
 Out[] = False

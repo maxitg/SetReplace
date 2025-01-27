@@ -28,7 +28,9 @@ In[] := HypergraphPlot /@ With[{
    evolution["AllEventsStatesEdgeIndicesList"]]
 ```
 
-<img src="/Documentation/Images/AllEventsStatesListPlot.png" width="746">
+<img src="/Documentation/Images/AllEventsStatesListPlot.png"
+     width="746"
+     alt="Out[] = {... 8 plots of state hypergraphs with single events in between consecutive states ...}">
 
 However, this representation is useful if one needs to distinguish between identical edges.
 

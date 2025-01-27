@@ -29,4 +29,6 @@ In[] := With[{
         2 -> White}, {1}]], VertexSize -> Medium]]]
 ```
 
-<img src="/Documentation/Images/ColoredCausalGraph.png" width="478">
+<img src="/Documentation/Images/ColoredCausalGraph.png"
+     width="478"
+     alt="Out[] = ... causal graph with event vertices shown in 2 colors corresponding to their rule ...">
