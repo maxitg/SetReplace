@@ -54,7 +54,9 @@ In[] := HypergraphPlot[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
-<img src="Documentation/Images/BasicHypergraphPlot.png" width="478">
+<img src="Documentation/Images/BasicHypergraphPlot.png"
+     width="478"
+     alt="Out[] = ... a plot showing 3 triangles connected at vertices labeled 2 and 4 ...">
 
 We can then have a rule which would pick a subset of these hyperedges related through common vertices (much like a join
 query) and replace them with something else:
@@ -76,7 +78,9 @@ In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
-<img src="Documentation/Images/EvolutionResult1Step.png" width="478">
+<img src="Documentation/Images/EvolutionResult1Step.png"
+     width="478"
+     alt="Out[] = ... {{4, 6, 7}, {5, v11, 1}, {v11, 4, 2}, {4, 5, 3}} ...">
 
 After 10 steps, we get a more complicated structure:
 
@@ -87,7 +91,9 @@ In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
  VertexLabels -> Automatic]
 ```
 
-<img src="Documentation/Images/EvolutionResult10Steps.png" width="478">
+<img src="Documentation/Images/EvolutionResult10Steps.png"
+     width="478"
+     alt="Out[] = ... {{7, 2, v13}, {7, v18, 6}, {v18, v15, 4}, {v15, 7, v12}, {3, v19, v16}, <<7>>, {7, 6, v15}} ...">
 
 And after 100 steps, it gets even more elaborate:
 
@@ -97,7 +103,9 @@ In[] := HypergraphPlot[SetReplace[{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
    Module[{v6}, {{v5, v6, v1}, {v6, v4, v2}, {v4, v5, v3}}], 100]]
 ```
 
-<img src="Documentation/Images/EvolutionResult100Steps.png" width="478">
+<img src="Documentation/Images/EvolutionResult100Steps.png"
+     width="478"
+     alt="Out[] = ... hypergraph with 103 hyperedges ...">
 
 Exploring the hypergraph models of this variety is the primary purpose of this package.
 

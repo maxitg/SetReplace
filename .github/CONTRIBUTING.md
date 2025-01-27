@@ -376,15 +376,30 @@ Also please name the patterns in `SyntaxInformation`. If you do that, you can tu
 the Front End (`Null` has to do with options, and unfortunately renaming them causes the corresponding template to be
 displayed if no options are specified):
 
-<img src="/Documentation/Images/HighlightMissingArgumentsWithTemplate.png" width="362.4">
+<img src="/Documentation/Images/HighlightMissingArgumentsWithTemplate.png"
+     width="362.4"
+     alt="In[] := WolframModel[rules, init, stepSpec, property, Null]">
 
 Functions must handle invalid inputs correctly. For example, if you try to evaluate
 
-<img src="/Documentation/Images/ArgumentChecks.png" width="469">
+<img src="/Documentation/Images/ArgumentChecks.png"
+     width="469"
+     alt="
+       In[] := WolframModel[1 -> 2, 1]
+       [...] WolframModel: The initial state specification 1 should be a List.
+       Out[] = WolframModel[1 -> 2, 1]
+     ">
 
 you would get a helpful error message. If we did not do any checks here, we would instead have the code go haywire:
 
-<img src="/Documentation/Images/NoArgumentChecks.png" width="582">
+<img src="/Documentation/Images/NoArgumentChecks.png"
+     width="582"
+     alt="
+       In[] := WolframModel[1 -> 2, 1]
+       [...] First: Nonatomic expression expected at position 1 in First[2].
+       [...] First: Nonatomic expression expected at position 1 in First[0].
+       ... (many more errors) ...
+     ">
 
 and the function would not even terminate, which is confusing and hostile to the user.
 
@@ -797,7 +812,7 @@ and saving them as .png files to [Documentation/Images](/Documentation/Images) (
 directory of the corresponding research note. They should then be inserted using the code similar to this:
 
   ```html
-  <img src="/Documentation/Images/image.png" width="xxx">
+  <img src="/Documentation/Images/image.png" width="xxx" alt="description">
   ```
 
 where the `width` should be computed as
