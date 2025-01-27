@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <limits>
 #include <unordered_map>
 #include <vector>
 
