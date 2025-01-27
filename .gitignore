@@ -2,6 +2,10 @@
 
 *.nb
 
+# Python environments
+
+.venv/
+
 # Sublime text
 
 *.sublime-workspace
