@@ -7,7 +7,7 @@ until [[ ${n} -ge 3 ]]; do
   echo "Attempt ${n}..."
 
   # Run the activation
-  if wolframscript -authenticate "maxitg@icloud.com" "${WOLFRAM_PASSWORD}" && wolframscript -activate; then
+  if wolframscript -authenticate "${WOLFRAM_ID}" "${WOLFRAM_PASSWORD}" && wolframscript -activate; then
     echo "Activation succeeded on attempt ${n}."
     break
   fi
