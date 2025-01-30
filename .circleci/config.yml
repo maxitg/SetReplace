@@ -21,9 +21,7 @@ jobs:
 
       - run:
           name: Activate Wolfram Engine
-          command: |
-            wolframscript -authenticate maxitg@icloud.com "${WOLFRAM_PASSWORD}"
-            wolframscript -activate
+          command: ./scripts/activateWolframScript.sh
 
       - run:
           name: Build
