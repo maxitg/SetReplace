@@ -7,6 +7,7 @@ $redColor = "\033[0;31m";
 $greenColor = "\033[0;32m";
 $orangeColor = "\033[0;33m";
 $yellowColor = "\033[1;33m";
+$cyanColor = "\033[0;36m";
 $endColor = "\033[0m";
 
 $commandLineArgs = Rest[$ScriptCommandLine];
@@ -118,9 +119,8 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
     testList, testResults, testReport, options, parallelQ, runInit, failedTests,
     requiresFrontEnd, probablyRequiresFrontEnd, bodyWrapper},
   (* Notify the user which test group we are running *)
-  WriteString["stdout",
-    testGroupName,
-    StringJoin[ConstantArray[" ", Max[40 - StringLength[testGroupName], 1]]]];
+  testGroupNameAndPadding = testGroupName <> StringJoin[ConstantArray[" ", Max[40 - StringLength[testGroupName], 1]]];
+  WriteString["stdout", testGroupNameAndPadding];
 
   probablyRequiresFrontEnd = !FreeQ[testGroup,
     SetReplace`PackageScope`checkGraphics | SetReplace`PackageScope`graphicsQ | UsingFrontEnd];
@@ -129,6 +129,10 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
   options = Association[ReleaseHold[Lookup[testGroup, "options", <||>]]];
   parallelQ = $allowParallelization && Lookup[options, "Parallel", True];
   requiresFrontEnd = Lookup[options, "RequiresFrontEnd", probablyRequiresFrontEnd];
+
+  resetTestStatus = "\r\033[" <> ToString[StringLength[testGroupNameAndPadding]] <> "C\033[K";
+  writeTestStatus[status___] := WriteString["stdout", resetTestStatus, status];
+  If[parallelQ, SetSharedFunction[writeTestStatus]];
 
   (* if a frontend is required, better to start it once than again and again in each test *)
   bodyWrapper = If[requiresFrontEnd, UsingFrontEnd, Identity];
@@ -140,10 +144,35 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
     If[parallelQ, ParallelEvaluate[runInit[]]];
 
     (* Make a list of tests, but don't run them yet *)
+    writeTestStatus[$cyanColor, "[0/...]", $endColor];
     testList = Flatten[ReleaseHold[testGroup["tests"] /. VerificationTest -> constrainedTest]];
+    testCount = Length[testList];
+    writeTestStatus[$cyanColor, "[0/", testCount, "]", $endColor];
 
     (* Run tests in parallel *)
-    testResults = If[parallelQ, ParallelMap, Map][# /. test -> VerificationTest &, testList];
+    testsCompleted = 0;
+    If[parallelQ, SetSharedVariable[testsCompleted]];
+    testsCompletedLock;
+
+    localTestCounter = 0;
+    lastProgressUpdate = 0.0;
+    If[parallelQ, ParallelEvaluate, Evaluate][
+      localTestCounter = 0;
+      lastProgressUpdate = 0.0;
+    ];
+
+    If[parallelQ, SetSharedFunction[printProgress]];
+    testResults = If[parallelQ, ParallelMap, Map][(
+      testResult = (# /. test -> VerificationTest);
+      localTestCounter++;
+      If[AbsoluteTime[] - lastProgressUpdate > 1,
+        CriticalSection[{testsCompletedLock}, testsCompleted += localTestCounter];
+        localTestCounter = 0;
+        lastProgressUpdate = AbsoluteTime[];
+        writeTestStatus[$cyanColor, "[", testsCompleted, "/", testCount, "]", $endColor];
+      ];
+      testResult
+    ) &, testList];
 
     runCleanup[];
   ];
@@ -151,8 +180,7 @@ $results = Association[KeyValueMap[Function[{testGroupName, testGroup}, Module[{
   testReport = TestReport[testResults];
 
   (* Print the summery (green if ok, red if failed) *)
-  WriteString[
-    "stdout",
+  writeTestStatus[
     If[testReport["AllTestsSucceeded"],
       $greenColor <> "[ok]" <> $endColor
     ,
