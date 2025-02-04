@@ -21,7 +21,10 @@ to be the number of causal relations, i.e. the number of pairs *x* ≺ *y* betwe
 ratio between *C*<sub>*2*</sub> and *C*<sub>*1*</sub> is dependent on the dimensionality *d* into which
 the causal set embeds:
 
-<img src="/Documentation/Images/MyrheimMeyer.png" width="203.8">,
+$$
+\frac{\langle C_2 \rangle}{\langle C_1 \rangle^2} =
+  \frac{\Gamma\left(d + 1\right) \Gamma\left(\frac{d}{2}\right)}{4 \Gamma\left(\frac{3 d}{2}\right)},
+$$
 
 where *d* is the dimensionality of the (flat) manifold. This expression comes from the fact that the probabilty
 that a random choice of elements in the causal set are causally connected is directly proportional to the volume
@@ -46,7 +49,9 @@ sprinkledGraph = BlockRandom[Module[{coordinates, causalSet},
 ], RandomSeeding -> 0]
 ```
 
-<img src="/Documentation/Images/CausalDensityDimensionInput.png" width="386.4">
+<img src="/Documentation/Images/CausalDensityDimensionInput.png"
+     width="386.4"
+     alt="Out[] = ... random causal set graph of 2 spacetime dimensions ...">
 
 ```wl
 In[] := CausalDensityDimension[sprinkledGraph, {1, 50}]

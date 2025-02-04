@@ -21,7 +21,9 @@ In[] := GroupOrder[
       8, 5}, {5, 9, 1}}]]
 ```
 
-<img src="/Documentation/Images/SymmetricHypergraphPlot.png" width="451">
+<img src="/Documentation/Images/SymmetricHypergraphPlot.png"
+     width="451"
+     alt=">> ... highly symmetric hypergraph plot ...">
 
 ```wl
 Out[] = 24

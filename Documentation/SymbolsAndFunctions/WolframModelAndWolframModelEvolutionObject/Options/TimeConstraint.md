@@ -10,4 +10,6 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
  {{1, 1}}, Infinity, TimeConstraint -> 1]
 ```
 
-<img src="/Documentation/Images/TimeConstrainedEvolutionObject.png" width="565">
+<img src="/Documentation/Images/TimeConstrainedEvolutionObject.png"
+     width="565"
+     alt="Out[] = WolframModelEvolutionObject[... Generations: 9...10, Events: 12454 ...]">

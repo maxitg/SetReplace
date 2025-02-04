@@ -13,6 +13,11 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  3, "EventsStatesPlotsList"]
 ```
 
-<img src="/Documentation/Images/EventsStatesPlotsList.png" width="746">
+<img src="/Documentation/Images/EventsStatesPlotsList.png"
+     width="746"
+     alt = "Out[] = {
+       ... 9 consecutive state plots with single events in between, with edges about to be deleted highlighted as dotted
+       gray, and edges just created highlighted in red ...
+     }">
 
 Here the dotted gray edges are the ones about to be deleted, whereas the red ones have just been created.

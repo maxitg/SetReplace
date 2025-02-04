@@ -17,7 +17,15 @@ In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="/Documentation/Images/ExpressionsEventsGraphWithBoundaryEvents.png" width="475">
+<img src="/Documentation/Images/ExpressionsEventsGraphWithBoundaryEvents.png"
+     width="475"
+     alt="Out[] = ...
+       Initial event -> {3, 8, 8, 8, 2, 10, 0, 9, 7},
+       {3, 8} -> Event 1 -> {11},
+       ...,
+       {27, 28} -> Event 8 -> {55},
+       {55} -> Final event
+     ...">
 
 Properties like [`"AllEventsList"`](../Properties/Events.md) are affected as well:
 

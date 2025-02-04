@@ -23,7 +23,9 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
  {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 10]
 ```
 
-<img src="/Documentation/Images/EvolutionObject10Steps.png" width="493">
+<img src="/Documentation/Images/EvolutionObject10Steps.png"
+     width="493"
+     alt="Out[] = WolframModelEvolutionObject[... Generations: 10, Events: 109 ...]">
 
 Note that this call is different from the [`SetReplace`](../SetReplace.md) function in a variety of ways:
 
@@ -45,12 +47,16 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
  {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, 3]
 ```
 
-<img src="/Documentation/Images/EvolutionObject3Steps.png" width="487">
+<img src="/Documentation/Images/EvolutionObject3Steps.png"
+     width="487"
+     alt="Out[] = WolframModelEvolutionObject[... Generations: 3, Events: 5 ...]">
 
 One can easily see its internal structure in
 its [`InputForm`](https://reference.wolfram.com/language/ref/InputForm.html):
 
-<img src="/Documentation/Images/InputFormOfEvolutionObject.png" width="594">
+<img src="/Documentation/Images/InputFormOfEvolutionObject.png"
+     width="594"
+     alt="In[] := WolframModelEvolutionObject[... Generations: 3, Events: 5 ...] // InputForm">
 
 ```wl
 Out[] = WolframModelEvolutionObject[<|
@@ -83,7 +89,9 @@ four more triples of edges corresponding to the outputs of remaining events.
 belongs. For example, `{5, 8, 1}` only appears in the result after a single step and `{7, 9, 8}` after two steps. Here
 we use [`"StatesList"`](Properties/States.md) property to demonstrate that:
 
-<img src="/Documentation/Images/StatesListOfEvolutionObject.png" width="613">
+<img src="/Documentation/Images/StatesListOfEvolutionObject.png"
+     width="613"
+     alt='In[] := WolframModelEvolutionObject[... Generations: 3, Events: 5 ...]["StatesList"]'>
 
 ```wl
 Out[] = {{{1, 2, 3}, {2, 4, 5}, {4, 6, 7}},
@@ -122,7 +130,9 @@ Other properties of the evolution object describe the relationships between edge
 
 A specific property can be requested from an evolution object by supplying it as an argument to the object itself:
 
-<img src="/Documentation/Images/EventsCountOfEvolutionObject.png" width="629">
+<img src="/Documentation/Images/EventsCountOfEvolutionObject.png"
+     width="629"
+     alt='In[] := WolframModelEvolutionObject[... Generations: 10, Events: 109 ...]["EventsCount"]'>
 
 ```wl
 Out[] = 109
@@ -131,7 +141,9 @@ Out[] = 109
 [Properties](#properties) section describes and gives examples for each available property. The full list of them can
 also be obtained with the `"Properties"` property:
 
-<img src="/Documentation/Images/PropertiesOfEvolutionObject.png" width="619">
+<img src="/Documentation/Images/PropertiesOfEvolutionObject.png"
+     width="619"
+     alt='In[] := WolframModelEvolutionObject[... Generations: 10, Events: 109 ...]["Properties"]'>
 
 ```wl
 Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList",
@@ -155,7 +167,9 @@ Out[] = {"EvolutionObject", "FinalState", "FinalStatePlot", "StatesList",
 
 Some properties take additional arguments, which can be supplied after the property name:
 
-<img src="/Documentation/Images/StateAfterEventOfEvolutionObject.png" width="691">
+<img src="/Documentation/Images/StateAfterEventOfEvolutionObject.png"
+     width="691"
+     alt='In[] := WolframModelEvolutionObject[... Generations: 10, Events: 109 ...]["StateAfterEvent", 7]'>
 
 ```wl
 Out[] = {{8, 1, 3}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}, {2, 13, 11}, {13, 7,
@@ -164,7 +178,9 @@ Out[] = {{8, 1, 3}, {5, 12, 1}, {12, 8, 10}, {8, 5, 4}, {2, 13, 11}, {13, 7,
 
 A particular generation can be extracted simply by its number (including, i.e., -1 for the final state):
 
-<img src="/Documentation/Images/GenerationOfEvolutionObject.png" width="516">
+<img src="/Documentation/Images/GenerationOfEvolutionObject.png"
+     width="516"
+     alt='In[] := WolframModelEvolutionObject[... Generations: 10, Events: 109 ...][3]'>
 
 ```wl
 Out[] = {{6, 7, 2}, {8, 1, 3}, {4, 11, 7}, {11, 6, 9}, {6, 4, 8}, {5, 12,
@@ -229,11 +245,15 @@ In[] := WolframModel[{{{1, 1, 2}} -> {{2, 2, 1}, {2, 3, 2}, {1, 2, 3}},
   {{1, 2, 1}, {3, 4, 2}} -> {{4, 3, 2}}}, {{1, 1, 1}}, 4]
 ```
 
-<img src="/Documentation/Images/EvolutionObjectFromMultipleRules.png" width="488">
+<img src="/Documentation/Images/EvolutionObjectFromMultipleRules.png"
+     width="488"
+     alt="Out[] = WolframModelEvolutionObject[... Generations: 4, Events: 13 ...]">
 
 To see which rules were used for each replacement:
 
-<img src="/Documentation/Images/AllEventsRuleIndicesOfEvolutionObject.png" width="708">
+<img src="/Documentation/Images/AllEventsRuleIndicesOfEvolutionObject.png"
+     width="708"
+     alt='In[] := WolframModelEvolutionObject[... Generations: 4, Events: 13 ...]["AllEventsRuleIndices"]'>
 
 ```wl
 Out[] = {1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2}
@@ -294,7 +314,9 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
    3}}, 6, "FinalStatePlot"]
 ```
 
-<img src="/Documentation/Images/MaxGenerationsFinalStatePlot.png" width="478">
+<img src="/Documentation/Images/MaxGenerationsFinalStatePlot.png"
+     width="478"
+     alt="Out[] = ... plot of a hypergraph with 512 hyperedges ...">
 
 Alternatively, an [`Association`](https://reference.wolfram.com/language/ref/Association.html) can be used to specify a
 more elaborate limiting condition:
@@ -308,7 +330,9 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
  <|"MaxVertices" -> 300, "MaxEvents" -> 200|>, "FinalStatePlot"]
 ```
 
-<img src="/Documentation/Images/MaxVerticesFinalStatePlot.png" width="478">
+<img src="/Documentation/Images/MaxVerticesFinalStatePlot.png"
+     width="478"
+     alt="Out[] = ... plot of a less symmetric hypergraph with 400 hyperedges ...">
 
 Note that the final state here is "less symmetric" because its last generation is incomplete (more on
 that [later](../UtilityFunctions/HypergraphAutomorphismGroup.md)). Such incomplete generations can be automatically
@@ -327,7 +351,15 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
  <|"MaxVertices" -> 300, "MaxEvents" -> 200|>]
 ```
 
-<img src="/Documentation/Images/MaxVerticesEvolutionObject.png" width="753">
+<img src="/Documentation/Images/MaxVerticesEvolutionObject.png"
+     width="753"
+     alt="Out[] = WolframModelEvolutionObject[...
+       Generations: 5...6,
+       Events: 49,
+       Termination reason: MaxVertices,
+       Rules: ...,
+       Initial set: ...
+     ...]">
 
 All possible keys in that association are:
 
@@ -365,7 +397,9 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} -> {{5, 6, 1}, {6, 4, 2}, {4, 5,
  {{1, 2, 3}, {2, 4, 5}, {4, 6, 7}}, Automatic]
 ```
 
-<img src="/Documentation/Images/AutomaticStepsGrowing.png" width="491">
+<img src="/Documentation/Images/AutomaticStepsGrowing.png"
+     width="491"
+     alt="Out[] = WolframModelEvolutionObject[... Generations: 11, Events: 163 ...]">
 
 But evolves the rule much longer if it does not grow:
 
@@ -374,7 +408,9 @@ In[] := WolframModel[<|"PatternRules" -> {{a_, b_}} :> {{a + b, a - b}}|>,
  {{1, 1}}, Automatic]
 ```
 
-<img src="/Documentation/Images/AutomaticStepsNotGrowing.png" width="565">
+<img src="/Documentation/Images/AutomaticStepsNotGrowing.png"
+     width="565"
+     alt="Out[] = WolframModelEvolutionObject[... Generations: 5000, Events: 5000 ...]">
 
 Currently, it's equivalent to `<|"MaxEvents" -> 5000, "MaxVertices" -> 200|>`, setting `TimeConstraint -> 5` (it still
 returns values for all properties even if terminated due to time constraint), and `"IncludePartialGenerations" -> False`
