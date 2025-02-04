@@ -79,7 +79,7 @@ jobs:
 
             python3 -m venv .venv
             . .venv/bin/activate
-            pip install cpplint==1.5.5
+            pip install cpplint==2.0.0
 
       - run:
           name: Lint
