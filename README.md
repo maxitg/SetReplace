@@ -8,7 +8,7 @@
 
 ## Set Substitution Systems
 
-*SetReplace* is a [Wolfram Language](https://www.wolfram.com/language/) package for manipulating set substitution
+_SetReplace_ is a [Wolfram Language](https://www.wolfram.com/language/) package for manipulating set substitution
 systems. To understand what a set substitution system does consider an unordered set of elements:
 
 ```wl
@@ -21,7 +21,7 @@ We can set up an operation on this set which would take any of the two elements 
 {a_, b_} :> {a + b}
 ```
 
-In *SetReplace*, this can be expressed as the following (the new element `1 + 2 -> 3` is put at the end)
+In _SetReplace_, this can be expressed as the following (the new element `1 + 2 -> 3` is put at the end)
 
 ```wl
 In[] := SetReplace[{1, 2, 5, 3, 6}, {a_, b_} :> {a + b}]
@@ -113,21 +113,21 @@ Exploring the hypergraph models of this variety is the primary purpose of this p
 
 ## Dependencies
 
-You only need three things to use *SetReplace*:
+You only need three things to use _SetReplace_:
 
-* Windows, macOS 10.12+, or Linux.
-* Windows only &mdash;
+- Windows, macOS 10.12+, or Linux.
+- Windows only &mdash;
   [Microsoft Visual C++ Redistributable 2015+](https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0).
-* [Wolfram Language 12.3+](https://www.wolfram.com/language/)
+- [Wolfram Language 12.3+](https://www.wolfram.com/language/)
   including [WolframScript](https://www.wolfram.com/wolframscript/). A free version is available
   as [Wolfram Engine](https://www.wolfram.com/engine/).
-* A C++17 compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in
+- A C++17 compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in
   WolframScript
   are [here](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
 
 ## Build Instructions
 
-For users who wish to make use of *SetReplace* functionality, and not modify the source code itself, we recommend simply
+For users who wish to make use of _SetReplace_ functionality, and not modify the source code itself, we recommend simply
 building and installing the paclet.
 
 To do this, run the following on the command line:
@@ -139,11 +139,11 @@ cd ~/PATH-TO-CHECKOUT/SetReplace
 
 Please note that if you do not have GitLink installed, it will be installed for you.
 
-Now that you have installed the *SetReplace* paclet, you should evaluate ``<< SetReplace` `` every time you start a
+Now that you have installed the _SetReplace_ paclet, you should evaluate `` << SetReplace` `` every time you start a
 fresh Mathematica session. This will load the paclet and bring the various functions into scope, so that you can call
 them.
 
-For more info about doing development on the *SetReplace* codebase and the associated workflows, see
+For more info about doing development on the _SetReplace_ codebase and the associated workflows, see
 the [Contributing guide](.github/CONTRIBUTING.md#building-in-place).
 
 ### C++17
@@ -156,17 +156,17 @@ following, for instance, typically works on a Mac:
 COMPILER=CCompilerDriver\`ClangCompiler\`ClangCompiler COMPILER_INSTALLATION=/usr/bin ./install.wls
 ```
 
-Here `ClangCompiler` can be replaced with one of ``<< CCompilerDriver`; "Compiler" /. CCompilerDriver`CCompilers[Full]``
+Here `ClangCompiler` can be replaced with one of `` << CCompilerDriver`; "Compiler" /. CCompilerDriver`CCompilers[Full] ``
 , and `COMPILER_INSTALLATION` is a directory in which the compiler binary can be found.
 
 ## Contributing
 
 Keep in mind that this is an active research project. While we try to keep the main functionality backward compatible,
 it might change in the future as we adjust our models and find better ways of analysis. Keep that in mind when building
-on top of *SetReplace*, and keep track of [git SHAs](Documentation/SymbolsAndFunctions/UtilityFunctions/BuildData.md) as
+on top of _SetReplace_, and keep track of [git SHAs](Documentation/SymbolsAndFunctions/UtilityFunctions/BuildData.md) as
 you go.
 
-*SetReplace* is an open-source project, and everyone is welcome to contribute. Read
+_SetReplace_ is an open-source project, and everyone is welcome to contribute. Read
 our [contributing guidelines](.github/CONTRIBUTING.md) to get started.
 
 We have a [Discord server](https://discord.setreplace.org). If you would like to contribute but have questions or don't
@@ -175,71 +175,72 @@ ideas. So, if you are interested, please join!
 
 # Symbols and Functions
 
-* [SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace.md)
-* [ToPatternRules](Documentation/SymbolsAndFunctions/ToPatternRules.md)
-* [WolframModel and WolframModelEvolutionObject](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
-  * Properties
-    * [States](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md)
-    * [Plots of States](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/PlotsOfStates.md)
-    * [Plots of Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/PlotsOfEvents.md)
-    * [All Edges throughout Evolution](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/AllEdgesThroughoutEvolution.md)
-    * [States as Edge Indices](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/StatesAsEdgeIndices.md)
-    * [Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/Events.md)
-    * [Events and States](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EventsAndStates.md)
-    * [Creator and Destroyer Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CreatorAndDestroyerEvents.md)
-    * [Causal Graphs](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
-    * [Expression Separations](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/ExpressionSeparations.md)
-    * [MultiwayQ](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md)
-    * [Rule Indices for Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/RuleIndicesForEvents.md)
-    * [Edge and Event Generations](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EdgeAndEventGenerations.md)
-    * [Termination Reason](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TerminationReason.md)
-    * [Generation Counts](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/GenerationCounts.md)
-    * [Event Counts](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EventCounts.md)
-    * [Element Count Lists](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/ElementCountLists.md)
-    * [Final Element Counts](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FinalElementCounts.md)
-    * [Total Element Counts](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TotalElementCounts.md)
-    * [Rules](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/Rules.md)
-    * [Feature Association](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FeatureAssociation.md)
-    * [Feature Vector](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FeatureVector.md)
-    * [Version](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/Version.md)
-  * Options
-    * ["VertexNamingFunction"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/VertexNamingFunction.md)
-    * ["IncludePartialGenerations"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/IncludePartialGenerations.md)
-    * ["IncludeBoundaryEvents"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/IncludeBoundaryEvents.md)
-    * ["EventOrderingFunction"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventOrderingFunction.md)
-    * ["EventSelectionFunction"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventSelectionFunction.md)
-    * ["EventDeduplication"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventDeduplication.md)
-    * [Method](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/Method.md)
-    * [Time Constraint](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/TimeConstraint.md)
-* [HypergraphPlot](Documentation/SymbolsAndFunctions/HypergraphPlot.md)
-* [RulePlot of WolframModel](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
-* Utility Functions
-  * [CausalDensityDimension](Documentation/SymbolsAndFunctions/UtilityFunctions/CausalDensityDimension.md)
-  * [AcyclicGraphTake](Documentation/SymbolsAndFunctions/UtilityFunctions/AcyclicGraphTake.md)
-  * [IndexHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/IndexHypergraph.md)
-  * [IsomorphicHypergraphQ](Documentation/SymbolsAndFunctions/UtilityFunctions/IsomorphicHypergraphQ.md)
-  * [HypergraphToGraph](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md)
-  * [RandomHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/RandomHypergraph.md)
-  * [Subhypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/Subhypergraph.md)
-  * [WolframModelRuleValue](Documentation/SymbolsAndFunctions/UtilityFunctions/WolframModelRuleValue.md)
-  * [GeneralizedGridGraph](Documentation/SymbolsAndFunctions/UtilityFunctions/GeneralizedGridGraph.md)
-  * [HypergraphAutomorphismGroup](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphAutomorphismGroup.md)
-  * [HypergraphUnifications](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphUnifications.md)
-  * [SetReplaceStyleData](Documentation/SymbolsAndFunctions/UtilityFunctions/SetReplaceStyleData.md)
-  * [Build Data](Documentation/SymbolsAndFunctions/UtilityFunctions/BuildData.md)
+- [SetReplace\*](Documentation/SymbolsAndFunctions/SetReplace.md)
+- [ToPatternRules](Documentation/SymbolsAndFunctions/ToPatternRules.md)
+- [WolframModel and WolframModelEvolutionObject](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
+  - Properties
+    - [States](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md)
+    - [Plots of States](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/PlotsOfStates.md)
+    - [Plots of Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/PlotsOfEvents.md)
+    - [All Edges throughout Evolution](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/AllEdgesThroughoutEvolution.md)
+    - [States as Edge Indices](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/StatesAsEdgeIndices.md)
+    - [Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/Events.md)
+    - [Events and States](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EventsAndStates.md)
+    - [Creator and Destroyer Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CreatorAndDestroyerEvents.md)
+    - [Causal Graphs](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
+    - [Expression Separations](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/ExpressionSeparations.md)
+    - [MultiwayQ](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md)
+    - [Rule Indices for Events](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/RuleIndicesForEvents.md)
+    - [Edge and Event Generations](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EdgeAndEventGenerations.md)
+    - [Termination Reason](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TerminationReason.md)
+    - [Generation Counts](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/GenerationCounts.md)
+    - [Event Counts](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/EventCounts.md)
+    - [Element Count Lists](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/ElementCountLists.md)
+    - [Final Element Counts](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FinalElementCounts.md)
+    - [Total Element Counts](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/TotalElementCounts.md)
+    - [Rules](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/Rules.md)
+    - [Feature Association](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FeatureAssociation.md)
+    - [Feature Vector](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FeatureVector.md)
+    - [Version](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/Version.md)
+  - Options
+    - ["VertexNamingFunction"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/VertexNamingFunction.md)
+    - ["IncludePartialGenerations"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/IncludePartialGenerations.md)
+    - ["IncludeBoundaryEvents"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/IncludeBoundaryEvents.md)
+    - ["EventOrderingFunction"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventOrderingFunction.md)
+    - ["EventSelectionFunction"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventSelectionFunction.md)
+    - ["EventDeduplication"](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/EventDeduplication.md)
+    - [Method](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/Method.md)
+    - [Time Constraint](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Options/TimeConstraint.md)
+- [Hypergraph](Documentation/SymbolsAndFunctions/Hypergraph.md)
+- [HypergraphPlot](Documentation/SymbolsAndFunctions/HypergraphPlot.md)
+- [RulePlot of WolframModel](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
+- Utility Functions
+  - [CausalDensityDimension](Documentation/SymbolsAndFunctions/UtilityFunctions/CausalDensityDimension.md)
+  - [AcyclicGraphTake](Documentation/SymbolsAndFunctions/UtilityFunctions/AcyclicGraphTake.md)
+  - [IndexHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/IndexHypergraph.md)
+  - [IsomorphicHypergraphQ](Documentation/SymbolsAndFunctions/UtilityFunctions/IsomorphicHypergraphQ.md)
+  - [HypergraphToGraph](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphToGraph.md)
+  - [RandomHypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/RandomHypergraph.md)
+  - [Subhypergraph](Documentation/SymbolsAndFunctions/UtilityFunctions/Subhypergraph.md)
+  - [WolframModelRuleValue](Documentation/SymbolsAndFunctions/UtilityFunctions/WolframModelRuleValue.md)
+  - [GeneralizedGridGraph](Documentation/SymbolsAndFunctions/UtilityFunctions/GeneralizedGridGraph.md)
+  - [HypergraphAutomorphismGroup](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphAutomorphismGroup.md)
+  - [HypergraphUnifications](Documentation/SymbolsAndFunctions/UtilityFunctions/HypergraphUnifications.md)
+  - [SetReplaceStyleData](Documentation/SymbolsAndFunctions/UtilityFunctions/SetReplaceStyleData.md)
+  - [Build Data](Documentation/SymbolsAndFunctions/UtilityFunctions/BuildData.md)
 
 # Physics
 
 A hypothesis is that spacetime at small scales is a network, and the fundamental law of physics is a system similar to
 the one this package implements.
 
-A slightly different version of this system was first introduced in *Stephen Wolfram*'
+A slightly different version of this system was first introduced in _Stephen Wolfram_'
 s [A New Kind Of Science](https://www.wolframscience.com/nks/chap-9--fundamental-physics/).
 
 # Acknowledgements
 
-In additional to commit authors and reviewers, *Stephen Wolfram* has contributed to the API design of some functions,
-and *Jeremy Davis* has contributed to the visual style
+In additional to commit authors and reviewers, _Stephen Wolfram_ has contributed to the API design of some functions,
+and _Jeremy Davis_ has contributed to the visual style
 of [`HypergraphPlot`](Documentation/SymbolsAndFunctions/HypergraphPlot.md)
 , [`RulePlot`](Documentation/SymbolsAndFunctions/RulePlotOfWolframModel.md)
 and [`"CausalGraph"`](Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
