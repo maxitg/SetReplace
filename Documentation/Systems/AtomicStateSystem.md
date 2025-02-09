@@ -11,7 +11,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/AtomicStateSystemExample.png"
      width="858.6"
-     alt="Out[] = ... 0 -> Rule 1 -> 1, 0 -> Rule 2 -> -1, 1 -> Rule 1 -> 2, <<26>>, -3 -> Rule 2 -> -4 ...">
+     alt="Out[] = Graph[... 0 -> Rule 1 -> 1, 0 -> Rule 2 -> -1, 1 -> Rule 1 -> 2, <<26>>, -3 -> Rule 2 -> -4 ...]">
 
 Note that spacelike separation is not possible in the `AtomicStateSystem`. As a result, branching due to overlaps of
 different subsets of input tokens cannot occur. And, since events cannot produce branchlike-separated outputs and there

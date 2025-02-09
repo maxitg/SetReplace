@@ -28,7 +28,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemExample.png"
      width="444.6"
-     alt="Out[] = ... {1, 2} -> {3 (* gen 1 *)}, {3 (* init *), 4} -> {7}, {3 (* gen 1 *), 7} -> {10} ...">
+     alt="Out[] = Graph[... {1, 2} -> {3 (* gen 1 *)}, {3 (* init *), 4} -> {7}, {3 (* gen 1 *), 7} -> {10} ...]">
 
 We can also use a more general [`GenerateMultihistory`](GenerateMultihistory.md) and specify
 [`MaxDestroyerEvents`](MaxDestroyerEvents.md) manually.
@@ -42,13 +42,13 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemPartialMultihistory.png"
      width="478.2"
-     alt="Out[] = ...
+     alt="Out[] = Graph[...
        {1, 2} -> {3 (* gen 1 *)},
        {1, 3 (* init *)} -> {4 (* gen 1 *)},
        {2, 3 (* init *)} -> {5},
        {3 (* gen 1 *), 4 (* init *)} -> {7},
        {4 (* init *), 5} -> {9}
-     ...">
+     ...]">
 
 The same generators support multiple systems. In addition to
 [`MultisetSubstitutionSystem`](/Documentation/Systems/MultisetSubstitutionSystem.md), other examples include

@@ -24,7 +24,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemExample.png"
      width="444.6"
-     alt="Out[] = ... {1, 2} -> {3 (* gen 1 *)}, {3 (* init *), 4} -> {7}, {3 (* gen 1 *), 7} -> {10} ...">
+     alt="Out[] = Graph[... {1, 2} -> {3 (* gen 1 *)}, {3 (* init *), 4} -> {7}, {3 (* gen 1 *), 7} -> {10} ...]">
 
 Arbitrary Wolfram Language patterns are supported including
 [conditions](https://reference.wolfram.com/language/ref/Condition.html) such as `{a_ /; a > 0, b_}` and
@@ -42,10 +42,10 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MultisetSubstitutionSystemConditionsAndSequences.png"
      width="478.2"
-     alt="Out[] = ...
+     alt="Out[] = Graph[...
        generation 1: {1, 2} -> {3}, {1, 4} -> {5}, {2, 3} -> {5}, {3, 4} -> {7}, {1, 2, 4} -> {7},
        generation 2: {2, 5} -> {7}, {3 (* gen 1 *), 4} -> {7}
-     ...">
+     ...]">
 
 Note, however, that the system cannot recognize if the code on the right-hand side is nondeterministic, so only the
 first output will be used for each assignment of pattern variables.
