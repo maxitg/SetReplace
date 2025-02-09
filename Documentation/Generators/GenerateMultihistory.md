@@ -23,4 +23,6 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/GenerateMultihistoryExample.png"
      width="478.2"
-     alt="Out[] = ... {1, 2} -> {3 (* token 5 *)}, {2, 1} -> {3 (* token 6 *)}, {1, 3 (* init *)} -> {4}, <<7>> ...">
+     alt="Out[] = Graph[...
+       {1, 2} -> {3 (* token 5 *)}, {2, 1} -> {3 (* token 6 *)}, {1, 3 (* init *)} -> {4}, <<7>>
+     ...]">

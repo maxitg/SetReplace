@@ -7,5 +7,5 @@ specification usually contains its version:
      width="628.2"
      alt="
        In[] := SetReplaceObjectType @ Multihistory[... MultisetSubstitutionSystem v0 ...]
-       Out[] = [... MultisetSubstitutionSystem v0 ...]
+       Out[] = SetReplaceType[... MultisetSubstitutionSystem v0 ...]
      ">

@@ -14,7 +14,9 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MinEventInputs0.png"
      width="367.8"
-     alt="Out[] = ... {} -> {0}, {1 (* init *)} -> {1 (* gen 1 *)}, {2 (* init *)} -> {2 (* gen 1 *)}, <<7>> ...">
+     alt="Out[] = Graph[...
+       {} -> {0}, {1 (* init *)} -> {1 (* gen 1 *)}, {2 (* init *)} -> {2 (* gen 1 *)}, <<7>>
+     ...]">
 
 and `MinEventInputs -> 2`:
 
@@ -27,4 +29,4 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MinEventInputs2.png"
      width="478.2"
-     alt="Out[] = ... {1, 2} -> {3 (* 1 + 2 *)}, {2, 1} -> {3 (* 2 + 1 *)}, {1, 3 (* init *)} -> {4}, <<7>> ...">
+     alt="Out[] = Graph[... {1, 2} -> {3 (* 1 + 2 *)}, {2, 1} -> {3 (* 2 + 1 *)}, {1, 3 (* init *)} -> {4}, <<7>> ...]">

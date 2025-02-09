@@ -9,5 +9,7 @@ In[] := $SetReplaceTypes
 <img src="/Documentation/Images/$SetReplaceTypes.png"
      width="791.4"
      alt="Out[] = {
-       [... AtomicStateSystem v0 ...], [... MultisetSubstitutionSystem v0 ...], [... WolframModelEvolutionObject v2 ...]
+       SetReplaceType[... AtomicStateSystem v0 ...],
+       SetReplaceType[... MultisetSubstitutionSystem v0 ...],
+       SetReplaceType[... WolframModelEvolutionObject v2 ...]
      }">

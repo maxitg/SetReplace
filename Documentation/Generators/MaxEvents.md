@@ -11,6 +11,6 @@ In[] := #["ExpressionsEventsGraph"] & @
 
 <img src="/Documentation/Images/MaxEventsExample.png"
      width="478.2"
-     alt="Out[] = ... token-event graph with 9 events ...">
+     alt="Out[] = Graph[... token-event graph with 9 events ...]">
 
 Compare to [`MaxGeneration`](MaxGeneration.md), which controls the depth of the evaluation instead.
