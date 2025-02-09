@@ -8,7 +8,12 @@
 In[] := $SetReplaceTypeGraph
 ```
 
-<img src="/Documentation/Images/$SetReplaceTypeGraph.png" width="787.8">
+<img src="/Documentation/Images/$SetReplaceTypeGraph.png"
+     width="787.8"
+     alt="Out[] = Graph[...
+       AtomicStateSystem v0 -> MultisetSubstitutionSystem v0,
+       MultisetSubstitutionSystem v0 -> WolframModelEvolutionObject v2
+     ...]">
 
 It is a [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) representation of a directed hypergraph with
 types and properties as vertices and implementations of translations and properties as edges.
