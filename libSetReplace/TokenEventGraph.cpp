@@ -88,7 +88,7 @@ class TokenEventGraph::Implementation {
     return SeparationType::Spacelike;
   }
 
-  uint64_t destroyerEventsCount(const TokenID id) { return tokenIDsToDestroyerEventsCount_[id]; }
+  uint64_t destroyerEventsCount(const TokenID id) const { return tokenIDsToDestroyerEventsCount_[id]; }
 
  private:
   std::vector<TokenID> createTokens(const EventID creatorEvent, const int count) {
