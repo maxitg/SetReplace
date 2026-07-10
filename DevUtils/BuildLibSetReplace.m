@@ -175,7 +175,8 @@ $compileOptions = Switch[$OperatingSystem,
   "Windows",
     {"/std:c++17 /O3", "/EHsc"},
   "MacOSX",
-    Join[{"-std=c++17 -O3"}, $warningsFlags, {"-mmacosx-version-min=10.12"}], (* for std::shared_mutex support *)
+    (* 11.0 is the oldest deployment target supported by current Xcode SDKs (and covers std::shared_mutex) *)
+    Join[{"-std=c++17 -O3"}, $warningsFlags, {"-mmacosx-version-min=11.0"}],
   "Unix",
     Join[{"-std=c++17 -O3"}, $warningsFlags]
 ];
