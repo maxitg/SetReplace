@@ -391,6 +391,7 @@ returns values for all properties even if terminated due to time constraint), an
 * [Events and States](Properties/EventsAndStates.md)
 * [Creator and Destroyer Events](Properties/CreatorAndDestroyerEvents.md)
 * [Causal Graphs](Properties/CausalGraphs.md)
+* [Token Deduplication](Properties/TokenDeduplication.md)
 * [Expression Separations](Properties/ExpressionSeparations.md)
 * [MultiwayQ](Properties/MultiwayQ.md)
 * [Rule Indices for Events](Properties/RuleIndicesForEvents.md)

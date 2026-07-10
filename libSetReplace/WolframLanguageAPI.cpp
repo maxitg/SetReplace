@@ -1,5 +1,6 @@
 #include "WolframLanguageAPI.hpp"
 
+#include <algorithm>
 // NOLINTNEXTLINE(build/c++11)
 #include <chrono>  // <chrono> is banned in Chromium, so cpplint flags it https://stackoverflow.com/a/33653404/905496
 #include <limits>
@@ -11,6 +12,7 @@
 #include <vector>
 
 #include "HypergraphSubstitutionSystem.hpp"
+#include "TokenDeduplication.hpp"
 
 namespace SetReplace {
 namespace {
@@ -382,6 +384,95 @@ int hypergraphSubstitutionSystemMaxCompleteGeneration(WolframLibraryData libData
   return LIBRARY_NO_ERROR;
 }
 
+// Decodes events in the format {eventCount, <rule ID, input count, inputs..., output count, outputs...>...}.
+std::vector<Event> getEvents(WolframLibraryData libData, MTensor eventsTensor) {
+  const mint tensorLength = libData->MTensor_getFlattenedLength(eventsTensor);
+  const mint* tensorData = libData->MTensor_getIntegerData(eventsTensor);
+  mint readIndex = 0;
+  const auto getEventsData = [&tensorData, &tensorLength, &readIndex]() -> mint {
+    return getData(tensorData, tensorLength, readIndex++);
+  };
+  const auto getTokenList = [&getEventsData, &tensorLength]() -> std::vector<TokenID> {
+    const mint count = getEventsData();
+    if (count < 0 || count > tensorLength) throw LIBRARY_FUNCTION_ERROR;
+    std::vector<TokenID> tokens(count);
+    for (auto& token : tokens) token = static_cast<TokenID>(getEventsData());
+    return tokens;
+  };
+
+  const mint eventsCount = getEventsData();
+  if (eventsCount < 0 || eventsCount > tensorLength) throw LIBRARY_FUNCTION_ERROR;
+  std::vector<Event> events;
+  events.reserve(eventsCount);
+  for (mint eventIndex = 0; eventIndex < eventsCount; ++eventIndex) {
+    const auto rule = static_cast<RuleID>(getEventsData());
+    auto inputTokens = getTokenList();
+    auto outputTokens = getTokenList();
+    // Generations are not passed in because deduplicateTokens recomputes them from the event structure.
+    events.push_back(Event{rule, std::move(inputTokens), std::move(outputTokens), 0});
+  }
+  return events;
+}
+
+MTensor putDeduplicationClasses(const TokenDeduplicationResult& classes, WolframLibraryData libData) {
+  const size_t tensorLength =
+      3 + classes.tokenClasses.size() + classes.eventClasses.size() + 2 * classes.atomClasses.size();
+
+  const mint dimensions[1] = {static_cast<mint>(tensorLength)};
+  MTensor output;
+  libData->MTensor_new(MType_Integer, 1, dimensions, &output);
+
+  mint writeIndex = 0;
+  mint position[1];
+  const auto appendToTensor = [libData, &writeIndex, &position, &output](const std::vector<mint>& numbers) {
+    for (const auto number : numbers) {
+      position[0] = ++writeIndex;
+      libData->MTensor_setInteger(output, position, number);
+    }
+  };
+
+  appendToTensor({static_cast<mint>(classes.tokenClasses.size())});
+  appendToTensor(std::vector<mint>(classes.tokenClasses.begin(), classes.tokenClasses.end()));
+  appendToTensor({static_cast<mint>(classes.eventClasses.size())});
+  appendToTensor(std::vector<mint>(classes.eventClasses.begin(), classes.eventClasses.end()));
+  appendToTensor({static_cast<mint>(classes.atomClasses.size())});
+  std::vector<std::pair<Atom, Atom>> sortedAtomClasses(classes.atomClasses.begin(), classes.atomClasses.end());
+  std::sort(sortedAtomClasses.begin(), sortedAtomClasses.end());
+  for (const auto& atomAndRepresentative : sortedAtomClasses) {
+    appendToTensor({static_cast<mint>(atomAndRepresentative.first), static_cast<mint>(atomAndRepresentative.second)});
+  }
+
+  return output;
+}
+
+int tokenDeduplicationClasses(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
+  if (argc != 4) {
+    return LIBRARY_FUNCTION_ERROR;
+  }
+
+  std::vector<AtomsVector> tokens;
+  std::vector<Event> events;
+  Generation completeGenerations;
+  Atom largestNamedAtom;
+  try {
+    tokens = getHypergraph(libData, MArgument_getMTensor(argv[0]));
+    events = getEvents(libData, MArgument_getMTensor(argv[1]));
+    completeGenerations = static_cast<Generation>(MArgument_getInteger(argv[2]));
+    largestNamedAtom = static_cast<Atom>(MArgument_getInteger(argv[3]));
+  } catch (...) {
+    return LIBRARY_FUNCTION_ERROR;
+  }
+
+  try {
+    const auto classes = deduplicateTokens(tokens, events, completeGenerations, largestNamedAtom, shouldAbort(libData));
+    MArgument_setMTensor(result, putDeduplicationClasses(classes, libData));
+  } catch (...) {
+    return LIBRARY_FUNCTION_ERROR;
+  }
+
+  return LIBRARY_NO_ERROR;
+}
+
 int hypergraphSubstitutionSystemTerminationReason([[maybe_unused]] WolframLibraryData,
                                                   mint argc,
                                                   MArgument* argv,
@@ -457,4 +548,8 @@ EXTERN_C int hypergraphSubstitutionSystemTerminationReason(WolframLibraryData li
                                                            MArgument* argv,
                                                            MArgument result) {
   return SetReplace::hypergraphSubstitutionSystemTerminationReason(libData, argc, argv, result);
+}
+
+EXTERN_C int tokenDeduplicationClasses(WolframLibraryData libData, mint argc, MArgument* argv, MArgument result) {
+  return SetReplace::tokenDeduplicationClasses(libData, argc, argv, result);
 }

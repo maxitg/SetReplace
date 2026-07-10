@@ -58,6 +58,7 @@ set(libSetReplace_headers
     Parallelism.hpp
     IDTypes.hpp
     Rule.hpp
+    TokenDeduplication.hpp
     TokenEventGraph.hpp
     AtomsIndex.hpp
     HypergraphMatcher.hpp
@@ -66,6 +67,7 @@ set(libSetReplace_headers
     )
 set(libSetReplace_sources
     Parallelism.cpp
+    TokenDeduplication.cpp
     TokenEventGraph.cpp
     AtomsIndex.cpp
     HypergraphMatcher.cpp

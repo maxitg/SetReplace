@@ -120,6 +120,8 @@ $propertyArgumentCounts = Join[
     "AllEventsEdgesCount" -> {0, 0},
     "AllEventsGenerationsList" -> {0, 0},
     "ExpressionsEventsGraph" -> {0, Infinity},
+    "DeduplicatedExpressionsEventsGraph" -> {0, Infinity},
+    "TokenDeduplicationClasses" -> {0, 0},
     "CausalGraph" -> {0, Infinity},
     "LayeredCausalGraph" -> {0, Infinity},
     "TerminationReason" -> {0, 0},
@@ -269,6 +271,7 @@ $expressionsEventsGraphOptions = Join[
 
 $propertyOptions = <|
   "ExpressionsEventsGraph" -> $expressionsEventsGraphOptions,
+  "DeduplicatedExpressionsEventsGraph" -> $expressionsEventsGraphOptions,
   "CausalGraph" -> $causalGraphOptions,
   "LayeredCausalGraph" -> $layeredCausalGraphOptions,
   "StatesPlotsList" -> Options[HypergraphPlot],
@@ -670,6 +673,96 @@ propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
           2 ("TotalGenerationsCount" - "AllEventsGenerationsList") + 1,
           2 ("TotalGenerationsCount" - "EdgeGenerationsList")} /.
             p_String :> propertyEvaluate[True, boundary][obj, p]]}],
+    Background -> Replace[
+      OptionValue[allOptionValues, Background], Automatic :> style[$lightTheme][$tokenEventGraphBackground]],
+    allOptionValues]
+];
+
+(* TokenDeduplicationClasses *)
+
+propertyEvaluate[True, includeBoundaryEventsPattern][
+    obj : WolframModelEvolutionObject[_ ? evolutionDataQ], "TokenDeduplicationClasses"] :=
+  tokenDeduplicationClasses[obj];
+
+(* DeduplicatedExpressionsEventsGraph *)
+(* Same as ExpressionsEventsGraph, but expressions and events that have provably isomorphic futures are merged into
+   single vertices. Merging works both between branches and in time, so periodic evolutions produce cycles, and the
+   layered layout is not applicable. *)
+
+propertyEvaluate[True, boundary : includeBoundaryEventsPattern][
+      obj : WolframModelEvolutionObject[_ ? evolutionDataQ],
+      property : "DeduplicatedExpressionsEventsGraph",
+      o : $nonEmptyOptionsPattern] /;
+        (Complement[{o}, FilterRules[{o}, $propertyOptions[property]]] == {}) := ModuleScope[
+  classes = tokenDeduplicationClasses[obj];
+  expressionClasses = classes["ExpressionClasses"];
+  eventClasses = classes["EventClasses"];
+  atomClasses = classes["AtomClasses"];
+  mapVertex = Replace[{
+    {"Expression", index_Integer} :> {"Expression", expressionClasses[[index]]},
+    (* eventClasses starts with the initial event, which has index 0 *)
+    {"Event", index_Integer} :> {"Event", eventClasses[[index + 1]]},
+    vertex_ :> vertex}];
+  {eventsToOutputs, expressionsToDestroyers} = eventsExpressionsRelations[obj, boundary];
+  graphVertices = DeleteDuplicates[mapVertex /@ Join[
+    {"Event", #} & /@ Keys[eventsToOutputs],
+    {"Expression", #} & /@ Keys[expressionsToDestroyers]]];
+  (* Edges are generated from a single representative event per event class so that edge multiplicities match event
+     arities: an event consuming multiple tokens of the same class keeps an input edge per token (its in-degree is
+     always the number of rule inputs), while parallel copies of merged events do not add extra edges. *)
+  eventsToInputs = Association[# -> {} & /@ Keys[eventsToOutputs]];
+  KeyValueMap[
+    Function[{expression, destroyers},
+      Scan[If[KeyExistsQ[eventsToInputs, #], AppendTo[eventsToInputs[#], expression]] &, destroyers]],
+    expressionsToDestroyers];
+  representativeEvents = Select[Keys[eventsToOutputs], mapVertex[{"Event", #}] === {"Event", #} &];
+  graphEdges = Catenate[Function[event, Join[
+      DirectedEdge[mapVertex[{"Expression", #}], {"Event", event}] & /@ Sort[eventsToInputs[event]],
+      DirectedEdge[{"Event", event}, mapVertex[{"Expression", #}]] & /@ eventsToOutputs[event]]] /@
+    representativeEvents];
+
+  allOptionValues = Flatten[Join[{o}, filterGraphProperties[$propertyOptions[property]]]];
+
+  vertexLabelsOptionValue = OptionValue[allOptionValues, VertexLabels];
+  automaticVertexLabelsPattern = Automatic | Placed[Automatic, ___];
+  If[MatchQ[vertexLabelsOptionValue, automaticVertexLabelsPattern],
+    rules = rulesList[propertyEvaluate[True, None][obj, "Rules"]];
+    eventRuleIDs = propertyEvaluate[True, None][obj, "AllEventsRuleIndices"];
+    allExpressions = propertyEvaluate[True, None][obj, "AllEventsEdgesList"];
+    placementFunction = Replace[vertexLabelsOptionValue, {
+      Automatic -> Identity,
+      Placed[Automatic, args___] :> (Placed[#, args] &)
+    }];
+  ];
+
+  Graph[
+    graphVertices,
+    graphEdges,
+    VertexStyle -> Replace[
+      OptionValue[allOptionValues, VertexStyle],
+      Automatic :> Join[
+        {{"Event", _} -> style[$lightTheme][$eventVertexStyle],
+         {"Expression", _} -> style[$lightTheme][$tokenVertexStyle]},
+        Cases[
+          graphVertices,
+          v : {"Event", e : 0 | Infinity} :> v -> style[$lightTheme][Switch[e,
+            0, $initialEventVertexStyle,
+            Infinity, $finalEventVertexStyle]],
+          {1}]]],
+    EdgeStyle -> Replace[
+      OptionValue[allOptionValues, EdgeStyle], Automatic :> style[$lightTheme][$causalEdgeStyle]],
+    VertexLabels -> Replace[
+      OptionValue[allOptionValues, VertexLabels], {
+        automaticVertexLabelsPattern :> Replace[graphVertices, {
+          v : {"Event", 0} :> v -> placementFunction["Initial event"],
+          v : {"Event", Infinity} :> v -> placementFunction["Final event"],
+          v : {"Event", idx_} :> v ->
+            If[Length[rules] > 1, placementFunction["Rule " <> ToString[eventRuleIDs[[idx]]]], None],
+          (* atoms are renamed to their class representatives, so the contents of the representative expression
+             describe the whole class *)
+          v : {"Expression", idx_} :> v ->
+            placementFunction[ToString[Lookup[atomClasses, #, #] & /@ allExpressions[[idx]]]]}, {1}],
+        "Index" -> Placed["Name", Automatic, Last]}],
     Background -> Replace[
       OptionValue[allOptionValues, Background], Automatic :> style[$lightTheme][$tokenEventGraphBackground]],
     allOptionValues]

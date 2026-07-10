@@ -55,4 +55,14 @@ EXTERN_C DLLEXPORT int hypergraphSubstitutionSystemTerminationReason(WolframLibr
                                                                      MArgument* argv,
                                                                      MArgument result);
 
+/** @brief Computes equivalence classes of tokens, events and atoms that can be deduplicated without changing possible
+ * evolution. Takes tokens and events of an existing evolution rather than a system pointer, so it can be applied to
+ * stored evolution objects.
+ * @details Is abortable, in which case returns LIBRARY_FUNCTION_ERROR.
+ */
+EXTERN_C DLLEXPORT int tokenDeduplicationClasses(WolframLibraryData libData,
+                                                 mint argc,
+                                                 MArgument* argv,
+                                                 MArgument result);
+
 #endif  // LIBSETREPLACE_WOLFRAMLANGUAGEAPI_HPP_
