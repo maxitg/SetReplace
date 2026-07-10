@@ -139,6 +139,31 @@ TEST(TokenDeduplication, identityRuleQuotientIsGenerationIndependent) {
   }
 }
 
+// When several destroyer events of the same generation use a token at the same input index, the correct
+// correspondence cannot be determined locally. The trial enumerates the possible alignments, so the merge succeeds
+// even though the heuristic order pairs the events incorrectly at first (the copy's destroyers are created in the
+// opposite order, and the sorting key cannot see the difference between the partners).
+TEST(TokenDeduplication, ambiguousDestroyerAlignmentIsSearched) {
+  const std::vector<AtomsVector> tokens = {
+      {1}, {2, 2}, {3, 4}, {5, 5}, {6, 7}, {1}, {20, 20}, {30, 40}, {60, 70}, {50, 50}, {1}, {80, 80}, {90, 91}};
+  const std::vector<Event> events = {{initialConditionRule, {}, {0, 1, 2}, 0},
+                                     {0, {0, 1}, {3}, 1},           // consumes X with the repeated-atom partner
+                                     {0, {0, 2}, {4}, 1},           // consumes X with the distinct-atom partner
+                                     {1, {0, 1, 2}, {5, 6, 7}, 1},  // copies the entire state
+                                     // the copy's destroyers are created in the opposite order
+                                     {0, {5, 7}, {8}, 2},
+                                     {0, {5, 6}, {9}, 2},
+                                     {1, {5, 6, 7}, {10, 11, 12}, 2}};
+
+  const auto result = deduplicateTokens(tokens, events, 2, 0, doNotAbort);
+
+  EXPECT_EQ(result.tokenClasses, (std::vector<TokenID>{0, 1, 2, 3, 4, 0, 1, 2, 4, 3, 0, 1, 2}));
+  EXPECT_EQ(result.eventClasses, (std::vector<EventID>{0, 1, 2, 3, 2, 1, 3}));
+  EXPECT_EQ(result.atomClasses,
+            (std::unordered_map<Atom, Atom>{
+                {20, 2}, {80, 2}, {30, 3}, {90, 3}, {40, 4}, {91, 4}, {50, 5}, {60, 6}, {70, 7}}));
+}
+
 // Two independent chains with different atoms evolve identically, but their atoms are spacelike separated, so the
 // chains must not be merged with each other. Each chain still collapses into its own self-loop.
 TEST(TokenDeduplication, spacelikeAtomsPreventMerging) {

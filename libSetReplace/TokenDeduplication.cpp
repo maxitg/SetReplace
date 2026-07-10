@@ -168,9 +168,7 @@ class Deduplicator {
         if (tokenClasses_->root(second) != second) continue;
         if (candidatePhase(first, second) != phase) continue;
         if (!quicklyCompatible(first, second)) continue;
-        Trial trial(this, first, second);
-        if (trial.run()) {
-          trial.commit();
+        if (tryMergeWithAlignmentSearch(first, second)) {
           if (phase != 0) return true;
           mergedDuringPass = true;
         }
@@ -180,14 +178,53 @@ class Deduplicator {
   }
 
  private:
+  // Runs trials for the pair, enumerating the possible alignments of destroyer events that cannot be distinguished
+  // locally (same token, same input index, same generation). A single trial commits to one alignment per such group;
+  // enumerating all combinations across restarts makes the trial a complete isomorphism search rather than a greedy
+  // heuristic, so an unfortunate local choice can no longer reject a valid merge. The first attempt (all choices 0)
+  // reproduces the heuristic order, so unambiguous merges cost a single trial.
+  bool tryMergeWithAlignmentSearch(const TokenID first, const TokenID second) {
+    constexpr size_t maxAttempts = 64;
+    std::vector<size_t> choices;
+    for (size_t attempt = 0; attempt < maxAttempts; ++attempt) {
+      std::vector<size_t> limits;
+      Trial trial(this, first, second, &choices, &limits);
+      if (trial.run()) {
+        trial.commit();
+        return true;
+      }
+      if (limits.empty()) return false;  // the failure did not involve any ambiguous alignments
+      // Advance to the next combination of alignment choices (an odometer over the groups this attempt encountered).
+      choices.resize(limits.size(), 0);
+      bool advanced = false;
+      size_t position = limits.size();
+      while (position > 0 && !advanced) {
+        --position;
+        if (++choices[position] < limits[position]) {
+          advanced = true;
+        } else {
+          choices[position] = 0;
+        }
+      }
+      if (!advanced) return false;  // all combinations exhausted
+    }
+    return false;
+  }
+
   /** @brief A single attempt to merge a pair of token classes, and everything that merge implies.
    */
   class Trial {
    public:
-    Trial(Deduplicator* owner, const TokenID rootFirst, const TokenID rootSecond)
+    Trial(Deduplicator* owner,
+          const TokenID rootFirst,
+          const TokenID rootSecond,
+          const std::vector<size_t>* alignmentChoices,
+          std::vector<size_t>* alignmentGroupLimits)
         : owner_(owner),
           rootFirst_(rootFirst),
           rootSecond_(rootSecond),
+          alignmentChoices_(alignmentChoices),
+          alignmentGroupLimits_(alignmentGroupLimits),
           tokens_(owner->tokenClasses_.get()),
           events_(owner->eventClasses_.get()),
           atoms_(owner->atomClasses_.get()) {}
@@ -393,9 +430,9 @@ class Deduplicator {
     bool pairDestroyerBucket(std::vector<EventID>* eventsFirst,
                              std::vector<EventID>* eventsSecond,
                              const Generation shift) {
-      // There is no way to cheaply determine which events correspond to each other if multiple destroyer events of
-      // the same generation use the token at the same input index. Sorting by a heuristic key pairs them correctly in
-      // common cases; incorrectly paired events fail the trial (a false negative rather than an incorrect merge).
+      // Events of the same generation using the token at the same input index cannot be distinguished locally: they
+      // are paired in a heuristic order first, and if the trial fails, other alignments are enumerated through
+      // nextAlignmentChoice restarts.
       sortDestroyerBucket(eventsFirst);
       sortDestroyerBucket(eventsSecond);
       size_t indexFirst = 0;
@@ -413,12 +450,65 @@ class Deduplicator {
           if (generationSecond - shift <= owner_->completeGenerations_) return false;
           ++indexSecond;
         } else {
-          eventPairQueue_.push_back({(*eventsFirst)[indexFirst], (*eventsSecond)[indexSecond]});
-          ++indexFirst;
-          ++indexSecond;
+          // Blocks of aligned generations on both sides.
+          size_t endFirst = indexFirst;
+          while (endFirst < eventsFirst->size() &&
+                 owner_->eventGeneration((*eventsFirst)[endFirst]) + shift == generationSecond) {
+            ++endFirst;
+          }
+          size_t endSecond = indexSecond;
+          while (endSecond < eventsSecond->size() &&
+                 owner_->eventGeneration((*eventsSecond)[endSecond]) == generationSecond) {
+            ++endSecond;
+          }
+          const size_t blockFirst = endFirst - indexFirst;
+          const size_t blockSecond = endSecond - indexSecond;
+          std::vector<EventID> secondBlock(eventsSecond->begin() + indexSecond, eventsSecond->begin() + endSecond);
+          constexpr size_t maxSearchedBlockSize = 4;
+          if (blockFirst == blockSecond && blockSecond > 1 && blockSecond <= maxSearchedBlockSize) {
+            permuteBlock(&secondBlock, nextAlignmentChoice(factorial(blockSecond)));
+          }
+          for (size_t pairIndex = 0; pairIndex < std::min(blockFirst, blockSecond); ++pairIndex) {
+            eventPairQueue_.push_back({(*eventsFirst)[indexFirst + pairIndex], secondBlock[pairIndex]});
+          }
+          if (blockFirst > blockSecond && generationSecond <= owner_->completeGenerations_) {
+            return false;  // required but missing
+          }
+          if (blockSecond > blockFirst && generationSecond - shift <= owner_->completeGenerations_) {
+            return false;
+          }
+          indexFirst = endFirst;
+          indexSecond = endSecond;
         }
       }
       return true;
+    }
+
+    // Returns the alignment to use for the next ambiguous group, and records the group so that
+    // tryMergeWithAlignmentSearch can enumerate all combinations across trial restarts.
+    size_t nextAlignmentChoice(const size_t permutationCount) {
+      const auto groupIndex = alignmentGroupLimits_->size();
+      alignmentGroupLimits_->push_back(permutationCount);
+      return groupIndex < alignmentChoices_->size() ? (*alignmentChoices_)[groupIndex] % permutationCount : 0;
+    }
+
+    static size_t factorial(const size_t value) {
+      size_t result = 1;
+      for (size_t factor = 2; factor <= value; ++factor) result *= factor;
+      return result;
+    }
+
+    // Applies the permutation with the given lexicographic index (0 is the identity, preserving the heuristic order).
+    static void permuteBlock(std::vector<EventID>* block, size_t permutationIndex) {
+      std::vector<EventID> remaining = *block;
+      block->clear();
+      while (!remaining.empty()) {
+        const size_t subpermutationCount = factorial(remaining.size() - 1);
+        const size_t position = permutationIndex / subpermutationCount;
+        permutationIndex %= subpermutationCount;
+        block->push_back(remaining[position]);
+        remaining.erase(remaining.begin() + static_cast<int64_t>(position));
+      }
     }
 
     void sortDestroyerBucket(std::vector<EventID>* bucket) const {
@@ -534,6 +624,8 @@ class Deduplicator {
     Deduplicator* owner_;
     const TokenID rootFirst_;
     const TokenID rootSecond_;
+    const std::vector<size_t>* alignmentChoices_;
+    std::vector<size_t>* alignmentGroupLimits_;
     TrialUnionFind tokens_;
     TrialUnionFind events_;
     TrialUnionFind atoms_;
