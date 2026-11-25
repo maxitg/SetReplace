@@ -23,7 +23,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 <img src="/Documentation/Images/GenerateSingleHistoryExample.png"
      width="478.2"
      alt="Out[] = Graph[...
-       token-event graph where all tokens have out degrees less or equal than 1:
+       token-event graph where all tokens have out degrees less than or equal to 1:
        {1, 2 (* init *)} -> {3, -1, 2 (* gen 1 *)},
        {3, -1} -> {2 (* gen 2 *), 4 (* gen 2 *), -3},
        {2 (* gen 1 *), 2 (* gen 2 *)} -> {4 (* gen 3 sum *), 0, 4 (* gen 3 product *)},

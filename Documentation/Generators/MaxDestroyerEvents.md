@@ -12,7 +12,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
 
 <img src="/Documentation/Images/MaxDestroyerEvents1.png"
      width="322.2"
-     alt="Out[] = Graph[... {1, 2} -> {3 (* gen 1 *)}, {3 (* init *), 3 (* gen 1 *)} -> 6 ...]">
+     alt="Out[] = Graph[... {1, 2} -> {3 (* gen 1 *)}, {3 (* init *), 3 (* gen 1 *)} -> {6} ...]">
 
 If unset (which defaults to [`Infinity`](https://reference.wolfram.com/language/ref/Infinity.html)), it will generate a
 full multihistory object subject to other selection and stopping parameters:
