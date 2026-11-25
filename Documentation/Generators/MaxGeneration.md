@@ -22,7 +22,9 @@ In[] := #["ExpressionsEventsGraph",
 <img src="/Documentation/Images/TokenEventGraphGenerations.png"
      width="444.6"
      alt="Out[] = Graph[...
-       token-event graph with 9 tokens arranged in 3 layers, and 3 events in 2 layers in between
+       generation 0: 3 tokens,
+       generation 1: 1 event and 2 tokens,
+       generation 2: 2 events and 4 tokens
      ...]">
 
 Restricting the number of generations to one will prevent the last two events from occurring. Note, however, that
@@ -36,7 +38,10 @@ In[] := #["ExpressionsEventsGraph"] & @ SetReplaceTypeConvert[WolframModelEvolut
 
 <img src="/Documentation/Images/MaxGeneration.png"
      width="478.2"
-     alt="Out[] = Graph[... token-event graph with 2 layers of tokens and a single layer of events ...]">
+     alt="Out[] = Graph[...
+       generation 0: 3 tokens, one of which is never destroyed,
+       generation 1: 2 events and 4 tokens
+     ...]">
 
 `MaxGeneration` is an event selection parameter, not a stopping condition. That is, the evolution of the system won't
 stop if a match (tentative event) with a generation greater than the constraint is encountered. Instead, it will ignore
