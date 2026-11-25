@@ -141,7 +141,7 @@ jobs:
 
   macos-build:
     macos:
-      xcode: 16.2.0
+      xcode: "27.2"
 
     steps:
       - checkout
