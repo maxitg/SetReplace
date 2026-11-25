@@ -44,7 +44,7 @@ In[] := #["ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & 
      width="478.2"
      alt="Out[] = Graph[...
        generation 1: {1, 2} -> {3}, {1, 4} -> {5}, {2, 3} -> {5}, {3, 4} -> {7}, {1, 2, 4} -> {7},
-       generation 2: {2, 5} -> {7}, {3 (* gen 1 *), 4} -> {7}
+       generation 2: {2, 5 (* 1 + 4 *)} -> {7}, {3 (* gen 1 *), 4} -> {7}
      ...]">
 
 Note, however, that the system cannot recognize if the code on the right-hand side is nondeterministic, so only the
