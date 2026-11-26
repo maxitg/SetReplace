@@ -55,7 +55,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
      width="478"
      alt="Out[] = Graph[...
        A disk-shaped network of events with arrows spreading toward the rim.
-       Several pairs of events are joined by parallel arrows.
+       Several pairs of events are joined by multiple edges.
      ...]">
 
 **`"LayeredCausalGraph"`** generates the same graph but layers events generation-by-generation. For example, in our
