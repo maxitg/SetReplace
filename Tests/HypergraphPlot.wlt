@@ -7,34 +7,6 @@
       Global`checkGraphics[args___] := SetReplace`PackageScope`checkGraphics[args];
       Global`graphicsQ[args___] := SetReplace`PackageScope`graphicsQ[args];
 
-      Global`timedLargeGraph[events_] := Module[{stage, timedGraphPlot, edges, plot},
-        SetAttributes[stage, HoldRest];
-        stage[name_, body_] := Module[{seconds, result, cpu = TimeUsed[]},
-          Print["\n[HypergraphPlot/", events, "] starting ", name, "; time ", DateString["ISODateTime"]];
-          {seconds, result} = AbsoluteTiming[body];
-          Print["[HypergraphPlot/", events, "] finished ", name, "; wall seconds ", seconds,
-            "; kernel CPU seconds ", Round[TimeUsed[] - cpu, 0.001], "; memory bytes ", MemoryInUse[]];
-          result
-        ];
-        SetAttributes[timedGraphPlot, HoldAll];
-        timedGraphPlot[args___] := stage["GraphPlot", GraphPlot[args]];
-        With[{embedding = ToExpression[First[Names["SetReplace`*`graphEmbedding"]]]},
-          (* Restore the internal plotting definition even if the test times out or aborts. *)
-          Internal`InheritedBlock[{embedding},
-            DownValues[embedding] = DownValues[embedding] /. GraphPlot -> timedGraphPlot;
-            edges = stage["SetReplace", SetReplace[
-              {{0, 1}, {0, 2}, {0, 3}},
-              ToPatternRules[
-                {{0, 1}, {0, 2}, {0, 3}} ->
-                {{4, 5}, {5, 4}, {4, 6}, {6, 4},
-                  {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}],
-              events]];
-            plot = stage["HypergraphPlot (including GraphPlot)", HypergraphPlot[edges]];
-            stage["frontend graphicsQ", graphicsQ[plot]]
-          ]
-        ]
-      ];
-
       $edgeTypes = {"Ordered", "Cyclic"};
 
       $simpleHypergraphs = {
@@ -327,7 +299,15 @@
 
       (** Large graphs **)
 
-      VerificationTest[timedLargeGraph[#]] & /@ {10, 5000},
+      VerificationTest[
+        graphicsQ @ HypergraphPlot @ SetReplace[
+          {{0, 1}, {0, 2}, {0, 3}},
+          ToPatternRules[
+            {{0, 1}, {0, 2}, {0, 3}} ->
+            {{4, 5}, {5, 4}, {4, 6}, {6, 4},
+              {5, 6}, {6, 5}, {4, 1}, {5, 2}, {6, 3}}],
+          #]
+      ] & /@ {10, 5000},
 
       (* EdgeType *)
 
