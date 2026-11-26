@@ -33,6 +33,9 @@ Check[
   Exit[1];
 ];
 
+Print["Wolfram runtime: ", $Version, "; system ", $SystemID, "; processors ", $ProcessorCount];
+Print["Wolfram thread settings: ", SystemOptions["ParallelOptions"]];
+
 (* make it possible to disable parallelization, which for very short tests saves quite a lot of time. *)
 If[tryPopFlag["--disable-parallelization", "-dp"],
   $allowParallelization = False;
@@ -50,6 +53,8 @@ If[tryPopFlag["--disable-parallelization", "-dp"],
   LaunchKernels[];
   With[{entryPoint = $localSetReplaceEntryPoint}, ParallelEvaluate[Get[entryPoint]]];
 ];
+
+Print["Launched subkernels: ", Length[Kernels[]]];
 
 Needs["GeneralUtilities`"];
 

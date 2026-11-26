@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+./.circleci/printRuntime.sh
+
 if [ "$CIRCLE_NODE_INDEX" -eq 2 ]; then
   testsToRun=hypergraphMatching
 elif [ "$CIRCLE_NODE_INDEX" -eq 3 ]; then
