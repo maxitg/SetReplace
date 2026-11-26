@@ -7,11 +7,11 @@ multiple [stopping conditions](../WolframModelAndWolframModelEvolutionObject.md#
 
 All possible values are:
 
-* `"MaxEvents"`, `"MaxGenerations"`, `"MaxVertices"`, `"MaxVertexDegree"` and `"MaxEdges"` correspond directly
+- `"MaxEvents"`, `"MaxGenerations"`, `"MaxVertices"`, `"MaxVertexDegree"` and `"MaxEdges"` correspond directly
   to [step limiters](../WolframModelAndWolframModelEvolutionObject.md#step-limiters).
-* `"FixedPoint"` means there were no more matches possible to rule inputs.
-* `"TimeConstraint"` could occur if a [`"TimeConstraint"`](../Options/TimeConstraint.md) option is used.
-* `"Aborted"` would occur if the evaluation was manually interrupted (i.e., by pressing ⌘. on a Mac). In that case, a
+- `"FixedPoint"` means there were no more matches possible to rule inputs.
+- `"TimeConstraint"` could occur if a [`"TimeConstraint"`](../Options/TimeConstraint.md) option is used.
+- `"Aborted"` would occur if the evaluation was manually interrupted (i.e., by pressing ⌘. on a Mac). In that case, a
   partially computed evolution object is returned.
 
 As an example, in our arithmetic model a `"FixedPoint"` is reached (which is why we can
@@ -33,4 +33,13 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 ⌘.
 ```
 
-<img src="/Documentation/Images/AbortedEvolutionObject.png" width="760">
+<img src="/Documentation/Images/AbortedEvolutionObject.png"
+     width="760"
+     alt="Out[] = WolframModelEvolutionObject[...
+       Generations: 64...65,
+       Events: 17629,
+       Termination reason: Aborted,
+       Rules: {{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
+         {{2, 7, 8}, {5, 9, 10}, {6, 11, 12}, <<2>>, {9, 7}, {10, 12}, {14, 11}},
+       Initial set: {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}
+     ...]">

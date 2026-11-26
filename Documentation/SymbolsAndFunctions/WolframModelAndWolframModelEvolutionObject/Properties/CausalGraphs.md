@@ -19,7 +19,13 @@ In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="/Documentation/Images/ArithmeticModelExpressionsEventsGraph.png" width="478">
+<img src="/Documentation/Images/ArithmeticModelExpressionsEventsGraph.png"
+     width="478"
+     alt="Out[] = Graph[...
+       orange events add the values on pairs of pale expression vertices:
+       3 + 8 = 11, 8 + 8 = 16, 2 + 10 = 12, 0 + 9 = 9,
+       7 + 11 = 18, 16 + 12 = 28, 9 + 18 = 27, and finally 28 + 27 = 55
+     ...]">
 
 The causal graph is very similar, it just has the expression-vertices contracted:
 
@@ -28,7 +34,12 @@ In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
  {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity, "CausalGraph"]
 ```
 
-<img src="/Documentation/Images/ArithmeticModelCausalGraph.png" width="478">
+<img src="/Documentation/Images/ArithmeticModelCausalGraph.png"
+     width="478"
+     alt="Out[] = Graph[...
+       Arrows link events 1 to 5, 2 and 3 to 6, 4 and 5 to 7, and 6 and 7 to 8.
+       All eight vertices represent events.
+     ...]">
 
 Here is an example for a hypergraph model (admittedly considerably harder to understand). Multiedges correspond to
 situations where multiple set elements were both created and destroyed by the same pair of events:
@@ -40,7 +51,12 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 20, "CausalGraph"]
 ```
 
-<img src="/Documentation/Images/HypergraphModelCausalGraph.png" width="478">
+<img src="/Documentation/Images/HypergraphModelCausalGraph.png"
+     width="478"
+     alt="Out[] = Graph[...
+       A disk-shaped network of events with arrows spreading toward the rim.
+       Several pairs of events are joined by multiple edges.
+     ...]">
 
 **`"LayeredCausalGraph"`** generates the same graph but layers events generation-by-generation. For example, in our
 arithmetic causal graph, note how it's arranged differently from an example above:
@@ -50,7 +66,13 @@ In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
  {3, 8, 8, 8, 2, 10, 0, 9, 7}, Infinity, "LayeredCausalGraph"]
 ```
 
-<img src="/Documentation/Images/ArithmeticModelLayeredCausalGraph.png" width="478">
+<img src="/Documentation/Images/ArithmeticModelLayeredCausalGraph.png"
+     width="478"
+     alt="Out[] = Graph[...
+       The eight events arranged in four generations.
+       Generation 1 contains events 1 through 4, generation 2 contains 5 and 6, generation 3 contains 7, and generation
+       4 contains 8.
+     ...]">
 
 Note how slices through the expressions-events graph correspond to states returned by [`"StatesList"`](States.md). Pay
 attention to intersections of the slices with edges as well, as they correspond to unused expressions from previous
@@ -66,7 +88,16 @@ In[] := With[{evolution =
     Table[Line[{{-10, k}, {10, k}}], {k, 0, 9, 2}]}]]
 ```
 
-<img src="/Documentation/Images/FoliatedExpressionsEventsGraph.png" width="478">
+<img src="/Documentation/Images/FoliatedExpressionsEventsGraph.png"
+     width="478"
+     alt="Out[] = Graph[...
+       the expressions-events graph as above with dotted lines plotted through each generation:
+       0: {3, 8, 8, 8, 2, 10, 0, 9, 7},
+       1: {11, 16, 12, 9} and crossing the destroyer edge of 7 from generation 0,
+       2: {18, 28} and crossing destroyer of 9 from generation 1,
+       3: {27} and crossing destroyer of 28 from generation 2,
+       4: {55}
+     ...]">
 
 ```wl
 In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
@@ -86,7 +117,14 @@ In[] := WolframModel[{{1}, {1, 2}} -> {{2}}, {{1}, {1, 2}, {2, 3}, {2, 4}},
  VertexLabels -> Placed[Automatic, After]]
 ```
 
-<img src="/Documentation/Images/MultiwayExpressionsEventsGraph.png" width="466">
+<img src="/Documentation/Images/MultiwayExpressionsEventsGraph.png"
+     width="466"
+     alt="Out[] = Graph[...
+       the expression {2} is used in both branches:
+       {{1}, {1, 2}} -> {{2}},
+       {{2}, {2, 3}} -> {{3}},
+       {{2}, {2, 4}} -> {{4}}
+     ...]">
 
 `"CausalGraph"`, `"LayeredCausalGraph"` and `"ExpressionsEventsGraph"` properties all
 accept [`Graph`](https://reference.wolfram.com/language/ref/Graph.html) options, as was demonstrated above
@@ -101,4 +139,10 @@ In[] := WolframModel[{{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}},
   {{0, 0}, {0, 0}}, 2]["ExpressionsEventsGraph", VertexLabels -> "Index"]
 ```
 
-<img src="/Documentation/Images/MultiwayExpressionsEventsGraphIndex.png" width="478">
+<img src="/Documentation/Images/MultiwayExpressionsEventsGraphIndex.png"
+     width="478"
+     alt="Out[] = Graph[...
+       Orange event 1 consumes expressions 1 and 2 and produces expressions 3 through 6.
+       Event 2 consumes 3 and 4 and produces 7 through 10.
+       Event 3 consumes 5 and 6 and produces 11 through 14.
+     ...]">

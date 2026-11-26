@@ -30,7 +30,15 @@ In[] := With[{
     g_ :> ColorData["Rainbow"][g/5], {2}]}]]
 ```
 
-<img src="/Documentation/Images/GenerationColoredStatePlots.png" width="746">
+<img src="/Documentation/Images/GenerationColoredStatePlots.png"
+     width="746"
+     alt="Out[] = {
+       Graphics[... three purple self-loops at generation 0 ...],
+       Graphics[... all blue edges at generation 1 ...],
+       Graphics[... both blue and green edges at generation 2 ...],
+       <<2>>,
+       Graphics[... red generation-5 edges coexist with one yellow-green self-loop from generation 3 ...]
+     }">
 
 Event and expression generations correspond to layers in [`"LayeredCausalGraph"`](CausalGraphs.md)
 and [`"ExpressionsEventsGraph"`](CausalGraphs.md):
@@ -48,4 +56,9 @@ In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
  {{1, 1}, {1, 1}, {1, 1}}, 5, "LayeredCausalGraph"]
 ```
 
-<img src="/Documentation/Images/HypergraphModelLayeredCausalGraph.png" width="218">
+<img src="/Documentation/Images/HypergraphModelLayeredCausalGraph.png"
+     width="218"
+     alt="Out[] = Graph[...
+       Six events in five layers, with two events in generation 5.
+       An edge directly from generation 1 to generation 3 skips generation 2.
+     ...]">

@@ -21,7 +21,12 @@ In[] := GroupOrder[
       8, 5}, {5, 9, 1}}]]
 ```
 
-<img src="/Documentation/Images/SymmetricHypergraphPlot.png" width="451">
+<img src="/Documentation/Images/SymmetricHypergraphPlot.png"
+     width="451"
+     alt="Out[] = Graphics[...
+       Three pairs of triangles arranged around a central gap.
+       The two triangles in each pair share two vertices and their tips can be interchanged.
+     ...]">
 
 ```wl
 Out[] = 24

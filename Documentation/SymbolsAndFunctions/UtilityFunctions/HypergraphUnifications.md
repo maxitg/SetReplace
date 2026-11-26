@@ -34,7 +34,13 @@ All unifications can be visualized with **`HypergraphUnificationsPlot`**:
 In[] := HypergraphUnificationsPlot[{{1, 2}, {2, 3}}, {{1, 2}, {2, 3}}]
 ```
 
-<img src="/Documentation/Images/HypergraphUnificationsPlot.png" width="745">
+<img src="/Documentation/Images/HypergraphUnificationsPlot.png"
+     width="745"
+     alt="Out[] = {
+       Graphics[... shared purple edge splitting into separate red and blue branches ...],
+       <<4>>,
+       Graphics[... red and blue branches merging into a shared purple edge ...]
+     }">
 
 Vertex labels here show the vertex names in the input graphs to which the unification is matched.
 
@@ -45,4 +51,11 @@ In[] := HypergraphUnificationsPlot[{{1, 2, 3}, {4, 5, 6}, {1, 4}},
  {{1, 2, 3}, {4, 5, 6}, {1, 4}}, VertexLabels -> Automatic]
 ```
 
-<img src="/Documentation/Images/HypergraphUnificationsPlotWithMultipleArities.png" width="746">
+<img src="/Documentation/Images/HypergraphUnificationsPlotWithMultipleArities.png"
+     width="746"
+     alt="Out[] = {
+       (* In all 13 plots red and blue labels give the original vertex names. *)
+       Graphics[... the matches share one purple triangle and each has a separate triangle ...],
+       <<11>>,
+       Graphics[... the matches share a purple connecting edge ...]
+     }">

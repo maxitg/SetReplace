@@ -14,7 +14,12 @@ In[] := HypergraphPlot @ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "FinalState"]
 ```
 
-<img src="/Documentation/Images/FinalStatePlot.png" width="478">
+<img src="/Documentation/Images/FinalStatePlot.png"
+     width="478"
+     alt="Out[] = Graphics[...
+       320 hyperedges form a roughly symmetric mesh with large openings on the left and right and smaller openings in
+       the center
+     ...]">
 
 **`"StatesList"`** yields the list of states at each generation:
 
@@ -25,7 +30,13 @@ In[] := HypergraphPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6, "StatesList"]
 ```
 
-<img src="/Documentation/Images/StatesListPlot.png" width="746">
+<img src="/Documentation/Images/StatesListPlot.png"
+     width="746"
+     alt="Out[] = {
+       Graphics[... generation 0, five hyperedges at one vertex ...],
+       <<5>>,
+       Graphics[... generation 6, the same mesh of 320 hyperedges shown by &quot;FinalStatePlot&quot; ...]
+     }">
 
 This is identical to using the **`"Generation"`** property mapped over all generations:
 
@@ -37,7 +48,13 @@ In[] := HypergraphPlot /@ (WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
      "Generation", #] &) /@ Range[0, 6]
 ```
 
-<img src="/Documentation/Images/StatesListPlot.png" width="746">
+<img src="/Documentation/Images/StatesListPlot.png"
+     width="746"
+     alt="Out[] = {
+       Graphics[... generation 0, five hyperedges at one vertex ...],
+       <<5>>,
+       Graphics[... generation 6, the same mesh of 320 hyperedges shown by &quot;FinalStatePlot&quot; ...]
+     }">
 
 In fact, the `"Generation"` property can be omitted and the index of the generation can be used directly:
 
@@ -48,7 +65,13 @@ In[] := HypergraphPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
    {{1, 1, 1}, {1, 1, 1}, {1, 1}, {1, 1}, {1, 1}}, 6] /@ Range[0, 6]
 ```
 
-<img src="/Documentation/Images/StatesListPlot.png" width="746">
+<img src="/Documentation/Images/StatesListPlot.png"
+     width="746"
+     alt="Out[] = {
+       Graphics[... generation 0, five hyperedges at one vertex ...],
+       <<5>>,
+       Graphics[... generation 6, the same mesh of 320 hyperedges shown by &quot;FinalStatePlot&quot; ...]
+     }">
 
 `"StatesList"` shows a compressed version of the evolution. To see how the state changes with each applied replacement,
 use **`"AllEventsStatesList"`**:
@@ -61,7 +84,13 @@ In[] := HypergraphPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   "AllEventsStatesList"]
 ```
 
-<img src="/Documentation/Images/AllEventsStatesListPlot.png" width="746">
+<img src="/Documentation/Images/AllEventsStatesListPlot.png"
+     width="746"
+     alt="Out[] = {
+       Graphics[... initial state with five hyperedges at one vertex ...],
+       <<6>>,
+       Graphics[... State after event 7 with 40 hyperedges. Each successive plot shows one replacement. ...]
+     }">
 
 Finally, to see a state after a specific event, use **`"StateAfterEvent"`** (aka `"SetAfterEvent"`):
 
@@ -73,7 +102,12 @@ In[] := HypergraphPlot @ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
   "StateAfterEvent", 42]
 ```
 
-<img src="/Documentation/Images/StateAfterEventPlot.png" width="478">
+<img src="/Documentation/Images/StateAfterEventPlot.png"
+     width="478"
+     alt="Out[] = Graphics[...
+       215 hyperedges after event 42 form an uneven mesh, with larger openings on one side than in the
+       complete-generation plots
+     ...]">
 
 `"StateAfterEvent"` is equivalent to taking a corresponding part in `"AllEventsStatesList"`, but it is much faster to
 compute than the entire list.

@@ -29,4 +29,9 @@ In[] := With[{
         2 -> White}, {1}]], VertexSize -> Medium]]]
 ```
 
-<img src="/Documentation/Images/ColoredCausalGraph.png" width="478">
+<img src="/Documentation/Images/ColoredCausalGraph.png"
+     width="478"
+     alt="Out[] = Graph[...
+       Black vertices represent rule 1 and white vertices represent rule 2.
+       Every white vertex is a sink, so no later event consumes an output of rule 2.
+     ...]">

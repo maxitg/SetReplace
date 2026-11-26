@@ -13,6 +13,13 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
  3, "EventsStatesPlotsList"]
 ```
 
-<img src="/Documentation/Images/EventsStatesPlotsList.png" width="746">
+<img src="/Documentation/Images/EventsStatesPlotsList.png"
+     width="746"
+     alt="Out[] = {
+       Graphics[... initial state with the next inputs dotted gray ...],
+       Graphics[... new edges in red, with red dots marking those consumed again at the next event ...],
+       <<5>>,
+       Graphics[... eighth state, after seven events, with the last outputs in red ...]
+     }">
 
 Here the dotted gray edges are the ones about to be deleted, whereas the red ones have just been created.

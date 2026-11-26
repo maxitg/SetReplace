@@ -31,7 +31,9 @@ In[] := AbsoluteTiming[
   {{0}}, <|"MaxEvents" -> 30|>, Method -> "LowLevel"]]
 ```
 
-<img src="/Documentation/Images/SlowLowLevelTiming.png" width="609">
+<img src="/Documentation/Images/SlowLowLevelTiming.png"
+     width="609"
+     alt="Out[] = {8.50169, WolframModelEvolutionObject[... Generations: 3...4, Events: 30 ...]}">
 
 takes almost 10 seconds in C++ implementation, and less than 1/10th of a second in the Wolfram Language implementation:
 
@@ -41,7 +43,9 @@ In[] := AbsoluteTiming[
   {{0}}, <|"MaxEvents" -> 30|>, Method -> "Symbolic"]]
 ```
 
-<img src="/Documentation/Images/FastSymbolicTiming.png" width="617">
+<img src="/Documentation/Images/FastSymbolicTiming.png"
+     width="617"
+     alt="Out[] = {0.010098, WolframModelEvolutionObject[... Generations: 3...4, Events: 30 ...]}">
 
 Wolfram Language implementation should be used if:
 
