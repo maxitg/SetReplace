@@ -67,7 +67,7 @@ class TokenEventGraph {
    */
   enum class SeparationTrackingMethod {
     None,             // lookup impossible
-    DestroyerChoices  // O(events * tokens) in memory and time, O(tokens) lookup
+    DestroyerChoices  // shared ancestry; O(events * tokens) worst-case space/time, O(tokens) worst-case lookup
   };
 
   /** @brief Creates a new TokenEventGraph with a given number of initial tokens.

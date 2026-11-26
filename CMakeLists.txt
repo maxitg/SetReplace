@@ -65,6 +65,7 @@ set(libSetReplace_headers
     WolframLanguageAPI.hpp
     )
 set(libSetReplace_sources
+    DestroyerChoices.hpp
     Parallelism.cpp
     TokenEventGraph.cpp
     AtomsIndex.cpp
