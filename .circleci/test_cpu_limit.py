@@ -65,6 +65,22 @@ class CpuQuotaTests(unittest.TestCase):
     self.v1Quota(point / "job", 300000, 200000)
     self.assertEqual(withCpuLimit.cpuQuota(self.proc), Fraction(3, 2))
 
+  def testHybridUsesV1CpuControllerWithoutUnifiedMount(self):
+    point = self.hierarchy(version=1)
+    self.v1Quota(point, 200000)
+    cgroup = self.proc / "cgroup"
+    v1 = cgroup.read_text()
+    for groups in [v1 + "\n0::/unified", "0::/unified\n" + v1]:
+      with self.subTest(groups=groups):
+        cgroup.write_text(groups)
+        self.assertEqual(withCpuLimit.cpuQuota(self.proc), 2)
+
+  def testHybridStillRequiresV1CpuMount(self):
+    self.hierarchy()
+    (self.proc / "cgroup").write_text("3:cpu:/\n0::/")
+    with self.assertRaises(ValueError):
+      withCpuLimit.cpuQuota(self.proc)
+
   def testNoCpuController(self):
     self.hierarchy(version=1, controllers="cpuacct")
     self.assertIsNone(withCpuLimit.cpuQuota(self.proc))
@@ -97,6 +113,13 @@ class CpuQuotaTests(unittest.TestCase):
     with self.assertRaises(ValueError):
       withCpuLimit.cpuQuota(self.proc)
 
+  def testUnrelatedMountWithEmptySourceIsIgnored(self):
+    point = self.hierarchy()
+    (point / "cpu.max").write_text("200000 100000")
+    mountinfo = self.proc / "mountinfo"
+    mountinfo.write_text("31 20 0:2 / /x rw - fuse  rw\n" + mountinfo.read_text())
+    self.assertEqual(withCpuLimit.cpuQuota(self.proc), 2)
+
 class AffinityTests(unittest.TestCase):
   def testSelectionNeverWidensAffinity(self):
     for quota, selected in [(Fraction(2), [3, 7]), (Fraction(5, 2), [3, 7]),
@@ -105,12 +128,27 @@ class AffinityTests(unittest.TestCase):
           patch.object(withCpuLimit, "cpuQuota", return_value=quota), \
           patch.object(os, "sched_getaffinity", return_value={3, 7, 11}, create=True), \
           patch.object(os, "sched_setaffinity", create=True) as setter, \
+          patch.object(withCpuLimit.random.SystemRandom, "randrange", return_value=0) as chooseOffset, \
           contextlib.redirect_stdout(io.StringIO()):
         withCpuLimit.limitCpus()
         if len(selected) < 3:
           setter.assert_called_once_with(0, selected)
+          chooseOffset.assert_called_once_with(3)
         else:
           setter.assert_not_called()
+          chooseOffset.assert_not_called()
+
+  def testSelectionRotatesWithinNoncontiguousAffinity(self):
+    for offset, selected in enumerate([[3, 7], [7, 11], [3, 11]]):
+      with self.subTest(offset=offset), \
+          patch.object(withCpuLimit, "cpuQuota", return_value=Fraction(2)), \
+          patch.object(os, "sched_getaffinity", return_value={3, 7, 11}, create=True), \
+          patch.object(os, "sched_setaffinity", create=True) as setter, \
+          patch.object(withCpuLimit.random.SystemRandom, "randrange", return_value=offset), \
+          contextlib.redirect_stdout(io.StringIO()) as output:
+        withCpuLimit.limitCpus()
+        setter.assert_called_once_with(0, selected)
+        self.assertIn("selected IDs: " + ",".join(map(str, selected)), output.getvalue())
 
   def testDetectionFailureDoesNotRunCommand(self):
     with patch.object(sys, "argv", ["withCpuLimit.py", "command"]), \

@@ -3,6 +3,7 @@
 from fractions import Fraction
 import os
 from pathlib import Path
+import random
 import re
 import sys
 
@@ -19,12 +20,18 @@ def cpuQuota(proc=Path("/proc/self")):
     elif "cpu" in controllers.split(","):
       groups["cgroup"] = Path(group)
 
+  # On hybrid hosts, a controller belongs to either v1 or v2, never both.
+  if "cgroup" in groups:
+    groups.pop("cgroup2", None)
+
   limits = []
   matched = set()
   for line in (proc / "mountinfo").read_text().splitlines():
     mount, filesystem = line.split(" - ", 1)
+    if filesystem.split(maxsplit=1)[0] not in groups:
+      continue
     kind, _, options = filesystem.split()
-    if kind not in groups or (kind == "cgroup" and "cpu" not in options.split(",")):
+    if kind == "cgroup" and "cpu" not in options.split(","):
       continue
     fields = mount.split()
     root, point = (Path(unescapeMountPath(value)) for value in fields[3:5])
@@ -73,8 +80,11 @@ def limitCpus():
   quota = cpuQuota()
   # Round down to avoid oversubscribing fractional quotas, but always allow one CPU.
   count = len(allowed) if quota is None else max(1, min(len(allowed), int(quota)))
-  selected = allowed[:count]
-  if selected != allowed:
+  selected = allowed
+  if count < len(allowed):
+    # Avoid sending every co-located container to the same lowest-numbered CPUs.
+    offset = random.SystemRandom().randrange(len(allowed))
+    selected = sorted((allowed + allowed)[offset:offset + count])
     os.sched_setaffinity(0, selected)
   quotaText = "no finite visible limit" if quota is None else str(quota)
   print("CPU affinity: {} -> {} CPUs; cgroup CPU quota: {}; selected IDs: {}".format(
