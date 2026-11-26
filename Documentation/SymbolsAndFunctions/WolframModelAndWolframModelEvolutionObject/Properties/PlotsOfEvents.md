@@ -18,7 +18,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
      alt="Out[] = {
        Graphics[... initial state with the next inputs dotted gray ...],
        Graphics[... new edges in red, with red dots marking those consumed again at the next event ...],
-       ...,
+       <<5>>,
        Graphics[... eighth state, after seven events, with the last outputs in red ...]
      }">
 

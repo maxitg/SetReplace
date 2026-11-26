@@ -21,7 +21,7 @@ In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
      width="475"
      alt="Out[] = Graph[... Initial event -> {3, 8, 8, 8, 2, 10, 0, 9, 7},
        {3, 8} -> Event 1 -> {11},
-       ...,
+       <<6>>,
        {27, 28} -> Event 8 -> {55},
        {55} -> Final event ...]">
 

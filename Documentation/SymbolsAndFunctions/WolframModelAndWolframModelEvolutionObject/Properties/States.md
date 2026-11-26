@@ -30,7 +30,7 @@ In[] := HypergraphPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 
 <img src="/Documentation/Images/StatesListPlot.png"
      width="746"
-     alt="Out[] = {Graphics[... generation 0, five hyperedges at one vertex ...], ..., Graphics[... generation 6, a
+     alt="Out[] = {Graphics[... generation 0, five hyperedges at one vertex ...], <<5>>, Graphics[... generation 6, a
        symmetric mesh of 320 hyperedges, seven states including the initial state ...]}">
 
 This is identical to using the **`"Generation"`** property mapped over all generations:
@@ -45,7 +45,7 @@ In[] := HypergraphPlot /@ (WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 
 <img src="/Documentation/Images/StatesListPlot.png"
      width="746"
-     alt="Out[] = {Graphics[... generation 0, five hyperedges at one vertex ...], ..., Graphics[... generation 6, a
+     alt="Out[] = {Graphics[... generation 0, five hyperedges at one vertex ...], <<5>>, Graphics[... generation 6, a
        symmetric mesh of 320 hyperedges, seven states including the initial state ...]}">
 
 In fact, the `"Generation"` property can be omitted and the index of the generation can be used directly:
@@ -59,7 +59,7 @@ In[] := HypergraphPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 
 <img src="/Documentation/Images/StatesListPlot.png"
      width="746"
-     alt="Out[] = {Graphics[... generation 0, five hyperedges at one vertex ...], ..., Graphics[... generation 6, a
+     alt="Out[] = {Graphics[... generation 0, five hyperedges at one vertex ...], <<5>>, Graphics[... generation 6, a
        symmetric mesh of 320 hyperedges, seven states including the initial state ...]}">
 
 `"StatesList"` shows a compressed version of the evolution. To see how the state changes with each applied replacement,
@@ -75,7 +75,7 @@ In[] := HypergraphPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 
 <img src="/Documentation/Images/AllEventsStatesListPlot.png"
      width="746"
-     alt="Out[] = {Graphics[... initial state with five hyperedges at one vertex ...], ..., Graphics[... state
+     alt="Out[] = {Graphics[... initial state with five hyperedges at one vertex ...], <<6>>, Graphics[... state
        after event 7 with 40 hyperedges. Each successive plot shows one replacement ...]}">
 
 Finally, to see a state after a specific event, use **`"StateAfterEvent"`** (aka `"SetAfterEvent"`):

@@ -359,8 +359,9 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
        Generations: 5...6,
        Events: 49,
        Termination reason: MaxVertices,
-       Rules: ...,
-       Initial set: ...
+       Rules: {{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
+         {{7, 1, 8}, {9, 3, 10}, {11, 4, 12}, <<6>>, {11, 9}, {12, 14}, {14, 12}},
+       Initial set: {{1, 2, 3}, {4, 5, 6}, {1, 4}, {4, 1}, {2, 5}, {5, 2}, {3, 6}, {6, 3}}
      ...]">
 
 All possible keys in that association are:

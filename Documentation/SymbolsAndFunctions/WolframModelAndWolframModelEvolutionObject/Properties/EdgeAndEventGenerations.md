@@ -36,7 +36,7 @@ In[] := With[{
        Graphics[... three purple self-loops at generation 0 ...],
        Graphics[... all blue edges at generation 1 ...],
        Graphics[... both blue and green edges at generation 2 ...],
-       ...,
+       <<2>>,
        Graphics[... red generation-5 edges coexist with older edges in the sixth plot ...]
      }">
 
