@@ -3,7 +3,7 @@ set(_link_libraries SetReplace ${GTEST_LIBRARIES})
 add_executable(Parallelism_test Parallelism_tests.cpp)
 add_executable(HypergraphSubstitutionSystem_test HypergraphSubstitutionSystem_test.cpp)
 add_executable(TokenEventGraph_test TokenEventGraph_test.cpp)
-add_executable(profile_tests profile_tests.cpp)
+add_executable(profile_tests profile_tests.cpp TokenEventGraph_benchmark.cpp)
 
 target_link_libraries(Parallelism_test ${_link_libraries})
 target_link_libraries(HypergraphSubstitutionSystem_test ${_link_libraries})

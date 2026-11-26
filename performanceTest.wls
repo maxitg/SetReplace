@@ -24,6 +24,20 @@ Check[
         {{1, 2}, {2, 1}, {1, 3}, {2, 3}, {3, 1}, {3, 2}, {1, 4}, {2, 4}, {3, 4}, {4, 1}, {4, 2}, {4, 3}},
       Automatic, 4],
     "Exponential-match-count rule" -> WolframModel[{{1}, {1}, {1}} -> {{1}, {1}, {1}, {1}}, Automatic, 10],
+    (* MultiwaySpacelike enables ancestry tracking, even for a rule that produces a single chain. *)
+    "Spacelike ancestry chain" -> WolframModel[
+      {{1}} -> {{2}}, {{1}}, <|"MaxEvents" -> 4000|>,
+      "EventSelectionFunction" -> "MultiwaySpacelike",
+      "EventOrderingFunction" -> {"OldestEdge", "RuleOrdering", "RuleIndex"}],
+    "Spacelike ancestry fork" -> WolframModel[
+      {{1}} -> {{2}, {3}}, {{1}}, <|"MaxEvents" -> 8000|>,
+      "EventSelectionFunction" -> "MultiwaySpacelike",
+      "EventOrderingFunction" -> {"OldestEdge", "RuleOrdering", "RuleIndex"}],
+    "Spacelike multi-input evolution" -> WolframModel[
+      {{1, 2}, {2, 3}} -> {{2, 3}, {2, 4}, {3, 4}, {2, 1}},
+      {{1, 1}, {1, 1}}, <|"MaxEvents" -> 500|>,
+      "EventSelectionFunction" -> "MultiwaySpacelike",
+      "EventOrderingFunction" -> {"OldestEdge", "RuleOrdering", "RuleIndex"}],
     "CA emulator" -> WolframModel[
       {{{18, 18, 3}, {3, 19, 3}, {3, 3, 3, 3, 3}} ->
           {{1, 1, 1, 12}, {1, 1, 14, 1}, {1, 10, 10}, {1, 1, 5}, {5, 5, 5, 5, 5}, {5, 4, 5}, {1, 19, 1}, {1},
