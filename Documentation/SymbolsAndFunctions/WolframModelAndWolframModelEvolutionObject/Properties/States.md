@@ -35,7 +35,7 @@ In[] := HypergraphPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
      alt="Out[] = {
        Graphics[... generation 0, five hyperedges at one vertex ...],
        <<5>>,
-       Graphics[... generation 6, a symmetric mesh of 320 hyperedges, seven states including the initial state ...]
+       Graphics[... generation 6, the same mesh of 320 hyperedges shown in the final-state plot above ...]
      }">
 
 This is identical to using the **`"Generation"`** property mapped over all generations:
@@ -53,7 +53,7 @@ In[] := HypergraphPlot /@ (WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
      alt="Out[] = {
        Graphics[... generation 0, five hyperedges at one vertex ...],
        <<5>>,
-       Graphics[... generation 6, a symmetric mesh of 320 hyperedges, seven states including the initial state ...]
+       Graphics[... generation 6, the same mesh of 320 hyperedges shown in the final-state plot above ...]
      }">
 
 In fact, the `"Generation"` property can be omitted and the index of the generation can be used directly:
@@ -70,7 +70,7 @@ In[] := HypergraphPlot /@ WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
      alt="Out[] = {
        Graphics[... generation 0, five hyperedges at one vertex ...],
        <<5>>,
-       Graphics[... generation 6, a symmetric mesh of 320 hyperedges, seven states including the initial state ...]
+       Graphics[... generation 6, the same mesh of 320 hyperedges shown in the final-state plot above ...]
      }">
 
 `"StatesList"` shows a compressed version of the evolution. To see how the state changes with each applied replacement,
