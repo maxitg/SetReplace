@@ -31,7 +31,7 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
      alt="Out[] = {
        Graphics[... generation 0, five hyperedges at one vertex ...],
        <<5>>,
-       Graphics[... generation 6, the same mesh of 320 hyperedges shown in the final-state plot above ...]
+       Graphics[... generation 6, the same mesh of 320 hyperedges shown by &quot;FinalStatePlot&quot; ...]
      }">
 
 These properties take the same options as [`HypergraphPlot`](../../HypergraphPlot.md) (but one has to specify them in a
