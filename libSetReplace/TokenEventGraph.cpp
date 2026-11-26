@@ -2,8 +2,9 @@
 
 #include <algorithm>
 #include <memory>
-#include <unordered_map>
 #include <vector>
+
+#include "DestroyerChoices.hpp"
 
 namespace SetReplace {
 class TokenEventGraph::Implementation {
@@ -18,10 +19,11 @@ class TokenEventGraph::Implementation {
   SeparationTrackingMethod separationTrackingMethod_;
 
   // Allows one to determine the type of separation between tokens.
-  // Addressed as destroyerChoices[eventID][tokenID] -> eventID.
   // For each event E, tells one which events need to be chosen as destroyers for each of the tokens in order to make E
   // possible. If there is no value for a given token, it means any destroyer can be chosen.
-  std::vector<std::unordered_map<TokenID, EventID>> destroyerChoices_;
+  // Events keep persistent roots into a shared arena instead of copying their ancestors' maps.
+  detail::DestroyerChoices destroyerChoices_;
+  std::vector<detail::DestroyerChoices::Root> destroyerChoiceRoots_;
 
   // If false, destroyerChoices is meaningless, and not computed.
   bool isSpacelikeEvolution_ = true;
@@ -66,23 +68,18 @@ class TokenEventGraph::Implementation {
       return SeparationType::Identical;
     }
 
-    const auto& firstDestroyerChoices = destroyerChoices_.at(tokenIDsToCreatorEvents_.at(first));
-    const auto& secondDestroyerChoices = destroyerChoices_.at(tokenIDsToCreatorEvents_.at(second));
+    const auto firstDestroyerChoices = destroyerChoiceRoots_.at(tokenIDsToCreatorEvents_.at(first));
+    const auto secondDestroyerChoices = destroyerChoiceRoots_.at(tokenIDsToCreatorEvents_.at(second));
 
-    if (firstDestroyerChoices.count(second) || secondDestroyerChoices.count(first)) {
+    if (destroyerChoices_.contains(firstDestroyerChoices, second) ||
+        destroyerChoices_.contains(secondDestroyerChoices, first)) {
       // This implies one token is required for another one to be possible. So, they are causally related.
       return SeparationType::Timelike;
     }
 
-    for (const auto& firstTokenAndChosenEvent : firstDestroyerChoices) {
-      const auto& token = firstTokenAndChosenEvent.first;
-      const auto& chosenEvent = firstTokenAndChosenEvent.second;
-      if (secondDestroyerChoices.count(token) && secondDestroyerChoices.at(token) != chosenEvent) {
-        // Both `first` and `second` tokens require a particular destroyer event to be chosen for `token` to exist.
-        // However, these destroyer events have to be different (`chosenEvent` and `secondDestroyerChoices.at(token)`).
-        // So, the tokens are on different multihistory branches.
-        return SeparationType::Branchlike;
-      }
+    if (!destroyerChoices_.compatible(firstDestroyerChoices, secondDestroyerChoices)) {
+      // The histories require different destroyer events for a common token.
+      return SeparationType::Branchlike;
     }
 
     return SeparationType::Spacelike;
@@ -125,27 +122,24 @@ class TokenEventGraph::Implementation {
   void addLastEventDestroyerChoices() {
     if (!isSpacelikeEvolution_) return;  // only spacelike evolutions are supported at the moment
     const auto& lastEvent = events_.back();
-    std::unordered_map<TokenID, EventID> newDestroyerChoices;
+    auto newDestroyerChoices = detail::DestroyerChoices::empty;
 
     // For lastEvent to exist, its direct prerequisites have to exist as well. So, merge the destroyer choices from
     // creator events of all inputs to the lastEvent.
     for (const auto& inputToken : lastEvent.inputTokens) {
       // the input token itself needs to be destroyed by `lastEvent`.
-      newDestroyerChoices[inputToken] = events_.size() - 1;
+      newDestroyerChoices = destroyerChoices_.set(newDestroyerChoices, inputToken, events_.size() - 1);
       const auto& inputEvent = tokenIDsToCreatorEvents_.at(inputToken);
-      for (const auto& inputEventTokenAndChosenEvent : destroyerChoices_.at(inputEvent)) {
-        const auto& token = inputEventTokenAndChosenEvent.first;
-        const auto& chosenEvent = inputEventTokenAndChosenEvent.second;
-        if (newDestroyerChoices.count(token) && newDestroyerChoices.at(token) != chosenEvent) {
-          // the prerequisite events for the `lastEvent` have inconsistent requirements. The lastEvent is not spacelike.
-          isSpacelikeEvolution_ = false;
-          destroyerChoices_.clear();
-          return;
-        }
-        newDestroyerChoices[token] = chosenEvent;
+      newDestroyerChoices = destroyerChoices_.unite(newDestroyerChoices, destroyerChoiceRoots_.at(inputEvent));
+      if (newDestroyerChoices == detail::DestroyerChoices::incompatible) {
+        // The prerequisite events have inconsistent requirements. The lastEvent is not spacelike.
+        isSpacelikeEvolution_ = false;
+        destroyerChoiceRoots_.clear();
+        destroyerChoices_ = detail::DestroyerChoices();
+        return;
       }
     }
-    destroyerChoices_.emplace_back(newDestroyerChoices);
+    destroyerChoiceRoots_.push_back(newDestroyerChoices);
   }
 };
 
