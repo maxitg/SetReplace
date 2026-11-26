@@ -21,8 +21,8 @@ jobs:
           name: Activate Wolfram Engine
           command: ./scripts/activateWolframScript.sh
       - run:
-          name: Install Paclet
-          command: ./install.wls
+          name: Build Library for In-Place Test
+          command: ./build.wls
       - run:
           name: Test Only the Large HypergraphPlot Case
           command: |
@@ -31,7 +31,7 @@ jobs:
             python3 .circleci/prepareHypergraphPlotProbe.py
             {
               ./.circleci/printRuntime.sh
-              timeout --kill-after=10s 10m ./test.wls -lip HypergraphPlotLargeOnly
+              timeout --kill-after=10s 10m ./test.wls HypergraphPlotLargeOnly
             } 2>&1 | tee test-diagnostics/hypergraphplot-current-version.log
       - store_artifacts:
           path: test-diagnostics
