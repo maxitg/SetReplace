@@ -17,7 +17,7 @@ jobs:
           name: Install Required Tools
           command: |
             apt-get update
-            apt-get install -y g++ git
+            apt-get install -y g++ git python3
 
       - run:
           name: Activate Wolfram Engine
@@ -25,7 +25,7 @@ jobs:
 
       - run:
           name: Build
-          command: ./build.wls
+          command: ./.circleci/withCpuLimit.py ./build.wls
 
       - store_artifacts:
           path: ./LibraryResources/
@@ -39,25 +39,26 @@ jobs:
 
       - run:
           name: Install
-          command: ./install.wls
+          command: ./.circleci/withCpuLimit.py ./install.wls
 
       - store_artifacts:
           path: ./BuiltPaclets/
 
       - run:
           name: Reinstall
-          command: ./install.wls
+          command: ./.circleci/withCpuLimit.py ./install.wls
 
       - run:
           name: Test
-          command: ./.circleci/test.sh # This assumes parallelism: 4 and would not run all tests otherwise
+          # This assumes parallelism: 4 and would not run all tests otherwise.
+          command: ./.circleci/withCpuLimit.py ./.circleci/test.sh
 
       - run:
           name: Performance Test
           command: |
             if [ $CIRCLE_NODE_INDEX -eq 0 ]
             then
-              ./performanceTest.wls master HEAD 2
+              ./.circleci/withCpuLimit.py ./performanceTest.wls master HEAD 2
             fi
 
   cpp-test:
@@ -92,6 +93,10 @@ jobs:
               echo "Please run scripts/install_git_hooks.sh to detect linting issues before git push."
               exit 1
             fi
+
+      - run:
+          name: Test CPU Limit Wrapper
+          command: python3 -B .circleci/test_cpu_limit.py
 
       - run:
           name: Build
