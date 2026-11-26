@@ -38,8 +38,7 @@ In[]:= HypergraphToGraph[
 
 <img src="/Documentation/Images/HypergraphToGraphUndirectedDistancePreserving.png"
      width="478"
-     alt="Out[] = Graph[{UndirectedEdge[x, x], UndirectedEdge[x, y], UndirectedEdge[x, z],
-       UndirectedEdge[x, y], UndirectedEdge[x, z], UndirectedEdge[y, z], UndirectedEdge[z, w]}, ...]">
+     alt="Out[] = Graph[{x <-> x, x <-> y, x <-> z, x <-> y, x <-> z, y <-> z, z <-> w}, ...]">
 
 ## **"StructurePreserving"**
 
