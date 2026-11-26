@@ -51,7 +51,8 @@ sprinkledGraph = BlockRandom[Module[{coordinates, causalSet},
 
 <img src="/Documentation/Images/CausalDensityDimensionInput.png"
      width="386.4"
-     alt="Out[] = ... random causal set graph of 2 spacetime dimensions ...">
+     alt="Out[] = Graph[... a diamond-shaped causal set with vertex 1 at the top, vertex 50 at the bottom, and
+       arrows pointing toward the future ...]">
 
 ```wl
 In[] := CausalDensityDimension[sprinkledGraph, {1, 50}]

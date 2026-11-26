@@ -28,10 +28,10 @@ In[] := SetReplaceStyleData["CausalGraph"]
 
 <img src="/Documentation/Images/CausalGraphStyles.png"
      width="747"
-     alt='<|
-       "Background" -> None, "EdgeStyle" -> Hue[0, 1, 0.56],
-       "FinalVertexStyle" -> Directive[GrayLevel[1], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
-       ...,
+     alt='Out[] = <|
+       "EdgeStyle" -> Hue[0, 1, 0.56],
+       "FinalVertexStyle" -> Directive[White, EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]],
+       "InitialVertexStyle" -> Directive[RGBColor[0.259, 0.576, 1], EdgeForm[{RGBColor[0.259, 0.576, 1], Opacity[1]}]],
        "VertexStyle" -> Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]]
      |>'>
 
@@ -46,7 +46,7 @@ In[] := SetReplaceStyleData["SpatialGraph3D", "Options"]
 
 <img src="/Documentation/Images/SpatialGraph3DOptions.png"
      width="625"
-     alt="{
+     alt="Out[] = {
        VertexStyle -> Directive[Hue[0.65, 0.64, 0.68], Specularity[Hue[0.71, 0.6, 0.64], 10]],
        EdgeStyle -> Hue[0.61, 0.3, 0.85]
      }">
@@ -61,8 +61,7 @@ In[] := SetReplaceStyleData["SpatialGraph3D", "Function"][
 
 <img src="/Documentation/Images/FakeStyledSpatialGraph3D.png"
      width="478"
-     alt="Out[] = Graph3D[
-       ...,
+     alt="Out[] = Graph[{1 -> 2, 2 -> 3, 3 -> 1, 3 -> 4, 4 -> 1},
+       ... four glossy blue-violet spheres joined by pale blue arrows in three dimensions ...,
        VertexStyle -> Directive[Hue[0.65, 0.64, 0.68], Specularity[Hue[0.71, 0.6, 0.64], 10]],
-       EdgeStyle -> Hue[0.61, 0.3, 0.85]
-     ]">
+       EdgeStyle -> Hue[0.61, 0.3, 0.85]]">

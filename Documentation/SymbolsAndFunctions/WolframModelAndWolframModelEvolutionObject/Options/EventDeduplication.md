@@ -16,7 +16,7 @@ In[] := WolframModel[{{a, b}, {a, c}} -> {{b, c}}, {{1, 2}, {1, 3}},
 
 <img src="/Documentation/Images/TwoMatchOrdersDifferentOutcomes.png"
      width="310"
-     alt="Out[] = ... {{1, 2}, {1, 3}} -> {{2, 3}} and {{1, 2}, {1, 3}} -> {{3, 2}} ...">
+     alt="Out[] = Graph[... {{1, 2}, {1, 3}} -> {{2, 3}} and {{1, 2}, {1, 3}} -> {{3, 2}} ...]">
 
 In the case above the outputs are different, however sometimes they are the same (more precisely, isomorphic):
 
@@ -29,7 +29,7 @@ In[] := WolframModel[{{a, b}, {a, c}} -> {{b, c}, {c, b}}, {{1, 2}, {1, 3}},
 
 <img src="/Documentation/Images/TwoMatchOrdersSameOutcome.png"
      width="478"
-     alt="Out[] = ... {{1, 2}, {1, 3}} -> {{2, 3}, {3, 2}} and {{1, 3}, {1, 2}} -> {{3, 2}, {2, 3}} ...">
+     alt="Out[] = Graph[... {{1, 2}, {1, 3}} -> {{2, 3}, {3, 2}} and {{1, 3}, {1, 2}} -> {{3, 2}, {2, 3}} ...]">
 
 **`EventDeduplication`** option can be used in a case like this to combine these two identical events into one:
 
@@ -42,7 +42,7 @@ In[] := WolframModel[{{a, b}, {a, c}} -> {{b, c}, {c, b}}, {{1, 2}, {1, 3}},
 
 <img src="/Documentation/Images/TwoIdentifiedMatchOrders.png"
      width="310"
-     alt="Out[] = ... {{1, 2}, {1, 3}} -> {{2, 3}, {3, 2}} ...">
+     alt="Out[] = Graph[... {{1, 2}, {1, 3}} -> {{2, 3}, {3, 2}} ...]">
 
 The outputs of the rule need not be identical, but should be isomorphic with respect to renaming of new atoms:
 
@@ -55,4 +55,4 @@ In[] := WolframModel[{{a, b}, {a, c}} -> {{b, d}, {c, d}}, {{1, 2}, {1, 3}},
 
 <img src="/Documentation/Images/TwoIsomorphicMatchOrders.png"
      width="310"
-     alt="Out[] = ... {{1, 2}, {1, 3}} -> {{2, 4}, {3, 4}} ...">
+     alt="Out[] = Graph[... {{1, 2}, {1, 3}} -> {{2, 4}, {3, 4}} ...]">

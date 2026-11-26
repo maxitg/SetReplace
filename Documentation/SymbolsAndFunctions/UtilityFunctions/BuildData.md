@@ -20,6 +20,6 @@ In[] := $SetReplaceBuildTime
 
 <img src="/Documentation/Images/BuildTime.png"
      width="277"
-     alt="Out[] = ... [Sun 12 Apr 2020 16:06:38 UTC] ...">
+     alt="Out[] = DateObject[... Sun 12 Apr 2020 16:06:38 UTC ...]">
 
 These constants are particularly useful for reporting issues with the code.

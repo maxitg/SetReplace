@@ -12,7 +12,10 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
 
 <img src="/Documentation/Images/NonoverlappingEvolutionWithAutomaticOrdering.png"
      width="513"
-     alt="Out[] = {... {{1, 2}, {2, 2}} -> {{2, 2}, {1, 3}, {3, 2}} ...}">
+     alt="Out[] = {
+       Graphics[... initial edges {1, 2} and {2, 2}, with {1, 2} dotted for deletion ...],
+       Graphics[... the loop {2, 2} remains and two new red arrows {1, 3} and {3, 2} subdivide the original edge ...]
+     }">
 
 ```wl
 In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
@@ -22,7 +25,10 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {3, 2}},
 
 <img src="/Documentation/Images/NonoverlappingEvolutionWithNewestEdgeOrdering.png"
      width="513"
-     alt="Out[] = {... {{1, 2}, {2, 2}} -> {{1, 2}, {2, 3}, {3, 2}} ...}">
+     alt="Out[] = {
+       Graphics[... initial edges {1, 2} and {2, 2}, with the loop dotted for deletion ...],
+       Graphics[... the edge {1, 2} remains and two new red arrows {2, 3} and {3, 2} replace the loop ...]
+     }">
 
 In this particular so-called non-overlapping system, the order of replacements does not matter. Regardless of order, the
 same final state (up to renaming of vertices) is produced for the same fixed number of generations. This will always be
@@ -36,7 +42,8 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
 
 <img src="/Documentation/Images/NonoverlappingRandomEvolutionComparison.png"
      width="513"
-     alt="Out[] = ... list of two isomorphic graphs with 54 edges ...">
+     alt="Out[] = {Graphics[... automatic ordering, 54 edges ...], Graphics[... random ordering, an isomorphic
+       54-edge hypergraph ...]}">
 
 For some systems, however, the order of replacements does matter, and non-equivalent final states would be produced for
 different orders even if a fixed number of generations is requested:
@@ -48,7 +55,7 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3, 4}},
 
 <img src="/Documentation/Images/OverlappingEvolutionAutomaticOrdering.png"
      width="478"
-     alt="Out[] = ... a graph with 128 edges ...">
+     alt="Out[] = Graphics[... 128 edges form a dense network with several hubs under automatic ordering ...]">
 
 ```wl
 In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3, 4}},
@@ -58,7 +65,8 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3, 4}},
 
 <img src="/Documentation/Images/OverlappingEvolutionRuleOrderingOrdering.png"
      width="478"
-     alt="Out[] = ... a graph with 96 edges ...">
+     alt="Out[] = Graphics[... 96 edges form two dense groups with sparse connections between them under
+       RuleOrdering ...]">
 
 In a case like that, it is important to be able to specify the desired evolution order, which is the purpose of
 the **`"EventOrderingFunction"`** option. `"EventOrderingFunction"` is specified as a list of sorting criteria such as
@@ -152,4 +160,15 @@ In[] := WolframModel[{{{1, 2}, {1, 3}, {1, 4}} -> {{5, 6}, {6, 7}, {7, 5}, {5,
 
 <img src="/Documentation/Images/AllEventOrderingFunctionPlots.png"
      width="1209"
-     alt="Out[] = {... 10 graphs with variable complexity and edge count, one of which disconnected ...}">
+     alt="Out[] = {
+       Graphics[... OldestEdge, a mesh with a large opening ...],
+       Graphics[... LeastOldEdge, a dense wheel of spokes ...],
+       Graphics[... LeastRecentEdge, a mesh with an open center ...],
+       Graphics[... NewestEdge, two disconnected components ...],
+       Graphics[... RuleOrdering, the same shape as OldestEdge ...],
+       Graphics[... ReverseRuleOrdering, a sparse cycle with branches ...],
+       Graphics[... RuleIndex, the same shape as LeastRecentEdge ...],
+       Graphics[... ReverseRuleIndex, two joined lobes ...],
+       Graphics[... Random, three lobes ...],
+       Graphics[... Any, a branching mesh ...]
+     }">

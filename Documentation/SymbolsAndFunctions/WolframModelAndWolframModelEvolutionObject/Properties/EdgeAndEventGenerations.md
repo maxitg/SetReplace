@@ -33,7 +33,11 @@ In[] := With[{
 <img src="/Documentation/Images/GenerationColoredStatePlots.png"
      width="746"
      alt="Out[] = {
-       ... 6 hypergraph plots showing edges of multiple generations in the same state starting from the 3rd plot ...
+       Graphics[... three purple self-loops at generation 0 ...],
+       Graphics[... all blue edges at generation 1 ...],
+       Graphics[... both blue and green edges at generation 2 ...],
+       ...,
+       Graphics[... red generation-5 edges coexist with older edges in the sixth plot ...]
      }">
 
 Event and expression generations correspond to layers in [`"LayeredCausalGraph"`](CausalGraphs.md)
@@ -54,4 +58,5 @@ In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
 
 <img src="/Documentation/Images/HypergraphModelLayeredCausalGraph.png"
      width="218"
-     alt="Out[] = ... causal graph showing 5 generations, some edges cross multiple generations, e.g., 1 -> 3 ...">
+     alt="Out[] = Graph[... six events in five layers, with two events in generation 5. An edge directly from
+       generation 1 to generation 3 skips generation 2 ...]">

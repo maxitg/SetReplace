@@ -30,7 +30,8 @@ In[] := HypergraphPlot /@ With[{
 
 <img src="/Documentation/Images/AllEventsStatesListPlot.png"
      width="746"
-     alt="Out[] = {... 8 plots of state hypergraphs with single events in between consecutive states ...}">
+     alt="Out[] = {Graphics[... initial state with five hyperedges at one vertex ...], ..., Graphics[... state
+       after event 7 with 40 hyperedges. Each successive plot shows one replacement ...]}">
 
 However, this representation is useful if one needs to distinguish between identical edges.
 

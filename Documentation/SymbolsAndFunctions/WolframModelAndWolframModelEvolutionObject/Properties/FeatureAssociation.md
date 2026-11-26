@@ -31,16 +31,16 @@ In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 
 
 <img src="/Documentation/Images/FeatureAssociationExampleSingleHistory.png"
      width="621.0"
-     alt="Out[] = <|
-       StructurePreservingFinalStateGraph -> Graph[...],
-       ObjectPropertiesEventsCount -> 22,
-       ObjectPropertiesPartialGenerationsCount -> 0,
-       ObjectPropertiesAllEventsDistinctElementsCount -> 23,
-       ObjectPropertiesAllEventsEdgesCount -> 90,
-       ObjectPropertiesCompleteGenerationsCount -> 5,
-       ObjectPropertiesTerminationReason -> MaxGenerations,
-       ObjectPropertiesCausalGraph -> Graph[...]
-     |>">
+     alt='Out[] = <|
+       "StructurePreservingFinalStateGraph" -> Graph[...],
+       "ObjectPropertiesEventsCount" -> 22,
+       "ObjectPropertiesPartialGenerationsCount" -> 0,
+       "ObjectPropertiesAllEventsDistinctElementsCount" -> 23,
+       "ObjectPropertiesAllEventsEdgesCount" -> 90,
+       "ObjectPropertiesCompleteGenerationsCount" -> 5,
+       "ObjectPropertiesTerminationReason" -> "MaxGenerations",
+       "ObjectPropertiesCausalGraph" -> Graph[...]
+     |>'>
 
 This property is useful for applying machine learning to Wolfram Models explorations:
 
@@ -54,7 +54,9 @@ In[] := BlockRandom[
 
 <img src="/Documentation/Images/FeatureAssociationFeatureSpacePlot.png"
      width="684.6"
-     alt="Out[] = ... plot showing a feature space with 10 points labeled with hypergraph plots ...">
+     alt="Out[] = Graphics[... feature-space projection of ten evolutions, with blue points labeled by their
+       final-state hypergraphs. The points run roughly from lower left to upper right, and some labels
+       overlap ...]">
 
 For [Multiway Systems](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md)
 it only computes features associated with
@@ -71,13 +73,13 @@ In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{1, 
 
 <img src="/Documentation/Images/FeatureAssociationExampleMultihistory.png"
      width="555.0"
-     alt="Out[] = <|
-       StructurePreservingFinalStateGraph -> Missing[NotExistent, {MultiwaySystem, FinalState}],
-       ObjectPropertiesEventsCount -> 4054,
-       ObjectPropertiesPartialGenerationsCount -> 0,
-       ObjectPropertiesAllEventsDistinctElementsCount -> 4056,
-       ObjectPropertiesAllEventsEdgesCount -> 16219,
-       ObjectPropertiesCompleteGenerationsCount -> 3,
-       ObjectPropertiesTerminationReason -> MaxGenerations,
-       ObjectPropertiesCausalGraph -> Graph[...]
-     |>">
+     alt='Out[] = <|
+       "StructurePreservingFinalStateGraph" -> Missing["NotExistent", {"MultiwaySystem", "FinalState"}],
+       "ObjectPropertiesEventsCount" -> 4054,
+       "ObjectPropertiesPartialGenerationsCount" -> 0,
+       "ObjectPropertiesAllEventsDistinctElementsCount" -> 4056,
+       "ObjectPropertiesAllEventsEdgesCount" -> 16219,
+       "ObjectPropertiesCompleteGenerationsCount" -> 3,
+       "ObjectPropertiesTerminationReason" -> "MaxGenerations",
+       "ObjectPropertiesCausalGraph" -> Graph[...]
+     |>'>

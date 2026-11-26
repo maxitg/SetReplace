@@ -39,4 +39,5 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
 
 <img src="/Documentation/Images/RandomEvolutionPlotWithDroppedGenerations.png"
      width="478"
-     alt="Out[] = ... hypergraph plot showing a result of random evolution after a complete number of generations ...">
+     alt="Out[] = Graphics[... clusters of overlapping hyperedges and self-loops joined by thinner stretches of
+       edges after the incomplete generations are dropped ...]">

@@ -31,4 +31,5 @@ In[] := With[{
 
 <img src="/Documentation/Images/ColoredCausalGraph.png"
      width="478"
-     alt="Out[] = ... causal graph with event vertices shown in 2 colors corresponding to their rule ...">
+     alt="Out[] = Graph[... black vertices represent rule 1 and white vertices represent rule 2. Every white vertex
+       is a sink, so no later event consumes an output of rule 2 ...]">

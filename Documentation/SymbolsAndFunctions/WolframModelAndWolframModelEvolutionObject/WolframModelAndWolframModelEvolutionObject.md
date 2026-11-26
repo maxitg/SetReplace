@@ -316,7 +316,8 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
 
 <img src="/Documentation/Images/MaxGenerationsFinalStatePlot.png"
      width="478"
-     alt="Out[] = ... plot of a hypergraph with 512 hyperedges ...">
+     alt="Out[] = Graphics[... 512 hyperedges form a roughly symmetric ring around a large central opening after
+       six complete generations ...]">
 
 Alternatively, an [`Association`](https://reference.wolfram.com/language/ref/Association.html) can be used to specify a
 more elaborate limiting condition:
@@ -332,7 +333,8 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
 
 <img src="/Documentation/Images/MaxVerticesFinalStatePlot.png"
      width="478"
-     alt="Out[] = ... plot of a less symmetric hypergraph with 400 hyperedges ...">
+     alt="Out[] = Graphics[... 400 hyperedges form an uneven ring. The upper and lower portions have developed
+       differently when the vertex limit cuts the sixth generation short ...]">
 
 Note that the final state here is "less symmetric" because its last generation is incomplete (more on
 that [later](../UtilityFunctions/HypergraphAutomorphismGroup.md)). Such incomplete generations can be automatically
