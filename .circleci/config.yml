@@ -4,41 +4,6 @@ orbs:
   win: circleci/windows@2.2.0
 
 jobs:
-  # Temporary, single-executor job for this draft investigation.
-  hypergraphplot-diagnostics:
-    docker:
-      - image: wolframresearch/wolframengine:12.3.0
-        user: root
-    resource_class: medium
-    steps:
-      - checkout
-      - run:
-          name: Install Required Tools
-          command: |
-            apt-get update
-            apt-get install -y g++ git
-      - run:
-          name: Activate Wolfram Engine
-          command: ./scripts/activateWolframScript.sh
-      - run:
-          name: Install and Reinstall Paclet
-          command: |
-            ./install.wls
-            ./install.wls
-      - run:
-          name: Diagnose HypergraphPlot Once
-          command: |
-            set -eo pipefail
-            mkdir -p test-diagnostics
-            {
-              # Controlled follow-up: match CPU visibility to this job's two-CPU quota.
-              taskset -c 0,1 ./.circleci/printRuntime.sh
-              timeout --kill-after=10s 15m taskset -c 0,1 \
-                ./test.wls -lip WolframModelEvolutionObject HypergraphPlot
-            } 2>&1 | tee test-diagnostics/hypergraphplot.log
-      - store_artifacts:
-          path: test-diagnostics
-
   wolfram-language-paclet-test:
     docker:
       - image: wolframresearch/wolframengine:12.3.0
@@ -52,7 +17,7 @@ jobs:
           name: Install Required Tools
           command: |
             apt-get update
-            apt-get install -y g++ git
+            apt-get install -y g++ git python3
 
       - run:
           name: Activate Wolfram Engine
@@ -60,7 +25,7 @@ jobs:
 
       - run:
           name: Build
-          command: ./build.wls
+          command: ./.circleci/withCpuLimit.py ./build.wls
 
       - store_artifacts:
           path: ./LibraryResources/
@@ -74,25 +39,26 @@ jobs:
 
       - run:
           name: Install
-          command: ./install.wls
+          command: ./.circleci/withCpuLimit.py ./install.wls
 
       - store_artifacts:
           path: ./BuiltPaclets/
 
       - run:
           name: Reinstall
-          command: ./install.wls
+          command: ./.circleci/withCpuLimit.py ./install.wls
 
       - run:
           name: Test
-          command: ./.circleci/test.sh # This assumes parallelism: 4 and would not run all tests otherwise
+          # This assumes parallelism: 4 and would not run all tests otherwise.
+          command: ./.circleci/withCpuLimit.py ./.circleci/test.sh
 
       - run:
           name: Performance Test
           command: |
             if [ $CIRCLE_NODE_INDEX -eq 0 ]
             then
-              ./performanceTest.wls master HEAD 2
+              ./.circleci/withCpuLimit.py ./performanceTest.wls master HEAD 2
             fi
 
   cpp-test:
@@ -127,6 +93,10 @@ jobs:
               echo "Please run scripts/install_git_hooks.sh to detect linting issues before git push."
               exit 1
             fi
+
+      - run:
+          name: Test CPU Limit Wrapper
+          command: python3 -B .circleci/test_cpu_limit.py
 
       - run:
           name: Build
@@ -241,9 +211,6 @@ jobs:
 workflows:
   version: 2
   build-and-test:
-    # Keep the investigation branch to one Linux job; remove these gates before merging this draft.
-    unless:
-      equal: [codex/hypergraphplot-container-investigation, << pipeline.git.branch >>]
     jobs:
       - macos-build
       - windows-build
@@ -253,8 +220,3 @@ workflows:
           requires:
             - macos-build
             - windows-build
-  hypergraphplot-investigation:
-    when:
-      equal: [codex/hypergraphplot-container-investigation, << pipeline.git.branch >>]
-    jobs:
-      - hypergraphplot-diagnostics
