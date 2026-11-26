@@ -8,7 +8,9 @@ object is returned by [generators](/Documentation/Generators/README.md) of the
 In[] := GenerateMultihistory[MultisetSubstitutionSystem[{a_, b_} :> {a + b}], MaxEvents -> 10] @ {1, 2, 3}
 ```
 
-<img src="/Documentation/Images/MultisetMultihistory.png" width="426.6">
+<img src="/Documentation/Images/MultisetMultihistory.png"
+     width="426.6"
+     alt="Out[] = Multihistory[... MultisetSubstitutionSystem v0 ...]">
 
 It is implemented as an [`Association`](https://reference.wolfram.com/language/guide/Associations.html) of
 [data structures](https://reference.wolfram.com/language/ref/DataStructure.html) containing information about the rules,
