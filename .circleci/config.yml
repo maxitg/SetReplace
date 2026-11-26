@@ -31,8 +31,10 @@ jobs:
             set -eo pipefail
             mkdir -p test-diagnostics
             {
-              ./.circleci/printRuntime.sh
-              timeout --kill-after=10s 15m ./test.wls -lip WolframModelEvolutionObject HypergraphPlot
+              # Controlled follow-up: match CPU visibility to this job's two-CPU quota.
+              taskset -c 0,1 ./.circleci/printRuntime.sh
+              timeout --kill-after=10s 15m taskset -c 0,1 \
+                ./test.wls -lip WolframModelEvolutionObject HypergraphPlot
             } 2>&1 | tee test-diagnostics/hypergraphplot.log
       - store_artifacts:
           path: test-diagnostics
