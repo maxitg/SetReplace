@@ -335,8 +335,8 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
 <img src="/Documentation/Images/MaxVerticesFinalStatePlot.png"
      width="478"
      alt="Out[] = Graphics[...
-       400 hyperedges form an uneven ring.
-       The upper and lower portions have developed differently when the vertex limit cuts the sixth generation short
+       400 hyperedges forming an uneven ring, with the upper and lower portions at different stages when the vertex
+       limit cuts the sixth generation short
      ...]">
 
 Note that the final state here is "less symmetric" because its last generation is incomplete (more on

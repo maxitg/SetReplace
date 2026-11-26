@@ -19,8 +19,8 @@ In[] := HypergraphPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}}]
 <img src="/Documentation/Images/HypergraphPlot.png"
      width="478"
      alt="Out[] = Graphics[...
-       two shaded triangles and a quadrilateral share vertices.
-       Arrows follow each vertex list and leave the closing side of each polygon unmarked
+       two shaded triangles and a quadrilateral sharing vertices, with arrows following the vertex order along all but
+       the closing side of each polygon
      ...]">
 
 Edges of any arity can be mixed. The binary edges are displayed as non-filled arrows, and the unary edges are shown as
@@ -33,8 +33,8 @@ In[] := HypergraphPlot[{{1, 2, 3}, {3, 4}, {4, 3}, {4, 5, 6}, {1}, {6}, {6}}]
 <img src="/Documentation/Images/BinaryAndUnaryEdgesPlot.png"
      width="478"
      alt="Out[] = Graphics[...
-       two shaded triangles joined by oppositely directed binary edges.
-       Unary edges form one ring at vertex 1 and two concentric rings at vertex 6
+       two shaded triangles joined by oppositely directed binary edges, with one unary ring at vertex 1 and two
+       concentric rings at vertex 6
      ...]">
 
 Self-loops are shown as convex polygons around the appropriate number of circular arrows:
@@ -46,8 +46,8 @@ In[] := HypergraphPlot[{{1, 1, 1}, {1, 2, 3}, {3, 4, 4}}]
 <img src="/Documentation/Images/SelfLoopsPlot.png"
      width="478"
      alt="Out[] = Graphics[...
-       the {1, 1, 1} edge encloses two loops at vertex 1.
-       The {3, 4, 4} edge encloses an arrow from 3 to 4 and a loop at 4
+       the {1, 1, 1} edge encloses two loops at vertex 1, while the {3, 4, 4} edge encloses an arrow from 3 to 4 and a
+       loop at 4
      ...]">
 
 Note the difference between a hyper-self-loop and two binary edges pointing in opposite directions:
@@ -59,8 +59,8 @@ In[] := HypergraphPlot[{{1, 2, 1}, {2, 3}, {3, 2}}]
 <img src="/Documentation/Images/HyperSelfLoopDoubleBinaryEdgesComparison.png"
      width="478"
      alt="Out[] = Graphics[...
-       opposite arrows between vertices 1 and 2 enclose a shaded region for {1, 2, 1}.
-       The opposite arrows between 2 and 3 enclose an unshaded region
+       opposite arrows enclose a shaded region between vertices 1 and 2 for the hyperedge {1, 2, 1}, while the two
+       binary edges between 2 and 3 enclose an unshaded region
      ...]">
 
 Multiedges are shown in a darker color (because of overlaid partially transparent polygons), or as separate polygons
@@ -73,8 +73,8 @@ In[] := HypergraphPlot[{{1, 2, 3}, {3, 4, 5}, {3, 4, 5}, {1, 6, 6}, {1, 6, 6}}]
 <img src="/Documentation/Images/MultiedgesPlot.png"
      width="478"
      alt="Out[] = Graphics[...
-       two copies of {3, 4, 5} overlap in a darker triangle.
-       The two copies of {1, 6, 6} form separate lobes at the other end
+       two copies of {3, 4, 5} overlap in a darker triangle, while the two copies of {1, 6, 6} form separate lobes at
+       the other end
      ...]">
 
 Many [`WolframModel`](WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
@@ -112,8 +112,7 @@ In[] := HypergraphPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 <img src="/Documentation/Images/PlotWithHighlight.png"
      width="478"
      alt="Out[] = Graphics[...
-       the triangle {1, 2, 3}, vertex 4, and the unary ring at 9 are red.
-       The other elements are blue
+       the triangle {1, 2, 3}, vertex 4, and the unary ring at 9 highlighted in red, with the other elements in blue
      ...]">
 
 For a hypergraph with multiedges, only the specified number of edges will be highlighted:
@@ -159,8 +158,8 @@ In[] := HypergraphPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 <img src="/Documentation/Images/SubgraphsHyperedgeRendering.png"
      width="478"
      alt="Out[] = Graphics[...
-       vertices 1 through 9 connected by arrows along each hyperedge, with a ring at 9.
-       Polygon fills are gone, so the paths no longer show where one hyperedge ends and another begins
+       vertices 1 through 9 connected by arrows along each hyperedge, with a ring at 9 and no polygon fills to
+       distinguish one hyperedge from the next
      ...]">
 
 ## VertexCoordinates
@@ -176,8 +175,7 @@ In[] := HypergraphPlot[{{1, 2, 3}, {2, 4, 5}, {2, 6, 7, 8}, {8, 9, 1}},
 <img src="/Documentation/Images/PlotWithCustomCoordinates.png"
      width="478"
      alt="Out[] = Graphics[...
-       one shaded triangle has its corners at (0, 0), (1, 0) and (0, 1) on the axes.
-       The other vertices are laid out around it
+       a shaded triangle with corners at (0, 0), (1, 0) and (0, 1) on the axes, surrounded by the other vertices
      ...]">
 
 Unfortunately, due to limitations of [`GraphEmbedding`](https://reference.wolfram.com/language/ref/GraphEmbedding.html),
@@ -248,8 +246,8 @@ In[] := HypergraphPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7}, {7, 8, 9}, {9, 10,
 <img src="/Documentation/Images/PlotWithNoArrowsAndVertices.png"
      width="478"
      alt="Out[] = Graphics[...
-       five shaded triangles form a ring around a central pentagonal gap.
-       Only the polygon outlines and fills are visible
+       five shaded triangles forming a ring around a central pentagonal gap, with only the polygon outlines and fills
+       visible
      ...]">
 
 As a neat example, one can even draw unordered hypergraphs:
@@ -265,8 +263,8 @@ In[] := HypergraphPlot[{{1, 2, 2}, {2, 3, 3}, {3, 1, 1}},
 <img src="/Documentation/Images/UnorderedPlot.png"
      width="478"
      alt="Out[] = Graphics[...
-       three visible vertex disks joined by pale, outlined polygons, each rounded around a repeated vertex.
-       No arrows indicate an ordering
+       three visible vertex disks joined by pale, outlined polygons, each rounded around a repeated vertex and drawn
+       without arrows
      ...]">
 
 ## "MaxImageSize"
@@ -295,7 +293,7 @@ In[] := HypergraphPlot[#, ImageSize -> 100] & /@ {{{1}}, {{1, 1}}, {{1, 2, 3}}}
      alt="Out[] = {
        Graphics[... a ring with a large vertex disk ...],
        Graphics[... a loop with a smaller disk ...],
-       Graphics[... a triangle with the smallest disks. All three plots have the same width ...]
+       Graphics[... a triangle with the smallest vertex disks of the three equal-width plots ...]
      }">
 
 ## Style Options
@@ -348,10 +346,7 @@ In[] := HypergraphPlot[{{1, 2, 3}, {3, 4, 5}, {5, 6, 7, 1}, {7, 8, 2}, {4,
 
 <img src="/Documentation/Images/PlotWithCustomEdgePolygonStyle.png"
      width="478"
-     alt="Out[] = Graphics[...
-       red vertices and solid green arrows on pale green polygons.
-       Black dotted outlines mark the polygon boundaries
-     ...]">
+     alt="Out[] = Graphics[... red vertices and solid green arrows on pale green polygons outlined in black dots ...]">
 
 It is possible to specify styles separately for each edge and vertex. Vertex styles are specified in the same order
 as `Union @* Catenate` evaluated on the list of edges:

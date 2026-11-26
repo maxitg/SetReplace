@@ -12,8 +12,8 @@ In[] := GeneralizedGridGraph[{5 -> "Directed", 5 -> "Circular"}]
 <img src="/Documentation/Images/GridGraph.png"
      width="478"
      alt="Out[] = Graph[...
-       five undirected pentagonal rings of five vertices.
-       Arrows point from each ring to the next along the cylinder
+       five undirected pentagonal rings of five vertices each, with arrows pointing from each ring to the next along the
+       cylinder
      ...]">
 
 Possible specifiers are `"Directed"` and `"Circular"`, and they can be combined:
@@ -25,8 +25,8 @@ In[] := GeneralizedGridGraph[{3 -> {"Directed", "Circular"}, 6}]
 <img src="/Documentation/Images/DirectedCircularGridGraph.png"
      width="478"
      alt="Out[] = Graph[...
-       six directed triangles connected in a row.
-       Arrows cycle around each triangle, and undirected edges join corresponding vertices of adjacent triangles
+       six triangles in a row, with arrows cycling around each triangle and undirected edges joining corresponding
+       vertices of adjacent triangles
      ...]">
 
 The same options as [`GridGraph`](https://reference.wolfram.com/language/ref/GridGraph.html) are supported. In
@@ -40,8 +40,8 @@ In[] := GeneralizedGridGraph[{4, 5, 2},
 <img src="/Documentation/Images/GridGraphWithCoordinateNamedVertices.png"
      width="478"
      alt="Out[] = Graph[...
-       two 4-by-5 grids joined at corresponding vertices.
-       Each label is a coordinate triple such as {1, 1, 1} or {1, 1, 2}
+       two 4-by-5 grids joined at corresponding vertices, each labeled with a coordinate triple such as {1, 1, 1} or {1,
+       1, 2}
      ...]">
 
 Finally, it's possible to use different `EdgeStyle` in different directions by specifying it as a list:
