@@ -4,6 +4,38 @@ orbs:
   win: circleci/windows@2.2.0
 
 jobs:
+  # Temporary comparison with the newest official Engine image, without CPU affinity changes.
+  hypergraphplot-current-version:
+    docker:
+      - image: wolframresearch/wolframengine@sha256:3ac08d6aaa33e6dccdda38d14cf8a7e5c22cc84d037a1a7562900914a487ef65
+        user: root
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Install Required Tools
+          command: |
+            apt-get update
+            apt-get install -y g++ git python3
+      - run:
+          name: Activate Wolfram Engine
+          command: ./scripts/activateWolframScript.sh
+      - run:
+          name: Install Paclet
+          command: ./install.wls
+      - run:
+          name: Test Only the Large HypergraphPlot Case
+          command: |
+            set -eo pipefail
+            mkdir -p test-diagnostics
+            python3 .circleci/prepareHypergraphPlotProbe.py
+            {
+              ./.circleci/printRuntime.sh
+              timeout --kill-after=10s 10m ./test.wls -lip HypergraphPlotLargeOnly
+            } 2>&1 | tee test-diagnostics/hypergraphplot-current-version.log
+      - store_artifacts:
+          path: test-diagnostics
+
   wolfram-language-paclet-test:
     docker:
       - image: wolframresearch/wolframengine:12.3.0
@@ -211,6 +243,8 @@ jobs:
 workflows:
   version: 2
   build-and-test:
+    unless:
+      equal: [codex/hypergraphplot-container-investigation, << pipeline.git.branch >>]
     jobs:
       - macos-build
       - windows-build
@@ -220,3 +254,8 @@ workflows:
           requires:
             - macos-build
             - windows-build
+  hypergraphplot-current-version-probe:
+    when:
+      equal: [codex/hypergraphplot-container-investigation, << pipeline.git.branch >>]
+    jobs:
+      - hypergraphplot-current-version
