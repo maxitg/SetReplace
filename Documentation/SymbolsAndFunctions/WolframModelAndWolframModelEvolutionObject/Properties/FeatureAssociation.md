@@ -54,9 +54,10 @@ In[] := BlockRandom[
 
 <img src="/Documentation/Images/FeatureAssociationFeatureSpacePlot.png"
      width="684.6"
-     alt="Out[] = Graphics[... feature-space projection of ten evolutions, with blue points labeled by their
-       final-state hypergraphs. The points run roughly from lower left to upper right, and some labels
-       overlap ...]">
+     alt="Out[] = Graphics[...
+       feature-space projection of ten evolutions, with blue points labeled by their final-state hypergraphs.
+       The points run roughly from lower left to upper right, and some labels overlap
+     ...]">
 
 For [Multiway Systems](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/MultiwayQ.md)
 it only computes features associated with

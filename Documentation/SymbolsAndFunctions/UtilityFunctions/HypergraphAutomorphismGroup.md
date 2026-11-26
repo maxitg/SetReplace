@@ -23,8 +23,10 @@ In[] := GroupOrder[
 
 <img src="/Documentation/Images/SymmetricHypergraphPlot.png"
      width="451"
-     alt="Out[] = Graphics[... three pairs of triangles arranged around a central gap. The two triangles in each
-       pair share two vertices and their tips can be interchanged ...]">
+     alt="Out[] = Graphics[...
+       three pairs of triangles arranged around a central gap.
+       The two triangles in each pair share two vertices and their tips can be interchanged
+     ...]">
 
 ```wl
 Out[] = 24

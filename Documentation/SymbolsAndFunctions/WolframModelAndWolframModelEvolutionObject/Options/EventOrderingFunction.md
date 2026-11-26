@@ -42,8 +42,10 @@ In[] := WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}},
 
 <img src="/Documentation/Images/NonoverlappingRandomEvolutionComparison.png"
      width="513"
-     alt="Out[] = {Graphics[... automatic ordering, 54 edges ...], Graphics[... random ordering, an isomorphic
-       54-edge hypergraph ...]}">
+     alt="Out[] = {
+       Graphics[... automatic ordering, 54 edges ...],
+       Graphics[... random ordering, an isomorphic 54-edge hypergraph ...]
+     }">
 
 For some systems, however, the order of replacements does matter, and non-equivalent final states would be produced for
 different orders even if a fixed number of generations is requested:
@@ -65,8 +67,9 @@ In[] := WolframModel[{{1, 2}, {2, 3}} -> {{4, 2}, {4, 1}, {2, 1}, {3, 4}},
 
 <img src="/Documentation/Images/OverlappingEvolutionRuleOrderingOrdering.png"
      width="478"
-     alt="Out[] = Graphics[... 96 edges form two dense groups with sparse connections between them under
-       RuleOrdering ...]">
+     alt="Out[] = Graphics[...
+       96 edges form two dense groups with sparse connections between them under RuleOrdering
+     ...]">
 
 In a case like that, it is important to be able to specify the desired evolution order, which is the purpose of
 the **`"EventOrderingFunction"`** option. `"EventOrderingFunction"` is specified as a list of sorting criteria such as

@@ -61,7 +61,9 @@ In[] := SetReplaceStyleData["SpatialGraph3D", "Function"][
 
 <img src="/Documentation/Images/FakeStyledSpatialGraph3D.png"
      width="478"
-     alt="Out[] = Graph[{1 -> 2, 2 -> 3, 3 -> 1, 3 -> 4, 4 -> 1},
+     alt="Out[] = Graph[
+       {1 -> 2, 2 -> 3, 3 -> 1, 3 -> 4, 4 -> 1},
        ... four glossy blue-violet spheres joined by pale blue arrows in three dimensions ...,
        VertexStyle -> Directive[Hue[0.65, 0.64, 0.68], Specularity[Hue[0.71, 0.6, 0.64], 10]],
-       EdgeStyle -> Hue[0.61, 0.3, 0.85]]">
+       EdgeStyle -> Hue[0.61, 0.3, 0.85]
+     ]">

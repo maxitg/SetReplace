@@ -83,10 +83,12 @@ In[] := WolframModel[{{{1, 2}, {2, 3}} -> {{1, 2, 3}},
 
 <img src="/Documentation/Images/BranchlikeMatching.png"
      width="373"
-     alt="Out[] = Graph[... {{1, 2}, {2, 3}} -> {{1, 2, 3}},
+     alt="Out[] = Graph[...
+       {{1, 2}, {2, 3}} -> {{1, 2, 3}},
        {{1, 2}, {2, 4}} -> {{1, 2, 4}},
        {{1, 2, 3}, {1, 2, 4}} -> {{1, 2, 3, 4}},
-       {{1, 2, 4}, {1, 2, 3}} -> {{1, 2, 4, 3}} ...]">
+       {{1, 2, 4}, {1, 2, 3}} -> {{1, 2, 4, 3}}
+     ...]">
 
 Similarly, it matches timelike expressions `{1, 2}` and `{1, 2, 3}` below:
 

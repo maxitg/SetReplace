@@ -58,5 +58,7 @@ In[] := WolframModel[{{1, 2}, {1, 3}, {1, 4}} ->
 
 <img src="/Documentation/Images/HypergraphModelLayeredCausalGraph.png"
      width="218"
-     alt="Out[] = Graph[... six events in five layers, with two events in generation 5. An edge directly from
-       generation 1 to generation 3 skips generation 2 ...]">
+     alt="Out[] = Graph[...
+       six events in five layers, with two events in generation 5.
+       An edge directly from generation 1 to generation 3 skips generation 2
+     ...]">

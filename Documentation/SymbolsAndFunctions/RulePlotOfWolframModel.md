@@ -12,8 +12,11 @@ In[] := RulePlot[WolframModel[{{1, 2}, {1, 2}} ->
 
 <img src="/Documentation/Images/RulePlot.png"
      width="429"
-     alt="Out[] = Graphics[... two parallel arrows from 1 to 2 become two arrows from the new vertex 3 to 2, one
-       from 2 to 1, and one from 1 to 3. The two shared vertices keep their positions ...]">
+     alt="Out[] = Graphics[...
+       two parallel arrows from 1 to 2 become two arrows from the new vertex 3 to 2, one from 2 to 1, and one from 1 to
+       3.
+       The two shared vertices keep their positions
+     ...]">
 
 The shared elements between rule sides (vertices `1` and `2` in the example above) are put at the same positions in
 the `RulePlot` and highlighted in a darker shade of blue. Shared edges are highlighted as well:
@@ -24,8 +27,10 @@ In[] := RulePlot[WolframModel[{{1, 2, 3}} -> {{1, 2, 3}, {3, 4, 5}}]]
 
 <img src="/Documentation/Images/RulePlotWithSharedEdges.png"
      width="429"
-     alt="Out[] = Graphics[... the highlighted triangle {1, 2, 3} stays in the same position on both sides. The
-       output adds a second triangle sharing vertex 3 ...]">
+     alt="Out[] = Graphics[...
+       the highlighted triangle {1, 2, 3} stays in the same position on both sides.
+       The output adds a second triangle sharing vertex 3
+     ...]">
 
 Multiple rules can be plotted:
 
@@ -37,8 +42,10 @@ In[] := RulePlot[WolframModel[{{{1, 1, 2}} ->
 
 <img src="/Documentation/Images/MultipleRulesPlot.png"
      width="808"
-     alt="Out[] = Graphics[... two framed rules side by side. The first replaces one ternary edge with three, and
-       the second replaces two ternary edges with one ...]">
+     alt="Out[] = Graphics[...
+       two framed rules side by side.
+       The first replaces one ternary edge with three, and the second replaces two ternary edges with one
+     ...]">
 
 Passing
 a [`WolframModelEvolutionObject`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
@@ -51,8 +58,10 @@ property:
 
 <img src="/Documentation/Images/RulePlot.png"
      width="429"
-     alt="Out[] = Graphics[... the same rule as above. Two parallel arrows from 1 to 2 become two from the new
-       vertex 3 to 2, one from 2 to 1, and one from 1 to 3 ...]">
+     alt="Out[] = Graphics[...
+       the same rule as above.
+       Two parallel arrows from 1 to 2 become two from the new vertex 3 to 2, one from 2 to 1, and one from 1 to 3
+     ...]">
 
 Sometimes an incorrectly scaled layout might be produced due to the issue discussed above
 in [`VertexCoordinates`](HypergraphPlot.md#vertexcoordinates):

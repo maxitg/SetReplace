@@ -13,8 +13,11 @@ In[] := WolframModel[{{x, y}, {x, z}} -> {{x, z}, {x, w}, {y, w}, {z, w}}, {{0, 
 
 <img src="/Documentation/Images/FeatureVectorExampleSingleHistory.png"
      width="513.0"
-     alt='Out[] = {Graph[... structure-preserving final-state graph ...], 22, 0, 23, 90, 5, "MaxGenerations",
-       Graph[... causal graph ...]}'>
+     alt='Out[] = {
+       Graph[... structure-preserving final-state graph ...],
+       22, 0, 23, 90, 5, "MaxGenerations",
+       Graph[... causal graph ...]
+     }'>
 
 For the list of features
 see [`FeatureAssociation`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/FeatureAssociation.md).
@@ -33,6 +36,8 @@ In[] := BlockRandom[
 
 <img src="/Documentation/Images/FeatureVectorFeatureSpacePlot.png"
      width="815.4"
-     alt="Out[] = Graphics[... ten evolutions projected into feature space, labeled by their final-state
-       hypergraphs. Two points at the upper left sit apart from the lower-right group. Several callouts
-       overlap ...]">
+     alt="Out[] = Graphics[...
+       ten evolutions projected into feature space, labeled by their final-state hypergraphs.
+       Two points at the upper left sit apart from the lower-right group.
+       Several callouts overlap
+     ...]">
