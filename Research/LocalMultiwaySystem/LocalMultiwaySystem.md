@@ -407,7 +407,7 @@ In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
      alt="Out[] = {
        Framed[Graph[... one event produces both {2, 3} and {3, 4}, so the two outputs are spacelike ...]],
        Framed[Graph[... two events compete for {1, 2}, so their outputs {2, 3} and {3, 4} are branchlike ...]],
-       Framed[Graph[... {1, 2} becomes {2, 3} and then {3, 4}, so the last two expressions are timelike ...]]
+       Framed[Graph[... {1, 2} becomes {2, 3} and then {3, 4}, so all three expressions are pairwise timelike ...]]
      }">
 
 In the first example, a single event produces two expressions, `{2, 3}` *and* `{3, 4}`. This corresponds to a spacelike
