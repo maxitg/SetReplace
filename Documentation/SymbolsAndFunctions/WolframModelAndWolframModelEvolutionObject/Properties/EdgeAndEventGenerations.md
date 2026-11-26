@@ -37,7 +37,7 @@ In[] := With[{
        Graphics[... all blue edges at generation 1 ...],
        Graphics[... both blue and green edges at generation 2 ...],
        <<2>>,
-       Graphics[... red generation-5 edges coexist with older edges in the sixth plot ...]
+       Graphics[... red generation-5 edges coexist with one yellow-green self-loop from generation 3 ...]
      }">
 
 Event and expression generations correspond to layers in [`"LayeredCausalGraph"`](CausalGraphs.md)
