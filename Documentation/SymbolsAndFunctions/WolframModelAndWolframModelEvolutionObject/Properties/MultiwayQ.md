@@ -16,7 +16,8 @@ In[] := EchoFunction[#["ExpressionsEventsGraph"] &][
 <img src="/Documentation/Images/MultiwayExpressionsEventsGraphEchoed.png"
      width="451"
      alt=">> Graph[...
-       Two events share the initial {2, 3}, pairing it with {1, 2} and {3, 4}, respectively.
+       Two events consume the same initial {2, 3}.
+       Their other inputs are {1, 2} and {3, 4}, respectively.
        The first produces {{1, 2}, {2, 3}, {3, 5}} and the second produces {{2, 3}, {3, 4}, {4, 6}}.
        The two output copies of {2, 3} are distinct expression vertices.
      ...]">
@@ -37,8 +38,9 @@ In[] := EchoFunction[#["ExpressionsEventsGraph"] &][WolframModel[
 <img src="/Documentation/Images/SinglewayExpressionsEventsGraphEchoed.png"
      width="415"
      alt=">> Graph[...
-       the initial {1, 1} produces {1, 2} and {2, 1}, which feed separate events:
-       {{1, 2}} -> {{1, 3}, {3, 2}} and {{2, 1}} -> {{2, 4}, {4, 1}}
+       {1, 1} produces {1, 2} and {2, 1}.
+       The next two events use separate inputs:
+       {{1, 2}} -> {{1, 3}, {3, 2}} and {{2, 1}} -> {{2, 4}, {4, 1}}.
      ...]">
 
 ```wl

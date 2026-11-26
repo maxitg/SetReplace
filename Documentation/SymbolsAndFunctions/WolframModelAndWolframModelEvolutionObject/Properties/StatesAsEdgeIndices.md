@@ -33,7 +33,7 @@ In[] := HypergraphPlot /@ With[{
      alt="Out[] = {
        Graphics[... initial state with five hyperedges at one vertex ...],
        <<6>>,
-       Graphics[... 40 hyperedges after event 7, with one replacement between consecutive plots ...]
+       Graphics[... State after event 7 with 40 hyperedges. Each successive plot shows one replacement. ...]
      }">
 
 However, this representation is useful if one needs to distinguish between identical edges.

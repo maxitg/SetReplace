@@ -37,7 +37,8 @@ In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
 <img src="/Documentation/Images/ArithmeticModelCausalGraph.png"
      width="478"
      alt="Out[] = Graph[...
-       eight event vertices with arrows from 1 to 5, from 2 and 3 to 6, from 4 and 5 to 7, and from 6 and 7 to 8
+       Arrows link events 1 to 5, 2 and 3 to 6, 4 and 5 to 7, and 6 and 7 to 8.
+       All eight vertices represent events.
      ...]">
 
 Here is an example for a hypergraph model (admittedly considerably harder to understand). Multiedges correspond to
@@ -53,7 +54,8 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {1, 4}} ->
 <img src="/Documentation/Images/HypergraphModelCausalGraph.png"
      width="478"
      alt="Out[] = Graph[...
-       a disk-shaped network with arrows spreading toward the rim and parallel arrows connecting several pairs of events
+       A disk-shaped network of events with arrows spreading toward the rim.
+       Several pairs of events are joined by parallel arrows.
      ...]">
 
 **`"LayeredCausalGraph"`** generates the same graph but layers events generation-by-generation. For example, in our
@@ -67,8 +69,9 @@ In[] := WolframModel[<|"PatternRules" -> {a_, b_} :> a + b|>,
 <img src="/Documentation/Images/ArithmeticModelLayeredCausalGraph.png"
      width="478"
      alt="Out[] = Graph[...
-       four generations of events, with events 1 through 4 in the first layer, 5 and 6 in the second, 7 in the third,
-       and 8 in the fourth
+       The eight events arranged in four generations.
+       Generation 1 contains events 1 through 4, generation 2 contains 5 and 6, generation 3 contains 7, and generation
+       4 contains 8.
      ...]">
 
 Note how slices through the expressions-events graph correspond to states returned by [`"StatesList"`](States.md). Pay

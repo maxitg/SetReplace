@@ -58,6 +58,6 @@ In[] := HypergraphUnificationsPlot[{{1, 2, 3}, {4, 5, 6}, {1, 4}},
        <<11>>,
        Graphics[...
          The matches share a purple connecting edge.
-         In all 13 plots, red and blue labels give the original vertex names.
+         In all 13 plots red and blue labels give the original vertex names.
        ...]
      }">

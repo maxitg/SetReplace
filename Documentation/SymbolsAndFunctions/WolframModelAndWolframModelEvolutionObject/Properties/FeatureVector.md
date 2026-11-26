@@ -37,7 +37,7 @@ In[] := BlockRandom[
 <img src="/Documentation/Images/FeatureVectorFeatureSpacePlot.png"
      width="815.4"
      alt="Out[] = Graphics[...
-       Final-state hypergraphs label ten evolutions in feature space.
+       Ten evolutions projected into feature space, labeled by their final-state hypergraphs.
        Two points at the upper left sit apart from the lower-right group.
        Several callouts overlap.
      ...]">
