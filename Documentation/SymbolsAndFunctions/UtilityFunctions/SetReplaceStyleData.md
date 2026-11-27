@@ -2,7 +2,7 @@
 
 # SetReplaceStyleData
 
-**`SetReplaceStyleData`** allows one to lookup styles used in various *SetReplace* functions and properties such as
+**`SetReplaceStyleData`** allows one to lookup styles used in various _SetReplace_ functions and properties such as
 [`HypergraphPlot`](../HypergraphPlot.md)
 and [`"CausalGraph"`](../WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md).
 
@@ -35,7 +35,7 @@ In[] := SetReplaceStyleData["CausalGraph"]
        "VertexStyle" -> Directive[Hue[0.11, 1, 0.97], EdgeForm[{Hue[0.11, 1, 0.97], Opacity[1]}]]
      |>'>
 
-This function is useful if one needs to produce "fake" example plots using styles consistent with *SetReplace*.
+This function is useful if one needs to produce "fake" example plots using styles consistent with _SetReplace_.
 
 For graphs composed of only a single type of vertices and edges, there is a short-hand syntax. One can get the list of
 all options that needs to be passed using an `"Options"` property:

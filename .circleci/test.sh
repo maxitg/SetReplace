@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-if [ "$CIRCLE_NODE_INDEX" -eq 2 ]; then
+if [[ ${CIRCLE_NODE_INDEX} -eq 2 ]]; then
   testsToRun=hypergraphMatching
-elif [ "$CIRCLE_NODE_INDEX" -eq 3 ]; then
+elif [[ ${CIRCLE_NODE_INDEX} -eq 3 ]]; then
   testsToRun=WolframModel
 else
   mapfile -t testsToRun < <(circleci tests glob "Tests/*.wlt" |

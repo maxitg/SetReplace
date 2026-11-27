@@ -1,7 +1,7 @@
 # $SetReplaceProperties
 
 **`$SetReplaceProperties`** gives the list of all [properties](/Documentation/Properties/README.md) defined in
-*SetReplace*:
+_SetReplace_:
 
 ```wl
 In[] := $SetReplaceProperties

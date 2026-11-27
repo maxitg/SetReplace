@@ -1,10 +1,9 @@
 ---
 name: Weed report
 about: Report something that is not working to help us improve
-title: ''
+title: ""
 labels: weed
-assignees: ''
-
+assignees: ""
 ---
 
 ### The problem

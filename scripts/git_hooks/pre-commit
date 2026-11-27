@@ -2,7 +2,7 @@
 
 stagedFiles=$(git diff --name-only --cached)
 
-for file in $stagedFiles; do
-  ./lint.sh -f -i "$file"
-  git add "$file"
+for file in ${stagedFiles}; do
+  ./lint.sh -f -i "${file}"
+  git add "${file}"
 done

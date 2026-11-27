@@ -3,7 +3,7 @@
 # Build Data
 
 There are two constants containing information about the build. **`$SetReplaceGitSHA`** is a git SHA of the
-currently-used version of *SetReplace*:
+currently-used version of _SetReplace_:
 
 ```wl
 In[] := $SetReplaceGitSHA

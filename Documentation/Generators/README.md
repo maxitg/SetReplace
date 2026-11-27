@@ -4,8 +4,8 @@ Generators are functions that create [`Multihistory`](/Documentation/Types/Multi
 rules for a [computational system](/Documentation/Systems/README.md) and additional parameters specifying how to perform
 the evaluation.
 
-In *SetReplace*, we split the states of [computational systems](/Documentation/Systems/README.md) into components which
-we call tokens. Rewrites (which we call events) replace some of these tokens with others. *SetReplace* can evaluate
+In _SetReplace_, we split the states of [computational systems](/Documentation/Systems/README.md) into components which
+we call tokens. Rewrites (which we call events) replace some of these tokens with others. _SetReplace_ can evaluate
 multiple branches of nondeterministic systems simultaneously. That is done by applying different events to the same
 tokens and keeping events and tokens instead of states in [`Multihistory`](/Documentation/Types/Multihistory/README.md)
 objects. We can reconstruct the states from that information afterward.
@@ -68,16 +68,16 @@ Generator[System[rules], parameters...] @ init
 in such [`Rule`](https://reference.wolfram.com/language/ref/Rule.html)s depend on the system and can be looked up with
 [`SetReplaceSystemParameters`](SetReplaceSystemParameters.md).
 
-* Introspection:
-  * [`$SetReplaceSystems`]($SetReplaceSystems.md) &mdash; yields the list of all implemented systems
-  * [`$SetReplaceGenerators`]($SetReplaceGenerators.md) &mdash; yields the list of all generators
-  * [`SetReplaceSystemParameters`](SetReplaceSystemParameters.md) &mdash; yields the list of parameters for a system
-* Generators:
-  * [`GenerateMultihistory`](GenerateMultihistory.md) &mdash; the universal generator for multihistories
-  * [`GenerateSingleHistory`](GenerateSingleHistory.md) &mdash; sets `MaxDestroyerEvents -> 1`
-* Parameters:
-  * [`MaxDestroyerEvents`](MaxDestroyerEvents.md) &mdash; allows one to switch between single and multihistories
-  * [`MinEventInputs`](MinEventInputs.md)
-  * [`MaxEventInputs`](MaxEventInputs.md)
-  * [`MaxEvents`](MaxEvents.md)
-  * [`MaxGeneration`](MaxGeneration.md) &mdash; controls the depth of the evaluation
+- Introspection:
+  - [`$SetReplaceSystems`]($SetReplaceSystems.md) &mdash; yields the list of all implemented systems
+  - [`$SetReplaceGenerators`]($SetReplaceGenerators.md) &mdash; yields the list of all generators
+  - [`SetReplaceSystemParameters`](SetReplaceSystemParameters.md) &mdash; yields the list of parameters for a system
+- Generators:
+  - [`GenerateMultihistory`](GenerateMultihistory.md) &mdash; the universal generator for multihistories
+  - [`GenerateSingleHistory`](GenerateSingleHistory.md) &mdash; sets `MaxDestroyerEvents -> 1`
+- Parameters:
+  - [`MaxDestroyerEvents`](MaxDestroyerEvents.md) &mdash; allows one to switch between single and multihistories
+  - [`MinEventInputs`](MinEventInputs.md)
+  - [`MaxEventInputs`](MaxEventInputs.md)
+  - [`MaxEvents`](MaxEvents.md)
+  - [`MaxGeneration`](MaxGeneration.md) &mdash; controls the depth of the evaluation
