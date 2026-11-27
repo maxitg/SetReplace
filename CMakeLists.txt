@@ -1,4 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
+# Must be set before project(). Keep in sync with DevUtils/BuildLibSetReplace.m, SetReplace.xcodeproj and README.md.
+if(NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.5" CACHE STRING "Minimum macOS version to target" FORCE)
+endif()
 project(SetReplace
     VERSION 0.3.0
     LANGUAGES CXX)
