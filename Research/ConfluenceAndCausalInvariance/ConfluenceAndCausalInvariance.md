@@ -67,7 +67,14 @@ WolframModel[{{{1, 1, 2}} -> {{1, 1, 3}, {3, 3, 2}}, {{1, 2,
 ```
 -->
 
-<img src="Images/LargeCausalInvariantEvolution.png" width="720">
+<img src="Images/LargeCausalInvariantEvolution.png"
+     width="720"
+     alt="Graph[...
+       Blue vertices are expressions and orange vertices are events.
+       The initial expression can be used by either of two events.
+       On both branches, each event produces two expressions and each nonterminal expression feeds a single event.
+       The two branches form isomorphic trees.
+     ...]">
 
 On the other hand, *confluence* has to do with the symmetries between expressions' contents. It requires that particular
 states from different branches are isomorphic as hypergraphs, regardless of the causal structures that lead to them:
@@ -125,7 +132,13 @@ Module[{leftBranch, rightBranch}, Graph[Join[
 ```
 -->
 
-<img src="Images/LargeConfluentEvolution.png" width="720">
+<img src="Images/LargeConfluentEvolution.png"
+     width="720"
+     alt="Graph[...
+       Two alternative events use the initial expression.
+       The left branch grows through successive pairs of outputs and the right through groups of four.
+       Despite their different shapes, both branches reach the same row of final expressions.
+     ...]">
 
 ## Confluence !=> Causal Invariance
 
@@ -144,7 +157,12 @@ In[] := ResourceFunction["MultiwaySystem"][
   "WolframModel" -> {confluentRule}, {confluentInit}, 2, "StatesGraph", VertexSize -> 1]
 ```
 
-<img src="Images/ConfluentStatesGraph.png" width="358">
+<img src="Images/ConfluentStatesGraph.png"
+     width="358"
+     alt="Out[] = Graph[...
+       On the directed triangle, the unary expression moves from {1} to {3} either directly or via {2}.
+       Both paths reach the same final state.
+     ...]">
 
 However, this system is not causal invariant. We can generate two non-isomorphic causal graphs by using different event
 ordering functions, which contradicts the definition above:
@@ -155,7 +173,12 @@ In[] := IsomorphicGraphQ @@ Echo @ (
     "CausalGraph"] & /@ {"OldestEdge", "NewestEdge"})
 ```
 
-<img src="Images/ConfluentCausalGraphs.png" width="480">
+<img src="Images/ConfluentCausalGraphs.png"
+     width="480"
+     alt=">> {
+       Graph[... two events joined by a causal edge ...],
+       Graph[... one isolated event ...]
+     }">
 
 ```wl
 Out[] = False
@@ -189,7 +212,12 @@ In[] := WolframModel[
     "ExpressionsEventsGraph", VertexLabels -> Automatic]
 ```
 
-<img src="Images/CausalInvariantMultiwaySystem.png" width="405">
+<img src="Images/CausalInvariantMultiwaySystem.png"
+     width="405"
+     alt="Out[] = Graph[...
+       Both alternative events consume the same {1, 2} and {2, 1}.
+       One produces {1}, the other {2}, and the initial {1} is isolated.
+     ...]">
 
 These two events correspond to two different singleway evolutions terminating at states `{{1}, {1}}` and `{{1}, {2}}`,
 respectively:
@@ -199,7 +227,12 @@ In[] := WolframModel[causalInvariantRule, causalInvariantInit, Infinity, "EventO
   "ExpressionsEventsGraph", VertexLabels -> Placed[Automatic, After]] & /@ {"RuleOrdering", "ReverseRuleOrdering"}
 ```
 
-<img src="Images/CausalInvariantEvolutions.png" width="470">
+<img src="Images/CausalInvariantEvolutions.png"
+     width="470"
+     alt="Out[] = {
+       Graph[... {{1, 2}, {2, 1}} -> {{1}}, with the initial {1} unused ...],
+       Graph[... {{2, 1}, {1, 2}} -> {{2}}, with the initial {1} unused ...]
+     }">
 
 These evolutions yield isomorphic causal graphs, which are composed of a single vertex with no edges, implying that this
 system is causal invariant by definition:
@@ -210,7 +243,9 @@ In[] := IsomorphicGraphQ @@ Echo @ (
     {"RuleOrdering", "ReverseRuleOrdering"})
 ```
 
-<img src="Images/CausalInvariantCausalGraphs.png" width="480">
+<img src="Images/CausalInvariantCausalGraphs.png"
+     width="480"
+     alt=">> {Graph[... one isolated event ...], Graph[... one isolated event ...]}">
 
 ```wl
 Out[] = True
@@ -224,7 +259,13 @@ In[] := ResourceFunction["MultiwaySystem"][
   "WolframModel" -> {causalInvariantRule}, {causalInvariantInit}, 2, "StatesGraph", VertexSize -> .7]
 ```
 
-<img src="Images/CausalInvariantStatesGraph.png" width="478">
+<img src="Images/CausalInvariantStatesGraph.png"
+     width="478"
+     alt="Out[] = Graph[...
+       The initial state {{1, 2}, {2, 1}, {1}} branches to two terminal states.
+       In {{1}, {1}} both unary expressions are at one vertex.
+       In {{1}, {2}} they are at different vertices.
+     ...]">
 
 Therefore, causal invariance *does not imply* confluence.
 
