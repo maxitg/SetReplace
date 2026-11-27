@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-if ! ./lint.sh; then
-  echo "Linter errors need to be fixed before pushing."
-  exit 1
-fi
-
-exit 0

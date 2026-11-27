@@ -60,6 +60,34 @@ jobs:
               ./performanceTest.wls master HEAD 2
             fi
 
+  lint:
+    docker:
+      - image: cimg/base:2026.11@sha256:4e57f523172e8f5bbf9cb57393b80c964ac0e6c75ee70ebd8c980d11bb503c01
+        auth:
+          username: maxitg
+          password: $DOCKERHUB_PASSWORD
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - trunk-{{ checksum ".trunk/trunk.yaml" }}
+
+      - run:
+          name: Lint
+          command: |
+            if ! ./lint.sh --all --ci; then
+              echo "Please see the Code Style section of .github/CONTRIBUTING.md to fix these issues locally."
+              exit 1
+            fi
+
+      - save_cache:
+          key: trunk-{{ checksum ".trunk/trunk.yaml" }}
+          paths:
+            - ~/.cache/trunk
+          when: always
+
   cpp-test:
     docker:
       - image: alpine:3.21.2@sha256:56fa17d2a7e7f168a043a2712e63aed1f8543aeafdcee47c58dcffe38ed51099
@@ -72,26 +100,7 @@ jobs:
 
       - run:
           name: Install Required Tools
-          command: |
-            apk add --no-cache bash git g++ make cmake clang clang-extra-tools py-pip shellcheck grep npm
-            apk add --no-cache shfmt --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
-            npm install -g markdownlint-cli@0.37.0
-
-            python3 -m venv .venv
-            . .venv/bin/activate
-            pip install cpplint==2.0.0
-
-      - run:
-          name: Lint
-          command: |
-            set +eo pipefail
-            . .venv/bin/activate
-            ./lint.sh
-            if [ $? -ne 0 ]
-            then
-              echo "Please run scripts/install_git_hooks.sh to detect linting issues before git push."
-              exit 1
-            fi
+          command: apk add --no-cache bash git g++ make cmake
 
       - run:
           name: Build
@@ -207,6 +216,7 @@ workflows:
   version: 2
   build-and-test:
     jobs:
+      - lint
       - macos-build
       - windows-build
       - cpp-test

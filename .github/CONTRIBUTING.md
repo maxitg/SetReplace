@@ -304,8 +304,8 @@ The main objectives for the code review:
 
 1. Verify the code works (i.e., make sure you can reproduce examples in the pull request message).
 2. Read the code, understand it, and see if you can spot any potential weeds/unnecessary slowdowns/issues with it (
-   including issues with code style as we currently only have a linter for the C++ and Bash, but not for the Wolfram
-   Language code).
+   including issues with code style as our linters only check whitespace and line widths in the Wolfram Language
+   code).
 3. Check the pull request has unit tests and changes documentation if appropriate.
 
 We use [Reviewable](https://reviewable.io) for code review, which greatly simplifies the tracking of comments (
@@ -610,6 +610,29 @@ from the checkpoint defined in [version.wl](/scripts/version.wl).
 
 ## Code Style
 
+We check the code style automatically with [Trunk](https://docs.trunk.io/code-quality), which runs formatters and
+linters for C++, Bash, Markdown, YAML, and other files. For Wolfram Language code, it only fixes whitespace and checks
+line widths, so please follow the rules [below](#wolfram-language).
+
+To run it, call `./lint.sh`. The first run downloads Trunk and all linters, so you don't need to install anything. By
+default, it only checks the files you changed. To check all files, use `./lint.sh --all`. To apply all fixes, including
+formatting, without being asked, use `./lint.sh --fix`. The same checks run in CI for every pull request.
+
+The first run also sets up two git hooks:
+
+1. `pre-commit` formats any staged files before committing.
+2. `pre-push` checks the changed files for formatting and linting errors before pushing.
+
+To skip the hooks once, use `git commit --no-verify` or `git push --no-verify`. To disable a hook, add it to
+`.trunk/user.yaml`, which is not committed:
+
+```yaml
+version: 0.1
+actions:
+  disabled:
+    - trunk-fmt-pre-commit # or trunk-check-pre-push
+```
+
 ### Wolfram Language
 
 Unfortunately, there are no established style guidelines for Wolfram Language code. Here, the best rule is to try to be
@@ -770,25 +793,7 @@ following exceptions:
 - We use `.cpp` and `.hpp` extensions for source files.
 
 We use [`clang-format`](https://clang.llvm.org/docs/ClangFormat.html) for formatting and
-[`cpplint`](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py) for linting C++ code.
-
-We use [`shfmt`](https://github.com/mvdan/sh) for formatting and
-[`shellcheck`](https://github.com/koalaman/shellcheck) for linting Bash code.
-
-To run these automatically, call `./lint.sh`. This will print a formatting diff and error messages from `cpplint`
-and `shellcheck`. If there are no errors found, it will exit with no output. To edit the code in place with the fixed
-formatting use `./lint.sh -i`.
-
-We have two useful git hooks that you may install:
-
-1. `pre-commit` formats any staged files before committing.
-2. `pre-push` checks for formatting and linting errors before pushing.
-
-You may install these hooks by running `./scripts/install_git_hooks.sh`. By default, both hooks will be installed. If
-you only wish to install one, pass the name of the hook as an argument (
-e.g., `./scripts/install_git_hooks.sh pre-commit`).
-
-You may uninstall a hook by running `rm .git/hooks/hook-name` where `hook-name` is `pre-commit` or `pre-push`.
+[`cpplint`](https://github.com/cpplint/cpplint) for linting C++ code.
 
 If `cpplint` flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
 positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
@@ -799,11 +804,17 @@ comments section.
 If you want to disable formatting, use `// clang-format off` and `// clang-format on` around the manually formatted
 code.
 
+### Bash
+
+We use [`shfmt`](https://github.com/mvdan/sh) for formatting and
+[`shellcheck`](https://github.com/koalaman/shellcheck) for linting Bash code.
+
 ### Markdown
 
 We are using GitHub-flavored Markdown for documentation and research notes.
 
-We use [`markdownlint`](https://github.com/DavidAnson/markdownlint) for formatting and linting markdown text.
+We use [`prettier`](https://prettier.io) for formatting and [`markdownlint`](https://github.com/DavidAnson/markdownlint)
+for linting Markdown text.
 
 #### Manual image embedding
 
