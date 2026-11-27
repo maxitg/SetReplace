@@ -1,6 +1,6 @@
 # SetReplaceType
 
-**`SetReplaceType`** represents a *SetReplace* [type](/Documentation/Types/README.md). It has the format
+**`SetReplaceType`** represents a _SetReplace_ [type](/Documentation/Types/README.md). It has the format
 
 ```wl
 SetReplaceType[name, version]

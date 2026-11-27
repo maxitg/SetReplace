@@ -29,11 +29,11 @@ In[] := WolframModel[{{1, 2, 3}, {2, 4, 5}} ->
 
 Note that this call is different from the [`SetReplace`](../SetReplace.md) function in a variety of ways:
 
-* The order of arguments is switched, the rule goes first.
-* The rule is specified in the "anonymous" form ([`ToPatternRules`](../ToPatternRules.md) is done implicitly).
-* The number of steps here is the number of generations, which is equivalent to steps
+- The order of arguments is switched, the rule goes first.
+- The rule is specified in the "anonymous" form ([`ToPatternRules`](../ToPatternRules.md) is done implicitly).
+- The number of steps here is the number of generations, which is equivalent to steps
   of [`SetReplaceAll`](../SetReplace.md). Here each edge can have at most 10 generations of predecessors.
-* The output is not a final state, but a **`WolframModelEvolutionObject`** containing the entire evolution (similar
+- The output is not a final state, but a **`WolframModelEvolutionObject`** containing the entire evolution (similar
   to [`SetReplaceList`](../SetReplace.md) but with additional information about the relationships between edges and the
   events that produced them. From the information field on that object, one can see that the evolution was done for 10
   generations (i.e., the evolution did not terminate early), and 109 replacements (aka events) were made in total.
@@ -108,25 +108,25 @@ as an input during the 3rd step.
 
 Other properties of the evolution object describe the relationships between edges and the features of the evolution:
 
-* `"Version"` is the data format of the evolution object. This description is for version 2, which is the first version
+- `"Version"` is the data format of the evolution object. This description is for version 2, which is the first version
   to support multiway systems. Version 1 does not have the `"Version"` key. The objects of older versions are
   automatically migrated when they are evaluated.
-* `"Rules"` is an exact copy of the corresponding `WolframModel` argument.
-* `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions
+- `"Rules"` is an exact copy of the corresponding `WolframModel` argument.
+- `"MaxCompleteGenerations"` shows the largest generation in which no matches are possible that only involve expressions
   of this or earlier generations. In this particular case, it is the same as the largest generation of any edge, but it
   might be different if a more elaborate [step specification](#step-limiters) is used.
-* `"TerminationReason"` shows the reason evaluation was stopped. See
+- `"TerminationReason"` shows the reason evaluation was stopped. See
   the [`"TerminationReason"`](Properties/TerminationReason.md) property for more details.
-* `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example
+- `"EventRuleIDs"` shows which rule was used for each event. It's rather boring in this particular case, as this example
   only has one rule. See [Rule Indices for Events](Properties/RuleIndicesForEvents.md) for a more interesting case. The
   first value, `0`, corresponds to the initial event, which is included in the evolution object but is
   omitted [by default](Options/IncludeBoundaryEvents.md) when computing [properties](#properties).
-* `"EventInputs"` shows which edge indices from `"AtomLists"` were used in each event. The order corresponds to the
+- `"EventInputs"` shows which edge indices from `"AtomLists"` were used in each event. The order corresponds to the
   input patterns of the rules. The first value, `{}`, again corresponds to the initial event. Note, the same index can
   appear multiple times in [multiway systems](Options/EventSelectionFunction.md).
-* `"EventOutputs"` similarly shows which edge indices from `"AtomLists"` were produced by each event. There are no
+- `"EventOutputs"` similarly shows which edge indices from `"AtomLists"` were produced by each event. There are no
   duplicates in these lists because events always generate new edges.
-* `"EventGenerations"` shows how many layers of predecessors a given event has.
+- `"EventGenerations"` shows how many layers of predecessors a given event has.
 
 A specific property can be requested from an evolution object by supplying it as an argument to the object itself:
 
@@ -369,18 +369,18 @@ In[] := WolframModel[{{1, 2, 3}, {4, 5, 6}, {2, 5}, {5, 2}} ->
 
 All possible keys in that association are:
 
-* `"MaxEvents"`: limit the number of individual replacements (in the [`SetReplace`](../SetReplace.md) function meaning).
-* `"MaxDestroyerEvents"`: limits the number of destroyer events per expression. That is, when the destroyer events count
+- `"MaxEvents"`: limit the number of individual replacements (in the [`SetReplace`](../SetReplace.md) function meaning).
+- `"MaxDestroyerEvents"`: limits the number of destroyer events per expression. That is, when the destroyer events count
   of a given expression reaches the maximum number allowed, no further match will involve said expression.
-* `"MaxGenerations"`: limit the number of generations (steps in [`SetReplaceAll`](../SetReplace.md) meaning), same as
+- `"MaxGenerations"`: limit the number of generations (steps in [`SetReplaceAll`](../SetReplace.md) meaning), same as
   specifying steps directly as a number in `WolframModel`.
-* `"MaxVertices"`: limit the number of vertices in the *final* state only (the total count throughout evolution might be
+- `"MaxVertices"`: limit the number of vertices in the _final_ state only (the total count throughout evolution might be
   larger). This limit stops evolution if the next event, if applied, would put the state over the limit. Note once such
   an event is encountered, the evolution stops immediately even if other matches exist that would not put the vertex
   count over the limit.
-* `"MaxVertexDegree"`: limit the number of final state edges in which any particular vertex is involved. Works in a
+- `"MaxVertexDegree"`: limit the number of final state edges in which any particular vertex is involved. Works in a
   similar way to `"MaxVertices"`.
-* `"MaxEdges"`: limit the number of edges (set elements) in the final state. Works similarly to `"MaxVertices"`.
+- `"MaxEdges"`: limit the number of edges (set elements) in the final state. Works similarly to `"MaxVertices"`.
 
 Any combination of these can be used, in which case the earliest triggered condition stops the evolution.
 
@@ -424,37 +424,37 @@ returns values for all properties even if terminated due to time constraint), an
 
 ## Properties
 
-* [States](Properties/States.md)
-* [Plots of States](Properties/PlotsOfStates.md)
-* [Plots of Events](Properties/PlotsOfEvents.md)
-* [All Edges throughout Evolution](Properties/AllEdgesThroughoutEvolution.md)
-* [States as Edge Indices](Properties/StatesAsEdgeIndices.md)
-* [Events](Properties/Events.md)
-* [Events and States](Properties/EventsAndStates.md)
-* [Creator and Destroyer Events](Properties/CreatorAndDestroyerEvents.md)
-* [Causal Graphs](Properties/CausalGraphs.md)
-* [Expression Separations](Properties/ExpressionSeparations.md)
-* [MultiwayQ](Properties/MultiwayQ.md)
-* [Rule Indices for Events](Properties/RuleIndicesForEvents.md)
-* [Edge and Event Generations](Properties/EdgeAndEventGenerations.md)
-* [Termination Reason](Properties/TerminationReason.md)
-* [Generation Counts](Properties/GenerationCounts.md)
-* [Event Counts](Properties/EventCounts.md)
-* [Element Count Lists](Properties/ElementCountLists.md)
-* [Final Element Counts](Properties/FinalElementCounts.md)
-* [Total Element Counts](Properties/TotalElementCounts.md)
-* [Rules](Properties/Rules.md)
-* [Feature Association](Properties/FeatureAssociation.md)
-* [Feature Vector](Properties/FeatureVector.md)
-* [Version](Properties/Version.md)
+- [States](Properties/States.md)
+- [Plots of States](Properties/PlotsOfStates.md)
+- [Plots of Events](Properties/PlotsOfEvents.md)
+- [All Edges throughout Evolution](Properties/AllEdgesThroughoutEvolution.md)
+- [States as Edge Indices](Properties/StatesAsEdgeIndices.md)
+- [Events](Properties/Events.md)
+- [Events and States](Properties/EventsAndStates.md)
+- [Creator and Destroyer Events](Properties/CreatorAndDestroyerEvents.md)
+- [Causal Graphs](Properties/CausalGraphs.md)
+- [Expression Separations](Properties/ExpressionSeparations.md)
+- [MultiwayQ](Properties/MultiwayQ.md)
+- [Rule Indices for Events](Properties/RuleIndicesForEvents.md)
+- [Edge and Event Generations](Properties/EdgeAndEventGenerations.md)
+- [Termination Reason](Properties/TerminationReason.md)
+- [Generation Counts](Properties/GenerationCounts.md)
+- [Event Counts](Properties/EventCounts.md)
+- [Element Count Lists](Properties/ElementCountLists.md)
+- [Final Element Counts](Properties/FinalElementCounts.md)
+- [Total Element Counts](Properties/TotalElementCounts.md)
+- [Rules](Properties/Rules.md)
+- [Feature Association](Properties/FeatureAssociation.md)
+- [Feature Vector](Properties/FeatureVector.md)
+- [Version](Properties/Version.md)
 
 ## Options
 
-* ["VertexNamingFunction"](Options/VertexNamingFunction.md)
-* ["IncludePartialGenerations"](Options/IncludePartialGenerations.md)
-* ["IncludeBoundaryEvents"](Options/IncludeBoundaryEvents.md)
-* ["EventOrderingFunction"](Options/EventOrderingFunction.md)
-* ["EventSelectionFunction"](Options/EventSelectionFunction.md)
-* ["EventDeduplication"](Options/EventDeduplication.md)
-* [Method](Options/Method.md)
-* [Time Constraint](Options/TimeConstraint.md)
+- ["VertexNamingFunction"](Options/VertexNamingFunction.md)
+- ["IncludePartialGenerations"](Options/IncludePartialGenerations.md)
+- ["IncludeBoundaryEvents"](Options/IncludeBoundaryEvents.md)
+- ["EventOrderingFunction"](Options/EventOrderingFunction.md)
+- ["EventSelectionFunction"](Options/EventSelectionFunction.md)
+- ["EventDeduplication"](Options/EventDeduplication.md)
+- [Method](Options/Method.md)
+- [Time Constraint](Options/TimeConstraint.md)

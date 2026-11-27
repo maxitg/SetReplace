@@ -7,10 +7,10 @@ graph.
 
 There are three fundamental cases, the separation between two expressions can be:
 
-* spacelike -- the expressions were produced (directly or indirectly) by a single event;
-* branchlike -- the expressions were produced (directly or indirectly) by multiple events that matched the same
+- spacelike -- the expressions were produced (directly or indirectly) by a single event;
+- branchlike -- the expressions were produced (directly or indirectly) by multiple events that matched the same
   expression;
-* timelike -- the expressions are causally related, one produced or was produced by another.
+- timelike -- the expressions are causally related, one produced or was produced by another.
 
 The expressions `{2, 3}` and `{3, 4}` here are spacelike, branchlike and timelike separated respectively:
 
@@ -39,7 +39,7 @@ One might be tempted to assume that spacelike separated expressions can always b
 history for a singleway system. For match-all evolution, however, this is not the case. Match-all rules can match two
 branchlike separated expressions, something that is never possible for singleway systems. If such events produce
 spacelike separated results, then we will obtain spacelike separated expressions that can be assembled into global
-states which *do not* correspond to any singleway evolution state. See expressions `{4, 5}` and `{5, 6}` in the
+states which _do not_ correspond to any singleway evolution state. See expressions `{4, 5}` and `{5, 6}` in the
 following picture:
 
 ```wl

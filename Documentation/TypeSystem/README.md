@@ -1,6 +1,6 @@
 # Type System
 
-The basis of *SetReplace* is the type system used for [`Multihistory`](/Documentation/Types/Multihistory/README.md)
+The basis of _SetReplace_ is the type system used for [`Multihistory`](/Documentation/Types/Multihistory/README.md)
 objects describing evolutions of various computational systems.
 
 `Multihistory` objects can be created with functions such as
@@ -17,18 +17,18 @@ Most of the time, it is sufficient to rely on these automatic conversions. Howev
 convert an object to a different type manually for persistence or optimization, in which case one can use the
 [`SetReplaceTypeConvert`](SetReplaceTypeConvert.md) function.
 
-[`SetReplaceObjectQ`](SetReplaceObjectQ.md) can be used to find out if an expression is a *SetReplace* object, and
+[`SetReplaceObjectQ`](SetReplaceObjectQ.md) can be used to find out if an expression is a _SetReplace_ object, and
 [`SetReplaceObjectType`](SetReplaceObjectType.md) can be used to determine its type.
 
-* Enumeration:
-  * [`$SetReplaceTypes`]($SetReplaceTypes.md)
-  * [`$SetReplaceProperties`]($SetReplaceProperties.md)
-  * [`$SetReplaceTypeGraph`]($SetReplaceTypeGraph.md) &mdash; a graph showing translations/property implementation paths
-    * Vertex heads: [`SetReplaceType`](SetReplaceType.md),
-                    [`SetReplaceProperty`](SetReplaceProperty.md),
-                    [`SetReplaceMethodImplementation`](SetReplaceMethodImplementation.md)
-* Introspection:
-  * [`SetReplaceObjectQ`](SetReplaceObjectQ.md)
-  * [`SetReplaceObjectType`](SetReplaceObjectType.md)
-* Conversion:
-  * [`SetReplaceTypeConvert`](SetReplaceTypeConvert.md) &mdash; change an object from one type to another
+- Enumeration:
+  - [`$SetReplaceTypes`]($SetReplaceTypes.md)
+  - [`$SetReplaceProperties`]($SetReplaceProperties.md)
+  - [`$SetReplaceTypeGraph`]($SetReplaceTypeGraph.md) &mdash; a graph showing translations/property implementation paths
+    - Vertex heads: [`SetReplaceType`](SetReplaceType.md),
+      [`SetReplaceProperty`](SetReplaceProperty.md),
+      [`SetReplaceMethodImplementation`](SetReplaceMethodImplementation.md)
+- Introspection:
+  - [`SetReplaceObjectQ`](SetReplaceObjectQ.md)
+  - [`SetReplaceObjectType`](SetReplaceObjectType.md)
+- Conversion:
+  - [`SetReplaceTypeConvert`](SetReplaceTypeConvert.md) &mdash; change an object from one type to another

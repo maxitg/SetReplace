@@ -1,6 +1,6 @@
 # SetReplaceObjectQ
 
-**`SetReplaceObjectQ`** yields [`True`](https://reference.wolfram.com/language/ref/True.html) for *SetReplace* objects
+**`SetReplaceObjectQ`** yields [`True`](https://reference.wolfram.com/language/ref/True.html) for _SetReplace_ objects
 and [`False`](https://reference.wolfram.com/language/ref/False.html) otherwise:
 
 <img src="/Documentation/Images/SetReplaceObjectQOfMultihistory.png"

@@ -16,14 +16,14 @@ says:
 > In a terminating system, causal invariance implies that whatever path is taken, the "answer" will always be the same.
 
 > **Confluence**: A simplified form of causal invariance considered in term rewriting systems such as ones that reach
-   fixed points.
+> fixed points.
 
 However, the glossary does not explicitly define confluence, so we are going to use the
 [standard definition](https://en.wikipedia.org/wiki/Confluence_%28abstract_rewriting%29#General_case_and_theory) from
 the theory of rewriting systems:
 
-> A state *a* is deemed **confluent** if, for all pairs of states *b*, *c* that can be reached from *a*, there exists a
-> state *d* that can be reached from both *b* and *c*.
+> A state _a_ is deemed **confluent** if, for all pairs of states _b_, _c_ that can be reached from _a_, there exists a
+> state _d_ that can be reached from both _b_ and _c_.
 > If every state in the system is confluent, the system itself is confluent.
 
 We can summarize the statements above with the following definitions:
@@ -43,7 +43,7 @@ We can then define confluence as:
 > A Wolfram model evolution is called **confluent** if and only if any pair of partial singleway evolutions starting
 > from a particular state can be continued in such a way as to reach isomorphic final states.
 
-In what follows, we will demonstrate that causal invariance is *not* equivalent to confluence, neither of them implies
+In what follows, we will demonstrate that causal invariance is _not_ equivalent to confluence, neither of them implies
 the other, and the two statements made above are false:
 
 > When causal invariance exists, every branch in the multiway system must eventually merge.
@@ -54,7 +54,7 @@ We will not make any comments in this note about the physics claims made above.
 
 Before we get to specific examples, it's essential to understand the fundamental difference between these two
 properties.
-*Causal invariance* has to do with symmetries between evolution branches of
+_Causal invariance_ has to do with symmetries between evolution branches of
 [expressions-events graphs](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
 . It requires that, even though the branches operate on different expressions, they have the same causal structure:
 
@@ -76,7 +76,7 @@ WolframModel[{{{1, 1, 2}} -> {{1, 1, 3}, {3, 3, 2}}, {{1, 2,
        The two branches form isomorphic trees.
      ...]">
 
-On the other hand, *confluence* has to do with the symmetries between expressions' contents. It requires that particular
+On the other hand, _confluence_ has to do with the symmetries between expressions' contents. It requires that particular
 states from different branches are isomorphic as hypergraphs, regardless of the causal structures that lead to them:
 
 <!--
@@ -184,7 +184,7 @@ In[] := IsomorphicGraphQ @@ Echo @ (
 Out[] = False
 ```
 
-Therefore, confluence *does not imply* causal invariance.
+Therefore, confluence _does not imply_ causal invariance.
 
 Note that the `"CausalInvariantQ"` property of
 [`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) checks for confluence
@@ -267,7 +267,7 @@ In[] := ResourceFunction["MultiwaySystem"][
        In {{1}, {2}} they are at different vertices.
      ...]">
 
-Therefore, causal invariance *does not imply* confluence.
+Therefore, causal invariance _does not imply_ confluence.
 
 Note that the `"CausalInvariantQ"` property of
 [`MultiwaySystem`](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem) returns
@@ -292,7 +292,7 @@ just one of these properties, both or neither.
 
 To do that, we need to implement tests for both confluence ([#59](https://github.com/maxitg/SetReplace/issues/59),
 [#477](https://github.com/maxitg/SetReplace/issues/477)) and causal invariance
-([#486](https://github.com/maxitg/SetReplace/issues/486)) in *SetReplace*.
+([#486](https://github.com/maxitg/SetReplace/issues/486)) in _SetReplace_.
 
 We will also need to generalize the definition of causal invariance to non-terminating Wolfram models
 ([#487](https://github.com/maxitg/SetReplace/issues/487)).
@@ -303,4 +303,4 @@ confluence:
 1. Consider any infinite singleway evolution of a system.
 2. Consider another finite partial singleway evolution.
 3. If any such finite evolution can be continued in such a way as to reach one of the states from the infinite
-   evolution, we define the system as *"super"-confluent* ([#478](https://github.com/maxitg/SetReplace/issues/478)).
+   evolution, we define the system as _"super"-confluent_ ([#478](https://github.com/maxitg/SetReplace/issues/478)).

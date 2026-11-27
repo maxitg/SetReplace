@@ -19,8 +19,8 @@ rules that have non-trivial nesting or conditions).
 
 The C++ implementation is used by default for supported systems and is particularly useful if:
 
-* Vertex degrees are expected to be small.
-* Evolution needs to be done for a large number of steps `> 100`, it is possible to produce states with up to a million
+- Vertex degrees are expected to be small.
+- Evolution needs to be done for a large number of steps `> 100`, it is possible to produce states with up to a million
   edges or more.
 
 It should not be used, however, if vertex degrees can grow large. For example
@@ -49,6 +49,6 @@ In[] := AbsoluteTiming[
 
 Wolfram Language implementation should be used if:
 
-* A large number of small rules with unknown behavior needs to be simulated for a small number of steps.
-* Vertex degrees are expected to be large, rules are non-local, or pattern rules with non-trivial nesting or conditions
+- A large number of small rules with unknown behavior needs to be simulated for a small number of steps.
+- Vertex degrees are expected to be large, rules are non-local, or pattern rules with non-trivial nesting or conditions
   are used.

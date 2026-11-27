@@ -3,7 +3,7 @@
 First, thanks for contributing! :thumbsup:
 
 These are the guidelines designed to make the development smooth, efficient, and fun for all of us. But remember, we are
-the ones who write them, and *anybody* is welcome to propose changes. Just open a pull request.
+the ones who write them, and _anybody_ is welcome to propose changes. Just open a pull request.
 
 There are fundamentally three kinds of things you can
 contribute: [issues](#issues) ([reports](#weed-reports-something-is-not-working) and [ideas](#feature-suggestions))
@@ -13,11 +13,11 @@ contribute: [issues](#issues) ([reports](#weed-reports-something-is-not-working)
 
 ## Weed reports (something is not working)
 
-First off, while it's common to call problems with the code "bugs", we call them *weeds* here instead (kudos
+First off, while it's common to call problems with the code "bugs", we call them _weeds_ here instead (kudos
 to [@aokellermann](https://github.com/aokellermann)). That's because using the word "bug" in a negative context
-implicitly sends a message that *bugs* (aka insects) are someone bad and should be squashed. We don't agree with that
-sentiment, as *bugs* :ant: :beetle: :spider: are living creatures who deserve moral consideration. Hence, let's leave "
-bugs" alone, and go *weed whacking*.
+implicitly sends a message that _bugs_ (aka insects) are someone bad and should be squashed. We don't agree with that
+sentiment, as _bugs_ :ant: :beetle: :spider: are living creatures who deserve moral consideration. Hence, let's leave "
+bugs" alone, and go _weed whacking_.
 
 Note that the weeds in function repository functions should be reported on the function repository website rather than
 here.
@@ -30,13 +30,13 @@ To report a weed, follow these steps:
    if it's not similar to ones already there).
 2. If the weed is not in the list, click "New issue", and then "Get started" next to the "Weed report".
 3. Fill in all the fields including:
-    * Brief description in natural language.
-    * The line of Wolfram Language code that results in unexpected behavior (or a screenshot if the weed is in the UI).
-    * The actual output you are getting.
-    * The output you expect to see.
-    * The output of `SystemInformation["Small"]` and `$SetReplaceGitSHA`.
-    * If the weed appears randomly and is not easy to reproduce, add details about how often and in what circumstances
-    you encounter it.
+   - Brief description in natural language.
+   - The line of Wolfram Language code that results in unexpected behavior (or a screenshot if the weed is in the UI).
+   - The actual output you are getting.
+   - The output you expect to see.
+   - The output of `SystemInformation["Small"]` and `$SetReplaceGitSHA`.
+   - If the weed appears randomly and is not easy to reproduce, add details about how often and in what circumstances
+     you encounter it.
 
 4. If you have a Mathematica notebook with more details, you can attach it to the issue, just compress it to a `ZIP`
    file first.
@@ -52,7 +52,7 @@ this project. Instead, we improve our development process to minimize the probab
 If you have an idea to improve an existing function, add a property to `WolframModel`, or add a new function that does
 not currently exist, you can suggest it by creating a feature request. There are no guarantees, but someone might
 implement it if they like the idea. You are welcome to suggest research ideas as long as they are directly related to
-the models implemented in *SetReplace*.
+the models implemented in _SetReplace_.
 
 The process is similar to weed reports, just use the "Feature request" option instead. Don't include any version
 information in feature requests.
@@ -63,28 +63,28 @@ It is helpful to add [labels](https://github.com/maxitg/SetReplace/labels) to yo
 developers to find something they are interested in and comfortable working with. We have several categories of labels
 corresponding to different colors.
 
-First, assign one of the *type* labels to your pull request:
+First, assign one of the _type_ labels to your pull request:
 
-* `feature`: new functionality, or change in existing functionality.
-* `weed`: fixes something that was not working.
-* `test`: adds new tests for existing functionality.
-* `documentation`: adds or changes documentation for existing functionality.
-* `optimization`: does not change functionality but makes code faster.
-* `convenience`: makes the syntax more convenient without significantly changing functionality.
-* `design`: changes the visual design (styles, colors, icons, etc.) without affecting functionality.
-* `refactor`: does not change functionality, but makes the code better organized or more readable.
-* `research`: introduces new ideas about the structure of the models themselves ([research notes](#research) will
+- `feature`: new functionality, or change in existing functionality.
+- `weed`: fixes something that was not working.
+- `test`: adds new tests for existing functionality.
+- `documentation`: adds or changes documentation for existing functionality.
+- `optimization`: does not change functionality but makes code faster.
+- `convenience`: makes the syntax more convenient without significantly changing functionality.
+- `design`: changes the visual design (styles, colors, icons, etc.) without affecting functionality.
+- `refactor`: does not change functionality, but makes the code better organized or more readable.
+- `research`: introduces new ideas about the structure of the models themselves ([research notes](#research) will
   typically have this label).
 
-Then, assign one of the *component* labels:
+Then, assign one of the _component_ labels:
 
-* `evolution`: modifies code for running the evolution of the model.
-* `analysis`: adds or changes evolution analysis tools, e.g., `WolframModelEvolutionObject` properties.
-* `visualization`: has to do with visualization code, such as `HypergraphPlot`.
-* `physics`: explores a connection with known physics. Would typically only be used with some `research` notes.
-* `utilities`: implements a tool that does not fit in the above categories (
+- `evolution`: modifies code for running the evolution of the model.
+- `analysis`: adds or changes evolution analysis tools, e.g., `WolframModelEvolutionObject` properties.
+- `visualization`: has to do with visualization code, such as `HypergraphPlot`.
+- `physics`: explores a connection with known physics. Would typically only be used with some `research` notes.
+- `utilities`: implements a tool that does not fit in the above categories (
   e.g., [`Subhypergraph`](https://github.com/maxitg/SetReplace/pull/431)).
-* `infrastructure`: implements changes to the development process, e.g., build scripts, CI, testing utilities, etc.
+- `infrastructure`: implements changes to the development process, e.g., build scripts, CI, testing utilities, etc.
 
 It is also helpful to specify the language one expects to use to solve the issue. This helps developers to find issues
 they are comfortable working with. The current choices are `c++`, `wolfram language`, and `english` (e.g., for research
@@ -92,9 +92,9 @@ documents).
 
 Also, one of the following may be used:
 
-* `critical`: fixes something that severely breaks the package (usually used for weeds).
-* `breaking`: introduces API changes that would break existing code, better to avoid if possible.
-* `blocked`: another issue needs to be closed before this one can be started. If using this label, you need to mention
+- `critical`: fixes something that severely breaks the package (usually used for weeds).
+- `breaking`: introduces API changes that would break existing code, better to avoid if possible.
+- `blocked`: another issue needs to be closed before this one can be started. If using this label, you need to mention
   the blocking issue in the description.
 
 # Code
@@ -115,7 +115,7 @@ passing [automated tests](#automated-tests), passing [code review](#code-review)
 ### Building in-place
 
 The main workflow we recommend is what we are calling an "in-place build". This largely happens automatically when you
-load the *SetReplace* package by calling `Get["~/git/SetReplace/Kernel/init.m"]` or equivalent. If the C++ library (*
+load the _SetReplace_ package by calling `Get["~/git/SetReplace/Kernel/init.m"]` or equivalent. If the C++ library (*
 libSetReplace*) has not already been built, it will automatically be built for you, and the resulting libraries placed
 in the `LibraryResources` subdirectory of the repository root.
 
@@ -124,7 +124,7 @@ into your current Mathematica session (you do not need to run `Quit[]`). Moreove
 based on the hash of the C++ code, making it easy to switch quickly between several library versions (say, in different
 Git branches).
 
-If you wish to invoke the library build process *directly*, you run the following on the command line:
+If you wish to invoke the library build process _directly_, you run the following on the command line:
 
 ```bash
 cd ~/git/SetReplace
@@ -174,11 +174,11 @@ In addition to the code itself, each pull request should include unit tests and 
 To help you get started, see how the code is [organized](#code-structure) and our notes on [code style](#code-style).
 Also, we are keeping dependencies to a minimum to make the paclet as easy to compile and run as possible. So, avoid
 adding dependencies if at all possible. That includes Wolfram Function Repository functions. Even though they don't
-require installation, most of them are not stable enough for use in *SetReplace*. Also, using them may result in
-unexpected behavior as they can be updated independently of *SetReplace*, and there is no way to enforce a specific
+require installation, most of them are not stable enough for use in _SetReplace_. Also, using them may result in
+unexpected behavior as they can be updated independently of _SetReplace_, and there is no way to enforce a specific
 version. They also require an Internet connection in a way that's hard to control. If you still think adding a
 dependency is worth it, please open a feature request first to discuss it. If you need functionality from a resource
-function, you are always welcome to add the function to *SetReplace*, but you will have to improve it to follow the same
+function, you are always welcome to add the function to _SetReplace_, but you will have to improve it to follow the same
 quality standards as the rest of the code.
 
 The unit tests are particularly important if you are implementing a weed fix, as it is crucial to make sure the weed you
@@ -223,14 +223,14 @@ or break your code.
 ### Automated tests
 
 To run the tests, `cd` to the repository root, and run `./test.wls` from the command line. Note that `./test.wls` will
-automatically rebuild *libSetReplace* for you before running the tests if your *libSetReplace* is out of date (for
-example, if you changed some C++ files but you did not either `Get` *SetReplace* or run `./build.wls`). If everything is
+automatically rebuild _libSetReplace_ for you before running the tests if your _libSetReplace_ is out of date (for
+example, if you changed some C++ files but you did not either `Get` _SetReplace_ or run `./build.wls`). If everything is
 ok, you will see `[ok]` next to each group of tests, and "Tests passed." message at the end. Otherwise, you will see
 error messages telling you which test inputs failed and for what reason.
 
 The `test.wls` script accepts various arguments. Running `./test.wls testfile`, where `testfile` is the name (without
 trailing `.wlt`) of a test file under the `Tests` directory, will limit the test run to only that file. With
-the `--load-installed-paclet` (or `-lip`) flag, the script will load the *installed paclet* instead of the local
+the `--load-installed-paclet` (or `-lip`) flag, the script will load the _installed paclet_ instead of the local
 codebase. With the `--disable-parallelization` (or `-dp`) flag, you can disable the use of parallel sub-kernels to
 perform tests. Using parallel sub-kernels will accelerate running the entire test suite, so it is the default behavior,
 but if you are running only a single test file with a small number of tests, the startup time of the sub-kernels can
@@ -269,7 +269,7 @@ The tool will checkout other branches while testing, so don't use git/modify any
 depend on the other activity happening on the machine, so do not perform any CPU-intensive tasks while running tests to
 avoid introducing bias to the results.
 
-As an example, test an optimization done to *libSetReplace* by [@aokellermann](https://github.com/aokellermann):
+As an example, test an optimization done to _libSetReplace_ by [@aokellermann](https://github.com/aokellermann):
 
 ```console
 $ ./performanceTest.wls db6f15c7b4ae1be98be5ced0c188859e2f9eef29 8910175fe9be3847f96a1cf3c877a3b54a64823d
@@ -304,8 +304,8 @@ The main objectives for the code review:
 
 1. Verify the code works (i.e., make sure you can reproduce examples in the pull request message).
 2. Read the code, understand it, and see if you can spot any potential weeds/unnecessary slowdowns/issues with it (
-   including issues with code style as we currently only have a linter for the C++ and Bash, but not for the Wolfram
-   Language code).
+   including issues with code style as our linters only check whitespace and line widths in the Wolfram Language
+   code).
 3. Check the pull request has unit tests and changes documentation if appropriate.
 
 We use [Reviewable](https://reviewable.io) for code review, which greatly simplifies the tracking of comments (
@@ -336,8 +336,8 @@ Generally speaking, the author of the pull request should be the one merging it.
 collaborator access to the repository, you will have to ask someone else to do it.
 
 Once you see the green "Squash and merge" button, all the necessary checks have passed, and you can merge your pull
-request! Congratulations! :tada: Push the green button, ***paste your pull request message to the commit message
-field***, and confirm. Your changes are now in and will be included in the next release.
+request! Congratulations! :tada: Push the green button, _**paste your pull request message to the commit message
+field**_, and confirm. Your changes are now in and will be included in the next release.
 
 ## Code structure
 
@@ -431,7 +431,7 @@ and return the function unevaluated.
 
 ---
 
-The main dispatch function of *SetReplace* is the
+The main dispatch function of _SetReplace_ is the
 package-scope [`setSubstitutionSystem`](/Kernel/setSubstitutionSystem.m). It is essentially the generic evolution
 function. It is used by [`WolframModel`](/Kernel/WolframModel.m), [`SetReplace`](/Kernel/SetReplace.m)
 , [`SetReplaceAll`](/Kernel/SetReplaceAll.m), etc.
@@ -452,7 +452,7 @@ in [utilities.m](/Kernel/utilities.m).
 
 ### libSetReplace
 
-*libSetReplace* is the C++ library that implements the `"LowLevel"` method of [`WolframModel`](/Kernel/WolframModel.m).
+_libSetReplace_ is the C++ library that implements the `"LowLevel"` method of [`WolframModel`](/Kernel/WolframModel.m).
 It lives in [`libSetReplace`](/libSetReplace) directory, and there is also the [Xcode project](/SetReplace.xcodeproj)
 for it. [`WolframLanguageAPI.cpp`](/libSetReplace/WolframLanguageAPI.cpp) and
 [`WolframLanguageAPI.hpp`](/libSetReplace/WolframLanguageAPI.hpp) implement the interface with Wolfram Language code.
@@ -469,11 +469,11 @@ Every time the `"LowLevel"` implementation of [`WolframModel`](/Kernel/WolframMo
 [`HypergraphSubstitutionSystem`](/libSetReplace/HypergraphSubstitutionSystem.hpp) is created.
 [`HypergraphSubstitutionSystem`](/libSetReplace/HypergraphSubstitutionSystem.hpp) in turn uses
 the [`HypergraphMatcher`](/libSetReplace/HypergraphMatcher.hpp) class to perform the matching of hypergraph tokens to
-rule inputs. [This class](/libSetReplace/HypergraphMatcher.cpp) is the core of *SetReplace*.
+rule inputs. [This class](/libSetReplace/HypergraphMatcher.cpp) is the core of _SetReplace_.
 
 #### Compile C++ library with CMake
 
-The *libSetReplace* library can be used outside of Wolfram Language. It provides a CMake project for easy interaction
+The _libSetReplace_ library can be used outside of Wolfram Language. It provides a CMake project for easy interaction
 with the C++ ecosystem. To compile the core library using CMake:
 
 ```bash
@@ -493,20 +493,20 @@ cmake --build . --config Release
 
 Options available for CMake:
 
-* `SET_REPLACE_BUILD_TESTING`:
+- `SET_REPLACE_BUILD_TESTING`:
   Enable cpp testing using googletest, which is downloaded at build time. This is not supported on Windows at this time.
 
-* `SET_REPLACE_ENABLE_ALLWARNINGS`:
+- `SET_REPLACE_ENABLE_ALLWARNINGS`:
   For developers and contributors. Useful for continuous integration. Add compile options to the targets enabling extra
   warnings and treating warnings as errors.
 
-* `SET_REPLACE_EXTRA_COMPILE_OPTIONS`:
+- `SET_REPLACE_EXTRA_COMPILE_OPTIONS`:
   Add extra compilation options in addition to ones added by using the options above.
 
-* `SET_REPLACE_COMPILE_OPTIONS_OVERRIDE`:
+- `SET_REPLACE_COMPILE_OPTIONS_OVERRIDE`:
   Set all compilations options directly.
 
-For example, to build *libSetReplace* with tests, replace the second line in the above with
+For example, to build _libSetReplace_ with tests, replace the second line in the above with
 
 ```bash
 cmake .. -DSET_REPLACE_BUILD_TESTING=ON
@@ -579,29 +579,29 @@ instead of the [Tests directory](/Tests).
 
 ### Documentation
 
-The *SetReplace* documentation is contained in three places: [README.md](/README.md)
+The _SetReplace_ documentation is contained in three places: [README.md](/README.md)
 , [CONTRIBUTING.md](CONTRIBUTING.md) (this file), and the code comments.
 
 Some things to note are:
 
-* Large [README](/README.md) sections should include navigation bars in the beginning.
-* All references to functions should be links, either
+- Large [README](/README.md) sections should include navigation bars in the beginning.
+- All references to functions should be links, either
   to [the Wolfram Language documentation](https://reference.wolfram.com/language/) or to the corresponding section
   in [README](/README.md).
-* The comments in the Wolfram Language code are encouraged, and the C++ code is documented
+- The comments in the Wolfram Language code are encouraged, and the C++ code is documented
   using [Doxygen](http://www.doxygen.nl).
 
 ### Scripts
 
-If you are using the *in-place* workflow, you will typically only need to run the [test.wls](/test.wls) script, but this
+If you are using the _in-place_ workflow, you will typically only need to run the [test.wls](/test.wls) script, but this
 section will describe the other scripts too.
 
-The four main scripts of *SetReplace* are:
+The four main scripts of _SetReplace_ are:
 
-* [build.wls](/build.wls), which builds *libSetReplace* (if necessary)
-* [test.wls](/test.wls), which first calls `build.wls`, then runs the full test suite.
-* [pack.wls](/pack.wls), which first calls `build.wls`, then produces a `.paclet` file
-* [install.wls](/install.wls), which first calls `pack.wls`, then installs the resulting `.paclet` file
+- [build.wls](/build.wls), which builds _libSetReplace_ (if necessary)
+- [test.wls](/test.wls), which first calls `build.wls`, then runs the full test suite.
+- [pack.wls](/pack.wls), which first calls `build.wls`, then produces a `.paclet` file
+- [install.wls](/install.wls), which first calls `pack.wls`, then installs the resulting `.paclet` file
 
 All four scripts use functionality defined in the [DevUtils](/DevUtils) package.
 
@@ -610,25 +610,48 @@ from the checkpoint defined in [version.wl](/scripts/version.wl).
 
 ## Code Style
 
+We check the code style automatically with [Trunk](https://docs.trunk.io/code-quality), which runs formatters and
+linters for C++, Bash, Markdown, YAML, and other files. For Wolfram Language code, it only fixes whitespace and checks
+line widths, so please follow the rules [below](#wolfram-language).
+
+To run it, call `./lint.sh`. The first run downloads Trunk and all linters, so you don't need to install anything. By
+default, it only checks the files you changed. To check all files, use `./lint.sh --all`. To apply all fixes, including
+formatting, without being asked, use `./lint.sh --fix`. The same checks run in CI for every pull request.
+
+The first run also sets up two git hooks:
+
+1. `pre-commit` formats any staged files before committing.
+2. `pre-push` checks the changed files for formatting and linting errors before pushing.
+
+To skip the hooks once, use `git commit --no-verify` or `git push --no-verify`. To disable a hook, add it to
+`.trunk/user.yaml`, which is not committed:
+
+```yaml
+version: 0.1
+actions:
+  disabled:
+    - trunk-fmt-pre-commit # or trunk-check-pre-push
+```
+
 ### Wolfram Language
 
 Unfortunately, there are no established style guidelines for Wolfram Language code. Here, the best rule is to try to be
-consistent as much as possible with the existing *SetReplace* code.
+consistent as much as possible with the existing _SetReplace_ code.
 
 In addition to that, here are some more-or-less established rules:
 
-* Keep line widths within 120 characters.
-* Use at most a single empty line to separate code paragraphs (note, the Front End uses two by default, which should be
+- Keep line widths within 120 characters.
+- Use at most a single empty line to separate code paragraphs (note, the Front End uses two by default, which should be
   manually fixed if you use the Front End for editing).
-* Don't use section and cell definitions for comments, such as `(* ::Text:: *)`.
-* Use spaces instead of tabs, and use 2 spaces for indentation.
-* Put semicolons at the end of file-level expressions:
+- Don't use section and cell definitions for comments, such as `(* ::Text:: *)`.
+- Use spaces instead of tabs, and use 2 spaces for indentation.
+- Put semicolons at the end of file-level expressions:
 
   ```wl
   F[x_] := x;
   ```
 
-* Close code block function brackets on the new line (for functions such
+- Close code block function brackets on the new line (for functions such
   as [`Module`](https://reference.wolfram.com/language/ref/Module.html)
   , [`With`](https://reference.wolfram.com/language/ref/With.html)
   and [`If`](https://reference.wolfram.com/language/ref/If.html)):
@@ -648,14 +671,14 @@ In addition to that, here are some more-or-less established rules:
   ]
   ```
 
-* However, close the brackets of ordinary functions on the same line as the last argument:
+- However, close the brackets of ordinary functions on the same line as the last argument:
 
   ```wl
   veryLongFunctionCall[
     longArgument1, longArgument2, longArgument3]
   ```
 
-* The function arguments should either all go on the same line, or should each be put on a separate line (except for
+- The function arguments should either all go on the same line, or should each be put on a separate line (except for
   special cases where a large quantity of short arguments is used):
 
   ```wl
@@ -675,18 +698,18 @@ In addition to that, here are some more-or-less established rules:
       ]
   ```
 
-* Avoid using [`Flatten`](https://reference.wolfram.com/language/ref/Flatten.html)
+- Avoid using [`Flatten`](https://reference.wolfram.com/language/ref/Flatten.html)
   and [`ReplaceAll`](https://reference.wolfram.com/language/ref/ReplaceAll.html) without explicit level arguments. That
   is because it is very easy to accidentally assume that the user's input is not
   a [`List`](https://reference.wolfram.com/language/ref/List.html) (e.g., a vertex name), even though it can be, in
   which case you would [`Flatten`](https://reference.wolfram.com/language/ref/Flatten.html) too much, and cause a weed.
   It is preferred to use [`Catenate`](https://reference.wolfram.com/language/ref/Catenate.html)
   and [`Replace`](https://reference.wolfram.com/language/ref/Replace.html) instead of these functions.
-* Similar issue could happen with [`Thread`](https://reference.wolfram.com/language/ref/Thread.html), especially when
+- Similar issue could happen with [`Thread`](https://reference.wolfram.com/language/ref/Thread.html), especially when
   used to thread a single element over multiple. For example, it is easy to assume naively that `Thread[x -> {1, 2, 3}]`
   would always yield `{x -> 1, x -> 2, x -> 3}`. Except, sometimes it might be called
   as `With[{x = {4, 5, 6}}, Thread[x -> {1, 2, 3}]]`.
-* Use uppercase camel for public symbols, lowercase camel for internal (including PackageScope) symbols:
+- Use uppercase camel for public symbols, lowercase camel for internal (including PackageScope) symbols:
 
   ```wl
   PackageExport["WolframModelEvolutionObject"]
@@ -694,13 +717,13 @@ In addition to that, here are some more-or-less established rules:
   PackageScope["propertyEvaluate"]
   ```
 
-* Start global constants with `$`, whether internal or public, and tags (such as used
+- Start global constants with `$`, whether internal or public, and tags (such as used
   in [`Throw`](https://reference.wolfram.com/language/ref/Throw.html)
   or [`Sow`](https://reference.wolfram.com/language/ref/Sow.html), or as generic enum labels) with `$$`. Global pure
   functions (defined as [`OwnValues`](https://reference.wolfram.com/language/ref/OwnValues.html)) should still be
   treated as ordinary (e.g., [`DownValues`](https://reference.wolfram.com/language/ref/DownValues.html)) functions and
   not start with `$`, unless they are public, in which case they should start with `$` and end with the word `Function`.
-* Use the macros `ModuleScope` and `Scope` (defined in ``"GeneralUtilities`"``) instead of `Module` and `Block` (
+- Use the macros `ModuleScope` and `Scope` (defined in ``"GeneralUtilities`"``) instead of `Module` and `Block` (
   respectively) when defining functions of the form `f[x__] := (Module|Block)[...]`. The main benefit of using them is
   that there is no need to specify a list of local variables (i.e. `{localVar1, localVar2, ...}`) at the beginning, as a
   list of local variables will be automatically generated by looking for expressions of the form `Set` (`=`)
@@ -729,7 +752,7 @@ In addition to that, here are some more-or-less established rules:
   ]
   ```
 
-* In order to spot the difference between a compound expression and an "else" branch in an `If` expression, the
+- In order to spot the difference between a compound expression and an "else" branch in an `If` expression, the
   following style is used:
 
   ```wl
@@ -757,38 +780,20 @@ In addition to that, here are some more-or-less established rules:
 The code should follow [Google C++ Style](https://google.github.io/styleguide/cppguide.html) guidelines, save for the
 following exceptions:
 
-* Maximum line length is 120 characters.
-* Function and variable names, including const and constexpr variables, use lower camel case.
-* Namespace and class names use upper camel case.
-* C++ exceptions may be thrown.
-* White space in pointer and reference declarations goes after the `*` or `&` character. For example:
-  * `int* foo;`
-  * `const std::string& string;`
-* If splitting function arguments into multiple lines, each argument should go on a separate line.
-* License, authors, and file descriptions should not be put at the top of files.
-* Doxygen format is used for documentation.
-* We use `.cpp` and `.hpp` extensions for source files.
+- Maximum line length is 120 characters.
+- Function and variable names, including const and constexpr variables, use lower camel case.
+- Namespace and class names use upper camel case.
+- C++ exceptions may be thrown.
+- White space in pointer and reference declarations goes after the `*` or `&` character. For example:
+  - `int* foo;`
+  - `const std::string& string;`
+- If splitting function arguments into multiple lines, each argument should go on a separate line.
+- License, authors, and file descriptions should not be put at the top of files.
+- Doxygen format is used for documentation.
+- We use `.cpp` and `.hpp` extensions for source files.
 
 We use [`clang-format`](https://clang.llvm.org/docs/ClangFormat.html) for formatting and
-[`cpplint`](https://raw.githubusercontent.com/google/styleguide/gh-pages/cpplint/cpplint.py) for linting C++ code.
-
-We use [`shfmt`](https://github.com/mvdan/sh) for formatting and
-[`shellcheck`](https://github.com/koalaman/shellcheck) for linting Bash code.
-
-To run these automatically, call `./lint.sh`. This will print a formatting diff and error messages from `cpplint`
-and `shellcheck`. If there are no errors found, it will exit with no output. To edit the code in place with the fixed
-formatting use `./lint.sh -i`.
-
-We have two useful git hooks that you may install:
-
-1. `pre-commit` formats any staged files before committing.
-2. `pre-push` checks for formatting and linting errors before pushing.
-
-You may install these hooks by running `./scripts/install_git_hooks.sh`. By default, both hooks will be installed. If
-you only wish to install one, pass the name of the hook as an argument (
-e.g., `./scripts/install_git_hooks.sh pre-commit`).
-
-You may uninstall a hook by running `rm .git/hooks/hook-name` where `hook-name` is `pre-commit` or `pre-push`.
+[`cpplint`](https://github.com/cpplint/cpplint) for linting C++ code.
 
 If `cpplint` flags a portion of your code, please make sure it is adhering to the proper code style. If it is a false
 positive or if there is no reasonable way to avoid the flag, you may put `// NOLINT` at the end of the line if there is
@@ -799,11 +804,17 @@ comments section.
 If you want to disable formatting, use `// clang-format off` and `// clang-format on` around the manually formatted
 code.
 
+### Bash
+
+We use [`shfmt`](https://github.com/mvdan/sh) for formatting and
+[`shellcheck`](https://github.com/koalaman/shellcheck) for linting Bash code.
+
 ### Markdown
 
 We are using GitHub-flavored Markdown for documentation and research notes.
 
-We use [`markdownlint`](https://github.com/DavidAnson/markdownlint) for formatting and linting markdown text.
+We use [`prettier`](https://prettier.io) for formatting and [`markdownlint`](https://github.com/DavidAnson/markdownlint)
+for linting Markdown text.
 
 #### Manual image embedding
 
@@ -811,15 +822,15 @@ Images (e.g., of output cells) can be made by selecting the relevant cells in th
 and saving them as .png files to [Documentation/Images](/Documentation/Images) (in the documentation) or to the Images
 directory of the corresponding research note. They should then be inserted using the code similar to this:
 
-  ```html
-  <img src="/Documentation/Images/image.png" width="xxx" alt="description">
-  ```
+```html
+<img src="/Documentation/Images/image.png" width="xxx" alt="description" />
+```
 
 where the `width` should be computed as
 
-  ```wl
-  Round[0.6 First @ Import["$RepoRoot/Documentation/Images/image.png", "ImageSize"]]
-  ```
+```wl
+Round[0.6 First @ Import["$RepoRoot/Documentation/Images/image.png", "ImageSize"]]
+```
 
 #### Markdown automation
 
@@ -832,16 +843,16 @@ SetReplace* repository):
 Get["~/git/SetReplace/DevUtils/init.m"];
 ```
 
-Next, find the input/output cell pair that you wish to include in your markdown. Then, create a new input cell *after*
+Next, find the input/output cell pair that you wish to include in your markdown. Then, create a new input cell _after_
 the pair, containing the following code, and run it:
 
 ```wl
 RasterizePreviousInputOutputAndExportToMarkdown["Documentation/Images/NameOfTargetFile.png"]
 ```
 
-This will rasterize the previous *output* cell, save the resulting image to the given location within the repository,
+This will rasterize the previous _output_ cell, save the resulting image to the given location within the repository,
 and produce a snippet of markdown code that contains the right image tag. In addition, the markdown will contain a code
-block that contains the textual form of the preceding *input* cell. You can copy-paste this markdown code into the
+block that contains the textual form of the preceding _input_ cell. You can copy-paste this markdown code into the
 appropriate markdown file.
 
 Note that for convenience, the relative directory "Documentation/Images/" will be automatically used if you do not
@@ -855,27 +866,27 @@ rasterization functions.
 
 # Research
 
-We have recently started publishing research notes directly in *SetReplace*. These research notes should go to
+We have recently started publishing research notes directly in _SetReplace_. These research notes should go to
 the [Research](/Research) directory.
 
 The idea here is to have a mini-"journal", where the peer review is implemented in the same way as code review, the
 documents are organized as a wiki (by subject rather than by date), and can be updated any time.
 
-We expect the same high level of quality here as in the rest of *SetReplace*. In particular, we should be reasonably
+We expect the same high level of quality here as in the rest of _SetReplace_. In particular, we should be reasonably
 confident that everything written in the research notes is correct. This means:
 
-* If you are discussing a hypothesis or speculation that is not necessarily correct, it should be explicitly mentioned
+- If you are discussing a hypothesis or speculation that is not necessarily correct, it should be explicitly mentioned
   in the text.
-* If you rely on results of a computation, you can only use stable code to run that computation. This includes *
-  SetReplace* and build-in Wolfram Language functions. However, it ***does not*** include Wolfram Function Repository
-  functions. If you need to rely on such functions' output, you will need to add similar functionality to *SetReplace*
+- If you rely on results of a computation, you can only use stable code to run that computation. This includes *
+  SetReplace* and build-in Wolfram Language functions. However, it _**does not**_ include Wolfram Function Repository
+  functions. If you need to rely on such functions' output, you will need to add similar functionality to _SetReplace_
   first.
-* However, you can use Wolfram Function Repository functions for demonstration purposes in cases where their output can
+- However, you can use Wolfram Function Repository functions for demonstration purposes in cases where their output can
   be easily verified by a reviewer.
-* You are equally welcome to modify existing research notes as well as create new ones. You don't have to be the
+- You are equally welcome to modify existing research notes as well as create new ones. You don't have to be the
   original author of the note to modify it (although it is a good idea to request a review from the original author).
 
-Research notes should follow the same [development process](#development-process) as the rest of *SetReplace* except for
+Research notes should follow the same [development process](#development-process) as the rest of _SetReplace_ except for
 tests. In particular, pull requests should still be kept under 500 lines and follow
 the [Markdown formatting rules](#markdown).
 

@@ -26,8 +26,8 @@ Another approach is to consider the so-called multiway systems, which evaluate a
 overlaps between matches. This is the approach that is discussed in this note.
 
 One type of the multiway system is what we will call the
-[*global* multiway system](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem), which will
-be discussed in more detail in the next section. Here we propose a new kind of multiway system, called a *local*
+[_global_ multiway system](https://resources.wolframcloud.com/FunctionRepository/resources/MultiwaySystem), which will
+be discussed in more detail in the next section. Here we propose a new kind of multiway system, called a _local_
 multiway system. The prime difference is that it allows one to consider the branching of only parts of space (subgraphs
 of the state hypergraph) instead of the entire hypergraph all at once.
 
@@ -57,7 +57,7 @@ If we run this system on a path graph with 3 vertices, we get a very simple beha
 
 ```wl
 In[] := ResourceFunction["MultiwaySystem"][
- "WolframModel" -> {{{1}, {1, 2}} -> {{1, 2}, {2}}}, {{{1}, {1, 
+ "WolframModel" -> {{{1}, {1, 2}} -> {{1, 2}, {2}}}, {{{1}, {1,
     2}, {2, 3}}}, 3, "StatesGraph", VertexSize -> 1]
 ```
 
@@ -195,7 +195,7 @@ events that have created and destroyed it:
    "DestroyerEvent" -> eventIndex|>, ...}
 ```
 
-The collection of these objects is essentially the *only* thing that needs to be returned from the evolution code.
+The collection of these objects is essentially the _only_ thing that needs to be returned from the evolution code.
 Things
 like [`"StatesList"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/States.md)
 and [`"CausalGraph"`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/Properties/CausalGraphs.md)
@@ -265,9 +265,9 @@ expression `{1, 2}`. We have obtained two events.
 The first event replaced `{1, 2}` with `{2, 3}`. That is entirely normal and would happen in a singleway system as well.
 However, the singleway system would terminate immediately after that, as there is only a single expression `{2, 3}` left
 now, `{1, 2}` has been deleted and the second rule requires both `{1, 2}` and `{2, 3}` as inputs. In other
-words, `{1, 2}` and `{2, 3}` are *timelike* expressions, and our singleway
+words, `{1, 2}` and `{2, 3}` are _timelike_ expressions, and our singleway
 [`WolframModel`](/Documentation/SymbolsAndFunctions/WolframModelAndWolframModelEvolutionObject/WolframModelAndWolframModelEvolutionObject.md)
-only matches *spacelike* expressions.
+only matches _spacelike_ expressions.
 
 However, the match-all multiway system will proceed, as both `{1, 2}` and `{2, 3}` are now in the system, and it does
 not care that they are timelike. Hence, the second event is instantiated as well, `{{1, 2}, {2, 3}} -> {{1, 2, 3}}`.
@@ -385,10 +385,10 @@ or timelike.
 Suppose we want to have more control over the local multiway system's matching behavior and reproduce the global
 multiway system's evolution. In that case, we need a way to detect whether a pair of expressions is:
 
-* Spacelike &mdash; the expressions were produced (directly or indirectly) by a single event
-* Branchlike &mdash; the expressions were made (directly or indirectly) by multiple events that matched the same
+- Spacelike &mdash; the expressions were produced (directly or indirectly) by a single event
+- Branchlike &mdash; the expressions were made (directly or indirectly) by multiple events that matched the same
   expression
-* Timelike &mdash; the expressions are causally related: one produced or was produced by another
+- Timelike &mdash; the expressions are causally related: one produced or was produced by another
 
 And in simple systems, it is straightforward to understand what the separation is, i.e., in the following three systems,
 the expressions `{2, 3}` and `{3, 4}` are spacelike, branchlike and timelike, respectively:
@@ -410,7 +410,7 @@ In[] := Framed[WolframModel[<|"PatternRules" -> #|>, {{1, 2}}, Infinity,
        Framed[Graph[... {1, 2} becomes {2, 3} and then {3, 4}, so all three expressions are pairwise timelike ...]]
      }">
 
-In the first example, a single event produces two expressions, `{2, 3}` *and* `{3, 4}`. This corresponds to a spacelike
+In the first example, a single event produces two expressions, `{2, 3}` _and_ `{3, 4}`. This corresponds to a spacelike
 separation, as both of these expressions can appear simultaneously in a singleway system. In the second example, there
 are two possibilities: the first or the second rule can be matched to the initial expression `{1, 2}`. Hence, the
 expressions produced from that, `{2, 3}` and `{3, 4}`, are branchlike separated. Finally, in the third example,
@@ -478,9 +478,9 @@ Thus, to determine the separation between two expressions, `A` and `B`, in an ex
 1. Compute the past causal cones of both `A` and `B`.
 2. Compute the intersection between the causal cones.
 3. Consider all vertices with out-degree zero (the future boundary of the intersection):
-    * If the boundary contains either `A` or `B`, they are timelike separated
-    * If any vertices on the boundary are expression-vertices, they are branchlike separated
-    * Otherwise, all vertices on the boundary are event-vertices, and they are spacelike separated
+   - If the boundary contains either `A` or `B`, they are timelike separated
+   - If any vertices on the boundary are expression-vertices, they are branchlike separated
+   - Otherwise, all vertices on the boundary are event-vertices, and they are spacelike separated
 
 ## Spacelike-Only Local Multiway System
 

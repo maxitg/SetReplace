@@ -1,13 +1,12 @@
 ---
 name: Weed report
 about: Report something that is not working to help us improve
-title: ''
+title: ""
 labels: weed
-assignees: ''
-
+assignees: ""
 ---
 
-### The problem
+## The problem
 
 A clear and concise description of what is not working.
 
@@ -17,11 +16,11 @@ In[] := minimal input that is not working
 
 image of the actual output.
 
-### Expected behavior
+## Expected behavior
 
 A clear and concise description of what you expected to happen.
 
-### Version
+## Version
 
 ```wl
 In[] := SystemInformation["Small"]
@@ -35,6 +34,6 @@ In[] := $SetReplaceGitSHA
 
 paste the output here without quotes.
 
-### Additional context
+## Additional context
 
 Add any other context or screenshots about the weed report here.

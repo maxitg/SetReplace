@@ -15,7 +15,7 @@ possible ordering functions and combines the result to a single evolution object
 expressions after they were used. Only spacelike separated expressions are matched for any given event, however, so
 every individual expression of the
 `"MultiwaySpacelike"` evolution can be obtained with a particular choice of the event ordering function.
-(It does not imply that it can actually be done in *SetReplace* as only few ordering functions are implemented at this
+(It does not imply that it can actually be done in _SetReplace_ as only few ordering functions are implemented at this
 time.)
 
 For example, consider a system

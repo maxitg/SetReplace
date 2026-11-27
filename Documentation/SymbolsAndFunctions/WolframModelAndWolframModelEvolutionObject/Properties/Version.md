@@ -3,7 +3,7 @@
 # Version
 
 **`"Version"`** returns the version of the data structure used in the evolution object. It will always be the same for
-the same version of *SetReplace*:
+the same version of _SetReplace_:
 
 ```wl
 In[] := WolframModel[1 -> 2, {1}]["Version"]
@@ -11,4 +11,4 @@ Out[] = 2
 ```
 
 Objects are automatically converted to the latest version when they are encountered by the newer version of
-  *SetReplace*.
+_SetReplace_.

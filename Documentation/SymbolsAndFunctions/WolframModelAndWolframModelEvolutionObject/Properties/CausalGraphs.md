@@ -2,7 +2,7 @@
 
 # Causal Graphs
 
-An event **A** *causes* an event **B** if there exists an expression (set element) created by **A** and destroyed by **
+An event **A** _causes_ an event **B** if there exists an expression (set element) created by **A** and destroyed by **
 B**. If we then consider all such relationships between events, we create a **`"CausalGraph"`**. In a causal graph,
 vertices correspond to events, and edges correspond to the set elements (aka spatial edges).
 

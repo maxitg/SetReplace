@@ -2,7 +2,7 @@
 
 # Creator and Destroyer Events
 
-An event is said to *destroy* the edges in its input, and *create* the edges in its output. Creator and destroyer events
+An event is said to _destroy_ the edges in its input, and _create_ the edges in its output. Creator and destroyer events
 for each edge can be obtained with **`"EdgeCreatorEventIndices"`** (aka `"CreatorEvents"`)
 and **`"EdgeDestroyerEventsIndices"`** properties.
 
