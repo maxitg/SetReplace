@@ -22,7 +22,7 @@ $DevUtilsRoot is the directory from which the DevUtils package was loaded.
 $DevUtilsRoot = FileNameDrop[$InputFileName, -1];
 
 SetUsage @ "
-$DevUtilsTemporaryDirectory is the temprary directory that DevUtils uses.
+$DevUtilsTemporaryDirectory is the temporary directory that DevUtils uses.
 ";
 
 $DevUtilsTemporaryDirectory := EnsureDirectory @ FileNameJoin[{$TemporaryDirectory, "SetReplace"}];
