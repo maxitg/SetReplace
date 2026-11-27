@@ -117,7 +117,7 @@ Exploring the hypergraph models of this variety is the primary purpose of this p
 
 You only need three things to use *SetReplace*:
 
-* Windows, macOS 10.12+, or Linux.
+* Windows, macOS, or Linux.
 * Windows only &mdash;
   [Microsoft Visual C++ Redistributable 2015+](https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0).
 * [Wolfram Language 12.3+](https://www.wolfram.com/language/)

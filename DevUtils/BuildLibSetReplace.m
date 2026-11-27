@@ -175,7 +175,7 @@ $compileOptions = Switch[$OperatingSystem,
   "Windows",
     {"/std:c++17 /O3", "/EHsc"},
   "MacOSX",
-    Join[{"-std=c++17 -O3"}, $warningsFlags, {"-mmacosx-version-min=10.12"}], (* for std::shared_mutex support *)
+    Join[{"-std=c++17 -O3"}, $warningsFlags],
   "Unix",
     Join[{"-std=c++17 -O3"}, $warningsFlags]
 ];
