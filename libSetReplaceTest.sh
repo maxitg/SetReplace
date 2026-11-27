@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-if [[ "$(uname)" == "Darwin" ]]; then
+os=$(uname)
+if [[ ${os} == "Darwin" ]]; then
   testBinaries=$(find build/libSetReplace/test -type f -perm +111 -print)
-elif [[ "$(uname)" == "Linux" ]]; then
+elif [[ ${os} == "Linux" ]]; then
   testBinaries=$(find build/libSetReplace/test -type f -executable -print)
 else
   echo "Operating System not supported."

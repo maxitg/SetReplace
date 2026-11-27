@@ -45,7 +45,10 @@ for arg in "$@"; do
 done
 
 if [[ ${#filesToLint[@]} -eq 0 ]]; then
-  mapfile -t filesToLint < <(LC_ALL=C comm -13 <(git ls-files --deleted) <(git ls-files "${lsfilesOptions[@]}"))
+  deletedFiles=$(git ls-files --deleted)
+  allFiles=$(git ls-files "${lsfilesOptions[@]}")
+  existingFiles=$(LC_ALL=C comm -13 <(echo "${deletedFiles}") <(echo "${allFiles}"))
+  mapfile -t filesToLint <<<"${existingFiles}"
 fi
 
 exitStatus=0
@@ -82,7 +85,8 @@ function formatWithCommand() {
     "${command}" -i "${file}"
   fi
   if [[ -n ${diff} ]]; then
-    echo -e "$(echo -e "${diff}\n\n" | sed "s|^-|${red}-|g" | sed "s|^+|${green}+|g" | sed "s|$|${endColor}|g")"
+    coloredDiff=$(echo -e "${diff}\n\n" | sed "s|^-|${red}-|g" | sed "s|^+|${green}+|g" | sed "s|$|${endColor}|g")
+    echo -e "${coloredDiff}"
     exitStatus=1
   fi
 }

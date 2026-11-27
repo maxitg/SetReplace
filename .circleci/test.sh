@@ -6,13 +6,14 @@ if [[ ${CIRCLE_NODE_INDEX} -eq 2 ]]; then
 elif [[ ${CIRCLE_NODE_INDEX} -eq 3 ]]; then
   testsToRun=WolframModel
 else
-  mapfile -t testsToRun < <(circleci tests glob "Tests/*.wlt" |
+  testsToSplit=$(circleci tests glob "Tests/*.wlt" |
     sed "/Tests\/performance.wlt/d" |
     sed "/Tests\/hypergraphMatching.wlt/d" |
     sed "/Tests\/WolframModel.wlt/d" |
     circleci tests split --total=2 --split-by=filesize |
     sed "s/\.wlt//" |
     sed "s/Tests\///")
+  mapfile -t testsToRun <<<"${testsToSplit}"
 fi
 
 rm -f exit_status.txt

@@ -6,7 +6,7 @@ orbs:
 jobs:
   wolfram-language-paclet-test:
     docker:
-      - image: wolframresearch/wolframengine:12.3.0
+      - image: wolframresearch/wolframengine:12.3.0@sha256:55ce7644a52be4ff654a15959c186f421a64c48b3d11e62de054a42c23113255
         user: root
     parallelism: 4
 
@@ -62,7 +62,7 @@ jobs:
 
   cpp-test:
     docker:
-      - image: alpine:3.21.2
+      - image: alpine:3.21.2@sha256:56fa17d2a7e7f168a043a2712e63aed1f8543aeafdcee47c58dcffe38ed51099
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD
@@ -111,7 +111,7 @@ jobs:
 
   cpp-32-test:
     docker:
-      - image: i386/alpine:3.13.5
+      - image: i386/alpine:3.13.5@sha256:5de788243acadd50526e70868b86d12ad79f3793619719ae22e0d09e8c873a66
         auth:
           username: maxitg
           password: $DOCKERHUB_PASSWORD

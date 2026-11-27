@@ -1,31 +1,35 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-setReplaceRoot=$(dirname "$(cd "$(dirname "$0")" && pwd)")
+scriptDir=$(cd "$(dirname "$0")" && pwd)
+setReplaceRoot=$(dirname "${scriptDir}")
 cd "${setReplaceRoot}"
 
 # Obtain requested architectures
 
+os=$(uname -s)
+machine=$(uname -m)
+
 if [[ -n $1 ]]; then
   arch="$1"
 else
-  arch="$(uname -m)"
+  arch="${machine}"
 fi
 
 # Set the platform-specific names
 
-if [[ "$(uname -s)" == "Darwin" && ${arch} == "arm64" ]]; then
+if [[ ${os} == "Darwin" && ${arch} == "arm64" ]]; then
   cmakeArchitectureArg="-DCMAKE_OSX_ARCHITECTURES=arm64"
   libraryResourcesDirName=MacOSX-ARM64
   libraryExtension=dylib
-elif [[ "$(uname -s)" == "Darwin" && ${arch} == "x86_64" ]]; then
+elif [[ ${os} == "Darwin" && ${arch} == "x86_64" ]]; then
   cmakeArchitectureArg="-DCMAKE_OSX_ARCHITECTURES=x86_64"
   libraryResourcesDirName=MacOSX-x86-64
   libraryExtension=dylib
-elif [[ "$(uname -s)" == "Linux" && ${arch} == "x86_64" ]]; then
+elif [[ ${os} == "Linux" && ${arch} == "x86_64" ]]; then
   libraryResourcesDirName=Linux-x86-64
   libraryExtension=so
-elif [[ ${OSTYPE} == "msys" && "$(uname -m)" == "x86_64" ]]; then # Windows
+elif [[ ${OSTYPE} == "msys" && ${machine} == "x86_64" ]]; then # Windows
   libraryResourcesDirName=Windows-x86-64
   libraryExtension=dll
 else
@@ -41,26 +45,27 @@ echo "Library extension: ${libraryExtension}"
 
 sourceFiles="$(ls libSetReplace/*pp CMakeLists.txt cmake/* scripts/buildLibraryResources.sh)"
 
-if command -v shasum &>/dev/null; then
-  echo "Using SHA tool: $(which shasum)"
-  sha="$(
-    echo "$(
+if shaTool=$(command -v shasum); then
+  echo "Using SHA tool: ${shaTool}"
+  sha=$(
+    {
       for fileToHash in ${sourceFiles}; do
         shasum -a 256 "${fileToHash}"
       done
-      uname -s
+      echo "${os}"
       echo "${arch}"
-    )" | shasum -a 256 | cut -d\  -f1
-  )"
-elif [[ ${OSTYPE} == "msys" && -n $(command -v certutil) ]]; then # there is another certutil in macOS
-  echo "Using SHA tool: $(which certutil)"
-  echo "$(
+    } | shasum -a 256 | cut -d\  -f1
+  )
+elif [[ ${OSTYPE} == "msys" ]] && shaTool=$(command -v certutil); then # there is another certutil in macOS
+  echo "Using SHA tool: ${shaTool}"
+  {
     for fileToHash in ${sourceFiles}; do
-      echo "$(certutil -hashfile "${fileToHash}" SHA256 | findstr -v "hash")" "${fileToHash}"
+      fileHash=$(certutil -hashfile "${fileToHash}" SHA256 | findstr -v "hash")
+      echo "${fileHash}" "${fileToHash}"
     done
-    uname -s
+    echo "${os}"
     echo "${arch}"
-  )" >"${TEMP}"/libSetReplaceFilesToHash
+  } >"${TEMP}"/libSetReplaceFilesToHash
   sha=$(certutil -hashfile "${TEMP}"/libSetReplaceFilesToHash SHA256 | findstr -v "hash")
 else
   echo "Could not find SHA utility"
@@ -102,10 +107,11 @@ cp "${compiledLibrary}" "${libraryDestination}"
 
 metadataDestination=${libraryDir}/libSetReplaceBuildInfo.json
 echo "Writing metadata to ${setReplaceRoot}/${metadataDestination}"
+buildTime=$(date -u "+[%-Y, %-m, %-d, %-H, %-M, %-S]")
 echo "\
 {
   \"LibraryFileName\": \"libSetReplace-${shortSHA}.${libraryExtension}\",
-  \"LibraryBuildTime\": $(date -u "+[%-Y, %-m, %-d, %-H, %-M, %-S]"),
+  \"LibraryBuildTime\": ${buildTime},
   \"LibrarySourceHash\": \"${shortSHA}\"
 }" >"${metadataDestination}"
 

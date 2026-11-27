@@ -123,9 +123,8 @@ You only need three things to use _SetReplace_:
 - [Wolfram Language 12.3+](https://www.wolfram.com/language/)
   including [WolframScript](https://www.wolfram.com/wolframscript/). A free version is available
   as [Wolfram Engine](https://www.wolfram.com/engine/).
-- A C++17 compiler to build the low-level part of the package. Instructions on how to set up a compiler to use in
-  WolframScript
-  are [here](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
+- A C++17 compiler to build the low-level part of the package. See
+  [how to set up a compiler to use in WolframScript](https://reference.wolfram.com/language/CCompilerDriver/tutorial/SpecificCompilers.html#509267359).
 
 ## Build Instructions
 
