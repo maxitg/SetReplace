@@ -175,7 +175,9 @@ $compileOptions = Switch[$OperatingSystem,
   "Windows",
     {"/std:c++17 /O3", "/EHsc"},
   "MacOSX",
-    Join[{"-std=c++17 -O3"}, $warningsFlags, {"-mmacosx-version-min=10.12"}], (* for std::shared_mutex support *)
+    (* Comes after CCompilerDriver's own version flag, so it takes precedence. Keep in sync with CMakeLists.txt,
+       SetReplace.xcodeproj and README.md. 13.5 is the minimum macOS for Wolfram Language 15. *)
+    Join[{"-std=c++17 -O3"}, $warningsFlags, {"-mmacosx-version-min=13.5"}],
   "Unix",
     Join[{"-std=c++17 -O3"}, $warningsFlags]
 ];
