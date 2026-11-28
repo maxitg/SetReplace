@@ -8,8 +8,6 @@ PackageExport["$SetReplaceMethods"]
    produce a WolframModelEvolutionObject that contains information about evolution of the network step-by-step.
    All SetReplace* and WolframModel functions use argument checks and implementation done here. *)
 
-PackageScope["$eventOrderingFunctions"]
-
 PackageScope["setReplaceRulesQ"]
 PackageScope["stepCountQ"]
 PackageScope["multiwayEventSelectionFunctionQ"]
@@ -25,18 +23,12 @@ PackageScope["$maxFinalExpressions"]
 PackageScope["$fixedPoint"]
 PackageScope["$timeConstraint"]
 
-PackageScope["$sortedExpressionIDs"]
-PackageScope["$reverseSortedExpressionIDs"]
-PackageScope["$expressionIDs"]
-PackageScope["$ruleIndex"]
-PackageScope["$any"]
-PackageScope["$forward"]
-PackageScope["$backward"]
-
 PackageScope["$globalSpacelike"]
 PackageScope["$spacelike"]
 
 PackageScope["$sameInputSetIsomorphicOutputs"]
+
+PackageScope["simpleRuleQ"]
 
 (* Termination reason values *)
 
@@ -183,64 +175,65 @@ setSubstitutionSystem[
 
 (* EventOrderingFunction is valid *)
 
-$eventOrderingFunctions = <|
-  "OldestEdge" -> {$sortedExpressionIDs, $forward},
-  "LeastOldEdge" -> {$sortedExpressionIDs, $backward},
-  "LeastRecentEdge" -> {$reverseSortedExpressionIDs, $forward},
-  "NewestEdge" -> {$reverseSortedExpressionIDs, $backward},
-  "RuleOrdering" -> {$expressionIDs, $forward},
-  "ReverseRuleOrdering" -> {$expressionIDs, $backward},
-  "RuleIndex" -> {$ruleIndex, $forward},
-  "ReverseRuleIndex" -> {$ruleIndex, $backward},
-  "Random" -> Nothing, (* Random is done automatically in C++ if no more sorting is available *)
-  "Any" -> {$any, $forward} (* OrderingDirection here doesn't do anything *)
-|>;
+$eventOrderingFunctions = {
+  "OldestEdge",
+  "LeastOldEdge",
+  "LeastRecentEdge",
+  "NewestEdge",
+  "RuleOrdering",
+  "ReverseRuleOrdering",
+  "RuleIndex",
+  "ReverseRuleIndex",
+  "Random",
+  "Any"
+};
 
 (* This applies only to C++ due to #158, WL code uses similar order but does not apply "LeastRecentEdge" correctly. *)
-$eventOrderingFunctionDefault = $eventOrderingFunctions /@ {"LeastRecentEdge", "RuleOrdering", "RuleIndex"};
+$eventOrderingFunctionDefault = {"LeastRecentEdge", "RuleOrdering", "RuleIndex"};
 
 parseEventOrderingFunction[caller_, Automatic] := $eventOrderingFunctionDefault;
 
 parseEventOrderingFunction[caller_, s_String] := parseEventOrderingFunction[caller, {s}];
 
-parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+parseEventOrderingFunction[caller_, func : {(Alternatives @@ $eventOrderingFunctions)...}] /;
     !FreeQ[func, "Random"] :=
   parseEventOrderingFunction[caller, func[[1 ;; FirstPosition[func, "Random"][[1]] - 1]]];
 
-parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+parseEventOrderingFunction[caller_, func : {(Alternatives @@ $eventOrderingFunctions)...}] /;
     !FreeQ[func, "Any"] && FirstPosition[func, "Any"][[1]] != Length[func] :=
     parseEventOrderingFunction[caller, func[[1 ;; FirstPosition[func, "Any"][[1]]]]];
 
-parseEventOrderingFunction[caller_, func : {(Alternatives @@ Keys[$eventOrderingFunctions])...}] /;
+parseEventOrderingFunction[caller_, func : {(Alternatives @@ $eventOrderingFunctions)...}] /;
     FreeQ[func, "Random"] :=
-  $eventOrderingFunctions /@ func;
+  func;
 
-General::invalidEventOrdering = "EventOrderingFunction `1` should be one of `2`, or a list of them by priority.";
+General::invalidEventOrderingFunction =
+  "EventOrderingFunction `1` should be one of `2`, or a list of them by priority.";
 
 parseEventOrderingFunction[caller_, func_] := (
-  Message[caller::invalidEventOrdering, func, Keys[$eventOrderingFunctions]];
+  Message[caller::invalidEventOrderingFunction, func, $eventOrderingFunctions];
   $Failed
 );
 
 (* String-valued parameter is valid *)
 
-$eventSelectionFunctions = <|
-  "GlobalSpacelike" -> $globalSpacelike,
-  None -> None, (* match-all local multiway *)
-  "MultiwaySpacelike" -> $spacelike (* enumerates all possible "GlobalSpacelike" evolutions *)
-|>;
+$eventSelectionFunctions = {
+  "GlobalSpacelike",
+  None,
+  "MultiwaySpacelike"
+};
 
-$eventDeduplications = <|
-  None -> None,
-  "SameInputSetIsomorphicOutputs" -> $sameInputSetIsomorphicOutputs
-|>;
+$eventDeduplications = {
+  None,
+  "SameInputSetIsomorphicOutputs"
+};
 
-parseParameterValue[caller_, name_, value_, association_] /; KeyMemberQ[association, value] := association[value];
+parseParameterValue[caller_, name_, value_, list_] /; MemberQ[list, value] := value;
 
 General::invalidParameterValue = "`1` `2` should be one of `3`.";
 
-parseParameterValue[caller_, name_, value_, association_] := (
-  Message[caller::invalidParameterValue, name, value, Keys[association]];
+parseParameterValue[caller_, name_, value_, list_] := (
+  Message[caller::invalidParameterValue, name, value, list];
   $Failed
 );
 
@@ -309,7 +302,8 @@ setSubstitutionSystem[
           caller, set, stepSpec, OptionValue[setSubstitutionSystem, {o}, "EventSelectionFunction"]] := ModuleScope[
   method = OptionValue[Method];
   timeConstraint = OptionValue[TimeConstraint];
-  eventOrderingFunction = parseEventOrderingFunction[caller, OptionValue["EventOrderingFunction"]];
+  eventOrdering = OptionValue["EventOrderingFunction"];
+  eventOrderingFunction = parseEventOrderingFunction[caller, eventOrdering];
   eventSelectionFunction = parseParameterValue[
     caller, "EventSelectionFunction", OptionValue["EventSelectionFunction"], $eventSelectionFunctions];
   eventDeduplication = parseParameterValue[
@@ -333,7 +327,8 @@ setSubstitutionSystem[
     If[$libSetReplaceAvailable,
       Return[
         setSubstitutionSystem$cpp[
-          rules, set, stepSpec, returnOnAbortQ, timeConstraint, eventOrderingFunction, eventSelectionFunction,
+          rules, set, stepSpec, returnOnAbortQ, timeConstraint, eventOrderingFunction,
+          eventSelectionFunction,
           eventDeduplication]]
     ]
   ];

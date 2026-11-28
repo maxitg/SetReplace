@@ -1677,7 +1677,7 @@
           WolframModel[{{1, 2}} -> {{1, 3}, {1, 3}, {3, 2}}, {{1, 1}}, 3, option -> value, Method -> method],
           {message}
         ]
-      ] @@@ Flatten /@ Tuples[{{{"EventOrderingFunction", WolframModel::invalidEventOrdering},
+      ] @@@ Flatten /@ Tuples[{{{"EventOrderingFunction", WolframModel::invalidEventOrderingFunction},
                                {"EventSelectionFunction", WolframModel::invalidParameterValue},
                                {"EventDeduplication", WolframModel::invalidParameterValue}},
                               {"$$$invalid$$$", $$$invalid$$$, 1},
